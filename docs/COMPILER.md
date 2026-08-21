@@ -1,0 +1,359 @@
+# Geometry Compiler
+
+Status: Draft 0.1
+
+## 1. Mission
+
+The compiler turns source-specific engineering data into immutable,
+progressively loadable, GPU-ready scene artifacts while preserving enough
+semantic and source mapping for engineering interaction.
+
+It is closer to an asset compiler than a file converter. Output is optimized for
+a declared runtime profile and can be rebuilt from authoritative sources.
+
+## 2. Command-line concept
+
+```text
+madi compile assembly.step \
+  --adapter occt \
+  --profile webgpu-desktop \
+  --output ./dist/assembly \
+  --linear-deflection 0.1mm \
+  --angular-deflection 0.5deg \
+  --coarse-error 4px@10m \
+  --max-chunk-gpu-bytes 32MiB \
+  --deterministic
+```
+
+Other commands:
+
+```text
+madi inspect ./dist/assembly/manifest.json
+madi validate ./dist/assembly
+madi diff old/manifest.json new/manifest.json
+madi benchmark ./dist/assembly --scenario review-default
+```
+
+Names and options are illustrative until the vertical slice.
+
+## 3. Pipeline
+
+```mermaid
+flowchart TB
+    S[Source resolver]
+    A[Adapter parse]
+    IR[Scene IR validation]
+    N[Normalize coordinates / units]
+    I[Identity & instancing analysis]
+    T[Tessellation]
+    E[Edge extraction]
+    C[Spatial & draw clustering]
+    L[Coarse representations / LOD]
+    Q[Quantization & encoding]
+    P[Package manifest / indexes / chunks]
+    V[Structural, metric, visual validation]
+
+    S --> A --> IR --> N --> I
+    I --> T --> C
+    I --> E --> C
+    C --> L --> Q --> P --> V
+```
+
+Stages consume and produce versioned artifacts in development builds so faults
+can be inspected without reparsing the source.
+
+## 4. Source resolution
+
+The source resolver handles:
+
+- local files and directories;
+- HTTP(S) with explicit allowlists and credentials supplied by the host;
+- object storage and PLM/PDM connectors;
+- referenced subassemblies;
+- source digesting and revision fingerprints;
+- temporary staging with configurable quotas.
+
+It never places credentials in compiler output. URI redaction is configurable.
+
+## 5. Adapter contract
+
+```ts
+interface SourceAdapter {
+  readonly id: string;
+  readonly version: string;
+  probe(source: SourceHandle): Promise<ProbeResult>;
+  open(source: SourceHandle, options: AdapterOptions): Promise<AdapterSession>;
+}
+
+interface AdapterSession {
+  capabilities(): AdapterCapabilities;
+  readScene(signal?: AbortSignal): AsyncIterable<SceneIREvent>;
+  evaluateExact?(request: ExactGeometryRequest): Promise<ExactGeometryResult>;
+  close(): Promise<void>;
+}
+```
+
+The actual native boundary may use C ABI, IPC, or files rather than TypeScript.
+The semantics are the contract.
+
+### OCCT adapter responsibilities
+
+- STEP/IGES document import;
+- XDE assembly hierarchy, names, colors, layers, and external references;
+- source label/path capture;
+- shape validation and optional healing diagnostics;
+- controlled tessellation using documented tolerances;
+- explicit topology edge extraction and classification;
+- optional face/edge source mapping;
+- release of OCCT objects after each compilation partition.
+
+OCCT is not linked into the browser runtime.
+
+## 6. Normalization
+
+Normalization produces a canonical, deterministic scene:
+
+- convert units without losing source-unit metadata;
+- convert handedness/up-axis into the selected profile;
+- preserve high-precision document origins;
+- canonicalize names and strings without destroying originals;
+- reject or diagnose non-finite data;
+- compute hierarchy paths and occurrence transforms;
+- validate duplicate IDs and cycles;
+- sort deterministic tables by canonical identity.
+
+## 7. Instancing and reuse
+
+The compiler first preserves authored prototypes. It may then detect additional
+geometry reuse when safe.
+
+Reuse keys can include:
+
+- exact source prototype ID;
+- canonical shape hash;
+- tessellated geometry hash;
+- material and edge representation compatibility.
+
+Detected reuse must not merge semantic identity. Distinct occurrences continue
+to carry their own metadata, visibility, selection, and source mapping.
+
+Compiler reports include:
+
+- authored prototype count;
+- occurrence count;
+- unique geometry count before/after detection;
+- geometry and GPU memory saved;
+- hash/canonicalization cost.
+
+## 8. Tessellation
+
+Tessellation options are explicit and recorded:
+
+- linear/chordal deflection;
+- angular deflection;
+- relative vs absolute tolerance;
+- per-part or per-size adaptation;
+- normal generation/smoothing policy;
+- UV retention;
+- seam and degenerate triangle handling.
+
+The compiler should support at least two display representations:
+
+1. a coarse representation for early recognition; and
+2. the target display tessellation for inspection.
+
+Tiny components may use bounds or procedural proxies in coarse content, but the
+manifest records that omission so selection/search can request them.
+
+## 9. CAD edge extraction
+
+Edges are extracted from source topology before the surface mesh is discarded.
+For each edge, the adapter/compiler records:
+
+- source reference when available;
+- adjacent face count and references;
+- boundary/seam/smooth/sharp classification;
+- curve type hint and parameter range when useful;
+- polyline representations at selected display errors;
+- material/style association.
+
+Mesh-derived edge fallback is labeled as derived and is never presented as
+equivalent to source CAD topology.
+
+## 10. Partitioning
+
+Partitioning balances network, decode, culling, draw, and semantic operations.
+One partition does not need to satisfy every concern; indexes can map among
+spatial tiles, draw clusters, prototypes, and semantic objects.
+
+Candidate policies:
+
+- preserve prototype payloads separately from occurrence placement;
+- group small, nearby, similarly rendered content into coarse draw clusters;
+- keep very large prototypes independently streamable;
+- bound compressed, decoded, and GPU sizes per chunk;
+- avoid semantic fragmentation that makes object picking or visibility costly;
+- retain enough locality for viewport-prioritized requests;
+- represent chunk dependencies explicitly.
+
+Partition metrics are emitted for tuning.
+
+## 11. LOD and simplification
+
+CAD simplification is conservative:
+
+- prefer occurrence/prototype-level omission at distance before destructive
+  simplification of critical small parts;
+- preserve silhouettes and sharp/boundary edges;
+- retain object identity and source mapping across LODs;
+- prevent cracks or make crack risk explicit at part boundaries;
+- never use simplified geometry for an operation labeled source-exact;
+- store geometric error in model units and enough information for screen-space
+  selection.
+
+LOD generation is plugin/profile based so industries can define importance
+rules for fasteners, pipes, equipment, or architectural components.
+
+## 12. Quantization and precision
+
+Positions are encoded relative to local prototype/chunk origins. Candidate
+encodings include:
+
+- 16-bit or 20/24-bit quantized positions where error bounds permit;
+- 32-bit local positions for detailed or small-range parts;
+- octahedral normal encoding;
+- compact material and source-map indices;
+- 16-bit indices for subclusters where beneficial, otherwise 32-bit.
+
+Every quantized representation records bounds and worst-case positional error.
+The compiler rejects a profile when requested accuracy cannot be represented.
+
+## 13. Compression
+
+Compression is chosen per payload class:
+
+- geometry codec optimized for decode speed and GPU-ready ordering;
+- general-purpose compression for semantic/index columns when suitable;
+- KTX2/Basis for textures;
+- independent chunks to preserve random access;
+- optional dictionary/schema sharing without making every chunk dependent on a
+  large global blob.
+
+Codec selection is a manifest feature. The runtime can reject unsupported
+required codecs before downloading their payloads.
+
+## 14. Manifest and indexes
+
+The compiler emits logical resources such as:
+
+```text
+manifest.json
+indexes/
+  hierarchy.bin
+  semantics.bin
+  spatial.bin
+  sources.bin
+chunks/
+  prototype-....bin
+  cluster-....bin
+  edges-....bin
+  materials-....bin
+```
+
+The physical layout is experimental. Each resource has:
+
+- content ID/hash;
+- media type and schema version;
+- compressed/decoded/GPU byte estimates;
+- dependencies;
+- bounds and geometric error where relevant;
+- feature requirements;
+- optional alternate URI/range location.
+
+## 15. Determinism
+
+With identical source bytes, adapter/compiler versions, options, and target
+profile, output content IDs should be identical.
+
+Sources of nondeterminism to control:
+
+- unordered map iteration;
+- thread completion order;
+- floating-point reduction order;
+- timestamps and temporary paths;
+- generated IDs;
+- compression library configuration;
+- OCCT algorithm/version differences.
+
+Build metadata that should not affect content identity lives outside hashed
+payloads.
+
+## 16. Incremental compilation
+
+Incremental compilation is a P1/P2 capability. The design reserves for:
+
+- source document/revision graph;
+- adapter-provided changed persistent IDs;
+- prototype content hashes;
+- chunk reuse based on normalized content;
+- manifest revision that references unchanged chunks;
+- invalidation of dependent spatial/semantic indexes.
+
+Correct full rebuilds come before clever incremental behavior.
+
+## 17. Validation
+
+### Structural
+
+- schema and feature compatibility;
+- hashes and sizes;
+- index/reference ranges;
+- hierarchy acyclicity;
+- finite bounds and transforms;
+- declared coordinate spaces;
+- decoded/GPU size estimates within tolerance.
+
+### Geometric
+
+- source vs compiled bounds;
+- triangle/edge counts and degenerate rates;
+- tessellation distance sampling where exact source access exists;
+- normal orientation and watertightness diagnostics;
+- quantization error bounds;
+- visual snapshot comparison from canonical cameras.
+
+### Semantic
+
+- source entity/occurrence/prototype count reconciliation;
+- source-reference coverage;
+- unit/property preservation;
+- explicit records for dropped/unsupported content.
+
+## 18. Build report
+
+Every compilation writes a machine-readable report with:
+
+- timings and peak memory by stage;
+- source and output sizes;
+- object/prototype/occurrence/triangle/edge/material counts;
+- instance reuse and compression ratios;
+- LOD and chunk histograms;
+- warnings/errors grouped by source reference;
+- target profile and decoder requirements;
+- reproducibility identity.
+
+## 19. Initial vertical slice
+
+The first compiler is intentionally narrow:
+
+1. one local STEP AP242 file;
+2. OCCT XDE hierarchy and colors;
+3. one coarse and one target display tessellation;
+4. explicit edge polylines;
+5. prototype/occurrence preservation;
+6. simple spatial bounds and fixed-size chunks;
+7. unoptimized or minimally compressed typed payloads;
+8. manifest, inspector, and independent validator.
+
+Advanced LOD, compression, incremental builds, and proprietary adapters follow
+only after the runtime proves the basic model.

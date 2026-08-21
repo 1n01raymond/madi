@@ -1,0 +1,34 @@
+name: Bug report
+description: Report a reproducible problem in MADI
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: Do not attach proprietary engineering files. Use a redistributable minimal fixture.
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: What happened and what did you expect?
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Reproduction
+      description: Commands, model/fixture link, camera/workflow, and minimal steps.
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Commit/version, browser, OS, CPU, GPU, and relevant compiler options.
+    validations:
+      required: true
+  - type: textarea
+    id: diagnostics
+    attributes:
+      label: Diagnostics
+      description: Sanitized logs, error codes, stats, screenshots, or benchmark output.

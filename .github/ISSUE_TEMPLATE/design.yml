@@ -1,0 +1,38 @@
+name: Design proposal
+description: Propose an architecture, API, schema, or product change
+title: "[Design]: "
+labels: ["design"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: Which user or implementation problem needs a decision?
+    validations:
+      required: true
+  - type: textarea
+    id: constraints
+    attributes:
+      label: Constraints and evidence
+      description: Scale, accuracy, compatibility, security, source, or benchmark constraints.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposal
+      description: Describe interfaces, data flow, and ownership where applicable.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives and trade-offs
+    validations:
+      required: true
+  - type: checkboxes
+    id: adr
+    attributes:
+      label: ADR impact
+      options:
+        - label: This may require a new or updated architecture decision record.

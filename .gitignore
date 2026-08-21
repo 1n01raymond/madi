@@ -1,0 +1,33 @@
+# JavaScript / TypeScript
+node_modules/
+dist/
+build/
+coverage/
+.turbo/
+.vite/
+
+# Native and compiler builds
+cmake-build-*/
+CMakeFiles/
+CMakeCache.txt
+target/
+out/
+
+# Generated engineering assets and caches
+*.madi-cache
+*.madi-cache/
+*.wgeo
+benchmarks/data/private/
+benchmarks/results/local/
+
+# IDE and OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Local environment
+.env
+.env.*
+!.env.example
+*.log
