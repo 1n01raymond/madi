@@ -39,6 +39,10 @@ Create and activate a temporary virtual environment, then run:
 ```sh
 python -m pip install -r tools/requirements-evidence.txt
 python tools/extract_scene_ir.py \
+  ../../fixtures/step/adafruit-pygamer.step \
+  --scene ../../output/occt/adafruit-pygamer.scene.json \
+  --report ../../artifacts/occt/adafruit-pygamer.report.json
+python tools/extract_scene_ir.py \
   ../../fixtures/step/repeated-fasteners.step \
   --scene ../../artifacts/occt/repeated-fasteners.scene.json \
   --report ../../artifacts/occt/repeated-fasteners.report.json
@@ -53,6 +57,12 @@ prototypes, occurrence transforms, names, millimetre units, source colors,
 tessellated surfaces, explicit edge polylines, and revision-local face/edge
 source references. `pnpm test` hydrates the JSON into typed arrays and runs the
 normal `@madi/scene-ir` validator.
+
+The canonical PyGamer extraction expands to roughly 80.6 MB of JSON, so that
+intermediate is generated under ignored `output/` storage. Its checksum-locked
+STEP source, compact OCCT report, compiled glTF package, and independent
+validation evidence are committed. The smaller MADI-authored scenes remain
+committed for fast regression tests.
 
 Before transfer, the harness scans addressable STEP entity declarations against
 the Phase 0 capability set. Known omitted semantics become stable diagnostics

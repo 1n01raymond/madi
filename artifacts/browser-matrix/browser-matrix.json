@@ -1,30 +1,32 @@
 {
   "schemaVersion": "phase-1-browser-matrix.1",
-  "capturedAt": "2026-08-22T18:04:33.211Z",
+  "capturedAt": "2026-08-22T18:29:53.284Z",
   "source": {
-    "fixture": "fixtures/step/repeated-fasteners.step",
-    "sceneIr": "artifacts/occt/repeated-fasteners.scene.json",
-    "gltf": "artifacts/phase1/repeated-fasteners/scene.gltf",
-    "binary": "artifacts/phase1/repeated-fasteners/scene.bin",
-    "packageDigest": "f8116762c49651d89c7c4f18770da80dc007f194057126462313ba9ea57d1566",
-    "sourceDigest": "sha256:de177178a4bb86a6983cabc7ad265117c56d7324df7912b94ece1263a6c8865d"
+    "fixture": "fixtures/step/adafruit-pygamer.step",
+    "sceneIr": "generated locally; not committed (80.6 MB JSON evidence)",
+    "occtReport": "artifacts/occt/adafruit-pygamer.report.json",
+    "gltf": "artifacts/phase1/adafruit-pygamer/scene.gltf",
+    "binary": "artifacts/phase1/adafruit-pygamer/scene.bin",
+    "packageDigest": "300abb2446a19b9667cad6ed6d1e01a8178212e9f29232af233dfaa9ee2e3c4e",
+    "sourceDigest": "sha256:f0caf940c27af5a409f7c964d50941f60a1cc6329de14407bedd5fabeb9f10c0"
   },
   "host": {
     "platform": "win32",
     "architecture": "x64"
   },
   "expected": {
-    "status": "Compiled glTF ready · 3 shared meshes · 10 renderable occurrences",
-    "selection": "Selected center-rail · node 2 · ID 3 · 12 CAD edge refs",
-    "prototypeCount": "3",
-    "occurrenceCount": "10",
-    "triangleCount": "2,076",
-    "edgeCount": "181",
-    "binarySize": "183.6 KiB",
+    "status": "Compiled glTF ready · 34 shared meshes · 85 renderable occurrences",
+    "selection": "Selected JOYSTICK_ANALOG_MINITHM:JOY1 · node 56 · ID 57 · 524 CAD edge refs",
+    "prototypeCount": "34",
+    "occurrenceCount": "85",
+    "triangleCount": "162,838",
+    "edgeCount": "13,897",
+    "binarySize": "14,479.3 KiB",
     "sourceFormat": "AP214",
     "hierarchyFirst": true,
     "brandMarkLoaded": true,
-    "faviconLoaded": true
+    "faviconLoaded": true,
+    "fixtureCreditLinked": true
   },
   "results": [
     {
@@ -46,23 +48,24 @@
         "isFallbackAdapter": false
       },
       "observed": {
-        "status": "Compiled glTF ready · 3 shared meshes · 10 renderable occurrences",
-        "prototypeCount": "3",
-        "occurrenceCount": "10",
-        "triangleCount": "2,076",
-        "edgeCount": "181",
-        "binarySize": "183.6 KiB",
+        "status": "Compiled glTF ready · 34 shared meshes · 85 renderable occurrences",
+        "prototypeCount": "34",
+        "occurrenceCount": "85",
+        "triangleCount": "162,838",
+        "edgeCount": "13,897",
+        "binarySize": "14,479.3 KiB",
         "sourceFormat": "AP214",
         "hierarchyFirst": true,
         "brandMarkLoaded": true,
         "faviconLoaded": true,
-        "selection": "Selected center-rail · node 2 · ID 3 · 12 CAD edge refs"
+        "fixtureCreditLinked": true,
+        "selection": "Selected JOYSTICK_ANALOG_MINITHM:JOY1 · node 56 · ID 57 · 524 CAD edge refs"
       },
       "consoleIssues": [],
       "screenshot": {
         "path": "chrome-151-windows-selected.png",
-        "bytes": 279308,
-        "sha256": "0c65b4c04fcfc33083fb5f4632569dd676e74033d00ddbbf3efab297939a0d6f"
+        "bytes": 307521,
+        "sha256": "ba57cbae0f86f8094b6aa0bb44f90a702914ed92d8933b8fa435a0f70c9ed034"
       }
     },
     {
@@ -84,23 +87,24 @@
         "isFallbackAdapter": false
       },
       "observed": {
-        "status": "Compiled glTF ready · 3 shared meshes · 10 renderable occurrences",
-        "prototypeCount": "3",
-        "occurrenceCount": "10",
-        "triangleCount": "2,076",
-        "edgeCount": "181",
-        "binarySize": "183.6 KiB",
+        "status": "Compiled glTF ready · 34 shared meshes · 85 renderable occurrences",
+        "prototypeCount": "34",
+        "occurrenceCount": "85",
+        "triangleCount": "162,838",
+        "edgeCount": "13,897",
+        "binarySize": "14,479.3 KiB",
         "sourceFormat": "AP214",
         "hierarchyFirst": true,
         "brandMarkLoaded": true,
         "faviconLoaded": true,
-        "selection": "Selected center-rail · node 2 · ID 3 · 12 CAD edge refs"
+        "fixtureCreditLinked": true,
+        "selection": "Selected JOYSTICK_ANALOG_MINITHM:JOY1 · node 56 · ID 57 · 524 CAD edge refs"
       },
       "consoleIssues": [],
       "screenshot": {
         "path": "firefox-150-windows-selected.png",
-        "bytes": 261925,
-        "sha256": "96313bd932f675fa410e58370ab95984c683f98d8b2d7811fc99339e0f165c4b"
+        "bytes": 292281,
+        "sha256": "cc60223333557a20d886caf1bfb76068252660b6498589fb3c9442ee6d12b322"
       }
     }
   ]

@@ -2,7 +2,7 @@ import { defineConfig } from "vite";
 import { fileURLToPath } from "node:url";
 
 const compiledSceneDirectory = fileURLToPath(
-  new URL("../../artifacts/phase1/repeated-fasteners", import.meta.url),
+  new URL("../../artifacts/phase1/adafruit-pygamer", import.meta.url),
 );
 
 export default defineConfig({

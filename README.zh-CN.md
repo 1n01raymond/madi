@@ -110,6 +110,16 @@ Engineering Scene IR 是逻辑系统边界，而不是新的交换格式。交�
 [基准测试约定](docs/BENCHMARKS.md)。性能数据将与可再分发模型、准确的硬件和
 浏览器信息、cold/warm 状态及可复现命令一同发布。
 
+## 当前运行时验证
+
+![MADI WebGPU 直接渲染的 Adafruit PyGamer STEP 装配体](artifacts/browser-matrix/chrome-151-windows-selected.png)
+
+标准演示现在使用真实的 Adafruit PyGamer 电子装配体，而非合成吉祥物：34 个
+共享 mesh、85 个 part occurrence、162,838 个唯一 triangle、13,897 条显式
+CAD edge、Worker 解码，以及在 Chrome 与 Firefox 中保留源引用的摇杆 picking。
+未经修改的 CAD 按 MIT 许可证再分发，并固定上游 commit 与许可证声明；这不
+表示 Adafruit 对 MADI 的认可。请查看[已审核的浏览器证据](artifacts/browser-matrix/README.md)。
+
 ## 从设计文档开始
 
 | 你想了解… | 请阅读… |

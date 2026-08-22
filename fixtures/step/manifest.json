@@ -1,9 +1,10 @@
 {
-  "schemaVersion": "0.3",
+  "schemaVersion": "0.4",
   "fixtures": [
     {
       "id": "precision-bracket",
       "kind": "precision-part",
+      "provenanceType": "generated",
       "path": "precision-bracket.step",
       "sourcePath": "generators/generate_fixtures.py",
       "sourceUrl": "https://github.com/1n01raymond/madi/blob/main/fixtures/step/generators/generate_fixtures.py",
@@ -31,6 +32,7 @@
     {
       "id": "repeated-fasteners",
       "kind": "assembly",
+      "provenanceType": "generated",
       "path": "repeated-fasteners.step",
       "sourcePath": "generators/generate_fixtures.py",
       "sourceUrl": "https://github.com/1n01raymond/madi/blob/main/fixtures/step/generators/generate_fixtures.py",
@@ -57,8 +59,40 @@
       }
     },
     {
+      "id": "adafruit-pygamer",
+      "kind": "assembly",
+      "provenanceType": "upstream",
+      "path": "adafruit-pygamer.step",
+      "sourcePath": "adafruit-pygamer.step",
+      "sourceUrl": "https://github.com/adafruit/Adafruit_CAD_Parts/blob/a94289fc02e7312f11647eb5e68f5c5ec06cabb6/4242%20Adafruit%20PyGamer/Adafruit%20PyGamer.step",
+      "license": "MIT",
+      "licenseUrl": "https://github.com/adafruit/Adafruit_CAD_Parts/blob/a94289fc02e7312f11647eb5e68f5c5ec06cabb6/LICENSE",
+      "licenseFile": "licenses/adafruit-cad-parts-MIT.txt",
+      "sha256": "f0caf940c27af5a409f7c964d50941f60a1cc6329de14407bedd5fabeb9f10c0",
+      "purposes": [
+        "canonical",
+        "assembly",
+        "electronics",
+        "pcb",
+        "instancing",
+        "hierarchy",
+        "transforms",
+        "names",
+        "colors",
+        "thin-features",
+        "high-part-count"
+      ],
+      "attribution": "Adafruit Industries",
+      "upstream": {
+        "repository": "https://github.com/adafruit/Adafruit_CAD_Parts",
+        "commit": "a94289fc02e7312f11647eb5e68f5c5ec06cabb6",
+        "artifactPath": "4242 Adafruit PyGamer/Adafruit PyGamer.step"
+      }
+    },
+    {
       "id": "unsupported-layer-assignment",
       "kind": "assembly",
+      "provenanceType": "generated",
       "path": "unsupported-layer-assignment.step",
       "sourcePath": "generators/generate_fixtures.py",
       "sourceUrl": "https://github.com/1n01raymond/madi/blob/main/fixtures/step/generators/generate_fixtures.py",

@@ -321,7 +321,8 @@ Initial targets are hypotheses until the benchmark suite exists.
 
 ## 11. Open product questions
 
-- Which public STEP assembly best represents the initial performance target?
+- Which second public assembly should extend the PyGamer electronics baseline
+  into the 100k+ occurrence performance target?
 - Does the first Studio release need IFC, or should IFC follow after the STEP
   vertical slice?
 - Which workspace operations require exact B-Rep access rather than display

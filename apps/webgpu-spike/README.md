@@ -13,4 +13,7 @@ scene.bin
 ```
 
 Run it with `pnpm dev`. Use `pnpm browser:matrix` for the reproducible headed
-Chrome and Firefox visual/picking check.
+Chrome and Firefox visual/picking check. The default scene is the canonical
+MIT-licensed Adafruit PyGamer electronics assembly: 34 shared meshes, 85 part
+occurrences, 162,838 triangles, 13,897 explicit CAD edge segments, and direct
+joystick-to-source picking. Adafruit does not endorse MADI.

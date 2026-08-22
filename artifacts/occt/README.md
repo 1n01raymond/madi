@@ -1,71 +1,63 @@
-# OCCT Phase 0 evidence
+# OCCT extraction evidence
 
-These artifacts are generated evidence, not a stable MADI interchange format.
+These artifacts are generated inspection evidence, not a stable MADI
+interchange format.
 
-- `repeated-fasteners.scene.json` is the logical `EngineeringScene` extracted
-  from `fixtures/step/repeated-fasteners.step`.
-- `repeated-fasteners.report.json` records the source digest, pinned OCCT/OCP
-  toolchain, extraction tolerances, counts, prototype reuse, and known limits.
-- `unsupported-layer-assignment.scene.json` preserves the same supported
-  assembly while recording one intentionally unmapped AP214 layer assignment.
-- `unsupported-layer-assignment.report.json` is the matching build report with
-  diagnostic counts, stable codes, handling, and a STEP entity source reference.
+- `adafruit-pygamer.report.json` records the canonical real-world electronics
+  fixture after OCCT 7.9.3 STEPCAF/XDE import.
+- `repeated-fasteners.scene.json` and its report remain the small committed
+  Scene IR regression case for deterministic compiler tests.
+- `unsupported-layer-assignment.scene.json` and its report prove partial import
+  with a stable diagnostic for intentionally unmapped AP214 layer metadata.
 
-## Recorded result
+## Canonical fixture result
 
-The extraction uses CadQuery 2.8.0 with the OCP binding for OCCT 7.9.3.1. The
-source is a MADI-authored AP214 assembly in millimetres with SHA-256
-`de177178a4bb86a6983cabc7ad265117c56d7324df7912b94ece1263a6c8865d`.
+The canonical source is the unmodified Adafruit PyGamer STEP assembly pinned in
+`fixtures/step/manifest.json`. It is copyright Adafruit Industries and is
+redistributed under the MIT License; this use does not imply endorsement.
 
 | Signal | Result |
-|---|---|
-| Scene IR validation | Passed in `apps/webgpu-spike/test/evidence.test.ts` |
-| Part prototypes / occurrences | 3 / 10 |
-| Fastener reuse | 1 prototype / 8 occurrences |
-| Unique triangles | 2,076 |
-| OCCT face / edge source refs | 30 / 69 |
-| Explicit edge segments | 181 |
-| Two-engine visual smoke, 2026-08-23 | Chrome/Blink and Firefox/Gecko on Windows |
-| Object picking | Both engines selected `center-rail`, object ID 2, with 12 OCCT edge refs |
-| Browser console | No warnings or errors in either engine |
+|---|---:|
+| STEP source bytes | 6,879,875 |
+| Part prototypes / occurrences | 34 / 85 |
+| Hierarchy depth below root | 2 |
+| 0603 package reuse | 1 prototype / 26 occurrences |
+| 0805 package reuse | 1 prototype / 11 occurrences |
+| Unique triangles | 162,838 |
+| OCCT face / edge source refs | 4,622 / 12,462 |
+| Explicit edge segments | 13,897 |
+| Adapter warnings / errors | 0 / 0 |
 
-## Unsupported-entity result
+The extracted JSON is 80.6 MB because Phase 0 evidence serializes expanded
+numeric arrays as text. It is generated into ignored `output/` storage rather
+than committed. The small report, source STEP checksum, compiled glTF package,
+and independent validators are committed. This is also concrete evidence that
+JSON must not become MADI's production delivery format.
 
-The diagnostic fixture adds one `PRESENTATION_LAYER_ASSIGNMENT` at STEP entity
-`#2135`. The adapter reports
-`OCCT_UNSUPPORTED_PRESENTATION_LAYER_ASSIGNMENT` as a warning with handling
-`omitted-semantic-metadata`. OCCT transfer still succeeds and produces the same
-3 part prototypes, 10 part occurrences, 2,076 triangles, 30 face source refs,
-69 edge source refs, and 181 explicit edge segments as the baseline assembly.
+## Focused regression fixtures
 
-`pnpm occt:diagnostics:check` locks the source digest, stable diagnostic
-contract, source-reference resolution, report parity, and geometry preservation.
-
-The committed screenshots and machine-readable browser metadata are in
-[`artifacts/browser-matrix`](../browser-matrix/README.md). This proves the two
-browser-engine path on one workstation; it is not a broad GPU compatibility or
-performance claim.
+`repeated-fasteners` retains one mounting plate, one center rail, and eight
+transformed fastener occurrences sharing one prototype. The unsupported
+variant adds one `PRESENTATION_LAYER_ASSIGNMENT` at STEP entity `#2135`.
+`pnpm occt:diagnostics:check` proves geometry preservation while reporting
+`OCCT_UNSUPPORTED_PRESENTATION_LAYER_ASSIGNMENT`.
 
 ## Reproduce
 
-Create and activate a disposable Python virtual environment, then run from the
+Create and activate a disposable Python environment, then run from the
 repository root:
 
 ```sh
 python -m pip install -r native/adapter-occt/tools/requirements-evidence.txt
 python native/adapter-occt/tools/extract_scene_ir.py \
-  fixtures/step/repeated-fasteners.step \
-  --scene artifacts/occt/repeated-fasteners.scene.json \
-  --report artifacts/occt/repeated-fasteners.report.json
-python native/adapter-occt/tools/extract_scene_ir.py \
-  fixtures/step/unsupported-layer-assignment.step \
-  --scene artifacts/occt/unsupported-layer-assignment.scene.json \
-  --report artifacts/occt/unsupported-layer-assignment.report.json
+  fixtures/step/adafruit-pygamer.step \
+  --scene output/occt/adafruit-pygamer.scene.json \
+  --report artifacts/occt/adafruit-pygamer.report.json
+node packages/compiler/dist/cli.js \
+  output/occt/adafruit-pygamer.scene.json \
+  artifacts/phase1/adafruit-pygamer
 pnpm check
-pnpm dev
 ```
 
-Open the local page in a WebGPU-capable browser. The ready state must report
-three geometry prototypes and ten part occurrences. Clicking the upper-right
-fastener in the default isometric view should select `fastener-03`, object ID 5,
-and resolve 21 revision-local OCCT edge references.
+The reviewed two-engine rendering and picking evidence is in
+[`artifacts/browser-matrix`](../browser-matrix/README.md).

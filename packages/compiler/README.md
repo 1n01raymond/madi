@@ -26,10 +26,11 @@ pnpm phase1:evidence:check
 pnpm test
 ```
 
-The first command compiles the committed OCCT Scene IR evidence into
-`artifacts/phase1/repeated-fasteners`. The second checks resource hashes,
-buffer/accessor ranges, hierarchy, prototype reuse, triangle/edge counts, and
-the source digest, then runs the official Khronos glTF Validator.
+The first command compiles the small committed OCCT Scene IR regression into
+`artifacts/phase1/repeated-fasteners`. The second independently checks that
+package and the canonical `artifacts/phase1/adafruit-pygamer` package: source
+and resource hashes, buffer/accessor ranges, hierarchy, prototype reuse,
+triangle/edge counts, and official Khronos glTF validation.
 
 ## Current limits
 
@@ -40,4 +41,5 @@ the source digest, then runs the official Khronos glTF Validator.
 - Geometry and node transforms are f32 in glTF; the large-coordinate precision
   profile remains an open ADR gate.
 - `extras.madi` is an experimental profile, not a public interchange standard.
-- The browser runtime does not consume this package yet.
+- The browser runtime directly consumes the canonical PyGamer package; coarse
+  LOD and progressive partitioning are still pending.

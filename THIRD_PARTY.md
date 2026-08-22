@@ -37,6 +37,16 @@ The generated models and generator source are original MADI contributions under
 Apache-2.0. Their provenance, exact checksums, and regeneration policy are in
 `fixtures/step/`.
 
+## Third-party STEP fixture
+
+`fixtures/step/adafruit-pygamer.step` is an unmodified copy of the Adafruit
+PyGamer CAD assembly from `adafruit/Adafruit_CAD_Parts`, pinned to commit
+`a94289fc02e7312f11647eb5e68f5c5ec06cabb6`. It remains copyright Adafruit
+Industries and is redistributed under the MIT License. The full notice is in
+`fixtures/step/licenses/adafruit-cad-parts-MIT.txt`; the source URL, license URL,
+artifact path, and SHA-256 digest are locked in the fixture manifest. Adafruit
+does not endorse MADI.
+
 ## Open CASCADE Technology
 
 The initial STEP/IGES adapter is expected to use Open CASCADE Technology

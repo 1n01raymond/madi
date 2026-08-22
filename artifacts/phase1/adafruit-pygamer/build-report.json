@@ -1,0 +1,112 @@
+{
+  "schemaVersion": "madi.phase1.compiler-report.1",
+  "profile": "madi.experimental.gltf.1",
+  "status": "experimental-not-interchange",
+  "compiler": {
+    "name": "@madi/compiler",
+    "version": "0.0.0",
+    "generator": "MADI compiler 0.0.0 / experimental glTF profile 1"
+  },
+  "options": {
+    "binaryUri": "scene.bin",
+    "coordinateSystem": "right-handed-y-up-meters",
+    "geometryEncoding": "gltf-f32"
+  },
+  "source": {
+    "sceneId": "scene:occt:f0caf940c27af5a4",
+    "revisionId": "revision:occt:f0caf940c27af5a4:14b35fda",
+    "sourceDigest": "sha256:f0caf940c27af5a409f7c964d50941f60a1cc6329de14407bedd5fabeb9f10c0",
+    "adapter": "madi-occt-xde-evidence 0.1.0",
+    "optionsDigest": "sha256:14b35fda584ddfbfe5614edd5a32be03938610e8b3ffbd51acdc8c8cc9df9abd"
+  },
+  "output": {
+    "packageDigest": "300abb2446a19b9667cad6ed6d1e01a8178212e9f29232af233dfaa9ee2e3c4e",
+    "resources": [
+      {
+        "path": "scene.gltf",
+        "mediaType": "model/gltf+json",
+        "bytes": 4366608,
+        "sha256": "1e8b463f2f56d5769fe316abccc99fb1075ba06ebf8f59fd5e9d5e014916aed3"
+      },
+      {
+        "path": "scene.bin",
+        "mediaType": "application/octet-stream",
+        "bytes": 14826752,
+        "sha256": "6503dbb3fcaf37e071a376fb1855f06b38abd751305d0fe689fbfb9606ec11c2"
+      }
+    ]
+  },
+  "counts": {
+    "prototypeCount": 36,
+    "compiledPrototypeCount": 34,
+    "occurrenceCount": 87,
+    "renderableOccurrenceCount": 85,
+    "gltfNodeCount": 88,
+    "gltfMeshCount": 34,
+    "materialCount": 24,
+    "triangleCount": 162838,
+    "edgeSegmentCount": 13897
+  },
+  "prototypeReuse": [
+    {
+      "prototypeId": "prototype:part:0603-no-c7",
+      "occurrenceCount": 26
+    },
+    {
+      "prototypeId": "prototype:part:0805-no-c8",
+      "occurrenceCount": 11
+    },
+    {
+      "prototypeId": "prototype:part:6mm-smt-6mmcap-start",
+      "occurrenceCount": 4
+    },
+    {
+      "prototypeId": "prototype:part:c1210-c22",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:part:chipled-0805-nooutline-l",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:part:jstph3-sense",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:part:led3535-led1",
+      "occurrenceCount": 5
+    },
+    {
+      "prototypeId": "prototype:part:respack-4x0603-r1",
+      "occurrenceCount": 4
+    },
+    {
+      "prototypeId": "prototype:part:sod-323-d1",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:part:sot23-5-u2",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:part:sot23-r-q1",
+      "occurrenceCount": 2
+    }
+  ],
+  "diagnostics": {
+    "counts": {
+      "info": 1,
+      "warning": 0,
+      "error": 0
+    },
+    "codes": [
+      "PHASE0_OCCT_PYTHON_BINDING"
+    ]
+  },
+  "limitations": [
+    "This is an experimental glTF profile, not a MADI interchange format.",
+    "Only one target display representation per prototype is emitted; coarse LOD is pending.",
+    "Geometry and node transforms are converted to f32 for glTF delivery.",
+    "MADI source mapping uses glTF extras until an interoperable extension is justified."
+  ]
+}

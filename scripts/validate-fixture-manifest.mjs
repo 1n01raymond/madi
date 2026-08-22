@@ -10,13 +10,14 @@ const fixtureDirectory = dirname(manifestPath);
 const realFixtureDirectory = await realpath(fixtureDirectory);
 const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
 
-if (manifest.schemaVersion !== "0.3" || !Array.isArray(manifest.fixtures)) {
+if (manifest.schemaVersion !== "0.4" || !Array.isArray(manifest.fixtures)) {
   throw new TypeError("fixtures/step/manifest.json has an unsupported shape.");
 }
 
 const required = [
   "id",
   "kind",
+  "provenanceType",
   "path",
   "sourcePath",
   "sourceUrl",
@@ -26,7 +27,6 @@ const required = [
   "sha256",
   "purposes",
   "attribution",
-  "generatedWith",
 ];
 const generatedWithRequired = [
   "tool",
@@ -37,6 +37,7 @@ const generatedWithRequired = [
   "kernelVersion",
 ];
 const fixtureKinds = new Set(["assembly", "precision-part"]);
+const provenanceTypes = new Set(["generated", "upstream"]);
 const diagnosticSeverities = new Set(["info", "warning", "error"]);
 const ids = new Set();
 const paths = new Set();
@@ -104,6 +105,9 @@ for (const [index, fixture] of manifest.fixtures.entries()) {
   if (!fixtureKinds.has(fixture.kind)) {
     throw new TypeError(`Fixture ${fixture.id} has an unsupported kind.`);
   }
+  if (!provenanceTypes.has(fixture.provenanceType)) {
+    throw new TypeError(`Fixture ${fixture.id} has an unsupported provenance type.`);
+  }
   if (ids.has(fixture.id)) throw new TypeError(`Duplicate fixture ID ${fixture.id}.`);
   if (paths.has(fixture.path)) throw new TypeError(`Duplicate fixture path ${fixture.path}.`);
   if (!/^[a-f0-9]{64}$/u.test(fixture.sha256)) {
@@ -163,13 +167,27 @@ for (const [index, fixture] of manifest.fixtures.entries()) {
   assertHttpsUrl(fixture.sourceUrl, `Fixture ${fixture.id} sourceUrl`);
   assertHttpsUrl(fixture.licenseUrl, `Fixture ${fixture.id} licenseUrl`);
 
-  if (typeof fixture.generatedWith !== "object" || fixture.generatedWith === null) {
-    throw new TypeError(`Fixture ${fixture.id} generatedWith must be an object.`);
-  }
-  for (const field of generatedWithRequired) {
+  if (fixture.provenanceType === "generated") {
+    if (typeof fixture.generatedWith !== "object" || fixture.generatedWith === null) {
+      throw new TypeError(`Fixture ${fixture.id} generatedWith must be an object.`);
+    }
+    for (const field of generatedWithRequired) {
+      assertNonEmptyString(
+        fixture.generatedWith[field],
+        `Fixture ${fixture.id} generatedWith.${field}`,
+      );
+    }
+  } else {
+    if (typeof fixture.upstream !== "object" || fixture.upstream === null) {
+      throw new TypeError(`Fixture ${fixture.id} upstream must be an object.`);
+    }
+    assertHttpsUrl(fixture.upstream.repository, `Fixture ${fixture.id} upstream.repository`);
+    if (!/^[a-f0-9]{40}$/u.test(fixture.upstream.commit)) {
+      throw new TypeError(`Fixture ${fixture.id} upstream.commit must be a full Git SHA.`);
+    }
     assertNonEmptyString(
-      fixture.generatedWith[field],
-      `Fixture ${fixture.id} generatedWith.${field}`,
+      fixture.upstream.artifactPath,
+      `Fixture ${fixture.id} upstream.artifactPath`,
     );
   }
 

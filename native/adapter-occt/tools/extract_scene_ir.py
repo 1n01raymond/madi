@@ -721,7 +721,7 @@ def extract(
             }
         ),
         "validation": {
-            "sceneIr": "enforced by apps/webgpu-spike/test/evidence.test.ts",
+            "sceneIr": "enforced during compiler hydration and @madi/scene-ir tests",
             "visual": "recorded in artifacts/occt/README.md",
         },
     }

@@ -1,7 +1,13 @@
 # Phase 1 compiler evidence
 
-`repeated-fasteners/` is the first deterministic, standards-first compiled
-package produced from the committed OCCT Scene IR evidence.
+Two deterministic, standards-first packages cover complementary risks.
+
+| Package | Role |
+|---|---|
+| `adafruit-pygamer/` | Canonical real-world electronics and browser demo fixture |
+| `repeated-fasteners/` | Small MADI-authored deterministic compiler regression fixture |
+
+Each package contains:
 
 | Resource | Purpose |
 |---|---|
@@ -9,24 +15,33 @@ package produced from the committed OCCT Scene IR evidence.
 | `scene.bin` | external little-endian geometry and source-map accessors |
 | `build-report.json` | source/compiler/options identity, SHA-256 hashes, counts, diagnostics, reuse, and limits |
 
-## Recorded result
+## Canonical PyGamer result
 
-- package digest: `f8116762c49651d89c7c4f18770da80dc007f194057126462313ba9ea57d1566`;
-- 3 compiled part prototypes and 10 renderable occurrences;
-- 8 fastener nodes reference one mesh;
-- 2,076 unique triangles and 181 explicit CAD edge segments;
-- 53,211 bytes of glTF JSON and 188,044 bytes of binary payload; and
+- package digest:
+  `300abb2446a19b9667cad6ed6d1e01a8178212e9f29232af233dfaa9ee2e3c4e`;
+- 34 compiled part prototypes and 85 renderable occurrences;
+- 26 0603 and 11 0805 occurrences each reuse one mesh;
+- 162,838 unique triangles and 13,897 explicit CAD edge segments;
+- 4,366,608 bytes of glTF JSON and 14,826,752 bytes of binary payload; and
 - zero errors and zero warnings from Khronos glTF Validator 2.0.0-dev.3.10.
 
-The package is evidence for the compiler/runtime boundary. It is explicitly
-marked `experimental-not-interchange` and does not define a `.madi` file format.
+The compiled package is about 19.2 MB versus the 80.6 MB temporary Scene IR
+JSON. It is still a monolithic baseline without compression, chunking, or LOD;
+that gap is now measurable rather than hypothetical.
 
-## Reproduce
+The package is marked `experimental-not-interchange`. It is standard glTF 2.0
+plus an external binary and does not define a `.madi` file format.
+
+## Reproduce and validate
 
 ```sh
 pnpm phase1:compile:evidence
 pnpm phase1:evidence:check
 ```
 
-The compiler output is byte-identical for identical Scene IR and options. Unit
-tests compile the source twice and compare the JSON, binary payload, and report.
+The first command reproduces the small regression package from committed Scene
+IR. Reproducing PyGamer first requires the OCCT extraction command documented in
+`artifacts/occt/README.md`; its large temporary JSON intentionally remains
+outside Git. The independent evidence check validates both committed packages,
+their source checksums, resource hashes, hierarchy, prototype reuse, accessor
+ranges, geometry counts, and Khronos conformance.

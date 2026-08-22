@@ -16,8 +16,8 @@ report. It intentionally avoids defining a MADI CAD or delivery container.
 |---|---|---|
 | Deterministic output | Two compilations compare JSON, binary, and report bytes | Passed in `packages/compiler/test/gltf.test.ts` |
 | Standards validation | Official Khronos glTF Validator checks JSON and external binary | Passed with 0 errors / 0 warnings |
-| Prototype reuse | Eight fastener occurrence nodes reference one mesh | Passed |
-| Engineering edges | glTF line primitives retain 181 explicit OCCT edge segments | Passed |
+| Prototype reuse | The canonical package reuses one 0603 mesh 26 times and one 0805 mesh 11 times; the focused regression keeps 8-way fastener reuse | Passed |
+| Engineering edges | Canonical glTF line primitives retain 13,897 explicit OCCT edge segments | Passed |
 | Source identity | Report source digest matches OCCT evidence; node/mesh `extras` retain IDs and refs | Passed for experimental profile |
 | Independent package validation | Hashes, ranges, hierarchy, counts, and report parity are checked without compiler state | Passed by `pnpm phase1:evidence:check` |
 
@@ -30,11 +30,11 @@ direct WebGPU renderer. The Phase 0 Scene IR JSON is no longer a browser input.
 
 | Signal | Evidence | Status |
 |---|---|---|
-| Hierarchy first | Recorder observes 12 occurrence records before the Worker requests `scene.bin` | Passed in Chrome and Firefox |
+| Hierarchy first | Recorder observes 87 occurrence records before the Worker requests the 14.8 MB `scene.bin` | Passed in Chrome and Firefox |
 | Worker boundary | Binary fetch, accessor validation, decoding, and transferable collection run in `geometry.worker.ts` | Passed |
-| Prototype reuse | Three GPU batches render 10 parts; eight fasteners share one mesh/buffer set | Passed |
-| Engineering rendering | 2,076 unique triangles and 181 explicit edge segments reproduce the compiler report | Passed |
-| Source picking | Center rail resolves glTF node 2, object ID 3, and 12 revision-local CAD edge refs | Passed |
+| Prototype reuse | 34 GPU batches render 85 parts; 26 tiny 0603 components share one mesh/buffer set | Passed |
+| Engineering rendering | 162,838 unique triangles and 13,897 explicit edge segments reproduce the compiler report | Passed |
+| Source picking | PyGamer joystick resolves glTF node 56, object ID 57, and 524 revision-local CAD edge refs | Passed |
 | Browser conformance | Headed Chrome/Blink and Firefox/Gecko emit no console warnings or errors | Passed by `pnpm browser:matrix` |
 
 ## Reproduce
@@ -59,6 +59,12 @@ See `artifacts/phase1/README.md` for the compiled package,
 - The Three.js comparison required by ADR-0003.
 - Large-coordinate precision behavior required by ADR-0005.
 - A public end-to-end review workflow and reproducible performance report.
+
+The canonical fixture is Adafruit's real PyGamer electronics assembly,
+redistributed unchanged under MIT with a pinned source commit and notice. Its
+temporary 80.6 MB Scene IR JSON compiles to a 19.2 MB glTF package, exposing the
+next concrete optimization targets: progressive partitions, compression, LOD,
+and bounded residency.
 
 ## Next slice
 
