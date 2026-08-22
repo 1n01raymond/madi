@@ -41,6 +41,24 @@ for branch names, merge rules, release backports, tags, and enforcement gates.
 - `test:` tests, fixtures, or benchmark harnesses; and
 - `build:` packaging, CI, or dependency management.
 
+## Development bootstrap
+
+The TypeScript workspace requires Node.js 22.12 or newer and pnpm 11. From the
+repository root:
+
+```sh
+pnpm install
+pnpm check
+pnpm dev
+```
+
+`pnpm check` validates the STEP fixture manifest, lints, type-checks, tests, and
+builds every workspace package. `pnpm dev` opens the Phase 0 direct WebGPU
+spike. Native OCCT work is isolated under `native/adapter-occt`; run
+`pnpm native:check` before configuring it. See the
+[Phase 0 evidence tracker](docs/PHASE_0.md) for current limits and the next
+feasibility gates.
+
 ## Documentation and translations
 
 The English `README.md` is the canonical project landing page. Translations may
