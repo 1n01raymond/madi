@@ -417,3 +417,9 @@ source colors, explicit CAD edges, an isometric bounds fit, and integer object
 picking. Selecting an occurrence also resolves its prototype representation's
 revision-local OCCT edge references. Streaming, Workers, visibility tools,
 clipping, and resource-budget behavior remain unimplemented.
+
+The reproducible browser smoke command is `pnpm browser:matrix`. Its committed
+Phase 0 run covers Chrome/Blink and Firefox/Gecko with the same viewport,
+engineering scene, pick coordinate, expected occurrence/source mapping, and
+console-error policy. See `artifacts/browser-matrix` for the exact versions,
+adapter disclosure, screenshots, and hashes.

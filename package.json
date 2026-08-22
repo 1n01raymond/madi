@@ -12,7 +12,9 @@
   },
   "scripts": {
     "build": "pnpm --recursive --if-present run build",
-    "check": "pnpm run fixtures:check && pnpm run lint && pnpm run typecheck && pnpm run test && pnpm run build",
+    "browser:evidence:check": "node scripts/validate-browser-evidence.mjs",
+    "browser:matrix": "node scripts/record-browser-matrix.mjs",
+    "check": "pnpm run fixtures:check && pnpm run browser:evidence:check && pnpm run lint && pnpm run typecheck && pnpm run test && pnpm run build",
     "dev": "pnpm --filter @madi/webgpu-spike run dev",
     "fixtures:check": "node scripts/validate-fixture-manifest.mjs",
     "lint": "eslint .",
@@ -28,6 +30,7 @@
     "@webgpu/types": "0.1.72",
     "eslint": "10.9.0",
     "globals": "17.11.0",
+    "playwright": "1.60.0",
     "typescript": "6.0.3",
     "typescript-eslint": "8.67.0",
     "vite": "8.2.2",

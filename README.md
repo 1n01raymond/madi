@@ -112,10 +112,10 @@ The roadmap is evidence-gated rather than date-driven.
 | **2 — Large-scene alpha** | 100k+ occurrences, streaming, LOD, cache, and memory budgets | Planned |
 | **3 — Open platform beta** | Plugins, IFC, embedding examples, and self-host deployment | Planned |
 
-See the full [roadmap](docs/ROADMAP.md) and
-[benchmark contract](docs/BENCHMARKS.md). Performance claims will be published
-with redistributable models, exact hardware and browser details, cold/warm
-states, and reproducible commands.
+See the full [roadmap](docs/ROADMAP.md), [Phase 0 evidence](docs/PHASE_0.md),
+and [Chrome/Firefox WebGPU matrix](artifacts/browser-matrix/README.md). Performance
+claims will be published with redistributable models, exact hardware and browser
+details, cold/warm states, and reproducible commands.
 
 ## Start with the design
 
