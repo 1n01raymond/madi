@@ -1,6 +1,7 @@
 # ADR-0003: Use a direct, data-oriented WebGPU rendering hot path
 
 Status: Proposed
+Reviewed: 2026-08-23
 
 ## Context
 
@@ -41,6 +42,12 @@ can make CPU traversal, memory, and state updates scale with total object count.
 
 ## Validation
 
-Benchmarks must compare equivalent Three.js and direct-runtime workloads. If the
-custom path produces no material scale, memory, or integration advantage, this
-decision is revisited.
+Phase 0 proves the feasibility sub-gate: one direct WebGPU path renders
+instanced OCCT geometry, explicit edges, and object IDs in Chrome/Blink and
+Firefox/Gecko. It does not prove that the custom path has a material advantage
+over a general-purpose engine.
+
+This ADR therefore remains Proposed. Acceptance requires equivalent Three.js
+and direct-runtime workloads with published CPU time, memory, draw/batch, and
+integration results. If the custom path produces no material advantage, the
+decision must be revised before the runtime API hardens.

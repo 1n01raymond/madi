@@ -1,6 +1,7 @@
 # ADR-0006: License MADI-owned code under Apache-2.0
 
-Status: Proposed
+Status: Accepted
+Accepted: 2026-08-23
 
 ## Context
 
@@ -38,5 +39,11 @@ LGPL-2.1-plus-exception terms and notices.
 
 ## Validation
 
-Review the license with early contributors/design partners before the first code
-release and maintain an automated third-party license inventory.
+The repository root carries the Apache License 2.0, JavaScript packages declare
+`Apache-2.0`, MADI-authored STEP fixtures record Apache-2.0 provenance, and the
+contribution workflow requires Developer Certificate of Origin sign-off. This
+accepts the license for MADI-owned work.
+
+Before the first packaged release, maintainers must add an automated third-party
+license inventory and verify notices for every distributed dependency and
+adapter. Trademark policy remains a separate future decision.

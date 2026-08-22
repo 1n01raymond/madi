@@ -107,8 +107,8 @@ The roadmap is evidence-gated rather than date-driven.
 
 | Phase | Outcome | Status |
 |---|---|---|
-| **0 — Feasibility** | Connect OCCT identity and edges to a direct WebGPU prototype | **Current** |
-| **1 — Vertical slice** | Public STEP-to-browser demo with core engineering interaction | Planned |
+| **0 — Feasibility** | Connect OCCT identity and edges to a direct WebGPU prototype | **Complete** |
+| **1 — Vertical slice** | Public STEP-to-browser demo with core engineering interaction | **Current** |
 | **2 — Large-scene alpha** | 100k+ occurrences, streaming, LOD, cache, and memory budgets | Planned |
 | **3 — Open platform beta** | Plugins, IFC, embedding examples, and self-host deployment | Planned |
 

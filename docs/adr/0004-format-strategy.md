@@ -1,6 +1,7 @@
 # ADR-0004: Use standards first and defer a custom delivery format
 
-Status: Proposed
+Status: Accepted
+Accepted: 2026-08-23
 
 ## Context
 
@@ -42,6 +43,12 @@ tooling and compatibility cost.
 
 ## Validation
 
-Phase 1 publishes size, startup, decode, peak-memory, and upload comparisons.
-Any custom structure must name the metric it improves and preserve adapters to
-standards-based content where practical.
+Phase 0 uses standard STEP source documents, keeps the Engineering Scene IR
+independent of serialization, and labels committed JSON as inspectable evidence
+rather than a delivery format. No new CAD interchange or public MADI container
+was introduced to complete the vertical feasibility slice.
+
+Phase 1 must publish size, startup, decode, peak-memory, and upload comparisons
+before any custom cache structure is frozen. A custom structure must name the
+metric it improves and preserve adapters to standards-based content where
+practical.

@@ -11,10 +11,11 @@
     "pnpm": ">=11.0.0"
   },
   "scripts": {
+    "adr:check": "node scripts/validate-adrs.mjs",
     "build": "pnpm --recursive --if-present run build",
     "browser:evidence:check": "node scripts/validate-browser-evidence.mjs",
     "browser:matrix": "node scripts/record-browser-matrix.mjs",
-    "check": "pnpm run fixtures:check && pnpm run occt:diagnostics:check && pnpm run browser:evidence:check && pnpm run lint && pnpm run typecheck && pnpm run test && pnpm run build",
+    "check": "pnpm run adr:check && pnpm run fixtures:check && pnpm run occt:diagnostics:check && pnpm run browser:evidence:check && pnpm run lint && pnpm run typecheck && pnpm run test && pnpm run build",
     "dev": "pnpm --filter @madi/webgpu-spike run dev",
     "fixtures:check": "node scripts/validate-fixture-manifest.mjs",
     "lint": "eslint .",

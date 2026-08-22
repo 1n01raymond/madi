@@ -1,6 +1,6 @@
 # Contributing to MADI
 
-MADI is in an architecture-first phase. Contributions that sharpen a use case,
+MADI is in an early vertical-slice phase. Contributions that sharpen a use case,
 add reproducible evidence, challenge an assumption, or reduce implementation
 risk are as valuable as code.
 
@@ -56,8 +56,8 @@ pnpm dev
 builds every workspace package. `pnpm dev` opens the Phase 0 direct WebGPU
 spike. Native OCCT work is isolated under `native/adapter-occt`; run
 `pnpm native:check` before configuring it. See the
-[Phase 0 evidence tracker](docs/PHASE_0.md) for current limits and the next
-feasibility gates.
+[Phase 0 evidence record](docs/PHASE_0.md) for the completed feasibility gates,
+current limits, and Phase 1 handoff.
 
 ## Documentation and translations
 
@@ -74,7 +74,9 @@ a fluent reviewer can focus on terminology and natural phrasing.
 
 Changes that affect a public API, serialized representation, trust boundary,
 source-of-truth rule, or major dependency require an ADR under `docs/adr/`.
-Proposed ADRs begin as `Status: Proposed` and become `Accepted` after review.
+Proposed ADRs begin as `Status: Proposed` and become `Accepted` only after
+review and their stated evidence gate. A reviewed ADR may remain Proposed when
+the evidence is incomplete.
 
 ## Performance claims
 
