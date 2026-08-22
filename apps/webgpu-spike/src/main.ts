@@ -12,6 +12,8 @@ import type {
 
 import type { GeometryDecodeResponse } from "./geometry.worker.js";
 import { createCompiledSceneCamera } from "./view.js";
+import faviconUrl from "../../../docs/media/madi-favicon.svg?url";
+import inverseMarkUrl from "../../../docs/media/madi-mark-inverse.svg?url";
 
 function requireElement<ElementType extends Element>(selector: string): ElementType {
   const element = document.querySelector<ElementType>(selector);
@@ -90,6 +92,8 @@ function renderHierarchy(hierarchy: CompiledHierarchy): void {
 const canvas = requireElement<HTMLCanvasElement>("#viewport");
 const status = requireElement<HTMLElement>("#status");
 const selection = requireElement<HTMLElement>("#selection");
+requireElement<HTMLLinkElement>("#madi-favicon").href = faviconUrl;
+requireElement<HTMLImageElement>("#madi-brand-mark").src = inverseMarkUrl;
 
 async function start(): Promise<void> {
   const gltfUrl = new URL("/scene.gltf", window.location.href);

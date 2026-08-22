@@ -52,16 +52,9 @@ nav {
 }
 
 .brand-mark {
-  display: grid;
   width: 32px;
   height: 32px;
-  place-items: center;
-  border: 1px solid #2b7794;
-  border-radius: 8px;
-  color: #56d4ff;
-  background: #0a1c26;
-  font-size: 15px;
-  letter-spacing: 0;
+  object-fit: contain;
 }
 
 .release {

@@ -39,6 +39,8 @@ const expected = {
   binarySize: "183.6 KiB",
   sourceFormat: "AP214",
   hierarchyFirst: true,
+  brandMarkLoaded: true,
+  faviconLoaded: true,
 };
 const compilerReport = JSON.parse(
   await readFile(
@@ -92,6 +94,19 @@ async function recordBrowser(definition) {
       binarySize: await page.locator("#binary-size").innerText(),
       sourceFormat: await page.locator("#source-format").innerText(),
       hierarchyFirst,
+      brandMarkLoaded: await page.locator("#madi-brand-mark").evaluate(
+        (element) =>
+          element instanceof HTMLImageElement &&
+          element.complete &&
+          element.naturalWidth > 0,
+      ),
+      faviconLoaded: await page.evaluate(async () => {
+        const favicon = document.querySelector("#madi-favicon");
+        if (!(favicon instanceof HTMLLinkElement) || !favicon.href) return false;
+        const response = await fetch(favicon.href);
+        const source = await response.text();
+        return response.ok && source.includes("<svg") && source.includes("MADI");
+      }),
     };
     for (const [label, expectedValue] of Object.entries(expected)) {
       if (label === "selection") continue;
