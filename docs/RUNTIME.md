@@ -411,15 +411,17 @@ may be added later behind a reviewed unsafe/experimental capability.
 No GPU compute culling is required to call the first slice successful. It is
 added only when a public benchmark shows the bottleneck.
 
-The Phase 0 evidence app currently implements the narrow rendering subset of
-this slice: three reusable prototype batches, per-occurrence transforms and
-source colors, explicit CAD edges, an isometric bounds fit, and integer object
-picking. Selecting an occurrence also resolves its prototype representation's
-revision-local OCCT edge references. Streaming, Workers, visibility tools,
-clipping, and resource-budget behavior remain unimplemented.
+The Phase 1 evidence app now opens the compiled glTF node graph before geometry,
+decodes the external binary in a Worker, transfers three reusable prototype
+batches, and renders per-occurrence transforms, source colors, explicit CAD
+edges, an isometric bounds fit, and integer object picking. Selecting an
+occurrence resolves its glTF node and revision-local OCCT edge references.
+Progressive chunks, visibility tools, navigation, clipping, and resource-budget
+behavior remain unimplemented.
 
 The reproducible browser smoke command is `pnpm browser:matrix`. Its committed
-Phase 0 run covers Chrome/Blink and Firefox/Gecko with the same viewport,
-engineering scene, pick coordinate, expected occurrence/source mapping, and
-console-error policy. See `artifacts/browser-matrix` for the exact versions,
-adapter disclosure, screenshots, and hashes.
+Phase 1 run covers Chrome/Blink and Firefox/Gecko with the same compiled package,
+hierarchy-before-binary assertion, viewport, pick coordinate, expected
+occurrence/source mapping, and console-error policy. See
+`artifacts/browser-matrix` for exact versions, adapter disclosure, screenshots,
+and hashes.

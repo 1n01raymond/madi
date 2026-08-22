@@ -1,0 +1,751 @@
+import type {
+  GpuOccurrenceInstance,
+  GpuPrototypeBatch,
+  GpuScene,
+} from "./layout.js";
+
+const supportedProfile = "madi.experimental.gltf.1";
+const identityMatrix = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1] as const;
+
+type JsonRecord = Record<string, unknown>;
+
+interface CompiledGltfBuffer {
+  readonly uri: string;
+  readonly byteLength: number;
+}
+
+interface CompiledGltfBufferView {
+  readonly buffer: number;
+  readonly byteOffset?: number;
+  readonly byteLength: number;
+  readonly byteStride?: number;
+}
+
+interface CompiledGltfAccessor {
+  readonly bufferView: number;
+  readonly byteOffset?: number;
+  readonly componentType: number;
+  readonly count: number;
+  readonly type: string;
+  readonly normalized?: boolean;
+}
+
+interface CompiledGltfPrimitive {
+  readonly attributes: Readonly<Record<string, number>>;
+  readonly indices?: number;
+  readonly material?: number;
+  readonly mode?: number;
+  readonly extras?: JsonRecord;
+}
+
+interface CompiledGltfMesh {
+  readonly name?: string;
+  readonly primitives: readonly CompiledGltfPrimitive[];
+  readonly extras?: JsonRecord;
+}
+
+interface CompiledGltfNode {
+  readonly name?: string;
+  readonly children?: readonly number[];
+  readonly matrix?: readonly number[];
+  readonly mesh?: number;
+  readonly extras?: JsonRecord;
+}
+
+interface CompiledGltfMaterial {
+  readonly pbrMetallicRoughness?: {
+    readonly baseColorFactor?: readonly number[];
+  };
+}
+
+export interface CompiledGltfDocument {
+  readonly asset: { readonly version: string; readonly generator?: string };
+  readonly scene?: number;
+  readonly scenes: readonly { readonly name?: string; readonly nodes: readonly number[] }[];
+  readonly nodes: readonly CompiledGltfNode[];
+  readonly meshes: readonly CompiledGltfMesh[];
+  readonly materials: readonly CompiledGltfMaterial[];
+  readonly buffers: readonly CompiledGltfBuffer[];
+  readonly bufferViews: readonly CompiledGltfBufferView[];
+  readonly accessors: readonly CompiledGltfAccessor[];
+  readonly extras?: JsonRecord;
+}
+
+export interface CompiledHierarchyEntry {
+  readonly nodeIndex: number;
+  readonly name: string;
+  readonly depth: number;
+  readonly renderable: boolean;
+  readonly occurrenceId: string;
+  readonly prototypeId: string;
+  readonly sourceRef?: string;
+}
+
+export interface CompiledHierarchy {
+  readonly profile: typeof supportedProfile;
+  readonly sceneId: string;
+  readonly sourceFormat: string;
+  readonly binaryUri: string;
+  readonly binaryByteLength: number;
+  readonly entries: readonly CompiledHierarchyEntry[];
+  readonly renderableOccurrences: number;
+  readonly sharedMeshes: number;
+}
+
+export interface SceneBounds {
+  readonly min: readonly [number, number, number];
+  readonly max: readonly [number, number, number];
+}
+
+export interface CompiledObjectEvidence {
+  readonly objectId: number;
+  readonly nodeIndex: number;
+  readonly label: string;
+  readonly occurrenceId: string;
+  readonly prototypeId: string;
+  readonly sourceRef?: string;
+  readonly edgeSourceRefs: readonly string[];
+}
+
+export interface DecodedCompiledScene {
+  readonly gpuScene: GpuScene;
+  readonly bounds: SceneBounds;
+  readonly hierarchy: CompiledHierarchy;
+  readonly objectEvidence: readonly CompiledObjectEvidence[];
+  readonly summary: {
+    readonly prototypeBatches: number;
+    readonly partOccurrences: number;
+    readonly triangles: number;
+    readonly edgeSegments: number;
+    readonly binaryBytes: number;
+  };
+}
+
+export type CompiledGltfErrorCode =
+  | "INVALID_GLTF"
+  | "UNSUPPORTED_PROFILE"
+  | "UNSUPPORTED_GEOMETRY"
+  | "INVALID_BINARY";
+
+export class CompiledGltfError extends Error {
+  readonly code: CompiledGltfErrorCode;
+
+  constructor(code: CompiledGltfErrorCode, message: string) {
+    super(message);
+    this.name = "CompiledGltfError";
+    this.code = code;
+  }
+}
+
+function isRecord(value: unknown): value is JsonRecord {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function recordAt(value: unknown, key: string): JsonRecord | undefined {
+  if (!isRecord(value)) return undefined;
+  const child = value[key];
+  return isRecord(child) ? child : undefined;
+}
+
+function madiExtras(value: { readonly extras?: JsonRecord }): JsonRecord {
+  return recordAt(value.extras, "madi") ?? {};
+}
+
+function finiteInteger(value: unknown, label: string, maximum?: number): number {
+  if (!Number.isInteger(value) || (value as number) < 0) {
+    throw new CompiledGltfError("INVALID_GLTF", `${label} must be a non-negative integer.`);
+  }
+  const result = value as number;
+  if (maximum !== undefined && result >= maximum) {
+    throw new CompiledGltfError("INVALID_GLTF", `${label} references missing index ${result}.`);
+  }
+  return result;
+}
+
+function stringArray(value: unknown): string[] {
+  return Array.isArray(value)
+    ? value.filter((entry): entry is string => typeof entry === "string")
+    : [];
+}
+
+function matrixFor(node: CompiledGltfNode, nodeIndex: number): readonly number[] {
+  const matrix = node.matrix ?? identityMatrix;
+  if (matrix.length !== 16 || matrix.some((value) => !Number.isFinite(value))) {
+    throw new CompiledGltfError(
+      "INVALID_GLTF",
+      `nodes[${nodeIndex}].matrix must contain 16 finite values.`,
+    );
+  }
+  return matrix;
+}
+
+function validateDocumentShape(value: unknown): asserts value is CompiledGltfDocument {
+  if (!isRecord(value)) {
+    throw new CompiledGltfError("INVALID_GLTF", "Compiled scene JSON must be an object.");
+  }
+  if (recordAt(value, "asset")?.version !== "2.0") {
+    throw new CompiledGltfError("INVALID_GLTF", "Compiled scene must use glTF 2.0.");
+  }
+  for (const key of ["scenes", "nodes", "meshes", "materials", "buffers", "bufferViews", "accessors"] as const) {
+    if (!Array.isArray(value[key])) {
+      throw new CompiledGltfError("INVALID_GLTF", `Compiled scene is missing ${key}.`);
+    }
+  }
+  if ((value.buffers as unknown[]).length !== 1) {
+    throw new CompiledGltfError(
+      "UNSUPPORTED_GEOMETRY",
+      "The experimental runtime slice requires exactly one external glTF buffer.",
+    );
+  }
+}
+
+export function parseCompiledGltf(value: unknown): CompiledGltfDocument {
+  validateDocumentShape(value);
+  const document = value;
+  const rootMadi = recordAt(document.extras, "madi");
+  if (rootMadi?.profile !== supportedProfile) {
+    throw new CompiledGltfError(
+      "UNSUPPORTED_PROFILE",
+      `Expected ${supportedProfile}; received ${String(rootMadi?.profile ?? "no profile")}.`,
+    );
+  }
+
+  const sceneIndex = finiteInteger(document.scene ?? 0, "scene", document.scenes.length);
+  const activeScene = document.scenes[sceneIndex];
+  if (!activeScene || !Array.isArray(activeScene.nodes)) {
+    throw new CompiledGltfError("INVALID_GLTF", "The active glTF scene has no root nodes.");
+  }
+  for (const root of activeScene.nodes) finiteInteger(root, "scene root", document.nodes.length);
+
+  document.nodes.forEach((node, nodeIndex) => {
+    if (!isRecord(node)) {
+      throw new CompiledGltfError("INVALID_GLTF", `nodes[${nodeIndex}] must be an object.`);
+    }
+    matrixFor(node, nodeIndex);
+    if (node.children !== undefined) {
+      if (!Array.isArray(node.children)) {
+        throw new CompiledGltfError("INVALID_GLTF", `nodes[${nodeIndex}].children must be an array.`);
+      }
+      for (const child of node.children) {
+        finiteInteger(child, `nodes[${nodeIndex}].children`, document.nodes.length);
+      }
+    }
+    if (node.mesh !== undefined) {
+      finiteInteger(node.mesh, `nodes[${nodeIndex}].mesh`, document.meshes.length);
+    }
+  });
+
+  const buffer = document.buffers[0];
+  if (
+    !buffer ||
+    typeof buffer.uri !== "string" ||
+    buffer.uri.trim() === "" ||
+    !Number.isInteger(buffer.byteLength) ||
+    buffer.byteLength <= 0
+  ) {
+    throw new CompiledGltfError(
+      "INVALID_GLTF",
+      "The compiled glTF buffer must have a URI and positive byteLength.",
+    );
+  }
+
+  return document;
+}
+
+function activeRoots(document: CompiledGltfDocument): readonly number[] {
+  return document.scenes[document.scene ?? 0]?.nodes ?? [];
+}
+
+function traverseActiveNodes(
+  document: CompiledGltfDocument,
+  visit: (node: CompiledGltfNode, nodeIndex: number, occurrenceDepth: number) => void,
+): void {
+  const visiting = new Set<number>();
+  const visited = new Set<number>();
+
+  const traverse = (nodeIndex: number, occurrenceDepth: number): void => {
+    if (visiting.has(nodeIndex)) {
+      throw new CompiledGltfError("INVALID_GLTF", `Cycle detected at nodes[${nodeIndex}].`);
+    }
+    if (visited.has(nodeIndex)) {
+      throw new CompiledGltfError(
+        "INVALID_GLTF",
+        `nodes[${nodeIndex}] has more than one active-scene parent.`,
+      );
+    }
+    const node = document.nodes[nodeIndex];
+    if (!node) {
+      throw new CompiledGltfError("INVALID_GLTF", `Missing nodes[${nodeIndex}].`);
+    }
+    visiting.add(nodeIndex);
+    visited.add(nodeIndex);
+    visit(node, nodeIndex, occurrenceDepth);
+    const isOccurrence = typeof madiExtras(node).occurrenceId === "string";
+    const childDepth = occurrenceDepth + (isOccurrence ? 1 : 0);
+    for (const child of node.children ?? []) traverse(child, childDepth);
+    visiting.delete(nodeIndex);
+  };
+
+  for (const root of activeRoots(document)) traverse(root, 0);
+}
+
+export function inspectCompiledHierarchy(value: unknown): {
+  readonly document: CompiledGltfDocument;
+  readonly hierarchy: CompiledHierarchy;
+} {
+  const document = parseCompiledGltf(value);
+  const rootMadi = recordAt(document.extras, "madi") ?? {};
+  const entries: CompiledHierarchyEntry[] = [];
+  const renderedMeshes = new Set<number>();
+
+  traverseActiveNodes(document, (node, nodeIndex, depth) => {
+    const madi = madiExtras(node);
+    if (typeof madi.occurrenceId !== "string") return;
+    if (node.mesh !== undefined) renderedMeshes.add(node.mesh);
+    entries.push({
+      nodeIndex,
+      name: node.name ?? madi.occurrenceId,
+      depth,
+      renderable: node.mesh !== undefined,
+      occurrenceId: madi.occurrenceId,
+      prototypeId: typeof madi.prototypeId === "string" ? madi.prototypeId : "unknown",
+      ...(typeof madi.sourceRef === "string" ? { sourceRef: madi.sourceRef } : {}),
+    });
+  });
+
+  const documents = Array.isArray(rootMadi.documents) ? rootMadi.documents : [];
+  const source = documents.find(isRecord);
+  const format = typeof source?.format === "string" ? source.format : "source";
+  const formatVersion =
+    typeof source?.formatVersion === "string" ? source.formatVersion : undefined;
+  const buffer = document.buffers[0];
+  if (!buffer) throw new CompiledGltfError("INVALID_GLTF", "Missing glTF buffer.");
+
+  return {
+    document,
+    hierarchy: {
+      profile: supportedProfile,
+      sceneId:
+        typeof rootMadi.sceneId === "string"
+          ? rootMadi.sceneId
+          : document.scenes[document.scene ?? 0]?.name ?? "compiled-scene",
+      sourceFormat: formatVersion ?? format,
+      binaryUri: buffer.uri,
+      binaryByteLength: buffer.byteLength,
+      entries,
+      renderableOccurrences: entries.filter(({ renderable }) => renderable).length,
+      sharedMeshes: renderedMeshes.size,
+    },
+  };
+}
+
+function multiplyMatrices(a: ArrayLike<number>, b: ArrayLike<number>): Float32Array {
+  const result = new Float32Array(16);
+  for (let column = 0; column < 4; column += 1) {
+    for (let row = 0; row < 4; row += 1) {
+      let value = 0;
+      for (let index = 0; index < 4; index += 1) {
+        value += (a[index * 4 + row] ?? 0) * (b[column * 4 + index] ?? 0);
+      }
+      result[column * 4 + row] = value;
+    }
+  }
+  return result;
+}
+
+function transformPoint(
+  matrix: ArrayLike<number>,
+  x: number,
+  y: number,
+  z: number,
+): readonly [number, number, number] {
+  return [
+    (matrix[0] ?? 0) * x + (matrix[4] ?? 0) * y + (matrix[8] ?? 0) * z + (matrix[12] ?? 0),
+    (matrix[1] ?? 0) * x + (matrix[5] ?? 0) * y + (matrix[9] ?? 0) * z + (matrix[13] ?? 0),
+    (matrix[2] ?? 0) * x + (matrix[6] ?? 0) * y + (matrix[10] ?? 0) * z + (matrix[14] ?? 0),
+  ];
+}
+
+class BinaryAccessors {
+  readonly document: CompiledGltfDocument;
+  readonly binary: ArrayBuffer;
+  private readonly data: DataView;
+
+  constructor(document: CompiledGltfDocument, binary: ArrayBuffer) {
+    const expected = document.buffers[0]?.byteLength;
+    if (expected === undefined || binary.byteLength !== expected) {
+      throw new CompiledGltfError(
+        "INVALID_BINARY",
+        `scene.bin byteLength must be ${String(expected)}; received ${binary.byteLength}.`,
+      );
+    }
+    this.document = document;
+    this.binary = binary;
+    this.data = new DataView(binary);
+  }
+
+  float32Vec3(accessorIndex: number, label: string): Float32Array {
+    const layout = this.layout(accessorIndex, 5126, "VEC3", label);
+    const result = new Float32Array(layout.count * 3);
+    for (let item = 0; item < layout.count; item += 1) {
+      for (let component = 0; component < 3; component += 1) {
+        result[item * 3 + component] = this.data.getFloat32(
+          layout.start + item * layout.stride + component * 4,
+          true,
+        );
+      }
+    }
+    return result;
+  }
+
+  uint32Scalar(accessorIndex: number, label: string): Uint32Array {
+    const layout = this.layout(accessorIndex, 5125, "SCALAR", label);
+    const result = new Uint32Array(layout.count);
+    for (let item = 0; item < layout.count; item += 1) {
+      result[item] = this.data.getUint32(layout.start + item * layout.stride, true);
+    }
+    return result;
+  }
+
+  private layout(
+    accessorIndex: number,
+    componentType: number,
+    type: string,
+    label: string,
+  ): { readonly start: number; readonly stride: number; readonly count: number } {
+    finiteInteger(accessorIndex, `${label} accessor`, this.document.accessors.length);
+    const accessor = this.document.accessors[accessorIndex];
+    if (!accessor || accessor.componentType !== componentType || accessor.type !== type) {
+      throw new CompiledGltfError(
+        "UNSUPPORTED_GEOMETRY",
+        `${label} must use ${type} component type ${componentType}.`,
+      );
+    }
+    if (!Number.isInteger(accessor.count) || accessor.count <= 0 || accessor.normalized) {
+      throw new CompiledGltfError("INVALID_GLTF", `${label} accessor metadata is invalid.`);
+    }
+    finiteInteger(accessor.bufferView, `${label} bufferView`, this.document.bufferViews.length);
+    const bufferView = this.document.bufferViews[accessor.bufferView];
+    if (!bufferView || bufferView.buffer !== 0) {
+      throw new CompiledGltfError("UNSUPPORTED_GEOMETRY", `${label} must use buffer 0.`);
+    }
+    const components = type === "VEC3" ? 3 : 1;
+    const elementBytes = components * 4;
+    const stride = bufferView.byteStride ?? elementBytes;
+    const viewStart = bufferView.byteOffset ?? 0;
+    const start = viewStart + (accessor.byteOffset ?? 0);
+    const end = start + (accessor.count - 1) * stride + elementBytes;
+    const viewEnd = viewStart + bufferView.byteLength;
+    if (
+      !Number.isInteger(viewStart) ||
+      !Number.isInteger(bufferView.byteLength) ||
+      !Number.isInteger(start) ||
+      !Number.isInteger(stride) ||
+      start < viewStart ||
+      stride < elementBytes ||
+      end > viewEnd ||
+      end > this.binary.byteLength
+    ) {
+      throw new CompiledGltfError("INVALID_BINARY", `${label} accessor exceeds scene.bin.`);
+    }
+    return { start, stride, count: accessor.count };
+  }
+}
+
+function interleaveSurface(positions: Float32Array, normals?: Float32Array): Float32Array {
+  if (normals && normals.length !== positions.length) {
+    throw new CompiledGltfError(
+      "INVALID_GLTF",
+      "Surface POSITION and NORMAL accessors must have equal counts.",
+    );
+  }
+  const result = new Float32Array((positions.length / 3) * 6);
+  for (let vertex = 0; vertex < positions.length / 3; vertex += 1) {
+    const source = vertex * 3;
+    const target = vertex * 6;
+    result[target] = positions[source] ?? 0;
+    result[target + 1] = positions[source + 1] ?? 0;
+    result[target + 2] = positions[source + 2] ?? 0;
+    result[target + 3] = normals?.[source] ?? 0;
+    result[target + 4] = normals?.[source + 1] ?? 1;
+    result[target + 5] = normals?.[source + 2] ?? 0;
+  }
+  return result;
+}
+
+function expandEdges(positions: Float32Array, indices: Uint32Array): Float32Array {
+  if (indices.length % 2 !== 0) {
+    throw new CompiledGltfError("INVALID_GLTF", "CAD edge indices must contain line pairs.");
+  }
+  const result = new Float32Array(indices.length * 3);
+  indices.forEach((vertexIndex, indexOffset) => {
+    const source = vertexIndex * 3;
+    if (source + 2 >= positions.length) {
+      throw new CompiledGltfError(
+        "INVALID_BINARY",
+        `CAD edge vertex index ${vertexIndex} is out of range.`,
+      );
+    }
+    const target = indexOffset * 3;
+    result[target] = positions[source] ?? 0;
+    result[target + 1] = positions[source + 1] ?? 0;
+    result[target + 2] = positions[source + 2] ?? 0;
+  });
+  return result;
+}
+
+function surfaceColor(
+  document: CompiledGltfDocument,
+  primitive: CompiledGltfPrimitive,
+): readonly [number, number, number, number] {
+  const material =
+    primitive.material === undefined ? undefined : document.materials[primitive.material];
+  const value = material?.pbrMetallicRoughness?.baseColorFactor;
+  return value?.length === 4 && value.every(Number.isFinite)
+    ? [value[0] ?? 0.55, value[1] ?? 0.62, value[2] ?? 0.68, value[3] ?? 1]
+    : [0.55, 0.62, 0.68, 1];
+}
+
+interface DecodedMeshGeometry {
+  readonly surfaceVertices: Float32Array;
+  readonly surfacePositions: Float32Array;
+  readonly surfaceIndices: Uint32Array;
+  readonly edgeVertices: Float32Array;
+  readonly edgeSourceRefs: readonly string[];
+  readonly color: readonly [number, number, number, number];
+}
+
+function decodeMesh(
+  document: CompiledGltfDocument,
+  accessors: BinaryAccessors,
+  mesh: CompiledGltfMesh,
+  meshIndex: number,
+): DecodedMeshGeometry {
+  if (!Array.isArray(mesh.primitives)) {
+    throw new CompiledGltfError("INVALID_GLTF", `meshes[${meshIndex}].primitives is missing.`);
+  }
+  const surfaces = mesh.primitives.filter((primitive) => (primitive.mode ?? 4) === 4);
+  const edges = mesh.primitives.filter((primitive) => primitive.mode === 1);
+  if (surfaces.length !== 1 || edges.length > 1) {
+    throw new CompiledGltfError(
+      "UNSUPPORTED_GEOMETRY",
+      `meshes[${meshIndex}] must contain one TRIANGLES primitive and at most one LINES primitive.`,
+    );
+  }
+  const surface = surfaces[0];
+  if (!surface || surface.indices === undefined) {
+    throw new CompiledGltfError("INVALID_GLTF", `meshes[${meshIndex}] surface is not indexed.`);
+  }
+  const positionAccessor = surface.attributes.POSITION;
+  if (positionAccessor === undefined) {
+    throw new CompiledGltfError("INVALID_GLTF", `meshes[${meshIndex}] has no POSITION accessor.`);
+  }
+  const positions = accessors.float32Vec3(positionAccessor, `meshes[${meshIndex}] POSITION`);
+  const normals =
+    surface.attributes.NORMAL === undefined
+      ? undefined
+      : accessors.float32Vec3(surface.attributes.NORMAL, `meshes[${meshIndex}] NORMAL`);
+  const surfaceIndices = accessors.uint32Scalar(
+    surface.indices,
+    `meshes[${meshIndex}] surface indices`,
+  );
+  if (surfaceIndices.length % 3 !== 0) {
+    throw new CompiledGltfError("INVALID_GLTF", "Surface indices must contain triangles.");
+  }
+  for (const index of surfaceIndices) {
+    if (index >= positions.length / 3) {
+      throw new CompiledGltfError(
+        "INVALID_BINARY",
+        `Surface vertex index ${index} is out of range.`,
+      );
+    }
+  }
+
+  const edge = edges[0];
+  let edgeVertices: Float32Array<ArrayBufferLike> = new Float32Array();
+  let edgeSourceRefs: readonly string[] = [];
+  if (edge) {
+    const edgePositionAccessor = edge.attributes.POSITION;
+    if (edgePositionAccessor === undefined || edge.indices === undefined) {
+      throw new CompiledGltfError("INVALID_GLTF", `meshes[${meshIndex}] edge stream is incomplete.`);
+    }
+    const edgePositions = accessors.float32Vec3(
+      edgePositionAccessor,
+      `meshes[${meshIndex}] edge POSITION`,
+    );
+    const edgeIndices = accessors.uint32Scalar(
+      edge.indices,
+      `meshes[${meshIndex}] edge indices`,
+    );
+    edgeVertices = expandEdges(edgePositions, edgeIndices);
+    const edgeMadi = recordAt(edge.extras, "madi") ?? {};
+    const sourceRefs = stringArray(edgeMadi.sourceRefs);
+    if (Number.isInteger(edgeMadi.edgeSourceAccessor)) {
+      const sourceIds = accessors.uint32Scalar(
+        edgeMadi.edgeSourceAccessor as number,
+        `meshes[${meshIndex}] edge source IDs`,
+      );
+      edgeSourceRefs = [
+        ...new Set(
+          Array.from(sourceIds, (sourceId) => {
+            const sourceRef = sourceRefs[sourceId];
+            if (sourceRef === undefined) {
+              throw new CompiledGltfError(
+                "INVALID_BINARY",
+                `CAD edge source ID ${sourceId} is out of range.`,
+              );
+            }
+            return sourceRef;
+          }),
+        ),
+      ];
+    } else {
+      edgeSourceRefs = sourceRefs.filter((sourceRef) => sourceRef.includes(":edge:"));
+    }
+  }
+
+  return {
+    surfaceVertices: interleaveSurface(positions, normals),
+    surfacePositions: positions,
+    surfaceIndices,
+    edgeVertices,
+    edgeSourceRefs,
+    color: surfaceColor(document, surface),
+  };
+}
+
+export function decodeCompiledGltf(
+  value: unknown,
+  binary: ArrayBuffer,
+): DecodedCompiledScene {
+  const { document, hierarchy } = inspectCompiledHierarchy(value);
+  const accessors = new BinaryAccessors(document, binary);
+  const meshGeometry = new Map<number, DecodedMeshGeometry>();
+  const instances = new Map<number, GpuOccurrenceInstance[]>();
+  const objectEvidence: CompiledObjectEvidence[] = [];
+  const boundsMin = [Infinity, Infinity, Infinity];
+  const boundsMax = [-Infinity, -Infinity, -Infinity];
+
+  const traverse = (
+    nodeIndex: number,
+    parentTransform: ArrayLike<number>,
+    activePath: Set<number>,
+  ): void => {
+    if (activePath.has(nodeIndex)) {
+      throw new CompiledGltfError("INVALID_GLTF", `Cycle detected at nodes[${nodeIndex}].`);
+    }
+    const node = document.nodes[nodeIndex];
+    if (!node) throw new CompiledGltfError("INVALID_GLTF", `Missing nodes[${nodeIndex}].`);
+    const path = new Set(activePath).add(nodeIndex);
+    const worldTransform = multiplyMatrices(parentTransform, matrixFor(node, nodeIndex));
+
+    if (node.mesh !== undefined) {
+      const meshIndex = node.mesh;
+      const mesh = document.meshes[meshIndex];
+      if (!mesh) throw new CompiledGltfError("INVALID_GLTF", `Missing meshes[${meshIndex}].`);
+      const geometry = meshGeometry.get(meshIndex) ?? decodeMesh(document, accessors, mesh, meshIndex);
+      meshGeometry.set(meshIndex, geometry);
+      const objectId = nodeIndex + 1;
+      const nodeMadi = madiExtras(node);
+      const meshMadi = madiExtras(mesh);
+      const occurrenceId =
+        typeof nodeMadi.occurrenceId === "string"
+          ? nodeMadi.occurrenceId
+          : `gltf-node:${nodeIndex}`;
+      const prototypeId =
+        typeof nodeMadi.prototypeId === "string"
+          ? nodeMadi.prototypeId
+          : typeof meshMadi.prototypeId === "string"
+            ? meshMadi.prototypeId
+            : `gltf-mesh:${meshIndex}`;
+      const instance: GpuOccurrenceInstance = {
+        transform: worldTransform,
+        objectId,
+        baseColor: geometry.color,
+      };
+      const meshInstances = instances.get(meshIndex) ?? [];
+      meshInstances.push(instance);
+      instances.set(meshIndex, meshInstances);
+      objectEvidence.push({
+        objectId,
+        nodeIndex,
+        label: node.name ?? occurrenceId,
+        occurrenceId,
+        prototypeId,
+        ...(typeof nodeMadi.sourceRef === "string" ? { sourceRef: nodeMadi.sourceRef } : {}),
+        edgeSourceRefs: geometry.edgeSourceRefs,
+      });
+
+      for (let offset = 0; offset < geometry.surfacePositions.length; offset += 3) {
+        const point = transformPoint(
+          worldTransform,
+          geometry.surfacePositions[offset] ?? 0,
+          geometry.surfacePositions[offset + 1] ?? 0,
+          geometry.surfacePositions[offset + 2] ?? 0,
+        );
+        for (let axis = 0; axis < 3; axis += 1) {
+          boundsMin[axis] = Math.min(boundsMin[axis] ?? Infinity, point[axis] ?? 0);
+          boundsMax[axis] = Math.max(boundsMax[axis] ?? -Infinity, point[axis] ?? 0);
+        }
+      }
+    }
+    for (const child of node.children ?? []) traverse(child, worldTransform, path);
+  };
+
+  for (const root of activeRoots(document)) traverse(root, identityMatrix, new Set());
+  if (objectEvidence.length === 0 || boundsMin.some((value) => !Number.isFinite(value))) {
+    throw new CompiledGltfError("UNSUPPORTED_GEOMETRY", "Compiled scene has no renderable geometry.");
+  }
+
+  const batches: GpuPrototypeBatch[] = [...instances.entries()]
+    .sort(([left], [right]) => left - right)
+    .map(([meshIndex, meshInstances]) => {
+      const geometry = meshGeometry.get(meshIndex);
+      if (!geometry) throw new CompiledGltfError("INVALID_GLTF", `Missing decoded mesh ${meshIndex}.`);
+      return {
+        surfaceVertices: geometry.surfaceVertices,
+        surfaceIndices: geometry.surfaceIndices,
+        edgeVertices: geometry.edgeVertices,
+        instances: meshInstances,
+      };
+    });
+  const triangles = [...meshGeometry.values()].reduce(
+    (total, geometry) => total + geometry.surfaceIndices.length / 3,
+    0,
+  );
+  const edgeSegments = [...meshGeometry.values()].reduce(
+    (total, geometry) => total + geometry.edgeVertices.length / 6,
+    0,
+  );
+
+  return {
+    gpuScene: { batches },
+    bounds: {
+      min: [boundsMin[0] ?? 0, boundsMin[1] ?? 0, boundsMin[2] ?? 0],
+      max: [boundsMax[0] ?? 0, boundsMax[1] ?? 0, boundsMax[2] ?? 0],
+    },
+    hierarchy,
+    objectEvidence: objectEvidence.sort((left, right) => left.nodeIndex - right.nodeIndex),
+    summary: {
+      prototypeBatches: batches.length,
+      partOccurrences: objectEvidence.length,
+      triangles,
+      edgeSegments,
+      binaryBytes: binary.byteLength,
+    },
+  };
+}
+
+export function compiledSceneTransferables(scene: DecodedCompiledScene): ArrayBuffer[] {
+  const buffers = new Set<ArrayBuffer>();
+  const add = (view: ArrayBufferView<ArrayBufferLike>): void => {
+    if (view.buffer instanceof ArrayBuffer) buffers.add(view.buffer);
+  };
+  for (const batch of scene.gpuScene.batches) {
+    add(batch.surfaceVertices);
+    add(batch.surfaceIndices);
+    add(batch.edgeVertices);
+    for (const instance of batch.instances) add(instance.transform);
+  }
+  return [...buffers];
+}

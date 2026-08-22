@@ -47,6 +47,11 @@ the [Phase 1 tracker](PHASE_1.md).
 
 ### Runtime
 
+Current evidence: the browser reads the compiled glTF hierarchy first, decodes
+`scene.bin` in a Worker, transfers shared typed-array batches to direct WebGPU,
+and preserves source-aware object picking in headed Chrome and Firefox. Basic
+review interaction, progressive resources, and bounded residency are pending.
+
 - manifest/hierarchy-first loading;
 - Worker decode;
 - direct WebGPU surfaces and edges;
