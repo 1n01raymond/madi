@@ -15,7 +15,7 @@ reproducible repository evidence.
 | Scene IR | `@madi/scene-ir` types, repeated-prototype fixture, and independent validator | Logical in-memory contract only; no disk schema |
 | WebGPU | `@madi/runtime-webgpu` and `apps/webgpu-spike` | One prototype batch; browser matrix results not yet published |
 | OCCT | isolated CMake/XDE extraction executable | Local CMake, compiler, and OCCT prerequisites are not installed yet |
-| Fixtures | licensed STEP manifest and validation policy | No external STEP fixture has passed license review yet |
+| Fixtures | two MADI-authored STEP files, generator source, inspection report, and checksum/provenance validation | Independent OCCT/XDE extraction evidence is not recorded yet |
 | Benchmarks | machine-readable Scene IR validation microbenchmark | Bootstrap smoke metric, not a rendering performance claim |
 
 ## Reproduce the bootstrap
@@ -39,7 +39,7 @@ from the GPU. This is feasibility evidence, not yet a scalable runtime API.
 
 - [x] Product requirements and scope are written.
 - [ ] The first architecture decisions are reviewed and accepted.
-- [ ] At least one redistributable STEP precision fixture and one assembly
+- [x] At least one redistributable STEP precision fixture and one assembly
   fixture are selected with checksums and license evidence.
 - [ ] Surface, explicit edge, instancing, and object-ID rendering are captured
   on two browser engines.
@@ -53,19 +53,18 @@ from the GPU. This is feasibility evidence, not yet a scalable runtime API.
 | Criterion | Required evidence | Status |
 |---|---|---|
 | STEP assembly validates as Scene IR | OCCT extraction converted to `EngineeringScene`; validator report committed as an artifact | Pending |
-| Repeated occurrences reuse geometry | Real STEP assembly shows one prototype referenced by multiple occurrences without duplicate geometry arrays | Synthetic fixture passes; real source pending |
+| Repeated occurrences reuse geometry | Real STEP assembly shows one prototype referenced by multiple occurrences without duplicate geometry arrays | STEP fixture selected; independent OCCT/XDE proof pending |
 | Source edges survive selection | Picked edge or selected occurrence resolves through representation source map to an OCCT edge reference | Pending |
 | Direct WebGPU works in two engines | Browser, OS, GPU, screenshot, adapter info, and picking result recorded | Pending |
 | Unsupported data is reported | Known unsupported fixture produces stable diagnostic codes and a build report | Pending |
 
 ## Next pull requests
 
-1. `test/step-fixtures`: select and license-review the first public STEP files.
-2. `spike/occt-scene-ir`: build OCCT, extract XDE assembly data, and construct a
+1. `spike/occt-scene-ir`: build OCCT, extract XDE assembly data, and construct a
    validator-clean scene.
-3. `spike/webgpu-browser-matrix`: automate the visual/picking smoke test in two
+2. `spike/webgpu-browser-matrix`: automate the visual/picking smoke test in two
    WebGPU engines and publish the evidence.
-4. `docs/accept-bootstrap-adrs`: accept or revise the decisions that the spikes
+3. `docs/accept-bootstrap-adrs`: accept or revise the decisions that the spikes
    support; keep unproven decisions proposed.
 
 Phase 0 exits only when the roadmap criteria are demonstrated. A green bootstrap
