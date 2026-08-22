@@ -1,0 +1,25 @@
+<svg width="256" height="256" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">MADI mark</title>
+  <desc id="desc">A letter M inside an abstract wireframe engineering assembly.</desc>
+  <defs>
+    <linearGradient id="background" x1="16" y1="8" x2="240" y2="248" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#071426"/>
+      <stop offset="1" stop-color="#151242"/>
+    </linearGradient>
+    <linearGradient id="brand" x1="47" y1="46" x2="210" y2="214" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#38E8FF"/>
+      <stop offset="0.5" stop-color="#4E9CFF"/>
+      <stop offset="1" stop-color="#A56BFF"/>
+    </linearGradient>
+  </defs>
+  <rect width="256" height="256" rx="52" fill="url(#background)"/>
+  <path d="M45 77L128 41L211 77V177L128 218L45 177V77Z" fill="#4A8CFF" fill-opacity="0.08"/>
+  <path d="M45 77L128 41L211 77M45 77L128 114M45 77V177L128 218M211 77L128 114M211 77V177L128 218M128 114V218" stroke="url(#brand)" stroke-width="2.5" stroke-linejoin="round"/>
+  <path d="M72 164V95L128 138L184 95V164" stroke="url(#brand)" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="45" cy="77" r="4" fill="#49EAFF"/>
+  <circle cx="128" cy="41" r="4" fill="#52CBFF"/>
+  <circle cx="211" cy="77" r="4" fill="#688DFF"/>
+  <circle cx="45" cy="177" r="4" fill="#4AAEFF"/>
+  <circle cx="128" cy="218" r="4" fill="#7B79FF"/>
+  <circle cx="211" cy="177" r="4" fill="#A56BFF"/>
+</svg>

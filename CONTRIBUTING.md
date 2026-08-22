@@ -23,6 +23,17 @@ risk are as valuable as code.
 - `test:` tests, fixtures, or benchmark harnesses; and
 - `build:` packaging, CI, or dependency management.
 
+## Documentation and translations
+
+The English `README.md` is the canonical project landing page. Translations may
+adapt phrasing naturally, but they should preserve project status, scope, and
+technical claims. See `docs/TRANSLATIONS.md` for file naming, language status,
+and terminology guidance.
+
+Documentation-only contributions are welcome. A translation generated or
+substantially assisted by a machine should be identified in the pull request so
+a fluent reviewer can focus on terminology and natural phrasing.
+
 ## Architecture changes
 
 Changes that affect a public API, serialized representation, trust boundary,
