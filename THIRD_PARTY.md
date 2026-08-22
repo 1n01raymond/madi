@@ -4,7 +4,7 @@ This file records current bootstrap tooling and architectural intent. The
 lockfile is the exact dependency inventory; `pnpm licenses list` reports the
 resolved license set.
 
-## Phase 0 TypeScript toolchain
+## TypeScript toolchain
 
 These are development/build dependencies and are not shipped as an OCCT or
 browser runtime bundle by themselves.
@@ -17,6 +17,7 @@ browser runtime bundle by themselves.
 | ESLint / `@eslint/js` | 10.9.0 / 10.0.1 | MIT | static analysis |
 | `typescript-eslint` | 8.67.0 | MIT | TypeScript lint integration |
 | `@webgpu/types` | 0.1.72 | BSD-3-Clause | WebGPU API declarations |
+| Khronos `gltf-validator` | 2.0.0-dev.3.10 | Apache-2.0 | official glTF 2.0 schema and binary validation for compiler evidence |
 
 Versions are pinned in `package.json` and `pnpm-lock.yaml`. Updates must pass
 the complete check and browser smoke path and must not introduce an incompatible

@@ -1,0 +1,27 @@
+{
+  "name": "@madi/compiler",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Deterministic standards-first engineering scene compiler.",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "bin": {
+    "madi-compile-phase1-evidence": "./dist/cli.js"
+  },
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@madi/scene-ir": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "22.20.1"
+  }
+}

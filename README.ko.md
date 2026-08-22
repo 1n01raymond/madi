@@ -112,7 +112,7 @@ Engineering Scene IR은 새로운 교환 포맷이 아니라 논리적인 시스
 | **2 — 대형 장면 알파** | 10만+ occurrence, 스트리밍, LOD, 캐시, 메모리 예산 | 예정 |
 | **3 — 오픈 플랫폼 베타** | 플러그인, IFC, 임베딩 예제, 셀프 호스팅 배포 | 예정 |
 
-전체 [로드맵](docs/ROADMAP.md)과
+전체 [로드맵](docs/ROADMAP.md), [Phase 1 진행 기록](docs/PHASE_1.md),
 [벤치마크 계약](docs/BENCHMARKS.md)을 확인하세요. 성능 수치는 재배포 가능한
 모델, 정확한 하드웨어·브라우저 정보, cold/warm 상태, 재현 명령과 함께
 공개합니다.
@@ -191,7 +191,9 @@ WebGPU 데이터 구조를 사용합니다. 이는 집중할 아키텍처를 고
 <br />
 glTF는 중요한 표준 기반 전송·상호운용 선택지입니다. 엔지니어링 식별자, 엣지,
 스트리밍, 정밀도 요구를 충족하는 범위에서 glTF, meshopt, KTX2, 3D Tiles의
-개념과 메타데이터 표준을 재사용합니다.
+개념과 메타데이터 표준을 재사용합니다. 첫 Phase 1 컴파일러 슬라이스는 glTF
+2.0과 외부 binary 리소스를 생성하며, MADI 식별자와 원본 매핑은 명시적으로
+실험 상태인 `extras`에 보관합니다.
 </details>
 
 ## 기여하기
@@ -217,6 +219,7 @@ MADI는 아직 근거에 따라 아키텍처를 바꿀 수 있는 초기 단계�
 apps/
   webgpu-spike/       Phase 0 직접 WebGPU 브라우저 검증
 packages/
+  compiler/           결정적 Scene IR → 표준 우선 glTF 컴파일러
   scene-ir/           인메모리 엔지니어링 장면 타입과 검증기
   runtime-webgpu/     직접 WebGPU surface, edge, instancing, picking 경로
 native/

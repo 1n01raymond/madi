@@ -1,7 +1,7 @@
 # Translating MADI
 
 MADI welcomes readers and contributors in their preferred language. During the
-architecture phase, the repository localizes the project landing page while
+early vertical-slice phase, the repository localizes the project landing page while
 keeping detailed design documents in English so technical decisions have one
 reviewable source of truth.
 

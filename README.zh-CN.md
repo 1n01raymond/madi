@@ -106,7 +106,7 @@ Engineering Scene IR 是逻辑系统边界，而不是新的交换格式。交�
 | **2 — 大场景 alpha** | 10 万以上 occurrence、流送、LOD、缓存和内存预算 | 计划中 |
 | **3 — 开放平台 beta** | 插件、IFC、嵌入示例与自托管部署 | 计划中 |
 
-请查看完整[路线图](docs/ROADMAP.md)与
+请查看完整[路线图](docs/ROADMAP.md)、[Phase 1 进展](docs/PHASE_1.md)与
 [基准测试约定](docs/BENCHMARKS.md)。性能数据将与可再分发模型、准确的硬件和
 浏览器信息、cold/warm 状态及可复现命令一同发布。
 
@@ -174,7 +174,9 @@ WebGPU 数据结构，使批处理、residency、拾取和内存策略都能被�
 <summary><strong>glTF 在哪里使用？</strong></summary>
 <br />
 glTF 是重要的标准化交付与互操作选项。在满足工程身份、边线、流送和精度要求
-时，MADI 会复用 glTF、meshopt、KTX2、3D Tiles 概念与元数据标准。
+时，MADI 会复用 glTF、meshopt、KTX2、3D Tiles 概念与元数据标准。首个
+Phase 1 编译器切片现已生成 glTF 2.0 与外部二进制资源；MADI 身份和源映射
+仍存放在明确标记为实验性的 `extras` 中。
 </details>
 
 ## 参与贡献
