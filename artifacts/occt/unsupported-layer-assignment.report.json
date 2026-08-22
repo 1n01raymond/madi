@@ -1,8 +1,8 @@
 {
   "schemaVersion": "phase-0-occt-evidence.2",
   "source": {
-    "path": "fixtures/step/repeated-fasteners.step",
-    "sha256": "de177178a4bb86a6983cabc7ad265117c56d7324df7912b94ece1263a6c8865d",
+    "path": "fixtures/step/unsupported-layer-assignment.step",
+    "sha256": "1a4da3b5fa2b2faf1fea790aca1b8a0266e6afdeac3311f142c121efb843fde4",
     "format": "STEP AP214",
     "units": "mm"
   },
@@ -52,19 +52,37 @@
   "diagnostics": {
     "counts": {
       "info": 1,
-      "warning": 0,
+      "warning": 1,
       "error": 0
     },
     "codes": [
+      "OCCT_UNSUPPORTED_PRESENTATION_LAYER_ASSIGNMENT",
       "PHASE0_OCCT_PYTHON_BINDING"
     ],
-    "unsupportedEntities": []
+    "unsupportedEntities": [
+      {
+        "entityId": "#2135",
+        "entityType": "PRESENTATION_LAYER_ASSIGNMENT",
+        "diagnosticCode": "OCCT_UNSUPPORTED_PRESENTATION_LAYER_ASSIGNMENT",
+        "capability": "presentation-layers",
+        "handling": "omitted-semantic-metadata",
+        "sourceRef": "source:document:sha256:1a4da3b5fa2b2faf:step-entity:2135"
+      }
+    ]
   },
   "unsupportedEntityInspection": {
-    "status": "not-exercised",
-    "entityCount": 0,
-    "entities": [],
-    "reason": "The selected fixture does not contain an entity known to be unsupported by the Phase 0 adapter."
+    "status": "reported",
+    "entityCount": 1,
+    "entities": [
+      {
+        "entityId": "#2135",
+        "entityType": "PRESENTATION_LAYER_ASSIGNMENT",
+        "diagnosticCode": "OCCT_UNSUPPORTED_PRESENTATION_LAYER_ASSIGNMENT",
+        "capability": "presentation-layers",
+        "handling": "omitted-semantic-metadata",
+        "sourceRef": "source:document:sha256:1a4da3b5fa2b2faf:step-entity:2135"
+      }
+    ]
   },
   "validation": {
     "sceneIr": "enforced by apps/webgpu-spike/test/evidence.test.ts",

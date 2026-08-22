@@ -5,7 +5,7 @@ committed here merely because it can be downloaded without authentication. Its
 redistribution terms, source, checksum, and intended test purpose must all be
 reviewable.
 
-The first two fixtures are original MADI project assets generated from the
+The three fixtures are original MADI project assets generated from the
 auditable Python source in `generators/generate_fixtures.py`. This avoids
 depending on unclear licensing for vendor or community CAD samples while still
 exercising real STEP AP214 B-rep and assembly structures.
@@ -24,6 +24,7 @@ exercising real STEP AP214 B-rep and assembly structures.
   "licenseFile": "LICENSE.md",
   "sha256": "64 lowercase hexadecimal characters",
   "purposes": ["assembly", "instancing", "hierarchy"],
+  "expectedDiagnostics": [],
   "attribution": "MADI Contributors",
   "generatedWith": {
     "tool": "CadQuery",
@@ -42,6 +43,7 @@ exercising real STEP AP214 B-rep and assembly structures.
 |---|---|
 | `precision-bracket.step` | curved seams, through-holes, fillets, explicit source edges, tolerance-sensitive B-rep traversal |
 | `repeated-fasteners.step` | nested hierarchy, eight occurrences of one prototype, transforms, names, and colors |
+| `unsupported-layer-assignment.step` | the same supported assembly geometry plus one AP214 presentation-layer assignment that Phase 0 intentionally does not map |
 
 See [`INSPECTION.md`](INSPECTION.md) for the qualification counts and known
 limits, and [`LICENSE.md`](LICENSE.md) for redistribution terms.
@@ -62,6 +64,11 @@ OCCT may still emit presentation entities in a different order, so a deliberate
 regeneration must update the manifest checksum and receive normal fixture
 review. Normal builds consume the committed, checksum-locked files and do not
 need Python or CadQuery.
+
+Fixtures whose purposes include `unsupported-entity` must declare the stable
+diagnostic code, severity, STEP entity type, and expected count in
+`expectedDiagnostics`. The normal repository check compares that contract with
+both Scene IR and the committed adapter build report.
 
 ## Acceptance checklist
 

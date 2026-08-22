@@ -10,7 +10,7 @@ const fixtureDirectory = dirname(manifestPath);
 const realFixtureDirectory = await realpath(fixtureDirectory);
 const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
 
-if (manifest.schemaVersion !== "0.2" || !Array.isArray(manifest.fixtures)) {
+if (manifest.schemaVersion !== "0.3" || !Array.isArray(manifest.fixtures)) {
   throw new TypeError("fixtures/step/manifest.json has an unsupported shape.");
 }
 
@@ -37,6 +37,7 @@ const generatedWithRequired = [
   "kernelVersion",
 ];
 const fixtureKinds = new Set(["assembly", "precision-part"]);
+const diagnosticSeverities = new Set(["info", "warning", "error"]);
 const ids = new Set();
 const paths = new Set();
 
@@ -119,6 +120,42 @@ for (const [index, fixture] of manifest.fixtures.entries()) {
     new Set(fixture.purposes).size !== fixture.purposes.length
   ) {
     throw new TypeError(`Fixture ${fixture.id} has invalid or duplicate purposes.`);
+  }
+
+  if (fixture.purposes.includes("unsupported-entity")) {
+    if (
+      !Array.isArray(fixture.expectedDiagnostics) ||
+      fixture.expectedDiagnostics.length === 0
+    ) {
+      throw new TypeError(
+        `Fixture ${fixture.id} must declare expectedDiagnostics for unsupported entities.`,
+      );
+    }
+  }
+  if (fixture.expectedDiagnostics !== undefined) {
+    if (!Array.isArray(fixture.expectedDiagnostics)) {
+      throw new TypeError(`Fixture ${fixture.id} expectedDiagnostics must be an array.`);
+    }
+    for (const [diagnosticIndex, diagnostic] of fixture.expectedDiagnostics.entries()) {
+      const label = `Fixture ${fixture.id} expectedDiagnostics[${diagnosticIndex}]`;
+      if (typeof diagnostic !== "object" || diagnostic === null) {
+        throw new TypeError(`${label} must be an object.`);
+      }
+      assertNonEmptyString(diagnostic.code, `${label}.code`);
+      assertNonEmptyString(diagnostic.entityType, `${label}.entityType`);
+      if (!/^[A-Z][A-Z0-9_]+$/u.test(diagnostic.code)) {
+        throw new TypeError(`${label}.code is not a stable diagnostic code.`);
+      }
+      if (!/^[A-Z][A-Z0-9_]+$/u.test(diagnostic.entityType)) {
+        throw new TypeError(`${label}.entityType is not a STEP entity name.`);
+      }
+      if (!diagnosticSeverities.has(diagnostic.severity)) {
+        throw new TypeError(`${label}.severity is invalid.`);
+      }
+      if (!Number.isSafeInteger(diagnostic.count) || diagnostic.count < 1) {
+        throw new TypeError(`${label}.count must be a positive integer.`);
+      }
+    }
   }
 
   assertNonEmptyString(fixture.license, `Fixture ${fixture.id} license`);

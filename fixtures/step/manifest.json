@@ -1,5 +1,5 @@
 {
-  "schemaVersion": "0.2",
+  "schemaVersion": "0.3",
   "fixtures": [
     {
       "id": "precision-bracket",
@@ -45,6 +45,42 @@
         "transforms",
         "names",
         "colors"
+      ],
+      "attribution": "MADI Contributors",
+      "generatedWith": {
+        "tool": "CadQuery",
+        "toolVersion": "2.8.0",
+        "binding": "cadquery-ocp",
+        "bindingVersion": "7.9.3.1.1",
+        "kernel": "Open CASCADE Technology",
+        "kernelVersion": "7.9.3"
+      }
+    },
+    {
+      "id": "unsupported-layer-assignment",
+      "kind": "assembly",
+      "path": "unsupported-layer-assignment.step",
+      "sourcePath": "generators/generate_fixtures.py",
+      "sourceUrl": "https://github.com/1n01raymond/madi/blob/main/fixtures/step/generators/generate_fixtures.py",
+      "license": "Apache-2.0",
+      "licenseUrl": "https://github.com/1n01raymond/madi/blob/main/LICENSE",
+      "licenseFile": "LICENSE.md",
+      "sha256": "1a4da3b5fa2b2faf1fea790aca1b8a0266e6afdeac3311f142c121efb843fde4",
+      "purposes": [
+        "assembly",
+        "brep",
+        "unsupported-entity",
+        "presentation-layer",
+        "partial-import",
+        "diagnostics"
+      ],
+      "expectedDiagnostics": [
+        {
+          "code": "OCCT_UNSUPPORTED_PRESENTATION_LAYER_ASSIGNMENT",
+          "severity": "warning",
+          "entityType": "PRESENTATION_LAYER_ASSIGNMENT",
+          "count": 1
+        }
       ],
       "attribution": "MADI Contributors",
       "generatedWith": {

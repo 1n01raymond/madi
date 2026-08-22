@@ -14,3 +14,6 @@
 *.step binary
 *.stp binary
 *.ifc binary
+
+# Large machine-generated evidence remains checksum/test reviewed, not line reviewed.
+artifacts/occt/*.scene.json linguist-generated=true

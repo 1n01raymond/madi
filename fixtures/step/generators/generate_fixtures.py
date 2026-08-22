@@ -16,6 +16,7 @@ from cadquery.occ_impl.exporters.assembly import exportAssembly
 
 FIXTURE_DIRECTORY = Path(__file__).resolve().parent.parent
 FIXED_TIMESTAMP = "2026-08-23T00:00:00"
+UNSUPPORTED_LAYER_NAME = "MADI_PHASE0_UNMAPPED_LAYER"
 
 
 def precision_bracket() -> cq.Workplane:
@@ -113,9 +114,48 @@ def canonicalize_header(path: Path) -> None:
     path.write_text(canonical.replace("\r\n", "\n"), encoding="utf-8", newline="\n")
 
 
+def add_unsupported_layer_assignment(source: Path, target: Path) -> None:
+    """Copy a valid assembly and add one intentionally unmapped AP214 entity.
+
+    Presentation layers are meaningful engineering metadata, but Phase 0 does
+    not claim a layer capability. Keeping the assignment in a separate fixture
+    lets the evidence harness prove that supported B-rep geometry survives
+    while the omitted semantic data produces a stable diagnostic.
+    """
+
+    content = source.read_text(encoding="utf-8")
+    entity_ids = [int(value) for value in re.findall(r"^#(\d+)\s*=", content, re.MULTILINE)]
+    brep_match = re.search(
+        r"^#(\d+)\s*=\s*MANIFOLD_SOLID_BREP\b",
+        content,
+        re.MULTILINE,
+    )
+    if not entity_ids or brep_match is None:
+        raise RuntimeError(f"Could not find STEP entity IDs and a B-rep in {source}")
+
+    entity_id = max(entity_ids) + 1
+    brep_id = brep_match.group(1)
+    assignment = (
+        f"#{entity_id} = PRESENTATION_LAYER_ASSIGNMENT("
+        f"'{UNSUPPORTED_LAYER_NAME}',"
+        "'Intentionally unsupported by the MADI Phase 0 adapter',"
+        f"(#{brep_id}));"
+    )
+    trailer = "\nENDSEC;\nEND-ISO-10303-21;"
+    if content.count(trailer) != 1:
+        raise RuntimeError(f"Expected one STEP DATA trailer in {source}")
+
+    target.write_text(
+        content.replace(trailer, f"\n{assignment}{trailer}"),
+        encoding="utf-8",
+        newline="\n",
+    )
+
+
 def main() -> None:
     precision_path = FIXTURE_DIRECTORY / "precision-bracket.step"
     assembly_path = FIXTURE_DIRECTORY / "repeated-fasteners.step"
+    unsupported_path = FIXTURE_DIRECTORY / "unsupported-layer-assignment.step"
 
     cq.exporters.export(
         precision_bracket(),
@@ -135,9 +175,12 @@ def main() -> None:
 
     canonicalize_header(precision_path)
     canonicalize_header(assembly_path)
+    add_unsupported_layer_assignment(assembly_path, unsupported_path)
+    canonicalize_header(unsupported_path)
 
     print(f"generated {precision_path}")
     print(f"generated {assembly_path}")
+    print(f"generated {unsupported_path}")
 
 
 if __name__ == "__main__":

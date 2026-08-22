@@ -12,6 +12,14 @@ const evidenceUrl = new URL(
   "../../../artifacts/occt/repeated-fasteners.scene.json",
   import.meta.url,
 );
+const unsupportedEvidenceUrl = new URL(
+  "../../../artifacts/occt/unsupported-layer-assignment.scene.json",
+  import.meta.url,
+);
+const unsupportedReportUrl = new URL(
+  "../../../artifacts/occt/unsupported-layer-assignment.report.json",
+  import.meta.url,
+);
 
 async function loadEvidence() {
   return hydrateEvidenceScene(JSON.parse(await readFile(evidenceUrl, "utf8")));
@@ -56,5 +64,44 @@ describe("OCCT Scene IR evidence", () => {
     [48, 28, 22].forEach((expected, axis) => {
       expect(prepared.bounds.max[axis]).toBeCloseTo(expected, 2);
     });
+  });
+
+  it("preserves supported geometry and resolves an unsupported STEP entity", async () => {
+    const [scene, report] = await Promise.all([
+      readFile(unsupportedEvidenceUrl, "utf8").then(JSON.parse).then(hydrateEvidenceScene),
+      readFile(unsupportedReportUrl, "utf8").then(JSON.parse),
+    ]);
+    const prepared = prepareEvidenceScene(scene);
+    const diagnostic = scene.diagnostics.find(
+      ({ code }) => code === "OCCT_UNSUPPORTED_PRESENTATION_LAYER_ASSIGNMENT",
+    );
+
+    expect(prepared.scene.prototypes).toHaveLength(5);
+    expect(prepared.summary.partOccurrences).toBe(10);
+    expect(prepared.summary.triangles).toBe(2076);
+    expect(diagnostic).toMatchObject({
+      severity: "warning",
+      data: {
+        entries: {
+          entityId: "#2135",
+          entityType: "PRESENTATION_LAYER_ASSIGNMENT",
+          handling: "omitted-semantic-metadata",
+        },
+      },
+    });
+    const sourceRef = scene.documents[0]?.sourceRefs.find(
+      ({ id }) => id === diagnostic?.sourceRef,
+    );
+    expect(sourceRef).toMatchObject({
+      namespace: "step:entity-instance",
+      value: "#2135",
+      kind: "property",
+      stability: "revision-local",
+    });
+    expect(report.unsupportedEntityInspection).toMatchObject({
+      status: "reported",
+      entityCount: 1,
+    });
+    expect(report.diagnostics.counts).toEqual({ info: 1, warning: 1, error: 0 });
   });
 });
