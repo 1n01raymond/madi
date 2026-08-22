@@ -3,8 +3,11 @@ node_modules/
 dist/
 build/
 coverage/
+*.tsbuildinfo
 .turbo/
 .vite/
+.playwright-cli/
+output/
 
 # Native and compiler builds
 cmake-build-*/
@@ -19,6 +22,7 @@ out/
 *.wgeo
 benchmarks/data/private/
 benchmarks/results/local/
+artifacts/benchmarks/*.json
 
 # IDE and OS
 .idea/

@@ -214,6 +214,17 @@ MADI는 아직 근거에 따라 아키텍처를 바꿀 수 있는 초기 단계�
 ## 저장소 구성
 
 ```text
+apps/
+  webgpu-spike/       Phase 0 직접 WebGPU 브라우저 검증
+packages/
+  scene-ir/           인메모리 엔지니어링 장면 타입과 검증기
+  runtime-webgpu/     직접 WebGPU surface, edge, instancing, picking 경로
+native/
+  adapter-occt/       격리된 STEP/XDE 추출 스파이크
+fixtures/
+  step/               재배포 가능한 STEP manifest와 검토 정책
+tools/
+  benchmark/          재현 가능한 벤치마크 결과 하네스
 docs/
   PRODUCT.md          제품 요구사항과 주요 워크플로
   ARCHITECTURE.md     시스템 경계와 품질 속성

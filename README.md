@@ -214,6 +214,17 @@ issue so assumptions are visible before implementation.
 ## Repository map
 
 ```text
+apps/
+  webgpu-spike/       Phase 0 direct WebGPU browser proof
+packages/
+  scene-ir/           In-memory engineering scene types and validator
+  runtime-webgpu/     Direct WebGPU surface, edge, instancing, and picking path
+native/
+  adapter-occt/       Isolated STEP/XDE extraction spike
+fixtures/
+  step/               Redistributable STEP manifest and review policy
+tools/
+  benchmark/          Reproducible benchmark result harness
 docs/
   PRODUCT.md          Product requirements and target workflows
   ARCHITECTURE.md     System boundaries and quality attributes

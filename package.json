@@ -1,0 +1,36 @@
+{
+  "name": "madi",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Open engineering scene studio and direct WebGPU runtime.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "packageManager": "pnpm@11.19.0",
+  "engines": {
+    "node": ">=22.12.0",
+    "pnpm": ">=11.0.0"
+  },
+  "scripts": {
+    "build": "pnpm --recursive --if-present run build",
+    "check": "pnpm run fixtures:check && pnpm run lint && pnpm run typecheck && pnpm run test && pnpm run build",
+    "dev": "pnpm --filter @madi/webgpu-spike run dev",
+    "fixtures:check": "node scripts/validate-fixture-manifest.mjs",
+    "lint": "eslint .",
+    "native:check": "node scripts/check-native-tools.mjs",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "pnpm --filter @madi/scene-ir run build && pnpm --filter @madi/runtime-webgpu run build && pnpm --recursive --if-present run typecheck",
+    "benchmark": "pnpm --filter @madi/benchmark run benchmark"
+  },
+  "devDependencies": {
+    "@eslint/js": "10.0.1",
+    "@types/node": "22.20.1",
+    "@webgpu/types": "0.1.72",
+    "eslint": "10.9.0",
+    "globals": "17.11.0",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.67.0",
+    "vite": "8.2.2",
+    "vitest": "4.1.11"
+  }
+}
