@@ -192,8 +192,9 @@ WebGPU 데이터 구조를 사용합니다. 이는 집중할 아키텍처를 고
 glTF는 중요한 표준 기반 전송·상호운용 선택지입니다. 엔지니어링 식별자, 엣지,
 스트리밍, 정밀도 요구를 충족하는 범위에서 glTF, meshopt, KTX2, 3D Tiles의
 개념과 메타데이터 표준을 재사용합니다. 첫 Phase 1 컴파일러 슬라이스는 glTF
-2.0과 외부 binary 리소스를 생성하며, MADI 식별자와 원본 매핑은 명시적으로
-실험 상태인 `extras`에 보관합니다.
+2.0과 외부 binary 리소스를 생성합니다. 브라우저는 이제 계층을 먼저 열고
+Worker에서 geometry를 해석하며, MADI 식별자와 원본 매핑은 명시적으로 실험
+상태인 `extras`에 보관합니다.
 </details>
 
 ## 기여하기
@@ -217,11 +218,11 @@ MADI는 아직 근거에 따라 아키텍처를 바꿀 수 있는 초기 단계�
 
 ```text
 apps/
-  webgpu-spike/       Phase 0 직접 WebGPU 브라우저 검증
+  webgpu-spike/       Phase 1 glTF + Worker + WebGPU 브라우저 검증
 packages/
   compiler/           결정적 Scene IR → 표준 우선 glTF 컴파일러
   scene-ir/           인메모리 엔지니어링 장면 타입과 검증기
-  runtime-webgpu/     직접 WebGPU surface, edge, instancing, picking 경로
+  runtime-webgpu/     glTF 로더와 직접 WebGPU 렌더링 경로
 native/
   adapter-occt/       격리된 STEP/XDE 추출 스파이크
 fixtures/

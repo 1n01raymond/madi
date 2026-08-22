@@ -5,55 +5,88 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       name="description"
-      content="MADI Phase 0 OCCT STEP to Scene IR to direct WebGPU visual evidence."
+      content="MADI Phase 1 compiled glTF hierarchy, Worker decode, and direct WebGPU runtime evidence."
     />
-    <link
-      rel="icon"
-      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%230b2331'/%3E%3Cpath d='M14 46V18l18 17 18-17v28' fill='none' stroke='%2344a7df' stroke-width='7' stroke-linejoin='round'/%3E%3C/svg%3E"
-    />
-    <title>MADI · OCCT to WebGPU evidence</title>
+    <link id="madi-favicon" rel="icon" href="data:," />
+    <title>MADI · Compiled glTF to WebGPU</title>
     <link rel="stylesheet" href="/src/style.css" />
   </head>
   <body>
     <main>
+      <nav aria-label="MADI runtime identity">
+        <a class="brand" href="https://github.com/1n01raymond/madi">
+          <img
+            id="madi-brand-mark"
+            class="brand-mark"
+            alt=""
+            aria-hidden="true"
+          />
+          <span>MADI</span>
+        </a>
+        <span class="release">RUNTIME PROOF · 01</span>
+      </nav>
+
       <header>
-        <p class="eyebrow">MADI · PHASE 0</p>
-        <h1>OCCT to WebGPU, end to end</h1>
-        <p>
-          A licensed STEP assembly read through OCCT/XDE, converted into
-          validator-clean Scene IR, and rendered with reusable prototype buffers,
-          explicit CAD edges, source colors, and object picking.
+        <p class="eyebrow">PHASE 1 · STANDARDS-FIRST DELIVERY</p>
+        <h1>Compiled glTF,<br /><span>direct to WebGPU.</span></h1>
+        <p class="lede">
+          The browser opens engineering hierarchy from standard glTF first, decodes
+          its external binary off-thread, and uploads shared meshes straight into a
+          data-oriented WebGPU renderer. No Scene IR JSON reconstruction in the page.
         </p>
       </header>
 
-      <section class="viewport" aria-label="WebGPU prototype viewport">
+      <section class="pipeline" aria-label="Runtime loading pipeline">
+        <article id="stage-hierarchy">
+          <span>01</span>
+          <div><strong>Hierarchy first</strong><small id="hierarchy-result">Opening scene.gltf</small></div>
+        </article>
+        <i aria-hidden="true">→</i>
+        <article id="stage-geometry">
+          <span>02</span>
+          <div><strong>Worker decode</strong><small id="geometry-result">Waiting for scene.bin</small></div>
+        </article>
+        <i aria-hidden="true">→</i>
+        <article id="stage-webgpu">
+          <span>03</span>
+          <div><strong>Direct WebGPU</strong><small>Shared buffers + object IDs</small></div>
+        </article>
+      </section>
+
+      <section class="viewport" aria-label="Compiled glTF WebGPU viewport">
+        <div class="viewport-label"><span></span> LIVE GPU VIEW</div>
         <canvas id="viewport"></canvas>
         <div class="hud">
-          <span id="status">Loading OCCT evidence…</span>
-          <span id="selection">Click an occurrence to pick it.</span>
+          <span id="status" data-state="loading">Loading compiled glTF hierarchy…</span>
+          <span id="selection">Click an occurrence to resolve its source identity.</span>
         </div>
       </section>
 
-      <dl>
-        <div><dt>Geometry prototypes</dt><dd id="prototype-count">—</dd></div>
-        <div><dt>Part occurrences</dt><dd id="occurrence-count">—</dd></div>
+      <dl class="metrics">
+        <div><dt>Shared meshes</dt><dd id="prototype-count">—</dd></div>
+        <div><dt>Occurrences</dt><dd id="occurrence-count">—</dd></div>
         <div><dt>Unique triangles</dt><dd id="triangle-count">—</dd></div>
-        <div><dt>Explicit edge segments</dt><dd id="edge-count">—</dd></div>
+        <div><dt>CAD edge segments</dt><dd id="edge-count">—</dd></div>
+        <div><dt>Binary payload</dt><dd id="binary-size">—</dd></div>
+        <div><dt>Worker load + decode</dt><dd id="decode-time">—</dd></div>
         <div><dt>Source schema</dt><dd id="source-format">—</dd></div>
         <div><dt>GPU adapter</dt><dd id="gpu-adapter">—</dd></div>
       </dl>
 
       <section class="evidence">
-        <div>
-          <p class="eyebrow">XDE HIERARCHY</p>
-          <h2>One fastener prototype, eight placements</h2>
+        <div class="evidence-copy">
+          <p class="eyebrow">GLTF NODE GRAPH</p>
+          <h2>Semantics before residency.</h2>
           <p>
-            Container nodes remain in Scene IR even when they do not own render
-            geometry. Part nodes resolve back to revision-local OCCT face and
-            edge source references.
+            Assembly names, occurrence IDs, prototype links, and source references
+            are usable as soon as <code>scene.gltf</code> arrives. Geometry follows
+            independently through a Worker and keeps eight fasteners on one mesh.
           </p>
+          <div class="contract">
+            <span>scene.gltf</span><b>+</b><span>scene.bin</span><b>≠</b><span>new CAD format</span>
+          </div>
         </div>
-        <ol id="hierarchy" aria-label="Extracted STEP assembly hierarchy"></ol>
+        <ol id="hierarchy" aria-label="Compiled glTF assembly hierarchy"></ol>
       </section>
     </main>
     <script type="module" src="/src/main.ts"></script>

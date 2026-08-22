@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "description": "Direct data-oriented WebGPU rendering spike for MADI Phase 0.",
+  "description": "Direct data-oriented WebGPU runtime and compiled glTF loader for MADI.",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",

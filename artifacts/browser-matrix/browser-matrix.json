@@ -1,23 +1,30 @@
 {
-  "schemaVersion": "phase-0-browser-matrix.1",
-  "capturedAt": "2026-08-22T16:45:46.656Z",
+  "schemaVersion": "phase-1-browser-matrix.1",
+  "capturedAt": "2026-08-22T18:04:33.211Z",
   "source": {
     "fixture": "fixtures/step/repeated-fasteners.step",
-    "sha256": "de177178a4bb86a6983cabc7ad265117c56d7324df7912b94ece1263a6c8865d",
-    "sceneIr": "artifacts/occt/repeated-fasteners.scene.json"
+    "sceneIr": "artifacts/occt/repeated-fasteners.scene.json",
+    "gltf": "artifacts/phase1/repeated-fasteners/scene.gltf",
+    "binary": "artifacts/phase1/repeated-fasteners/scene.bin",
+    "packageDigest": "f8116762c49651d89c7c4f18770da80dc007f194057126462313ba9ea57d1566",
+    "sourceDigest": "sha256:de177178a4bb86a6983cabc7ad265117c56d7324df7912b94ece1263a6c8865d"
   },
   "host": {
     "platform": "win32",
     "architecture": "x64"
   },
   "expected": {
-    "status": "OCCT Scene IR ready · 3 geometry prototypes · 10 part occurrences",
-    "selection": "Selected center-rail · ID 2 · 12 OCCT edge refs",
+    "status": "Compiled glTF ready · 3 shared meshes · 10 renderable occurrences",
+    "selection": "Selected center-rail · node 2 · ID 3 · 12 CAD edge refs",
     "prototypeCount": "3",
     "occurrenceCount": "10",
     "triangleCount": "2,076",
     "edgeCount": "181",
-    "sourceFormat": "AP214"
+    "binarySize": "183.6 KiB",
+    "sourceFormat": "AP214",
+    "hierarchyFirst": true,
+    "brandMarkLoaded": true,
+    "faviconLoaded": true
   },
   "results": [
     {
@@ -39,19 +46,23 @@
         "isFallbackAdapter": false
       },
       "observed": {
-        "status": "OCCT Scene IR ready · 3 geometry prototypes · 10 part occurrences",
+        "status": "Compiled glTF ready · 3 shared meshes · 10 renderable occurrences",
         "prototypeCount": "3",
         "occurrenceCount": "10",
         "triangleCount": "2,076",
         "edgeCount": "181",
+        "binarySize": "183.6 KiB",
         "sourceFormat": "AP214",
-        "selection": "Selected center-rail · ID 2 · 12 OCCT edge refs"
+        "hierarchyFirst": true,
+        "brandMarkLoaded": true,
+        "faviconLoaded": true,
+        "selection": "Selected center-rail · node 2 · ID 3 · 12 CAD edge refs"
       },
       "consoleIssues": [],
       "screenshot": {
         "path": "chrome-151-windows-selected.png",
-        "bytes": 107252,
-        "sha256": "0197aa03c6d4581b2f303e1113e829e08a328ac7feac70f107cdf8d2e8b67a7c"
+        "bytes": 279308,
+        "sha256": "0c65b4c04fcfc33083fb5f4632569dd676e74033d00ddbbf3efab297939a0d6f"
       }
     },
     {
@@ -73,19 +84,23 @@
         "isFallbackAdapter": false
       },
       "observed": {
-        "status": "OCCT Scene IR ready · 3 geometry prototypes · 10 part occurrences",
+        "status": "Compiled glTF ready · 3 shared meshes · 10 renderable occurrences",
         "prototypeCount": "3",
         "occurrenceCount": "10",
         "triangleCount": "2,076",
         "edgeCount": "181",
+        "binarySize": "183.6 KiB",
         "sourceFormat": "AP214",
-        "selection": "Selected center-rail · ID 2 · 12 OCCT edge refs"
+        "hierarchyFirst": true,
+        "brandMarkLoaded": true,
+        "faviconLoaded": true,
+        "selection": "Selected center-rail · node 2 · ID 3 · 12 CAD edge refs"
       },
       "consoleIssues": [],
       "screenshot": {
         "path": "firefox-150-windows-selected.png",
-        "bytes": 132632,
-        "sha256": "69f59dac59996008990ee5c7c6cc9ea44d2658efad221cc55ec9397bf9ab7004"
+        "bytes": 261925,
+        "sha256": "96313bd932f675fa410e58370ab95984c683f98d8b2d7811fc99339e0f165c4b"
       }
     }
   ]

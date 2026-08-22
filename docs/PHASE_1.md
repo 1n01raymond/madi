@@ -21,30 +21,48 @@ report. It intentionally avoids defining a MADI CAD or delivery container.
 | Source identity | Report source digest matches OCCT evidence; node/mesh `extras` retain IDs and refs | Passed for experimental profile |
 | Independent package validation | Hashes, ranges, hierarchy, counts, and report parity are checked without compiler state | Passed by `pnpm phase1:evidence:check` |
 
+## First browser runtime slice
+
+The browser now consumes that compiled package directly. It reads the glTF node
+graph and MADI identity metadata on the main thread, then fetches and decodes the
+external binary in a Worker before transferring packed typed arrays to the
+direct WebGPU renderer. The Phase 0 Scene IR JSON is no longer a browser input.
+
+| Signal | Evidence | Status |
+|---|---|---|
+| Hierarchy first | Recorder observes 12 occurrence records before the Worker requests `scene.bin` | Passed in Chrome and Firefox |
+| Worker boundary | Binary fetch, accessor validation, decoding, and transferable collection run in `geometry.worker.ts` | Passed |
+| Prototype reuse | Three GPU batches render 10 parts; eight fasteners share one mesh/buffer set | Passed |
+| Engineering rendering | 2,076 unique triangles and 181 explicit edge segments reproduce the compiler report | Passed |
+| Source picking | Center rail resolves glTF node 2, object ID 3, and 12 revision-local CAD edge refs | Passed |
+| Browser conformance | Headed Chrome/Blink and Firefox/Gecko emit no console warnings or errors | Passed by `pnpm browser:matrix` |
+
 ## Reproduce
 
 ```sh
 pnpm phase1:compile:evidence
 pnpm phase1:evidence:check
+pnpm browser:matrix
 pnpm check
 ```
 
-See `artifacts/phase1/README.md` for the committed result and
+See `artifacts/phase1/README.md` for the compiled package,
+`artifacts/browser-matrix/README.md` for reviewed screenshots, and
 `packages/compiler/README.md` for the profile boundary.
 
 ## Not yet proven
 
 - Direct local STEP AP242 input into the Phase 1 compiler entry point.
 - Coarse and target LODs, partitioning, compression, and progressive loading.
-- Runtime consumption of `scene.gltf` / `scene.bin` in a Worker.
-- Hierarchy-first interaction before geometry residency.
+- Useful first render before a delayed or large target-geometry payload completes.
+- Orbit/pan/zoom, tree-driven selection, hide/isolate, and section interaction.
 - The Three.js comparison required by ADR-0003.
 - Large-coordinate precision behavior required by ADR-0005.
 - A public end-to-end review workflow and reproducible performance report.
 
 ## Next slice
 
-Load the compiled glTF package in the browser without reconstructing the Phase 0
-Scene IR JSON. The runtime should fetch hierarchy/metadata first, decode binary
-geometry in a Worker, preserve occurrence/source identity, and render the same
-surface, edge, and picking result.
+Turn the proof viewport into the first review interaction slice: orbit, pan,
+zoom, fit, tree-to-viewport selection, and hide/isolate over the compiled glTF
+node table. Keep scene identity independent from GPU residency and record the
+interaction behavior in both browser engines.

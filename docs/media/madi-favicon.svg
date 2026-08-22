@@ -1,0 +1,5 @@
+<svg width="128" height="128" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="MADI">
+  <rect width="128" height="128" rx="28" fill="#111111"></rect>
+  <rect x="26" y="34" width="52" height="60" rx="8" fill="none" stroke="#FFFFFF" stroke-width="8"></rect>
+  <path d="M84 44L106 56V80L84 92L62 80V56L84 44Z" fill="#FFFFFF" stroke="#111111" stroke-width="7" stroke-linejoin="round"></path>
+</svg>

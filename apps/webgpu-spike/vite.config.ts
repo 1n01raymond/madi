@@ -1,12 +1,12 @@
 import { defineConfig } from "vite";
 import { fileURLToPath } from "node:url";
 
-const evidenceDirectory = fileURLToPath(
-  new URL("../../artifacts/occt", import.meta.url),
+const compiledSceneDirectory = fileURLToPath(
+  new URL("../../artifacts/phase1/repeated-fasteners", import.meta.url),
 );
 
 export default defineConfig({
-  publicDir: evidenceDirectory,
+  publicDir: compiledSceneDirectory,
   server: {
     headers: {
       "Cross-Origin-Embedder-Policy": "require-corp",

@@ -175,8 +175,9 @@ WebGPU 数据结构，使批处理、residency、拾取和内存策略都能被�
 <br />
 glTF 是重要的标准化交付与互操作选项。在满足工程身份、边线、流送和精度要求
 时，MADI 会复用 glTF、meshopt、KTX2、3D Tiles 概念与元数据标准。首个
-Phase 1 编译器切片现已生成 glTF 2.0 与外部二进制资源；MADI 身份和源映射
-仍存放在明确标记为实验性的 `extras` 中。
+Phase 1 编译器切片现已生成 glTF 2.0 与外部二进制资源。浏览器会先打开层级，
+再由 Worker 解码几何；MADI 身份和源映射仍存放在明确标记为实验性的
+`extras` 中。
 </details>
 
 ## 参与贡献

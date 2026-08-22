@@ -10,9 +10,11 @@ const realEvidenceDirectory = await realpath(evidenceDirectory);
 const evidence = JSON.parse(
   await readFile(resolve(evidenceDirectory, "browser-matrix.json"), "utf8"),
 );
-const occtReport = JSON.parse(
+const compilerReport = JSON.parse(
   await readFile(
-    fileURLToPath(new URL("../artifacts/occt/repeated-fasteners.report.json", import.meta.url)),
+    fileURLToPath(
+      new URL("../artifacts/phase1/repeated-fasteners/build-report.json", import.meta.url),
+    ),
     "utf8",
   ),
 );
@@ -26,13 +28,13 @@ function assertNonEmptyString(value, label) {
 }
 
 assert(
-  evidence.schemaVersion === "phase-0-browser-matrix.1",
+  evidence.schemaVersion === "phase-1-browser-matrix.1",
   "Unsupported browser evidence schema.",
 );
 assert(Array.isArray(evidence.results) && evidence.results.length === 2, "Expected two results.");
 assert(
-  evidence.source.sha256 === occtReport.source.sha256,
-  "Browser evidence and OCCT evidence must reference the same fixture digest.",
+  evidence.source.packageDigest === compilerReport.output.packageDigest,
+  "Browser evidence and compiled glTF evidence must reference the same package digest.",
 );
 
 const browsers = new Set();

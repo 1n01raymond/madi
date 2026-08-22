@@ -187,11 +187,11 @@ export class Phase0Renderer {
     });
 
     const surfaceModule = device.createShaderModule({
-      label: "MADI Phase 0 surface + picking shader",
+      label: "MADI surface + picking shader",
       code: surfaceShader,
     });
     const edgeModule = device.createShaderModule({
-      label: "MADI Phase 0 explicit edge shader",
+      label: "MADI explicit edge shader",
       code: edgeShader,
     });
     this.cameraBuffer = device.createBuffer({
@@ -210,7 +210,7 @@ export class Phase0Renderer {
       ],
     });
     const pipelineLayout = device.createPipelineLayout({
-      label: "MADI Phase 0 pipeline layout",
+      label: "MADI pipeline layout",
       bindGroupLayouts: [bindGroupLayout],
     });
     this.cameraBindGroup = device.createBindGroup({
@@ -371,7 +371,7 @@ export class Phase0Renderer {
     if (!this.depthTexture || !this.pickTexture) return;
 
     this.device.queue.writeBuffer(this.cameraBuffer, 0, viewProjection);
-    const encoder = this.device.createCommandEncoder({ label: "MADI Phase 0 frame" });
+    const encoder = this.device.createCommandEncoder({ label: "MADI frame" });
     const colorView = this.context.getCurrentTexture().createView();
     const depthView = this.depthTexture.createView();
 

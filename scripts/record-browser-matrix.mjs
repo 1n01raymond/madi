@@ -30,16 +30,23 @@ const operatingSystem =
 const viewport = { width: 1320, height: 1000 };
 const url = "http://127.0.0.1:4173/";
 const expected = {
-  status: "OCCT Scene IR ready · 3 geometry prototypes · 10 part occurrences",
-  selection: "Selected center-rail · ID 2 · 12 OCCT edge refs",
+  status: "Compiled glTF ready · 3 shared meshes · 10 renderable occurrences",
+  selection: "Selected center-rail · node 2 · ID 3 · 12 CAD edge refs",
   prototypeCount: "3",
   occurrenceCount: "10",
   triangleCount: "2,076",
   edgeCount: "181",
+  binarySize: "183.6 KiB",
   sourceFormat: "AP214",
+  hierarchyFirst: true,
+  brandMarkLoaded: true,
+  faviconLoaded: true,
 };
-const report = JSON.parse(
-  await readFile(resolve(repositoryRoot, "artifacts/occt/repeated-fasteners.report.json"), "utf8"),
+const compilerReport = JSON.parse(
+  await readFile(
+    resolve(repositoryRoot, "artifacts/phase1/repeated-fasteners/build-report.json"),
+    "utf8",
+  ),
 );
 
 function assertEqual(actual, expectedValue, label) {
@@ -67,6 +74,13 @@ async function recordBrowser(definition) {
     page.on("pageerror", (error) => {
       consoleIssues.push({ level: "pageerror", message: error.message });
     });
+    let hierarchyFirst = false;
+    await page.route("**/scene.bin", async (route) => {
+      hierarchyFirst = await page
+        .evaluate(() => document.documentElement.dataset.hierarchyReady === "true")
+        .catch(() => false);
+      await route.continue();
+    });
 
     await page.goto(url, { waitUntil: "domcontentloaded" });
     await page.locator("#status[data-state='ready']").waitFor({ timeout: 15_000 });
@@ -77,7 +91,22 @@ async function recordBrowser(definition) {
       occurrenceCount: await page.locator("#occurrence-count").innerText(),
       triangleCount: await page.locator("#triangle-count").innerText(),
       edgeCount: await page.locator("#edge-count").innerText(),
+      binarySize: await page.locator("#binary-size").innerText(),
       sourceFormat: await page.locator("#source-format").innerText(),
+      hierarchyFirst,
+      brandMarkLoaded: await page.locator("#madi-brand-mark").evaluate(
+        (element) =>
+          element instanceof HTMLImageElement &&
+          element.complete &&
+          element.naturalWidth > 0,
+      ),
+      faviconLoaded: await page.evaluate(async () => {
+        const favicon = document.querySelector("#madi-favicon");
+        if (!(favicon instanceof HTMLLinkElement) || !favicon.href) return false;
+        const response = await fetch(favicon.href);
+        const source = await response.text();
+        return response.ok && source.includes("<svg") && source.includes("MADI");
+      }),
     };
     for (const [label, expectedValue] of Object.entries(expected)) {
       if (label === "selection") continue;
@@ -178,12 +207,15 @@ try {
   }
 
   const evidence = {
-    schemaVersion: "phase-0-browser-matrix.1",
+    schemaVersion: "phase-1-browser-matrix.1",
     capturedAt: new Date().toISOString(),
     source: {
-      fixture: report.source.path,
-      sha256: report.source.sha256,
+      fixture: "fixtures/step/repeated-fasteners.step",
       sceneIr: "artifacts/occt/repeated-fasteners.scene.json",
+      gltf: "artifacts/phase1/repeated-fasteners/scene.gltf",
+      binary: "artifacts/phase1/repeated-fasteners/scene.bin",
+      packageDigest: compilerReport.output.packageDigest,
+      sourceDigest: compilerReport.source.sourceDigest,
     },
     host: { platform: process.platform, architecture: process.arch },
     expected,

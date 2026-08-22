@@ -193,7 +193,8 @@ architectural focus, not a claim that general-purpose scene graphs are wrong.
 glTF is an important standards-based delivery and interoperability option. MADI
 reuses glTF, meshopt, KTX2, 3D Tiles concepts, and metadata standards where they
 meet engineering identity, edge, streaming, and precision requirements. The
-first Phase 1 compiler slice now emits glTF 2.0 plus an external binary resource;
+first Phase 1 compiler slice emits glTF 2.0 plus an external binary resource;
+the browser now opens its hierarchy first and decodes geometry in a Worker.
 MADI identity and source mappings remain explicitly experimental `extras`.
 </details>
 
@@ -218,11 +219,11 @@ issue so assumptions are visible before implementation.
 
 ```text
 apps/
-  webgpu-spike/       Phase 0 direct WebGPU browser proof
+  webgpu-spike/       Phase 1 compiled glTF + Worker + WebGPU browser proof
 packages/
   compiler/           Deterministic Scene IR to standards-first glTF compiler
   scene-ir/           In-memory engineering scene types and validator
-  runtime-webgpu/     Direct WebGPU surface, edge, instancing, and picking path
+  runtime-webgpu/     Compiled glTF loader and direct WebGPU rendering path
 native/
   adapter-occt/       Isolated STEP/XDE extraction spike
 fixtures/
