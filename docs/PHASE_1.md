@@ -68,7 +68,9 @@ and bounded residency.
 
 ## Next slice
 
-Turn the proof viewport into the first review interaction slice: orbit, pan,
-zoom, fit, tree-to-viewport selection, and hide/isolate over the compiled glTF
-node table. Keep scene identity independent from GPU residency and record the
-interaction behavior in both browser engines.
+Advance the ADR-0003 industrial benchmark before widening Studio UI. Extend the
+shared 1k/10k/100k scale ladder with spatial bins and a heterogeneous prototype
+tier, then compare MADI and optimized Three.js under equivalent CPU culling,
+edges, on-demand picking, memory accounting, and scripted exterior/interior
+camera traces. Keep the first committed 10k surface-only run labeled as
+exploratory evidence, not a renderer decision.

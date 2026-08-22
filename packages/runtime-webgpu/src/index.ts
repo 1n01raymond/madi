@@ -35,4 +35,6 @@ export type {
   MadiWebGpuErrorCode,
   Phase0RendererOptions,
   Phase0RendererOptions as MadiWebGpuRendererOptions,
+  RenderOptions,
+  SetSceneOptions,
 } from "./renderer.js";

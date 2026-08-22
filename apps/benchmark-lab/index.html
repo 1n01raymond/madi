@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en" data-benchmark-status="loading">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" href="/madi-favicon.svg" type="image/svg+xml" />
+    <title>MADI Industrial Benchmark Lab</title>
+  </head>
+  <body>
+    <main>
+      <header>
+        <div>
+          <p class="eyebrow">ADR-0003 · exploratory evidence</p>
+          <h1>Industrial assembly benchmark lab</h1>
+          <p>
+            The same deterministic pipe-rack workload is submitted through direct WebGPU and an
+            optimized Three.js <code>InstancedMesh</code> baseline.
+          </p>
+        </div>
+        <nav>
+          <a href="?backend=madi&scale=smoke">MADI</a>
+          <a href="?backend=three&scale=smoke">Three.js</a>
+          <a href="?backend=madi&scale=gate">10k gate</a>
+        </nav>
+      </header>
+      <section class="metrics" aria-label="workload summary">
+        <div><span>Backend</span><strong id="backend">—</strong></div>
+        <div><span>Scale</span><strong id="scale">—</strong></div>
+        <div><span>Occurrences</span><strong id="occurrences">—</strong></div>
+        <div><span>Submitted triangles</span><strong id="triangles">—</strong></div>
+      </section>
+      <p id="status" role="status">Preparing benchmark…</p>
+      <section class="workspace">
+        <canvas id="viewport" aria-label="industrial benchmark viewport"></canvas>
+        <pre id="result" aria-label="benchmark result">Waiting for samples…</pre>
+      </section>
+      <footer>
+        Surface-only, culling-disabled comparison. It validates the harness; it does not accept or
+        reject ADR-0003.
+      </footer>
+    </main>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

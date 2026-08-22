@@ -115,6 +115,18 @@ export class MadiWebGpuError extends Error {
 
 export interface Phase0RendererOptions {
   readonly onDeviceLost?: (message: string) => void;
+  /** Override the browser device pixel ratio for reproducible benchmark profiles. */
+  readonly pixelRatio?: number;
+}
+
+export interface SetSceneOptions {
+  /** Upload explicit CAD edge streams. Defaults to true. */
+  readonly includeEdges?: boolean;
+}
+
+export interface RenderOptions {
+  /** Draw uploaded explicit CAD edge streams. Defaults to true. */
+  readonly edges?: boolean;
 }
 
 interface GpuBatchResources {
@@ -162,7 +174,10 @@ export class Phase0Renderer {
   private readonly surfacePipeline: GPURenderPipeline;
   private readonly edgePipeline: GPURenderPipeline;
   private readonly pickPipeline: GPURenderPipeline;
+  private readonly pixelRatio?: number;
+  private readonly lastViewProjection = new Float32Array(16);
   private batches: GpuBatchResources[] = [];
+  private hasRendered = false;
   private depthTexture?: GPUTexture;
   private pickTexture?: GPUTexture;
   private targetWidth = 0;
@@ -179,6 +194,7 @@ export class Phase0Renderer {
     this.context = context;
     this.adapter = adapter;
     this.device = device;
+    this.pixelRatio = options.pixelRatio;
     this.format = navigator.gpu.getPreferredCanvasFormat();
     this.context.configure({
       device,
@@ -299,6 +315,12 @@ export class Phase0Renderer {
     canvas: HTMLCanvasElement,
     options: Phase0RendererOptions = {},
   ): Promise<Phase0Renderer> {
+    if (
+      options.pixelRatio !== undefined &&
+      (!Number.isFinite(options.pixelRatio) || options.pixelRatio <= 0)
+    ) {
+      throw new RangeError("pixelRatio must be a positive finite number.");
+    }
     if (!navigator.gpu) {
       throw new MadiWebGpuError(
         "WEBGPU_UNAVAILABLE",
@@ -324,10 +346,14 @@ export class Phase0Renderer {
     return new Phase0Renderer(canvas, context, adapter, device, options);
   }
 
-  setScene(sceneOrBatch: GpuScene | GpuPrototypeBatch): void {
+  setScene(
+    sceneOrBatch: GpuScene | GpuPrototypeBatch,
+    options: SetSceneOptions = {},
+  ): void {
     const scene: GpuScene =
       "batches" in sceneOrBatch ? sceneOrBatch : { batches: [sceneOrBatch] };
     validateGpuScene(scene);
+    const includeEdges = options.includeEdges ?? true;
     this.destroyBatches();
     this.batches = scene.batches.map((batch, index) => ({
       surfaceVertex: createBuffer(
@@ -345,7 +371,7 @@ export class Phase0Renderer {
       edgeVertex: createBuffer(
         this.device,
         `MADI prototype ${index} explicit edges`,
-        batch.edgeVertices,
+        includeEdges ? batch.edgeVertices : new Float32Array(),
         GPUBufferUsage.VERTEX,
       ),
       instance: createBuffer(
@@ -355,20 +381,22 @@ export class Phase0Renderer {
         GPUBufferUsage.VERTEX,
       ),
       indexCount: batch.surfaceIndices.length,
-      edgeVertexCount: batch.edgeVertices.length / 3,
+      edgeVertexCount: includeEdges ? batch.edgeVertices.length / 3 : 0,
       instanceCount: batch.instances.length,
     }));
   }
 
-  render(viewProjection: Float32Array): void {
+  render(viewProjection: Float32Array, options: RenderOptions = {}): void {
     if (this.batches.length === 0) {
       throw new MadiWebGpuError("SCENE_NOT_SET", "Call setScene before render.");
     }
     if (viewProjection.length !== 16) {
       throw new TypeError("viewProjection must contain 16 float32 values.");
     }
+    this.lastViewProjection.set(viewProjection);
+    this.hasRendered = true;
     this.ensureTargets();
-    if (!this.depthTexture || !this.pickTexture) return;
+    if (!this.depthTexture) return;
 
     this.device.queue.writeBuffer(this.cameraBuffer, 0, viewProjection);
     const encoder = this.device.createCommandEncoder({ label: "MADI frame" });
@@ -396,43 +424,29 @@ export class Phase0Renderer {
       this.bindBatch(surfacePass, this.surfacePipeline, batch);
       surfacePass.drawIndexed(batch.indexCount, batch.instanceCount);
     }
-    for (const batch of this.batches) {
-      surfacePass.setPipeline(this.edgePipeline);
-      surfacePass.setBindGroup(0, this.cameraBindGroup);
-      surfacePass.setVertexBuffer(0, batch.edgeVertex);
-      surfacePass.setVertexBuffer(1, batch.instance);
-      surfacePass.draw(batch.edgeVertexCount, batch.instanceCount);
+    if (options.edges ?? true) {
+      for (const batch of this.batches) {
+        if (batch.edgeVertexCount === 0) continue;
+        surfacePass.setPipeline(this.edgePipeline);
+        surfacePass.setBindGroup(0, this.cameraBindGroup);
+        surfacePass.setVertexBuffer(0, batch.edgeVertex);
+        surfacePass.setVertexBuffer(1, batch.instance);
+        surfacePass.draw(batch.edgeVertexCount, batch.instanceCount);
+      }
     }
     surfacePass.end();
-
-    const pickPass = encoder.beginRenderPass({
-      label: "MADI object ID pass",
-      colorAttachments: [
-        {
-          view: this.pickTexture.createView(),
-          clearValue: { r: 0, g: 0, b: 0, a: 0 },
-          loadOp: "clear",
-          storeOp: "store",
-        },
-      ],
-      depthStencilAttachment: {
-        view: depthView,
-        depthClearValue: 1,
-        depthLoadOp: "clear",
-        depthStoreOp: "discard",
-      },
-    });
-    for (const batch of this.batches) {
-      this.bindBatch(pickPass, this.pickPipeline, batch);
-      pickPass.drawIndexed(batch.indexCount, batch.instanceCount);
-    }
-    pickPass.end();
 
     this.device.queue.submit([encoder.finish()]);
   }
 
   async pick(clientX: number, clientY: number): Promise<number> {
-    if (!this.pickTexture || this.targetWidth === 0 || this.targetHeight === 0) {
+    if (
+      !this.pickTexture ||
+      !this.depthTexture ||
+      !this.hasRendered ||
+      this.targetWidth === 0 ||
+      this.targetHeight === 0
+    ) {
       return 0;
     }
     const rect = this.canvas.getBoundingClientRect();
@@ -445,12 +459,35 @@ export class Phase0Renderer {
       0,
       Math.min(this.targetHeight - 1, Math.floor(((clientY - rect.top) / rect.height) * this.targetHeight)),
     );
+    this.device.queue.writeBuffer(this.cameraBuffer, 0, this.lastViewProjection);
     const readback = this.device.createBuffer({
       label: "MADI pick readback",
       size: 256,
       usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ,
     });
-    const encoder = this.device.createCommandEncoder({ label: "MADI pick copy" });
+    const encoder = this.device.createCommandEncoder({ label: "MADI on-demand pick" });
+    const pickPass = encoder.beginRenderPass({
+      label: "MADI object ID pass",
+      colorAttachments: [
+        {
+          view: this.pickTexture.createView(),
+          clearValue: { r: 0, g: 0, b: 0, a: 0 },
+          loadOp: "clear",
+          storeOp: "store",
+        },
+      ],
+      depthStencilAttachment: {
+        view: this.depthTexture.createView(),
+        depthClearValue: 1,
+        depthLoadOp: "clear",
+        depthStoreOp: "discard",
+      },
+    });
+    for (const batch of this.batches) {
+      this.bindBatch(pickPass, this.pickPipeline, batch);
+      pickPass.drawIndexed(batch.indexCount, batch.instanceCount);
+    }
+    pickPass.end();
     encoder.copyTextureToBuffer(
       { texture: this.pickTexture, origin: { x, y } },
       { buffer: readback, bytesPerRow: 256 },
@@ -486,7 +523,7 @@ export class Phase0Renderer {
   }
 
   private ensureTargets(): void {
-    const ratio = Math.max(1, window.devicePixelRatio || 1);
+    const ratio = this.pixelRatio ?? Math.max(1, window.devicePixelRatio || 1);
     const width = Math.max(1, Math.floor(this.canvas.clientWidth * ratio));
     const height = Math.max(1, Math.floor(this.canvas.clientHeight * ratio));
     if (width === this.targetWidth && height === this.targetHeight) return;

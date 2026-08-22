@@ -51,3 +51,41 @@ This ADR therefore remains Proposed. Acceptance requires equivalent Three.js
 and direct-runtime workloads with published CPU time, memory, draw/batch, and
 integration results. If the custom path produces no material advantage, the
 decision must be revised before the runtime API hardens.
+
+### Industrial decision contract
+
+The decisive workload targets shipbuilding and process-plant review rather
+than a generic triangle demo. It must combine repeated equipment with unique
+geometry, deep occurrence identity, large spatial extents, dense interiors,
+and object-level visibility. The public scale floor is 100,000 occurrences and
+10 million submitted triangles; private design-partner scenes may supplement
+but never replace reproducible public evidence.
+
+The comparison pins an optimized Three.js baseline and gives both paths the
+same source arrays, camera trace, resolution, visual features, culling policy,
+and cache state. Renderer-isolated and end-to-end streaming results are
+reported separately so compiler or network gains are not attributed to the
+WebGPU hot path.
+
+Before decision runs begin, the benchmark release locks these thresholds:
+
+- continue the direct hot path when it reduces main-thread p95 by at least 25%
+  or retained browser scene memory by at least 30% on a strategic industrial
+  workload, while frame-time p95 is no more than 10% worse;
+- also continue when bounded residency keeps the workload interactive inside a
+  published low-memory budget that the optimized baseline cannot satisfy;
+- revise this ADR toward Three.js when all material differences remain within
+  10%, no bounded-residency advantage is demonstrated, and the custom path has
+  higher integration or conformance cost.
+
+No single metric or hardware profile decides the ADR. A result must reproduce
+on the discrete reference profile and at least one integrated-GPU profile.
+
+### First exploratory harness
+
+The first committed industrial harness compares direct WebGPU with Three.js
+WebGPURenderer 0.180.0 over the same 10,000-occurrence plant-style workload in
+Chrome/Blink and Firefox/Gecko. It deliberately disables edges, culling, LOD,
+streaming, and navigation-time picking. Its status is
+`exploratory-not-adr-decision`: it validates workload parity, real-browser
+automation, and result integrity but cannot accept or reject this ADR.
