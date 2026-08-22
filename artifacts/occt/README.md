@@ -21,12 +21,14 @@ source is a MADI-authored AP214 assembly in millimetres with SHA-256
 | Unique triangles | 2,076 |
 | OCCT face / edge source refs | 30 / 69 |
 | Explicit edge segments | 181 |
-| Local visual smoke, 2026-08-23 | Chrome on Windows, WebGPU adapter `nvidia` |
-| Object picking | `fastener-03`, object ID 5, 21 OCCT edge refs |
-| Browser console | No warnings or errors |
+| Two-engine visual smoke, 2026-08-23 | Chrome/Blink and Firefox/Gecko on Windows |
+| Object picking | Both engines selected `center-rail`, object ID 2, with 12 OCCT edge refs |
+| Browser console | No warnings or errors in either engine |
 
-This is one local visual result. The Phase 0 exit gate still requires a second
-WebGPU engine, committed screenshots, and fuller adapter/browser/GPU metadata.
+The committed screenshots and machine-readable browser metadata are in
+[`artifacts/browser-matrix`](../browser-matrix/README.md). This proves the two
+browser-engine path on one workstation; it is not a broad GPU compatibility or
+performance claim.
 
 ## Reproduce
 

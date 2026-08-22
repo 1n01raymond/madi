@@ -1,0 +1,92 @@
+{
+  "schemaVersion": "phase-0-browser-matrix.1",
+  "capturedAt": "2026-08-22T16:45:46.656Z",
+  "source": {
+    "fixture": "fixtures/step/repeated-fasteners.step",
+    "sha256": "de177178a4bb86a6983cabc7ad265117c56d7324df7912b94ece1263a6c8865d",
+    "sceneIr": "artifacts/occt/repeated-fasteners.scene.json"
+  },
+  "host": {
+    "platform": "win32",
+    "architecture": "x64"
+  },
+  "expected": {
+    "status": "OCCT Scene IR ready · 3 geometry prototypes · 10 part occurrences",
+    "selection": "Selected center-rail · ID 2 · 12 OCCT edge refs",
+    "prototypeCount": "3",
+    "occurrenceCount": "10",
+    "triangleCount": "2,076",
+    "edgeCount": "181",
+    "sourceFormat": "AP214"
+  },
+  "results": [
+    {
+      "browser": "chrome",
+      "browserEngine": "Blink",
+      "browserVersion": "151.0.7922.139",
+      "headless": false,
+      "viewport": {
+        "width": 1320,
+        "height": 1000
+      },
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36",
+      "platform": "Win32",
+      "adapter": {
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "device": "",
+        "description": "",
+        "isFallbackAdapter": false
+      },
+      "observed": {
+        "status": "OCCT Scene IR ready · 3 geometry prototypes · 10 part occurrences",
+        "prototypeCount": "3",
+        "occurrenceCount": "10",
+        "triangleCount": "2,076",
+        "edgeCount": "181",
+        "sourceFormat": "AP214",
+        "selection": "Selected center-rail · ID 2 · 12 OCCT edge refs"
+      },
+      "consoleIssues": [],
+      "screenshot": {
+        "path": "chrome-151-windows-selected.png",
+        "bytes": 107252,
+        "sha256": "0197aa03c6d4581b2f303e1113e829e08a328ac7feac70f107cdf8d2e8b67a7c"
+      }
+    },
+    {
+      "browser": "firefox",
+      "browserEngine": "Gecko",
+      "browserVersion": "150.0.2",
+      "headless": false,
+      "viewport": {
+        "width": 1320,
+        "height": 1000
+      },
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:150.0) Gecko/20100101 Firefox/150.0",
+      "platform": "Win32",
+      "adapter": {
+        "vendor": "",
+        "architecture": "",
+        "device": "",
+        "description": "",
+        "isFallbackAdapter": false
+      },
+      "observed": {
+        "status": "OCCT Scene IR ready · 3 geometry prototypes · 10 part occurrences",
+        "prototypeCount": "3",
+        "occurrenceCount": "10",
+        "triangleCount": "2,076",
+        "edgeCount": "181",
+        "sourceFormat": "AP214",
+        "selection": "Selected center-rail · ID 2 · 12 OCCT edge refs"
+      },
+      "consoleIssues": [],
+      "screenshot": {
+        "path": "firefox-150-windows-selected.png",
+        "bytes": 132632,
+        "sha256": "69f59dac59996008990ee5c7c6cc9ea44d2658efad221cc55ec9397bf9ab7004"
+      }
+    }
+  ]
+}
