@@ -117,6 +117,18 @@ Engineering Scene IRは新しい交換形式ではなく、論理的なシステ
 モデル、正確なハードウェア・ブラウザ情報、cold/warm状態、再現コマンドと
 ともに公開します。
 
+## 現在のランタイム検証
+
+![MADI WebGPUで直接描画したAdafruit PyGamer STEPアセンブリ](artifacts/browser-matrix/chrome-151-windows-selected.png)
+
+標準デモは合成マスコットではなく、実在するAdafruit PyGamer電子機器
+アセンブリを使用します。34個の共有mesh、85個のpart occurrence、162,838
+個の固有triangle、13,897個の明示的CAD edge、Worker decode、ソース参照を
+保持したjoystick pickingをChromeとFirefoxで検証しました。未変更のCADは
+固定upstream commitと通知を保持してMITで再配布しており、Adafruitによる
+MADIの推奨を意味しません。[検証済みブラウザ証拠](artifacts/browser-matrix/README.md)を
+参照してください。
+
 ## 設計から読み始める
 
 | 知りたいこと | 文書 |

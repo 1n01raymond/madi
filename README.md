@@ -118,6 +118,17 @@ See the full [roadmap](docs/ROADMAP.md), [Phase 1 evidence](docs/PHASE_1.md),
 claims will be published with redistributable models, exact hardware and browser
 details, cold/warm states, and reproducible commands.
 
+## Current runtime proof
+
+![Adafruit PyGamer STEP assembly rendered directly with MADI WebGPU](artifacts/browser-matrix/chrome-151-windows-selected.png)
+
+The canonical demo now uses Adafruit's real PyGamer electronics assembly rather
+than a synthetic mascot: 34 shared meshes, 85 part occurrences, 162,838 unique
+triangles, 13,897 explicit CAD edge segments, Worker decoding, and source-aware
+joystick picking in Chrome and Firefox. The unmodified CAD is redistributed
+under MIT with a pinned upstream commit and notice; Adafruit does not endorse
+MADI. See the [reviewed browser evidence](artifacts/browser-matrix/README.md).
+
 ## Start with the design
 
 | If you want to… | Read… |

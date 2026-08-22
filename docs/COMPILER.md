@@ -363,7 +363,9 @@ only after the runtime proves the basic model.
 
 `@madi/compiler` now compiles a validator-clean in-memory `EngineeringScene`
 into `scene.gltf`, external `scene.bin`, and `build-report.json`. The first
-committed package is under `artifacts/phase1/repeated-fasteners`.
+committed packages are under `artifacts/phase1/repeated-fasteners` for focused
+regression and `artifacts/phase1/adafruit-pygamer` for the canonical real-world
+electronics path.
 
 The glTF profile uses standard node hierarchy, shared mesh references, triangle
 and line primitives, materials, metre units, and Y-up coordinates. Occurrence,
@@ -375,3 +377,8 @@ The build is deterministic for identical Scene IR and options. The normal check
 runs both MADI invariants and the official Khronos glTF Validator. The current
 slice has one target representation and no progressive partitions, so it proves
 the compiler output boundary but not the complete Phase 1 compiler roadmap.
+
+The PyGamer baseline contains 34 shared meshes, 85 renderable occurrences,
+162,838 triangles, and 13,897 explicit edge segments. Its 14.8 MB binary is
+deliberately uncompressed so later chunking, LOD, compression, and residency
+work has a stable public baseline.

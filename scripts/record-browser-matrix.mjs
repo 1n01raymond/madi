@@ -30,21 +30,23 @@ const operatingSystem =
 const viewport = { width: 1320, height: 1000 };
 const url = "http://127.0.0.1:4173/";
 const expected = {
-  status: "Compiled glTF ready · 3 shared meshes · 10 renderable occurrences",
-  selection: "Selected center-rail · node 2 · ID 3 · 12 CAD edge refs",
-  prototypeCount: "3",
-  occurrenceCount: "10",
-  triangleCount: "2,076",
-  edgeCount: "181",
-  binarySize: "183.6 KiB",
+  status: "Compiled glTF ready · 34 shared meshes · 85 renderable occurrences",
+  selection:
+    "Selected JOYSTICK_ANALOG_MINITHM:JOY1 · node 56 · ID 57 · 524 CAD edge refs",
+  prototypeCount: "34",
+  occurrenceCount: "85",
+  triangleCount: "162,838",
+  edgeCount: "13,897",
+  binarySize: "14,479.3 KiB",
   sourceFormat: "AP214",
   hierarchyFirst: true,
   brandMarkLoaded: true,
   faviconLoaded: true,
+  fixtureCreditLinked: true,
 };
 const compilerReport = JSON.parse(
   await readFile(
-    resolve(repositoryRoot, "artifacts/phase1/repeated-fasteners/build-report.json"),
+    resolve(repositoryRoot, "artifacts/phase1/adafruit-pygamer/build-report.json"),
     "utf8",
   ),
 );
@@ -107,6 +109,12 @@ async function recordBrowser(definition) {
         const source = await response.text();
         return response.ok && source.includes("<svg") && source.includes("MADI");
       }),
+      fixtureCreditLinked: await page.locator(".fixture-credit a").evaluate(
+        (element) =>
+          element instanceof HTMLAnchorElement &&
+          element.href ===
+            "https://github.com/adafruit/Adafruit_CAD_Parts/blob/a94289fc02e7312f11647eb5e68f5c5ec06cabb6/LICENSE",
+      ),
     };
     for (const [label, expectedValue] of Object.entries(expected)) {
       if (label === "selection") continue;
@@ -118,8 +126,8 @@ async function recordBrowser(definition) {
     if (!canvasBounds) throw new Error(`${definition.id} canvas has no visible bounds.`);
     await canvas.click({
       position: {
-        x: Math.round(canvasBounds.width * 0.593),
-        y: Math.round(canvasBounds.height * 0.49),
+        x: Math.round(canvasBounds.width * 0.6),
+        y: Math.round(canvasBounds.height * 0.35),
       },
     });
     await page.locator("#selection").filter({ hasText: expected.selection }).waitFor({
@@ -210,10 +218,11 @@ try {
     schemaVersion: "phase-1-browser-matrix.1",
     capturedAt: new Date().toISOString(),
     source: {
-      fixture: "fixtures/step/repeated-fasteners.step",
-      sceneIr: "artifacts/occt/repeated-fasteners.scene.json",
-      gltf: "artifacts/phase1/repeated-fasteners/scene.gltf",
-      binary: "artifacts/phase1/repeated-fasteners/scene.bin",
+      fixture: "fixtures/step/adafruit-pygamer.step",
+      sceneIr: "generated locally; not committed (80.6 MB JSON evidence)",
+      occtReport: "artifacts/occt/adafruit-pygamer.report.json",
+      gltf: "artifacts/phase1/adafruit-pygamer/scene.gltf",
+      binary: "artifacts/phase1/adafruit-pygamer/scene.bin",
       packageDigest: compilerReport.output.packageDigest,
       sourceDigest: compilerReport.source.sourceDigest,
     },

@@ -26,7 +26,10 @@ function setText(selector: string, value: string): void {
 }
 
 function formatBytes(bytes: number): string {
-  return `${(bytes / 1024).toFixed(1)} KiB`;
+  return `${(bytes / 1024).toLocaleString("en-US", {
+    minimumFractionDigits: 1,
+    maximumFractionDigits: 1,
+  })} KiB`;
 }
 
 async function loadCompiledHierarchy(gltfUrl: URL): Promise<{

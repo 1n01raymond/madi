@@ -117,6 +117,18 @@ Engineering Scene IR은 새로운 교환 포맷이 아니라 논리적인 시스
 모델, 정확한 하드웨어·브라우저 정보, cold/warm 상태, 재현 명령과 함께
 공개합니다.
 
+## 현재 런타임 증거
+
+![MADI WebGPU에서 직접 렌더링한 Adafruit PyGamer STEP 어셈블리](artifacts/browser-matrix/chrome-151-windows-selected.png)
+
+대표 데모는 이제 합성 마스코트 대신 실제 Adafruit PyGamer 전자기기
+어셈블리를 사용합니다. 34개 공유 mesh, 85개 part occurrence, 162,838개 고유
+triangle, 13,897개 명시적 CAD edge, Worker 디코딩, 원본 참조가 유지되는
+조이스틱 picking을 Chrome과 Firefox에서 검증했습니다. 수정하지 않은 CAD는
+고정된 upstream commit과 라이선스 고지를 보존해 MIT로 재배포하며, Adafruit가
+MADI를 보증한다는 의미는 아닙니다. [검토된 브라우저 증거](artifacts/browser-matrix/README.md)를
+확인하세요.
+
 ## 설계 문서부터 시작하기
 
 | 알고 싶은 내용 | 문서 |

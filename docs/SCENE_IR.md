@@ -471,3 +471,11 @@ JSON is MADI's delivery format.
 with one known unsupported semantic entity. Its validator-clean scene retains
 the same prototype reuse and geometry counts while resolving the warning to
 STEP entity `#2135`.
+
+`artifacts/occt/adafruit-pygamer.report.json` records the larger canonical
+electronics fixture: 34 part prototypes, 85 part occurrences, 162,838 unique
+triangles, and 13,897 edge segments. The extracted Scene IR JSON is 80.6 MB and
+is intentionally generated under ignored `output/` storage instead of being
+treated as a disk format or committed artifact. The checksum-locked STEP,
+compact report, compiled glTF resources, and independent validators preserve
+the reproducible evidence chain.

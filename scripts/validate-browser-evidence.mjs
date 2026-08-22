@@ -13,10 +13,20 @@ const evidence = JSON.parse(
 const compilerReport = JSON.parse(
   await readFile(
     fileURLToPath(
-      new URL("../artifacts/phase1/repeated-fasteners/build-report.json", import.meta.url),
+      new URL("../artifacts/phase1/adafruit-pygamer/build-report.json", import.meta.url),
     ),
     "utf8",
   ),
+);
+const fixtureManifest = JSON.parse(
+  await readFile(
+    fileURLToPath(new URL("../fixtures/step/manifest.json", import.meta.url)),
+    "utf8",
+  ),
+);
+const fixture = fixtureManifest.fixtures.find(({ id }) => id === "adafruit-pygamer");
+const fixtureBytes = await readFile(
+  fileURLToPath(new URL("../fixtures/step/adafruit-pygamer.step", import.meta.url)),
 );
 
 function assert(condition, message) {
@@ -35,6 +45,17 @@ assert(Array.isArray(evidence.results) && evidence.results.length === 2, "Expect
 assert(
   evidence.source.packageDigest === compilerReport.output.packageDigest,
   "Browser evidence and compiled glTF evidence must reference the same package digest.",
+);
+assert(
+  fixture?.license === "MIT" && fixture.provenanceType === "upstream",
+  "Canonical browser fixture must retain its upstream MIT provenance.",
+);
+const fixtureDigest = createHash("sha256").update(fixtureBytes).digest("hex");
+assert(fixture.sha256 === fixtureDigest, "Canonical browser fixture checksum changed.");
+assert(
+  evidence.source.sourceDigest === `sha256:${fixtureDigest}` &&
+    compilerReport.source.sourceDigest === evidence.source.sourceDigest,
+  "Browser, compiler, and canonical STEP source digests differ.",
 );
 
 const browsers = new Set();
