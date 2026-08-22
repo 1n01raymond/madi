@@ -1,4 +1,60 @@
 {
-  "schemaVersion": "0.1",
-  "fixtures": []
+  "schemaVersion": "0.2",
+  "fixtures": [
+    {
+      "id": "precision-bracket",
+      "kind": "precision-part",
+      "path": "precision-bracket.step",
+      "sourcePath": "generators/generate_fixtures.py",
+      "sourceUrl": "https://github.com/1n01raymond/madi/blob/main/fixtures/step/generators/generate_fixtures.py",
+      "license": "Apache-2.0",
+      "licenseUrl": "https://github.com/1n01raymond/madi/blob/main/LICENSE",
+      "licenseFile": "LICENSE.md",
+      "sha256": "985fb011f9e7ab754bb9b719161197fdd3b2dd76186b3dffe6ec2ab7194cbb81",
+      "purposes": [
+        "precision",
+        "brep",
+        "fillets",
+        "cylindrical-seams",
+        "explicit-edges"
+      ],
+      "attribution": "MADI Contributors",
+      "generatedWith": {
+        "tool": "CadQuery",
+        "toolVersion": "2.8.0",
+        "binding": "cadquery-ocp",
+        "bindingVersion": "7.9.3.1.1",
+        "kernel": "Open CASCADE Technology",
+        "kernelVersion": "7.9.3"
+      }
+    },
+    {
+      "id": "repeated-fasteners",
+      "kind": "assembly",
+      "path": "repeated-fasteners.step",
+      "sourcePath": "generators/generate_fixtures.py",
+      "sourceUrl": "https://github.com/1n01raymond/madi/blob/main/fixtures/step/generators/generate_fixtures.py",
+      "license": "Apache-2.0",
+      "licenseUrl": "https://github.com/1n01raymond/madi/blob/main/LICENSE",
+      "licenseFile": "LICENSE.md",
+      "sha256": "de177178a4bb86a6983cabc7ad265117c56d7324df7912b94ece1263a6c8865d",
+      "purposes": [
+        "assembly",
+        "instancing",
+        "hierarchy",
+        "transforms",
+        "names",
+        "colors"
+      ],
+      "attribution": "MADI Contributors",
+      "generatedWith": {
+        "tool": "CadQuery",
+        "toolVersion": "2.8.0",
+        "binding": "cadquery-ocp",
+        "bindingVersion": "7.9.3.1.1",
+        "kernel": "Open CASCADE Technology",
+        "kernelVersion": "7.9.3"
+      }
+    }
+  ]
 }

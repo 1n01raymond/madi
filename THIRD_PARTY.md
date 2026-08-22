@@ -22,6 +22,20 @@ Versions are pinned in `package.json` and `pnpm-lock.yaml`. Updates must pass
 the complete check and browser smoke path and must not introduce an incompatible
 runtime license.
 
+## STEP fixture authoring tools
+
+These tools generated the committed Phase 0 STEP fixtures. They are not pnpm
+dependencies, are not required by normal CI, and are not bundled into MADI.
+
+| Dependency | Version | Package license | Purpose |
+|---|---:|---|---|
+| CadQuery | 2.8.0 | Apache-2.0 | authored and exported the synthetic B-rep and assembly fixtures |
+| `cadquery-ocp` | 7.9.3.1.1 | Apache-2.0 package metadata | Python OCCT binding used by CadQuery during fixture generation |
+
+The generated models and generator source are original MADI contributions under
+Apache-2.0. Their provenance, exact checksums, and regeneration policy are in
+`fixtures/step/`.
+
 ## Open CASCADE Technology
 
 The initial STEP/IGES adapter is expected to use Open CASCADE Technology
