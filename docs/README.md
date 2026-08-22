@@ -18,7 +18,9 @@ Read in this order:
    and anti-benchmark rules.
 8. [Roadmap](ROADMAP.md) — evidence-gated phases and exit criteria.
 9. [Architecture decisions](adr/README.md) — decisions and alternatives.
-10. [Translations](TRANSLATIONS.md) — README languages, terminology, and
+10. [Branching and releases](BRANCHING.md) — work branches, pull requests,
+    merge rules, backports, tags, and enforcement gates.
+11. [Translations](TRANSLATIONS.md) — README languages, terminology, and
     maintenance workflow.
 
 ## Documentation rules
