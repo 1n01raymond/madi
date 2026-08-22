@@ -3,6 +3,8 @@ export interface GpuOccurrenceInstance {
   readonly transform: Float32Array;
   /** Zero is reserved for the picking background. */
   readonly objectId: number;
+  /** Linear RGBA display color for this occurrence. */
+  readonly baseColor?: readonly [number, number, number, number];
 }
 
 export interface GpuPrototypeBatch {
@@ -15,7 +17,12 @@ export interface GpuPrototypeBatch {
   readonly instances: readonly GpuOccurrenceInstance[];
 }
 
-export const instanceStride = 80;
+export interface GpuScene {
+  /** One immutable geometry batch per renderable prototype. */
+  readonly batches: readonly GpuPrototypeBatch[];
+}
+
+export const instanceStride = 96;
 
 export function validatePrototypeBatch(batch: GpuPrototypeBatch): void {
   if (batch.surfaceVertices.length % 6 !== 0) {
@@ -52,7 +59,31 @@ export function validatePrototypeBatch(batch: GpuPrototypeBatch): void {
     if (objectIds.has(instance.objectId)) {
       throw new RangeError(`Duplicate occurrence object ID ${instance.objectId}.`);
     }
+    if (
+      instance.baseColor &&
+      (instance.baseColor.length !== 4 ||
+        instance.baseColor.some((value) => !Number.isFinite(value)))
+    ) {
+      throw new TypeError("Occurrence base colors must contain four finite values.");
+    }
     objectIds.add(instance.objectId);
+  }
+}
+
+export function validateGpuScene(scene: GpuScene): void {
+  if (scene.batches.length === 0) {
+    throw new TypeError("A GPU scene must contain at least one prototype batch.");
+  }
+
+  const objectIds = new Set<number>();
+  for (const batch of scene.batches) {
+    validatePrototypeBatch(batch);
+    for (const instance of batch.instances) {
+      if (objectIds.has(instance.objectId)) {
+        throw new RangeError(`Duplicate scene object ID ${instance.objectId}.`);
+      }
+      objectIds.add(instance.objectId);
+    }
   }
 }
 
@@ -68,6 +99,10 @@ export function packInstanceData(
       view.setFloat32(base + matrixIndex * 4, value, true);
     });
     view.setUint32(base + 64, instance.objectId, true);
+    const color = instance.baseColor ?? [0.16, 0.55, 0.92, 1.0];
+    color.forEach((value, channel) => {
+      view.setFloat32(base + 80 + channel * 4, value, true);
+    });
   });
 
   return data;

@@ -92,7 +92,7 @@ canvas {
 
 dl {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(6, 1fr);
   gap: 1px;
   overflow: hidden;
   margin: 18px 0 0;
@@ -104,6 +104,58 @@ dl {
 dl div {
   padding: 13px 14px;
   background: #f9fbfc;
+}
+
+.evidence {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 0.85fr);
+  gap: 42px;
+  margin-top: 38px;
+  padding: 30px;
+  border: 1px solid #d4dde2;
+  border-radius: 16px;
+  background: #f9fbfc;
+}
+
+.evidence h2 {
+  margin: 0;
+  font-size: 26px;
+  letter-spacing: -0.03em;
+}
+
+.evidence p:not(.eyebrow) {
+  color: #52646f;
+  line-height: 1.65;
+}
+
+#hierarchy {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font: 12px/1.5 ui-monospace, "Cascadia Code", monospace;
+}
+
+#hierarchy li {
+  position: relative;
+  margin-left: calc(var(--depth) * 18px);
+  padding: 5px 8px 5px 20px;
+  border-left: 1px solid #b9c8d0;
+}
+
+#hierarchy li::before {
+  position: absolute;
+  top: 11px;
+  left: 7px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #2e8fc7;
+  content: "";
+}
+
+#hierarchy li[data-renderable="false"]::before {
+  border: 1px solid #7f939e;
+  background: transparent;
 }
 
 dt {
@@ -130,5 +182,10 @@ dd {
 
   dl {
     grid-template-columns: repeat(2, 1fr);
+  }
+
+  .evidence {
+    grid-template-columns: 1fr;
+    padding: 22px;
   }
 }

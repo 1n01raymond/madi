@@ -1,10 +1,14 @@
 # OCCT adapter feasibility spike
 
-This executable is a deliberately isolated native experiment. It reads a STEP
-document through OCCT/XDE and emits deterministic JSON describing reusable
-prototypes, assembly occurrences, transforms, and generated revision-local edge
-references. It does not define a serialized MADI format and none of its OCCT
-types cross into browser packages.
+This directory keeps OCCT behind an adapter boundary. It contains two Phase 0
+paths:
+
+- the C++/CMake executable is the production-boundary experiment; and
+- `tools/extract_scene_ir.py` is a reproducible evidence harness using the OCP
+  Python binding for OCCT 7.9.3 STEPCAF/XDE.
+
+Neither output defines a serialized MADI format, and no OCCT type crosses into
+the browser packages.
 
 ## Prerequisites
 
@@ -12,8 +16,8 @@ types cross into browser packages.
 - a C++20 compiler and Ninja;
 - an Open CASCADE development package that exports `OpenCASCADEConfig.cmake`.
 
-The current Windows workspace does not have the native prerequisites installed.
-Run `pnpm native:check` for an actionable diagnostic. Once installed:
+The current Windows workspace does not have these native prerequisites. Run
+`pnpm native:check` for an actionable diagnostic. Once installed:
 
 ```sh
 cmake --preset dev
@@ -23,7 +27,30 @@ cmake --build --preset dev
 
 Set `OpenCASCADE_DIR` when OCCT is installed outside CMake's normal search path.
 
-## Spike output contract
+## Reproducible evidence harness
+
+The Python harness exists so the XDE-to-Scene-IR boundary can be exercised while
+the native development toolchain is unavailable. It still reads the STEP file
+through OCCT STEPCAF/XDE; CadQuery supplies the assembly wrapper and tessellation
+helpers.
+
+Create and activate a temporary virtual environment, then run:
+
+```sh
+python -m pip install -r tools/requirements-evidence.txt
+python tools/extract_scene_ir.py \
+  ../../fixtures/step/repeated-fasteners.step \
+  --scene ../../artifacts/occt/repeated-fasteners.scene.json \
+  --report ../../artifacts/occt/repeated-fasteners.report.json
+```
+
+The generated logical scene preserves assembly containers, reusable part
+prototypes, occurrence transforms, names, millimetre units, source colors,
+tessellated surfaces, explicit edge polylines, and revision-local face/edge
+source references. `pnpm test` hydrates the JSON into typed arrays and runs the
+normal `@madi/scene-ir` validator.
+
+## Native spike output contract
 
 The JSON is inspection evidence, not a stable API. It reports:
 
@@ -33,6 +60,6 @@ The JSON is inspection evidence, not a stable API. It reports:
 - face and edge counts for every prototype; and
 - deterministic edge references of the form `<prototype-label>:edge:<ordinal>`.
 
-The next OCCT task must add names, units, colors, tessellation arrays, and a
-direct conversion into `@madi/scene-ir`, followed by validation against a
-licensed fixture from `fixtures/step/manifest.json`.
+The native executable still emits inspection JSON rather than the complete
+logical scene. Porting the proven extraction behavior into the C++ adapter is a
+separate implementation task once the native toolchain is available.

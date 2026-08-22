@@ -9,6 +9,7 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
+    "@madi/scene-ir": "workspace:*",
     "@madi/runtime-webgpu": "workspace:*"
   },
   "devDependencies": {

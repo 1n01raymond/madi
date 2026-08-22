@@ -440,3 +440,12 @@ be frozen as FlatBuffers/Protobuf/JSON until:
 
 Disk/cache schemas may intentionally differ from the IR while preserving its
 observable semantics.
+
+## 19. Phase 0 extraction evidence
+
+`artifacts/occt/repeated-fasteners.scene.json` records one complete vertical
+slice produced from the licensed STEP assembly through OCCT 7.9.3 STEPCAF/XDE.
+The repository test hydrates its numeric arrays, runs the normal validator, and
+then compiles three part representations into ten render occurrences. The file
+is intentionally evidence for this logical contract, not a declaration that
+JSON is MADI's delivery format.

@@ -410,3 +410,10 @@ may be added later behind a reviewed unsafe/experimental capability.
 
 No GPU compute culling is required to call the first slice successful. It is
 added only when a public benchmark shows the bottleneck.
+
+The Phase 0 evidence app currently implements the narrow rendering subset of
+this slice: three reusable prototype batches, per-occurrence transforms and
+source colors, explicit CAD edges, an isometric bounds fit, and integer object
+picking. Selecting an occurrence also resolves its prototype representation's
+revision-local OCCT edge references. Streaming, Workers, visibility tools,
+clipping, and resource-budget behavior remain unimplemented.

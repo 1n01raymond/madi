@@ -1,0 +1,60 @@
+{
+  "schemaVersion": "phase-0-occt-evidence.1",
+  "source": {
+    "path": "fixtures/step/repeated-fasteners.step",
+    "sha256": "de177178a4bb86a6983cabc7ad265117c56d7324df7912b94ece1263a6c8865d",
+    "format": "STEP AP214",
+    "units": "mm"
+  },
+  "toolchain": {
+    "cadquery": "2.8.0",
+    "ocp": "7.9.3.1",
+    "cadqueryOcpPackage": "7.9.3.1.1"
+  },
+  "options": {
+    "linearTolerance": 0.15,
+    "angularTolerance": 0.15
+  },
+  "counts": {
+    "hierarchyDepthBelowRoot": 2,
+    "prototypeCount": 5,
+    "partPrototypeCount": 3,
+    "occurrenceNodeCount": 12,
+    "partOccurrenceCount": 10,
+    "representationCount": 3,
+    "materialCount": 4,
+    "faceSourceCount": 30,
+    "edgeSourceCount": 69,
+    "triangleCount": 2076,
+    "edgeSegmentCount": 181
+  },
+  "prototypeReuse": [
+    {
+      "prototypeId": "prototype:part:fastener-01",
+      "occurrenceIds": [
+        "occurrence:madi-repeated-fasteners/fastener-bank/fastener-01",
+        "occurrence:madi-repeated-fasteners/fastener-bank/fastener-02",
+        "occurrence:madi-repeated-fasteners/fastener-bank/fastener-03",
+        "occurrence:madi-repeated-fasteners/fastener-bank/fastener-04",
+        "occurrence:madi-repeated-fasteners/fastener-bank/fastener-05",
+        "occurrence:madi-repeated-fasteners/fastener-bank/fastener-06",
+        "occurrence:madi-repeated-fasteners/fastener-bank/fastener-07",
+        "occurrence:madi-repeated-fasteners/fastener-bank/fastener-08"
+      ],
+      "occurrenceCount": 8
+    }
+  ],
+  "reader": {
+    "status": "done",
+    "transfer": true,
+    "warnings": []
+  },
+  "unsupportedEntityInspection": {
+    "status": "not-exercised",
+    "reason": "The selected fixture is intentionally within the supported AP214 subset."
+  },
+  "validation": {
+    "sceneIr": "enforced by apps/webgpu-spike/test/evidence.test.ts",
+    "visual": "recorded in artifacts/occt/README.md"
+  }
+}

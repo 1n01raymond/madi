@@ -5,41 +5,56 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       name="description"
-      content="MADI Phase 0 direct WebGPU surface, explicit edge, instancing, and object picking spike."
+      content="MADI Phase 0 OCCT STEP to Scene IR to direct WebGPU visual evidence."
     />
     <link
       rel="icon"
       href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%230b2331'/%3E%3Cpath d='M14 46V18l18 17 18-17v28' fill='none' stroke='%2344a7df' stroke-width='7' stroke-linejoin='round'/%3E%3C/svg%3E"
     />
-    <title>MADI · Phase 0 WebGPU spike</title>
+    <title>MADI · OCCT to WebGPU evidence</title>
     <link rel="stylesheet" href="/src/style.css" />
   </head>
   <body>
     <main>
       <header>
         <p class="eyebrow">MADI · PHASE 0</p>
-        <h1>Direct WebGPU feasibility spike</h1>
+        <h1>OCCT to WebGPU, end to end</h1>
         <p>
-          One prototype buffer, two occurrence instances, explicit CAD-style
-          edges, and an integer object-ID pass.
+          A licensed STEP assembly read through OCCT/XDE, converted into
+          validator-clean Scene IR, and rendered with reusable prototype buffers,
+          explicit CAD edges, source colors, and object picking.
         </p>
       </header>
 
       <section class="viewport" aria-label="WebGPU prototype viewport">
         <canvas id="viewport"></canvas>
         <div class="hud">
-          <span id="status">Starting WebGPU…</span>
+          <span id="status">Loading OCCT evidence…</span>
           <span id="selection">Click an occurrence to pick it.</span>
         </div>
       </section>
 
       <dl>
-        <div><dt>Prototype buffers</dt><dd>1</dd></div>
-        <div><dt>Occurrences</dt><dd>2</dd></div>
-        <div><dt>Surface pass</dt><dd>triangle-list</dd></div>
-        <div><dt>Edge pass</dt><dd>line-list</dd></div>
-        <div><dt>Picking</dt><dd>RGBA8 uint</dd></div>
+        <div><dt>Geometry prototypes</dt><dd id="prototype-count">—</dd></div>
+        <div><dt>Part occurrences</dt><dd id="occurrence-count">—</dd></div>
+        <div><dt>Unique triangles</dt><dd id="triangle-count">—</dd></div>
+        <div><dt>Explicit edge segments</dt><dd id="edge-count">—</dd></div>
+        <div><dt>Source schema</dt><dd id="source-format">—</dd></div>
+        <div><dt>GPU adapter</dt><dd id="gpu-adapter">—</dd></div>
       </dl>
+
+      <section class="evidence">
+        <div>
+          <p class="eyebrow">XDE HIERARCHY</p>
+          <h2>One fastener prototype, eight placements</h2>
+          <p>
+            Container nodes remain in Scene IR even when they do not own render
+            geometry. Part nodes resolve back to revision-local OCCT face and
+            edge source references.
+          </p>
+        </div>
+        <ol id="hierarchy" aria-label="Extracted STEP assembly hierarchy"></ol>
+      </section>
     </main>
     <script type="module" src="/src/main.ts"></script>
   </body>
