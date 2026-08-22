@@ -1,6 +1,6 @@
 # Phase 0 Evidence Tracker
 
-Status: In progress
+Status: Complete (2026-08-23)
 
 Phase 0 validates the riskiest boundaries before MADI commits to a delivery
 format or a full Studio product. The authoritative outcomes and exit criteria
@@ -65,7 +65,9 @@ streaming runtime API.
 ## Outcome checklist
 
 - [x] Product requirements and scope are written.
-- [ ] The first architecture decisions are reviewed and accepted.
+- [x] The first architecture decisions are reviewed: ADRs 0001, 0002, 0004,
+  and 0006 are accepted; ADRs 0003 and 0005 remain proposed with explicit
+  benchmark and precision gates.
 - [x] At least one redistributable STEP precision fixture and one assembly
   fixture are selected with checksums and license evidence.
 - [x] Surface, explicit edge, instancing, and object-ID rendering are captured
@@ -85,10 +87,17 @@ streaming runtime API.
 | Direct WebGPU works in two engines | Browser, OS, GPU, screenshot, adapter info, and picking result recorded | Passed on Chrome 151/Blink and Firefox 150/Gecko on Windows; screenshots, metadata, and hashes are in `artifacts/browser-matrix` |
 | Unsupported data is reported | Known unsupported fixture produces stable diagnostic codes and a build report | Passed: AP214 layer entity `#2135` resolves to `OCCT_UNSUPPORTED_PRESENTATION_LAYER_ASSIGNMENT`; Scene IR, build report, and preserved geometry are enforced by `pnpm occt:diagnostics:check` |
 
-## Next pull requests
+## Phase 1 handoff
 
-1. `codex/accept-bootstrap-adrs`: accept or revise the decisions that the spikes
-   support; keep unproven decisions proposed.
+- Build the deterministic STEP AP242 compiler slice without freezing the
+  evidence JSON as a delivery format.
+- Add the comparable Three.js workload required to decide ADR-0003.
+- Add large-coordinate visual and measurement cases required to decide
+  ADR-0005.
+- Turn the evidence viewer into the first review workflow: tree, properties,
+  visibility, sectioning, and diagnostics.
 
-Phase 0 exits only when the roadmap criteria are demonstrated. A green bootstrap
-CI run is necessary infrastructure, not completion evidence.
+Phase 0 exited after every roadmap criterion was demonstrated and the first ADR
+review was recorded. The native C++ OCCT target, broad GPU coverage, large-scene
+performance, and production delivery format remain Phase 1 or later work; this
+completion is not a production-readiness claim.

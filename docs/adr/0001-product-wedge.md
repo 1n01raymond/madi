@@ -1,6 +1,7 @@
 # ADR-0001: Begin with an engineering scene studio and runtime
 
-Status: Proposed
+Status: Accepted
+Accepted: 2026-08-23
 
 ## Context
 
@@ -44,6 +45,13 @@ Exact authoring is a future workbench, not a prerequisite for the runtime.
 
 ## Validation
 
-Phase 1 must demonstrate a useful review workflow and an independent embedding
-sample. External demand determines whether Studio or the runtime receives more
-investment.
+Phase 0 connected a licensed STEP assembly to OCCT-derived Scene IR, reusable
+occurrences, explicit edges, direct WebGPU rendering, and source-linked picking
+on two browser engines. The committed [evidence tracker](../PHASE_0.md) shows
+that this narrow scene/runtime wedge is technically coherent without first
+building a parametric CAD system.
+
+Acceptance fixes the implementation sequence, not the claim that the Studio is
+already useful. Phase 1 must still demonstrate a review workflow and an
+independent embedding sample. External demand will determine whether Studio or
+the runtime receives more investment.

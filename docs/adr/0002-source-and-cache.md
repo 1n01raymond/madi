@@ -1,6 +1,7 @@
 # ADR-0002: Source engineering documents remain authoritative
 
-Status: Proposed
+Status: Accepted
+Accepted: 2026-08-23
 
 ## Context
 
@@ -41,5 +42,14 @@ execution.
 
 ## Validation
 
-Deleting generated output and recompiling the same inputs must recreate a
-functionally equivalent workspace view with deterministic content IDs.
+Phase 0 stores checksum-locked STEP files as authoritative inputs and commits
+separately generated Scene IR/build reports whose revisions carry the source
+digest, adapter version, and compiler options. The unsupported-entity fixture
+also proves that a partial semantic mapping is reported without changing the
+supported geometry. These relationships are enforced by
+`pnpm occt:diagnostics:check` and summarized in the
+[evidence tracker](../PHASE_0.md).
+
+Phase 1 must extend this from the evidence harness to the compiler: deleting
+generated output and recompiling the same inputs must recreate a functionally
+equivalent workspace view with deterministic content IDs.

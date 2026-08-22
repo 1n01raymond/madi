@@ -1,6 +1,7 @@
 # ADR-0005: Use hierarchical local coordinates and camera-relative rendering
 
 Status: Proposed
+Reviewed: 2026-08-23
 
 ## Context
 
@@ -41,5 +42,11 @@ causes visible jitter and measurement instability.
 
 ## Validation
 
-Visual and measurement tests place millimeter details at large coordinate
-offsets and compare jitter/error while the camera moves.
+Phase 0 establishes only the structural path: Scene IR can retain positions and
+transforms in double precision, while the evidence renderer creates local f32
+GPU buffers. It does not yet implement camera-relative origin subtraction or
+exercise site-scale offsets.
+
+This ADR therefore remains Proposed. Acceptance requires visual and measurement
+tests that place millimeter details at large coordinate offsets and compare
+jitter/error while the camera moves.

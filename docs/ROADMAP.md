@@ -7,6 +7,8 @@ criteria are demonstrated in the repository.
 
 ## Phase 0 — Architecture and feasibility
 
+Status: Complete (2026-08-23). See the [evidence record](PHASE_0.md).
+
 ### Outcomes
 
 - product requirements and scope;
@@ -25,6 +27,8 @@ criteria are demonstrated in the repository.
 - risks and unsupported source data are reported rather than ignored.
 
 ## Phase 1 — Vertical slice (`0.1.0-alpha`)
+
+Status: Current.
 
 ### Compiler
 
@@ -142,8 +146,10 @@ The implementation can be organized into parallel but integrated tracks:
 
 ### After Phase 0
 
-Continue only if source identity, explicit edges, and direct WebGPU rendering can
-be connected without making OCCT a browser dependency.
+Decision: continue to Phase 1. The 2026-08-23 evidence review connected source
+identity, explicit edges, and direct WebGPU rendering without making OCCT a
+browser dependency. ADR-0003 and ADR-0005 remain proposed until their narrower
+performance and precision gates are measured.
 
 ### After Phase 1
 

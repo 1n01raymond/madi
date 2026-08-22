@@ -17,8 +17,8 @@ Read in this order:
 7. [Benchmark plan](BENCHMARKS.md) — datasets, baselines, metrics, scenarios,
    and anti-benchmark rules.
 8. [Roadmap](ROADMAP.md) — evidence-gated phases and exit criteria.
-9. [Phase 0 evidence](PHASE_0.md) — implementation status, reproduction, and
-   remaining feasibility gates.
+9. [Phase 0 evidence](PHASE_0.md) — completed exit record, reproduction, and
+   known limits.
 10. [Architecture decisions](adr/README.md) — decisions and alternatives.
 11. [Branching and releases](BRANCHING.md) — work branches, pull requests,
     merge rules, backports, tags, and enforcement gates.
