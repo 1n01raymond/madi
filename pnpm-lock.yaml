@@ -50,6 +50,9 @@ importers:
       '@madi/runtime-webgpu':
         specifier: workspace:*
         version: link:../../packages/runtime-webgpu
+      '@madi/scene-ir':
+        specifier: workspace:*
+        version: link:../../packages/scene-ir
     devDependencies:
       '@webgpu/types':
         specifier: 'catalog:'

@@ -2,9 +2,9 @@ import {
   decodeObjectId,
   instanceStride,
   packInstanceData,
-  validatePrototypeBatch,
+  validateGpuScene,
 } from "./layout.js";
-import type { GpuPrototypeBatch } from "./layout.js";
+import type { GpuPrototypeBatch, GpuScene } from "./layout.js";
 
 const surfaceShader = /* wgsl */ `
 struct Camera {
@@ -21,12 +21,14 @@ struct VertexInput {
   @location(4) model2: vec4<f32>,
   @location(5) model3: vec4<f32>,
   @location(6) objectId: u32,
+  @location(7) baseColor: vec4<f32>,
 };
 
 struct VertexOutput {
   @builtin(position) position: vec4<f32>,
   @location(0) normal: vec3<f32>,
   @location(1) @interpolate(flat) objectId: u32,
+  @location(2) @interpolate(flat) baseColor: vec4<f32>,
 };
 
 @vertex
@@ -36,13 +38,14 @@ fn vsMain(input: VertexInput) -> VertexOutput {
   output.position = camera.viewProjection * model * vec4<f32>(input.position, 1.0);
   output.normal = normalize(mat3x3<f32>(input.model0.xyz, input.model1.xyz, input.model2.xyz) * input.normal);
   output.objectId = input.objectId;
+  output.baseColor = input.baseColor;
   return output;
 }
 
 @fragment
 fn fsSurface(input: VertexOutput) -> @location(0) vec4<f32> {
   let light = 0.35 + 0.65 * max(dot(normalize(input.normal), normalize(vec3<f32>(0.3, 0.5, 1.0))), 0.0);
-  return vec4<f32>(vec3<f32>(0.16, 0.55, 0.92) * light, 1.0);
+  return vec4<f32>(input.baseColor.rgb * light, input.baseColor.a);
 }
 
 @fragment
@@ -66,6 +69,7 @@ struct VertexInput {
   @location(4) model2: vec4<f32>,
   @location(5) model3: vec4<f32>,
   @location(6) objectId: u32,
+  @location(7) baseColor: vec4<f32>,
 };
 
 @vertex
@@ -89,6 +93,7 @@ const instanceBufferLayout: GPUVertexBufferLayout = {
     { shaderLocation: 4, offset: 32, format: "float32x4" },
     { shaderLocation: 5, offset: 48, format: "float32x4" },
     { shaderLocation: 6, offset: 64, format: "uint32" },
+    { shaderLocation: 7, offset: 80, format: "float32x4" },
   ],
 };
 
@@ -157,7 +162,7 @@ export class Phase0Renderer {
   private readonly surfacePipeline: GPURenderPipeline;
   private readonly edgePipeline: GPURenderPipeline;
   private readonly pickPipeline: GPURenderPipeline;
-  private batch?: GpuBatchResources;
+  private batches: GpuBatchResources[] = [];
   private depthTexture?: GPUTexture;
   private pickTexture?: GPUTexture;
   private targetWidth = 0;
@@ -319,42 +324,44 @@ export class Phase0Renderer {
     return new Phase0Renderer(canvas, context, adapter, device, options);
   }
 
-  setScene(batch: GpuPrototypeBatch): void {
-    validatePrototypeBatch(batch);
-    this.destroyBatch();
-    this.batch = {
+  setScene(sceneOrBatch: GpuScene | GpuPrototypeBatch): void {
+    const scene: GpuScene =
+      "batches" in sceneOrBatch ? sceneOrBatch : { batches: [sceneOrBatch] };
+    validateGpuScene(scene);
+    this.destroyBatches();
+    this.batches = scene.batches.map((batch, index) => ({
       surfaceVertex: createBuffer(
         this.device,
-        "MADI prototype surface vertices",
+        `MADI prototype ${index} surface vertices`,
         batch.surfaceVertices,
         GPUBufferUsage.VERTEX,
       ),
       surfaceIndex: createBuffer(
         this.device,
-        "MADI prototype surface indices",
+        `MADI prototype ${index} surface indices`,
         batch.surfaceIndices,
         GPUBufferUsage.INDEX,
       ),
       edgeVertex: createBuffer(
         this.device,
-        "MADI prototype explicit edges",
+        `MADI prototype ${index} explicit edges`,
         batch.edgeVertices,
         GPUBufferUsage.VERTEX,
       ),
       instance: createBuffer(
         this.device,
-        "MADI occurrence instances",
+        `MADI prototype ${index} occurrences`,
         packInstanceData(batch.instances),
         GPUBufferUsage.VERTEX,
       ),
       indexCount: batch.surfaceIndices.length,
       edgeVertexCount: batch.edgeVertices.length / 3,
       instanceCount: batch.instances.length,
-    };
+    }));
   }
 
   render(viewProjection: Float32Array): void {
-    if (!this.batch) {
+    if (this.batches.length === 0) {
       throw new MadiWebGpuError("SCENE_NOT_SET", "Call setScene before render.");
     }
     if (viewProjection.length !== 16) {
@@ -385,15 +392,17 @@ export class Phase0Renderer {
         depthStoreOp: "store",
       },
     });
-    this.bindBatch(surfacePass, this.surfacePipeline);
-    surfacePass.drawIndexed(
-      this.batch.indexCount,
-      this.batch.instanceCount,
-    );
-    surfacePass.setPipeline(this.edgePipeline);
-    surfacePass.setVertexBuffer(0, this.batch.edgeVertex);
-    surfacePass.setVertexBuffer(1, this.batch.instance);
-    surfacePass.draw(this.batch.edgeVertexCount, this.batch.instanceCount);
+    for (const batch of this.batches) {
+      this.bindBatch(surfacePass, this.surfacePipeline, batch);
+      surfacePass.drawIndexed(batch.indexCount, batch.instanceCount);
+    }
+    for (const batch of this.batches) {
+      surfacePass.setPipeline(this.edgePipeline);
+      surfacePass.setBindGroup(0, this.cameraBindGroup);
+      surfacePass.setVertexBuffer(0, batch.edgeVertex);
+      surfacePass.setVertexBuffer(1, batch.instance);
+      surfacePass.draw(batch.edgeVertexCount, batch.instanceCount);
+    }
     surfacePass.end();
 
     const pickPass = encoder.beginRenderPass({
@@ -413,8 +422,10 @@ export class Phase0Renderer {
         depthStoreOp: "discard",
       },
     });
-    this.bindBatch(pickPass, this.pickPipeline);
-    pickPass.drawIndexed(this.batch.indexCount, this.batch.instanceCount);
+    for (const batch of this.batches) {
+      this.bindBatch(pickPass, this.pickPipeline, batch);
+      pickPass.drawIndexed(batch.indexCount, batch.instanceCount);
+    }
     pickPass.end();
 
     this.device.queue.submit([encoder.finish()]);
@@ -454,7 +465,7 @@ export class Phase0Renderer {
   }
 
   destroy(): void {
-    this.destroyBatch();
+    this.destroyBatches();
     this.depthTexture?.destroy();
     this.pickTexture?.destroy();
     this.cameraBuffer.destroy();
@@ -465,13 +476,13 @@ export class Phase0Renderer {
   private bindBatch(
     pass: GPURenderPassEncoder,
     pipeline: GPURenderPipeline,
+    batch: GpuBatchResources,
   ): void {
-    if (!this.batch) return;
     pass.setPipeline(pipeline);
     pass.setBindGroup(0, this.cameraBindGroup);
-    pass.setVertexBuffer(0, this.batch.surfaceVertex);
-    pass.setVertexBuffer(1, this.batch.instance);
-    pass.setIndexBuffer(this.batch.surfaceIndex, "uint32");
+    pass.setVertexBuffer(0, batch.surfaceVertex);
+    pass.setVertexBuffer(1, batch.instance);
+    pass.setIndexBuffer(batch.surfaceIndex, "uint32");
   }
 
   private ensureTargets(): void {
@@ -500,11 +511,13 @@ export class Phase0Renderer {
     });
   }
 
-  private destroyBatch(): void {
-    this.batch?.surfaceVertex.destroy();
-    this.batch?.surfaceIndex.destroy();
-    this.batch?.edgeVertex.destroy();
-    this.batch?.instance.destroy();
-    this.batch = undefined;
+  private destroyBatches(): void {
+    for (const batch of this.batches) {
+      batch.surfaceVertex.destroy();
+      batch.surfaceIndex.destroy();
+      batch.edgeVertex.destroy();
+      batch.instance.destroy();
+    }
+    this.batches = [];
   }
 }

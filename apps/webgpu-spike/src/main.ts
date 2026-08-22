@@ -1,74 +1,85 @@
 import { MadiWebGpuError, Phase0Renderer } from "@madi/runtime-webgpu";
-import type { GpuPrototypeBatch } from "@madi/runtime-webgpu";
+
+import {
+  createIsometricCamera,
+  hierarchyEntries,
+  hydrateEvidenceScene,
+  prepareEvidenceScene,
+} from "./evidence.js";
 
 function requireElement<ElementType extends Element>(selector: string): ElementType {
   const element = document.querySelector<ElementType>(selector);
-  if (!element) {
-    throw new Error(`The Phase 0 spike page is missing ${selector}.`);
-  }
+  if (!element) throw new Error(`The Phase 0 spike page is missing ${selector}.`);
   return element;
+}
+
+function setText(selector: string, value: string): void {
+  requireElement<HTMLElement>(selector).textContent = value;
 }
 
 const canvas = requireElement<HTMLCanvasElement>("#viewport");
 const status = requireElement<HTMLElement>("#status");
 const selection = requireElement<HTMLElement>("#selection");
+const hierarchy = requireElement<HTMLOListElement>("#hierarchy");
 
-const viewProjection = new Float32Array([
-  1, 0, 0, 0,
-  0, 1, 0, 0,
-  0, 0, 1, 0,
-  0, 0, 0, 1,
-]);
-
-function transform(x: number, y: number): Float32Array {
-  return new Float32Array([
-    1, 0, 0, 0,
-    0, 1, 0, 0,
-    0, 0, 1, 0,
-    x, y, 0, 1,
-  ]);
-}
-
-function createBatch(): GpuPrototypeBatch {
-  return {
-    surfaceVertices: new Float32Array([
-      -0.24, -0.22, 0, 0, 0, 1,
-       0.24, -0.22, 0, 0, 0, 1,
-       0.00,  0.24, 0, 0, 0, 1,
-    ]),
-    surfaceIndices: new Uint32Array([0, 1, 2]),
-    edgeVertices: new Float32Array([
-      -0.24, -0.22, 0,  0.24, -0.22, 0,
-       0.24, -0.22, 0,  0.00,  0.24, 0,
-       0.00,  0.24, 0, -0.24, -0.22, 0,
-    ]),
-    instances: [
-      { transform: transform(-0.34, 0), objectId: 101 },
-      { transform: transform(0.34, 0), objectId: 202 },
-    ],
-  };
+async function loadEvidence(): Promise<unknown> {
+  const response = await fetch("/repeated-fasteners.scene.json", { cache: "no-store" });
+  if (!response.ok) {
+    throw new Error(`Failed to load OCCT evidence (${response.status}).`);
+  }
+  return response.json() as Promise<unknown>;
 }
 
 async function start(): Promise<void> {
   try {
+    status.textContent = "Loading OCCT/XDE Scene IR evidence…";
+    const scene = hydrateEvidenceScene(await loadEvidence());
+    const prepared = prepareEvidenceScene(scene);
     const renderer = await Phase0Renderer.create(canvas, {
       onDeviceLost: (message) => {
         status.textContent = `WebGPU device lost: ${message}`;
         status.dataset.state = "error";
       },
     });
-    renderer.setScene(createBatch());
-    renderer.render(viewProjection);
-    status.textContent = "WebGPU ready · direct instanced draw";
-    status.dataset.state = "ready";
+    renderer.setScene(prepared.gpuScene);
 
-    const resizeObserver = new ResizeObserver(() => renderer.render(viewProjection));
+    const render = (): void => {
+      const aspect = canvas.clientWidth / Math.max(canvas.clientHeight, 1);
+      renderer.render(createIsometricCamera(prepared.bounds, aspect));
+    };
+    render();
+
+    status.textContent =
+      `OCCT Scene IR ready · ${prepared.summary.prototypeBatches} geometry prototypes · ` +
+      `${prepared.summary.partOccurrences} part occurrences`;
+    status.dataset.state = "ready";
+    setText("#prototype-count", String(prepared.summary.prototypeBatches));
+    setText("#occurrence-count", String(prepared.summary.partOccurrences));
+    setText("#triangle-count", prepared.summary.triangles.toLocaleString("en-US"));
+    setText("#edge-count", prepared.summary.edgeSegments.toLocaleString("en-US"));
+    setText("#source-format", scene.documents[0]?.formatVersion ?? "STEP");
+    const adapterInfo = renderer.adapter.info;
+    setText(
+      "#gpu-adapter",
+      adapterInfo.description || adapterInfo.vendor || "WebGPU adapter",
+    );
+
+    for (const entry of hierarchyEntries(scene)) {
+      const item = document.createElement("li");
+      item.style.setProperty("--depth", String(entry.depth));
+      item.dataset.renderable = String(entry.renderable);
+      item.textContent = entry.name;
+      hierarchy.append(item);
+    }
+
+    const resizeObserver = new ResizeObserver(render);
     resizeObserver.observe(canvas);
 
     canvas.addEventListener("click", async (event) => {
       const objectId = await renderer.pick(event.clientX, event.clientY);
-      selection.textContent = objectId
-        ? `Selected occurrence object ID ${objectId}`
+      const evidence = prepared.objectEvidence.get(objectId);
+      selection.textContent = evidence
+        ? `Selected ${evidence.label} · ID ${objectId} · ${evidence.edgeSourceRefs.length} OCCT edge refs`
         : "No occurrence at that pixel.";
     });
 

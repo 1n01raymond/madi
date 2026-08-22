@@ -4,6 +4,7 @@ import {
   decodeObjectId,
   instanceStride,
   packInstanceData,
+  validateGpuScene,
   validatePrototypeBatch,
 } from "../src/index.js";
 import type { GpuPrototypeBatch } from "../src/index.js";
@@ -20,7 +21,11 @@ function createBatch(): GpuPrototypeBatch {
     surfaceIndices: new Uint32Array([0, 1, 2]),
     edgeVertices: new Float32Array([0, 0, 0, 1, 0, 0]),
     instances: [
-      { transform: identity, objectId: 0x0403_0201 },
+      {
+        transform: identity,
+        objectId: 0x0403_0201,
+        baseColor: [0.25, 0.5, 0.75, 1],
+      },
       { transform: identity, objectId: 9 },
     ],
   };
@@ -34,7 +39,12 @@ describe("WebGPU packed layouts", () => {
     expect(packed.byteLength).toBe(instanceStride * 2);
     expect(view.getFloat32(0, true)).toBe(1);
     expect(view.getUint32(64, true)).toBe(0x0403_0201);
+    expect(view.getFloat32(80, true)).toBe(0.25);
+    expect(view.getFloat32(84, true)).toBe(0.5);
+    expect(view.getFloat32(88, true)).toBe(0.75);
+    expect(view.getFloat32(92, true)).toBe(1);
     expect(view.getUint32(instanceStride + 64, true)).toBe(9);
+    expect(view.getFloat32(instanceStride + 80, true)).toBeCloseTo(0.16);
   });
 
   it("decodes the picking color without signed overflow", () => {
@@ -53,5 +63,20 @@ describe("WebGPU packed layouts", () => {
         ],
       }),
     ).toThrow(/Duplicate occurrence object ID/u);
+  });
+
+  it("rejects duplicate object IDs across prototype batches", () => {
+    const batch = createBatch();
+    expect(() =>
+      validateGpuScene({
+        batches: [
+          batch,
+          {
+            ...batch,
+            instances: [{ transform: identity, objectId: 9 }],
+          },
+        ],
+      }),
+    ).toThrow(/Duplicate scene object ID/u);
   });
 });
