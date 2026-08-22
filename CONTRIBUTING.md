@@ -13,6 +13,24 @@ risk are as valuable as code.
 5. Do not commit proprietary CAD models or data derived from them without
    explicit redistribution rights.
 
+## Branch and pull request workflow
+
+MADI uses a lightweight GitHub Flow with `main` as its only permanent
+development branch.
+
+1. Create a short-lived work branch from the latest `main`.
+2. Use a descriptive prefix such as `feat/`, `fix/`, `docs/`, `perf/`, or
+   `spike/`.
+3. Open a Draft PR early for risky or cross-cutting work.
+4. Keep one logical change in each PR and record exact validation results.
+5. Resolve review conversations, then squash-merge into `main`.
+6. Delete the work branch after merge.
+
+Direct pushes, force pushes, and merge commits are not part of the normal
+workflow. During the single-maintainer bootstrap phase a PR is required but a
+peer approval is not. See [the branching and release policy](docs/BRANCHING.md)
+for branch names, merge rules, release backports, tags, and enforcement gates.
+
 ## Change categories
 
 - `docs:` product, architecture, or API documentation;
@@ -54,5 +72,5 @@ Every performance pull request should include:
 ## Developer certificate of origin
 
 By contributing, you certify that you have the right to submit the work under
-the repository license. Sign commits with `git commit -s` once implementation
-work begins.
+the repository license. Sign every contribution commit with `git commit -s`.
+GitHub's web editor is configured to require the equivalent sign-off.

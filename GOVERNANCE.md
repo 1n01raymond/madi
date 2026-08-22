@@ -13,6 +13,9 @@ lightweight while the architecture and first vertical slice are being proven.
 
 - Routine changes use pull-request review and maintainer consensus.
 - Cross-cutting technical decisions use Architecture Decision Records.
+- Maintainers follow the same branch and pull-request rules as contributors;
+  see `docs/BRANCHING.md`. Repository-setting exceptions are reserved for
+  security or recovery emergencies and must be documented afterward.
 - Security reports follow `SECURITY.md` and are not discussed publicly until
   coordinated disclosure is complete.
 - Serialized compatibility promises begin only after the first explicitly
