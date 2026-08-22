@@ -413,6 +413,23 @@ Expected diagnostic categories include unsupported entities, invalid topology,
 healing performed, tessellation failure, lost properties, unit ambiguity,
 duplicate source IDs, non-invertible transforms, and precision risk.
 
+Consumers branch on `code`, never on human-readable `message`. Within one
+adapter evidence schema, a code keeps its severity and meaning; changing either
+requires a schema revision. Diagnostics for omitted source content must resolve
+to a `SourceReference` when the source format exposes an addressable entity.
+
+The Phase 0 OCCT evidence defines these codes:
+
+| Code | Severity | Meaning |
+|---|---|---|
+| `PHASE0_OCCT_PYTHON_BINDING` | info | Evidence came through the OCP Python binding rather than the native C++ target. |
+| `OCCT_UNSUPPORTED_PRESENTATION_LAYER_ASSIGNMENT` | warning | A STEP `PRESENTATION_LAYER_ASSIGNMENT` was not mapped; supported geometry remains available. |
+
+The unsupported-entity warning uses the `step:entity-instance` namespace and
+records `entityId`, `entityType`, `capability`, and `handling` in its property
+bag. The adapter build report mirrors the Scene IR diagnostic counts, codes,
+and unsupported-entity records.
+
 ## 17. IR invariants
 
 A validator enforces:
@@ -449,3 +466,8 @@ The repository test hydrates its numeric arrays, runs the normal validator, and
 then compiles three part representations into ten render occurrences. The file
 is intentionally evidence for this logical contract, not a declaration that
 JSON is MADI's delivery format.
+
+`artifacts/occt/unsupported-layer-assignment.scene.json` repeats that slice
+with one known unsupported semantic entity. Its validator-clean scene retains
+the same prototype reuse and geometry counts while resolving the warning to
+STEP entity `#2135`.

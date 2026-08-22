@@ -8,6 +8,8 @@ coverage/
 .vite/
 .playwright-cli/
 output/
+__pycache__/
+*.py[cod]
 
 # Native and compiler builds
 cmake-build-*/

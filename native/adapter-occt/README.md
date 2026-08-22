@@ -42,6 +42,10 @@ python tools/extract_scene_ir.py \
   ../../fixtures/step/repeated-fasteners.step \
   --scene ../../artifacts/occt/repeated-fasteners.scene.json \
   --report ../../artifacts/occt/repeated-fasteners.report.json
+python tools/extract_scene_ir.py \
+  ../../fixtures/step/unsupported-layer-assignment.step \
+  --scene ../../artifacts/occt/unsupported-layer-assignment.scene.json \
+  --report ../../artifacts/occt/unsupported-layer-assignment.report.json
 ```
 
 The generated logical scene preserves assembly containers, reusable part
@@ -49,6 +53,12 @@ prototypes, occurrence transforms, names, millimetre units, source colors,
 tessellated surfaces, explicit edge polylines, and revision-local face/edge
 source references. `pnpm test` hydrates the JSON into typed arrays and runs the
 normal `@madi/scene-ir` validator.
+
+Before transfer, the harness scans addressable STEP entity declarations against
+the Phase 0 capability set. Known omitted semantics become stable diagnostics
+with STEP entity source references; they do not make supported geometry fail.
+`pnpm occt:diagnostics:check` verifies the fixture digest, geometry preservation,
+Scene IR warning, and matching build-report record.
 
 ## Native spike output contract
 

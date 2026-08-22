@@ -15,7 +15,7 @@ reproducible repository evidence.
 | Scene IR | `@madi/scene-ir`, independent validator, and an OCCT-produced engineering scene artifact | The JSON evidence is not a frozen disk schema |
 | WebGPU | multi-prototype `@madi/runtime-webgpu` scene plus a reproducible Chrome/Blink and Firefox/Gecko visual/picking matrix | Evidence currently covers one Windows/NVIDIA workstation, not the supported hardware matrix |
 | OCCT | isolated native boundary plus a reproducible OCCT 7.9.3 STEPCAF/XDE evidence harness | The local machine still lacks CMake, a C++ compiler, and a native OCCT development package |
-| Fixtures | two MADI-authored STEP files with provenance checks; the assembly is independently read through OCCT/XDE | An unsupported-entity diagnostic fixture is not selected yet |
+| Fixtures | three MADI-authored STEP files with provenance checks; both assembly variants are independently read through OCCT/XDE | The unsupported case covers one AP214 semantic entity, not the broader STEP feature matrix |
 | Benchmarks | machine-readable Scene IR validation microbenchmark | Bootstrap smoke metric, not a rendering performance claim |
 
 ## Reproduce the bootstrap
@@ -48,7 +48,11 @@ python native/adapter-occt/tools/extract_scene_ir.py \
   fixtures/step/repeated-fasteners.step \
   --scene artifacts/occt/repeated-fasteners.scene.json \
   --report artifacts/occt/repeated-fasteners.report.json
-pnpm test
+python native/adapter-occt/tools/extract_scene_ir.py \
+  fixtures/step/unsupported-layer-assignment.step \
+  --scene artifacts/occt/unsupported-layer-assignment.scene.json \
+  --report artifacts/occt/unsupported-layer-assignment.report.json
+pnpm check
 ```
 
 The WebGPU spike now renders three geometry prototypes as ten part occurrences.
@@ -79,13 +83,11 @@ streaming runtime API.
 | Repeated occurrences reuse geometry | Real STEP assembly shows one prototype referenced by multiple occurrences without duplicate geometry arrays | Passed: one fastener prototype feeds eight occurrence instances |
 | Source edges survive selection | Picked edge or selected occurrence resolves through representation source map to an OCCT edge reference | Passed for occurrence selection: the matrix resolves object ID 2 to `center-rail` and 12 OCCT edge refs; primitive edge picking remains future work |
 | Direct WebGPU works in two engines | Browser, OS, GPU, screenshot, adapter info, and picking result recorded | Passed on Chrome 151/Blink and Firefox 150/Gecko on Windows; screenshots, metadata, and hashes are in `artifacts/browser-matrix` |
-| Unsupported data is reported | Known unsupported fixture produces stable diagnostic codes and a build report | Pending |
+| Unsupported data is reported | Known unsupported fixture produces stable diagnostic codes and a build report | Passed: AP214 layer entity `#2135` resolves to `OCCT_UNSUPPORTED_PRESENTATION_LAYER_ASSIGNMENT`; Scene IR, build report, and preserved geometry are enforced by `pnpm occt:diagnostics:check` |
 
 ## Next pull requests
 
-1. `codex/unsupported-entity-diagnostics`: add a fixture that exercises stable
-   unsupported-data diagnostics and a build report.
-2. `codex/accept-bootstrap-adrs`: accept or revise the decisions that the spikes
+1. `codex/accept-bootstrap-adrs`: accept or revise the decisions that the spikes
    support; keep unproven decisions proposed.
 
 Phase 0 exits only when the roadmap criteria are demonstrated. A green bootstrap

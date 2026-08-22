@@ -45,6 +45,17 @@ ROOT_FRAME = {
     "handedness": "right",
     "upAxis": "Z",
 }
+UNSUPPORTED_STEP_ENTITIES = {
+    "PRESENTATION_LAYER_ASSIGNMENT": {
+        "code": "OCCT_UNSUPPORTED_PRESENTATION_LAYER_ASSIGNMENT",
+        "capability": "presentation-layers",
+        "handling": "omitted-semantic-metadata",
+        "message": (
+            "STEP presentation layer assignment is not mapped by the Phase 0 "
+            "adapter; supported geometry remains available."
+        ),
+    }
+}
 
 
 def rounded(value: float) -> float:
@@ -289,6 +300,72 @@ def source_timestamp(source_text: str) -> str:
     return f"{timestamp}.000Z" if not timestamp.endswith("Z") else timestamp
 
 
+def inspect_unsupported_entities(
+    source_text: str,
+    document_id: str,
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]], list[dict[str, str]]]:
+    """Preflight STEP entity declarations against Phase 0 adapter capabilities."""
+
+    source_refs: list[dict[str, Any]] = []
+    diagnostics: list[dict[str, Any]] = []
+    report_entries: list[dict[str, str]] = []
+    declarations = re.finditer(
+        r"^\s*#(?P<id>\d+)\s*=\s*(?P<type>[A-Z][A-Z0-9_]*)\s*\(",
+        source_text,
+        re.MULTILINE,
+    )
+    for declaration in declarations:
+        entity_type = declaration.group("type")
+        descriptor = UNSUPPORTED_STEP_ENTITIES.get(entity_type)
+        if descriptor is None:
+            continue
+
+        entity_value = f"#{declaration.group('id')}"
+        source_ref_id = (
+            f"source:{document_id}:step-entity:{declaration.group('id')}"
+        )
+        source_refs.append(
+            {
+                "id": source_ref_id,
+                "documentId": document_id,
+                "namespace": "step:entity-instance",
+                "value": entity_value,
+                "kind": "property",
+                "stability": "revision-local",
+            }
+        )
+        diagnostics.append(
+            {
+                "severity": "warning",
+                "code": descriptor["code"],
+                "message": descriptor["message"],
+                "documentId": document_id,
+                "sourceRef": source_ref_id,
+                "data": {
+                    "schema": "madi.adapter-diagnostics.1",
+                    "entries": {
+                        "entityId": entity_value,
+                        "entityType": entity_type,
+                        "capability": descriptor["capability"],
+                        "handling": descriptor["handling"],
+                    },
+                },
+            }
+        )
+        report_entries.append(
+            {
+                "entityId": entity_value,
+                "entityType": entity_type,
+                "diagnosticCode": descriptor["code"],
+                "capability": descriptor["capability"],
+                "handling": descriptor["handling"],
+                "sourceRef": source_ref_id,
+            }
+        )
+
+    return source_refs, diagnostics, report_entries
+
+
 def material_id_for(color: Sequence[float]) -> str:
     channels = [max(0, min(255, round(channel * 255))) for channel in color[:3]]
     return "material:rgb-" + "".join(f"{channel:02x}" for channel in channels)
@@ -312,6 +389,9 @@ def extract(
     neutral_material_id = "material:neutral"
 
     assembly = cq.Assembly.importStep(str(source))
+    unsupported_refs, unsupported_diagnostics, unsupported_entities = (
+        inspect_unsupported_entities(source_text, document_id)
+    )
     source_refs: list[dict[str, Any]] = [
         {
             "id": document_ref_id,
@@ -320,7 +400,8 @@ def extract(
             "value": source_digest,
             "kind": "document",
             "stability": "persistent",
-        }
+        },
+        *unsupported_refs,
     ]
     prototypes: list[dict[str, Any]] = []
     occurrences: list[dict[str, Any]] = []
@@ -565,7 +646,8 @@ def extract(
                 ),
                 "documentId": document_id,
                 "sourceRef": document_ref_id,
-            }
+            },
+            *unsupported_diagnostics,
         ],
     }
 
@@ -576,8 +658,14 @@ def extract(
         for prototype_id, ids in prototype_occurrences.items()
         if len(ids) > 1
     ]
+    diagnostic_counts = {
+        severity: sum(
+            1 for diagnostic in scene["diagnostics"] if diagnostic["severity"] == severity
+        )
+        for severity in ("info", "warning", "error")
+    }
     report = {
-        "schemaVersion": "phase-0-occt-evidence.1",
+        "schemaVersion": "phase-0-occt-evidence.2",
         "source": {
             "path": source.as_posix(),
             "sha256": source_digest,
@@ -610,10 +698,28 @@ def extract(
         },
         "prototypeReuse": repeated,
         "reader": {"status": "done", "transfer": True, "warnings": []},
-        "unsupportedEntityInspection": {
-            "status": "not-exercised",
-            "reason": "The selected fixture is intentionally within the supported AP214 subset.",
+        "diagnostics": {
+            "counts": diagnostic_counts,
+            "codes": sorted({diagnostic["code"] for diagnostic in scene["diagnostics"]}),
+            "unsupportedEntities": unsupported_entities,
         },
+        "unsupportedEntityInspection": (
+            {
+                "status": "reported",
+                "entityCount": len(unsupported_entities),
+                "entities": unsupported_entities,
+            }
+            if unsupported_entities
+            else {
+                "status": "not-exercised",
+                "entityCount": 0,
+                "entities": [],
+                "reason": (
+                    "The selected fixture does not contain an entity known to be "
+                    "unsupported by the Phase 0 adapter."
+                ),
+            }
+        ),
         "validation": {
             "sceneIr": "enforced by apps/webgpu-spike/test/evidence.test.ts",
             "visual": "recorded in artifacts/occt/README.md",
