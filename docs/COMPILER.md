@@ -1,6 +1,6 @@
 # Geometry Compiler
 
-Status: Draft 0.1
+Status: Draft 0.2
 
 ## 1. Mission
 
@@ -34,7 +34,8 @@ madi diff old/manifest.json new/manifest.json
 madi benchmark ./dist/assembly --scenario review-default
 ```
 
-Names and options are illustrative until the vertical slice.
+The general `madi compile` names and options remain illustrative. The first
+executable evidence command is `pnpm phase1:compile:evidence`.
 
 ## 3. Pipeline
 
@@ -357,3 +358,20 @@ The first compiler is intentionally narrow:
 
 Advanced LOD, compression, incremental builds, and proprietary adapters follow
 only after the runtime proves the basic model.
+
+## 20. Phase 1 standards-first slice
+
+`@madi/compiler` now compiles a validator-clean in-memory `EngineeringScene`
+into `scene.gltf`, external `scene.bin`, and `build-report.json`. The first
+committed package is under `artifacts/phase1/repeated-fasteners`.
+
+The glTF profile uses standard node hierarchy, shared mesh references, triangle
+and line primitives, materials, metre units, and Y-up coordinates. Occurrence,
+prototype, semantic, diagnostic, and source-reference fields live in
+`extras.madi`; no custom extension is required. This is an experimental profile
+under ADR-0004, not a frozen MADI format.
+
+The build is deterministic for identical Scene IR and options. The normal check
+runs both MADI invariants and the official Khronos glTF Validator. The current
+slice has one target representation and no progressive partitions, so it proves
+the compiler output boundary but not the complete Phase 1 compiler roadmap.

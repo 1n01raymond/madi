@@ -17,3 +17,4 @@
 
 # Large machine-generated evidence remains checksum/test reviewed, not line reviewed.
 artifacts/occt/*.scene.json linguist-generated=true
+artifacts/phase1/**/scene.gltf linguist-generated=true

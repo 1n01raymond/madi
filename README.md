@@ -112,8 +112,9 @@ The roadmap is evidence-gated rather than date-driven.
 | **2 — Large-scene alpha** | 100k+ occurrences, streaming, LOD, cache, and memory budgets | Planned |
 | **3 — Open platform beta** | Plugins, IFC, embedding examples, and self-host deployment | Planned |
 
-See the full [roadmap](docs/ROADMAP.md), [Phase 0 evidence](docs/PHASE_0.md),
-and [Chrome/Firefox WebGPU matrix](artifacts/browser-matrix/README.md). Performance
+See the full [roadmap](docs/ROADMAP.md), [Phase 1 evidence](docs/PHASE_1.md),
+[Phase 0 record](docs/PHASE_0.md), and
+[Chrome/Firefox WebGPU matrix](artifacts/browser-matrix/README.md). Performance
 claims will be published with redistributable models, exact hardware and browser
 details, cold/warm states, and reproducible commands.
 
@@ -191,7 +192,9 @@ architectural focus, not a claim that general-purpose scene graphs are wrong.
 <br />
 glTF is an important standards-based delivery and interoperability option. MADI
 reuses glTF, meshopt, KTX2, 3D Tiles concepts, and metadata standards where they
-meet engineering identity, edge, streaming, and precision requirements.
+meet engineering identity, edge, streaming, and precision requirements. The
+first Phase 1 compiler slice now emits glTF 2.0 plus an external binary resource;
+MADI identity and source mappings remain explicitly experimental `extras`.
 </details>
 
 ## Contributing
@@ -217,6 +220,7 @@ issue so assumptions are visible before implementation.
 apps/
   webgpu-spike/       Phase 0 direct WebGPU browser proof
 packages/
+  compiler/           Deterministic Scene IR to standards-first glTF compiler
   scene-ir/           In-memory engineering scene types and validator
   runtime-webgpu/     Direct WebGPU surface, edge, instancing, and picking path
 native/

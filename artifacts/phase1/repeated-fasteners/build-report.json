@@ -1,0 +1,72 @@
+{
+  "schemaVersion": "madi.phase1.compiler-report.1",
+  "profile": "madi.experimental.gltf.1",
+  "status": "experimental-not-interchange",
+  "compiler": {
+    "name": "@madi/compiler",
+    "version": "0.0.0",
+    "generator": "MADI compiler 0.0.0 / experimental glTF profile 1"
+  },
+  "options": {
+    "binaryUri": "scene.bin",
+    "coordinateSystem": "right-handed-y-up-meters",
+    "geometryEncoding": "gltf-f32"
+  },
+  "source": {
+    "sceneId": "scene:occt:de177178a4bb86a6",
+    "revisionId": "revision:occt:de177178a4bb86a6:14b35fda",
+    "sourceDigest": "sha256:de177178a4bb86a6983cabc7ad265117c56d7324df7912b94ece1263a6c8865d",
+    "adapter": "madi-occt-xde-evidence 0.1.0",
+    "optionsDigest": "sha256:14b35fda584ddfbfe5614edd5a32be03938610e8b3ffbd51acdc8c8cc9df9abd"
+  },
+  "output": {
+    "packageDigest": "f8116762c49651d89c7c4f18770da80dc007f194057126462313ba9ea57d1566",
+    "resources": [
+      {
+        "path": "scene.gltf",
+        "mediaType": "model/gltf+json",
+        "bytes": 53211,
+        "sha256": "ffaad9710d56f5aed13d9a9a746ad3c59f6444630334ffa947d079c3b9a45c87"
+      },
+      {
+        "path": "scene.bin",
+        "mediaType": "application/octet-stream",
+        "bytes": 188044,
+        "sha256": "3c4d9dde02c117343e4013a675d40d41a61c2f59eb5d3b1959774b434883d395"
+      }
+    ]
+  },
+  "counts": {
+    "prototypeCount": 5,
+    "compiledPrototypeCount": 3,
+    "occurrenceCount": 12,
+    "renderableOccurrenceCount": 10,
+    "gltfNodeCount": 13,
+    "gltfMeshCount": 3,
+    "materialCount": 10,
+    "triangleCount": 2076,
+    "edgeSegmentCount": 181
+  },
+  "prototypeReuse": [
+    {
+      "prototypeId": "prototype:part:fastener-01",
+      "occurrenceCount": 8
+    }
+  ],
+  "diagnostics": {
+    "counts": {
+      "info": 1,
+      "warning": 0,
+      "error": 0
+    },
+    "codes": [
+      "PHASE0_OCCT_PYTHON_BINDING"
+    ]
+  },
+  "limitations": [
+    "This is an experimental glTF profile, not a MADI interchange format.",
+    "Only one target display representation per prototype is emitted; coarse LOD is pending.",
+    "Geometry and node transforms are converted to f32 for glTF delivery.",
+    "MADI source mapping uses glTF extras until an interoperable extension is justified."
+  ]
+}

@@ -52,9 +52,11 @@ pnpm check
 pnpm dev
 ```
 
-`pnpm check` validates the STEP fixture manifest, lints, type-checks, tests, and
-builds every workspace package. `pnpm dev` opens the Phase 0 direct WebGPU
-spike. Native OCCT work is isolated under `native/adapter-occt`; run
+`pnpm check` validates ADR, fixture, OCCT, browser, and Phase 1 compiled
+evidence, then lints, type-checks, tests, and builds every workspace package.
+`pnpm phase1:compile:evidence` reproduces the first glTF package, while
+`pnpm dev` opens the Phase 0 direct WebGPU spike. Native OCCT work is isolated
+under `native/adapter-occt`; run
 `pnpm native:check` before configuring it. See the
 [Phase 0 evidence record](docs/PHASE_0.md) for the completed feasibility gates,
 current limits, and Phase 1 handoff.

@@ -19,10 +19,12 @@ Read in this order:
 8. [Roadmap](ROADMAP.md) — evidence-gated phases and exit criteria.
 9. [Phase 0 evidence](PHASE_0.md) — completed exit record, reproduction, and
    known limits.
-10. [Architecture decisions](adr/README.md) — decisions and alternatives.
-11. [Branching and releases](BRANCHING.md) — work branches, pull requests,
+10. [Phase 1 evidence](PHASE_1.md) — current vertical-slice evidence and open
+    gates.
+11. [Architecture decisions](adr/README.md) — decisions and alternatives.
+12. [Branching and releases](BRANCHING.md) — work branches, pull requests,
     merge rules, backports, tags, and enforcement gates.
-12. [Translations](TRANSLATIONS.md) — README languages, terminology, and
+13. [Translations](TRANSLATIONS.md) — README languages, terminology, and
     maintenance workflow.
 
 ## Documentation rules
