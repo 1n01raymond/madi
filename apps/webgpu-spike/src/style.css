@@ -389,13 +389,182 @@ dd {
 
 .evidence {
   display: grid;
-  grid-template-columns: minmax(0, 0.9fr) minmax(420px, 1.1fr);
-  gap: 56px;
+  grid-template-columns: minmax(260px, 0.7fr) minmax(620px, 1.3fr);
+  gap: 42px;
   margin-top: 52px;
   padding: 34px;
   border: 1px solid #1c313c;
   border-radius: 14px;
   background: rgb(8 23 31 / 85%);
+}
+
+.scene-inspector {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: minmax(290px, 1.08fr) minmax(250px, 0.92fr);
+  gap: 12px;
+}
+
+.hierarchy-panel,
+.properties-panel {
+  min-width: 0;
+  padding: 14px;
+  border: 1px solid #1c3541;
+  border-radius: 10px;
+  background: #081923;
+}
+
+.inspector-heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.inspector-heading strong {
+  color: #dce9ee;
+  font-size: 12px;
+}
+
+.inspector-heading span {
+  color: #58727e;
+  font: 9px/1.4 ui-monospace, "Cascadia Code", monospace;
+  text-align: right;
+  text-transform: uppercase;
+}
+
+.hierarchy-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  padding: 7px 9px;
+  border: 1px solid #294653;
+  border-radius: 7px;
+  color: #63808d;
+  background: #0b202a;
+}
+
+.hierarchy-search:focus-within {
+  border-color: #2aaed9;
+  box-shadow: 0 0 0 2px rgb(42 174 217 / 10%);
+}
+
+.hierarchy-search input {
+  min-width: 0;
+  flex: 1;
+  border: 0;
+  outline: 0;
+  color: #dceaf0;
+  background: transparent;
+  font: 10px/1.4 ui-monospace, "Cascadia Code", monospace;
+}
+
+.hierarchy-search input::placeholder {
+  color: #56717d;
+}
+
+.hierarchy-search kbd {
+  padding: 1px 5px;
+  border: 1px solid #38525e;
+  border-radius: 4px;
+  color: #708b97;
+  font: 9px/1.4 ui-monospace, "Cascadia Code", monospace;
+}
+
+.hierarchy-empty,
+.properties-empty {
+  margin: 28px 8px;
+  color: #607b87;
+  font: 10px/1.6 ui-monospace, "Cascadia Code", monospace;
+}
+
+.property-name {
+  display: block;
+  overflow: hidden;
+  color: #e3f1f5;
+  font-size: 13px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.property-visibility {
+  display: inline-block;
+  margin-top: 5px;
+  padding: 2px 6px;
+  border-radius: 999px;
+  color: #62dea0;
+  background: rgb(45 184 113 / 12%);
+  font: 8px/1.5 ui-monospace, "Cascadia Code", monospace;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.property-visibility[data-hidden="true"] {
+  color: #91a6af;
+  background: rgb(125 148 158 / 12%);
+}
+
+.property-grid {
+  display: grid;
+  gap: 8px;
+  margin: 14px 0 0;
+}
+
+.property-grid div {
+  min-width: 0;
+}
+
+.property-grid dt {
+  font-size: 8px;
+}
+
+.property-grid dd {
+  overflow: visible;
+  margin-top: 2px;
+  color: #bcd0d8;
+  font-size: 9px;
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+
+.property-grid code {
+  color: inherit;
+  font-size: inherit;
+}
+
+.edge-reference-preview {
+  margin-top: 14px;
+  padding-top: 11px;
+  border-top: 1px solid #1c3541;
+}
+
+.edge-reference-preview > span {
+  color: #58727e;
+  font: 9px/1.4 ui-monospace, "Cascadia Code", monospace;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.edge-reference-preview ul {
+  display: grid;
+  gap: 4px;
+  margin: 7px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.edge-reference-preview li {
+  overflow: hidden;
+  color: #78939e;
+  font: 9px/1.4 ui-monospace, "Cascadia Code", monospace;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.edge-reference-preview li[data-summary="true"] {
+  color: #50bddf;
 }
 
 .evidence h2 {
@@ -445,12 +614,20 @@ code {
 }
 
 #hierarchy {
-  max-height: 344px;
+  max-height: 390px;
   margin: 0;
   padding: 0 8px 0 0;
   overflow: auto;
   list-style: none;
   font: 11px/1.4 ui-monospace, "Cascadia Code", monospace;
+}
+
+#hierarchy li[data-search-match="true"] {
+  color: #e8faff;
+}
+
+#hierarchy li[data-search-match="true"]::before {
+  box-shadow: 0 0 0 3px rgb(86 212 255 / 12%);
 }
 
 #hierarchy li {
@@ -463,6 +640,10 @@ code {
   padding: 6px 8px 6px 20px;
   border-left: 1px solid #24404d;
   color: #b8cbd4;
+}
+
+#hierarchy li[hidden] {
+  display: none;
 }
 
 #hierarchy li[data-renderable="true"] {
@@ -521,13 +702,15 @@ code {
   font-size: 9px;
 }
 
+@media (max-width: 1040px) {
+  .evidence {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media (max-width: 900px) {
   .metrics {
     grid-template-columns: repeat(4, 1fr);
-  }
-
-  .evidence {
-    grid-template-columns: 1fr;
   }
 }
 
@@ -568,5 +751,9 @@ code {
 
   .evidence {
     padding: 22px;
+  }
+
+  .scene-inspector {
+    grid-template-columns: 1fr;
   }
 }

@@ -7,10 +7,13 @@ import {
 import type {
   CompiledGltfDocument,
   CompiledHierarchy,
+  CompiledObjectEvidence,
   DecodedCompiledScene,
 } from "@madi/runtime-webgpu";
 
 import type { GeometryDecodeResponse } from "./geometry.worker.js";
+import { HierarchySearchIndex } from "./hierarchy-search.js";
+import type { HierarchySearchResult } from "./hierarchy-search.js";
 import { AxisSectionPlane } from "./section-plane.js";
 import type { SectionAxis } from "./section-plane.js";
 import { OrthographicOrbitCamera } from "./view.js";
@@ -104,6 +107,21 @@ const canvas = requireElement<HTMLCanvasElement>("#viewport");
 const status = requireElement<HTMLElement>("#status");
 const selection = requireElement<HTMLElement>("#selection");
 const hierarchyList = requireElement<HTMLOListElement>("#hierarchy");
+const hierarchySearchInput = requireElement<HTMLInputElement>("#hierarchy-search");
+const hierarchySearchResult = requireElement<HTMLElement>("#hierarchy-search-result");
+const hierarchyEmpty = requireElement<HTMLElement>("#hierarchy-empty");
+const propertiesPanel = requireElement<HTMLElement>("#properties-panel");
+const propertiesEmpty = requireElement<HTMLElement>("#properties-empty");
+const propertiesContent = requireElement<HTMLElement>("#properties-content");
+const propertyName = requireElement<HTMLElement>("#property-name");
+const propertyVisibility = requireElement<HTMLElement>("#property-visibility");
+const propertyOccurrence = requireElement<HTMLElement>("#property-occurrence");
+const propertyPrototype = requireElement<HTMLElement>("#property-prototype");
+const propertyNode = requireElement<HTMLElement>("#property-node");
+const propertyObjectId = requireElement<HTMLElement>("#property-object-id");
+const propertySourceRef = requireElement<HTMLElement>("#property-source-ref");
+const propertyEdgeCount = requireElement<HTMLElement>("#property-edge-count");
+const propertyEdgeRefs = requireElement<HTMLUListElement>("#property-edge-refs");
 const visibilityStatus = requireElement<HTMLElement>("#visibility-status");
 const hideSelectionButton = requireElement<HTMLButtonElement>("#hide-selection");
 const isolateSelectionButton = requireElement<HTMLButtonElement>("#isolate-selection");
@@ -125,6 +143,32 @@ async function start(): Promise<void> {
     status.dataset.state = "loading";
     const { document: gltf, hierarchy } = await loadCompiledHierarchy(gltfUrl);
     renderHierarchy(hierarchy);
+    const searchIndex = new HierarchySearchIndex(hierarchy.entries);
+    const hierarchyItems = new Map(
+      Array.from(hierarchyList.querySelectorAll<HTMLElement>("li[data-node-index]"), (item) => [
+        Number(item.dataset.nodeIndex),
+        item,
+      ]),
+    );
+    let activeSearch: HierarchySearchResult;
+    const applyHierarchySearch = (): void => {
+      activeSearch = searchIndex.search(hierarchySearchInput.value);
+      const visible = new Set(activeSearch.visibleNodeIndices);
+      const matching = new Set(activeSearch.matchingNodeIndices);
+      for (const [nodeIndex, item] of hierarchyItems) {
+        item.hidden = !visible.has(nodeIndex);
+        if (matching.has(nodeIndex)) item.dataset.searchMatch = "true";
+        else delete item.dataset.searchMatch;
+      }
+      const matches = activeSearch.matchingNodeIndices.length;
+      hierarchySearchResult.textContent = activeSearch.query
+        ? `${matches} ${matches === 1 ? "match" : "matches"}`
+        : `${hierarchy.entries.length} nodes`;
+      hierarchyEmpty.hidden = visible.size !== 0;
+      document.documentElement.dataset.hierarchyMatches = String(matches);
+    };
+    hierarchySearchInput.addEventListener("input", applyHierarchySearch);
+    applyHierarchySearch();
     setText("#prototype-count", String(hierarchy.sharedMeshes));
     setText("#occurrence-count", String(hierarchy.renderableOccurrences));
     setText("#source-format", hierarchy.sourceFormat);
@@ -185,6 +229,45 @@ async function start(): Promise<void> {
     const section = new AxisSectionPlane(scene.bounds);
     let selectedObjectId = 0;
 
+    const updateProperties = (picked: CompiledObjectEvidence | undefined): void => {
+      propertiesEmpty.hidden = Boolean(picked);
+      propertiesContent.hidden = !picked;
+      propertiesPanel.dataset.state = picked ? "selected" : "empty";
+      document.documentElement.dataset.selectedObjectId = String(picked?.objectId ?? 0);
+      if (!picked) return;
+
+      const isVisible = visibility.isVisible(picked.objectId);
+      propertyName.textContent = picked.label;
+      propertyVisibility.textContent = isVisible ? "Visible" : "Hidden";
+      if (isVisible) delete propertyVisibility.dataset.hidden;
+      else propertyVisibility.dataset.hidden = "true";
+      propertyOccurrence.textContent = picked.occurrenceId;
+      propertyPrototype.textContent = picked.prototypeId;
+      propertyNode.textContent = String(picked.nodeIndex);
+      propertyObjectId.textContent = String(picked.objectId);
+      propertySourceRef.textContent = picked.sourceRef ?? "Not provided";
+      propertyEdgeCount.textContent = picked.edgeSourceRefs.length.toLocaleString("en-US");
+
+      const fragment = document.createDocumentFragment();
+      for (const sourceRef of picked.edgeSourceRefs.slice(0, 3)) {
+        const item = document.createElement("li");
+        item.textContent = sourceRef;
+        item.title = sourceRef;
+        fragment.append(item);
+      }
+      if (picked.edgeSourceRefs.length === 0) {
+        const item = document.createElement("li");
+        item.textContent = "No edge references in the compiled profile.";
+        fragment.append(item);
+      } else if (picked.edgeSourceRefs.length > 3) {
+        const item = document.createElement("li");
+        item.dataset.summary = "true";
+        item.textContent = `+ ${picked.edgeSourceRefs.length - 3} more`;
+        fragment.append(item);
+      }
+      propertyEdgeRefs.replaceChildren(fragment);
+    };
+
     const updateSelectionText = (): void => {
       const picked = evidence.get(selectedObjectId);
       selection.textContent = picked
@@ -192,6 +275,7 @@ async function start(): Promise<void> {
           `${picked.edgeSourceRefs.length} CAD edge refs` +
           (visibility.isVisible(selectedObjectId) ? "" : " · hidden")
         : "No occurrence at that pixel.";
+      updateProperties(picked);
     };
 
     const updateVisibilityControls = (): void => {
@@ -240,6 +324,10 @@ async function start(): Promise<void> {
           `[data-node-index="${picked.nodeIndex}"]`,
         );
         if (item) {
+          if (item.hidden) {
+            hierarchySearchInput.value = "";
+            applyHierarchySearch();
+          }
           item.dataset.selected = "true";
           item.setAttribute("aria-current", "true");
           const itemBounds = item.getBoundingClientRect();
@@ -271,6 +359,7 @@ async function start(): Promise<void> {
       applyVisibility();
     };
     updateVisibilityControls();
+    updateProperties(undefined);
 
     const applySection = (): void => {
       const state = section.state();
@@ -396,10 +485,38 @@ async function start(): Promise<void> {
         listenerOptions,
       );
     }
+    hierarchySearchInput.addEventListener(
+      "keydown",
+      (event) => {
+        if (event.key === "Escape" && hierarchySearchInput.value !== "") {
+          hierarchySearchInput.value = "";
+          applyHierarchySearch();
+          event.preventDefault();
+          return;
+        }
+        if (event.key !== "Enter" || activeSearch.firstRenderableNodeIndex === undefined) return;
+        const picked = evidenceByNode.get(activeSearch.firstRenderableNodeIndex);
+        if (picked) selectObject(picked.objectId);
+        event.preventDefault();
+      },
+      listenerOptions,
+    );
     window.addEventListener(
       "keydown",
       (event) => {
         const target = event.target;
+        if (
+          event.key === "/" &&
+          !event.ctrlKey &&
+          !event.metaKey &&
+          !(target instanceof HTMLInputElement) &&
+          !(target instanceof HTMLTextAreaElement)
+        ) {
+          hierarchySearchInput.focus();
+          hierarchySearchInput.select();
+          event.preventDefault();
+          return;
+        }
         if (
           event.ctrlKey ||
           event.metaKey ||

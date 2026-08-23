@@ -118,7 +118,54 @@
             <span>scene.gltf</span><b>+</b><span>scene.bin</span><b>≠</b><span>new CAD format</span>
           </div>
         </div>
-        <ol id="hierarchy" aria-label="Compiled glTF assembly hierarchy"></ol>
+        <div class="scene-inspector">
+          <section class="hierarchy-panel" aria-labelledby="hierarchy-title">
+            <header class="inspector-heading">
+              <strong id="hierarchy-title">Assembly</strong>
+              <span id="hierarchy-search-result" aria-live="polite">Waiting for hierarchy</span>
+            </header>
+            <label class="hierarchy-search" for="hierarchy-search">
+              <span aria-hidden="true">⌕</span>
+              <input
+                id="hierarchy-search"
+                type="search"
+                aria-label="Search assembly hierarchy"
+                placeholder="Name, ID, or source ref"
+                autocomplete="off"
+                spellcheck="false"
+              />
+              <kbd aria-hidden="true">/</kbd>
+            </label>
+            <p id="hierarchy-empty" class="hierarchy-empty" hidden>No matching occurrences.</p>
+            <ol id="hierarchy" aria-label="Compiled glTF assembly hierarchy"></ol>
+          </section>
+
+          <aside id="properties-panel" class="properties-panel" aria-labelledby="properties-title">
+            <header class="inspector-heading">
+              <strong id="properties-title">Properties</strong>
+              <span>Source identity</span>
+            </header>
+            <p id="properties-empty" class="properties-empty">
+              Select a renderable occurrence in the viewport or assembly tree.
+            </p>
+            <div id="properties-content" hidden>
+              <strong id="property-name" class="property-name">—</strong>
+              <span id="property-visibility" class="property-visibility">—</span>
+              <dl class="property-grid">
+                <div><dt>Occurrence</dt><dd><code id="property-occurrence">—</code></dd></div>
+                <div><dt>Prototype</dt><dd><code id="property-prototype">—</code></dd></div>
+                <div><dt>glTF node</dt><dd id="property-node">—</dd></div>
+                <div><dt>Object ID</dt><dd id="property-object-id">—</dd></div>
+                <div><dt>Source ref</dt><dd><code id="property-source-ref">—</code></dd></div>
+                <div><dt>CAD edge refs</dt><dd id="property-edge-count">—</dd></div>
+              </dl>
+              <div class="edge-reference-preview">
+                <span>Revision-local edge references</span>
+                <ul id="property-edge-refs"></ul>
+              </div>
+            </div>
+          </aside>
+        </div>
       </section>
     </main>
     <script type="module" src="/src/main.ts"></script>
