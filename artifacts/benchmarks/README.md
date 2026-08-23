@@ -8,3 +8,8 @@ Reviewed evidence lives in a named subdirectory with its validator and scope.
 The first such record is [`industrial-baseline`](industrial-baseline/README.md),
 an exploratory 10k-occurrence MADI/Three.js browser matrix. It validates the
 comparison harness but does not decide ADR-0003.
+
+The second reviewed record is
+[`heterogeneous-culling`](heterogeneous-culling/README.md): 256 prototypes,
+100,000 occurrences, a local-review camera trace, and equivalent MADI dense CPU
+culling versus Three.js `BatchedMesh` per-object culling. It remains exploratory.

@@ -4,6 +4,7 @@ import {
   decodeObjectId,
   instanceStride,
   packInstanceData,
+  packInstanceDataInto,
   validateGpuScene,
   validatePrototypeBatch,
 } from "../src/index.js";
@@ -45,6 +46,14 @@ describe("WebGPU packed layouts", () => {
     expect(view.getFloat32(92, true)).toBe(1);
     expect(view.getUint32(instanceStride + 64, true)).toBe(9);
     expect(view.getFloat32(instanceStride + 80, true)).toBeCloseTo(0.16);
+  });
+
+  it("packs a dense visibility index table into reusable storage", () => {
+    const instances = createBatch().instances;
+    const target = new ArrayBuffer(instances.length * 96);
+    const bytes = packInstanceDataInto(instances, new DataView(target), new Int32Array([0]), 1);
+    expect(bytes).toBe(96);
+    expect(new DataView(target).getUint32(64, true)).toBe(instances[0]?.objectId);
   });
 
   it("decodes the picking color without signed overflow", () => {

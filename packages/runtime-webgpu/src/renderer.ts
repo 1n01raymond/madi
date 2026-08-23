@@ -2,9 +2,10 @@ import {
   decodeObjectId,
   instanceStride,
   packInstanceData,
+  packInstanceDataInto,
   validateGpuScene,
 } from "./layout.js";
-import type { GpuPrototypeBatch, GpuScene } from "./layout.js";
+import type { GpuOccurrenceInstance, GpuPrototypeBatch, GpuScene } from "./layout.js";
 
 const surfaceShader = /* wgsl */ `
 struct Camera {
@@ -134,9 +135,12 @@ interface GpuBatchResources {
   readonly surfaceIndex: GPUBuffer;
   readonly edgeVertex: GPUBuffer;
   readonly instance: GPUBuffer;
+  readonly instances: readonly GpuOccurrenceInstance[];
+  readonly instanceStaging: ArrayBuffer;
+  readonly instanceStagingView: DataView;
   readonly indexCount: number;
   readonly edgeVertexCount: number;
-  readonly instanceCount: number;
+  instanceCount: number;
 }
 
 function createBuffer(
@@ -355,35 +359,68 @@ export class Phase0Renderer {
     validateGpuScene(scene);
     const includeEdges = options.includeEdges ?? true;
     this.destroyBatches();
-    this.batches = scene.batches.map((batch, index) => ({
-      surfaceVertex: createBuffer(
-        this.device,
-        `MADI prototype ${index} surface vertices`,
-        batch.surfaceVertices,
-        GPUBufferUsage.VERTEX,
-      ),
-      surfaceIndex: createBuffer(
-        this.device,
-        `MADI prototype ${index} surface indices`,
-        batch.surfaceIndices,
-        GPUBufferUsage.INDEX,
-      ),
-      edgeVertex: createBuffer(
-        this.device,
-        `MADI prototype ${index} explicit edges`,
-        includeEdges ? batch.edgeVertices : new Float32Array(),
-        GPUBufferUsage.VERTEX,
-      ),
-      instance: createBuffer(
-        this.device,
-        `MADI prototype ${index} occurrences`,
-        packInstanceData(batch.instances),
-        GPUBufferUsage.VERTEX,
-      ),
-      indexCount: batch.surfaceIndices.length,
-      edgeVertexCount: includeEdges ? batch.edgeVertices.length / 3 : 0,
-      instanceCount: batch.instances.length,
-    }));
+    this.batches = scene.batches.map((batch, index) => {
+      const instanceStaging = new ArrayBuffer(batch.instances.length * instanceStride);
+      return {
+        surfaceVertex: createBuffer(
+          this.device,
+          `MADI prototype ${index} surface vertices`,
+          batch.surfaceVertices,
+          GPUBufferUsage.VERTEX,
+        ),
+        surfaceIndex: createBuffer(
+          this.device,
+          `MADI prototype ${index} surface indices`,
+          batch.surfaceIndices,
+          GPUBufferUsage.INDEX,
+        ),
+        edgeVertex: createBuffer(
+          this.device,
+          `MADI prototype ${index} explicit edges`,
+          includeEdges ? batch.edgeVertices : new Float32Array(),
+          GPUBufferUsage.VERTEX,
+        ),
+        instance: createBuffer(
+          this.device,
+          `MADI prototype ${index} occurrences`,
+          packInstanceData(batch.instances),
+          GPUBufferUsage.VERTEX,
+        ),
+        instances: batch.instances,
+        instanceStaging,
+        instanceStagingView: new DataView(instanceStaging),
+        indexCount: batch.surfaceIndices.length,
+        edgeVertexCount: includeEdges ? batch.edgeVertices.length / 3 : 0,
+        instanceCount: batch.instances.length,
+      };
+    });
+  }
+
+  /** Re-packs visible occurrences from dense per-prototype index tables. */
+  updateVisibleInstances(
+    indicesByBatch: readonly Int32Array[],
+    counts: Uint32Array,
+  ): void {
+    if (indicesByBatch.length !== this.batches.length || counts.length !== this.batches.length) {
+      throw new RangeError("Visibility tables must match the uploaded prototype count.");
+    }
+    this.batches.forEach((batch, batchIndex) => {
+      const indices = indicesByBatch[batchIndex];
+      const count = counts[batchIndex] ?? 0;
+      if (!indices || count > indices.length || count > batch.instances.length) {
+        throw new RangeError(`Invalid visibility count for prototype ${batchIndex}.`);
+      }
+      const byteLength = packInstanceDataInto(
+        batch.instances,
+        batch.instanceStagingView,
+        indices,
+        count,
+      );
+      if (byteLength > 0) {
+        this.device.queue.writeBuffer(batch.instance, 0, batch.instanceStaging, 0, byteLength);
+      }
+      batch.instanceCount = count;
+    });
   }
 
   render(viewProjection: Float32Array, options: RenderOptions = {}): void {
@@ -421,6 +458,7 @@ export class Phase0Renderer {
       },
     });
     for (const batch of this.batches) {
+      if (batch.instanceCount === 0) continue;
       this.bindBatch(surfacePass, this.surfacePipeline, batch);
       surfacePass.drawIndexed(batch.indexCount, batch.instanceCount);
     }

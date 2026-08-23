@@ -2,6 +2,7 @@ export {
   decodeObjectId,
   instanceStride,
   packInstanceData,
+  packInstanceDataInto,
   validateGpuScene,
   validatePrototypeBatch,
 } from "./layout.js";

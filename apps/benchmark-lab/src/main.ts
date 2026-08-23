@@ -1,13 +1,14 @@
 import "./style.css";
 
 import { createBenchmarkBackend } from "./backend.js";
-import type { BenchmarkBackendId } from "./backend.js";
+import type { BenchmarkBackendId, BenchmarkCullingMode } from "./backend.js";
 import { createBenchmarkCamera } from "./camera.js";
+import type { BenchmarkCameraTrace } from "./camera.js";
 import {
   createIndustrialWorkload,
   industrialScaleTiers,
 } from "./workload.js";
-import type { IndustrialScaleTier } from "./workload.js";
+import type { IndustrialScaleTier, IndustrialWorkloadProfile } from "./workload.js";
 
 interface Distribution {
   readonly samples: number;
@@ -18,15 +19,17 @@ interface Distribution {
 }
 
 interface BenchmarkResult {
-  readonly schemaVersion: "madi.industrial-browser-benchmark.1";
+  readonly schemaVersion: "madi.industrial-browser-benchmark.2";
   readonly backend: BenchmarkBackendId;
   readonly scale: IndustrialScaleTier;
+  readonly profile: IndustrialWorkloadProfile;
   readonly features: {
     readonly surfaces: true;
     readonly explicitEdges: false;
     readonly picking: "on-demand-not-sampled";
-    readonly frustumCulling: "disabled";
+    readonly frustumCulling: BenchmarkCullingMode;
     readonly lod: false;
+    readonly cameraTrace: BenchmarkCameraTrace;
   };
   readonly workload: ReturnType<typeof createIndustrialWorkload>["stats"] & {
     readonly id: string;
@@ -39,11 +42,12 @@ interface BenchmarkResult {
   };
   readonly frameIntervals: Distribution;
   readonly cpuSubmit: Distribution;
-  readonly renderer: {
-    readonly logicalDrawCalls: number;
-    readonly submittedTriangles: number;
+  readonly renderer: ReturnType<Awaited<ReturnType<typeof createBenchmarkBackend>>["stats"]>;
+  readonly memory: {
+    readonly usedJsHeapBytes: number | null;
+    readonly userAgentSpecificBytes: number | null;
+    readonly measurementScope: "diagnostic-not-retained-scene-memory";
   };
-  readonly memory: { readonly usedJsHeapBytes: number | null };
 }
 
 declare global {
@@ -93,11 +97,33 @@ function getHeapBytes(): number | null {
   return Number.isFinite(memory?.usedJSHeapSize) ? (memory?.usedJSHeapSize ?? null) : null;
 }
 
+async function getUserAgentSpecificMemory(): Promise<number | null> {
+  const measurement = performance as Performance & {
+    measureUserAgentSpecificMemory?: () => Promise<{ readonly bytes: number }>;
+  };
+  if (!measurement.measureUserAgentSpecificMemory) return null;
+  try {
+    const result = await measurement.measureUserAgentSpecificMemory();
+    return Number.isFinite(result.bytes) ? result.bytes : null;
+  } catch {
+    return null;
+  }
+}
+
 const parameters = new URLSearchParams(location.search);
 const backend = (parameters.get("backend") ?? "madi") as BenchmarkBackendId;
 const scale = (parameters.get("scale") ?? "smoke") as IndustrialScaleTier;
+const profile = (parameters.get("profile") ?? "repeated") as IndustrialWorkloadProfile;
+const culling = (
+  parameters.get("culling") ?? (profile === "heterogeneous" ? "frustum" : "disabled")
+) as BenchmarkCullingMode;
 if (backend !== "madi" && backend !== "three") throw new TypeError("Unknown backend.");
 if (!(scale in industrialScaleTiers)) throw new TypeError("Unknown scale tier.");
+if (profile !== "repeated" && profile !== "heterogeneous") {
+  throw new TypeError("Unknown workload profile.");
+}
+if (culling !== "disabled" && culling !== "frustum") throw new TypeError("Unknown culling mode.");
+const cameraTrace: BenchmarkCameraTrace = culling === "frustum" ? "local-review" : "overview-orbit";
 const warmupFrames = parsePositiveInteger(parameters.get("warmup"), 30);
 const sampleFrames = parsePositiveInteger(parameters.get("frames"), 120);
 
@@ -106,11 +132,13 @@ const resultNode = requiredElement<HTMLElement>("#result");
 const canvas = requiredElement<HTMLCanvasElement>("#viewport");
 requiredElement<HTMLElement>("#backend").textContent = backend;
 requiredElement<HTMLElement>("#scale").textContent = scale;
+requiredElement<HTMLElement>("#profile").textContent = profile;
+requiredElement<HTMLElement>("#culling").textContent = culling;
 
 async function run(): Promise<void> {
   const started = performance.now();
   status.textContent = "Generating deterministic plant workload…";
-  const workload = createIndustrialWorkload(scale);
+  const workload = createIndustrialWorkload(scale, profile);
   const workloadReadyMs = performance.now() - started;
   requiredElement<HTMLElement>("#occurrences").textContent =
     workload.stats.occurrenceCount.toLocaleString("en-US");
@@ -118,18 +146,18 @@ async function run(): Promise<void> {
     workload.stats.submittedTriangleCount.toLocaleString("en-US");
 
   status.textContent = `Initializing ${backend} backend…`;
-  const renderer = await createBenchmarkBackend(backend, canvas, workload);
+  const renderer = await createBenchmarkBackend(backend, canvas, workload, culling);
   const backendReadyMs = performance.now() - started;
   try {
     const aspect = canvas.clientWidth / Math.max(1, canvas.clientHeight);
-    const initialCamera = createBenchmarkCamera(workload.bounds, aspect, 0);
+    const initialCamera = createBenchmarkCamera(workload.bounds, aspect, 0, cameraTrace);
     await renderer.render(initialCamera);
     const firstFrameMs = performance.now() - started;
     status.textContent = `Warming ${warmupFrames} frames…`;
     for (let frame = 0; frame < warmupFrames; frame += 1) {
       await nextAnimationFrame();
       await renderer.render(
-        createBenchmarkCamera(workload.bounds, aspect, frame / warmupFrames),
+        createBenchmarkCamera(workload.bounds, aspect, frame / warmupFrames, cameraTrace),
       );
     }
 
@@ -143,22 +171,25 @@ async function run(): Promise<void> {
       previousTimestamp = timestamp;
       const submitStart = performance.now();
       await renderer.render(
-        createBenchmarkCamera(workload.bounds, aspect, frame / sampleFrames),
+        createBenchmarkCamera(workload.bounds, aspect, frame / sampleFrames, cameraTrace),
       );
       cpuSubmit.push(performance.now() - submitStart);
     }
-    await renderer.render(createBenchmarkCamera(workload.bounds, aspect, 0.125));
+    await renderer.render(createBenchmarkCamera(workload.bounds, aspect, 0.125, cameraTrace));
+    const userAgentSpecificBytes = await getUserAgentSpecificMemory();
 
     const result: BenchmarkResult = {
-      schemaVersion: "madi.industrial-browser-benchmark.1",
+      schemaVersion: "madi.industrial-browser-benchmark.2",
       backend,
       scale,
+      profile,
       features: {
         surfaces: true,
         explicitEdges: false,
         picking: "on-demand-not-sampled",
-        frustumCulling: "disabled",
+        frustumCulling: culling,
         lod: false,
+        cameraTrace,
       },
       workload: { id: workload.id, ...workload.stats },
       config: { warmupFrames, sampleFrames },
@@ -166,7 +197,11 @@ async function run(): Promise<void> {
       frameIntervals: summarize(frameIntervals),
       cpuSubmit: summarize(cpuSubmit),
       renderer: renderer.stats(),
-      memory: { usedJsHeapBytes: getHeapBytes() },
+      memory: {
+        usedJsHeapBytes: getHeapBytes(),
+        userAgentSpecificBytes,
+        measurementScope: "diagnostic-not-retained-scene-memory",
+      },
     };
     window.__MADI_BENCHMARK_RESULT__ = result;
     document.documentElement.dataset.benchmarkStatus = "complete";

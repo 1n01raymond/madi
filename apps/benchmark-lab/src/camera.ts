@@ -10,6 +10,7 @@ export interface BenchmarkCamera {
 }
 
 type Vector3 = readonly [number, number, number];
+export type BenchmarkCameraTrace = "overview-orbit" | "local-review";
 
 function subtract(left: Vector3, right: Vector3): [number, number, number] {
   return [left[0] - right[0], left[1] - right[1], left[2] - right[2]];
@@ -78,8 +79,9 @@ export function createBenchmarkCamera(
   bounds: { readonly min: Vector3; readonly max: Vector3 },
   aspect: number,
   progress: number,
+  trace: BenchmarkCameraTrace = "overview-orbit",
 ): BenchmarkCamera {
-  const center: [number, number, number] = [
+  const sceneCenter: [number, number, number] = [
     (bounds.min[0] + bounds.max[0]) / 2,
     (bounds.min[1] + bounds.max[1]) / 2,
     (bounds.min[2] + bounds.max[2]) / 2,
@@ -89,12 +91,21 @@ export function createBenchmarkCamera(
     bounds.max[1] - bounds.min[1],
     bounds.max[2] - bounds.min[2],
   );
+  const center: [number, number, number] = trace === "local-review"
+    ? [
+        bounds.min[0] + (bounds.max[0] - bounds.min[0]) * (0.15 + progress * 0.7),
+        sceneCenter[1] + Math.sin(progress * Math.PI * 2) * (bounds.max[1] - bounds.min[1]) * 0.2,
+        sceneCenter[2],
+      ]
+    : sceneCenter;
   const angle = progress * Math.PI * 2;
-  const distance = Math.max(diagonal * 0.72, 20);
+  const distance = trace === "local-review"
+    ? Math.max(180, Math.min(340, diagonal * 0.28))
+    : Math.max(diagonal * 0.72, 20);
   const position: [number, number, number] = [
     center[0] + Math.cos(angle) * distance,
     center[1] + Math.sin(angle) * distance,
-    center[2] + diagonal * 0.32,
+    center[2] + (trace === "local-review" ? distance * 0.45 : diagonal * 0.32),
   ];
   const up: [number, number, number] = [0, 0, 1];
   const fovRadians = Math.PI / 4;

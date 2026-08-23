@@ -89,3 +89,17 @@ Chrome/Blink and Firefox/Gecko. It deliberately disables edges, culling, LOD,
 streaming, and navigation-time picking. Its status is
 `exploratory-not-adr-decision`: it validates workload parity, real-browser
 automation, and result integrity but cannot accept or reject this ADR.
+
+### Heterogeneous culling harness
+
+The second committed record reaches 100,000 occurrences and 10,223,768
+unculled triangles across 256 deterministic equipment variants. A shared
+local-review trace exercises material frustum rejection. MADI uses reusable
+dense CPU visibility tables and instance compaction; Three.js 0.180.0 uses one
+optimized `BatchedMesh` with per-object culling and default opaque sorting.
+
+This remains `exploratory-not-adr-decision`. The run is a single host session
+without integrated-GPU coverage, GPU timestamps, repeated clean sessions,
+isolated retained-memory accounting, bounded residency, or a real partner
+assembly. Its outcome chooses the next experiment but does not satisfy the
+industrial decision contract above.

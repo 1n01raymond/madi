@@ -91,21 +91,43 @@ export function packInstanceData(
   instances: readonly GpuOccurrenceInstance[],
 ): ArrayBuffer {
   const data = new ArrayBuffer(instances.length * instanceStride);
-  const view = new DataView(data);
+  packInstanceDataInto(instances, new DataView(data));
+  return data;
+}
 
-  instances.forEach((instance, instanceIndex) => {
-    const base = instanceIndex * instanceStride;
+/** Packs either all instances or a dense index table into reusable storage. */
+export function packInstanceDataInto(
+  instances: readonly GpuOccurrenceInstance[],
+  target: DataView,
+  sourceIndices?: ArrayLike<number>,
+  sourceCount = sourceIndices?.length ?? instances.length,
+): number {
+  if (!Number.isInteger(sourceCount) || sourceCount < 0) {
+    throw new RangeError("sourceCount must be a non-negative integer.");
+  }
+  if (sourceIndices && sourceCount > sourceIndices.length) {
+    throw new RangeError("sourceCount exceeds the source index table.");
+  }
+  if (sourceCount * instanceStride > target.byteLength) {
+    throw new RangeError("The target view is too small for the packed instances.");
+  }
+
+  for (let outputIndex = 0; outputIndex < sourceCount; outputIndex += 1) {
+    const sourceIndex = sourceIndices?.[outputIndex] ?? outputIndex;
+    const instance = instances[sourceIndex];
+    if (!instance) throw new RangeError(`Instance index ${sourceIndex} is out of range.`);
+    const base = outputIndex * instanceStride;
     instance.transform.forEach((value, matrixIndex) => {
-      view.setFloat32(base + matrixIndex * 4, value, true);
+      target.setFloat32(base + matrixIndex * 4, value, true);
     });
-    view.setUint32(base + 64, instance.objectId, true);
+    target.setUint32(base + 64, instance.objectId, true);
     const color = instance.baseColor ?? [0.16, 0.55, 0.92, 1.0];
     color.forEach((value, channel) => {
-      view.setFloat32(base + 80 + channel * 4, value, true);
+      target.setFloat32(base + 80 + channel * 4, value, true);
     });
-  });
+  }
 
-  return data;
+  return sourceCount * instanceStride;
 }
 
 export function decodeObjectId(pixel: ArrayLike<number>): number {
