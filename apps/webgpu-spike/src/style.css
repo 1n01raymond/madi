@@ -194,11 +194,55 @@ h1 span {
   box-shadow: 0 0 0 4px rgb(37 188 119 / 13%);
 }
 
+.viewport-tools {
+  position: absolute;
+  z-index: 2;
+  top: 12px;
+  right: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #617986;
+  font: 10px/1.4 ui-monospace, "Cascadia Code", monospace;
+}
+
+.viewport-tools button {
+  padding: 7px 9px;
+  border: 1px solid #b6c5cc;
+  border-radius: 7px;
+  color: #354f5b;
+  background: rgb(255 255 255 / 82%);
+  font: 700 10px/1.2 ui-monospace, "Cascadia Code", monospace;
+  cursor: pointer;
+}
+
+.viewport-tools button:hover,
+.viewport-tools button:focus-visible {
+  border-color: #168cb6;
+  outline: none;
+  color: #075a78;
+  background: #fff;
+}
+
+.viewport-tools kbd {
+  margin-left: 4px;
+  padding: 1px 4px;
+  border: 1px solid #b8c7ce;
+  border-radius: 3px;
+  font: inherit;
+}
+
 canvas {
   display: block;
   width: 100%;
   height: 520px;
-  cursor: crosshair;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+
+canvas.is-navigating {
+  cursor: grabbing;
 }
 
 .hud {
@@ -336,6 +380,25 @@ code {
   color: #b8cbd4;
 }
 
+#hierarchy li[data-renderable="true"] {
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+#hierarchy li[data-renderable="true"]:hover,
+#hierarchy li[data-renderable="true"]:focus-visible {
+  outline: none;
+  color: #e8f7fc;
+  background: #102c38;
+}
+
+#hierarchy li[data-selected="true"] {
+  border-left-color: #56d4ff;
+  color: #e8faff;
+  background: #0c3443;
+  box-shadow: inset 0 0 0 1px rgb(86 212 255 / 18%);
+}
+
 #hierarchy li::before {
   position: absolute;
   top: 11px;
@@ -389,6 +452,10 @@ code {
   canvas {
     min-height: 420px;
     height: 420px;
+  }
+
+  .viewport-tools > span {
+    display: none;
   }
 
   .metrics {

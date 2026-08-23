@@ -11,7 +11,7 @@ import type {
 } from "@madi/runtime-webgpu";
 
 import type { GeometryDecodeResponse } from "./geometry.worker.js";
-import { createCompiledSceneCamera } from "./view.js";
+import { OrthographicOrbitCamera } from "./view.js";
 import faviconUrl from "../../../docs/media/madi-favicon.svg?url";
 import inverseMarkUrl from "../../../docs/media/madi-mark-inverse.svg?url";
 
@@ -81,6 +81,11 @@ function renderHierarchy(hierarchy: CompiledHierarchy): void {
     item.dataset.renderable = String(entry.renderable);
     item.dataset.nodeIndex = String(entry.nodeIndex);
     item.title = entry.occurrenceId;
+    if (entry.renderable) {
+      item.tabIndex = 0;
+      item.setAttribute("role", "button");
+      item.setAttribute("aria-label", `Select ${entry.name}`);
+    }
 
     const label = document.createElement("span");
     label.textContent = entry.name;
@@ -95,6 +100,7 @@ function renderHierarchy(hierarchy: CompiledHierarchy): void {
 const canvas = requireElement<HTMLCanvasElement>("#viewport");
 const status = requireElement<HTMLElement>("#status");
 const selection = requireElement<HTMLElement>("#selection");
+const hierarchyList = requireElement<HTMLOListElement>("#hierarchy");
 requireElement<HTMLLinkElement>("#madi-favicon").href = faviconUrl;
 requireElement<HTMLImageElement>("#madi-brand-mark").src = inverseMarkUrl;
 
@@ -130,9 +136,15 @@ async function start(): Promise<void> {
     ]);
     renderer.setScene(scene.gpuScene);
 
+    const camera = new OrthographicOrbitCamera(scene.bounds);
+    let animationFrame = 0;
     const render = (): void => {
+      animationFrame = 0;
       const aspect = canvas.clientWidth / Math.max(canvas.clientHeight, 1);
-      renderer.render(createCompiledSceneCamera(scene.bounds, aspect));
+      renderer.render(camera.viewProjection(aspect));
+    };
+    const scheduleRender = (): void => {
+      if (animationFrame === 0) animationFrame = requestAnimationFrame(render);
     };
     render();
 
@@ -154,22 +166,169 @@ async function start(): Promise<void> {
     );
 
     const evidence = new Map(scene.objectEvidence.map((entry) => [entry.objectId, entry]));
-    const resizeObserver = new ResizeObserver(render);
-    resizeObserver.observe(canvas);
-
-    canvas.addEventListener("click", async (event) => {
-      const objectId = await renderer.pick(event.clientX, event.clientY);
+    const evidenceByNode = new Map(scene.objectEvidence.map((entry) => [entry.nodeIndex, entry]));
+    const selectObject = (objectId: number): void => {
       const picked = evidence.get(objectId);
+      renderer.setSelection(picked ? objectId : 0);
+      for (const item of hierarchyList.querySelectorAll<HTMLElement>("[data-selected='true']")) {
+        delete item.dataset.selected;
+        item.removeAttribute("aria-current");
+      }
+      if (picked) {
+        const item = hierarchyList.querySelector<HTMLElement>(
+          `[data-node-index="${picked.nodeIndex}"]`,
+        );
+        if (item) {
+          item.dataset.selected = "true";
+          item.setAttribute("aria-current", "true");
+          const itemBounds = item.getBoundingClientRect();
+          const listBounds = hierarchyList.getBoundingClientRect();
+          if (itemBounds.top < listBounds.top) {
+            hierarchyList.scrollTop -= listBounds.top - itemBounds.top;
+          } else if (itemBounds.bottom > listBounds.bottom) {
+            hierarchyList.scrollTop += itemBounds.bottom - listBounds.bottom;
+          }
+        }
+      }
       selection.textContent = picked
         ? `Selected ${picked.label} · node ${picked.nodeIndex} · ID ${objectId} · ` +
           `${picked.edgeSourceRefs.length} CAD edge refs`
         : "No occurrence at that pixel.";
-    });
+      scheduleRender();
+    };
+
+    const interactions = new AbortController();
+    const listenerOptions = { signal: interactions.signal };
+    let activePointer: number | undefined;
+    let navigationMode: "orbit" | "pan" = "orbit";
+    let lastPointerX = 0;
+    let lastPointerY = 0;
+    let pointerTravel = 0;
+    let suppressClick = false;
+
+    canvas.addEventListener(
+      "pointerdown",
+      (event) => {
+        if (event.button !== 0 && event.button !== 1) return;
+        activePointer = event.pointerId;
+        navigationMode = event.button === 1 || event.shiftKey ? "pan" : "orbit";
+        lastPointerX = event.clientX;
+        lastPointerY = event.clientY;
+        pointerTravel = 0;
+        suppressClick = false;
+        canvas.setPointerCapture(event.pointerId);
+        canvas.classList.add("is-navigating");
+        event.preventDefault();
+      },
+      listenerOptions,
+    );
+    canvas.addEventListener(
+      "pointermove",
+      (event) => {
+        if (event.pointerId !== activePointer) return;
+        const deltaX = event.clientX - lastPointerX;
+        const deltaY = event.clientY - lastPointerY;
+        lastPointerX = event.clientX;
+        lastPointerY = event.clientY;
+        pointerTravel += Math.abs(deltaX) + Math.abs(deltaY);
+        if (pointerTravel < 2) return;
+        const aspect = canvas.clientWidth / Math.max(canvas.clientHeight, 1);
+        if (navigationMode === "pan") {
+          camera.pan(deltaX, deltaY, canvas.clientWidth, canvas.clientHeight, aspect);
+        } else {
+          camera.orbit(deltaX, deltaY);
+        }
+        scheduleRender();
+      },
+      listenerOptions,
+    );
+    const finishNavigation = (event: PointerEvent): void => {
+      if (event.pointerId !== activePointer) return;
+      suppressClick = pointerTravel >= 3;
+      if (canvas.hasPointerCapture(event.pointerId)) canvas.releasePointerCapture(event.pointerId);
+      activePointer = undefined;
+      canvas.classList.remove("is-navigating");
+    };
+    canvas.addEventListener("pointerup", finishNavigation, listenerOptions);
+    canvas.addEventListener("pointercancel", finishNavigation, listenerOptions);
+    canvas.addEventListener(
+      "wheel",
+      (event) => {
+        camera.zoomBy(event.deltaY);
+        scheduleRender();
+        event.preventDefault();
+      },
+      { ...listenerOptions, passive: false },
+    );
+    canvas.addEventListener("contextmenu", (event) => event.preventDefault(), listenerOptions);
+
+    const fitView = (): void => {
+      camera.fit();
+      scheduleRender();
+    };
+    requireElement<HTMLButtonElement>("#fit-view").addEventListener("click", fitView, listenerOptions);
+    window.addEventListener(
+      "keydown",
+      (event) => {
+        const target = event.target;
+        if (
+          event.key.toLowerCase() !== "f" ||
+          event.ctrlKey ||
+          event.metaKey ||
+          target instanceof HTMLInputElement ||
+          target instanceof HTMLTextAreaElement
+        ) {
+          return;
+        }
+        fitView();
+        event.preventDefault();
+      },
+      listenerOptions,
+    );
+
+    const selectHierarchyTarget = (target: EventTarget | null): boolean => {
+      const item = target instanceof Element ? target.closest<HTMLElement>("li[data-node-index]") : null;
+      if (!item || item.dataset.renderable !== "true") return false;
+      const nodeIndex = Number(item.dataset.nodeIndex);
+      const picked = evidenceByNode.get(nodeIndex);
+      if (!picked) return false;
+      selectObject(picked.objectId);
+      return true;
+    };
+    hierarchyList.addEventListener(
+      "click",
+      (event) => {
+        selectHierarchyTarget(event.target);
+      },
+      listenerOptions,
+    );
+    hierarchyList.addEventListener(
+      "keydown",
+      (event) => {
+        if (event.key !== "Enter" && event.key !== " ") return;
+        if (selectHierarchyTarget(event.target)) event.preventDefault();
+      },
+      listenerOptions,
+    );
+
+    const resizeObserver = new ResizeObserver(scheduleRender);
+    resizeObserver.observe(canvas);
+
+    canvas.addEventListener("click", async (event) => {
+      if (suppressClick) {
+        suppressClick = false;
+        return;
+      }
+      const objectId = await renderer.pick(event.clientX, event.clientY);
+      selectObject(objectId);
+    }, listenerOptions);
 
     window.addEventListener(
       "beforeunload",
       () => {
+        interactions.abort();
         resizeObserver.disconnect();
+        if (animationFrame !== 0) cancelAnimationFrame(animationFrame);
         renderer.destroy();
       },
       { once: true },

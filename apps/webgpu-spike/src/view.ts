@@ -1,7 +1,13 @@
 import type { SceneBounds } from "@madi/runtime-webgpu";
 
-function boundsCorners(bounds: SceneBounds): number[][] {
-  const corners: number[][] = [];
+type Vector3 = readonly [number, number, number];
+
+const defaultYaw = -Math.PI / 4;
+const defaultPitch = Math.asin(1 / Math.sqrt(3));
+const minimumScale = 0.000_001;
+
+function boundsCorners(bounds: SceneBounds): Vector3[] {
+  const corners: Vector3[] = [];
   for (const x of [bounds.min[0], bounds.max[0]]) {
     for (const y of [bounds.min[1], bounds.max[1]]) {
       for (const z of [bounds.min[2], bounds.max[2]]) corners.push([x, y, z]);
@@ -10,12 +16,168 @@ function boundsCorners(bounds: SceneBounds): number[][] {
   return corners;
 }
 
-function dot(axis: readonly number[], point: readonly number[]): number {
-  return (
-    (axis[0] ?? 0) * (point[0] ?? 0) +
-    (axis[1] ?? 0) * (point[1] ?? 0) +
-    (axis[2] ?? 0) * (point[2] ?? 0)
-  );
+function dot(axis: Vector3, point: Vector3): number {
+  return axis[0] * point[0] + axis[1] * point[1] + axis[2] * point[2];
+}
+
+function finiteAspect(aspect: number): number {
+  return Number.isFinite(aspect) && aspect > 0 ? aspect : 1;
+}
+
+function clamp(value: number, minimum: number, maximum: number): number {
+  return Math.min(maximum, Math.max(minimum, value));
+}
+
+interface CameraBasis {
+  readonly right: Vector3;
+  readonly up: Vector3;
+  readonly depth: Vector3;
+}
+
+function cameraBasis(yaw: number, pitch: number): CameraBasis {
+  const cosinePitch = Math.cos(pitch);
+  const depth: Vector3 = [
+    Math.sin(yaw) * cosinePitch,
+    Math.sin(pitch),
+    Math.cos(yaw) * cosinePitch,
+  ];
+  const horizontalLength = Math.hypot(depth[0], depth[2]);
+  const right: Vector3 = [depth[2] / horizontalLength, 0, -depth[0] / horizontalLength];
+  const up: Vector3 = [
+    depth[1] * right[2],
+    depth[2] * right[0] - depth[0] * right[2],
+    -depth[1] * right[0],
+  ];
+  return { right, up, depth };
+}
+
+/**
+ * Small orthographic CAD camera used by the Phase 1 Studio slice.
+ *
+ * It keeps navigation state independent of the renderer, so fit/orbit/pan/zoom
+ * can later be reused by a framework-neutral viewer shell.
+ */
+export class OrthographicOrbitCamera {
+  private readonly corners: readonly Vector3[];
+  private readonly center: Vector3;
+  private yaw = defaultYaw;
+  private pitch = defaultPitch;
+  private panRight = 0;
+  private panUp = 0;
+  private zoom = 1;
+  private fittedHalfWidth = 1;
+  private fittedHalfHeight = 1;
+
+  constructor(bounds: SceneBounds) {
+    const values = [...bounds.min, ...bounds.max];
+    if (
+      values.some((value) => !Number.isFinite(value)) ||
+      bounds.min.some((value, axis) => value > (bounds.max[axis] ?? -Infinity))
+    ) {
+      throw new TypeError("Scene bounds must contain ordered finite values.");
+    }
+    this.corners = boundsCorners(bounds);
+    this.center = [
+      (bounds.min[0] + bounds.max[0]) / 2,
+      (bounds.min[1] + bounds.max[1]) / 2,
+      (bounds.min[2] + bounds.max[2]) / 2,
+    ];
+    this.fit();
+  }
+
+  /** Restores an isometric view and frames the complete scene. */
+  reset(): void {
+    this.yaw = defaultYaw;
+    this.pitch = defaultPitch;
+    this.fit();
+  }
+
+  /** Frames the complete scene while preserving the current view direction. */
+  fit(): void {
+    const { right, up } = cameraBasis(this.yaw, this.pitch);
+    const projectedX = this.corners.map((corner) => dot(right, corner));
+    const projectedY = this.corners.map((corner) => dot(up, corner));
+    this.fittedHalfWidth = Math.max(
+      (Math.max(...projectedX) - Math.min(...projectedX)) * 0.58,
+      minimumScale,
+    );
+    this.fittedHalfHeight = Math.max(
+      (Math.max(...projectedY) - Math.min(...projectedY)) * 0.58,
+      minimumScale,
+    );
+    this.panRight = 0;
+    this.panUp = 0;
+    this.zoom = 1;
+  }
+
+  orbit(deltaX: number, deltaY: number): void {
+    if (!Number.isFinite(deltaX) || !Number.isFinite(deltaY)) return;
+    this.yaw += deltaX * 0.006;
+    this.pitch = clamp(this.pitch + deltaY * 0.006, -Math.PI * 0.495, Math.PI * 0.495);
+  }
+
+  pan(deltaX: number, deltaY: number, width: number, height: number, aspect: number): void {
+    if (
+      !Number.isFinite(deltaX) ||
+      !Number.isFinite(deltaY) ||
+      !Number.isFinite(width) ||
+      !Number.isFinite(height) ||
+      width <= 0 ||
+      height <= 0
+    ) {
+      return;
+    }
+    const { halfWidth, halfHeight } = this.halfExtents(aspect);
+    this.panRight -= (deltaX / width) * halfWidth * 2;
+    this.panUp += (deltaY / height) * halfHeight * 2;
+  }
+
+  zoomBy(deltaY: number): void {
+    if (!Number.isFinite(deltaY)) return;
+    this.zoom = clamp(this.zoom * Math.exp(-deltaY * 0.0015), 0.05, 100);
+  }
+
+  viewProjection(aspect: number): Float32Array {
+    const { right, up, depth } = cameraBasis(this.yaw, this.pitch);
+    const { halfWidth, halfHeight } = this.halfExtents(aspect);
+    const target: Vector3 = [
+      this.center[0] + right[0] * this.panRight + up[0] * this.panUp,
+      this.center[1] + right[1] * this.panRight + up[1] * this.panUp,
+      this.center[2] + right[2] * this.panRight + up[2] * this.panUp,
+    ];
+    const projectedDepth = this.corners.map((corner) => dot(depth, corner));
+    const minDepth = Math.min(...projectedDepth);
+    const maxDepth = Math.max(...projectedDepth);
+    const depthPadding = Math.max((maxDepth - minDepth) * 0.08, minimumScale);
+    const nearDepth = minDepth - depthPadding;
+    const depthRange = Math.max(maxDepth - minDepth + depthPadding * 2, minimumScale);
+
+    return new Float32Array([
+      right[0] / halfWidth,
+      up[0] / halfHeight,
+      depth[0] / depthRange,
+      0,
+      right[1] / halfWidth,
+      up[1] / halfHeight,
+      depth[1] / depthRange,
+      0,
+      right[2] / halfWidth,
+      up[2] / halfHeight,
+      depth[2] / depthRange,
+      0,
+      -dot(right, target) / halfWidth,
+      -dot(up, target) / halfHeight,
+      -nearDepth / depthRange,
+      1,
+    ]);
+  }
+
+  private halfExtents(aspect: number): { readonly halfWidth: number; readonly halfHeight: number } {
+    const safeAspect = finiteAspect(aspect);
+    const halfHeight =
+      Math.max(this.fittedHalfHeight, this.fittedHalfWidth / safeAspect) / this.zoom;
+    return { halfWidth: halfHeight * safeAspect, halfHeight };
+  }
 }
 
 /** Fits a right-handed, Y-up glTF scene into WebGPU's 0..1 depth range. */
@@ -23,46 +185,5 @@ export function createCompiledSceneCamera(
   bounds: SceneBounds,
   aspect: number,
 ): Float32Array {
-  const right = [Math.SQRT1_2, 0, Math.SQRT1_2];
-  const up = [1 / Math.sqrt(6), 2 / Math.sqrt(6), -1 / Math.sqrt(6)];
-  const depth = [-1 / Math.sqrt(3), 1 / Math.sqrt(3), 1 / Math.sqrt(3)];
-  const corners = boundsCorners(bounds);
-  const projectedX = corners.map((corner) => dot(right, corner));
-  const projectedY = corners.map((corner) => dot(up, corner));
-  const projectedDepth = corners.map((corner) => dot(depth, corner));
-  const minX = Math.min(...projectedX);
-  const maxX = Math.max(...projectedX);
-  const minY = Math.min(...projectedY);
-  const maxY = Math.max(...projectedY);
-  const minDepth = Math.min(...projectedDepth);
-  const maxDepth = Math.max(...projectedDepth);
-  const centerX = (minX + maxX) / 2;
-  const centerY = (minY + maxY) / 2;
-  let halfWidth = Math.max((maxX - minX) * 0.58, 0.001);
-  let halfHeight = Math.max((maxY - minY) * 0.58, 0.001);
-  const safeAspect = Number.isFinite(aspect) && aspect > 0 ? aspect : 1;
-  if (halfWidth / halfHeight < safeAspect) halfWidth = halfHeight * safeAspect;
-  else halfHeight = halfWidth / safeAspect;
-  const depthPadding = Math.max((maxDepth - minDepth) * 0.08, 0.001);
-  const nearDepth = minDepth - depthPadding;
-  const depthRange = Math.max(maxDepth - minDepth + depthPadding * 2, 0.001);
-
-  return new Float32Array([
-    (right[0] ?? 0) / halfWidth,
-    (up[0] ?? 0) / halfHeight,
-    (depth[0] ?? 0) / depthRange,
-    0,
-    (right[1] ?? 0) / halfWidth,
-    (up[1] ?? 0) / halfHeight,
-    (depth[1] ?? 0) / depthRange,
-    0,
-    (right[2] ?? 0) / halfWidth,
-    (up[2] ?? 0) / halfHeight,
-    (depth[2] ?? 0) / depthRange,
-    0,
-    -centerX / halfWidth,
-    -centerY / halfHeight,
-    -nearDepth / depthRange,
-    1,
-  ]);
+  return new OrthographicOrbitCamera(bounds).viewProjection(aspect);
 }

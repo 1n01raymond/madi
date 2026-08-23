@@ -15,6 +15,10 @@ Direct WebGPU rendering and the Phase 1 compiled glTF runtime boundary.
 - `MadiWebGpuRenderer` uploads those batches and renders surfaces, edges, and an
   integer object-ID picking pass directly with WebGPU.
 
+`setSelection(objectId)` updates a small scene uniform so the selected
+occurrence's surfaces and explicit edges are highlighted without repacking
+prototype or occurrence buffers. Object ID zero clears selection.
+
 Object-ID rendering is on demand: navigation frames submit surfaces and
 optional explicit edges, while a click renders and reads the ID target only
 when requested. The renderer also accepts a fixed pixel ratio and can omit edge
