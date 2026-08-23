@@ -57,6 +57,13 @@ const progressiveDirectory = resolve(
 const progressiveCompilerReport = JSON.parse(
   await readFile(resolve(progressiveDirectory, "build-report.json"), "utf8"),
 );
+const progressiveGltf = JSON.parse(
+  await readFile(resolve(progressiveDirectory, "scene.gltf"), "utf8"),
+);
+const progressiveTargetBytes = await readFile(resolve(progressiveDirectory, "scene.bin"));
+const expectedTargetRanges = progressiveGltf.extras.madi.progressive.targetChunks.map(
+  ({ byteOffset, byteLength }) => `bytes=${byteOffset}-${byteOffset + byteLength - 1}`,
+);
 
 function assertEqual(actual, expectedValue, label) {
   if (actual !== expectedValue) {
@@ -316,24 +323,51 @@ async function recordBrowser(definition) {
         contentType: "application/octet-stream",
       }),
     );
-    let releaseTarget;
-    const targetGate = new Promise((resolveGate) => {
-      releaseTarget = resolveGate;
+    let releaseFirstTargetChunk;
+    const firstTargetGate = new Promise((resolveGate) => {
+      releaseFirstTargetChunk = resolveGate;
     });
-    let targetRequestedResolve;
-    const targetRequested = new Promise((resolveRequest) => {
-      targetRequestedResolve = resolveRequest;
+    let releaseSecondTargetChunk;
+    const secondTargetGate = new Promise((resolveGate) => {
+      releaseSecondTargetChunk = resolveGate;
+    });
+    let firstTargetRequestedResolve;
+    const firstTargetRequested = new Promise((resolveRequest) => {
+      firstTargetRequestedResolve = resolveRequest;
+    });
+    let secondTargetRequestedResolve;
+    const secondTargetRequested = new Promise((resolveRequest) => {
+      secondTargetRequestedResolve = resolveRequest;
     });
     let targetRequestSawCoarseReady = false;
+    const targetRangeRequests = [];
     await progressivePage.route("**/progressive/scene.bin", async (route) => {
-      targetRequestSawCoarseReady = await progressivePage.evaluate(
-        () => document.documentElement.dataset.coarseReady === "true",
-      );
-      targetRequestedResolve();
-      await targetGate;
+      const range = route.request().headers().range;
+      if (!range) throw new Error(`${definition.id} target request omitted the Range header.`);
+      const match = /^bytes=(\d+)-(\d+)$/u.exec(range);
+      if (!match) throw new Error(`${definition.id} emitted invalid target range ${range}.`);
+      const start = Number(match[1]);
+      const end = Number(match[2]);
+      const requestIndex = targetRangeRequests.length;
+      targetRangeRequests.push(range);
+      if (requestIndex === 0) {
+        targetRequestSawCoarseReady = await progressivePage.evaluate(
+          () => document.documentElement.dataset.coarseReady === "true",
+        );
+        firstTargetRequestedResolve();
+        await firstTargetGate;
+      } else if (requestIndex === 1) {
+        secondTargetRequestedResolve();
+        await secondTargetGate;
+      }
       await route.fulfill({
-        path: resolve(progressiveDirectory, "scene.bin"),
+        status: 206,
         contentType: "application/octet-stream",
+        headers: {
+          "Accept-Ranges": "bytes",
+          "Content-Range": `bytes ${start}-${end}/${progressiveTargetBytes.byteLength}`,
+        },
+        body: progressiveTargetBytes.subarray(start, end + 1),
       });
     });
     const progressiveSceneUrl = new URL("progressive/scene.gltf", url);
@@ -347,7 +381,7 @@ async function recordBrowser(definition) {
           document.documentElement.dataset.geometryRepresentation === "coarse" &&
           document.querySelector("#status")?.getAttribute("data-stage") === "coarse",
       ),
-      targetRequested,
+      firstTargetRequested,
     ]);
     const progressiveScreenshotName =
       `${definition.id}-${browserVersion.split(".")[0]}-${operatingSystem}-coarse.png`;
@@ -371,7 +405,36 @@ async function recordBrowser(definition) {
     if (!targetRequestSawCoarseReady) {
       throw new Error(`${definition.id} requested target geometry before the coarse frame.`);
     }
-    releaseTarget();
+    releaseFirstTargetChunk();
+    await Promise.all([
+      progressivePage.waitForFunction(
+        () =>
+          document.documentElement.dataset.targetChunksReady === "1" &&
+          document.documentElement.dataset.targetChunksTotal === "3" &&
+          document.documentElement.dataset.geometryRepresentation === "mixed" &&
+          document.querySelector("#status")?.getAttribute("data-stage") === "target-chunks",
+      ),
+      secondTargetRequested,
+    ]);
+    const partialScreenshotName =
+      `${definition.id}-${browserVersion.split(".")[0]}-${operatingSystem}-partial.png`;
+    const partialScreenshot = await progressivePage.screenshot({
+      fullPage: true,
+      type: "png",
+    });
+    await writeFile(resolve(outputDirectory, partialScreenshotName), partialScreenshot);
+    Object.assign(observed.progressive, {
+      firstTargetChunkPromoted: true,
+      partialStatus: await progressivePage.locator("#status").innerText(),
+      partialTriangles: await progressivePage.locator("#triangle-count").innerText(),
+      partialEdges: await progressivePage.locator("#edge-count").innerText(),
+      partialScreenshot: {
+        path: partialScreenshotName,
+        bytes: partialScreenshot.byteLength,
+        sha256: sha256(partialScreenshot),
+      },
+    });
+    releaseSecondTargetChunk();
     await progressivePage.locator("#status[data-state='ready']").waitFor({ timeout: 15_000 });
     Object.assign(observed.progressive, {
       targetPromoted: await progressivePage.evaluate(
@@ -382,11 +445,98 @@ async function recordBrowser(definition) {
       targetStatus: await progressivePage.locator("#status").innerText(),
       targetTriangles: await progressivePage.locator("#triangle-count").innerText(),
       targetEdges: await progressivePage.locator("#edge-count").innerText(),
+      targetRangeRequests,
+      targetResponsesPartial: targetRangeRequests.length === expectedTargetRanges.length,
     });
     if (!observed.progressive.targetPromoted) {
       throw new Error(`${definition.id} did not promote coarse bounds to target geometry.`);
     }
+    assertEqual(
+      JSON.stringify(targetRangeRequests),
+      JSON.stringify(expectedTargetRanges),
+      `${definition.id} target range sequence`,
+    );
     await progressivePage.close();
+
+    const cancellationPage = await context.newPage();
+    cancellationPage.on("console", (message) => {
+      if (message.type() === "warning" || message.type() === "error") {
+        consoleIssues.push({ level: message.type(), message: message.text() });
+      }
+    });
+    cancellationPage.on("pageerror", (error) => {
+      consoleIssues.push({ level: "pageerror", message: error.message });
+    });
+    await cancellationPage.route("**/progressive/scene.gltf", (route) =>
+      route.fulfill({
+        path: resolve(progressiveDirectory, "scene.gltf"),
+        contentType: "model/gltf+json",
+      }),
+    );
+    await cancellationPage.route("**/progressive/coarse.bin", (route) =>
+      route.fulfill({
+        path: resolve(progressiveDirectory, "coarse.bin"),
+        contentType: "application/octet-stream",
+      }),
+    );
+    let abortSecondChunk;
+    const abortSecondChunkGate = new Promise((resolveAbort) => {
+      abortSecondChunk = resolveAbort;
+    });
+    let cancellableChunkRequestedResolve;
+    const cancellableChunkRequested = new Promise((resolveRequest) => {
+      cancellableChunkRequestedResolve = resolveRequest;
+    });
+    let cancellationRangeRequests = 0;
+    await cancellationPage.route("**/progressive/scene.bin", async (route) => {
+      const range = route.request().headers().range;
+      const match = range ? /^bytes=(\d+)-(\d+)$/u.exec(range) : undefined;
+      if (!match) throw new Error(`${definition.id} cancellation request omitted its range.`);
+      const start = Number(match[1]);
+      const end = Number(match[2]);
+      cancellationRangeRequests += 1;
+      if (cancellationRangeRequests === 2) {
+        cancellableChunkRequestedResolve();
+        await abortSecondChunkGate;
+        await route.abort("aborted").catch(() => undefined);
+        return;
+      }
+      await route.fulfill({
+        status: 206,
+        contentType: "application/octet-stream",
+        headers: {
+          "Accept-Ranges": "bytes",
+          "Content-Range": `bytes ${start}-${end}/${progressiveTargetBytes.byteLength}`,
+        },
+        body: progressiveTargetBytes.subarray(start, end + 1),
+      });
+    });
+    await cancellationPage.goto(progressiveViewerUrl.href, { waitUntil: "domcontentloaded" });
+    await Promise.all([
+      cancellationPage.waitForFunction(
+        () => document.documentElement.dataset.targetChunksReady === "1",
+      ),
+      cancellableChunkRequested,
+    ]);
+    await cancellationPage.locator("#cancel-scene-load").click();
+    abortSecondChunk();
+    await cancellationPage.waitForFunction(
+      () =>
+        document.documentElement.dataset.sceneLoading === "false" &&
+        document.querySelector("#status")?.getAttribute("data-state") === "error" &&
+        document.querySelector("#status")?.textContent === "Scene load cancelled.",
+    );
+    await cancellationPage.waitForTimeout(250);
+    observed.progressive.cancellation = {
+      activeRangeAborted: true,
+      requestsBeforeCancel: cancellationRangeRequests,
+      noFurtherRequests: cancellationRangeRequests === 2,
+      status: await cancellationPage.locator("#status").innerText(),
+    };
+    if (!observed.progressive.cancellation.noFurtherRequests) {
+      throw new Error(`${definition.id} continued target requests after cancellation.`);
+    }
+    await cancellationPage.close();
 
     const webGpu = await page.evaluate(async () => {
       const adapter = await navigator.gpu?.requestAdapter();

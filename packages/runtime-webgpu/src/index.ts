@@ -21,10 +21,12 @@ export {
 export type {
   CompiledGltfDocument,
   CompiledGltfErrorCode,
+  CompiledBatchEvidence,
   DecodeCompiledGltfOptions,
   CompiledHierarchy,
   CompiledHierarchyEntry,
   CompiledObjectEvidence,
+  CompiledTargetChunk,
   DecodedCompiledScene,
   GeometryRepresentation,
   SceneBounds,

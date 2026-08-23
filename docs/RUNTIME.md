@@ -419,8 +419,12 @@ occurrence resolves its glTF node and revision-local OCCT edge references.
 Visibility, navigation, clipping, hierarchy inspection, and local/URL package
 opening are implemented. A progressive package can now decode and render
 prototype AABBs from `coarse.bin`, then replace GPU batches with `scene.bin`
-target geometry while preserving node-derived object IDs. Scheduling across
-spatial chunks, cancellation, and resource-budget behavior remain unimplemented.
+target geometry while preserving node-derived object IDs. Target prototype
+ranges are fetched and decoded one at a time; unresolved prototypes keep their
+coarse batches. Scene replacement or an explicit user cancellation aborts the
+active range, terminates its Worker, and prevents later ranges from starting.
+Camera-driven scheduling across spatial chunks, cancellation of obsolete view
+work, and resource-budget eviction remain unimplemented.
 
 The reproducible browser smoke command is `pnpm browser:matrix`. Its committed
 Phase 1 run covers Chrome/Blink and Firefox/Gecko with the same compiled package,

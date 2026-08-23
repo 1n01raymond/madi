@@ -12,7 +12,8 @@
     "coarseBinaryUri": "coarse.bin",
     "coordinateSystem": "right-handed-y-up-meters",
     "geometryEncoding": "gltf-f32",
-    "progressiveRepresentation": "prototype-aabb-v1"
+    "progressiveRepresentation": "prototype-aabb-v1",
+    "targetChunking": "prototype-range-v1"
   },
   "source": {
     "sceneId": "scene:occt:87b7909984c635ff",
@@ -22,13 +23,13 @@
     "optionsDigest": "sha256:14b35fda584ddfbfe5614edd5a32be03938610e8b3ffbd51acdc8c8cc9df9abd"
   },
   "output": {
-    "packageDigest": "c92abeee8e10e7373e64cb5e5c9ac84145bceb5272b329e6466137de6091cd2d",
+    "packageDigest": "e12163df8b95f401e866f002d170e9957ee350b8e768caad68969949746c241c",
     "resources": [
       {
         "path": "scene.gltf",
         "mediaType": "model/gltf+json",
-        "bytes": 64719,
-        "sha256": "66061f82bd2ee5b11bd8885822d6e690d40885ba8bde61f79d3a5866cde99309"
+        "bytes": 65815,
+        "sha256": "e2f52189091431ce9c0ff94a939c52dee89d9b3ce2b8b9fdb41a0a21a8e1499b"
       },
       {
         "path": "scene.bin",
@@ -53,7 +54,8 @@
     "gltfMeshCount": 6,
     "materialCount": 10,
     "triangleCount": 2076,
-    "edgeSegmentCount": 181
+    "edgeSegmentCount": 181,
+    "targetChunkCount": 3
   },
   "prototypeReuse": [
     {

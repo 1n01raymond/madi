@@ -40,6 +40,11 @@ separates prototype AABB proxies from target geometry in two standard glTF
 buffers. Shape-preserving LOD and spatial chunks remain pending. See the
 [Phase 1 tracker](PHASE_1.md).
 
+The direct AP242 package also records deterministic prototype byte ranges over
+`scene.bin`. The browser promotes each completed HTTP Range while retaining
+coarse batches for unresolved prototypes. The current order is static;
+camera-driven reprioritization and eviction remain pending.
+
 - local STEP AP242 input;
 - XDE hierarchy, names, colors, units, transforms;
 - coarse and target display tessellation;
@@ -57,7 +62,10 @@ implemented. Hierarchy/source-identity search and occurrence properties are
 also available. The Studio opens shareable HTTP(S) scene URLs and validated
 local `.gltf` packages with all declared `.bin` resources without uploading
 them. A delayed-network browser record proves a coarse WebGPU frame before the
-target request completes; prioritization and bounded residency remain pending.
+target request completes and a mixed coarse/target frame after one prototype
+range. User/scene replacement cancellation now stops an active range and its
+Worker; camera-driven reprioritization, obsolete-work cancellation, and bounded
+residency remain pending.
 
 - manifest/hierarchy-first loading;
 - Worker decode;
@@ -87,7 +95,7 @@ target request completes; prioritization and bounded residency remain pending.
 ## Phase 2 — Large-scene alpha (`0.2.x`)
 
 - content-addressed persistent cache;
-- view-prioritized scheduling and cancellation;
+- view-prioritized scheduling and cancellation of obsolete camera work;
 - memory budgets and eviction;
 - spatial/draw clustering;
 - screen-space LOD policy;

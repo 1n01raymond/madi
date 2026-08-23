@@ -175,6 +175,51 @@ async function validateFixture(definition) {
       gltf.extras?.madi?.progressive?.strategy === "prototype-aabb-v1",
       `${label} progressive strategy changed.`,
     );
+    const targetChunks = gltf.extras.madi.progressive.targetChunks;
+    assert(
+      report.options.targetChunking === "prototype-range-v1" &&
+        report.counts.targetChunkCount === targetChunks?.length &&
+        targetChunks?.length === 3,
+      `${label} target chunk contract changed.`,
+    );
+    const claimedMeshes = new Set();
+    let chunkBytes = 0;
+    for (const [chunkIndex, chunk] of targetChunks.entries()) {
+      assert(chunk.priority === chunkIndex, `${label} target chunk priority changed.`);
+      assert(chunk.buffer === 0, `${label} target chunk must reference scene.bin.`);
+      assert(
+        chunk.byteOffset >= 0 &&
+          chunk.byteLength > 0 &&
+          chunk.byteOffset + chunk.byteLength <= binary.byteLength,
+        `${label} target chunk range is invalid.`,
+      );
+      chunkBytes += chunk.byteLength;
+      for (const meshIndex of chunk.meshIndexes) {
+        assert(!claimedMeshes.has(meshIndex), `${label} target mesh belongs to two chunks.`);
+        claimedMeshes.add(meshIndex);
+        const mesh = gltf.meshes[meshIndex];
+        assert(mesh, `${label} target chunk references a missing mesh.`);
+        const accessorIndexes = mesh.primitives.flatMap((primitive) => [
+          ...Object.values(primitive.attributes),
+          primitive.indices,
+          primitive.extras?.madi?.faceSourceAccessor,
+          primitive.extras?.madi?.edgeClassAccessor,
+          primitive.extras?.madi?.edgeSourceAccessor,
+        ]).filter(Number.isInteger);
+        for (const accessorIndex of accessorIndexes) {
+          const accessor = gltf.accessors[accessorIndex];
+          const bufferView = gltf.bufferViews[accessor.bufferView];
+          assert(
+            bufferView.buffer === 0 &&
+              bufferView.byteOffset >= chunk.byteOffset &&
+              bufferView.byteOffset + bufferView.byteLength <=
+                chunk.byteOffset + chunk.byteLength,
+            `${label} target mesh accessor escapes its chunk.`,
+          );
+        }
+      }
+    }
+    assert(chunkBytes === binary.byteLength, `${label} target chunks do not cover scene.bin.`);
   }
   const binaries = [binary, ...(coarseBinary ? [coarseBinary] : [])];
   for (const [index, bufferView] of gltf.bufferViews.entries()) {

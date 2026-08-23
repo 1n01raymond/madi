@@ -258,6 +258,7 @@ export class Phase0Renderer {
   private pickTexture?: GPUTexture;
   private targetWidth = 0;
   private targetHeight = 0;
+  private destroyed = false;
 
   private constructor(
     canvas: HTMLCanvasElement,
@@ -383,7 +384,7 @@ export class Phase0Renderer {
     });
 
     void device.lost.then((info) => {
-      options.onDeviceLost?.(info.message || info.reason);
+      if (!this.destroyed) options.onDeviceLost?.(info.message || info.reason);
     });
   }
 
@@ -626,6 +627,8 @@ export class Phase0Renderer {
   }
 
   destroy(): void {
+    if (this.destroyed) return;
+    this.destroyed = true;
     this.destroyBatches();
     this.depthTexture?.destroy();
     this.pickTexture?.destroy();

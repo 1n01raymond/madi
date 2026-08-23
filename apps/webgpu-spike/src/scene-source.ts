@@ -15,8 +15,18 @@ export interface LocalSceneSource {
 export type SceneSource = UrlSceneSource | LocalSceneSource;
 
 export type GeometryBinarySource =
-  | { readonly kind: "url"; readonly href: string }
-  | { readonly kind: "file"; readonly file: File };
+  | {
+      readonly kind: "url";
+      readonly href: string;
+      readonly byteOffset?: number;
+      readonly byteLength?: number;
+    }
+  | {
+      readonly kind: "file";
+      readonly file: File;
+      readonly byteOffset?: number;
+      readonly byteLength?: number;
+    };
 
 export interface LoadedSceneHierarchy {
   readonly document: CompiledGltfDocument;
@@ -90,9 +100,12 @@ function parseJson(text: string, label: string): unknown {
   }
 }
 
-export async function loadSceneHierarchy(source: SceneSource): Promise<LoadedSceneHierarchy> {
+export async function loadSceneHierarchy(
+  source: SceneSource,
+  signal?: AbortSignal,
+): Promise<LoadedSceneHierarchy> {
   if (source.kind === "url") {
-    const response = await fetch(source.gltfUrl, { cache: "no-store" });
+    const response = await fetch(source.gltfUrl, { cache: "no-store", signal });
     if (!response.ok) {
       throw new Error(`Failed to load compiled hierarchy (${response.status}).`);
     }

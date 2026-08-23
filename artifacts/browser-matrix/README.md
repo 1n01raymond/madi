@@ -3,7 +3,8 @@
 This evidence records the canonical Adafruit PyGamer STEP fixture loaded,
 rendered, and picked through two independent browser engines on 2026-08-23
 (Asia/Seoul). `browser-matrix.json` is the machine-readable result; the PNG
-files are full-page post-selection captures referenced by that report.
+files are full-page selection, coarse, and mixed-residency captures referenced
+by that report.
 
 The CAD asset is copyright Adafruit Industries and redistributed unchanged
 under the MIT License. Adafruit does not endorse MADI.
@@ -18,7 +19,10 @@ under the MIT License. Adafruit does not endorse MADI.
 | Delivery path | `scene.gltf` hierarchy → Worker `scene.bin` decode → WebGPU | Same |
 | Hierarchy before binary request | Passed | Passed |
 | Coarse frame before delayed target | 36 triangles / 36 edges, passed | Same |
+| First target Range promoted | 31.7 KiB; 8 detailed fasteners with retained coarse plate/rail | Same |
+| Mixed frame | 380 triangles / 61 edges, passed | Same |
 | Target promotion | 2,076 triangles / 181 edges, passed | Same |
+| Cancel during range 2/3 | Active request aborted; range 3/3 not requested | Same |
 | Ready state | 34 shared meshes, 85 renderable occurrences | Same |
 | Geometry | 162,838 triangles, 13,897 explicit CAD edge segments | Same |
 | Pick result | PyGamer joystick, glTF node 56, object ID 57, 524 CAD edge refs | Same |
@@ -33,18 +37,26 @@ under the MIT License. Adafruit does not endorse MADI.
 |---|---|
 | ![Chrome coarse bounds before target](chrome-151-windows-coarse.png) | ![Firefox coarse bounds before target](firefox-150-windows-coarse.png) |
 
-Both screenshots were visually reviewed for the canonical camera, source
+| Chrome 151 first target Range | Firefox 150 first target Range |
+|---|---|
+| ![Chrome mixed coarse and target frame](chrome-151-windows-partial.png) | ![Firefox mixed coarse and target frame](firefox-150-windows-partial.png) |
+
+All screenshots were visually reviewed for the canonical camera, source
 colors, recognizable display/joystick/button assembly, explicit CAD edges,
 hierarchy, statistics, and selected-occurrence text. Minor browser font
 rasterization differences are not geometry differences. This run proves the
 compiled-package runtime boundary and one AABB-to-target progressive slice, not
-shape-preserving LOD, large-scene performance, or broad GPU/OS/mobile support.
+shape-preserving LOD, camera-driven chunk priority, bounded residency,
+large-scene performance, or broad GPU/OS/mobile support.
 
 ## Reproduce
 
 The recorder starts and stops its own Vite server, uses a fixed 1320 × 1000 CSS
 viewport, confirms that all 87 hierarchy records are available before the
-14.8 MB binary request, selects the joystick at a fixed normalized point,
+14.8 MB canonical binary request, and verifies three exact 206 Range responses
+for the progressive AP242 package with coarse and mixed frames before final
+target residency. A separate run cancels during range 2/3 and asserts that no
+later request starts. It selects the joystick at a fixed normalized point,
 rejects browser warnings/errors, and writes screenshots plus SHA-256 metadata.
 
 ```sh

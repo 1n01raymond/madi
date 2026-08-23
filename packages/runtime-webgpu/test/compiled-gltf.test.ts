@@ -111,6 +111,7 @@ describe("compiled glTF runtime boundary", () => {
       coarseBinaryUri: "coarse.bin",
       coarseBinaryByteLength: 2_736,
     });
+    expect(hierarchy.targetChunks).toHaveLength(3);
     expect(coarse.summary).toEqual({
       prototypeBatches: 3,
       partOccurrences: 10,
@@ -127,6 +128,30 @@ describe("compiled glTF runtime boundary", () => {
       target.objectEvidence.map(({ occurrenceId }) => occurrenceId),
     );
     expect(coarse.bounds).toEqual(target.bounds);
+    expect(coarse.batchEvidence.map(({ targetMeshIndex }) => targetMeshIndex)).toEqual(
+      target.batchEvidence.map(({ targetMeshIndex }) => targetMeshIndex),
+    );
+
+    const chunkScenes = hierarchy.targetChunks.map((chunk) =>
+      decodeCompiledGltf(
+        json,
+        Uint8Array.from(
+          targetBytes.subarray(chunk.byteOffset, chunk.byteOffset + chunk.byteLength),
+        ).buffer,
+        { targetChunkId: chunk.id },
+      ),
+    );
+    expect(chunkScenes.map(({ summary }) => summary.partOccurrences)).toEqual([8, 1, 1]);
+    expect(chunkScenes.reduce((total, value) => total + value.summary.triangles, 0)).toBe(
+      target.summary.triangles,
+    );
+    expect(chunkScenes.reduce((total, value) => total + value.summary.edgeSegments, 0)).toBe(
+      target.summary.edgeSegments,
+    );
+    expect(
+      chunkScenes.flatMap(({ objectEvidence }) => objectEvidence.map(({ objectId }) => objectId))
+        .sort((left, right) => left - right),
+    ).toEqual(target.objectEvidence.map(({ objectId }) => objectId));
   });
 
   it("rejects unrecognized MADI extras profiles", async () => {

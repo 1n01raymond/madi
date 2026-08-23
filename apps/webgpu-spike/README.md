@@ -13,7 +13,8 @@ scene.bin
             └─ Studio slice: orbit/pan/zoom/fit + synchronized selection
 
 progressive package
-  └─ coarse.bin → first WebGPU frame → scene.bin request/decode → in-place promotion
+  └─ coarse.bin → first WebGPU frame
+       └─ scene.bin Range chunks → prototype-by-prototype promotion
 ```
 
 Run it with `pnpm dev`. Use `pnpm browser:matrix` for the reproducible headed
@@ -48,3 +49,7 @@ its external `.bin` resources. The browser validates each declared file name
 and byte length before sending local `File` objects to the geometry Worker.
 Local files stay on the client and do not create a shareable URL. This is a
 compiled scene workflow; direct STEP AP242/AP214 input belongs to the compiler.
+For progressive packages, local `File.slice()` provides the same target chunk
+boundary without network requests. **Cancel** aborts the active hierarchy or
+geometry load, terminates its Worker, and prevents later target ranges from
+starting.

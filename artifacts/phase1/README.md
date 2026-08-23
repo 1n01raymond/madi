@@ -43,7 +43,9 @@ three reusable part meshes and ten renderable occurrences, and the compiler
 emits 2,076 triangles plus 181 explicit CAD edge segments. The expanded Scene
 IR exists only in a temporary directory and is removed after validation. Its
 2.7 KiB `coarse.bin` contains 36 triangles and 36 edge segments across three
-shared prototype bounds; `scene.bin` remains the 183.6 KiB target payload.
+shared prototype bounds; `scene.bin` remains the 183.6 KiB target payload. Its
+three prototype ranges cover that file without overlap: the occurrence-heavy
+fastener geometry is scheduled first, followed by the mounting plate and rail.
 
 ## Reproduce and validate
 

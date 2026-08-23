@@ -70,7 +70,7 @@ header {
 
 .scene-source {
   display: grid;
-  grid-template-columns: minmax(180px, 0.8fr) minmax(320px, 1.5fr) auto auto;
+  grid-template-columns: minmax(180px, 0.8fr) minmax(320px, 1.5fr) auto auto auto;
   align-items: center;
   gap: 8px;
   margin-bottom: 16px;
@@ -167,7 +167,7 @@ header {
   font: 8px/1.4 ui-monospace, "Cascadia Code", monospace;
 }
 
-html[data-scene-loading="true"] canvas {
+html[data-scene-loading="true"]:not([data-coarse-ready="true"]) canvas {
   opacity: 0.45;
 }
 
