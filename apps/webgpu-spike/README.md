@@ -33,3 +33,16 @@ not required. Press `/` to focus search and Enter to select its first renderable
 result. Viewport, tree, and search selection populate the same source-identity
 property panel, including glTF node/object IDs and a bounded preview of
 revision-local CAD edge references.
+
+## Open another compiled scene
+
+Use **Open URL** for an HTTP(S) `scene.gltf`. A successful URL is retained in
+the page's `?scene=` query so the view can be reopened or shared; the remote
+host must allow cross-origin requests for both the glTF and its external binary.
+
+Use **Open local pair** to select exactly one MADI-profile `.gltf` and the
+matching external `.bin`. The browser validates the declared binary file name
+and byte length before sending the local `File` to the geometry Worker. Local
+files stay on the client and do not create a shareable URL. This is a compiled
+scene workflow, not direct STEP import; local STEP AP242 input remains a
+compiler milestone.

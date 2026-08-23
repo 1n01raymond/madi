@@ -68,6 +68,109 @@ header {
   padding-bottom: 34px;
 }
 
+.scene-source {
+  display: grid;
+  grid-template-columns: minmax(180px, 0.8fr) minmax(320px, 1.5fr) auto auto;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  padding: 10px;
+  border: 1px solid #1c313c;
+  border-radius: 10px;
+  background: rgb(8 24 33 / 88%);
+}
+
+.scene-source-current {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+
+.scene-source-current span {
+  color: #56d4ff;
+  font: 700 8px/1.4 ui-monospace, "Cascadia Code", monospace;
+  letter-spacing: 0.12em;
+}
+
+.scene-source-current strong {
+  overflow: hidden;
+  color: #b8cdd6;
+  font: 10px/1.4 ui-monospace, "Cascadia Code", monospace;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.scene-url-form {
+  display: flex;
+  min-width: 0;
+  gap: 6px;
+}
+
+.scene-url-form input {
+  min-width: 0;
+  flex: 1;
+  padding: 7px 9px;
+  border: 1px solid #294653;
+  border-radius: 7px;
+  outline: 0;
+  color: #dceaf0;
+  background: #0b202a;
+  font: 9px/1.4 ui-monospace, "Cascadia Code", monospace;
+}
+
+.scene-url-form input:focus {
+  border-color: #2aaed9;
+  box-shadow: 0 0 0 2px rgb(42 174 217 / 10%);
+}
+
+.scene-source button,
+.local-scene-button {
+  padding: 7px 9px;
+  border: 1px solid #315363;
+  border-radius: 7px;
+  color: #a9c4cf;
+  background: #0b222d;
+  font: 700 9px/1.4 ui-monospace, "Cascadia Code", monospace;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.scene-source button:hover,
+.scene-source button:focus-visible,
+.local-scene-button:hover,
+.local-scene-button:focus-within {
+  border-color: #2aaed9;
+  outline: 0;
+  color: #e7f8fc;
+}
+
+.scene-source button:disabled,
+.local-scene-button[data-disabled="true"] {
+  color: #57717d;
+  cursor: wait;
+  opacity: 0.7;
+}
+
+.local-scene-button input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.scene-source > small {
+  grid-column: 2 / -1;
+  color: #58727e;
+  font: 8px/1.4 ui-monospace, "Cascadia Code", monospace;
+}
+
+html[data-scene-loading="true"] canvas {
+  opacity: 0.45;
+}
+
 .eyebrow {
   margin: 0 0 12px;
   color: #56d4ff;
@@ -703,6 +806,14 @@ code {
 }
 
 @media (max-width: 1040px) {
+  .scene-source {
+    grid-template-columns: minmax(160px, 0.7fr) minmax(300px, 1.3fr) auto;
+  }
+
+  .demo-scene-button {
+    display: none;
+  }
+
   .evidence {
     grid-template-columns: 1fr;
   }
@@ -725,6 +836,16 @@ code {
 
   .pipeline {
     grid-template-columns: 1fr;
+  }
+
+  .scene-source {
+    grid-template-columns: 1fr auto;
+  }
+
+  .scene-source-current,
+  .scene-url-form,
+  .scene-source > small {
+    grid-column: 1 / -1;
   }
 
   .pipeline > i {
