@@ -22,6 +22,7 @@ const defaultAdapterScript = fileURLToPath(
   ),
 );
 const disciplinePattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/u;
+export const defaultIfcTargetChunkByteBudget = 512 * 1024;
 
 export interface IfcFederationDocumentInput {
   readonly discipline: string;
@@ -36,6 +37,8 @@ export interface IfcFederationCompileOptions {
   readonly adapterScriptPath?: string;
   readonly threads?: number;
   readonly retainSceneIr?: boolean;
+  /** Maximum target bytes fetched and decoded in one progressive IFC request. */
+  readonly targetChunkByteBudget?: number;
   readonly environment?: NodeJS.ProcessEnv;
 }
 
@@ -256,6 +259,8 @@ export async function compileIfcFederation(
     const compiled = compileSceneToGltf(scene, {
       coarseBounds: true,
       generator: "MADI compiler 0.0.0 / IfcOpenShell federation slice",
+      targetChunkByteBudget:
+        options.targetChunkByteBudget ?? defaultIfcTargetChunkByteBudget,
     });
     const validation = validateCompiledGltf(
       compiled.document,

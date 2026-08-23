@@ -396,8 +396,11 @@ runs both MADI invariants and the official Khronos glTF Validator. The current
 slice keeps target geometry as the ordinary node mesh and records its coarse
 mesh index in standard `extras`. This proves representation-separated delivery,
 and `targetChunks` maps target prototype meshes to deterministic, non-overlapping
-`scene.bin` byte ranges. This proves partial range delivery, but not
-shape-preserving LOD, spatial partitioning, or bounded residency.
+`scene.bin` byte ranges. The IFC compile path coalesces adjacent prototype
+ranges into 512 KiB requests (without splitting an oversized prototype), which
+turns the qualified Digital Hub package from 3,383 prototype ranges into 45
+network/decode units. This proves partial range delivery and static request
+scheduling, but not shape-preserving LOD or spatial partitioning.
 
 The public `madi compile` entry now accepts a local AP242 or AP214 Part 21 file,
 invokes the isolated OCCT adapter, verifies schema and source digest parity,
@@ -423,7 +426,9 @@ triangles to 913,520 unique triangles. The compiled package passes the official
 Khronos validator with zero errors and warnings. Compact reports and the
 reproduction command live under `artifacts/ifc/digital-hub/`.
 
-This is an adapter/contract proof, not a Phase 2 streaming result. Its 3,383
-prototype-granular target ranges expose the next compiler/runtime requirement:
-spatial chunking, range coalescing, incremental GPU uploads, and bounded
-residency. Explicit IFC CAD-edge classification also remains deferred.
+This now also exercises the first Phase 2 scheduler boundary: its 3,383
+prototype-granular ranges compile into 45 request chunks, the browser updates
+only changed GPU batches, and fixed decoded/GPU admission caps retain coarse
+fallbacks when pressure is reached. It is not yet a spatial scheduler: LOD,
+camera reprioritization, eviction, cache tiers, and explicit IFC CAD-edge
+classification remain deferred.

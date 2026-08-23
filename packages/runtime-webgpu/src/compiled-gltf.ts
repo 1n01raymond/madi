@@ -87,6 +87,9 @@ export interface CompiledTargetChunk {
   readonly byteOffset: number;
   readonly byteLength: number;
   readonly meshIndexes: readonly number[];
+  /** All prototypes represented by this request. Legacy chunks contain one. */
+  readonly prototypeIds: readonly string[];
+  /** @deprecated Use prototypeIds; retained for the prototype-range-v1 contract. */
   readonly prototypeId: string;
   readonly occurrenceCount: number;
   readonly priority: number;
@@ -360,6 +363,20 @@ function targetChunksFor(
     if (typeof value.prototypeId !== "string" || value.prototypeId.trim() === "") {
       throw new CompiledGltfError("INVALID_GLTF", `${label}.prototypeId must be non-empty.`);
     }
+    const prototypeIds = value.prototypeIds === undefined
+      ? [value.prototypeId]
+      : stringArray(value.prototypeIds);
+    if (
+      prototypeIds.length === 0 ||
+      prototypeIds.some((prototypeId) => prototypeId.trim() === "") ||
+      new Set(prototypeIds).size !== prototypeIds.length ||
+      prototypeIds[0] !== value.prototypeId
+    ) {
+      throw new CompiledGltfError(
+        "INVALID_GLTF",
+        `${label}.prototypeIds must be unique, non-empty, and start with prototypeId.`,
+      );
+    }
     const buffer = finiteInteger(value.buffer, `${label}.buffer`, document.buffers.length);
     if (buffer !== targetBufferIndex) {
       throw new CompiledGltfError("INVALID_GLTF", `${label}.buffer must select the target buffer.`);
@@ -392,6 +409,7 @@ function targetChunksFor(
       byteOffset,
       byteLength,
       meshIndexes,
+      prototypeIds,
       prototypeId: value.prototypeId,
       occurrenceCount: finiteInteger(value.occurrenceCount, `${label}.occurrenceCount`),
       priority: finiteInteger(value.priority, `${label}.priority`),

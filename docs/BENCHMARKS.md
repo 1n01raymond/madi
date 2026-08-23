@@ -311,5 +311,7 @@ occurrences, and 273,188 property values across four IFC4 documents. Source,
 adapter, Scene IR, glTF resources, and Khronos validation are digest-linked.
 This is not an ADR-0003 renderer benchmark: it records no controlled frame,
 memory, startup, or Three.js/IFC baseline measurements. Its 3,383
-prototype-granular ranges instead identify chunk coalescing and incremental GPU
-residency as prerequisites for Phase 2 performance evidence.
+prototype-granular ranges now compile into 45 static requests and exercise
+incremental GPU reconciliation with fixed admission caps. Controlled retained
+memory, timing, and baseline comparisons remain prerequisites for Phase 2
+performance evidence.

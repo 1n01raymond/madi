@@ -13,18 +13,18 @@
     },
     "compiler": {
       "path": "build-report.json",
-      "bytes": 33836,
-      "sha256": "4c4a6779ada764347747f5d38bfff232567502399ade6558f73e680f8ce96ed3"
+      "bytes": 33881,
+      "sha256": "842e957c3aa4234329e34efd7a576549755c681f7f8cbec6a524bf99640ae312"
     }
   },
   "package": {
-    "digest": "32c5cf2183db37e6d2718e603f4ad833df72e684b94a98ce4086ee32d7d0451c",
+    "digest": "a6d5c0eecebf286208e151d281af26e6747e8a163ba3eb4a3b5cfe9353260d5d",
     "resources": [
       {
         "path": "scene.gltf",
         "mediaType": "model/gltf+json",
-        "bytes": 35225820,
-        "sha256": "f7e65e474f8861bfea8fb8eec96d885414bf607b686bed33c7bf13e9e46444b5"
+        "bytes": 34183800,
+        "sha256": "b5b3e2e662b3636426c8e73cf4eba0518345ab8ee5a7d7c35abac2411aaa84d3"
       },
       {
         "path": "scene.bin",

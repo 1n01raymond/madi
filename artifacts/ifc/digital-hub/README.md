@@ -18,7 +18,9 @@ Digital Hub dataset.
 | Reused geometry occurrences | 1,769 |
 | Unique triangles | 913,520 |
 | Submitted triangles before reuse | 2,534,364 |
-| Compiled package bytes | 60,721,476 |
+| Coalesced target requests | 45 |
+| Target request budget | 512 KiB (except one indivisible 1.12 MiB prototype) |
+| Compiled package bytes | 59,679,456 |
 
 IfcOpenShell 0.8.5 generated local prototype geometry and occurrence
 placements in metres. MADI retained document-scoped GlobalIds, hierarchy,
@@ -58,7 +60,7 @@ pnpm ifc:federation:check
 ```
 
 The checked package digest is
-`32c5cf2183db37e6d2718e603f4ad833df72e684b94a98ce4086ee32d7d0451c`.
+`a6d5c0eecebf286208e151d281af26e6747e8a163ba3eb4a3b5cfe9353260d5d`.
 
 ## Deliberate limits
 
@@ -67,6 +69,9 @@ The checked package digest is
 - Properties are flattened for the first queryable semantic path.
 - Cross-document identity stays document-scoped; names are not used to infer
   object equivalence.
-- Prototype-granular delivery produces 3,383 target ranges. The current Phase
-  1 browser can display coarse geometry and consume those ranges, but range
-  coalescing and incremental GPU residency are Phase 2 scheduler work.
+- The compiler coalesces the 3,383 prototype ranges into 45 deterministic
+  target requests at a 512 KiB budget. A single prototype exceeding that
+  budget is kept whole at 1.12 MiB: splitting one mesh's accessor payload is a
+  later spatial-chunking concern. The browser promotes these requests through
+  stable GPU batch keys and stops safely at its published 64 MiB decoded/GPU
+  residency cap, retaining coarse geometry for anything not admitted.

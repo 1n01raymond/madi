@@ -98,7 +98,9 @@ export interface CompilerBuildReport {
     readonly coordinateSystem: "right-handed-y-up-meters";
     readonly geometryEncoding: "gltf-f32";
     readonly progressiveRepresentation?: "prototype-aabb-v1";
-    readonly targetChunking?: "prototype-range-v1";
+    readonly targetChunking?: "prototype-range-v1" | "coalesced-prototype-range-v1";
+    /** Maximum bytes per progressive target request when coalescing is enabled. */
+    readonly targetChunkByteBudget?: number;
   };
   readonly source: {
     readonly sceneId: string;
@@ -147,6 +149,11 @@ export interface CompileGltfOptions {
   readonly coarseBounds?: boolean;
   readonly coarseBinaryUri?: string;
   readonly generator?: string;
+  /**
+   * Coalesce adjacent prototype ranges into deterministic HTTP Range requests.
+   * Omit this to retain one target chunk per prototype for compatibility.
+   */
+  readonly targetChunkByteBudget?: number;
 }
 
 export interface PackageValidationIssue {
