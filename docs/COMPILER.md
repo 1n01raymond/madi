@@ -110,6 +110,22 @@ The semantics are the contract.
 
 OCCT is not linked into the browser runtime.
 
+### IFC adapter responsibilities
+
+- preflight IFC2X3/IFC4/IFC4X3 Part 21 documents independently;
+- preserve document-scoped GlobalIds and source hashes across a federation;
+- map project/site/building/storey containment plus decomposition, type, group,
+  and classification relationships;
+- retain queryable property sets separately from render geometry;
+- extract local geometry and occurrence placement without baking every product
+  into world-space vertices;
+- preserve mapped-representation reuse through shared prototypes; and
+- normalize source units while retaining each document's original unit scale.
+
+IfcOpenShell and Open CASCADE remain in an isolated compiler process. IFC edge
+and curve semantics are not inferred from triangle adjacency when the adapter
+cannot classify them reliably.
+
 ## 6. Normalization
 
 Normalization produces a canonical, deterministic scene:
@@ -392,3 +408,22 @@ The PyGamer baseline contains 34 shared meshes, 85 renderable occurrences,
 162,838 triangles, and 13,897 explicit edge segments. Its 14.8 MB binary is
 deliberately uncompressed so later chunking, LOD, compression, and residency
 work has a stable public baseline.
+
+## 21. First IFC federation slice
+
+The executable `madi compile-ifc` path accepts repeated discipline/document
+pairs, preflights their Part 21 envelopes, invokes pinned IfcOpenShell 0.8.5,
+cross-checks every source digest, validates the resulting Scene IR, and uses the
+same standards-first glTF compiler as STEP.
+
+The qualified Digital Hub result combines four IFC4 documents into 13,681
+occurrences, including 5,152 renderable products. It preserves 3,383 unique
+geometric prototypes and 1,769 reused occurrences, reducing 2,534,364 submitted
+triangles to 913,520 unique triangles. The compiled package passes the official
+Khronos validator with zero errors and warnings. Compact reports and the
+reproduction command live under `artifacts/ifc/digital-hub/`.
+
+This is an adapter/contract proof, not a Phase 2 streaming result. Its 3,383
+prototype-granular target ranges expose the next compiler/runtime requirement:
+spatial chunking, range coalescing, incremental GPU uploads, and bounded
+residency. Explicit IFC CAD-edge classification also remains deferred.

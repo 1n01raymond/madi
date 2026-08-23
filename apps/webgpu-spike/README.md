@@ -38,6 +38,20 @@ result. Viewport, tree, and search selection populate the same source-identity
 property panel, including glTF node/object IDs and a bounded preview of
 revision-local CAD edge references.
 
+To serve another locally compiled package as `/scene.gltf`, set
+`MADI_SCENE_DIR` to an absolute path or a repository-relative directory before
+starting Vite. For example, in PowerShell:
+
+```powershell
+$env:MADI_SCENE_DIR = "output/ifc/digital-hub"
+pnpm dev
+```
+
+The runtime preserves one pickable occurrence ID across material-separated
+surface batches. Prototype-granular progressive packages are still promoted
+one range at a time; range coalescing and incremental GPU residency remain
+Phase 2 work.
+
 ## Open another compiled scene
 
 Use **Open URL** for an HTTP(S) `scene.gltf`. A successful URL is retained in

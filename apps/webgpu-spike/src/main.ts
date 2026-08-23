@@ -116,9 +116,16 @@ interface ResidentBatch {
 }
 
 function orderedResidentBatches(
-  resident: ReadonlyMap<number, ResidentBatch>,
-): readonly [number, ResidentBatch][] {
-  return [...resident].sort(([left], [right]) => left - right);
+  resident: ReadonlyMap<string, ResidentBatch>,
+): readonly [string, ResidentBatch][] {
+  return [...resident].sort(([, left], [, right]) =>
+    left.evidence.targetMeshIndex - right.evidence.targetMeshIndex ||
+    left.evidence.surfacePrimitiveIndex - right.evidence.surfacePrimitiveIndex,
+  );
+}
+
+function residentBatchKey(evidence: Omit<CompiledBatchEvidence, "batchIndex">): string {
+  return `${evidence.targetMeshIndex}:${evidence.surfacePrimitiveIndex}`;
 }
 
 function renderHierarchy(hierarchy: CompiledHierarchy): void {
@@ -378,12 +385,12 @@ async function loadScene(source: SceneSource): Promise<boolean> {
         renderer.setScene(scene.gpuScene);
         render();
       } else {
-        const resident = new Map<number, ResidentBatch>();
+        const resident = new Map<string, ResidentBatch>();
         for (const batchIdentity of scene.batchEvidence) {
           const batch = scene.gpuScene.batches[batchIdentity.batchIndex];
           if (!batch) throw new Error("Coarse batch identity is incomplete.");
           const { batchIndex: _, ...evidence } = batchIdentity;
-          resident.set(batchIdentity.targetMeshIndex, { batch, evidence });
+          resident.set(residentBatchKey(evidence), { batch, evidence });
         }
         const targetObjects = new Map<number, CompiledObjectEvidence>();
         let targetTriangles = 0;
@@ -415,10 +422,13 @@ async function loadScene(source: SceneSource): Promise<boolean> {
             const batch = target.scene.gpuScene.batches[batchIdentity.batchIndex];
             if (!batch) throw new Error(`Target chunk ${chunk.id} has incomplete batch identity.`);
             const { batchIndex: _, ...evidence } = batchIdentity;
-            resident.set(batchIdentity.targetMeshIndex, { batch, evidence });
+            resident.set(residentBatchKey(evidence), { batch, evidence });
           }
           const ordered = orderedResidentBatches(resident);
-          renderer.setScene({ batches: ordered.map(([, entry]) => entry.batch) });
+          renderer.setScene({
+            batches: ordered.map(([, entry]) => entry.batch),
+            sharedObjectIdsAcrossBatches: true,
+          });
           render();
           const residentTriangles = ordered.reduce(
             (total, [, entry]) => total + entry.batch.surfaceIndices.length / 3,
@@ -449,7 +459,10 @@ async function loadScene(source: SceneSource): Promise<boolean> {
 
         const ordered = orderedResidentBatches(resident);
         scene = {
-          gpuScene: { batches: ordered.map(([, entry]) => entry.batch) },
+          gpuScene: {
+            batches: ordered.map(([, entry]) => entry.batch),
+            sharedObjectIdsAcrossBatches: true,
+          },
           bounds: scene.bounds,
           hierarchy,
           objectEvidence: [...targetObjects.values()].sort(
@@ -475,7 +488,7 @@ async function loadScene(source: SceneSource): Promise<boolean> {
     document.documentElement.dataset.targetReady = "true";
 
     status.textContent =
-      `Compiled glTF ready · ${scene.summary.prototypeBatches} shared meshes · ` +
+      `Compiled glTF ready · ${scene.summary.prototypeBatches} surface batches · ` +
       `${scene.summary.partOccurrences} renderable occurrences`;
     status.dataset.state = "ready";
     status.dataset.stage = "rendered";

@@ -110,7 +110,7 @@ The roadmap is evidence-gated rather than date-driven.
 | **0 — Feasibility** | Connect OCCT identity and edges to a direct WebGPU prototype | **Complete** |
 | **1 — Vertical slice** | Public STEP-to-browser demo with core engineering interaction | **Current** |
 | **2 — Large-scene alpha** | 100k+ occurrences, streaming, LOD, cache, and memory budgets | Planned |
-| **3 — Open platform beta** | Plugins, IFC, embedding examples, and self-host deployment | Planned |
+| **3 — Open platform beta** | Plugins, production IFC workflows, embedding, and self-host deployment | Planned |
 
 See the full [roadmap](docs/ROADMAP.md), [Phase 1 evidence](docs/PHASE_1.md),
 [Phase 0 record](docs/PHASE_0.md), and
@@ -151,6 +151,15 @@ pnpm madi compile fixtures/step/repeated-fasteners-ap242.step \
 The committed AP242 result is independently checked with zero Khronos glTF
 errors or warnings. The expanded Scene IR is temporary and is not a MADI file
 format. See the [compiler evidence](artifacts/phase1/README.md).
+
+The same compiler boundary now has an early multi-document IFC path. The
+qualified Digital Hub slice federates architecture, heating, plumbing, and
+ventilation through pinned IfcOpenShell 0.8.5: 5,152 renderable occurrences,
+3,383 shared geometric prototypes, 913,520 unique triangles, and 273,188
+property values. Its source and package hashes are independently checked with
+zero Khronos glTF errors or warnings. This is correctness evidence, not yet a
+large-scene performance claim. See the
+[IFC federation evidence](artifacts/ifc/digital-hub/README.md).
 
 ## Start with the design
 
@@ -260,6 +269,7 @@ packages/
   runtime-webgpu/     Compiled glTF loader and direct WebGPU rendering path
 native/
   adapter-occt/       Isolated STEP/XDE extraction spike
+  adapter-ifc/        Isolated multi-document IFC federation adapter
 fixtures/
   step/               Redistributable STEP manifest and review policy
   external/           Download-on-demand STEP/IFC registry and license records

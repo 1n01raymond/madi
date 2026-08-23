@@ -88,4 +88,20 @@ describe("WebGPU packed layouts", () => {
       }),
     ).toThrow(/Duplicate scene object ID/u);
   });
+
+  it("allows one logical object to span declared material batches", () => {
+    const batch = createBatch();
+    expect(() =>
+      validateGpuScene({
+        batches: [
+          batch,
+          {
+            ...batch,
+            instances: [{ transform: identity, objectId: 9 }],
+          },
+        ],
+        sharedObjectIdsAcrossBatches: true,
+      }),
+    ).not.toThrow();
+  });
 });

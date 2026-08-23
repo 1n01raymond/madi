@@ -38,6 +38,15 @@ The generated models and generator source are original MADI contributions under
 Apache-2.0. Their provenance, exact checksums, and regeneration policy are in
 `fixtures/step/`.
 
+## IFC adapter tool
+
+IfcOpenShell 0.8.5 is pinned in
+`native/adapter-ifc/tools/requirements-evidence.txt` and used by the isolated
+IFC federation adapter. Its package is LGPL-3.0-or-later and uses Open CASCADE
+for geometry processing. It is not installed by normal CI and is not bundled
+into MADI's browser runtime. Distribution of an adapter environment must retain
+the applicable IfcOpenShell and Open CASCADE notices and license terms.
+
 ## Third-party STEP fixture
 
 `fixtures/step/adafruit-pygamer.step` is an unmodified copy of the Adafruit

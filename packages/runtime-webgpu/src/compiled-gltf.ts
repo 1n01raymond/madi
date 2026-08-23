@@ -125,6 +125,7 @@ export interface CompiledBatchEvidence {
   readonly batchIndex: number;
   readonly meshIndex: number;
   readonly targetMeshIndex: number;
+  readonly surfacePrimitiveIndex: number;
   readonly prototypeId: string;
 }
 
@@ -676,13 +677,18 @@ function surfaceColor(
     : [0.55, 0.62, 0.68, 1];
 }
 
-interface DecodedMeshGeometry {
+interface DecodedSurfaceGeometry {
   readonly surfaceVertices: Float32Array;
   readonly surfacePositions: Float32Array;
   readonly surfaceIndices: Uint32Array;
+  readonly color: readonly [number, number, number, number];
+  readonly primitiveIndex: number;
+}
+
+interface DecodedMeshGeometry {
+  readonly surfaces: readonly DecodedSurfaceGeometry[];
   readonly edgeVertices: Float32Array;
   readonly edgeSourceRefs: readonly string[];
-  readonly color: readonly [number, number, number, number];
 }
 
 function decodeMesh(
@@ -694,42 +700,64 @@ function decodeMesh(
   if (!Array.isArray(mesh.primitives)) {
     throw new CompiledGltfError("INVALID_GLTF", `meshes[${meshIndex}].primitives is missing.`);
   }
-  const surfaces = mesh.primitives.filter((primitive) => (primitive.mode ?? 4) === 4);
+  const surfaces = mesh.primitives
+    .map((primitive, primitiveIndex) => ({ primitive, primitiveIndex }))
+    .filter(({ primitive }) => (primitive.mode ?? 4) === 4);
   const edges = mesh.primitives.filter((primitive) => primitive.mode === 1);
-  if (surfaces.length !== 1 || edges.length > 1) {
+  if (surfaces.length === 0 || edges.length > 1) {
     throw new CompiledGltfError(
       "UNSUPPORTED_GEOMETRY",
-      `meshes[${meshIndex}] must contain one TRIANGLES primitive and at most one LINES primitive.`,
+      `meshes[${meshIndex}] must contain TRIANGLES primitives and at most one LINES primitive.`,
     );
   }
-  const surface = surfaces[0];
-  if (!surface || surface.indices === undefined) {
-    throw new CompiledGltfError("INVALID_GLTF", `meshes[${meshIndex}] surface is not indexed.`);
-  }
-  const positionAccessor = surface.attributes.POSITION;
-  if (positionAccessor === undefined) {
-    throw new CompiledGltfError("INVALID_GLTF", `meshes[${meshIndex}] has no POSITION accessor.`);
-  }
-  const positions = accessors.float32Vec3(positionAccessor, `meshes[${meshIndex}] POSITION`);
-  const normals =
-    surface.attributes.NORMAL === undefined
-      ? undefined
-      : accessors.float32Vec3(surface.attributes.NORMAL, `meshes[${meshIndex}] NORMAL`);
-  const surfaceIndices = accessors.uint32Scalar(
-    surface.indices,
-    `meshes[${meshIndex}] surface indices`,
-  );
-  if (surfaceIndices.length % 3 !== 0) {
-    throw new CompiledGltfError("INVALID_GLTF", "Surface indices must contain triangles.");
-  }
-  for (const index of surfaceIndices) {
-    if (index >= positions.length / 3) {
+  const decodedSurfaces = surfaces.map(({ primitive: surface, primitiveIndex }) => {
+    if (surface.indices === undefined) {
       throw new CompiledGltfError(
-        "INVALID_BINARY",
-        `Surface vertex index ${index} is out of range.`,
+        "INVALID_GLTF",
+        `meshes[${meshIndex}].primitives[${primitiveIndex}] surface is not indexed.`,
       );
     }
-  }
+    const positionAccessor = surface.attributes.POSITION;
+    if (positionAccessor === undefined) {
+      throw new CompiledGltfError(
+        "INVALID_GLTF",
+        `meshes[${meshIndex}].primitives[${primitiveIndex}] has no POSITION accessor.`,
+      );
+    }
+    const positions = accessors.float32Vec3(
+      positionAccessor,
+      `meshes[${meshIndex}].primitives[${primitiveIndex}] POSITION`,
+    );
+    const normals =
+      surface.attributes.NORMAL === undefined
+        ? undefined
+        : accessors.float32Vec3(
+            surface.attributes.NORMAL,
+            `meshes[${meshIndex}].primitives[${primitiveIndex}] NORMAL`,
+          );
+    const surfaceIndices = accessors.uint32Scalar(
+      surface.indices,
+      `meshes[${meshIndex}].primitives[${primitiveIndex}] surface indices`,
+    );
+    if (surfaceIndices.length % 3 !== 0) {
+      throw new CompiledGltfError("INVALID_GLTF", "Surface indices must contain triangles.");
+    }
+    for (const index of surfaceIndices) {
+      if (index >= positions.length / 3) {
+        throw new CompiledGltfError(
+          "INVALID_BINARY",
+          `Surface vertex index ${index} is out of range.`,
+        );
+      }
+    }
+    return {
+      surfaceVertices: interleaveSurface(positions, normals),
+      surfacePositions: positions,
+      surfaceIndices,
+      color: surfaceColor(document, surface),
+      primitiveIndex,
+    };
+  });
 
   const edge = edges[0];
   let edgeVertices: Float32Array<ArrayBufferLike> = new Float32Array();
@@ -775,12 +803,9 @@ function decodeMesh(
   }
 
   return {
-    surfaceVertices: interleaveSurface(positions, normals),
-    surfacePositions: positions,
-    surfaceIndices,
+    surfaces: decodedSurfaces,
     edgeVertices,
     edgeSourceRefs,
-    color: surfaceColor(document, surface),
   };
 }
 
@@ -823,7 +848,14 @@ export function decodeCompiledGltf(
   const accessors = new BinaryAccessors(document, binary, bufferIndex, targetChunk);
   const selectedTargetMeshes = targetChunk ? new Set(targetChunk.meshIndexes) : undefined;
   const meshGeometry = new Map<number, DecodedMeshGeometry>();
-  const instances = new Map<number, GpuOccurrenceInstance[]>();
+  const instances = new Map<
+    string,
+    {
+      readonly meshIndex: number;
+      readonly surfacePrimitiveIndex: number;
+      readonly values: GpuOccurrenceInstance[];
+    }
+  >();
   const targetMeshByDecodedMesh = new Map<number, number>();
   const objectEvidence: CompiledObjectEvidence[] = [];
   const boundsMin = [Infinity, Infinity, Infinity];
@@ -867,14 +899,20 @@ export function decodeCompiledGltf(
           : typeof meshMadi.prototypeId === "string"
             ? meshMadi.prototypeId
             : `gltf-mesh:${meshIndex}`;
-      const instance: GpuOccurrenceInstance = {
-        transform: worldTransform,
-        objectId,
-        baseColor: geometry.color,
-      };
-      const meshInstances = instances.get(meshIndex) ?? [];
-      meshInstances.push(instance);
-      instances.set(meshIndex, meshInstances);
+      for (const surface of geometry.surfaces) {
+        const batchKey = `${meshIndex}:${surface.primitiveIndex}`;
+        const batchInstances = instances.get(batchKey) ?? {
+          meshIndex,
+          surfacePrimitiveIndex: surface.primitiveIndex,
+          values: [],
+        };
+        batchInstances.values.push({
+          transform: worldTransform,
+          objectId,
+          baseColor: surface.color,
+        });
+        instances.set(batchKey, batchInstances);
+      }
       const existingTargetMesh = targetMeshByDecodedMesh.get(meshIndex);
       if (existingTargetMesh !== undefined && existingTargetMesh !== node.mesh) {
         throw new CompiledGltfError(
@@ -893,16 +931,18 @@ export function decodeCompiledGltf(
         edgeSourceRefs: geometry.edgeSourceRefs,
       });
 
-      for (let offset = 0; offset < geometry.surfacePositions.length; offset += 3) {
-        const point = transformPoint(
-          worldTransform,
-          geometry.surfacePositions[offset] ?? 0,
-          geometry.surfacePositions[offset + 1] ?? 0,
-          geometry.surfacePositions[offset + 2] ?? 0,
-        );
-        for (let axis = 0; axis < 3; axis += 1) {
-          boundsMin[axis] = Math.min(boundsMin[axis] ?? Infinity, point[axis] ?? 0);
-          boundsMax[axis] = Math.max(boundsMax[axis] ?? -Infinity, point[axis] ?? 0);
+      for (const surface of geometry.surfaces) {
+        for (let offset = 0; offset < surface.surfacePositions.length; offset += 3) {
+          const point = transformPoint(
+            worldTransform,
+            surface.surfacePositions[offset] ?? 0,
+            surface.surfacePositions[offset + 1] ?? 0,
+            surface.surfacePositions[offset + 2] ?? 0,
+          );
+          for (let axis = 0; axis < 3; axis += 1) {
+            boundsMin[axis] = Math.min(boundsMin[axis] ?? Infinity, point[axis] ?? 0);
+            boundsMax[axis] = Math.max(boundsMax[axis] ?? -Infinity, point[axis] ?? 0);
+          }
         }
       }
     }
@@ -914,28 +954,53 @@ export function decodeCompiledGltf(
     throw new CompiledGltfError("UNSUPPORTED_GEOMETRY", "Compiled scene has no renderable geometry.");
   }
 
-  const batchEntries = [...instances.entries()].sort(([left], [right]) => left - right);
-  const batches: GpuPrototypeBatch[] = batchEntries.map(([meshIndex, meshInstances]) => {
-      const geometry = meshGeometry.get(meshIndex);
-      if (!geometry) throw new CompiledGltfError("INVALID_GLTF", `Missing decoded mesh ${meshIndex}.`);
-      return {
-        surfaceVertices: geometry.surfaceVertices,
-        surfaceIndices: geometry.surfaceIndices,
-        edgeVertices: geometry.edgeVertices,
-        instances: meshInstances,
-      };
-    });
-  const batchEvidence: CompiledBatchEvidence[] = batchEntries.map(([meshIndex], batchIndex) => {
-    const mesh = document.meshes[meshIndex];
-    const targetMeshIndex = targetMeshByDecodedMesh.get(meshIndex);
+  const batchEntries = [...instances.values()].sort(
+    (left, right) =>
+      left.meshIndex - right.meshIndex ||
+      left.surfacePrimitiveIndex - right.surfacePrimitiveIndex,
+  );
+  const batches: GpuPrototypeBatch[] = batchEntries.map((entry) => {
+    const geometry = meshGeometry.get(entry.meshIndex);
+    if (!geometry) {
+      throw new CompiledGltfError(
+        "INVALID_GLTF",
+        `Missing decoded mesh ${entry.meshIndex}.`,
+      );
+    }
+    const surface = geometry.surfaces.find(
+      ({ primitiveIndex }) => primitiveIndex === entry.surfacePrimitiveIndex,
+    );
+    if (!surface) {
+      throw new CompiledGltfError(
+        "INVALID_GLTF",
+        `Missing decoded surface ${entry.meshIndex}:${entry.surfacePrimitiveIndex}.`,
+      );
+    }
+    return {
+      surfaceVertices: surface.surfaceVertices,
+      surfaceIndices: surface.surfaceIndices,
+      edgeVertices:
+        entry.surfacePrimitiveIndex === geometry.surfaces[0]?.primitiveIndex
+          ? geometry.edgeVertices
+          : new Float32Array(),
+      instances: entry.values,
+    };
+  });
+  const batchEvidence: CompiledBatchEvidence[] = batchEntries.map((entry, batchIndex) => {
+    const mesh = document.meshes[entry.meshIndex];
+    const targetMeshIndex = targetMeshByDecodedMesh.get(entry.meshIndex);
     if (!mesh || targetMeshIndex === undefined) {
-      throw new CompiledGltfError("INVALID_GLTF", `Missing batch identity for mesh ${meshIndex}.`);
+      throw new CompiledGltfError(
+        "INVALID_GLTF",
+        `Missing batch identity for mesh ${entry.meshIndex}.`,
+      );
     }
     const meshMadi = madiExtras(mesh);
     return {
       batchIndex,
-      meshIndex,
+      meshIndex: entry.meshIndex,
       targetMeshIndex,
+      surfacePrimitiveIndex: entry.surfacePrimitiveIndex,
       prototypeId:
         typeof meshMadi.prototypeId === "string"
           ? meshMadi.prototypeId
@@ -943,7 +1008,12 @@ export function decodeCompiledGltf(
     };
   });
   const triangles = [...meshGeometry.values()].reduce(
-    (total, geometry) => total + geometry.surfaceIndices.length / 3,
+    (total, geometry) =>
+      total +
+      geometry.surfaces.reduce(
+        (surfaceTotal, surface) => surfaceTotal + surface.surfaceIndices.length / 3,
+        0,
+      ),
     0,
   );
   const edgeSegments = [...meshGeometry.values()].reduce(
@@ -952,7 +1022,12 @@ export function decodeCompiledGltf(
   );
 
   return {
-    gpuScene: { batches },
+    gpuScene: {
+      batches,
+      sharedObjectIdsAcrossBatches: batchEntries.some(
+        (entry) => (meshGeometry.get(entry.meshIndex)?.surfaces.length ?? 0) > 1,
+      ),
+    },
     bounds: {
       min: [boundsMin[0] ?? 0, boundsMin[1] ?? 0, boundsMin[2] ?? 0],
       max: [boundsMax[0] ?? 0, boundsMax[1] ?? 0, boundsMax[2] ?? 0],

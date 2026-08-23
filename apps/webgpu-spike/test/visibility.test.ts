@@ -71,4 +71,20 @@ describe("occurrence visibility", () => {
     expect(() => visibility.hide(99)).toThrow(/Unknown scene object ID 99/u);
     expect(() => visibility.isolate(0)).toThrow(/Unknown scene object ID 0/u);
   });
+
+  it("counts and filters material-split occurrences once", () => {
+    const visibility = new OccurrenceVisibility({
+      batches: [batch([1, 2]), batch([1])],
+      sharedObjectIdsAcrossBatches: true,
+    });
+
+    expect(visibility.state().totalOccurrences).toBe(2);
+    expect(visibility.state().visibleOccurrences).toBe(2);
+    visibility.hide(1);
+    expect(Array.from(visibility.counts)).toEqual([1, 0]);
+    expect(visibility.state()).toMatchObject({
+      visibleOccurrences: 1,
+      hiddenOccurrences: 1,
+    });
+  });
 });

@@ -442,6 +442,7 @@ The exact monorepo structure is deferred, but the intended dependency graph is:
 @madi/studio        reference web application
 native/compiler     compiler orchestration
 native/adapter-occt STEP/IGES implementation
+native/adapter-ifc  IFC federation implementation
 tools/inspect       manifest/cache inspector
 tools/benchmark     repeatable benchmark runner
 ```

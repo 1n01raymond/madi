@@ -5,6 +5,7 @@ import { describe, expect, it } from "vitest";
 import {
   decodeCompiledGltf,
   inspectCompiledHierarchy,
+  validateGpuScene,
 } from "../src/index.js";
 import type { CompiledGltfError } from "../src/index.js";
 
@@ -83,6 +84,34 @@ describe("compiled glTF runtime boundary", () => {
     expect(
       decoded.objectEvidence.find(({ label }) => label === "center-rail")?.edgeSourceRefs,
     ).toHaveLength(12);
+  });
+
+  it("decodes material-separated surface primitives as one pickable object", async () => {
+    const { json, binary } = await loadPackage();
+    const copy = structuredClone(json) as {
+      meshes: { primitives: Record<string, unknown>[] }[];
+      materials: unknown[];
+    };
+    const mesh = copy.meshes[0];
+    const surface = mesh?.primitives[0];
+    if (!mesh || !surface) throw new TypeError("Fixture mesh is incomplete.");
+    const material = copy.materials.push({
+      pbrMetallicRoughness: { baseColorFactor: [0.9, 0.2, 0.1, 1] },
+    }) - 1;
+    mesh.primitives.splice(1, 0, { ...surface, material });
+
+    const decoded = decodeCompiledGltf(copy, binary);
+    const splitBatches = decoded.batchEvidence.filter(({ meshIndex }) => meshIndex === 0);
+
+    expect(splitBatches.map(({ surfacePrimitiveIndex }) => surfacePrimitiveIndex)).toEqual([0, 1]);
+    expect(decoded.gpuScene.sharedObjectIdsAcrossBatches).toBe(true);
+    expect(decoded.gpuScene.batches).toHaveLength(4);
+    expect(decoded.objectEvidence).toHaveLength(10);
+    expect(decoded.summary.triangles).toBeGreaterThan(2076);
+    expect(
+      decoded.gpuScene.batches[1]?.instances[0]?.baseColor,
+    ).toEqual([0.9, 0.2, 0.1, 1]);
+    expect(() => validateGpuScene(decoded.gpuScene)).not.toThrow();
   });
 
   it("rejects a truncated binary before exposing GPU buffers", async () => {
