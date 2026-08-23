@@ -99,6 +99,9 @@ function aggregateResults(results) {
       const entries = results.filter(
         (entry) => entry.browser === browser && entry.result.backend === backend,
       );
+      const gpuTiming = entries.filter(
+        (entry) => entry.result.gpuFrameTiming?.supported === true,
+      );
       byPath.push({
         browser,
         backend,
@@ -112,6 +115,13 @@ function aggregateResults(results) {
             .map((entry) => entry.result.memory.sceneActivationDeltaBytes)
             .filter((value) => Number.isFinite(value)),
         ),
+        gpuFrameP95Ms: summarize(
+          gpuTiming.map((entry) => entry.result.gpuFrameTiming.frameMs.p95Ms),
+        ),
+        retainedResourceBytes: {
+          cpuBytes: summarize(entries.map((entry) => entry.result.retainedResources.cpuBytes)),
+          gpuBytes: summarize(entries.map((entry) => entry.result.retainedResources.gpuBytes)),
+        },
       });
     }
   }
@@ -304,19 +314,21 @@ try {
       for (const backend of backendOrder) {
         const recorded = await record(definition, backend, repeat, repeat === 1);
         results.push(recorded);
+        const gpuP95 = recorded.result.gpuFrameTiming?.supported
+          ? recorded.result.gpuFrameTiming.frameMs.p95Ms
+          : null;
         console.log(
           `[industrial-benchmark] ${definition.id}/${backend} repeat ${repeat}/${repeats}: ` +
             `${recorded.result.cpuSubmit.p95Ms.toFixed(3)} ms CPU submit p95, ` +
-            `${recorded.result.frameIntervals.p95Ms.toFixed(3)} ms frame p95`,
+            `${recorded.result.frameIntervals.p95Ms.toFixed(3)} ms frame p95` +
+            (gpuP95 === null ? "" : `, ${gpuP95.toFixed(3)} ms GPU pass p95`),
         );
       }
     }
   }
 
   const evidence = {
-    schemaVersion: repeats > 1 || memory === "scene-delta"
-      ? "madi.industrial-browser-matrix.3"
-      : "madi.industrial-browser-matrix.2",
+    schemaVersion: "madi.industrial-browser-matrix.4",
     status: "exploratory-not-adr-decision",
     capturedAt: new Date().toISOString(),
     host: { platform: process.platform, architecture: process.arch },
@@ -336,6 +348,8 @@ try {
       freshBrowserProcessPerRun: true,
       alternatingBackendOrder: repeats > 1,
       sceneMemoryDelta: memory === "scene-delta",
+      gpuTimestamps: "madi-surface-pass-only",
+      retainedResourceCensus: true,
     },
     results,
     aggregates: aggregateResults(results),
@@ -351,6 +365,8 @@ try {
       memory === "scene-delta"
         ? "Scene activation delta is measured from a backend-ready shell with the shared workload retained to the first rendered frame; it remains browser-wide diagnostic memory, not an allocator census."
         : "Only final whole-page memory is sampled.",
+      "GPU pass timestamps instrument only the MADI surface pass through WebGPU timestamp-query; the Three.js WebGPURenderer path reports them as unsupported because its command encoding is not caller-instrumentable.",
+      "The retained-resource census counts backend-owned scene upload memory. MADI reports exact GPUBuffer allocations; the Three.js figure is a constructed floor because its internal buffers, sort structures, uniforms, and render targets are not enumerable.",
     ],
   };
   await writeFile(

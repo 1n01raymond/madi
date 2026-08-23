@@ -313,6 +313,22 @@ architecture. It remains exploratory because browser results differ and the
 same host, adapter, procedural workload, and lack of GPU timestamps still apply.
 See `artifacts/benchmarks/heterogeneous-repeatability/`.
 
+The fourth record adds two decision-quality signals to the same repeated
+matrix. WebGPU `timestamp-query` pass timing (Chrome and Firefox both exposed
+the feature) shows the MADI surface pass is sub-millisecond — median 0.459 ms
+in Chrome, p95 0.852 ms — so at this tier the frame budget is CPU-side and
+any renderer difference is decided on main-thread cost, not GPU raster work.
+A backend-owned retained-resource census attributes scene memory: MADI
+reports exact allocations (10.92 MiB GPU, 9.16 MiB CPU staging) while the
+Three.js figure is a constructed floor (10.78 MiB GPU, 1.47 MiB enumerable
+CPU) because its internals are not enumerable. This session's paired CPU-p95
+reduction medians are 23.9% in Chrome and 18.4% in Firefox (one of three
+pairs crossing 25% per browser), versus the prior session's 27.0% Chrome
+median; the cross-session spread itself demonstrates why repeated,
+multi-host evidence is contractually required. The integrated-GPU profile,
+explicit-edge and bounded-residency slices, and a real industrial assembly
+remain outstanding. See `artifacts/benchmarks/heterogeneous-gpu-timing/`.
+
 The external-source registry now supplies two qualified correctness layers:
 two NIST AP242 cases (30,100 Part 21 entities) and the four-discipline IFC-Bench
 Digital Hub federation (482,994 Part 21 entities). Their source files remain in

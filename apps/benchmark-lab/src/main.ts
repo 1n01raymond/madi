@@ -5,9 +5,11 @@ import type {
   BenchmarkBackendId,
   BenchmarkCullingMode,
   BenchmarkMemoryMeasurement,
+  BenchmarkRetainedResources,
 } from "./backend.js";
 import { createBenchmarkCamera } from "./camera.js";
 import type { BenchmarkCameraTrace } from "./camera.js";
+import type { GpuFrameTiming } from "./gpu-timing.js";
 import {
   createIndustrialWorkload,
   industrialScaleTiers,
@@ -23,9 +25,7 @@ interface Distribution {
 }
 
 interface BenchmarkResult {
-  readonly schemaVersion:
-    | "madi.industrial-browser-benchmark.2"
-    | "madi.industrial-browser-benchmark.3";
+  readonly schemaVersion: "madi.industrial-browser-benchmark.4";
   readonly backend: BenchmarkBackendId;
   readonly scale: IndustrialScaleTier;
   readonly profile: IndustrialWorkloadProfile;
@@ -53,6 +53,16 @@ interface BenchmarkResult {
   readonly frameIntervals: Distribution;
   readonly cpuSubmit: Distribution;
   readonly renderer: ReturnType<Awaited<ReturnType<typeof createBenchmarkBackend>>["stats"]>;
+  readonly gpuFrameTiming: {
+    readonly supported: boolean;
+    readonly timestampPeriodNs: number | null;
+    readonly frameMs: Distribution | null;
+    readonly scope:
+      | "madi-surface-pass"
+      | "timestamp-query-unsupported"
+      | "three-backend-not-instrumented";
+  };
+  readonly retainedResources: BenchmarkRetainedResources;
   readonly memory: {
     readonly usedJsHeapBytes: number | null;
     readonly userAgentSpecificBytes: number | null;
@@ -198,6 +208,7 @@ async function run(): Promise<void> {
         createBenchmarkCamera(workload.bounds, aspect, frame / warmupFrames, cameraTrace),
       );
     }
+    renderer.resetGpuFrameTiming();
 
     status.textContent = `Sampling ${sampleFrames} frames…`;
     const frameIntervals: number[] = [];
@@ -214,6 +225,7 @@ async function run(): Promise<void> {
       cpuSubmit.push(performance.now() - submitStart);
     }
     await renderer.render(createBenchmarkCamera(workload.bounds, aspect, 0.125, cameraTrace));
+    const gpuTiming: GpuFrameTiming = await renderer.gpuFrameTiming();
     const finalMemory = await measureUserAgentSpecificMemory();
     const backendCoreReadyBytes = renderer.coreReadyMemory?.bytes ?? null;
     const sceneActivatedBytes = sceneActivatedMemory?.bytes ?? null;
@@ -223,9 +235,7 @@ async function run(): Promise<void> {
         : sceneActivatedBytes - backendCoreReadyBytes;
 
     const result: BenchmarkResult = {
-      schemaVersion: memoryMode === "scene-delta"
-        ? "madi.industrial-browser-benchmark.3"
-        : "madi.industrial-browser-benchmark.2",
+      schemaVersion: "madi.industrial-browser-benchmark.4",
       backend,
       scale,
       profile,
@@ -243,6 +253,23 @@ async function run(): Promise<void> {
       frameIntervals: summarize(frameIntervals),
       cpuSubmit: summarize(cpuSubmit),
       renderer: renderer.stats(),
+      gpuFrameTiming: gpuTiming.supported
+        ? {
+            supported: true,
+            timestampPeriodNs: gpuTiming.timestampPeriodNs,
+            frameMs: summarize(gpuTiming.frameMs),
+            scope: "madi-surface-pass",
+          }
+        : {
+            supported: false,
+            timestampPeriodNs: null,
+            frameMs: null,
+            scope:
+              gpuTiming.reason === "timestamp-query-unsupported"
+                ? "timestamp-query-unsupported"
+                : "three-backend-not-instrumented",
+          },
+      retainedResources: renderer.retainedResources,
       memory: {
         usedJsHeapBytes: getHeapBytes(),
         userAgentSpecificBytes: finalMemory.bytes,

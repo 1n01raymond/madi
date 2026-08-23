@@ -117,3 +117,24 @@ The result supports continuing the investigation but does not accept this ADR.
 It is still one host and adapter, browser behavior differs, the public workload
 is procedural, and GPU timestamps, integrated-GPU coverage, bounded residency,
 and a real industrial assembly remain missing.
+
+### GPU timestamp and retained-resource census harness
+
+The fourth record keeps the fresh-process, alternating-order matrix and adds
+WebGPU `timestamp-query` pass timing plus a backend-owned retained-resource
+census. Both Chrome and Firefox expose the feature on the discrete reference
+host. The MADI surface pass is sub-millisecond there (Chrome median 0.459 ms,
+p95 0.852 ms; Firefox median 0.297 ms), which relocates this decision to the
+CPU side: with the GPU pass holding more than an order of magnitude of frame
+headroom, the acceptance question is main-thread cost and retained memory,
+not raster throughput. The census attributes scene memory symmetrically with
+disclosed accounting (MADI exact allocations; Three.js a constructed floor
+because its internals are not enumerable).
+
+Cross-session variance is now measured rather than assumed: paired CPU-p95
+reduction medians moved from 27.0% to 23.9% in Chrome between the two most
+recent discrete-host sessions, with the 25% gate crossing in two versus one
+of three pairs. This spread does not favor either outcome; it confirms that
+only the contract's repeated, dual-profile reproduction can accept or revise
+the hot-path decision. The integrated-GPU profile, bounded-residency slice,
+and a real industrial assembly still gate acceptance.
