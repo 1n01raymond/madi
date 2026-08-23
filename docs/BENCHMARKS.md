@@ -301,6 +301,18 @@ profile, GPU timestamps, isolated retained-memory measurement, streaming/LOD,
 or real design-partner assembly. Whole-page Chrome memory readings are recorded
 only as diagnostics. See `artifacts/benchmarks/heterogeneous-culling/`.
 
+The third record repeats the 100k comparison three times per browser/backend,
+launching a fresh browser process for every run and alternating backend order.
+Chrome's paired CPU-p95 reduction has a 27.0% median but crosses the 25% gate in
+only two of three pairs. Its backend scene-activation memory delta is 38.2%
+lower at the median and crosses 30% in all three pairs. Firefox CPU reduction
+has a 10.0% median and no memory delta because the measurement API is absent.
+
+This repeatability evidence prevents a single favorable run from deciding the
+architecture. It remains exploratory because browser results differ and the
+same host, adapter, procedural workload, and lack of GPU timestamps still apply.
+See `artifacts/benchmarks/heterogeneous-repeatability/`.
+
 The external-source registry now supplies two qualified correctness layers:
 two NIST AP242 cases (30,100 Part 21 entities) and the four-discipline IFC-Bench
 Digital Hub federation (482,994 Part 21 entities). Their source files remain in

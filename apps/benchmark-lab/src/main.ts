@@ -1,7 +1,11 @@
 import "./style.css";
 
 import { createBenchmarkBackend } from "./backend.js";
-import type { BenchmarkBackendId, BenchmarkCullingMode } from "./backend.js";
+import type {
+  BenchmarkBackendId,
+  BenchmarkCullingMode,
+  BenchmarkMemoryMeasurement,
+} from "./backend.js";
 import { createBenchmarkCamera } from "./camera.js";
 import type { BenchmarkCameraTrace } from "./camera.js";
 import {
@@ -19,7 +23,9 @@ interface Distribution {
 }
 
 interface BenchmarkResult {
-  readonly schemaVersion: "madi.industrial-browser-benchmark.2";
+  readonly schemaVersion:
+    | "madi.industrial-browser-benchmark.2"
+    | "madi.industrial-browser-benchmark.3";
   readonly backend: BenchmarkBackendId;
   readonly scale: IndustrialScaleTier;
   readonly profile: IndustrialWorkloadProfile;
@@ -34,7 +40,11 @@ interface BenchmarkResult {
   readonly workload: ReturnType<typeof createIndustrialWorkload>["stats"] & {
     readonly id: string;
   };
-  readonly config: { readonly warmupFrames: number; readonly sampleFrames: number };
+  readonly config: {
+    readonly warmupFrames: number;
+    readonly sampleFrames: number;
+    readonly memoryMode: BenchmarkMemoryMode;
+  };
   readonly milestones: {
     readonly workloadReadyMs: number;
     readonly backendReadyMs: number;
@@ -46,9 +56,17 @@ interface BenchmarkResult {
   readonly memory: {
     readonly usedJsHeapBytes: number | null;
     readonly userAgentSpecificBytes: number | null;
-    readonly measurementScope: "diagnostic-not-retained-scene-memory";
+    readonly backendCoreReadyBytes: number | null;
+    readonly sceneActivatedBytes: number | null;
+    readonly sceneActivationDeltaBytes: number | null;
+    readonly measurementOverheadMs: number;
+    readonly measurementScope:
+      | "diagnostic-not-retained-scene-memory"
+      | "diagnostic-backend-scene-activation-delta";
   };
 }
+
+type BenchmarkMemoryMode = "final" | "scene-delta";
 
 declare global {
   interface Window {
@@ -97,16 +115,22 @@ function getHeapBytes(): number | null {
   return Number.isFinite(memory?.usedJSHeapSize) ? (memory?.usedJSHeapSize ?? null) : null;
 }
 
-async function getUserAgentSpecificMemory(): Promise<number | null> {
+async function measureUserAgentSpecificMemory(): Promise<BenchmarkMemoryMeasurement> {
+  const started = performance.now();
   const measurement = performance as Performance & {
     measureUserAgentSpecificMemory?: () => Promise<{ readonly bytes: number }>;
   };
-  if (!measurement.measureUserAgentSpecificMemory) return null;
+  if (!measurement.measureUserAgentSpecificMemory) {
+    return { bytes: null, durationMs: performance.now() - started };
+  }
   try {
     const result = await measurement.measureUserAgentSpecificMemory();
-    return Number.isFinite(result.bytes) ? result.bytes : null;
+    return {
+      bytes: Number.isFinite(result.bytes) ? result.bytes : null,
+      durationMs: performance.now() - started,
+    };
   } catch {
-    return null;
+    return { bytes: null, durationMs: performance.now() - started };
   }
 }
 
@@ -117,12 +141,16 @@ const profile = (parameters.get("profile") ?? "repeated") as IndustrialWorkloadP
 const culling = (
   parameters.get("culling") ?? (profile === "heterogeneous" ? "frustum" : "disabled")
 ) as BenchmarkCullingMode;
+const memoryMode = (parameters.get("memory") ?? "final") as BenchmarkMemoryMode;
 if (backend !== "madi" && backend !== "three") throw new TypeError("Unknown backend.");
 if (!(scale in industrialScaleTiers)) throw new TypeError("Unknown scale tier.");
 if (profile !== "repeated" && profile !== "heterogeneous") {
   throw new TypeError("Unknown workload profile.");
 }
 if (culling !== "disabled" && culling !== "frustum") throw new TypeError("Unknown culling mode.");
+if (memoryMode !== "final" && memoryMode !== "scene-delta") {
+  throw new TypeError("Unknown memory mode.");
+}
 const cameraTrace: BenchmarkCameraTrace = culling === "frustum" ? "local-review" : "overview-orbit";
 const warmupFrames = parsePositiveInteger(parameters.get("warmup"), 30);
 const sampleFrames = parsePositiveInteger(parameters.get("frames"), 120);
@@ -146,13 +174,23 @@ async function run(): Promise<void> {
     workload.stats.submittedTriangleCount.toLocaleString("en-US");
 
   status.textContent = `Initializing ${backend} backend…`;
-  const renderer = await createBenchmarkBackend(backend, canvas, workload, culling);
-  const backendReadyMs = performance.now() - started;
+  const renderer = await createBenchmarkBackend(
+    backend,
+    canvas,
+    workload,
+    culling,
+    memoryMode === "scene-delta" ? measureUserAgentSpecificMemory : undefined,
+  );
+  const coreMemoryOverheadMs = renderer.coreReadyMemory?.durationMs ?? 0;
+  const backendReadyMs = performance.now() - started - coreMemoryOverheadMs;
   try {
     const aspect = canvas.clientWidth / Math.max(1, canvas.clientHeight);
     const initialCamera = createBenchmarkCamera(workload.bounds, aspect, 0, cameraTrace);
     await renderer.render(initialCamera);
-    const firstFrameMs = performance.now() - started;
+    const firstFrameMs = performance.now() - started - coreMemoryOverheadMs;
+    const sceneActivatedMemory = memoryMode === "scene-delta"
+      ? await measureUserAgentSpecificMemory()
+      : null;
     status.textContent = `Warming ${warmupFrames} frames…`;
     for (let frame = 0; frame < warmupFrames; frame += 1) {
       await nextAnimationFrame();
@@ -176,10 +214,18 @@ async function run(): Promise<void> {
       cpuSubmit.push(performance.now() - submitStart);
     }
     await renderer.render(createBenchmarkCamera(workload.bounds, aspect, 0.125, cameraTrace));
-    const userAgentSpecificBytes = await getUserAgentSpecificMemory();
+    const finalMemory = await measureUserAgentSpecificMemory();
+    const backendCoreReadyBytes = renderer.coreReadyMemory?.bytes ?? null;
+    const sceneActivatedBytes = sceneActivatedMemory?.bytes ?? null;
+    const sceneActivationDeltaBytes =
+      backendCoreReadyBytes === null || sceneActivatedBytes === null
+        ? null
+        : sceneActivatedBytes - backendCoreReadyBytes;
 
     const result: BenchmarkResult = {
-      schemaVersion: "madi.industrial-browser-benchmark.2",
+      schemaVersion: memoryMode === "scene-delta"
+        ? "madi.industrial-browser-benchmark.3"
+        : "madi.industrial-browser-benchmark.2",
       backend,
       scale,
       profile,
@@ -192,15 +238,24 @@ async function run(): Promise<void> {
         cameraTrace,
       },
       workload: { id: workload.id, ...workload.stats },
-      config: { warmupFrames, sampleFrames },
+      config: { warmupFrames, sampleFrames, memoryMode },
       milestones: { workloadReadyMs, backendReadyMs, firstFrameMs },
       frameIntervals: summarize(frameIntervals),
       cpuSubmit: summarize(cpuSubmit),
       renderer: renderer.stats(),
       memory: {
         usedJsHeapBytes: getHeapBytes(),
-        userAgentSpecificBytes,
-        measurementScope: "diagnostic-not-retained-scene-memory",
+        userAgentSpecificBytes: finalMemory.bytes,
+        backendCoreReadyBytes,
+        sceneActivatedBytes,
+        sceneActivationDeltaBytes,
+        measurementOverheadMs:
+          coreMemoryOverheadMs +
+          (sceneActivatedMemory?.durationMs ?? 0) +
+          finalMemory.durationMs,
+        measurementScope: memoryMode === "scene-delta"
+          ? "diagnostic-backend-scene-activation-delta"
+          : "diagnostic-not-retained-scene-memory",
       },
     };
     window.__MADI_BENCHMARK_RESULT__ = result;

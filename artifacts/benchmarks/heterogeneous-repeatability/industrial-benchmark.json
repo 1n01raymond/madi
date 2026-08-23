@@ -1,0 +1,1303 @@
+{
+  "schemaVersion": "madi.industrial-browser-matrix.3",
+  "status": "exploratory-not-adr-decision",
+  "capturedAt": "2026-08-23T04:25:39.485Z",
+  "host": {
+    "platform": "win32",
+    "architecture": "x64"
+  },
+  "config": {
+    "scale": "target",
+    "profile": "heterogeneous",
+    "culling": "frustum",
+    "frames": 90,
+    "warmup": 30,
+    "repeats": 3,
+    "memory": "scene-delta"
+  },
+  "comparisonContract": {
+    "sameWorkload": true,
+    "sameCameraTrace": true,
+    "sameResolution": true,
+    "surfaces": true,
+    "explicitEdges": false,
+    "picking": "on-demand-not-sampled",
+    "frustumCulling": "frustum",
+    "cameraTrace": "local-review",
+    "lod": false,
+    "selfHostedStaticOrigin": true,
+    "outboundRequestCount": 0,
+    "freshBrowserProcessPerRun": true,
+    "alternatingBackendOrder": true,
+    "sceneMemoryDelta": true
+  },
+  "results": [
+    {
+      "repeat": 1,
+      "browser": "chrome",
+      "browserEngine": "Blink",
+      "browserVersion": "151.0.7922.139",
+      "headless": false,
+      "viewport": {
+        "width": 1440,
+        "height": 960
+      },
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36",
+      "platform": "Win32",
+      "adapter": {
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "device": "",
+        "description": "",
+        "isFallbackAdapter": false
+      },
+      "consoleIssues": [],
+      "outboundRequests": [],
+      "result": {
+        "schemaVersion": "madi.industrial-browser-benchmark.3",
+        "backend": "madi",
+        "scale": "target",
+        "profile": "heterogeneous",
+        "features": {
+          "surfaces": true,
+          "explicitEdges": false,
+          "picking": "on-demand-not-sampled",
+          "frustumCulling": "frustum",
+          "lod": false,
+          "cameraTrace": "local-review"
+        },
+        "workload": {
+          "id": "madi.industrial-heterogeneous.1",
+          "prototypeCount": 256,
+          "occurrenceCount": 100000,
+          "uniqueTriangleCount": 26240,
+          "submittedTriangleCount": 10223768,
+          "explicitEdgeSegmentCount": 6064765,
+          "instanceBytes": 9600000,
+          "profile": "heterogeneous"
+        },
+        "config": {
+          "warmupFrames": 30,
+          "sampleFrames": 90,
+          "memoryMode": "scene-delta"
+        },
+        "milestones": {
+          "workloadReadyMs": 53.10000002384186,
+          "backendReadyMs": 448.97000002861023,
+          "firstFrameMs": 467.2849999666214
+        },
+        "frameIntervals": {
+          "samples": 89,
+          "medianMs": 6.949999999998909,
+          "p95Ms": 20.790000000000873,
+          "p99Ms": 20.860000000000582,
+          "worstMs": 20.860000000000582
+        },
+        "cpuSubmit": {
+          "samples": 90,
+          "medianMs": 5.259999990463257,
+          "p95Ms": 17.7849999666214,
+          "p99Ms": 21.12000000476837,
+          "worstMs": 21.12000000476837
+        },
+        "renderer": {
+          "logicalDrawCalls": 256,
+          "visibleSubdraws": 256,
+          "unculledSubmittedTriangles": 10223768,
+          "visibleOccurrences": 34443,
+          "visibleTriangles": 3521604,
+          "cullingImplementation": "dense-cpu-compaction"
+        },
+        "memory": {
+          "usedJsHeapBytes": 43869376,
+          "userAgentSpecificBytes": 45525430,
+          "backendCoreReadyBytes": 32977394,
+          "sceneActivatedBytes": 45898683,
+          "sceneActivationDeltaBytes": 12921289,
+          "measurementOverheadMs": 32974.12000012398,
+          "measurementScope": "diagnostic-backend-scene-activation-delta"
+        }
+      },
+      "screenshot": {
+        "path": "chrome-151-madi-target-heterogeneous-frustum-windows.png",
+        "bytes": 556786,
+        "sha256": "0fe728906d0decd9b7acc58c73fbca2bbaaaa2ab810586707b224a29b3cc77af"
+      }
+    },
+    {
+      "repeat": 1,
+      "browser": "chrome",
+      "browserEngine": "Blink",
+      "browserVersion": "151.0.7922.139",
+      "headless": false,
+      "viewport": {
+        "width": 1440,
+        "height": 960
+      },
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36",
+      "platform": "Win32",
+      "adapter": {
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "device": "",
+        "description": "",
+        "isFallbackAdapter": false
+      },
+      "consoleIssues": [],
+      "outboundRequests": [],
+      "result": {
+        "schemaVersion": "madi.industrial-browser-benchmark.3",
+        "backend": "three",
+        "scale": "target",
+        "profile": "heterogeneous",
+        "features": {
+          "surfaces": true,
+          "explicitEdges": false,
+          "picking": "on-demand-not-sampled",
+          "frustumCulling": "frustum",
+          "lod": false,
+          "cameraTrace": "local-review"
+        },
+        "workload": {
+          "id": "madi.industrial-heterogeneous.1",
+          "prototypeCount": 256,
+          "occurrenceCount": 100000,
+          "uniqueTriangleCount": 26240,
+          "submittedTriangleCount": 10223768,
+          "explicitEdgeSegmentCount": 6064765,
+          "instanceBytes": 9600000,
+          "profile": "heterogeneous"
+        },
+        "config": {
+          "warmupFrames": 30,
+          "sampleFrames": 90,
+          "memoryMode": "scene-delta"
+        },
+        "milestones": {
+          "workloadReadyMs": 59.04000008106232,
+          "backendReadyMs": 478.6050000190735,
+          "firstFrameMs": 512.4800000190735
+        },
+        "frameIntervals": {
+          "samples": 89,
+          "medianMs": 6.955000000001746,
+          "p95Ms": 20.840000000000146,
+          "p99Ms": 34.73999999999796,
+          "worstMs": 34.73999999999796
+        },
+        "cpuSubmit": {
+          "samples": 90,
+          "medianMs": 9.419999957084656,
+          "p95Ms": 22.139999985694885,
+          "p99Ms": 30.389999985694885,
+          "worstMs": 30.389999985694885
+        },
+        "renderer": {
+          "logicalDrawCalls": 1,
+          "visibleSubdraws": 34443,
+          "unculledSubmittedTriangles": 10223768,
+          "visibleOccurrences": 34443,
+          "visibleTriangles": 3521604,
+          "cullingImplementation": "three-batched-mesh"
+        },
+        "memory": {
+          "usedJsHeapBytes": 73820504,
+          "userAgentSpecificBytes": 83858390,
+          "backendCoreReadyBytes": 60173173,
+          "sceneActivatedBytes": 80437494,
+          "sceneActivationDeltaBytes": 20264321,
+          "measurementOverheadMs": 28305.375,
+          "measurementScope": "diagnostic-backend-scene-activation-delta"
+        }
+      },
+      "screenshot": {
+        "path": "chrome-151-three-target-heterogeneous-frustum-windows.png",
+        "bytes": 546140,
+        "sha256": "224aab0d0334ce9e192e0af34e5cc95197398aecb9060ac9541969e1e47da3f8"
+      }
+    },
+    {
+      "repeat": 2,
+      "browser": "chrome",
+      "browserEngine": "Blink",
+      "browserVersion": "151.0.7922.139",
+      "headless": false,
+      "viewport": {
+        "width": 1440,
+        "height": 960
+      },
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36",
+      "platform": "Win32",
+      "adapter": {
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "device": "",
+        "description": "",
+        "isFallbackAdapter": false
+      },
+      "consoleIssues": [],
+      "outboundRequests": [],
+      "result": {
+        "schemaVersion": "madi.industrial-browser-benchmark.3",
+        "backend": "three",
+        "scale": "target",
+        "profile": "heterogeneous",
+        "features": {
+          "surfaces": true,
+          "explicitEdges": false,
+          "picking": "on-demand-not-sampled",
+          "frustumCulling": "frustum",
+          "lod": false,
+          "cameraTrace": "local-review"
+        },
+        "workload": {
+          "id": "madi.industrial-heterogeneous.1",
+          "prototypeCount": 256,
+          "occurrenceCount": 100000,
+          "uniqueTriangleCount": 26240,
+          "submittedTriangleCount": 10223768,
+          "explicitEdgeSegmentCount": 6064765,
+          "instanceBytes": 9600000,
+          "profile": "heterogeneous"
+        },
+        "config": {
+          "warmupFrames": 30,
+          "sampleFrames": 90,
+          "memoryMode": "scene-delta"
+        },
+        "milestones": {
+          "workloadReadyMs": 52.43499994277954,
+          "backendReadyMs": 401.59500002861023,
+          "firstFrameMs": 440.27499997615814
+        },
+        "frameIntervals": {
+          "samples": 89,
+          "medianMs": 6.955000000001746,
+          "p95Ms": 20.840000000000146,
+          "p99Ms": 27.80500000000029,
+          "worstMs": 27.80500000000029
+        },
+        "cpuSubmit": {
+          "samples": 90,
+          "medianMs": 9.384999990463257,
+          "p95Ms": 23.4650000333786,
+          "p99Ms": 30.25499999523163,
+          "worstMs": 30.25499999523163
+        },
+        "renderer": {
+          "logicalDrawCalls": 1,
+          "visibleSubdraws": 34443,
+          "unculledSubmittedTriangles": 10223768,
+          "visibleOccurrences": 34443,
+          "visibleTriangles": 3521604,
+          "cullingImplementation": "three-batched-mesh"
+        },
+        "memory": {
+          "usedJsHeapBytes": 73778164,
+          "userAgentSpecificBytes": 83859922,
+          "backendCoreReadyBytes": 60178360,
+          "sceneActivatedBytes": 80371474,
+          "sceneActivationDeltaBytes": 20193114,
+          "measurementOverheadMs": 36795.40999996662,
+          "measurementScope": "diagnostic-backend-scene-activation-delta"
+        }
+      },
+      "screenshot": null
+    },
+    {
+      "repeat": 2,
+      "browser": "chrome",
+      "browserEngine": "Blink",
+      "browserVersion": "151.0.7922.139",
+      "headless": false,
+      "viewport": {
+        "width": 1440,
+        "height": 960
+      },
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36",
+      "platform": "Win32",
+      "adapter": {
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "device": "",
+        "description": "",
+        "isFallbackAdapter": false
+      },
+      "consoleIssues": [],
+      "outboundRequests": [],
+      "result": {
+        "schemaVersion": "madi.industrial-browser-benchmark.3",
+        "backend": "madi",
+        "scale": "target",
+        "profile": "heterogeneous",
+        "features": {
+          "surfaces": true,
+          "explicitEdges": false,
+          "picking": "on-demand-not-sampled",
+          "frustumCulling": "frustum",
+          "lod": false,
+          "cameraTrace": "local-review"
+        },
+        "workload": {
+          "id": "madi.industrial-heterogeneous.1",
+          "prototypeCount": 256,
+          "occurrenceCount": 100000,
+          "uniqueTriangleCount": 26240,
+          "submittedTriangleCount": 10223768,
+          "explicitEdgeSegmentCount": 6064765,
+          "instanceBytes": 9600000,
+          "profile": "heterogeneous"
+        },
+        "config": {
+          "warmupFrames": 30,
+          "sampleFrames": 90,
+          "memoryMode": "scene-delta"
+        },
+        "milestones": {
+          "workloadReadyMs": 58.81000006198883,
+          "backendReadyMs": 458.25,
+          "firstFrameMs": 473.52499997615814
+        },
+        "frameIntervals": {
+          "samples": 89,
+          "medianMs": 6.944999999999709,
+          "p95Ms": 13.909999999999854,
+          "p99Ms": 27.760000000002037,
+          "worstMs": 27.760000000002037
+        },
+        "cpuSubmit": {
+          "samples": 90,
+          "medianMs": 5.284999966621399,
+          "p95Ms": 17.12999999523163,
+          "p99Ms": 22.850000023841858,
+          "worstMs": 22.850000023841858
+        },
+        "renderer": {
+          "logicalDrawCalls": 256,
+          "visibleSubdraws": 256,
+          "unculledSubmittedTriangles": 10223768,
+          "visibleOccurrences": 34443,
+          "visibleTriangles": 3521604,
+          "cullingImplementation": "dense-cpu-compaction"
+        },
+        "memory": {
+          "usedJsHeapBytes": 43886472,
+          "userAgentSpecificBytes": 47769922,
+          "backendCoreReadyBytes": 32979878,
+          "sceneActivatedBytes": 45467641,
+          "sceneActivationDeltaBytes": 12487763,
+          "measurementOverheadMs": 28006.670000076294,
+          "measurementScope": "diagnostic-backend-scene-activation-delta"
+        }
+      },
+      "screenshot": null
+    },
+    {
+      "repeat": 3,
+      "browser": "chrome",
+      "browserEngine": "Blink",
+      "browserVersion": "151.0.7922.139",
+      "headless": false,
+      "viewport": {
+        "width": 1440,
+        "height": 960
+      },
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36",
+      "platform": "Win32",
+      "adapter": {
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "device": "",
+        "description": "",
+        "isFallbackAdapter": false
+      },
+      "consoleIssues": [],
+      "outboundRequests": [],
+      "result": {
+        "schemaVersion": "madi.industrial-browser-benchmark.3",
+        "backend": "madi",
+        "scale": "target",
+        "profile": "heterogeneous",
+        "features": {
+          "surfaces": true,
+          "explicitEdges": false,
+          "picking": "on-demand-not-sampled",
+          "frustumCulling": "frustum",
+          "lod": false,
+          "cameraTrace": "local-review"
+        },
+        "workload": {
+          "id": "madi.industrial-heterogeneous.1",
+          "prototypeCount": 256,
+          "occurrenceCount": 100000,
+          "uniqueTriangleCount": 26240,
+          "submittedTriangleCount": 10223768,
+          "explicitEdgeSegmentCount": 6064765,
+          "instanceBytes": 9600000,
+          "profile": "heterogeneous"
+        },
+        "config": {
+          "warmupFrames": 30,
+          "sampleFrames": 90,
+          "memoryMode": "scene-delta"
+        },
+        "milestones": {
+          "workloadReadyMs": 55.63499999046326,
+          "backendReadyMs": 479.74000000953674,
+          "firstFrameMs": 494.4599999189377
+        },
+        "frameIntervals": {
+          "samples": 89,
+          "medianMs": 6.945000000001528,
+          "p95Ms": 13.905000000000655,
+          "p99Ms": 20.860000000000582,
+          "worstMs": 20.860000000000582
+        },
+        "cpuSubmit": {
+          "samples": 90,
+          "medianMs": 5.299999952316284,
+          "p95Ms": 16.75,
+          "p99Ms": 19.72000002861023,
+          "worstMs": 19.72000002861023
+        },
+        "renderer": {
+          "logicalDrawCalls": 256,
+          "visibleSubdraws": 256,
+          "unculledSubmittedTriangles": 10223768,
+          "visibleOccurrences": 34443,
+          "visibleTriangles": 3521604,
+          "cullingImplementation": "dense-cpu-compaction"
+        },
+        "memory": {
+          "usedJsHeapBytes": 43843084,
+          "userAgentSpecificBytes": 47762666,
+          "backendCoreReadyBytes": 32971218,
+          "sceneActivatedBytes": 45460270,
+          "sceneActivationDeltaBytes": 12489052,
+          "measurementOverheadMs": 22994.610000133514,
+          "measurementScope": "diagnostic-backend-scene-activation-delta"
+        }
+      },
+      "screenshot": null
+    },
+    {
+      "repeat": 3,
+      "browser": "chrome",
+      "browserEngine": "Blink",
+      "browserVersion": "151.0.7922.139",
+      "headless": false,
+      "viewport": {
+        "width": 1440,
+        "height": 960
+      },
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36",
+      "platform": "Win32",
+      "adapter": {
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "device": "",
+        "description": "",
+        "isFallbackAdapter": false
+      },
+      "consoleIssues": [],
+      "outboundRequests": [],
+      "result": {
+        "schemaVersion": "madi.industrial-browser-benchmark.3",
+        "backend": "three",
+        "scale": "target",
+        "profile": "heterogeneous",
+        "features": {
+          "surfaces": true,
+          "explicitEdges": false,
+          "picking": "on-demand-not-sampled",
+          "frustumCulling": "frustum",
+          "lod": false,
+          "cameraTrace": "local-review"
+        },
+        "workload": {
+          "id": "madi.industrial-heterogeneous.1",
+          "prototypeCount": 256,
+          "occurrenceCount": 100000,
+          "uniqueTriangleCount": 26240,
+          "submittedTriangleCount": 10223768,
+          "explicitEdgeSegmentCount": 6064765,
+          "instanceBytes": 9600000,
+          "profile": "heterogeneous"
+        },
+        "config": {
+          "warmupFrames": 30,
+          "sampleFrames": 90,
+          "memoryMode": "scene-delta"
+        },
+        "milestones": {
+          "workloadReadyMs": 61.6599999666214,
+          "backendReadyMs": 477.5350000858307,
+          "firstFrameMs": 512.5100001096725
+        },
+        "frameIntervals": {
+          "samples": 89,
+          "medianMs": 13.875,
+          "p95Ms": 27.765000000001237,
+          "p99Ms": 27.795000000000073,
+          "worstMs": 27.795000000000073
+        },
+        "cpuSubmit": {
+          "samples": 90,
+          "medianMs": 10.195000052452087,
+          "p95Ms": 26.194999933242798,
+          "p99Ms": 30.180000066757202,
+          "worstMs": 30.180000066757202
+        },
+        "renderer": {
+          "logicalDrawCalls": 1,
+          "visibleSubdraws": 34443,
+          "unculledSubmittedTriangles": 10223768,
+          "visibleOccurrences": 34443,
+          "visibleTriangles": 3521604,
+          "cullingImplementation": "three-batched-mesh"
+        },
+        "memory": {
+          "usedJsHeapBytes": 73484348,
+          "userAgentSpecificBytes": 83865130,
+          "backendCoreReadyBytes": 60172266,
+          "sceneActivatedBytes": 80444378,
+          "sceneActivationDeltaBytes": 20272112,
+          "measurementOverheadMs": 28155.674999833107,
+          "measurementScope": "diagnostic-backend-scene-activation-delta"
+        }
+      },
+      "screenshot": null
+    },
+    {
+      "repeat": 1,
+      "browser": "firefox",
+      "browserEngine": "Gecko",
+      "browserVersion": "150.0.2",
+      "headless": false,
+      "viewport": {
+        "width": 1440,
+        "height": 960
+      },
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:150.0) Gecko/20100101 Firefox/150.0",
+      "platform": "Win32",
+      "adapter": {
+        "vendor": "",
+        "architecture": "",
+        "device": "",
+        "description": "",
+        "isFallbackAdapter": false
+      },
+      "consoleIssues": [],
+      "outboundRequests": [],
+      "result": {
+        "schemaVersion": "madi.industrial-browser-benchmark.3",
+        "backend": "madi",
+        "scale": "target",
+        "profile": "heterogeneous",
+        "features": {
+          "surfaces": true,
+          "explicitEdges": false,
+          "picking": "on-demand-not-sampled",
+          "frustumCulling": "frustum",
+          "lod": false,
+          "cameraTrace": "local-review"
+        },
+        "workload": {
+          "id": "madi.industrial-heterogeneous.1",
+          "prototypeCount": 256,
+          "occurrenceCount": 100000,
+          "uniqueTriangleCount": 26240,
+          "submittedTriangleCount": 10223768,
+          "explicitEdgeSegmentCount": 6064765,
+          "instanceBytes": 9600000,
+          "profile": "heterogeneous"
+        },
+        "config": {
+          "warmupFrames": 30,
+          "sampleFrames": 90,
+          "memoryMode": "scene-delta"
+        },
+        "milestones": {
+          "workloadReadyMs": 36.72000000000003,
+          "backendReadyMs": 417.18000000000006,
+          "firstFrameMs": 428.6400000000001
+        },
+        "frameIntervals": {
+          "samples": 89,
+          "medianMs": 6.940000000000055,
+          "p95Ms": 20.839999999999918,
+          "p99Ms": 27.779999999999973,
+          "worstMs": 27.779999999999973
+        },
+        "cpuSubmit": {
+          "samples": 90,
+          "medianMs": 6,
+          "p95Ms": 20.460000000000036,
+          "p99Ms": 23.200000000000045,
+          "worstMs": 23.200000000000045
+        },
+        "renderer": {
+          "logicalDrawCalls": 256,
+          "visibleSubdraws": 256,
+          "unculledSubmittedTriangles": 10223768,
+          "visibleOccurrences": 34711,
+          "visibleTriangles": 3548756,
+          "cullingImplementation": "dense-cpu-compaction"
+        },
+        "memory": {
+          "usedJsHeapBytes": null,
+          "userAgentSpecificBytes": null,
+          "backendCoreReadyBytes": null,
+          "sceneActivatedBytes": null,
+          "sceneActivationDeltaBytes": null,
+          "measurementOverheadMs": 0.01999999999998181,
+          "measurementScope": "diagnostic-backend-scene-activation-delta"
+        }
+      },
+      "screenshot": {
+        "path": "firefox-150-madi-target-heterogeneous-frustum-windows.png",
+        "bytes": 409522,
+        "sha256": "0f412b12d198fc58f21472add8238bb7cfced4f51d8b0b3f1cfee5b5d3c142dd"
+      }
+    },
+    {
+      "repeat": 1,
+      "browser": "firefox",
+      "browserEngine": "Gecko",
+      "browserVersion": "150.0.2",
+      "headless": false,
+      "viewport": {
+        "width": 1440,
+        "height": 960
+      },
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:150.0) Gecko/20100101 Firefox/150.0",
+      "platform": "Win32",
+      "adapter": {
+        "vendor": "",
+        "architecture": "",
+        "device": "",
+        "description": "",
+        "isFallbackAdapter": false
+      },
+      "consoleIssues": [],
+      "outboundRequests": [],
+      "result": {
+        "schemaVersion": "madi.industrial-browser-benchmark.3",
+        "backend": "three",
+        "scale": "target",
+        "profile": "heterogeneous",
+        "features": {
+          "surfaces": true,
+          "explicitEdges": false,
+          "picking": "on-demand-not-sampled",
+          "frustumCulling": "frustum",
+          "lod": false,
+          "cameraTrace": "local-review"
+        },
+        "workload": {
+          "id": "madi.industrial-heterogeneous.1",
+          "prototypeCount": 256,
+          "occurrenceCount": 100000,
+          "uniqueTriangleCount": 26240,
+          "submittedTriangleCount": 10223768,
+          "explicitEdgeSegmentCount": 6064765,
+          "instanceBytes": 9600000,
+          "profile": "heterogeneous"
+        },
+        "config": {
+          "warmupFrames": 30,
+          "sampleFrames": 90,
+          "memoryMode": "scene-delta"
+        },
+        "milestones": {
+          "workloadReadyMs": 43.120000000000005,
+          "backendReadyMs": 603.3000000000001,
+          "firstFrameMs": 632.74
+        },
+        "frameIntervals": {
+          "samples": 89,
+          "medianMs": 13.879999999999882,
+          "p95Ms": 20.840000000000146,
+          "p99Ms": 27.7800000000002,
+          "worstMs": 27.7800000000002
+        },
+        "cpuSubmit": {
+          "samples": 90,
+          "medianMs": 10.680000000000064,
+          "p95Ms": 22.480000000000018,
+          "p99Ms": 27.800000000000182,
+          "worstMs": 27.800000000000182
+        },
+        "renderer": {
+          "logicalDrawCalls": 1,
+          "visibleSubdraws": 34711,
+          "unculledSubmittedTriangles": 10223768,
+          "visibleOccurrences": 34711,
+          "visibleTriangles": 3548756,
+          "cullingImplementation": "three-batched-mesh"
+        },
+        "memory": {
+          "usedJsHeapBytes": null,
+          "userAgentSpecificBytes": null,
+          "backendCoreReadyBytes": null,
+          "sceneActivatedBytes": null,
+          "sceneActivationDeltaBytes": null,
+          "measurementOverheadMs": 0,
+          "measurementScope": "diagnostic-backend-scene-activation-delta"
+        }
+      },
+      "screenshot": {
+        "path": "firefox-150-three-target-heterogeneous-frustum-windows.png",
+        "bytes": 401240,
+        "sha256": "b544506423994e0d93a4b04be67b558a8bdb87c3f1cb78d9adc7aa74d7405762"
+      }
+    },
+    {
+      "repeat": 2,
+      "browser": "firefox",
+      "browserEngine": "Gecko",
+      "browserVersion": "150.0.2",
+      "headless": false,
+      "viewport": {
+        "width": 1440,
+        "height": 960
+      },
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:150.0) Gecko/20100101 Firefox/150.0",
+      "platform": "Win32",
+      "adapter": {
+        "vendor": "",
+        "architecture": "",
+        "device": "",
+        "description": "",
+        "isFallbackAdapter": false
+      },
+      "consoleIssues": [],
+      "outboundRequests": [],
+      "result": {
+        "schemaVersion": "madi.industrial-browser-benchmark.3",
+        "backend": "three",
+        "scale": "target",
+        "profile": "heterogeneous",
+        "features": {
+          "surfaces": true,
+          "explicitEdges": false,
+          "picking": "on-demand-not-sampled",
+          "frustumCulling": "frustum",
+          "lod": false,
+          "cameraTrace": "local-review"
+        },
+        "workload": {
+          "id": "madi.industrial-heterogeneous.1",
+          "prototypeCount": 256,
+          "occurrenceCount": 100000,
+          "uniqueTriangleCount": 26240,
+          "submittedTriangleCount": 10223768,
+          "explicitEdgeSegmentCount": 6064765,
+          "instanceBytes": 9600000,
+          "profile": "heterogeneous"
+        },
+        "config": {
+          "warmupFrames": 30,
+          "sampleFrames": 90,
+          "memoryMode": "scene-delta"
+        },
+        "milestones": {
+          "workloadReadyMs": 38.68000000000001,
+          "backendReadyMs": 614.4,
+          "firstFrameMs": 648.54
+        },
+        "frameIntervals": {
+          "samples": 89,
+          "medianMs": 13.879999999999882,
+          "p95Ms": 20.840000000000146,
+          "p99Ms": 27.7800000000002,
+          "worstMs": 27.7800000000002
+        },
+        "cpuSubmit": {
+          "samples": 90,
+          "medianMs": 10.920000000000073,
+          "p95Ms": 23.09999999999991,
+          "p99Ms": 26.59999999999991,
+          "worstMs": 26.59999999999991
+        },
+        "renderer": {
+          "logicalDrawCalls": 1,
+          "visibleSubdraws": 34711,
+          "unculledSubmittedTriangles": 10223768,
+          "visibleOccurrences": 34711,
+          "visibleTriangles": 3548756,
+          "cullingImplementation": "three-batched-mesh"
+        },
+        "memory": {
+          "usedJsHeapBytes": null,
+          "userAgentSpecificBytes": null,
+          "backendCoreReadyBytes": null,
+          "sceneActivatedBytes": null,
+          "sceneActivationDeltaBytes": null,
+          "measurementOverheadMs": 0,
+          "measurementScope": "diagnostic-backend-scene-activation-delta"
+        }
+      },
+      "screenshot": null
+    },
+    {
+      "repeat": 2,
+      "browser": "firefox",
+      "browserEngine": "Gecko",
+      "browserVersion": "150.0.2",
+      "headless": false,
+      "viewport": {
+        "width": 1440,
+        "height": 960
+      },
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:150.0) Gecko/20100101 Firefox/150.0",
+      "platform": "Win32",
+      "adapter": {
+        "vendor": "",
+        "architecture": "",
+        "device": "",
+        "description": "",
+        "isFallbackAdapter": false
+      },
+      "consoleIssues": [],
+      "outboundRequests": [],
+      "result": {
+        "schemaVersion": "madi.industrial-browser-benchmark.3",
+        "backend": "madi",
+        "scale": "target",
+        "profile": "heterogeneous",
+        "features": {
+          "surfaces": true,
+          "explicitEdges": false,
+          "picking": "on-demand-not-sampled",
+          "frustumCulling": "frustum",
+          "lod": false,
+          "cameraTrace": "local-review"
+        },
+        "workload": {
+          "id": "madi.industrial-heterogeneous.1",
+          "prototypeCount": 256,
+          "occurrenceCount": 100000,
+          "uniqueTriangleCount": 26240,
+          "submittedTriangleCount": 10223768,
+          "explicitEdgeSegmentCount": 6064765,
+          "instanceBytes": 9600000,
+          "profile": "heterogeneous"
+        },
+        "config": {
+          "warmupFrames": 30,
+          "sampleFrames": 90,
+          "memoryMode": "scene-delta"
+        },
+        "milestones": {
+          "workloadReadyMs": 35.24000000000001,
+          "backendReadyMs": 468.18,
+          "firstFrameMs": 480.46
+        },
+        "frameIntervals": {
+          "samples": 89,
+          "medianMs": 6.940000000000055,
+          "p95Ms": 20.839999999999918,
+          "p99Ms": 27.779999999999973,
+          "worstMs": 27.779999999999973
+        },
+        "cpuSubmit": {
+          "samples": 90,
+          "medianMs": 5.980000000000018,
+          "p95Ms": 20.800000000000182,
+          "p99Ms": 23.680000000000064,
+          "worstMs": 23.680000000000064
+        },
+        "renderer": {
+          "logicalDrawCalls": 256,
+          "visibleSubdraws": 256,
+          "unculledSubmittedTriangles": 10223768,
+          "visibleOccurrences": 34711,
+          "visibleTriangles": 3548756,
+          "cullingImplementation": "dense-cpu-compaction"
+        },
+        "memory": {
+          "usedJsHeapBytes": null,
+          "userAgentSpecificBytes": null,
+          "backendCoreReadyBytes": null,
+          "sceneActivatedBytes": null,
+          "sceneActivationDeltaBytes": null,
+          "measurementOverheadMs": 0,
+          "measurementScope": "diagnostic-backend-scene-activation-delta"
+        }
+      },
+      "screenshot": null
+    },
+    {
+      "repeat": 3,
+      "browser": "firefox",
+      "browserEngine": "Gecko",
+      "browserVersion": "150.0.2",
+      "headless": false,
+      "viewport": {
+        "width": 1440,
+        "height": 960
+      },
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:150.0) Gecko/20100101 Firefox/150.0",
+      "platform": "Win32",
+      "adapter": {
+        "vendor": "",
+        "architecture": "",
+        "device": "",
+        "description": "",
+        "isFallbackAdapter": false
+      },
+      "consoleIssues": [],
+      "outboundRequests": [],
+      "result": {
+        "schemaVersion": "madi.industrial-browser-benchmark.3",
+        "backend": "madi",
+        "scale": "target",
+        "profile": "heterogeneous",
+        "features": {
+          "surfaces": true,
+          "explicitEdges": false,
+          "picking": "on-demand-not-sampled",
+          "frustumCulling": "frustum",
+          "lod": false,
+          "cameraTrace": "local-review"
+        },
+        "workload": {
+          "id": "madi.industrial-heterogeneous.1",
+          "prototypeCount": 256,
+          "occurrenceCount": 100000,
+          "uniqueTriangleCount": 26240,
+          "submittedTriangleCount": 10223768,
+          "explicitEdgeSegmentCount": 6064765,
+          "instanceBytes": 9600000,
+          "profile": "heterogeneous"
+        },
+        "config": {
+          "warmupFrames": 30,
+          "sampleFrames": 90,
+          "memoryMode": "scene-delta"
+        },
+        "milestones": {
+          "workloadReadyMs": 56.28000000000003,
+          "backendReadyMs": 491.4200000000001,
+          "firstFrameMs": 502.32000000000005
+        },
+        "frameIntervals": {
+          "samples": 89,
+          "medianMs": 6.940000000000055,
+          "p95Ms": 13.900000000000091,
+          "p99Ms": 20.839999999999918,
+          "worstMs": 20.839999999999918
+        },
+        "cpuSubmit": {
+          "samples": 90,
+          "medianMs": 5.339999999999918,
+          "p95Ms": 15.440000000000055,
+          "p99Ms": 19.360000000000127,
+          "worstMs": 19.360000000000127
+        },
+        "renderer": {
+          "logicalDrawCalls": 256,
+          "visibleSubdraws": 256,
+          "unculledSubmittedTriangles": 10223768,
+          "visibleOccurrences": 34711,
+          "visibleTriangles": 3548756,
+          "cullingImplementation": "dense-cpu-compaction"
+        },
+        "memory": {
+          "usedJsHeapBytes": null,
+          "userAgentSpecificBytes": null,
+          "backendCoreReadyBytes": null,
+          "sceneActivatedBytes": null,
+          "sceneActivationDeltaBytes": null,
+          "measurementOverheadMs": 0.01999999999998181,
+          "measurementScope": "diagnostic-backend-scene-activation-delta"
+        }
+      },
+      "screenshot": null
+    },
+    {
+      "repeat": 3,
+      "browser": "firefox",
+      "browserEngine": "Gecko",
+      "browserVersion": "150.0.2",
+      "headless": false,
+      "viewport": {
+        "width": 1440,
+        "height": 960
+      },
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:150.0) Gecko/20100101 Firefox/150.0",
+      "platform": "Win32",
+      "adapter": {
+        "vendor": "",
+        "architecture": "",
+        "device": "",
+        "description": "",
+        "isFallbackAdapter": false
+      },
+      "consoleIssues": [],
+      "outboundRequests": [],
+      "result": {
+        "schemaVersion": "madi.industrial-browser-benchmark.3",
+        "backend": "three",
+        "scale": "target",
+        "profile": "heterogeneous",
+        "features": {
+          "surfaces": true,
+          "explicitEdges": false,
+          "picking": "on-demand-not-sampled",
+          "frustumCulling": "frustum",
+          "lod": false,
+          "cameraTrace": "local-review"
+        },
+        "workload": {
+          "id": "madi.industrial-heterogeneous.1",
+          "prototypeCount": 256,
+          "occurrenceCount": 100000,
+          "uniqueTriangleCount": 26240,
+          "submittedTriangleCount": 10223768,
+          "explicitEdgeSegmentCount": 6064765,
+          "instanceBytes": 9600000,
+          "profile": "heterogeneous"
+        },
+        "config": {
+          "warmupFrames": 30,
+          "sampleFrames": 90,
+          "memoryMode": "scene-delta"
+        },
+        "milestones": {
+          "workloadReadyMs": 39.27999999999997,
+          "backendReadyMs": 594.98,
+          "firstFrameMs": 623.62
+        },
+        "frameIntervals": {
+          "samples": 89,
+          "medianMs": 13.879999999999882,
+          "p95Ms": 20.840000000000146,
+          "p99Ms": 34.720000000000255,
+          "worstMs": 34.720000000000255
+        },
+        "cpuSubmit": {
+          "samples": 90,
+          "medianMs": 11.200000000000273,
+          "p95Ms": 23.9399999999996,
+          "p99Ms": 29.5,
+          "worstMs": 29.5
+        },
+        "renderer": {
+          "logicalDrawCalls": 1,
+          "visibleSubdraws": 34711,
+          "unculledSubmittedTriangles": 10223768,
+          "visibleOccurrences": 34711,
+          "visibleTriangles": 3548756,
+          "cullingImplementation": "three-batched-mesh"
+        },
+        "memory": {
+          "usedJsHeapBytes": null,
+          "userAgentSpecificBytes": null,
+          "backendCoreReadyBytes": null,
+          "sceneActivatedBytes": null,
+          "sceneActivationDeltaBytes": null,
+          "measurementOverheadMs": 0,
+          "measurementScope": "diagnostic-backend-scene-activation-delta"
+        }
+      },
+      "screenshot": null
+    }
+  ],
+  "aggregates": {
+    "byPath": [
+      {
+        "browser": "chrome",
+        "backend": "madi",
+        "runs": 3,
+        "cpuSubmitP95Ms": {
+          "samples": 3,
+          "median": 17.12999999523163,
+          "min": 16.75,
+          "max": 17.7849999666214,
+          "mean": 17.221666653951008,
+          "standardDeviation": 0.5235535454632656
+        },
+        "frameIntervalP95Ms": {
+          "samples": 3,
+          "median": 13.909999999999854,
+          "min": 13.905000000000655,
+          "max": 20.790000000000873,
+          "mean": 16.201666666667126,
+          "standardDeviation": 3.9736140141357676
+        },
+        "sceneActivationDeltaBytes": {
+          "samples": 3,
+          "median": 12489052,
+          "min": 12487763,
+          "max": 12921289,
+          "mean": 12632701.333333334,
+          "standardDeviation": 249925.08156312228
+        }
+      },
+      {
+        "browser": "chrome",
+        "backend": "three",
+        "runs": 3,
+        "cpuSubmitP95Ms": {
+          "samples": 3,
+          "median": 23.4650000333786,
+          "min": 22.139999985694885,
+          "max": 26.194999933242798,
+          "mean": 23.933333317438763,
+          "standardDeviation": 2.067669749348847
+        },
+        "frameIntervalP95Ms": {
+          "samples": 3,
+          "median": 20.840000000000146,
+          "min": 20.840000000000146,
+          "max": 27.765000000001237,
+          "mean": 23.14833333333384,
+          "standardDeviation": 3.9981506141387886
+        },
+        "sceneActivationDeltaBytes": {
+          "samples": 3,
+          "median": 20264321,
+          "min": 20193114,
+          "max": 20272112,
+          "mean": 20243182.333333332,
+          "standardDeviation": 43535.08266138165
+        }
+      },
+      {
+        "browser": "firefox",
+        "backend": "madi",
+        "runs": 3,
+        "cpuSubmitP95Ms": {
+          "samples": 3,
+          "median": 20.460000000000036,
+          "min": 15.440000000000055,
+          "max": 20.800000000000182,
+          "mean": 18.90000000000009,
+          "standardDeviation": 3.0012663993721405
+        },
+        "frameIntervalP95Ms": {
+          "samples": 3,
+          "median": 20.839999999999918,
+          "min": 13.900000000000091,
+          "max": 20.839999999999918,
+          "mean": 18.526666666666642,
+          "standardDeviation": 4.0068108681759025
+        },
+        "sceneActivationDeltaBytes": {
+          "samples": 0,
+          "median": null,
+          "min": null,
+          "max": null,
+          "mean": null,
+          "standardDeviation": null
+        }
+      },
+      {
+        "browser": "firefox",
+        "backend": "three",
+        "runs": 3,
+        "cpuSubmitP95Ms": {
+          "samples": 3,
+          "median": 23.09999999999991,
+          "min": 22.480000000000018,
+          "max": 23.9399999999996,
+          "mean": 23.173333333333176,
+          "standardDeviation": 0.7327573495591979
+        },
+        "frameIntervalP95Ms": {
+          "samples": 3,
+          "median": 20.840000000000146,
+          "min": 20.840000000000146,
+          "max": 20.840000000000146,
+          "mean": 20.840000000000146,
+          "standardDeviation": 0
+        },
+        "sceneActivationDeltaBytes": {
+          "samples": 0,
+          "median": null,
+          "min": null,
+          "max": null,
+          "mean": null,
+          "standardDeviation": null
+        }
+      }
+    ],
+    "pairedComparisons": [
+      {
+        "browser": "chrome",
+        "pairs": 3,
+        "cpuP95ReductionPercent": {
+          "samples": 3,
+          "median": 26.997656207694575,
+          "min": 19.670280134992513,
+          "max": 36.05649916897541,
+          "mean": 27.57481183722083,
+          "standardDeviation": 8.208341794962989
+        },
+        "frameP95RegressionPercent": {
+          "samples": 3,
+          "median": -33.253358925145115,
+          "min": -49.918962722852385,
+          "max": -0.23992322456464518,
+          "mean": -27.804081624187386,
+          "standardDeviation": 25.283842838760847
+        },
+        "sceneDeltaReductionPercent": {
+          "samples": 3,
+          "median": 38.15830980798702,
+          "min": 36.23625977894843,
+          "max": 38.39294100190449,
+          "mean": 37.59583686294665,
+          "standardDeviation": 1.1832583550474525
+        },
+        "continueThresholdCounts": {
+          "cpuP95AtLeast25Percent": 2,
+          "frameP95NoMoreThan10PercentWorse": 3,
+          "sceneDeltaAtLeast30Percent": 3
+        }
+      },
+      {
+        "browser": "firefox",
+        "pairs": 3,
+        "cpuP95ReductionPercent": {
+          "samples": 3,
+          "median": 9.956709956708815,
+          "min": 8.985765124555071,
+          "max": 35.50543024227104,
+          "mean": 18.149301774511642,
+          "standardDeviation": 15.03868611311499
+        },
+        "frameP95RegressionPercent": {
+          "samples": 3,
+          "median": -1.0910445078849832e-12,
+          "min": -33.30134357005761,
+          "max": -1.0910445078849832e-12,
+          "mean": -11.1004478566866,
+          "standardDeviation": 19.226539674548345
+        },
+        "sceneDeltaReductionPercent": {
+          "samples": 0,
+          "median": null,
+          "min": null,
+          "max": null,
+          "mean": null,
+          "standardDeviation": null
+        },
+        "continueThresholdCounts": {
+          "cpuP95AtLeast25Percent": 1,
+          "frameP95NoMoreThan10PercentWorse": 3,
+          "sceneDeltaAtLeast30Percent": 0
+        }
+      }
+    ]
+  },
+  "notes": [
+    "This run validates parity and measurement plumbing; it does not accept or reject ADR-0003.",
+    "Absolute performance varies by host load. Decision runs require reference hardware and repeated clean sessions.",
+    "MADI uses dense CPU sphere culling and instance compaction; Three.js uses BatchedMesh per-object culling with its default opaque sorting.",
+    "Each repeat launches a fresh browser process and alternates backend order.",
+    "Scene activation delta is measured from a backend-ready shell with the shared workload retained to the first rendered frame; it remains browser-wide diagnostic memory, not an allocator census."
+  ]
+}

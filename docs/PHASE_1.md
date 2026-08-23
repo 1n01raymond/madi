@@ -131,7 +131,12 @@ is persistent cache tiers and camera/view reprioritization.
 On the compiler side the next increment is a streamed structure section format
 for the adapter boundary, so a real-large federation no longer has to be
 resident as one JSON string or one object graph. The sixty5 measurement in
-`artifacts/ifc/sixty5/` is the gate that increment has to clear. In parallel, advance the 100k
-heterogeneous/culling record into decision-quality evidence with retained-memory
-isolation, GPU timestamps, and repeated discrete and integrated GPU runs. Keep
-current browser matrices labeled exploratory until those contracts are complete.
+`artifacts/ifc/sixty5/` is the gate that increment has to clear.
+
+In parallel, advance the repeated 100k record onto genuinely different hardware
+before widening Studio UI. Add GPU timestamp queries and allocator/GPU retained-
+memory accounting, run the locked matrix on an integrated-GPU profile, and
+replace procedural variants with a redistributable engineering assembly or
+design-partner aggregate. Then add equivalent explicit-edge and bounded-
+residency slices. Keep the committed browser matrices labeled exploratory until
+those independent signals converge.

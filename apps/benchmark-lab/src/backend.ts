@@ -16,8 +16,16 @@ export interface BenchmarkRendererStats {
   readonly cullingImplementation: "none" | "dense-cpu-compaction" | "three-batched-mesh";
 }
 
+export interface BenchmarkMemoryMeasurement {
+  readonly bytes: number | null;
+  readonly durationMs: number;
+}
+
+export type BenchmarkMemoryProbe = () => Promise<BenchmarkMemoryMeasurement>;
+
 export interface BenchmarkBackend {
   readonly id: BenchmarkBackendId;
+  readonly coreReadyMemory: BenchmarkMemoryMeasurement | null;
   render(camera: BenchmarkCamera): Promise<void>;
   stats(): BenchmarkRendererStats;
   dispose(): void;
@@ -35,8 +43,10 @@ async function createMadiBackend(
   canvas: HTMLCanvasElement,
   workload: IndustrialWorkload,
   culling: BenchmarkCullingMode,
+  memoryProbe?: BenchmarkMemoryProbe,
 ): Promise<BenchmarkBackend> {
   const renderer = await Phase0Renderer.create(canvas, { pixelRatio: 1 });
+  const coreReadyMemory = memoryProbe ? await memoryProbe() : null;
   renderer.setScene(workload.scene, { includeEdges: false });
   const culler = culling === "frustum" ? new DenseFrustumCuller(workload) : undefined;
   let currentVisibleOccurrences = workload.stats.occurrenceCount;
@@ -44,6 +54,7 @@ async function createMadiBackend(
   let currentVisibleSubdraws = workload.stats.prototypeCount;
   return {
     id: "madi",
+    coreReadyMemory,
     render(camera) {
       if (culler) {
         const visibility = culler.cull(camera.viewProjection);
@@ -74,6 +85,7 @@ async function createThreeBackend(
   canvas: HTMLCanvasElement,
   workload: IndustrialWorkload,
   culling: BenchmarkCullingMode,
+  memoryProbe?: BenchmarkMemoryProbe,
 ): Promise<BenchmarkBackend> {
   const THREE = await import("three/webgpu");
   const renderer = new THREE.WebGPURenderer({ canvas, antialias: false, alpha: false });
@@ -95,6 +107,7 @@ async function createThreeBackend(
   const color = new THREE.Color();
   const geometries: InstanceType<typeof THREE.BufferGeometry>[] = [];
   let batchedMesh: InstanceType<typeof THREE.BatchedMesh> | undefined;
+  const coreReadyMemory = memoryProbe ? await memoryProbe() : null;
 
   if (culling === "frustum") {
     const maxVertexCount = workload.scene.batches.reduce(
@@ -169,6 +182,7 @@ async function createThreeBackend(
   let lastCamera: BenchmarkCamera | undefined;
   return {
     id: "three",
+    coreReadyMemory,
     async render(state) {
       lastCamera = state;
       camera.aspect = state.aspect;
@@ -223,8 +237,9 @@ export function createBenchmarkBackend(
   canvas: HTMLCanvasElement,
   workload: IndustrialWorkload,
   culling: BenchmarkCullingMode = "disabled",
+  memoryProbe?: BenchmarkMemoryProbe,
 ): Promise<BenchmarkBackend> {
   return id === "madi"
-    ? createMadiBackend(canvas, workload, culling)
-    : createThreeBackend(canvas, workload, culling);
+    ? createMadiBackend(canvas, workload, culling, memoryProbe)
+    : createThreeBackend(canvas, workload, culling, memoryProbe);
 }
