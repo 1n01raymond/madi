@@ -618,10 +618,17 @@
     }
   ],
   "scene": {
-    "byteLength": 81805061,
-    "sha256": "0f9b1e65d81370c283da4313312568da53a77373dd8f87486bb8b912d8fdaec1"
+    "encodingVersion": "madi.ifc-scene-ir-split.1",
+    "geometry": {
+      "byteLength": 28134848,
+      "sha256": "247ae94d95883b1b65c5cc00e35048379fb8adbb22999cee9a13858945e84c2b"
+    },
+    "structure": {
+      "byteLength": 39135637,
+      "sha256": "38dd0f03affa65e1165ac84853645ed6b1e7939fc07d72cae5bcb8da2997025c"
+    }
   },
-  "schemaVersion": "madi.ifc-adapter-report.1",
+  "schemaVersion": "madi.ifc-adapter-report.2",
   "sources": [
     {
       "byteLength": 9022255,

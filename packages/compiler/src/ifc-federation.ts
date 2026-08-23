@@ -1,3 +1,4 @@
+import { constants as bufferConstants } from "node:buffer";
 import { spawn } from "node:child_process";
 import { availableParallelism, tmpdir } from "node:os";
 import { createHash } from "node:crypto";
@@ -7,8 +8,8 @@ import { fileURLToPath } from "node:url";
 
 import { validateScene } from "@madi/scene-ir";
 
-import { hydratePhase0Evidence } from "./evidence-input.js";
 import { compileSceneToGltf } from "./gltf.js";
+import { hydrateIfcSceneSplit, ifcSceneSplitEncodingVersion } from "./ifc-scene.js";
 import { inspectIfcFile } from "./ifc-source.js";
 import type { IfcSourceInspection } from "./ifc-source.js";
 import { writeCompiledPackage } from "./package-output.js";
@@ -162,10 +163,11 @@ async function runAdapter(
 function assertAdapterIdentity(
   adapterReport: unknown,
   sources: readonly InspectedIfcFederationDocument[],
-  serializedScene: string,
+  structure: Buffer,
+  geometry: Buffer,
 ): { readonly report: Record<string, unknown>; readonly federationDigest: string } {
   const report = asRecord(adapterReport, "IFC adapter report");
-  if (report.schemaVersion !== "madi.ifc-adapter-report.1") {
+  if (report.schemaVersion !== "madi.ifc-adapter-report.2") {
     throw new TypeError("IFC adapter report has an unsupported schema version.");
   }
   if (!Array.isArray(report.sources) || report.sources.length !== sources.length) {
@@ -193,14 +195,38 @@ function assertAdapterIdentity(
     throw new TypeError("IFC adapter report is missing its federation digest.");
   }
   const scene = asRecord(report.scene, "IFC adapter scene identity");
-  const sceneBytes = Buffer.from(serializedScene, "utf8");
-  if (
-    scene.byteLength !== sceneBytes.byteLength ||
-    scene.sha256 !== createHash("sha256").update(sceneBytes).digest("hex")
-  ) {
-    throw new TypeError("IFC adapter Scene IR digest does not match its report.");
+  if (scene.encodingVersion !== ifcSceneSplitEncodingVersion) {
+    throw new TypeError("IFC adapter scene transport version is unsupported.");
+  }
+  const structureIdentity = asRecord(scene.structure, "IFC scene structure identity");
+  const geometryIdentity = asRecord(scene.geometry, "IFC scene geometry identity");
+  for (const [identity, payload, label] of [
+    [structureIdentity, structure, "structure"] as const,
+    [geometryIdentity, geometry, "geometry"] as const,
+  ]) {
+    if (
+      identity.byteLength !== payload.byteLength ||
+      identity.sha256 !== createHash("sha256").update(payload).digest("hex")
+    ) {
+      throw new TypeError(`IFC adapter ${label} digest does not match its report.`);
+    }
   }
   return { report, federationDigest: federation.sourceDigest };
+}
+
+/**
+ * The split transport keeps geometry out of the structure document, but the
+ * structure is still parsed as one JSON string. Report that runtime ceiling as
+ * a measured limit instead of letting V8 raise an opaque allocation error.
+ */
+function assertStructureIsParseable(structure: Buffer): void {
+  if (structure.byteLength <= bufferConstants.MAX_STRING_LENGTH) return;
+  const megabytes = (bytes: number) => (bytes / 1_000_000).toFixed(1);
+  throw new TypeError(
+    `The IFC Scene IR structure document is ${megabytes(structure.byteLength)} MB, above the ` +
+      `${megabytes(bufferConstants.MAX_STRING_LENGTH)} MB maximum this runtime can hold as one ` +
+      "JSON string. Compile fewer documents until the structure transport is streamed.",
+  );
 }
 
 export async function compileIfcFederation(
@@ -211,6 +237,7 @@ export async function compileIfcFederation(
   const outputDirectory = resolve(options.outputDirectory);
   const temporaryDirectory = await mkdtemp(join(tmpdir(), "madi-ifc-"));
   const scenePath = join(temporaryDirectory, "scene-ir.json");
+  const geometryPath = join(temporaryDirectory, "scene-ir-geometry.bin");
   const adapterReportPath = join(temporaryDirectory, "adapter-report.json");
   try {
     const sourceArguments = sources.flatMap((source) => [
@@ -229,6 +256,8 @@ export async function compileIfcFederation(
         ...sourceArguments,
         "--scene",
         scenePath,
+        "--geometry",
+        geometryPath,
         "--report",
         adapterReportPath,
         "--threads",
@@ -236,13 +265,18 @@ export async function compileIfcFederation(
       ],
       options.environment ?? process.env,
     );
-    const [serializedScene, serializedAdapterReport] = await Promise.all([
-      readFile(scenePath, "utf8"),
+    const [structure, geometry, serializedAdapterReport] = await Promise.all([
+      readFile(scenePath),
+      readFile(geometryPath),
       readFile(adapterReportPath, "utf8"),
     ]);
     const parsedAdapterReport = parseJson(serializedAdapterReport, "IFC adapter report");
-    const identity = assertAdapterIdentity(parsedAdapterReport, sources, serializedScene);
-    const scene = hydratePhase0Evidence(parseJson(serializedScene, "IFC Scene IR"));
+    const identity = assertAdapterIdentity(parsedAdapterReport, sources, structure, geometry);
+    assertStructureIsParseable(structure);
+    const scene = hydrateIfcSceneSplit(
+      parseJson(structure.toString("utf8"), "IFC Scene IR"),
+      geometry,
+    );
     if (scene.revision.sourceDigest !== `sha256:${identity.federationDigest}`) {
       throw new TypeError("IFC Scene IR federation digest does not match the adapter report.");
     }
@@ -289,7 +323,10 @@ export async function compileIfcFederation(
     };
     await writeCompiledPackage(compiled, outputDirectory, adapterReport);
     if (options.retainSceneIr) {
-      await writeFile(resolve(outputDirectory, "scene-ir.json"), serializedScene, "utf8");
+      await Promise.all([
+        writeFile(resolve(outputDirectory, "scene-ir.json"), structure),
+        writeFile(resolve(outputDirectory, "scene-ir-geometry.bin"), geometry),
+      ]);
     }
     return {
       sources,

@@ -58,6 +58,14 @@ identity. It is not the Phase 3 BIM workflow or a Phase 2 performance result:
 explicit IFC edges, property indexing, spatial chunks, view-driven scheduling,
 and cache tiers remain pending.
 
+The adapter boundary now uses a split Scene IR transport — structure-only JSON
+plus a digest-linked binary geometry file — which reproduces the same compiled
+package while halving the document the compiler must parse. That was enough to
+qualify the 839.9 MB seven-discipline `sixty5` federation as a source and to
+extract 4.87M unique triangles from it, and it exposed the next boundary: its
+631.9 MB structure document is larger than one JavaScript string. A streamed
+structure section format is the named follow-up.
+
 - local STEP AP242 input;
 - XDE hierarchy, names, colors, units, transforms;
 - coarse and target display tessellation;

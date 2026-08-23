@@ -18,7 +18,7 @@ IFC options:
   --python <executable>          Python environment containing IfcOpenShell
   --threads <count>              Geometry iterator threads (default: up to 8)
   --target-chunk-kib <count>     Coalesced target request budget (default: 512)
-  --retain-scene-ir              Keep the large intermediate under output
+  --retain-scene-ir              Keep the split intermediate pair under output
 
 General options:
   --help                         Show this help`;

@@ -699,7 +699,8 @@ def inspect_document(
     timestamp = str(getattr(model.header.file_name, "time_stamp", ""))
     authors = safe_header_values(getattr(model.header.file_name, "author", ()))
     organizations = safe_header_values(getattr(model.header.file_name, "organization", ()))
-    crs_entities = model.by_type("IfcProjectedCRS")
+    # IfcProjectedCRS first appeared in IFC4; IFC2X3 schemas reject the query.
+    crs_entities = [] if model.schema == "IFC2X3" else model.by_type("IfcProjectedCRS")
     source_frame = dict(ROOT_FRAME)
     if crs_entities:
         crs_name = getattr(crs_entities[0], "Name", None)
@@ -887,7 +888,7 @@ def extract_federation(documents: Sequence[DocumentInput], threads: int) -> tupl
         for record in item["prototypeReuse"]
     )
     report = {
-        "schemaVersion": "madi.ifc-adapter-report.1",
+        "schemaVersion": "madi.ifc-adapter-report.2",
         "adapter": {
             "name": "IfcOpenShell",
             "version": ifcopenshell.version,
@@ -934,11 +935,7 @@ def extract_federation(documents: Sequence[DocumentInput], threads: int) -> tupl
     return scene, report
 
 
-def write_scene(path: Path, scene: dict[str, Any]) -> dict[str, Any]:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    with path.open("w", encoding="utf-8", newline="\n") as output:
-        json.dump(scene, output, ensure_ascii=False, separators=(",", ":"), sort_keys=True)
-        output.write("\n")
+def digest_file(path: Path) -> dict[str, Any]:
     digest = hashlib.sha256()
     byte_length = 0
     with path.open("rb") as source:
@@ -946,6 +943,67 @@ def write_scene(path: Path, scene: dict[str, Any]) -> dict[str, Any]:
             digest.update(chunk)
             byte_length += len(chunk)
     return {"byteLength": byte_length, "sha256": digest.hexdigest()}
+
+
+GEOMETRY_ENCODINGS = {
+    "<f8": "f64le",
+    "<f4": "f32le",
+    "<u4": "u32le",
+}
+
+
+def write_scene(
+    structure_path: Path,
+    geometry_path: Path,
+    scene: dict[str, Any],
+) -> dict[str, Any]:
+    """Writes the split Scene IR transport: small structure JSON plus binary streams.
+
+    The expanded single-JSON transport exceeded practical string limits on
+    real-large federations, so representation geometry streams move into a
+    concatenated little-endian binary file while the observable Engineering
+    Scene semantics stay unchanged. Streams go straight to disk and every
+    start is padded to eight bytes so the reader can take typed-array views
+    without copying.
+    """
+    geometry_path.parent.mkdir(parents=True, exist_ok=True)
+    offset = 0
+    with geometry_path.open("wb") as sink:
+
+        def append(values: Any, dtype: str) -> dict[str, Any]:
+            nonlocal offset
+            padding = -offset % 8
+            if padding:
+                sink.write(bytes(padding))
+                offset += padding
+            payload = np.asarray(values, dtype=dtype).tobytes(order="C")
+            entry = {
+                "encoding": GEOMETRY_ENCODINGS[dtype],
+                "byteOffset": offset,
+                "byteLength": len(payload),
+            }
+            sink.write(payload)
+            offset += len(payload)
+            return entry
+
+        for representation in scene["representations"]:
+            surface = representation.get("surface")
+            if not surface:
+                continue
+            surface["positions"] = append(surface["positions"], "<f8")
+            surface["indices"] = append(surface["indices"], "<u4")
+            if surface.get("normals") is not None:
+                surface["normals"] = append(surface["normals"], "<f4")
+
+    structure_path.parent.mkdir(parents=True, exist_ok=True)
+    with structure_path.open("w", encoding="utf-8", newline="\n") as output:
+        json.dump(scene, output, ensure_ascii=False, separators=(",", ":"), sort_keys=True)
+        output.write("\n")
+    return {
+        "encodingVersion": "madi.ifc-scene-ir-split.1",
+        "structure": digest_file(structure_path),
+        "geometry": digest_file(geometry_path),
+    }
 
 
 def write_report(path: Path, report: dict[str, Any]) -> None:
@@ -971,6 +1029,7 @@ def main() -> None:
         help="Non-sensitive source label in discipline=value form.",
     )
     parser.add_argument("--scene", required=True, type=Path)
+    parser.add_argument("--geometry", required=True, type=Path)
     parser.add_argument("--report", required=True, type=Path)
     parser.add_argument(
         "--threads",
@@ -983,7 +1042,7 @@ def main() -> None:
 
     documents = parse_inputs(arguments.document, arguments.uri_hint)
     scene, report = extract_federation(documents, arguments.threads)
-    report["scene"] = write_scene(arguments.scene, scene)
+    report["scene"] = write_scene(arguments.scene, arguments.geometry, scene)
     write_report(arguments.report, report)
     counts = report["counts"]
     print(

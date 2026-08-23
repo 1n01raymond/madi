@@ -458,6 +458,17 @@ be frozen as FlatBuffers/Protobuf/JSON until:
 Disk/cache schemas may intentionally differ from the IR while preserving its
 observable semantics.
 
+The IFC adapter is the first place where that freedom was exercised for a
+measured reason rather than a preference. Its intermediate is now a split
+transport: a structure-only JSON document whose representation surfaces hold
+`{encoding, byteOffset, byteLength}` references into a separate little-endian
+geometry file, with a SHA-256 recorded for each half. The compiler verifies both
+digests and resolves the references into typed-array views without copying, so
+the observable `EngineeringScene` is unchanged. This is an adapter-to-compiler
+transport, not a delivery or cache format, and it is deliberately versioned
+(`madi.ifc-scene-ir-split.1`) so it can be replaced when the structure document
+itself needs streaming.
+
 ## 19. Phase 0 extraction evidence
 
 `artifacts/occt/repeated-fasteners.scene.json` records one complete vertical

@@ -75,9 +75,25 @@ pnpm madi compile-ifc \
 ```
 
 The command preflights every Part 21 envelope, verifies adapter/source digests,
-validates the expanded Scene IR, emits the compiled package and adapter report,
-and deletes Scene IR unless `--retain-scene-ir` is requested. The qualified
-four-discipline result is under `artifacts/ifc/digital-hub/`.
+validates the intermediate Scene IR, emits the compiled package and adapter
+report, and deletes Scene IR unless `--retain-scene-ir` is requested. The
+qualified four-discipline result is under `artifacts/ifc/digital-hub/`.
+
+### Split Scene IR transport
+
+The IFC adapter does not hand back one expanded JSON document. It writes a
+structure-only JSON file whose representation surfaces hold
+`{encoding, byteOffset, byteLength}` references into a separate little-endian
+geometry file, and reports a SHA-256 for each half. The compiler verifies both
+digests and then resolves the references into typed-array views without copying
+the coordinate data.
+
+This keeps the structure document far below the JavaScript maximum string
+length that a real-large federation otherwise exceeds, and it removes the
+decimal round-trip for every coordinate. The observable `EngineeringScene`
+contract is unchanged, so the split exists only between the adapter and the
+compiler. `--retain-scene-ir` therefore writes both `scene-ir.json` and
+`scene-ir-geometry.bin`; the JSON alone is not a loadable scene.
 
 ## Current limits
 
@@ -87,6 +103,10 @@ four-discipline result is under `artifacts/ifc/digital-hub/`.
 - The IFC command currently depends on pinned IfcOpenShell 0.8.5. IFC topology
   edge classification, non-flattened property indexing, and cross-document
   reconciliation remain explicit follow-up work.
+- The split transport moves geometry out of the structure document but still
+  parses that document as one JSON string, and it requires a little-endian
+  host. Streaming the structure and encoding flattened properties as binary
+  streams remain follow-up work.
 - The first coarse representation is a per-prototype AABB, not a
   shape-preserving LOD. IFC target ranges are coalesced with a static initial
   priority; spatial partitioning, compression, and view reprioritization are
