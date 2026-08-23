@@ -33,6 +33,7 @@ artifacts/benchmarks/*.json
 Thumbs.db
 
 # Local environment
+CLAUDE.local.md
 .venv/
 .env
 .env.*
