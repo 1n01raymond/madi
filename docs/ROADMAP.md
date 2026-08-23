@@ -35,8 +35,10 @@ Status: Current.
 Current evidence: the first deterministic package emits standard glTF 2.0 JSON,
 external binary geometry, and build reports from local AP242/AP214 through the
 isolated OCCT adapter. It preserves hierarchy, prototype reuse, explicit edges,
-and source identity; expanded Scene IR is temporary. Coarse LOD and progressive
-chunks remain pending. See the [Phase 1 tracker](PHASE_1.md).
+and source identity; expanded Scene IR is temporary. Direct STEP output now
+separates prototype AABB proxies from target geometry in two standard glTF
+buffers. Shape-preserving LOD and spatial chunks remain pending. See the
+[Phase 1 tracker](PHASE_1.md).
 
 - local STEP AP242 input;
 - XDE hierarchy, names, colors, units, transforms;
@@ -53,8 +55,9 @@ and preserves source-aware object picking in headed Chrome and Firefox. Orbit,
 pan, zoom, fit, synchronized selection, hide/isolate, and one section plane are
 implemented. Hierarchy/source-identity search and occurrence properties are
 also available. The Studio opens shareable HTTP(S) scene URLs and validated
-local `.gltf` + `.bin` pairs without uploading them; progressive resources and
-bounded residency are pending.
+local `.gltf` packages with all declared `.bin` resources without uploading
+them. A delayed-network browser record proves a coarse WebGPU frame before the
+target request completes; prioritization and bounded residency remain pending.
 
 - manifest/hierarchy-first loading;
 - Worker decode;

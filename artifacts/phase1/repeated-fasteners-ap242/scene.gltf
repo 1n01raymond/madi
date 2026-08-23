@@ -118,7 +118,8 @@
             "phase-0",
             "occt-xde",
             "part"
-          ]
+          ],
+          "coarseMesh": 1
         }
       }
     },
@@ -187,7 +188,7 @@
         0.006000000052154064,
         1
       ],
-      "mesh": 1,
+      "mesh": 2,
       "extras": {
         "madi": {
           "occurrenceId": "occurrence:madi-repeated-fasteners/fastener-bank/fastener-01",
@@ -199,7 +200,8 @@
             "phase-0",
             "occt-xde",
             "part"
-          ]
+          ],
+          "coarseMesh": 3
         }
       }
     },
@@ -223,7 +225,7 @@
         0.006000000052154064,
         1
       ],
-      "mesh": 1,
+      "mesh": 2,
       "extras": {
         "madi": {
           "occurrenceId": "occurrence:madi-repeated-fasteners/fastener-bank/fastener-02",
@@ -235,7 +237,8 @@
             "phase-0",
             "occt-xde",
             "part"
-          ]
+          ],
+          "coarseMesh": 3
         }
       }
     },
@@ -259,7 +262,7 @@
         0.006000000052154064,
         1
       ],
-      "mesh": 1,
+      "mesh": 2,
       "extras": {
         "madi": {
           "occurrenceId": "occurrence:madi-repeated-fasteners/fastener-bank/fastener-03",
@@ -271,7 +274,8 @@
             "phase-0",
             "occt-xde",
             "part"
-          ]
+          ],
+          "coarseMesh": 3
         }
       }
     },
@@ -295,7 +299,7 @@
         0.006000000052154064,
         1
       ],
-      "mesh": 1,
+      "mesh": 2,
       "extras": {
         "madi": {
           "occurrenceId": "occurrence:madi-repeated-fasteners/fastener-bank/fastener-04",
@@ -307,7 +311,8 @@
             "phase-0",
             "occt-xde",
             "part"
-          ]
+          ],
+          "coarseMesh": 3
         }
       }
     },
@@ -331,7 +336,7 @@
         0.006000000052154064,
         1
       ],
-      "mesh": 1,
+      "mesh": 2,
       "extras": {
         "madi": {
           "occurrenceId": "occurrence:madi-repeated-fasteners/fastener-bank/fastener-05",
@@ -343,7 +348,8 @@
             "phase-0",
             "occt-xde",
             "part"
-          ]
+          ],
+          "coarseMesh": 3
         }
       }
     },
@@ -367,7 +373,7 @@
         0.006000000052154064,
         1
       ],
-      "mesh": 1,
+      "mesh": 2,
       "extras": {
         "madi": {
           "occurrenceId": "occurrence:madi-repeated-fasteners/fastener-bank/fastener-06",
@@ -379,7 +385,8 @@
             "phase-0",
             "occt-xde",
             "part"
-          ]
+          ],
+          "coarseMesh": 3
         }
       }
     },
@@ -403,7 +410,7 @@
         0.006000000052154064,
         1
       ],
-      "mesh": 1,
+      "mesh": 2,
       "extras": {
         "madi": {
           "occurrenceId": "occurrence:madi-repeated-fasteners/fastener-bank/fastener-07",
@@ -415,7 +422,8 @@
             "phase-0",
             "occt-xde",
             "part"
-          ]
+          ],
+          "coarseMesh": 3
         }
       }
     },
@@ -439,7 +447,7 @@
         0.006000000052154064,
         1
       ],
-      "mesh": 1,
+      "mesh": 2,
       "extras": {
         "madi": {
           "occurrenceId": "occurrence:madi-repeated-fasteners/fastener-bank/fastener-08",
@@ -451,7 +459,8 @@
             "phase-0",
             "occt-xde",
             "part"
-          ]
+          ],
+          "coarseMesh": 3
         }
       }
     },
@@ -475,7 +484,7 @@
         0,
         1
       ],
-      "mesh": 2,
+      "mesh": 4,
       "extras": {
         "madi": {
           "occurrenceId": "occurrence:madi-repeated-fasteners/mounting-plate",
@@ -487,7 +496,8 @@
             "phase-0",
             "occt-xde",
             "part"
-          ]
+          ],
+          "coarseMesh": 5
         }
       }
     }
@@ -631,14 +641,56 @@
       }
     },
     {
-      "name": "fastener-01",
+      "name": "center-rail coarse bounds",
       "primitives": [
         {
           "attributes": {
             "POSITION": 8,
             "NORMAL": 9
           },
-          "indices": 11,
+          "indices": 10,
+          "material": 8,
+          "mode": 4,
+          "extras": {
+            "madi": {
+              "kind": "coarse-bounds-surface",
+              "representationId": "representation:prototype:part:center-rail:display"
+            }
+          }
+        },
+        {
+          "attributes": {
+            "POSITION": 11
+          },
+          "indices": 12,
+          "material": 9,
+          "mode": 1,
+          "extras": {
+            "madi": {
+              "kind": "coarse-bounds-edges",
+              "representationId": "representation:prototype:part:center-rail:display"
+            }
+          }
+        }
+      ],
+      "extras": {
+        "madi": {
+          "prototypeId": "prototype:part:center-rail",
+          "representationId": "representation:prototype:part:center-rail:display",
+          "role": "coarse-bounds",
+          "materialOverrideId": "material:rgb-eb7a1f"
+        }
+      }
+    },
+    {
+      "name": "fastener-01",
+      "primitives": [
+        {
+          "attributes": {
+            "POSITION": 13,
+            "NORMAL": 14
+          },
+          "indices": 16,
           "material": 6,
           "mode": 4,
           "extras": {
@@ -647,7 +699,7 @@
               "representationId": "representation:prototype:part:fastener-01:display",
               "firstIndex": 0,
               "indexCount": 1068,
-              "faceSourceAccessor": 10,
+              "faceSourceAccessor": 15,
               "sourceRefs": [
                 "source:prototype:part:fastener-01:face:000",
                 "source:prototype:part:fastener-01:face:001",
@@ -686,17 +738,17 @@
         },
         {
           "attributes": {
-            "POSITION": 12
+            "POSITION": 17
           },
-          "indices": 13,
+          "indices": 18,
           "material": 7,
           "mode": 1,
           "extras": {
             "madi": {
               "kind": "explicit-cad-edges",
               "representationId": "representation:prototype:part:fastener-01:display",
-              "edgeClassAccessor": 14,
-              "edgeSourceAccessor": 15,
+              "edgeClassAccessor": 19,
+              "edgeSourceAccessor": 20,
               "sourceRefs": [
                 "source:prototype:part:fastener-01:face:000",
                 "source:prototype:part:fastener-01:face:001",
@@ -830,14 +882,56 @@
       }
     },
     {
+      "name": "fastener-01 coarse bounds",
+      "primitives": [
+        {
+          "attributes": {
+            "POSITION": 21,
+            "NORMAL": 22
+          },
+          "indices": 23,
+          "material": 6,
+          "mode": 4,
+          "extras": {
+            "madi": {
+              "kind": "coarse-bounds-surface",
+              "representationId": "representation:prototype:part:fastener-01:display"
+            }
+          }
+        },
+        {
+          "attributes": {
+            "POSITION": 24
+          },
+          "indices": 25,
+          "material": 7,
+          "mode": 1,
+          "extras": {
+            "madi": {
+              "kind": "coarse-bounds-edges",
+              "representationId": "representation:prototype:part:fastener-01:display"
+            }
+          }
+        }
+      ],
+      "extras": {
+        "madi": {
+          "prototypeId": "prototype:part:fastener-01",
+          "representationId": "representation:prototype:part:fastener-01:display",
+          "role": "coarse-bounds",
+          "materialOverrideId": "material:rgb-b8bdc7"
+        }
+      }
+    },
+    {
       "name": "mounting-plate",
       "primitives": [
         {
           "attributes": {
-            "POSITION": 16,
-            "NORMAL": 17
+            "POSITION": 26,
+            "NORMAL": 27
           },
-          "indices": 19,
+          "indices": 29,
           "material": 4,
           "mode": 4,
           "extras": {
@@ -846,7 +940,7 @@
               "representationId": "representation:prototype:part:mounting-plate:display",
               "firstIndex": 0,
               "indexCount": 5124,
-              "faceSourceAccessor": 18,
+              "faceSourceAccessor": 28,
               "sourceRefs": [
                 "source:prototype:part:mounting-plate:face:000",
                 "source:prototype:part:mounting-plate:face:001",
@@ -904,17 +998,17 @@
         },
         {
           "attributes": {
-            "POSITION": 20
+            "POSITION": 30
           },
-          "indices": 21,
+          "indices": 31,
           "material": 5,
           "mode": 1,
           "extras": {
             "madi": {
               "kind": "explicit-cad-edges",
               "representationId": "representation:prototype:part:mounting-plate:display",
-              "edgeClassAccessor": 22,
-              "edgeSourceAccessor": 23,
+              "edgeClassAccessor": 32,
+              "edgeSourceAccessor": 33,
               "sourceRefs": [
                 "source:prototype:part:mounting-plate:face:000",
                 "source:prototype:part:mounting-plate:face:001",
@@ -1125,6 +1219,48 @@
           "materialOverrideId": "material:rgb-2e579e"
         }
       }
+    },
+    {
+      "name": "mounting-plate coarse bounds",
+      "primitives": [
+        {
+          "attributes": {
+            "POSITION": 34,
+            "NORMAL": 35
+          },
+          "indices": 36,
+          "material": 4,
+          "mode": 4,
+          "extras": {
+            "madi": {
+              "kind": "coarse-bounds-surface",
+              "representationId": "representation:prototype:part:mounting-plate:display"
+            }
+          }
+        },
+        {
+          "attributes": {
+            "POSITION": 37
+          },
+          "indices": 38,
+          "material": 5,
+          "mode": 1,
+          "extras": {
+            "madi": {
+              "kind": "coarse-bounds-edges",
+              "representationId": "representation:prototype:part:mounting-plate:display"
+            }
+          }
+        }
+      ],
+      "extras": {
+        "madi": {
+          "prototypeId": "prototype:part:mounting-plate",
+          "representationId": "representation:prototype:part:mounting-plate:display",
+          "role": "coarse-bounds",
+          "materialOverrideId": "material:rgb-2e579e"
+        }
+      }
     }
   ],
   "materials": [
@@ -1323,6 +1459,10 @@
     {
       "uri": "scene.bin",
       "byteLength": 188044
+    },
+    {
+      "uri": "coarse.bin",
+      "byteLength": 2736
     }
   ],
   "bufferViews": [
@@ -1380,6 +1520,41 @@
       "name": "representation:prototype:part:center-rail:display edge source IDs"
     },
     {
+      "buffer": 1,
+      "byteOffset": 0,
+      "byteLength": 288,
+      "target": 34962,
+      "name": "representation:prototype:part:center-rail:display coarse bounds positions"
+    },
+    {
+      "buffer": 1,
+      "byteOffset": 288,
+      "byteLength": 288,
+      "target": 34962,
+      "name": "representation:prototype:part:center-rail:display coarse bounds normals"
+    },
+    {
+      "buffer": 1,
+      "byteOffset": 576,
+      "byteLength": 144,
+      "target": 34963,
+      "name": "representation:prototype:part:center-rail:display coarse bounds surface indices"
+    },
+    {
+      "buffer": 1,
+      "byteOffset": 720,
+      "byteLength": 96,
+      "target": 34962,
+      "name": "representation:prototype:part:center-rail:display coarse bounds edge positions"
+    },
+    {
+      "buffer": 1,
+      "byteOffset": 816,
+      "byteLength": 96,
+      "target": 34963,
+      "name": "representation:prototype:part:center-rail:display coarse bounds edge indices"
+    },
+    {
       "buffer": 0,
       "byteOffset": 1500,
       "byteLength": 12816,
@@ -1433,6 +1608,41 @@
       "name": "representation:prototype:part:fastener-01:display edge source IDs"
     },
     {
+      "buffer": 1,
+      "byteOffset": 912,
+      "byteLength": 288,
+      "target": 34962,
+      "name": "representation:prototype:part:fastener-01:display coarse bounds positions"
+    },
+    {
+      "buffer": 1,
+      "byteOffset": 1200,
+      "byteLength": 288,
+      "target": 34962,
+      "name": "representation:prototype:part:fastener-01:display coarse bounds normals"
+    },
+    {
+      "buffer": 1,
+      "byteOffset": 1488,
+      "byteLength": 144,
+      "target": 34963,
+      "name": "representation:prototype:part:fastener-01:display coarse bounds surface indices"
+    },
+    {
+      "buffer": 1,
+      "byteOffset": 1632,
+      "byteLength": 96,
+      "target": 34962,
+      "name": "representation:prototype:part:fastener-01:display coarse bounds edge positions"
+    },
+    {
+      "buffer": 1,
+      "byteOffset": 1728,
+      "byteLength": 96,
+      "target": 34963,
+      "name": "representation:prototype:part:fastener-01:display coarse bounds edge indices"
+    },
+    {
       "buffer": 0,
       "byteOffset": 34008,
       "byteLength": 61488,
@@ -1484,6 +1694,41 @@
       "byteOffset": 187516,
       "byteLength": 528,
       "name": "representation:prototype:part:mounting-plate:display edge source IDs"
+    },
+    {
+      "buffer": 1,
+      "byteOffset": 1824,
+      "byteLength": 288,
+      "target": 34962,
+      "name": "representation:prototype:part:mounting-plate:display coarse bounds positions"
+    },
+    {
+      "buffer": 1,
+      "byteOffset": 2112,
+      "byteLength": 288,
+      "target": 34962,
+      "name": "representation:prototype:part:mounting-plate:display coarse bounds normals"
+    },
+    {
+      "buffer": 1,
+      "byteOffset": 2400,
+      "byteLength": 144,
+      "target": 34963,
+      "name": "representation:prototype:part:mounting-plate:display coarse bounds surface indices"
+    },
+    {
+      "buffer": 1,
+      "byteOffset": 2544,
+      "byteLength": 96,
+      "target": 34962,
+      "name": "representation:prototype:part:mounting-plate:display coarse bounds edge positions"
+    },
+    {
+      "buffer": 1,
+      "byteOffset": 2640,
+      "byteLength": 96,
+      "target": 34963,
+      "name": "representation:prototype:part:mounting-plate:display coarse bounds edge indices"
     }
   ],
   "accessors": [
@@ -1578,6 +1823,73 @@
     {
       "bufferView": 8,
       "componentType": 5126,
+      "count": 24,
+      "type": "VEC3",
+      "min": [
+        -0.03500000014901161,
+        -0.004999999888241291,
+        0.0010000000474974513
+      ],
+      "max": [
+        0.03500000014901161,
+        0.004999999888241291,
+        0.010999999940395355
+      ],
+      "name": "representation:prototype:part:center-rail:display coarse bounds positions"
+    },
+    {
+      "bufferView": 9,
+      "componentType": 5126,
+      "count": 24,
+      "type": "VEC3",
+      "name": "representation:prototype:part:center-rail:display coarse bounds normals"
+    },
+    {
+      "bufferView": 10,
+      "componentType": 5125,
+      "count": 36,
+      "type": "SCALAR",
+      "min": [
+        0
+      ],
+      "max": [
+        23
+      ],
+      "name": "representation:prototype:part:center-rail:display coarse bounds surface indices"
+    },
+    {
+      "bufferView": 11,
+      "componentType": 5126,
+      "count": 8,
+      "type": "VEC3",
+      "min": [
+        -0.03500000014901161,
+        -0.004999999888241291,
+        0.0010000000474974513
+      ],
+      "max": [
+        0.03500000014901161,
+        0.004999999888241291,
+        0.010999999940395355
+      ],
+      "name": "representation:prototype:part:center-rail:display coarse bounds edge positions"
+    },
+    {
+      "bufferView": 12,
+      "componentType": 5125,
+      "count": 24,
+      "type": "SCALAR",
+      "min": [
+        0
+      ],
+      "max": [
+        7
+      ],
+      "name": "representation:prototype:part:center-rail:display coarse bounds edge indices"
+    },
+    {
+      "bufferView": 13,
+      "componentType": 5126,
       "count": 1068,
       "type": "VEC3",
       "min": [
@@ -1593,21 +1905,21 @@
       "name": "representation:prototype:part:fastener-01:display surface positions"
     },
     {
-      "bufferView": 9,
+      "bufferView": 14,
       "componentType": 5126,
       "count": 1068,
       "type": "VEC3",
       "name": "representation:prototype:part:fastener-01:display surface normals"
     },
     {
-      "bufferView": 10,
+      "bufferView": 15,
       "componentType": 5125,
       "count": 356,
       "type": "SCALAR",
       "name": "representation:prototype:part:fastener-01:display face source IDs"
     },
     {
-      "bufferView": 11,
+      "bufferView": 16,
       "componentType": 5125,
       "count": 1068,
       "type": "SCALAR",
@@ -1620,7 +1932,7 @@
       "name": "representation:prototype:part:fastener-01:display surface indices 0"
     },
     {
-      "bufferView": 12,
+      "bufferView": 17,
       "componentType": 5126,
       "count": 58,
       "type": "VEC3",
@@ -1637,7 +1949,7 @@
       "name": "representation:prototype:part:fastener-01:display edge positions"
     },
     {
-      "bufferView": 13,
+      "bufferView": 18,
       "componentType": 5125,
       "count": 74,
       "type": "SCALAR",
@@ -1650,21 +1962,88 @@
       "name": "representation:prototype:part:fastener-01:display edge indices"
     },
     {
-      "bufferView": 14,
+      "bufferView": 19,
       "componentType": 5121,
       "count": 37,
       "type": "SCALAR",
       "name": "representation:prototype:part:fastener-01:display edge classes"
     },
     {
-      "bufferView": 15,
+      "bufferView": 20,
       "componentType": 5125,
       "count": 37,
       "type": "SCALAR",
       "name": "representation:prototype:part:fastener-01:display edge source IDs"
     },
     {
-      "bufferView": 16,
+      "bufferView": 21,
+      "componentType": 5126,
+      "count": 24,
+      "type": "VEC3",
+      "min": [
+        -0.004999999888241291,
+        -0.0043301270343363285,
+        0
+      ],
+      "max": [
+        0.004999999888241291,
+        0.0043301270343363285,
+        0.01600000075995922
+      ],
+      "name": "representation:prototype:part:fastener-01:display coarse bounds positions"
+    },
+    {
+      "bufferView": 22,
+      "componentType": 5126,
+      "count": 24,
+      "type": "VEC3",
+      "name": "representation:prototype:part:fastener-01:display coarse bounds normals"
+    },
+    {
+      "bufferView": 23,
+      "componentType": 5125,
+      "count": 36,
+      "type": "SCALAR",
+      "min": [
+        0
+      ],
+      "max": [
+        23
+      ],
+      "name": "representation:prototype:part:fastener-01:display coarse bounds surface indices"
+    },
+    {
+      "bufferView": 24,
+      "componentType": 5126,
+      "count": 8,
+      "type": "VEC3",
+      "min": [
+        -0.004999999888241291,
+        -0.0043301270343363285,
+        0
+      ],
+      "max": [
+        0.004999999888241291,
+        0.0043301270343363285,
+        0.01600000075995922
+      ],
+      "name": "representation:prototype:part:fastener-01:display coarse bounds edge positions"
+    },
+    {
+      "bufferView": 25,
+      "componentType": 5125,
+      "count": 24,
+      "type": "SCALAR",
+      "min": [
+        0
+      ],
+      "max": [
+        7
+      ],
+      "name": "representation:prototype:part:fastener-01:display coarse bounds edge indices"
+    },
+    {
+      "bufferView": 26,
       "componentType": 5126,
       "count": 5124,
       "type": "VEC3",
@@ -1681,21 +2060,21 @@
       "name": "representation:prototype:part:mounting-plate:display surface positions"
     },
     {
-      "bufferView": 17,
+      "bufferView": 27,
       "componentType": 5126,
       "count": 5124,
       "type": "VEC3",
       "name": "representation:prototype:part:mounting-plate:display surface normals"
     },
     {
-      "bufferView": 18,
+      "bufferView": 28,
       "componentType": 5125,
       "count": 1708,
       "type": "SCALAR",
       "name": "representation:prototype:part:mounting-plate:display face source IDs"
     },
     {
-      "bufferView": 19,
+      "bufferView": 29,
       "componentType": 5125,
       "count": 5124,
       "type": "SCALAR",
@@ -1708,7 +2087,7 @@
       "name": "representation:prototype:part:mounting-plate:display surface indices 0"
     },
     {
-      "bufferView": 20,
+      "bufferView": 30,
       "componentType": 5126,
       "count": 168,
       "type": "VEC3",
@@ -1725,7 +2104,7 @@
       "name": "representation:prototype:part:mounting-plate:display edge positions"
     },
     {
-      "bufferView": 21,
+      "bufferView": 31,
       "componentType": 5125,
       "count": 264,
       "type": "SCALAR",
@@ -1738,18 +2117,85 @@
       "name": "representation:prototype:part:mounting-plate:display edge indices"
     },
     {
-      "bufferView": 22,
+      "bufferView": 32,
       "componentType": 5121,
       "count": 132,
       "type": "SCALAR",
       "name": "representation:prototype:part:mounting-plate:display edge classes"
     },
     {
-      "bufferView": 23,
+      "bufferView": 33,
       "componentType": 5125,
       "count": 132,
       "type": "SCALAR",
       "name": "representation:prototype:part:mounting-plate:display edge source IDs"
+    },
+    {
+      "bufferView": 34,
+      "componentType": 5126,
+      "count": 24,
+      "type": "VEC3",
+      "min": [
+        -0.04800000041723251,
+        -0.02800000086426735,
+        0
+      ],
+      "max": [
+        0.04800000041723251,
+        0.02800000086426735,
+        0.006000000052154064
+      ],
+      "name": "representation:prototype:part:mounting-plate:display coarse bounds positions"
+    },
+    {
+      "bufferView": 35,
+      "componentType": 5126,
+      "count": 24,
+      "type": "VEC3",
+      "name": "representation:prototype:part:mounting-plate:display coarse bounds normals"
+    },
+    {
+      "bufferView": 36,
+      "componentType": 5125,
+      "count": 36,
+      "type": "SCALAR",
+      "min": [
+        0
+      ],
+      "max": [
+        23
+      ],
+      "name": "representation:prototype:part:mounting-plate:display coarse bounds surface indices"
+    },
+    {
+      "bufferView": 37,
+      "componentType": 5126,
+      "count": 8,
+      "type": "VEC3",
+      "min": [
+        -0.04800000041723251,
+        -0.02800000086426735,
+        0
+      ],
+      "max": [
+        0.04800000041723251,
+        0.02800000086426735,
+        0.006000000052154064
+      ],
+      "name": "representation:prototype:part:mounting-plate:display coarse bounds edge positions"
+    },
+    {
+      "bufferView": 38,
+      "componentType": 5125,
+      "count": 24,
+      "type": "SCALAR",
+      "min": [
+        0
+      ],
+      "max": [
+        7
+      ],
+      "name": "representation:prototype:part:mounting-plate:display coarse bounds edge indices"
     }
   ],
   "extras": {
@@ -1760,6 +2206,11 @@
       "revisionId": "revision:occt:87b7909984c635ff:14b35fda",
       "sourceDigest": "sha256:87b7909984c635ffc02c61211b22380252d455ebbf7c8e18ab68a2d2f7ac4da3",
       "optionsDigest": "sha256:14b35fda584ddfbfe5614edd5a32be03938610e8b3ffbd51acdc8c8cc9df9abd",
+      "progressive": {
+        "strategy": "prototype-aabb-v1",
+        "targetBuffer": 0,
+        "coarseBuffer": 1
+      },
       "documents": [
         {
           "id": "document:sha256:87b7909984c635ff",

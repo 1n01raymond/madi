@@ -362,7 +362,9 @@ only after the runtime proves the basic model.
 ## 20. Phase 1 standards-first slice
 
 `@madi/compiler` now compiles a validator-clean in-memory `EngineeringScene`
-into `scene.gltf`, external `scene.bin`, and `build-report.json`. The first
+into `scene.gltf`, external `scene.bin`, and `build-report.json`. Direct STEP
+compilation additionally emits `coarse.bin` with one reusable prototype AABB
+surface/edge mesh per target mesh. The first
 committed packages are under `artifacts/phase1/repeated-fasteners` for focused
 regression and `artifacts/phase1/adafruit-pygamer` for the canonical real-world
 electronics path.
@@ -375,8 +377,9 @@ under ADR-0004, not a frozen MADI format.
 
 The build is deterministic for identical Scene IR and options. The normal check
 runs both MADI invariants and the official Khronos glTF Validator. The current
-slice has one target representation and no progressive partitions, so it proves
-the compiler output boundary but not the complete Phase 1 compiler roadmap.
+slice keeps target geometry as the ordinary node mesh and records its coarse
+mesh index in standard `extras`. This proves representation-separated delivery,
+but not shape-preserving LOD, spatial partitioning, or bounded residency.
 
 The public `madi compile` entry now accepts a local AP242 or AP214 Part 21 file,
 invokes the isolated OCCT adapter, verifies schema and source digest parity,

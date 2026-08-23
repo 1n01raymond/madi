@@ -416,8 +416,11 @@ decodes the external binary in a Worker, transfers three reusable prototype
 batches, and renders per-occurrence transforms, source colors, explicit CAD
 edges, an isometric bounds fit, and integer object picking. Selecting an
 occurrence resolves its glTF node and revision-local OCCT edge references.
-Progressive chunks, visibility tools, navigation, clipping, and resource-budget
-behavior remain unimplemented.
+Visibility, navigation, clipping, hierarchy inspection, and local/URL package
+opening are implemented. A progressive package can now decode and render
+prototype AABBs from `coarse.bin`, then replace GPU batches with `scene.bin`
+target geometry while preserving node-derived object IDs. Scheduling across
+spatial chunks, cancellation, and resource-budget behavior remain unimplemented.
 
 The reproducible browser smoke command is `pnpm browser:matrix`. Its committed
 Phase 1 run covers Chrome/Blink and Firefox/Gecko with the same compiled package,

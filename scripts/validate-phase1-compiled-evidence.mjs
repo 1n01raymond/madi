@@ -20,6 +20,7 @@ const fixtures = [
   },
   {
     id: "repeated-fasteners-ap242",
+    progressive: true,
     sourceId: "repeated-fasteners-ap242",
     adapterReport: "artifacts/phase1/repeated-fasteners-ap242/adapter-report.json",
     stepSchema: "AP242",
@@ -28,7 +29,7 @@ const fixtures = [
       occurrenceCount: 12,
       renderableOccurrenceCount: 10,
       gltfNodeCount: 13,
-      gltfMeshCount: 3,
+      gltfMeshCount: 6,
       triangleCount: 2076,
       edgeSegmentCount: 181,
     },
@@ -69,9 +70,10 @@ function sha256(bytes) {
 async function validateFixture(definition) {
   const artifact = (name) => path(`artifacts/phase1/${definition.id}/${name}`);
   const sourceId = definition.sourceId ?? definition.id;
-  const [gltfBytes, binary, report, adapterReport, sourceBytes] = await Promise.all([
+  const [gltfBytes, binary, coarseBinary, report, adapterReport, sourceBytes] = await Promise.all([
     readFile(artifact("scene.gltf")),
     readFile(artifact("scene.bin")),
+    definition.progressive ? readFile(artifact("coarse.bin")) : Promise.resolve(undefined),
     readFile(artifact("build-report.json"), "utf8").then(JSON.parse),
     readFile(
       path(definition.adapterReport ?? `artifacts/occt/${definition.id}.report.json`),
@@ -86,8 +88,9 @@ async function validateFixture(definition) {
     writeTimestamp: false,
     maxIssues: 100,
     externalResourceFunction: async (uri) => {
-      if (uri !== "scene.bin") throw new TypeError(`Unexpected glTF resource ${uri}.`);
-      return new Uint8Array(binary);
+      if (uri === "scene.bin") return new Uint8Array(binary);
+      if (uri === "coarse.bin" && coarseBinary) return new Uint8Array(coarseBinary);
+      throw new TypeError(`Unexpected glTF resource ${uri}.`);
     },
   });
 
@@ -145,18 +148,42 @@ async function validateFixture(definition) {
   assert(gltfResource?.sha256 === sha256(gltfBytes), `${label} glTF digest changed.`);
   assert(binaryResource?.bytes === binary.byteLength, `${label} binary byte count changed.`);
   assert(binaryResource?.sha256 === sha256(binary), `${label} binary digest changed.`);
-  const packageDigest = createHash("sha256").update(gltfBytes).update(binary).digest("hex");
+  const packageHash = createHash("sha256").update(gltfBytes).update(binary);
+  if (coarseBinary) {
+    const coarseResource = resources.get("coarse.bin");
+    assert(coarseResource?.bytes === coarseBinary.byteLength, `${label} coarse byte count changed.`);
+    assert(coarseResource?.sha256 === sha256(coarseBinary), `${label} coarse digest changed.`);
+    packageHash.update(coarseBinary);
+  }
+  const packageDigest = packageHash.digest("hex");
   assert(packageDigest === report.output.packageDigest, `${label} package digest changed.`);
 
-  assert(gltf.buffers.length === 1, `${label} expected one external glTF buffer.`);
+  assert(
+    gltf.buffers.length === (definition.progressive ? 2 : 1),
+    `${label} external glTF buffer count changed.`,
+  );
   assert(gltf.buffers[0].uri === "scene.bin", `${label} glTF buffer must remain external.`);
   assert(gltf.buffers[0].byteLength === binary.byteLength, `${label} glTF buffer length changed.`);
+  if (definition.progressive) {
+    assert(coarseBinary, `${label} coarse binary is missing.`);
+    assert(
+      gltf.buffers[1]?.uri === "coarse.bin" &&
+        gltf.buffers[1]?.byteLength === coarseBinary.byteLength,
+      `${label} coarse glTF buffer changed.`,
+    );
+    assert(
+      gltf.extras?.madi?.progressive?.strategy === "prototype-aabb-v1",
+      `${label} progressive strategy changed.`,
+    );
+  }
+  const binaries = [binary, ...(coarseBinary ? [coarseBinary] : [])];
   for (const [index, bufferView] of gltf.bufferViews.entries()) {
-    assert(bufferView.buffer === 0, `${label} bufferViews[${index}] references another buffer.`);
+    const resource = binaries[bufferView.buffer];
+    assert(resource, `${label} bufferViews[${index}] references an unknown buffer.`);
     assert(bufferView.byteOffset % 4 === 0, `${label} bufferViews[${index}] is not aligned.`);
     assert(
-      bufferView.byteOffset + bufferView.byteLength <= binary.byteLength,
-      `${label} bufferViews[${index}] exceeds scene.bin.`,
+      bufferView.byteOffset + bufferView.byteLength <= resource.byteLength,
+      `${label} bufferViews[${index}] exceeds its binary resource.`,
     );
   }
 
@@ -223,11 +250,14 @@ async function validateFixture(definition) {
     assert(mesh.primitives.some(({ mode }) => mode === 1), `${label} mesh is missing edges.`);
   }
 
-  const triangleCount = gltf.meshes
+  const targetMeshes = gltf.meshes.filter(
+    (mesh) => mesh.extras?.madi?.role !== "coarse-bounds",
+  );
+  const triangleCount = targetMeshes
     .flatMap(({ primitives }) => primitives)
     .filter(({ mode }) => mode === 4)
     .reduce((total, { indices }) => total + gltf.accessors[indices].count / 3, 0);
-  const edgeSegmentCount = gltf.meshes
+  const edgeSegmentCount = targetMeshes
     .flatMap(({ primitives }) => primitives)
     .filter(({ mode }) => mode === 1)
     .reduce((total, { indices }) => total + gltf.accessors[indices].count / 2, 0);

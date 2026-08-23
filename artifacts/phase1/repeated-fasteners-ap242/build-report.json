@@ -9,8 +9,10 @@
   },
   "options": {
     "binaryUri": "scene.bin",
+    "coarseBinaryUri": "coarse.bin",
     "coordinateSystem": "right-handed-y-up-meters",
-    "geometryEncoding": "gltf-f32"
+    "geometryEncoding": "gltf-f32",
+    "progressiveRepresentation": "prototype-aabb-v1"
   },
   "source": {
     "sceneId": "scene:occt:87b7909984c635ff",
@@ -20,19 +22,25 @@
     "optionsDigest": "sha256:14b35fda584ddfbfe5614edd5a32be03938610e8b3ffbd51acdc8c8cc9df9abd"
   },
   "output": {
-    "packageDigest": "b8fae770619d12edc2e22e8aa07cf7e8c19478605eb34ad436023091d9cbf6b3",
+    "packageDigest": "c92abeee8e10e7373e64cb5e5c9ac84145bceb5272b329e6466137de6091cd2d",
     "resources": [
       {
         "path": "scene.gltf",
         "mediaType": "model/gltf+json",
-        "bytes": 53217,
-        "sha256": "02265952f7f10f693e2cf1a7f67623624faeef6be56d44ffeec1d97e88c85a4b"
+        "bytes": 64719,
+        "sha256": "66061f82bd2ee5b11bd8885822d6e690d40885ba8bde61f79d3a5866cde99309"
       },
       {
         "path": "scene.bin",
         "mediaType": "application/octet-stream",
         "bytes": 188044,
         "sha256": "3c4d9dde02c117343e4013a675d40d41a61c2f59eb5d3b1959774b434883d395"
+      },
+      {
+        "path": "coarse.bin",
+        "mediaType": "application/octet-stream",
+        "bytes": 2736,
+        "sha256": "d2f99f758809a85a5b6bebe0a56c277df399e33c81ffa14c66eb211c12ed214a"
       }
     ]
   },
@@ -42,7 +50,7 @@
     "occurrenceCount": 12,
     "renderableOccurrenceCount": 10,
     "gltfNodeCount": 13,
-    "gltfMeshCount": 3,
+    "gltfMeshCount": 6,
     "materialCount": 10,
     "triangleCount": 2076,
     "edgeSegmentCount": 181
@@ -65,7 +73,7 @@
   },
   "limitations": [
     "This is an experimental glTF profile, not a MADI interchange format.",
-    "Only one target display representation per prototype is emitted; coarse LOD is pending.",
+    "The coarse representation is a prototype AABB, not a shape-preserving LOD.",
     "Geometry and node transforms are converted to f32 for glTF delivery.",
     "MADI source mapping uses glTF extras until an interoperable extension is justified."
   ]

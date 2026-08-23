@@ -23,6 +23,7 @@ or delivery container.
 | Source identity | Report source digest matches OCCT evidence; node/mesh `extras` retain IDs and refs | Passed for experimental profile |
 | Independent package validation | Hashes, ranges, hierarchy, counts, and report parity are checked without compiler state | Passed by `pnpm phase1:evidence:check` |
 | Direct AP242 input | `pnpm madi compile` preflights the Part 21 schema, runs OCCT STEPCAF/XDE, cross-checks source SHA-256, and removes temporary Scene IR | Passed with the checksum-locked `repeated-fasteners-ap242.step` package |
+| Coarse/target split | Direct STEP output keeps target meshes in `scene.bin` and emits 3 reusable prototype AABBs in a 2.7 KiB `coarse.bin`; both remain standard external glTF buffers | Passed with 0 Khronos validator errors/warnings |
 
 ## First browser runtime slice
 
@@ -40,7 +41,8 @@ direct WebGPU renderer. The Phase 0 Scene IR JSON is no longer a browser input.
 | Source picking | PyGamer joystick resolves glTF node 56, object ID 57, and 524 revision-local CAD edge refs | Passed |
 | Review interaction | Orthographic orbit/pan/zoom/fit, synchronized canvas/tree selection, hide/isolate/show-all, and one axis-controlled section plane; surfaces, explicit edges, and picking share the clipping equation without rebuilding GPU resources | Passed by camera/visibility/section unit tests and browser interaction review |
 | Scene inspection | Tokenized hierarchy search covers names and source identity before geometry residency; viewport/tree/search selection share an occurrence property panel with bounded edge-reference previews | Passed by search unit tests and cross-browser interaction review |
-| Scene opening | HTTP(S) glTF URLs are shareable through `?scene=`; a validated local `.gltf` + `.bin` pair loads entirely client-side and decodes its `File` in the Worker without a binary network request | Passed by source unit tests and the Chrome/Firefox browser matrix |
+| Scene opening | HTTP(S) glTF URLs are shareable through `?scene=`; a validated local `.gltf` plus all declared `.bin` resources load entirely client-side and decode their `File` objects in the Worker without a binary network request | Passed by source unit tests and the Chrome/Firefox browser matrix |
+| Useful frame before target | Recorder holds the 183.6 KiB target response, captures a 36-triangle/36-edge coarse frame, then releases and observes promotion to 2,076 triangles/181 edges | Passed in headed Chrome and Firefox |
 | Browser conformance | Headed Chrome/Blink and Firefox/Gecko emit no console warnings or errors | Passed by `pnpm browser:matrix` |
 
 ## Reproduce
@@ -60,8 +62,8 @@ See `artifacts/phase1/README.md` for the compiled package,
 
 ## Not yet proven
 
-- Coarse and target LODs, partitioning, compression, and progressive loading.
-- Useful first render before a delayed or large target-geometry payload completes.
+- Shape-preserving LODs, spatial partitioning, compression, prioritization, and
+  bounded progressive residency beyond the first AABB-to-target slice.
 - Full material, mass, PMI, and domain-specific property schemas remain pending.
 - A repeated reference-hardware and integrated-GPU decision matrix for ADR-0003.
 - Large-coordinate precision behavior required by ADR-0005.

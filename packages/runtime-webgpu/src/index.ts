@@ -21,10 +21,12 @@ export {
 export type {
   CompiledGltfDocument,
   CompiledGltfErrorCode,
+  DecodeCompiledGltfOptions,
   CompiledHierarchy,
   CompiledHierarchyEntry,
   CompiledObjectEvidence,
   DecodedCompiledScene,
+  GeometryRepresentation,
   SceneBounds,
 } from "./compiled-gltf.js";
 export {

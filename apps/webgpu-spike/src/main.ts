@@ -8,6 +8,7 @@ import type {
   CompiledHierarchy,
   CompiledObjectEvidence,
   DecodedCompiledScene,
+  GeometryRepresentation,
 } from "@madi/runtime-webgpu";
 
 import type { GeometryDecodeResponse } from "./geometry.worker.js";
@@ -46,6 +47,7 @@ function formatBytes(bytes: number): string {
 function decodeGeometry(
   document: CompiledGltfDocument,
   binary: GeometryBinarySource,
+  representation: GeometryRepresentation,
   signal: AbortSignal,
 ): Promise<{ readonly scene: DecodedCompiledScene; readonly decodeMilliseconds: number }> {
   return new Promise((resolve, reject) => {
@@ -83,7 +85,7 @@ function decodeGeometry(
       },
       { once: true },
     );
-    worker.postMessage({ type: "decode", document, binary });
+    worker.postMessage({ type: "decode", document, binary, representation });
   });
 }
 
@@ -167,6 +169,9 @@ function setSourceControlsBusy(busy: boolean): void {
 }
 
 function resetSceneUi(): void {
+  delete document.documentElement.dataset.coarseReady;
+  delete document.documentElement.dataset.targetReady;
+  delete document.documentElement.dataset.geometryRepresentation;
   hierarchySearchInput.value = "";
   hierarchySearchResult.textContent = "Waiting for hierarchy";
   hierarchyEmpty.hidden = true;
@@ -200,6 +205,15 @@ async function loadScene(source: SceneSource): Promise<boolean> {
     disposeActiveScene?.();
     disposeActiveScene = undefined;
     resetSceneUi();
+    sceneSourceKind.textContent =
+      source.kind === "local"
+        ? "LOCAL"
+        : source.gltfUrl.href === defaultSceneUrl.href
+          ? "DEMO"
+          : "URL";
+    sceneSourceLabel.textContent = loaded.label;
+    sceneSourceLabel.title = loaded.label;
+    document.documentElement.dataset.sceneSource = source.kind;
     const interactions = new AbortController();
     pendingCleanup = () => interactions.abort();
     const listenerOptions = { signal: interactions.signal };
@@ -248,6 +262,11 @@ async function loadScene(source: SceneSource): Promise<boolean> {
         status.dataset.state = "error";
       },
     });
+    const adapterInfo = renderer.adapter.info;
+    setText(
+      "#gpu-adapter",
+      adapterInfo.description || adapterInfo.vendor || "WebGPU adapter",
+    );
     let animationFrame = 0;
     const sessionResources: { resizeObserver?: ResizeObserver } = {};
     let disposed = false;
@@ -261,14 +280,20 @@ async function loadScene(source: SceneSource): Promise<boolean> {
     };
     pendingCleanup = dispose;
     disposeActiveScene = dispose;
-    const { scene, decodeMilliseconds } = await decodeGeometry(
+    const initialRepresentation: GeometryRepresentation = loaded.coarseBinary
+      ? "coarse"
+      : "target";
+    const initial = await decodeGeometry(
       gltf,
-      loaded.binary,
+      loaded.coarseBinary ?? loaded.targetBinary,
+      initialRepresentation,
       interactions.signal,
     ).catch((error: unknown) => {
       dispose();
       throw error;
     });
+    let scene = initial.scene;
+    let decodeMilliseconds = initial.decodeMilliseconds;
     renderer.setScene(scene.gpuScene);
 
     const camera = new OrthographicOrbitCamera(scene.bounds);
@@ -282,6 +307,39 @@ async function loadScene(source: SceneSource): Promise<boolean> {
     };
     render();
 
+    if (initialRepresentation === "coarse") {
+      await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+      document.documentElement.dataset.coarseReady = "true";
+      document.documentElement.dataset.geometryRepresentation = "coarse";
+      status.textContent =
+        `Coarse bounds ready · ${scene.summary.partOccurrences} renderable occurrences · ` +
+        `loading ${formatBytes(hierarchy.binaryByteLength)} target geometry…`;
+      status.dataset.stage = "coarse";
+      setText("#triangle-count", scene.summary.triangles.toLocaleString("en-US"));
+      setText("#edge-count", scene.summary.edgeSegments.toLocaleString("en-US"));
+      setText("#decode-time", `${decodeMilliseconds.toFixed(1)} ms`);
+      setText("#geometry-result", `${formatBytes(scene.summary.binaryBytes)} coarse bounds decoded off-thread`);
+      requireElement<HTMLElement>("#stage-geometry").dataset.state = "ready";
+      requireElement<HTMLElement>("#stage-webgpu").dataset.state = "ready";
+
+      const target = await decodeGeometry(
+        gltf,
+        loaded.targetBinary,
+        "target",
+        interactions.signal,
+      ).catch((error: unknown) => {
+        dispose();
+        throw error;
+      });
+      scene = target.scene;
+      decodeMilliseconds += target.decodeMilliseconds;
+      renderer.setScene(scene.gpuScene);
+      render();
+    }
+
+    document.documentElement.dataset.geometryRepresentation = "target";
+    document.documentElement.dataset.targetReady = "true";
+
     status.textContent =
       `Compiled glTF ready · ${scene.summary.prototypeBatches} shared meshes · ` +
       `${scene.summary.partOccurrences} renderable occurrences`;
@@ -293,12 +351,6 @@ async function loadScene(source: SceneSource): Promise<boolean> {
     setText("#geometry-result", `${formatBytes(scene.summary.binaryBytes)} decoded off-thread`);
     requireElement<HTMLElement>("#stage-geometry").dataset.state = "ready";
     requireElement<HTMLElement>("#stage-webgpu").dataset.state = "ready";
-    const adapterInfo = renderer.adapter.info;
-    setText(
-      "#gpu-adapter",
-      adapterInfo.description || adapterInfo.vendor || "WebGPU adapter",
-    );
-
     const evidence = new Map(scene.objectEvidence.map((entry) => [entry.objectId, entry]));
     const evidenceByNode = new Map(scene.objectEvidence.map((entry) => [entry.nodeIndex, entry]));
     const visibility = new OccurrenceVisibility(scene.gpuScene);
@@ -649,15 +701,6 @@ async function loadScene(source: SceneSource): Promise<boolean> {
       selectObject(objectId);
     }, listenerOptions);
 
-    sceneSourceKind.textContent =
-      source.kind === "local"
-        ? "LOCAL"
-        : source.gltfUrl.href === defaultSceneUrl.href
-          ? "DEMO"
-          : "URL";
-    sceneSourceLabel.textContent = loaded.label;
-    sceneSourceLabel.title = loaded.label;
-    document.documentElement.dataset.sceneSource = source.kind;
     pendingCleanup = undefined;
     return true;
   } catch (error) {

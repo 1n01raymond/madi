@@ -26,6 +26,8 @@ import type {
   CompileGltfOptions,
   CompiledGltfPackage,
   CompilerBuildReport,
+  GltfAccessor,
+  GltfBufferView,
   GltfDocument,
   GltfMaterial,
   GltfMesh,
@@ -54,6 +56,16 @@ interface GeometryResource {
   readonly edgeIndexAccessor?: number;
   readonly edgeClassAccessor?: number;
   readonly edgeSourceAccessor?: number;
+}
+
+interface CoarseGeometryResource {
+  readonly prototype: Prototype;
+  readonly representation: Representation;
+  readonly positionAccessor: number;
+  readonly normalAccessor: number;
+  readonly indexAccessor: number;
+  readonly edgePositionAccessor: number;
+  readonly edgeIndexAccessor: number;
 }
 
 function compareId(left: { readonly id: string }, right: { readonly id: string }): number {
@@ -270,6 +282,107 @@ function appendGeometry(
   };
 }
 
+function appendCoarseBounds(
+  builder: GltfBinaryBuilder,
+  prototype: Prototype,
+  representation: Representation,
+  scaleToMeters: number,
+): CoarseGeometryResource {
+  const surfacePositionsSource = representation.surface?.positions;
+  const sourcePositions = surfacePositionsSource && surfacePositionsSource.length > 0
+    ? surfacePositionsSource
+    : representation.edges?.positions;
+  if (!sourcePositions || sourcePositions.length === 0) {
+    throw new TypeError(`Representation ${representation.id} has no positions for coarse bounds.`);
+  }
+  const { min, max } = scaledPositionBounds(sourcePositions, 1);
+  const [minX = 0, minY = 0, minZ = 0] = min;
+  const [maxX = 0, maxY = 0, maxZ = 0] = max;
+  const corners: readonly (readonly [number, number, number])[] = [
+    [minX, minY, minZ],
+    [maxX, minY, minZ],
+    [maxX, maxY, minZ],
+    [minX, maxY, minZ],
+    [minX, minY, maxZ],
+    [maxX, minY, maxZ],
+    [maxX, maxY, maxZ],
+    [minX, maxY, maxZ],
+  ];
+  const faces = [
+    { corners: [0, 3, 2, 1], normal: [0, 0, -1] },
+    { corners: [4, 5, 6, 7], normal: [0, 0, 1] },
+    { corners: [0, 1, 5, 4], normal: [0, -1, 0] },
+    { corners: [3, 7, 6, 2], normal: [0, 1, 0] },
+    { corners: [0, 4, 7, 3], normal: [-1, 0, 0] },
+    { corners: [1, 2, 6, 5], normal: [1, 0, 0] },
+  ] as const;
+  const surfacePositions = faces.flatMap((face) =>
+    face.corners.flatMap((corner) => [...(corners[corner] ?? [0, 0, 0])]),
+  );
+  const normals = faces.flatMap((face) => face.corners.flatMap(() => [...face.normal]));
+  const indices = faces.flatMap((_, faceIndex) => {
+    const offset = faceIndex * 4;
+    return [offset, offset + 1, offset + 2, offset, offset + 2, offset + 3];
+  });
+  const edgeIndices = [
+    0, 1, 1, 2, 2, 3, 3, 0,
+    4, 5, 5, 6, 6, 7, 7, 4,
+    0, 4, 1, 5, 2, 6, 3, 7,
+  ];
+  const positionAccessor = builder.append(encodeFloat32(surfacePositions, scaleToMeters), {
+    componentType: 5126,
+    count: 24,
+    type: "VEC3",
+    target: 34962,
+    name: `${representation.id} coarse bounds positions`,
+    min: min.map((value) => Math.fround(value * scaleToMeters)),
+    max: max.map((value) => Math.fround(value * scaleToMeters)),
+  });
+  const normalAccessor = builder.append(encodeFloat32(normals), {
+    componentType: 5126,
+    count: 24,
+    type: "VEC3",
+    target: 34962,
+    name: `${representation.id} coarse bounds normals`,
+  });
+  const indexAccessor = builder.append(encodeUint32(indices), {
+    componentType: 5125,
+    count: indices.length,
+    type: "SCALAR",
+    target: 34963,
+    name: `${representation.id} coarse bounds surface indices`,
+    min: [0],
+    max: [23],
+  });
+  const edgePositionAccessor = builder.append(encodeFloat32(corners.flat(), scaleToMeters), {
+    componentType: 5126,
+    count: 8,
+    type: "VEC3",
+    target: 34962,
+    name: `${representation.id} coarse bounds edge positions`,
+    min: min.map((value) => Math.fround(value * scaleToMeters)),
+    max: max.map((value) => Math.fround(value * scaleToMeters)),
+  });
+  const edgeIndexAccessor = builder.append(encodeUint32(edgeIndices), {
+    componentType: 5125,
+    count: edgeIndices.length,
+    type: "SCALAR",
+    target: 34963,
+    name: `${representation.id} coarse bounds edge indices`,
+    min: [0],
+    max: [7],
+  });
+  return {
+    prototype,
+    representation,
+    positionAccessor,
+    normalAccessor,
+    indexAccessor,
+    edgePositionAccessor,
+    edgeIndexAccessor,
+  };
+}
+
 export function compileSceneToGltf(
   scene: EngineeringScene,
   options: CompileGltfOptions = {},
@@ -286,13 +399,24 @@ export function compileSceneToGltf(
   assertCanonicalFrame(scene);
 
   const binaryUri = options.binaryUri ?? "scene.bin";
+  const coarseBounds = options.coarseBounds ?? false;
+  const coarseBinaryUri = options.coarseBinaryUri ?? "coarse.bin";
+  if (coarseBounds && coarseBinaryUri === binaryUri) {
+    throw new TypeError("Target and coarse glTF buffers must use different URIs.");
+  }
   const generator = options.generator ?? "MADI compiler 0.0.0 / experimental glTF profile 1";
   const scaleToMeters = scene.units.scaleToMeters;
-  const builder = new GltfBinaryBuilder();
+  const bufferViews: GltfBufferView[] = [];
+  const accessors: GltfAccessor[] = [];
+  const builder = new GltfBinaryBuilder({ bufferIndex: 0, bufferViews, accessors });
+  const coarseBuilder = coarseBounds
+    ? new GltfBinaryBuilder({ bufferIndex: 1, bufferViews, accessors })
+    : undefined;
   const representations = new Map(scene.representations.map((value) => [value.id, value]));
   const prototypes = [...scene.prototypes].sort(compareId);
   const prototypeById = new Map(prototypes.map((value) => [value.id, value]));
   const geometryByPrototype = new Map<string, GeometryResource>();
+  const coarseGeometryByPrototype = new Map<string, CoarseGeometryResource>();
   let triangleCount = 0;
   let edgeSegmentCount = 0;
 
@@ -301,6 +425,12 @@ export function compileSceneToGltf(
     if (!representation) continue;
     const compiled = appendGeometry(builder, prototype, representation, scaleToMeters);
     geometryByPrototype.set(prototype.id, compiled.resource);
+    if (coarseBuilder) {
+      coarseGeometryByPrototype.set(
+        prototype.id,
+        appendCoarseBounds(coarseBuilder, prototype, representation, scaleToMeters),
+      );
+    }
     triangleCount += compiled.triangles;
     edgeSegmentCount += compiled.edges;
   }
@@ -323,6 +453,7 @@ export function compileSceneToGltf(
     0;
   const meshes: GltfMesh[] = [];
   const meshVariants = new Map<string, number>();
+  const coarseMeshVariants = new Map<string, number>();
 
   function meshFor(resource: GeometryResource, overrideMaterialId?: MaterialId): number {
     const variantKey = `${resource.representation.id}\u0000${overrideMaterialId ?? ""}`;
@@ -397,6 +528,64 @@ export function compileSceneToGltf(
     return meshIndex;
   }
 
+  function coarseMeshFor(
+    resource: CoarseGeometryResource,
+    overrideMaterialId?: MaterialId,
+  ): number {
+    const variantKey = `${resource.representation.id}\u0000${overrideMaterialId ?? ""}`;
+    const existing = coarseMeshVariants.get(variantKey);
+    if (existing !== undefined) return existing;
+    const meshIndex = meshes.length;
+    meshes.push({
+      name: `${resource.prototype.name ?? resource.prototype.id} coarse bounds`,
+      primitives: [
+        {
+          attributes: {
+            POSITION: resource.positionAccessor,
+            NORMAL: resource.normalAccessor,
+          },
+          indices: resource.indexAccessor,
+          material: materialIndex(
+            "surface",
+            overrideMaterialId ?? resource.prototype.defaultMaterialId,
+          ),
+          mode: 4,
+          extras: {
+            madi: {
+              kind: "coarse-bounds-surface",
+              representationId: resource.representation.id,
+            },
+          },
+        },
+        {
+          attributes: { POSITION: resource.edgePositionAccessor },
+          indices: resource.edgeIndexAccessor,
+          material: materialIndex(
+            "edge",
+            overrideMaterialId ?? resource.prototype.defaultMaterialId,
+          ),
+          mode: 1,
+          extras: {
+            madi: {
+              kind: "coarse-bounds-edges",
+              representationId: resource.representation.id,
+            },
+          },
+        },
+      ],
+      extras: {
+        madi: {
+          prototypeId: resource.prototype.id,
+          representationId: resource.representation.id,
+          role: "coarse-bounds",
+          materialOverrideId: overrideMaterialId,
+        },
+      },
+    });
+    coarseMeshVariants.set(variantKey, meshIndex);
+    return meshIndex;
+  }
+
   const occurrences = [...scene.occurrences].sort(compareId);
   const occurrenceIndexes = new Map(
     occurrences.map((occurrence, index) => [occurrence.id, index + 1]),
@@ -432,16 +621,21 @@ export function compileSceneToGltf(
     const prototype = prototypeById.get(occurrence.prototypeId);
     if (!prototype) throw new TypeError(`Missing prototype ${occurrence.prototypeId}.`);
     const geometry = geometryByPrototype.get(prototype.id);
+    const coarseGeometry = coarseGeometryByPrototype.get(prototype.id);
     const childIndexes = (children.get(occurrence.id) ?? []).map(
       ({ id }) => occurrenceIndexes.get(id) ?? 0,
     );
+    const mesh = geometry === undefined
+      ? undefined
+      : meshFor(geometry, occurrence.materialOverrideId);
+    const coarseMesh = coarseGeometry === undefined
+      ? undefined
+      : coarseMeshFor(coarseGeometry, occurrence.materialOverrideId);
     nodes.push({
       name: occurrence.name ?? occurrence.id,
       ...(childIndexes.length === 0 ? {} : { children: childIndexes }),
       matrix: scaledOccurrenceMatrix(occurrence.localTransform, scaleToMeters),
-      ...(geometry === undefined
-        ? {}
-        : { mesh: meshFor(geometry, occurrence.materialOverrideId) }),
+      ...(mesh === undefined ? {} : { mesh }),
       extras: {
         madi: {
           occurrenceId: occurrence.id,
@@ -450,12 +644,14 @@ export function compileSceneToGltf(
           sourceRef: occurrence.sourceRef,
           initialVisibility: occurrence.initialVisibility,
           tags: [...occurrence.tags],
+          ...(coarseMesh === undefined ? {} : { coarseMesh }),
         },
       },
     });
   }
 
   const binary = builder.finish();
+  const coarseBinary = coarseBuilder?.finish();
   const diagnostics = [...scene.diagnostics].sort((left, right) =>
     `${left.code}\u0000${left.sourceRef ?? ""}`.localeCompare(
       `${right.code}\u0000${right.sourceRef ?? ""}`,
@@ -469,9 +665,12 @@ export function compileSceneToGltf(
     nodes,
     meshes,
     materials,
-    buffers: [{ uri: binaryUri, byteLength: binary.byteLength }],
-    bufferViews: builder.bufferViews,
-    accessors: builder.accessors,
+    buffers: [
+      { uri: binaryUri, byteLength: binary.byteLength },
+      ...(coarseBinary ? [{ uri: coarseBinaryUri, byteLength: coarseBinary.byteLength }] : []),
+    ],
+    bufferViews,
+    accessors,
     extras: {
       madi: {
         profile: experimentalGltfProfile,
@@ -480,6 +679,15 @@ export function compileSceneToGltf(
         revisionId: scene.revision.id,
         sourceDigest: scene.revision.sourceDigest,
         optionsDigest: scene.revision.optionsDigest,
+        ...(coarseBinary
+          ? {
+              progressive: {
+                strategy: "prototype-aabb-v1",
+                targetBuffer: 0,
+                coarseBuffer: 1,
+              },
+            }
+          : {}),
         documents: [...scene.documents]
           .sort(compareId)
           .map(({ id, displayName, format, formatVersion, sourceDigest }) => ({
@@ -505,7 +713,10 @@ export function compileSceneToGltf(
   const json = `${JSON.stringify(document, null, 2)}\n`;
   const jsonDigest = sha256(json);
   const binaryDigest = sha256(binary);
-  const packageDigest = createHash("sha256").update(json).update(binary).digest("hex");
+  const coarseBinaryDigest = coarseBinary ? sha256(coarseBinary) : undefined;
+  const packageHash = createHash("sha256").update(json).update(binary);
+  if (coarseBinary) packageHash.update(coarseBinary);
+  const packageDigest = packageHash.digest("hex");
   const diagnosticCounts = { info: 0, warning: 0, error: 0 };
   for (const diagnostic of diagnostics) diagnosticCounts[diagnostic.severity] += 1;
   const occurrenceCounts = new Map<string, number>();
@@ -526,8 +737,10 @@ export function compileSceneToGltf(
     },
     options: {
       binaryUri,
+      ...(coarseBinary ? { coarseBinaryUri } : {}),
       coordinateSystem: "right-handed-y-up-meters",
       geometryEncoding: "gltf-f32",
+      ...(coarseBinary ? { progressiveRepresentation: "prototype-aabb-v1" as const } : {}),
     },
     source: {
       sceneId: scene.sceneId,
@@ -551,6 +764,16 @@ export function compileSceneToGltf(
           bytes: binary.byteLength,
           sha256: binaryDigest,
         },
+        ...(coarseBinary && coarseBinaryDigest
+          ? [
+              {
+                path: coarseBinaryUri,
+                mediaType: "application/octet-stream",
+                bytes: coarseBinary.byteLength,
+                sha256: coarseBinaryDigest,
+              },
+            ]
+          : []),
       ],
     },
     counts: {
@@ -576,10 +799,18 @@ export function compileSceneToGltf(
     },
     limitations: [
       "This is an experimental glTF profile, not a MADI interchange format.",
-      "Only one target display representation per prototype is emitted; coarse LOD is pending.",
+      ...(coarseBinary
+        ? ["The coarse representation is a prototype AABB, not a shape-preserving LOD."]
+        : ["Only one target display representation per prototype is emitted; coarse LOD is pending."]),
       "Geometry and node transforms are converted to f32 for glTF delivery.",
       "MADI source mapping uses glTF extras until an interoperable extension is justified.",
     ],
   };
-  return { document, json, binary, report };
+  return {
+    document,
+    json,
+    binary,
+    ...(coarseBinary ? { coarseBinary } : {}),
+    report,
+  };
 }

@@ -17,6 +17,8 @@ under the MIT License. Adafruit does not endorse MADI.
 | Public adapter info | NVIDIA, Lovelace, non-fallback | Vendor fields withheld by the browser, non-fallback |
 | Delivery path | `scene.gltf` hierarchy → Worker `scene.bin` decode → WebGPU | Same |
 | Hierarchy before binary request | Passed | Passed |
+| Coarse frame before delayed target | 36 triangles / 36 edges, passed | Same |
+| Target promotion | 2,076 triangles / 181 edges, passed | Same |
 | Ready state | 34 shared meshes, 85 renderable occurrences | Same |
 | Geometry | 162,838 triangles, 13,897 explicit CAD edge segments | Same |
 | Pick result | PyGamer joystick, glTF node 56, object ID 57, 524 CAD edge refs | Same |
@@ -27,12 +29,16 @@ under the MIT License. Adafruit does not endorse MADI.
 |---|---|
 | ![Chrome WebGPU PyGamer selection](chrome-151-windows-selected.png) | ![Firefox WebGPU PyGamer selection](firefox-150-windows-selected.png) |
 
+| Chrome 151 delayed-target coarse frame | Firefox 150 delayed-target coarse frame |
+|---|---|
+| ![Chrome coarse bounds before target](chrome-151-windows-coarse.png) | ![Firefox coarse bounds before target](firefox-150-windows-coarse.png) |
+
 Both screenshots were visually reviewed for the canonical camera, source
 colors, recognizable display/joystick/button assembly, explicit CAD edges,
 hierarchy, statistics, and selected-occurrence text. Minor browser font
 rasterization differences are not geometry differences. This run proves the
-compiled-package runtime boundary, not progressive LOD, performance, or broad
-GPU/OS/mobile support.
+compiled-package runtime boundary and one AABB-to-target progressive slice, not
+shape-preserving LOD, large-scene performance, or broad GPU/OS/mobile support.
 
 ## Reproduce
 

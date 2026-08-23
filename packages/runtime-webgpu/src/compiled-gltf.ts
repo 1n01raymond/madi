@@ -87,6 +87,8 @@ export interface CompiledHierarchy {
   readonly sourceFormat: string;
   readonly binaryUri: string;
   readonly binaryByteLength: number;
+  readonly coarseBinaryUri?: string;
+  readonly coarseBinaryByteLength?: number;
   readonly entries: readonly CompiledHierarchyEntry[];
   readonly renderableOccurrences: number;
   readonly sharedMeshes: number;
@@ -118,7 +120,14 @@ export interface DecodedCompiledScene {
     readonly triangles: number;
     readonly edgeSegments: number;
     readonly binaryBytes: number;
+    readonly representation: GeometryRepresentation;
   };
+}
+
+export type GeometryRepresentation = "target" | "coarse";
+
+export interface DecodeCompiledGltfOptions {
+  readonly representation?: GeometryRepresentation;
 }
 
 export type CompiledGltfErrorCode =
@@ -191,10 +200,10 @@ function validateDocumentShape(value: unknown): asserts value is CompiledGltfDoc
       throw new CompiledGltfError("INVALID_GLTF", `Compiled scene is missing ${key}.`);
     }
   }
-  if ((value.buffers as unknown[]).length !== 1) {
+  if ((value.buffers as unknown[]).length < 1) {
     throw new CompiledGltfError(
       "UNSUPPORTED_GEOMETRY",
-      "The experimental runtime slice requires exactly one external glTF buffer.",
+      "The experimental runtime slice requires at least one external glTF buffer.",
     );
   }
 }
@@ -233,21 +242,30 @@ export function parseCompiledGltf(value: unknown): CompiledGltfDocument {
     if (node.mesh !== undefined) {
       finiteInteger(node.mesh, `nodes[${nodeIndex}].mesh`, document.meshes.length);
     }
+    const coarseMesh = madiExtras(node).coarseMesh;
+    if (coarseMesh !== undefined) {
+      finiteInteger(
+        coarseMesh,
+        `nodes[${nodeIndex}].extras.madi.coarseMesh`,
+        document.meshes.length,
+      );
+    }
   });
 
-  const buffer = document.buffers[0];
-  if (
-    !buffer ||
-    typeof buffer.uri !== "string" ||
-    buffer.uri.trim() === "" ||
-    !Number.isInteger(buffer.byteLength) ||
-    buffer.byteLength <= 0
-  ) {
-    throw new CompiledGltfError(
-      "INVALID_GLTF",
-      "The compiled glTF buffer must have a URI and positive byteLength.",
-    );
-  }
+  document.buffers.forEach((buffer, bufferIndex) => {
+    if (
+      !isRecord(buffer) ||
+      typeof buffer.uri !== "string" ||
+      buffer.uri.trim() === "" ||
+      !Number.isInteger(buffer.byteLength) ||
+      buffer.byteLength <= 0
+    ) {
+      throw new CompiledGltfError(
+        "INVALID_GLTF",
+        `buffers[${bufferIndex}] must have a URI and positive byteLength.`,
+      );
+    }
+  });
 
   return document;
 }
@@ -295,6 +313,13 @@ export function inspectCompiledHierarchy(value: unknown): {
 } {
   const document = parseCompiledGltf(value);
   const rootMadi = recordAt(document.extras, "madi") ?? {};
+  const progressive = recordAt(rootMadi, "progressive");
+  const targetBufferIndex = progressive
+    ? finiteInteger(progressive.targetBuffer, "extras.madi.progressive.targetBuffer", document.buffers.length)
+    : 0;
+  const coarseBufferIndex = progressive
+    ? finiteInteger(progressive.coarseBuffer, "extras.madi.progressive.coarseBuffer", document.buffers.length)
+    : undefined;
   const entries: CompiledHierarchyEntry[] = [];
   const renderedMeshes = new Set<number>();
 
@@ -318,8 +343,11 @@ export function inspectCompiledHierarchy(value: unknown): {
   const format = typeof source?.format === "string" ? source.format : "source";
   const formatVersion =
     typeof source?.formatVersion === "string" ? source.formatVersion : undefined;
-  const buffer = document.buffers[0];
+  const buffer = document.buffers[targetBufferIndex];
   if (!buffer) throw new CompiledGltfError("INVALID_GLTF", "Missing glTF buffer.");
+  const coarseBuffer = coarseBufferIndex === undefined
+    ? undefined
+    : document.buffers[coarseBufferIndex];
 
   return {
     document,
@@ -332,6 +360,12 @@ export function inspectCompiledHierarchy(value: unknown): {
       sourceFormat: formatVersion ?? format,
       binaryUri: buffer.uri,
       binaryByteLength: buffer.byteLength,
+      ...(coarseBuffer
+        ? {
+            coarseBinaryUri: coarseBuffer.uri,
+            coarseBinaryByteLength: coarseBuffer.byteLength,
+          }
+        : {}),
       entries,
       renderableOccurrences: entries.filter(({ renderable }) => renderable).length,
       sharedMeshes: renderedMeshes.size,
@@ -369,18 +403,22 @@ function transformPoint(
 class BinaryAccessors {
   readonly document: CompiledGltfDocument;
   readonly binary: ArrayBuffer;
+  readonly bufferIndex: number;
   private readonly data: DataView;
 
-  constructor(document: CompiledGltfDocument, binary: ArrayBuffer) {
-    const expected = document.buffers[0]?.byteLength;
+  constructor(document: CompiledGltfDocument, binary: ArrayBuffer, bufferIndex: number) {
+    const resource = document.buffers[bufferIndex];
+    const expected = resource?.byteLength;
     if (expected === undefined || binary.byteLength !== expected) {
       throw new CompiledGltfError(
         "INVALID_BINARY",
-        `scene.bin byteLength must be ${String(expected)}; received ${binary.byteLength}.`,
+        `${resource?.uri ?? `buffer ${bufferIndex}`} byteLength must be ${String(expected)}; ` +
+          `received ${binary.byteLength}.`,
       );
     }
     this.document = document;
     this.binary = binary;
+    this.bufferIndex = bufferIndex;
     this.data = new DataView(binary);
   }
 
@@ -426,8 +464,11 @@ class BinaryAccessors {
     }
     finiteInteger(accessor.bufferView, `${label} bufferView`, this.document.bufferViews.length);
     const bufferView = this.document.bufferViews[accessor.bufferView];
-    if (!bufferView || bufferView.buffer !== 0) {
-      throw new CompiledGltfError("UNSUPPORTED_GEOMETRY", `${label} must use buffer 0.`);
+    if (!bufferView || bufferView.buffer !== this.bufferIndex) {
+      throw new CompiledGltfError(
+        "UNSUPPORTED_GEOMETRY",
+        `${label} must use the selected geometry buffer ${this.bufferIndex}.`,
+      );
     }
     const components = type === "VEC3" ? 3 : 1;
     const elementBytes = components * 4;
@@ -446,7 +487,10 @@ class BinaryAccessors {
       end > viewEnd ||
       end > this.binary.byteLength
     ) {
-      throw new CompiledGltfError("INVALID_BINARY", `${label} accessor exceeds scene.bin.`);
+      throw new CompiledGltfError(
+        "INVALID_BINARY",
+        `${label} accessor exceeds ${this.document.buffers[this.bufferIndex]?.uri ?? "binary"}.`,
+      );
     }
     return { start, stride, count: accessor.count };
   }
@@ -617,9 +661,25 @@ function decodeMesh(
 export function decodeCompiledGltf(
   value: unknown,
   binary: ArrayBuffer,
+  options: DecodeCompiledGltfOptions = {},
 ): DecodedCompiledScene {
   const { document, hierarchy } = inspectCompiledHierarchy(value);
-  const accessors = new BinaryAccessors(document, binary);
+  const representation = options.representation ?? "target";
+  const progressive = recordAt(recordAt(document.extras, "madi"), "progressive");
+  const bufferIndex = representation === "coarse"
+    ? finiteInteger(
+        progressive?.coarseBuffer,
+        "extras.madi.progressive.coarseBuffer",
+        document.buffers.length,
+      )
+    : progressive
+      ? finiteInteger(
+          progressive.targetBuffer,
+          "extras.madi.progressive.targetBuffer",
+          document.buffers.length,
+        )
+      : 0;
+  const accessors = new BinaryAccessors(document, binary, bufferIndex);
   const meshGeometry = new Map<number, DecodedMeshGeometry>();
   const instances = new Map<number, GpuOccurrenceInstance[]>();
   const objectEvidence: CompiledObjectEvidence[] = [];
@@ -640,13 +700,19 @@ export function decodeCompiledGltf(
     const worldTransform = multiplyMatrices(parentTransform, matrixFor(node, nodeIndex));
 
     if (node.mesh !== undefined) {
-      const meshIndex = node.mesh;
+      const nodeMadi = madiExtras(node);
+      const meshIndex = representation === "coarse"
+        ? finiteInteger(
+            nodeMadi.coarseMesh,
+            `nodes[${nodeIndex}].extras.madi.coarseMesh`,
+            document.meshes.length,
+          )
+        : node.mesh;
       const mesh = document.meshes[meshIndex];
       if (!mesh) throw new CompiledGltfError("INVALID_GLTF", `Missing meshes[${meshIndex}].`);
       const geometry = meshGeometry.get(meshIndex) ?? decodeMesh(document, accessors, mesh, meshIndex);
       meshGeometry.set(meshIndex, geometry);
       const objectId = nodeIndex + 1;
-      const nodeMadi = madiExtras(node);
       const meshMadi = madiExtras(mesh);
       const occurrenceId =
         typeof nodeMadi.occurrenceId === "string"
@@ -732,6 +798,7 @@ export function decodeCompiledGltf(
       triangles,
       edgeSegments,
       binaryBytes: binary.byteLength,
+      representation,
     },
   };
 }

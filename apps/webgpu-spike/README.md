@@ -11,6 +11,9 @@ scene.bin
   └─ Worker: validate accessors, decode shared typed-array batches
        └─ direct WebGPU: surfaces, explicit CAD edges, object-ID picking
             └─ Studio slice: orbit/pan/zoom/fit + synchronized selection
+
+progressive package
+  └─ coarse.bin → first WebGPU frame → scene.bin request/decode → in-place promotion
 ```
 
 Run it with `pnpm dev`. Use `pnpm browser:matrix` for the reproducible headed
@@ -40,9 +43,8 @@ Use **Open URL** for an HTTP(S) `scene.gltf`. A successful URL is retained in
 the page's `?scene=` query so the view can be reopened or shared; the remote
 host must allow cross-origin requests for both the glTF and its external binary.
 
-Use **Open local pair** to select exactly one MADI-profile `.gltf` and the
-matching external `.bin`. The browser validates the declared binary file name
-and byte length before sending the local `File` to the geometry Worker. Local
-files stay on the client and do not create a shareable URL. This is a compiled
-scene workflow, not direct STEP import; local STEP AP242 input remains a
-compiler milestone.
+Use **Open local package** to select exactly one MADI-profile `.gltf` and all of
+its external `.bin` resources. The browser validates each declared file name
+and byte length before sending local `File` objects to the geometry Worker.
+Local files stay on the client and do not create a shareable URL. This is a
+compiled scene workflow; direct STEP AP242/AP214 input belongs to the compiler.

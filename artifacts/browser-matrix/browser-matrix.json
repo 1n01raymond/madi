@@ -1,12 +1,17 @@
 {
   "schemaVersion": "phase-1-browser-matrix.1",
-  "capturedAt": "2026-08-22T18:29:53.284Z",
+  "capturedAt": "2026-08-23T06:13:56.415Z",
   "source": {
     "fixture": "fixtures/step/adafruit-pygamer.step",
     "sceneIr": "generated locally; not committed (80.6 MB JSON evidence)",
     "occtReport": "artifacts/occt/adafruit-pygamer.report.json",
     "gltf": "artifacts/phase1/adafruit-pygamer/scene.gltf",
     "binary": "artifacts/phase1/adafruit-pygamer/scene.bin",
+    "progressiveGltf": "artifacts/phase1/repeated-fasteners-ap242/scene.gltf",
+    "progressiveCoarse": "artifacts/phase1/repeated-fasteners-ap242/coarse.bin",
+    "progressiveTarget": "artifacts/phase1/repeated-fasteners-ap242/scene.bin",
+    "progressivePackageDigest": "c92abeee8e10e7373e64cb5e5c9ac84145bceb5272b329e6466137de6091cd2d",
+    "progressiveSourceDigest": "sha256:87b7909984c635ffc02c61211b22380252d455ebbf7c8e18ab68a2d2f7ac4da3",
     "packageDigest": "300abb2446a19b9667cad6ed6d1e01a8178212e9f29232af233dfaa9ee2e3c4e",
     "sourceDigest": "sha256:f0caf940c27af5a409f7c964d50941f60a1cc6329de14407bedd5fabeb9f10c0"
   },
@@ -56,16 +61,40 @@
         "binarySize": "14,479.3 KiB",
         "sourceFormat": "AP214",
         "hierarchyFirst": true,
+        "hierarchySearchBeforeGeometry": true,
         "brandMarkLoaded": true,
         "faviconLoaded": true,
         "fixtureCreditLinked": true,
-        "selection": "Selected JOYSTICK_ANALOG_MINITHM:JOY1 · node 56 · ID 57 · 524 CAD edge refs"
+        "selection": "Selected JOYSTICK_ANALOG_MINITHM:JOY1 · node 56 · ID 57 · 524 CAD edge refs",
+        "sectionInteraction": true,
+        "hierarchySearchAndProperties": true,
+        "sceneSources": {
+          "url": true,
+          "local": true,
+          "localBinaryDecodedWithoutNetworkFetch": true
+        },
+        "progressive": {
+          "coarseVisibleBeforeTarget": true,
+          "targetRequestSawCoarseReady": true,
+          "coarseStatus": "Coarse bounds ready · 10 renderable occurrences · loading 183.6 KiB target geometry…",
+          "coarseTriangles": "36",
+          "coarseEdges": "36",
+          "coarseScreenshot": {
+            "path": "chrome-151-windows-coarse.png",
+            "bytes": 321325,
+            "sha256": "9f8a2dbd4161c73dbb7611c3369405d422a90dfb91ca5eb5b736c281db7ed68e"
+          },
+          "targetPromoted": true,
+          "targetStatus": "Compiled glTF ready · 3 shared meshes · 10 renderable occurrences",
+          "targetTriangles": "2,076",
+          "targetEdges": "181"
+        }
       },
       "consoleIssues": [],
       "screenshot": {
         "path": "chrome-151-windows-selected.png",
-        "bytes": 307521,
-        "sha256": "ba57cbae0f86f8094b6aa0bb44f90a702914ed92d8933b8fa435a0f70c9ed034"
+        "bytes": 380276,
+        "sha256": "c9897af7c118eaeb7d6cec7eda7395f2486f40cef1bca602e829295b5114cee5"
       }
     },
     {
@@ -95,16 +124,40 @@
         "binarySize": "14,479.3 KiB",
         "sourceFormat": "AP214",
         "hierarchyFirst": true,
+        "hierarchySearchBeforeGeometry": true,
         "brandMarkLoaded": true,
         "faviconLoaded": true,
         "fixtureCreditLinked": true,
-        "selection": "Selected JOYSTICK_ANALOG_MINITHM:JOY1 · node 56 · ID 57 · 524 CAD edge refs"
+        "selection": "Selected JOYSTICK_ANALOG_MINITHM:JOY1 · node 56 · ID 57 · 524 CAD edge refs",
+        "sectionInteraction": true,
+        "hierarchySearchAndProperties": true,
+        "sceneSources": {
+          "url": true,
+          "local": true,
+          "localBinaryDecodedWithoutNetworkFetch": true
+        },
+        "progressive": {
+          "coarseVisibleBeforeTarget": true,
+          "targetRequestSawCoarseReady": true,
+          "coarseStatus": "Coarse bounds ready · 10 renderable occurrences · loading 183.6 KiB target geometry…",
+          "coarseTriangles": "36",
+          "coarseEdges": "36",
+          "coarseScreenshot": {
+            "path": "firefox-150-windows-coarse.png",
+            "bytes": 302284,
+            "sha256": "cff3e1cd4c70e9b49d76cc33056f66a7553c2c09dce99c97008409c6049dc796"
+          },
+          "targetPromoted": true,
+          "targetStatus": "Compiled glTF ready · 3 shared meshes · 10 renderable occurrences",
+          "targetTriangles": "2,076",
+          "targetEdges": "181"
+        }
       },
       "consoleIssues": [],
       "screenshot": {
         "path": "firefox-150-windows-selected.png",
-        "bytes": 292281,
-        "sha256": "cc60223333557a20d886caf1bfb76068252660b6498589fb3c9442ee6d12b322"
+        "bytes": 354474,
+        "sha256": "ad9405854fd2395e35ae87215cbee80dd73ccdf9d84454f32dd165ce0a51a055"
       }
     }
   ]

@@ -169,8 +169,13 @@ export async function compileStepFile(
     if (scene.revision.sourceDigest !== `sha256:${inspection.sha256}`) {
       throw new TypeError("OCCT Scene IR source digest does not match the STEP input.");
     }
-    const compiled = compileSceneToGltf(scene);
-    const validation = validateCompiledGltf(compiled.document, compiled.binary);
+    const compiled = compileSceneToGltf(scene, { coarseBounds: true });
+    const validation = validateCompiledGltf(
+      compiled.document,
+      compiled.coarseBinary
+        ? [compiled.binary, compiled.coarseBinary]
+        : compiled.binary,
+    );
     if (!validation.ok) {
       throw new TypeError(
         `Compiled glTF validation failed: ${validation.issues

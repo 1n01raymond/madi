@@ -16,6 +16,10 @@ const binaryUrl = new URL(
   "../../../artifacts/phase1/repeated-fasteners/scene.bin",
   import.meta.url,
 );
+const progressiveUrl = new URL(
+  "../../../artifacts/phase1/repeated-fasteners-ap242/",
+  import.meta.url,
+);
 
 async function loadPackage(): Promise<{ json: unknown; binary: ArrayBuffer }> {
   const [json, bytes] = await Promise.all([
@@ -59,6 +63,7 @@ describe("compiled glTF runtime boundary", () => {
       triangles: 2076,
       edgeSegments: 181,
       binaryBytes: 188_044,
+      representation: "target",
     });
     expect(
       Math.max(...decoded.gpuScene.batches.map(({ instances }) => instances.length)),
@@ -86,6 +91,42 @@ describe("compiled glTF runtime boundary", () => {
     expect(() => decodeCompiledGltf(json, binary.slice(0, binary.byteLength - 4))).toThrowError(
       expect.objectContaining<Partial<CompiledGltfError>>({ code: "INVALID_BINARY" }),
     );
+  });
+
+  it("decodes coarse bounds before target geometry without changing object identity", async () => {
+    const [json, targetBytes, coarseBytes] = await Promise.all([
+      readFile(new URL("scene.gltf", progressiveUrl), "utf8").then(JSON.parse),
+      readFile(new URL("scene.bin", progressiveUrl)),
+      readFile(new URL("coarse.bin", progressiveUrl)),
+    ]);
+    const { hierarchy } = inspectCompiledHierarchy(json);
+    const coarse = decodeCompiledGltf(json, Uint8Array.from(coarseBytes).buffer, {
+      representation: "coarse",
+    });
+    const target = decodeCompiledGltf(json, Uint8Array.from(targetBytes).buffer);
+
+    expect(hierarchy).toMatchObject({
+      binaryUri: "scene.bin",
+      binaryByteLength: 188_044,
+      coarseBinaryUri: "coarse.bin",
+      coarseBinaryByteLength: 2_736,
+    });
+    expect(coarse.summary).toEqual({
+      prototypeBatches: 3,
+      partOccurrences: 10,
+      triangles: 36,
+      edgeSegments: 36,
+      binaryBytes: 2_736,
+      representation: "coarse",
+    });
+    expect(target.summary.representation).toBe("target");
+    expect(coarse.objectEvidence.map(({ objectId }) => objectId)).toEqual(
+      target.objectEvidence.map(({ objectId }) => objectId),
+    );
+    expect(coarse.objectEvidence.map(({ occurrenceId }) => occurrenceId)).toEqual(
+      target.objectEvidence.map(({ occurrenceId }) => occurrenceId),
+    );
+    expect(coarse.bounds).toEqual(target.bounds);
   });
 
   it("rejects unrecognized MADI extras profiles", async () => {
