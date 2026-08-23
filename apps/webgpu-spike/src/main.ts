@@ -2,7 +2,6 @@ import {
   CompiledGltfError,
   MadiWebGpuError,
   MadiWebGpuRenderer,
-  inspectCompiledHierarchy,
 } from "@madi/runtime-webgpu";
 import type {
   CompiledGltfDocument,
@@ -16,6 +15,12 @@ import { HierarchySearchIndex } from "./hierarchy-search.js";
 import type { HierarchySearchResult } from "./hierarchy-search.js";
 import { AxisSectionPlane } from "./section-plane.js";
 import type { SectionAxis } from "./section-plane.js";
+import {
+  loadSceneHierarchy,
+  parseSceneUrl,
+  selectLocalSceneFiles,
+} from "./scene-source.js";
+import type { GeometryBinarySource, SceneSource } from "./scene-source.js";
 import { OrthographicOrbitCamera } from "./view.js";
 import { OccurrenceVisibility } from "./visibility.js";
 import faviconUrl from "../../../docs/media/madi-favicon.svg?url";
@@ -38,25 +43,29 @@ function formatBytes(bytes: number): string {
   })} KiB`;
 }
 
-async function loadCompiledHierarchy(gltfUrl: URL): Promise<{
-  readonly document: CompiledGltfDocument;
-  readonly hierarchy: CompiledHierarchy;
-}> {
-  const response = await fetch(gltfUrl, { cache: "no-store" });
-  if (!response.ok) throw new Error(`Failed to load compiled hierarchy (${response.status}).`);
-  return inspectCompiledHierarchy(await response.json());
-}
-
 function decodeGeometry(
   document: CompiledGltfDocument,
-  binaryUrl: URL,
+  binary: GeometryBinarySource,
+  signal: AbortSignal,
 ): Promise<{ readonly scene: DecodedCompiledScene; readonly decodeMilliseconds: number }> {
   return new Promise((resolve, reject) => {
     const worker = new Worker(new URL("./geometry.worker.ts", import.meta.url), {
       type: "module",
       name: "madi-compiled-geometry",
     });
-    const finish = (): void => worker.terminate();
+    const finish = (): void => {
+      signal.removeEventListener("abort", abort);
+      worker.terminate();
+    };
+    const abort = (): void => {
+      finish();
+      reject(new DOMException("Scene load cancelled.", "AbortError"));
+    };
+    if (signal.aborted) {
+      abort();
+      return;
+    }
+    signal.addEventListener("abort", abort, { once: true });
     worker.addEventListener(
       "message",
       (event: MessageEvent<GeometryDecodeResponse>) => {
@@ -74,7 +83,7 @@ function decodeGeometry(
       },
       { once: true },
     );
-    worker.postMessage({ type: "decode", document, binaryUrl: binaryUrl.href });
+    worker.postMessage({ type: "decode", document, binary });
   });
 }
 
@@ -133,15 +142,67 @@ const sectionPositionValue = requireElement<HTMLOutputElement>("#section-positio
 const sectionDirection = requireElement<HTMLElement>("#section-direction");
 const flipSectionButton = requireElement<HTMLButtonElement>("#flip-section");
 const sectionAxisButtons = document.querySelectorAll<HTMLButtonElement>("[data-section-axis]");
+const sceneSourceKind = requireElement<HTMLElement>("#scene-source-kind");
+const sceneSourceLabel = requireElement<HTMLElement>("#scene-source-label");
+const sceneUrlForm = requireElement<HTMLFormElement>("#scene-url-form");
+const sceneUrlInput = requireElement<HTMLInputElement>("#scene-url");
+const openSceneUrlButton = requireElement<HTMLButtonElement>("#open-scene-url");
+const localSceneFiles = requireElement<HTMLInputElement>("#local-scene-files");
+const localSceneButton = requireElement<HTMLElement>(".local-scene-button");
+const openDemoSceneButton = requireElement<HTMLButtonElement>("#open-demo-scene");
+const defaultSceneUrl = new URL("/scene.gltf", window.location.href);
 requireElement<HTMLLinkElement>("#madi-favicon").href = faviconUrl;
 requireElement<HTMLImageElement>("#madi-brand-mark").src = inverseMarkUrl;
 
-async function start(): Promise<void> {
-  const gltfUrl = new URL("/scene.gltf", window.location.href);
+let disposeActiveScene: (() => void) | undefined;
+
+function setSourceControlsBusy(busy: boolean): void {
+  openSceneUrlButton.disabled = busy;
+  sceneUrlInput.disabled = busy;
+  localSceneFiles.disabled = busy;
+  openDemoSceneButton.disabled = busy;
+  if (busy) localSceneButton.dataset.disabled = "true";
+  else delete localSceneButton.dataset.disabled;
+  document.documentElement.dataset.sceneLoading = String(busy);
+}
+
+function resetSceneUi(): void {
+  hierarchySearchInput.value = "";
+  hierarchySearchResult.textContent = "Waiting for hierarchy";
+  hierarchyEmpty.hidden = true;
+  hierarchyList.replaceChildren();
+  propertiesEmpty.hidden = false;
+  propertiesContent.hidden = true;
+  selection.textContent = "No occurrence selected.";
+  visibilityStatus.textContent = "Waiting for occurrences";
+  hideSelectionButton.disabled = true;
+  isolateSelectionButton.disabled = true;
+  showAllButton.disabled = true;
+  toggleSectionButton.setAttribute("aria-pressed", "false");
+  sectionControls.hidden = true;
+  for (const selector of ["#triangle-count", "#edge-count", "#decode-time", "#gpu-adapter"]) {
+    setText(selector, "—");
+  }
+  for (const selector of ["#stage-hierarchy", "#stage-geometry", "#stage-webgpu"]) {
+    const stage = requireElement<HTMLElement>(selector);
+    delete stage.dataset.state;
+  }
+}
+
+async function loadScene(source: SceneSource): Promise<boolean> {
+  setSourceControlsBusy(true);
+  let pendingCleanup: (() => void) | undefined;
   try {
     status.textContent = "Loading compiled glTF hierarchy…";
     status.dataset.state = "loading";
-    const { document: gltf, hierarchy } = await loadCompiledHierarchy(gltfUrl);
+    const loaded = await loadSceneHierarchy(source);
+    const { document: gltf, hierarchy } = loaded;
+    disposeActiveScene?.();
+    disposeActiveScene = undefined;
+    resetSceneUi();
+    const interactions = new AbortController();
+    pendingCleanup = () => interactions.abort();
+    const listenerOptions = { signal: interactions.signal };
     renderHierarchy(hierarchy);
     const searchIndex = new HierarchySearchIndex(hierarchy.entries);
     const hierarchyItems = new Map(
@@ -167,7 +228,7 @@ async function start(): Promise<void> {
       hierarchyEmpty.hidden = visible.size !== 0;
       document.documentElement.dataset.hierarchyMatches = String(matches);
     };
-    hierarchySearchInput.addEventListener("input", applyHierarchySearch);
+    hierarchySearchInput.addEventListener("input", applyHierarchySearch, listenerOptions);
     applyHierarchySearch();
     setText("#prototype-count", String(hierarchy.sharedMeshes));
     setText("#occurrence-count", String(hierarchy.renderableOccurrences));
@@ -181,21 +242,36 @@ async function start(): Promise<void> {
       `decoding ${formatBytes(hierarchy.binaryByteLength)} in Worker…`;
     status.dataset.stage = "hierarchy";
 
-    const binaryUrl = new URL(hierarchy.binaryUri, gltfUrl);
-    const rendererPromise = MadiWebGpuRenderer.create(canvas, {
+    const renderer = await MadiWebGpuRenderer.create(canvas, {
       onDeviceLost: (message) => {
         status.textContent = `WebGPU device lost: ${message}`;
         status.dataset.state = "error";
       },
     });
-    const [{ scene, decodeMilliseconds }, renderer] = await Promise.all([
-      decodeGeometry(gltf, binaryUrl),
-      rendererPromise,
-    ]);
+    let animationFrame = 0;
+    const sessionResources: { resizeObserver?: ResizeObserver } = {};
+    let disposed = false;
+    const dispose = (): void => {
+      if (disposed) return;
+      disposed = true;
+      interactions.abort();
+      sessionResources.resizeObserver?.disconnect();
+      if (animationFrame !== 0) cancelAnimationFrame(animationFrame);
+      renderer.destroy();
+    };
+    pendingCleanup = dispose;
+    disposeActiveScene = dispose;
+    const { scene, decodeMilliseconds } = await decodeGeometry(
+      gltf,
+      loaded.binary,
+      interactions.signal,
+    ).catch((error: unknown) => {
+      dispose();
+      throw error;
+    });
     renderer.setScene(scene.gpuScene);
 
     const camera = new OrthographicOrbitCamera(scene.bounds);
-    let animationFrame = 0;
     const render = (): void => {
       animationFrame = 0;
       const aspect = canvas.clientWidth / Math.max(canvas.clientHeight, 1);
@@ -385,8 +461,6 @@ async function start(): Promise<void> {
     };
     applySection();
 
-    const interactions = new AbortController();
-    const listenerOptions = { signal: interactions.signal };
     let activePointer: number | undefined;
     let navigationMode: "orbit" | "pan" = "orbit";
     let lastPointerX = 0;
@@ -563,8 +637,8 @@ async function start(): Promise<void> {
       listenerOptions,
     );
 
-    const resizeObserver = new ResizeObserver(scheduleRender);
-    resizeObserver.observe(canvas);
+    sessionResources.resizeObserver = new ResizeObserver(scheduleRender);
+    sessionResources.resizeObserver.observe(canvas);
 
     canvas.addEventListener("click", async (event) => {
       if (suppressClick) {
@@ -575,17 +649,21 @@ async function start(): Promise<void> {
       selectObject(objectId);
     }, listenerOptions);
 
-    window.addEventListener(
-      "beforeunload",
-      () => {
-        interactions.abort();
-        resizeObserver.disconnect();
-        if (animationFrame !== 0) cancelAnimationFrame(animationFrame);
-        renderer.destroy();
-      },
-      { once: true },
-    );
+    sceneSourceKind.textContent =
+      source.kind === "local"
+        ? "LOCAL"
+        : source.gltfUrl.href === defaultSceneUrl.href
+          ? "DEMO"
+          : "URL";
+    sceneSourceLabel.textContent = loaded.label;
+    sceneSourceLabel.title = loaded.label;
+    document.documentElement.dataset.sceneSource = source.kind;
+    pendingCleanup = undefined;
+    return true;
   } catch (error) {
+    const cleanup = pendingCleanup;
+    cleanup?.();
+    if (disposeActiveScene === cleanup) disposeActiveScene = undefined;
     const message =
       error instanceof CompiledGltfError ||
       error instanceof MadiWebGpuError ||
@@ -594,7 +672,68 @@ async function start(): Promise<void> {
         : String(error);
     status.textContent = message;
     status.dataset.state = "error";
+    return false;
+  } finally {
+    setSourceControlsBusy(false);
   }
 }
 
-await start();
+function replaceSceneQuery(sceneUrl?: URL): void {
+  const pageUrl = new URL(window.location.href);
+  if (sceneUrl) pageUrl.searchParams.set("scene", sceneUrl.href);
+  else pageUrl.searchParams.delete("scene");
+  window.history.replaceState(null, "", pageUrl);
+}
+
+sceneUrlForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+  let gltfUrl: URL;
+  try {
+    gltfUrl = parseSceneUrl(sceneUrlInput.value, window.location.href);
+  } catch (error) {
+    status.textContent = error instanceof Error ? error.message : String(error);
+    status.dataset.state = "error";
+    return;
+  }
+  void loadScene({ kind: "url", gltfUrl }).then((loaded) => {
+    if (loaded) replaceSceneQuery(gltfUrl);
+  });
+});
+
+localSceneFiles.addEventListener("change", () => {
+  let source: SceneSource;
+  try {
+    source = selectLocalSceneFiles(Array.from(localSceneFiles.files ?? []));
+  } catch (error) {
+    status.textContent = error instanceof Error ? error.message : String(error);
+    status.dataset.state = "error";
+    localSceneFiles.value = "";
+    return;
+  }
+  void loadScene(source).then((loaded) => {
+    localSceneFiles.value = "";
+    if (loaded) replaceSceneQuery();
+  });
+});
+
+openDemoSceneButton.addEventListener("click", () => {
+  sceneUrlInput.value = defaultSceneUrl.href;
+  void loadScene({ kind: "url", gltfUrl: defaultSceneUrl }).then((loaded) => {
+    if (loaded) replaceSceneQuery();
+  });
+});
+
+window.addEventListener("beforeunload", () => disposeActiveScene?.(), { once: true });
+
+const requestedScene = new URL(window.location.href).searchParams.get("scene");
+let initialSceneUrl = defaultSceneUrl;
+if (requestedScene) {
+  try {
+    initialSceneUrl = parseSceneUrl(requestedScene, window.location.href);
+  } catch (error) {
+    status.textContent = error instanceof Error ? error.message : String(error);
+    status.dataset.state = "error";
+  }
+}
+sceneUrlInput.value = initialSceneUrl.href;
+await loadScene({ kind: "url", gltfUrl: initialSceneUrl });

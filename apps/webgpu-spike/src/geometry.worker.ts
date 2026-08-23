@@ -6,11 +6,12 @@ import type {
   CompiledGltfDocument,
   DecodedCompiledScene,
 } from "@madi/runtime-webgpu";
+import type { GeometryBinarySource } from "./scene-source.js";
 
 interface GeometryDecodeRequest {
   readonly type: "decode";
   readonly document: CompiledGltfDocument;
-  readonly binaryUrl: string;
+  readonly binary: GeometryBinarySource;
 }
 
 export type GeometryDecodeResponse =
@@ -42,11 +43,17 @@ worker.addEventListener("message", (event) => {
 async function decode(request: GeometryDecodeRequest): Promise<void> {
   try {
     const startedAt = performance.now();
-    const response = await fetch(request.binaryUrl, { cache: "no-store" });
-    if (!response.ok) {
-      throw new Error(`Failed to load compiled geometry (${response.status}).`);
+    let binary: ArrayBuffer;
+    if (request.binary.kind === "url") {
+      const response = await fetch(request.binary.href, { cache: "no-store" });
+      if (!response.ok) {
+        throw new Error(`Failed to load compiled geometry (${response.status}).`);
+      }
+      binary = await response.arrayBuffer();
+    } else {
+      binary = await request.binary.file.arrayBuffer();
     }
-    const scene = decodeCompiledGltf(request.document, await response.arrayBuffer());
+    const scene = decodeCompiledGltf(request.document, binary);
     worker.postMessage(
       {
         type: "ready",

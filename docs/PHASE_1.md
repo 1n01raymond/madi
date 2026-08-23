@@ -37,6 +37,7 @@ direct WebGPU renderer. The Phase 0 Scene IR JSON is no longer a browser input.
 | Source picking | PyGamer joystick resolves glTF node 56, object ID 57, and 524 revision-local CAD edge refs | Passed |
 | Review interaction | Orthographic orbit/pan/zoom/fit, synchronized canvas/tree selection, hide/isolate/show-all, and one axis-controlled section plane; surfaces, explicit edges, and picking share the clipping equation without rebuilding GPU resources | Passed by camera/visibility/section unit tests and browser interaction review |
 | Scene inspection | Tokenized hierarchy search covers names and source identity before geometry residency; viewport/tree/search selection share an occurrence property panel with bounded edge-reference previews | Passed by search unit tests and cross-browser interaction review |
+| Scene opening | HTTP(S) glTF URLs are shareable through `?scene=`; a validated local `.gltf` + `.bin` pair loads entirely client-side and decodes its `File` in the Worker without a binary network request | Passed by source unit tests and the Chrome/Firefox browser matrix |
 | Browser conformance | Headed Chrome/Blink and Firefox/Gecko emit no console warnings or errors | Passed by `pnpm browser:matrix` |
 
 ## Reproduce

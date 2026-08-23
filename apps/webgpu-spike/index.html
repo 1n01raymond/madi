@@ -36,6 +36,35 @@
         </p>
       </header>
 
+      <section class="scene-source" aria-label="Open compiled scene">
+        <div class="scene-source-current">
+          <span id="scene-source-kind">DEMO</span>
+          <strong id="scene-source-label" aria-live="polite">Preparing default package…</strong>
+        </div>
+        <form id="scene-url-form" class="scene-url-form">
+          <input
+            id="scene-url"
+            type="text"
+            inputmode="url"
+            aria-label="Compiled glTF URL"
+            placeholder="https://host/path/scene.gltf"
+            spellcheck="false"
+          />
+          <button id="open-scene-url" type="submit">Open URL</button>
+        </form>
+        <label class="local-scene-button" for="local-scene-files">
+          Open local pair
+          <input
+            id="local-scene-files"
+            type="file"
+            accept=".gltf,.bin,model/gltf+json,application/octet-stream"
+            multiple
+          />
+        </label>
+        <button id="open-demo-scene" class="demo-scene-button" type="button">Demo</button>
+        <small>Select one compiled <code>.gltf</code> and its external <code>.bin</code>. Remote hosts require CORS.</small>
+      </section>
+
       <section class="pipeline" aria-label="Runtime loading pipeline">
         <article id="stage-hierarchy">
           <span>01</span>

@@ -78,7 +78,9 @@ async function recordBrowser(definition) {
     });
     let hierarchyFirst = false;
     let hierarchySearchBeforeGeometry = false;
+    let binaryNetworkRequests = 0;
     await page.route("**/scene.bin", async (route) => {
+      binaryNetworkRequests += 1;
       hierarchyFirst = await page
         .evaluate(() => document.documentElement.dataset.hierarchyReady === "true")
         .catch(() => false);
@@ -229,6 +231,62 @@ async function recordBrowser(definition) {
       `${definition.id} picked edge properties`,
     );
     observed.hierarchySearchAndProperties = true;
+
+    const remoteSceneUrl = new URL("scene.gltf?source=browser-matrix", url);
+    await page.locator("#scene-url").fill(remoteSceneUrl.href);
+    await page.locator("#open-scene-url").click();
+    await page.waitForFunction(
+      (sceneHref) =>
+        document.documentElement.dataset.sceneSource === "url" &&
+        document.querySelector("#scene-source-kind")?.textContent === "URL" &&
+        document.querySelector("#scene-source-label")?.textContent === sceneHref &&
+        document.querySelector("#status")?.getAttribute("data-state") === "ready",
+      remoteSceneUrl.href,
+    );
+    assertEqual(
+      new URL(page.url()).searchParams.get("scene"),
+      remoteSceneUrl.href,
+      `${definition.id} URL scene query`,
+    );
+    assertEqual(binaryNetworkRequests, 2, `${definition.id} URL binary request`);
+    await canvas.click({
+      position: {
+        x: Math.round(canvasBounds.width * 0.6),
+        y: Math.round(canvasBounds.height * 0.35),
+      },
+    });
+    await page.locator("#selection").filter({ hasText: expected.selection }).waitFor({
+      timeout: 5_000,
+    });
+
+    await page.locator("#local-scene-files").setInputFiles([
+      resolve(repositoryRoot, "artifacts/phase1/adafruit-pygamer/scene.gltf"),
+      resolve(repositoryRoot, "artifacts/phase1/adafruit-pygamer/scene.bin"),
+    ]);
+    await page.waitForFunction(
+      () =>
+        document.documentElement.dataset.sceneSource === "local" &&
+        document.querySelector("#scene-source-kind")?.textContent === "LOCAL" &&
+        document.querySelector("#scene-source-label")?.textContent ===
+          "scene.gltf + scene.bin" &&
+        document.querySelector("#status")?.getAttribute("data-state") === "ready",
+    );
+    assertEqual(new URL(page.url()).searchParams.get("scene"), null, `${definition.id} local URL`);
+    assertEqual(binaryNetworkRequests, 2, `${definition.id} local Worker binary decode`);
+    await canvas.click({
+      position: {
+        x: Math.round(canvasBounds.width * 0.6),
+        y: Math.round(canvasBounds.height * 0.35),
+      },
+    });
+    await page.locator("#selection").filter({ hasText: expected.selection }).waitFor({
+      timeout: 5_000,
+    });
+    observed.sceneSources = {
+      url: true,
+      local: true,
+      localBinaryDecodedWithoutNetworkFetch: true,
+    };
 
     const webGpu = await page.evaluate(async () => {
       const adapter = await navigator.gpu?.requestAdapter();

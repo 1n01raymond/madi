@@ -52,7 +52,9 @@ Current evidence: the browser reads the compiled glTF hierarchy first, decodes
 and preserves source-aware object picking in headed Chrome and Firefox. Orbit,
 pan, zoom, fit, synchronized selection, hide/isolate, and one section plane are
 implemented. Hierarchy/source-identity search and occurrence properties are
-also available; progressive resources and bounded residency are pending.
+also available. The Studio opens shareable HTTP(S) scene URLs and validated
+local `.gltf` + `.bin` pairs without uploading them; progressive resources and
+bounded residency are pending.
 
 - manifest/hierarchy-first loading;
 - Worker decode;
