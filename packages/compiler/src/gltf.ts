@@ -68,6 +68,12 @@ interface CoarseGeometryResource {
   readonly edgeIndexAccessor: number;
 }
 
+interface TargetGeometryRange {
+  readonly prototypeId: string;
+  readonly byteOffset: number;
+  readonly byteLength: number;
+}
+
 function compareId(left: { readonly id: string }, right: { readonly id: string }): number {
   return left.id.localeCompare(right.id, "en");
 }
@@ -417,14 +423,21 @@ export function compileSceneToGltf(
   const prototypeById = new Map(prototypes.map((value) => [value.id, value]));
   const geometryByPrototype = new Map<string, GeometryResource>();
   const coarseGeometryByPrototype = new Map<string, CoarseGeometryResource>();
+  const targetRangesByPrototype = new Map<string, TargetGeometryRange>();
   let triangleCount = 0;
   let edgeSegmentCount = 0;
 
   for (const prototype of prototypes) {
     const representation = representationFor(prototype, representations);
     if (!representation) continue;
+    const byteOffset = builder.byteLength;
     const compiled = appendGeometry(builder, prototype, representation, scaleToMeters);
     geometryByPrototype.set(prototype.id, compiled.resource);
+    targetRangesByPrototype.set(prototype.id, {
+      prototypeId: prototype.id,
+      byteOffset,
+      byteLength: builder.byteLength - byteOffset,
+    });
     if (coarseBuilder) {
       coarseGeometryByPrototype.set(
         prototype.id,
@@ -454,6 +467,7 @@ export function compileSceneToGltf(
   const meshes: GltfMesh[] = [];
   const meshVariants = new Map<string, number>();
   const coarseMeshVariants = new Map<string, number>();
+  const targetMeshesByPrototype = new Map<string, Set<number>>();
 
   function meshFor(resource: GeometryResource, overrideMaterialId?: MaterialId): number {
     const variantKey = `${resource.representation.id}\u0000${overrideMaterialId ?? ""}`;
@@ -525,6 +539,9 @@ export function compileSceneToGltf(
       },
     });
     meshVariants.set(variantKey, meshIndex);
+    const prototypeMeshes = targetMeshesByPrototype.get(resource.prototype.id) ?? new Set();
+    prototypeMeshes.add(meshIndex);
+    targetMeshesByPrototype.set(resource.prototype.id, prototypeMeshes);
     return meshIndex;
   }
 
@@ -587,6 +604,13 @@ export function compileSceneToGltf(
   }
 
   const occurrences = [...scene.occurrences].sort(compareId);
+  const occurrenceCounts = new Map<string, number>();
+  for (const occurrence of occurrences) {
+    occurrenceCounts.set(
+      occurrence.prototypeId,
+      (occurrenceCounts.get(occurrence.prototypeId) ?? 0) + 1,
+    );
+  }
   const occurrenceIndexes = new Map(
     occurrences.map((occurrence, index) => [occurrence.id, index + 1]),
   );
@@ -652,6 +676,33 @@ export function compileSceneToGltf(
 
   const binary = builder.finish();
   const coarseBinary = coarseBuilder?.finish();
+  const targetChunks = coarseBinary
+    ? [...targetRangesByPrototype.values()]
+        .map((range) => ({
+          ...range,
+          meshIndexes: [...(targetMeshesByPrototype.get(range.prototypeId) ?? [])].sort(
+            (left, right) => left - right,
+          ),
+          occurrenceCount: occurrenceCounts.get(range.prototypeId) ?? 0,
+        }))
+        .filter(({ meshIndexes }) => meshIndexes.length > 0)
+        .sort(
+          (left, right) =>
+            right.occurrenceCount - left.occurrenceCount ||
+            right.byteLength - left.byteLength ||
+            left.prototypeId.localeCompare(right.prototypeId, "en"),
+        )
+        .map((chunk, priority) => ({
+          id: `target:${String(priority).padStart(4, "0")}:${chunk.prototypeId}`,
+          buffer: 0,
+          byteOffset: chunk.byteOffset,
+          byteLength: chunk.byteLength,
+          meshIndexes: chunk.meshIndexes,
+          prototypeId: chunk.prototypeId,
+          occurrenceCount: chunk.occurrenceCount,
+          priority,
+        }))
+    : [];
   const diagnostics = [...scene.diagnostics].sort((left, right) =>
     `${left.code}\u0000${left.sourceRef ?? ""}`.localeCompare(
       `${right.code}\u0000${right.sourceRef ?? ""}`,
@@ -685,6 +736,7 @@ export function compileSceneToGltf(
                 strategy: "prototype-aabb-v1",
                 targetBuffer: 0,
                 coarseBuffer: 1,
+                targetChunks,
               },
             }
           : {}),
@@ -719,13 +771,6 @@ export function compileSceneToGltf(
   const packageDigest = packageHash.digest("hex");
   const diagnosticCounts = { info: 0, warning: 0, error: 0 };
   for (const diagnostic of diagnostics) diagnosticCounts[diagnostic.severity] += 1;
-  const occurrenceCounts = new Map<string, number>();
-  for (const occurrence of occurrences) {
-    occurrenceCounts.set(
-      occurrence.prototypeId,
-      (occurrenceCounts.get(occurrence.prototypeId) ?? 0) + 1,
-    );
-  }
   const report: CompilerBuildReport = {
     schemaVersion: compilerEvidenceSchema,
     profile: experimentalGltfProfile,
@@ -741,6 +786,7 @@ export function compileSceneToGltf(
       coordinateSystem: "right-handed-y-up-meters",
       geometryEncoding: "gltf-f32",
       ...(coarseBinary ? { progressiveRepresentation: "prototype-aabb-v1" as const } : {}),
+      ...(coarseBinary ? { targetChunking: "prototype-range-v1" as const } : {}),
     },
     source: {
       sceneId: scene.sceneId,
@@ -788,6 +834,7 @@ export function compileSceneToGltf(
       materialCount: materials.length,
       triangleCount,
       edgeSegmentCount,
+      ...(coarseBinary ? { targetChunkCount: targetChunks.length } : {}),
     },
     prototypeReuse: [...occurrenceCounts]
       .filter(([, count]) => count > 1)

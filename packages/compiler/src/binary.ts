@@ -7,6 +7,10 @@ export class GltfBinaryBuilder {
   readonly #chunks: { readonly offset: number; readonly bytes: Uint8Array }[] = [];
   #byteLength = 0;
 
+  get byteLength(): number {
+    return this.#byteLength;
+  }
+
   constructor(options: {
     readonly bufferIndex?: number;
     readonly bufferViews?: GltfBufferView[];

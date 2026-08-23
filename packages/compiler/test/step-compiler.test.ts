@@ -84,8 +84,10 @@ await writeFile(option("--report"), JSON.stringify({
       expect(buildReport.options).toMatchObject({
         coarseBinaryUri: "coarse.bin",
         progressiveRepresentation: "prototype-aabb-v1",
+        targetChunking: "prototype-range-v1",
       });
       expect(buildReport.counts.gltfMeshCount).toBe(6);
+      expect(buildReport.counts.targetChunkCount).toBe(3);
       expect(buildReport.source.sourceDigest).toBe(`sha256:${result.source.sha256}`);
       expect(adapterReport.source).toMatchObject({
         path: "assembly.step",

@@ -98,6 +98,7 @@ export interface CompilerBuildReport {
     readonly coordinateSystem: "right-handed-y-up-meters";
     readonly geometryEncoding: "gltf-f32";
     readonly progressiveRepresentation?: "prototype-aabb-v1";
+    readonly targetChunking?: "prototype-range-v1";
   };
   readonly source: {
     readonly sceneId: string;
@@ -120,6 +121,7 @@ export interface CompilerBuildReport {
     readonly materialCount: number;
     readonly triangleCount: number;
     readonly edgeSegmentCount: number;
+    readonly targetChunkCount?: number;
   };
   readonly prototypeReuse: readonly {
     readonly prototypeId: string;

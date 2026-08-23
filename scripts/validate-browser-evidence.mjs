@@ -29,6 +29,17 @@ const progressiveCompilerReport = JSON.parse(
     "utf8",
   ),
 );
+const progressiveGltf = JSON.parse(
+  await readFile(
+    fileURLToPath(
+      new URL("../artifacts/phase1/repeated-fasteners-ap242/scene.gltf", import.meta.url),
+    ),
+    "utf8",
+  ),
+);
+const expectedTargetRanges = progressiveGltf.extras.madi.progressive.targetChunks.map(
+  ({ byteOffset, byteLength }) => `bytes=${byteOffset}-${byteOffset + byteLength - 1}`,
+);
 const fixtureManifest = JSON.parse(
   await readFile(
     fileURLToPath(new URL("../fixtures/step/manifest.json", import.meta.url)),
@@ -142,12 +153,32 @@ for (const [resultIndex, result] of evidence.results.entries()) {
   );
   assert(progressive?.targetPromoted === true, `${label} did not promote target geometry.`);
   assert(
+    progressive?.firstTargetChunkPromoted === true,
+    `${label} did not expose a partial target frame.`,
+  );
+  assert(
+    progressive?.partialTriangles === "380" && progressive?.partialEdges === "61",
+    `${label} partial target geometry counts changed.`,
+  );
+  assert(
+    progressive?.targetResponsesPartial === true &&
+      JSON.stringify(progressive?.targetRangeRequests) === JSON.stringify(expectedTargetRanges),
+    `${label} target Range request sequence changed.`,
+  );
+  assert(
     progressive?.coarseTriangles === "36" && progressive?.coarseEdges === "36",
     `${label} coarse geometry counts changed.`,
   );
   assert(
     progressive?.targetTriangles === "2,076" && progressive?.targetEdges === "181",
     `${label} target geometry counts changed.`,
+  );
+  assert(
+    progressive?.cancellation?.activeRangeAborted === true &&
+      progressive?.cancellation?.requestsBeforeCancel === 2 &&
+      progressive?.cancellation?.noFurtherRequests === true &&
+      progressive?.cancellation?.status === "Scene load cancelled.",
+    `${label} did not cancel the active target range cleanly.`,
   );
   const coarseScreenshotPath = progressive?.coarseScreenshot?.path;
   assertNonEmptyString(coarseScreenshotPath, `${label}.progressive.coarseScreenshot.path`);
@@ -184,6 +215,45 @@ for (const [resultIndex, result] of evidence.results.entries()) {
     createHash("sha256").update(coarseScreenshotBytes).digest("hex") ===
       progressive.coarseScreenshot.sha256,
     `${label} coarse screenshot digest changed.`,
+  );
+  const partialScreenshotPath = progressive?.partialScreenshot?.path;
+  assertNonEmptyString(partialScreenshotPath, `${label}.progressive.partialScreenshot.path`);
+  assert(!isAbsolute(partialScreenshotPath), `${label} partial screenshot path must be relative.`);
+  assert(
+    extname(partialScreenshotPath).toLowerCase() === ".png",
+    `${label} partial screenshot must be PNG.`,
+  );
+  const partialScreenshot = resolve(evidenceDirectory, partialScreenshotPath);
+  const partialFromRoot = relative(evidenceDirectory, partialScreenshot);
+  assert(
+    partialFromRoot !== "" &&
+      partialFromRoot !== ".." &&
+      !partialFromRoot.startsWith(`..${sep}`) &&
+      !isAbsolute(partialFromRoot),
+    `${label} partial screenshot path escapes the evidence directory.`,
+  );
+  const realPartialScreenshot = await realpath(partialScreenshot);
+  const realPartialFromRoot = relative(realEvidenceDirectory, realPartialScreenshot);
+  assert(
+    realPartialFromRoot !== "" &&
+      realPartialFromRoot !== ".." &&
+      !realPartialFromRoot.startsWith(`..${sep}`) &&
+      !isAbsolute(realPartialFromRoot),
+    `${label} partial screenshot resolves outside the evidence directory.`,
+  );
+  const partialScreenshotBytes = await readFile(realPartialScreenshot);
+  assert(
+    partialScreenshotBytes.byteLength === progressive.partialScreenshot.bytes,
+    `${label} partial screenshot size changed.`,
+  );
+  assert(
+    partialScreenshotBytes.subarray(0, 8).equals(Buffer.from("89504e470d0a1a0a", "hex")),
+    `${label} partial screenshot has an invalid PNG signature.`,
+  );
+  assert(
+    createHash("sha256").update(partialScreenshotBytes).digest("hex") ===
+      progressive.partialScreenshot.sha256,
+    `${label} partial screenshot digest changed.`,
   );
 }
 

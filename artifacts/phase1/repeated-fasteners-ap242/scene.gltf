@@ -2209,7 +2209,45 @@
       "progressive": {
         "strategy": "prototype-aabb-v1",
         "targetBuffer": 0,
-        "coarseBuffer": 1
+        "coarseBuffer": 1,
+        "targetChunks": [
+          {
+            "id": "target:0000:prototype:part:fastener-01",
+            "buffer": 0,
+            "byteOffset": 1500,
+            "byteLength": 32508,
+            "meshIndexes": [
+              2
+            ],
+            "prototypeId": "prototype:part:fastener-01",
+            "occurrenceCount": 8,
+            "priority": 0
+          },
+          {
+            "id": "target:0001:prototype:part:mounting-plate",
+            "buffer": 0,
+            "byteOffset": 34008,
+            "byteLength": 154036,
+            "meshIndexes": [
+              4
+            ],
+            "prototypeId": "prototype:part:mounting-plate",
+            "occurrenceCount": 1,
+            "priority": 1
+          },
+          {
+            "id": "target:0002:prototype:part:center-rail",
+            "buffer": 0,
+            "byteOffset": 0,
+            "byteLength": 1500,
+            "meshIndexes": [
+              0
+            ],
+            "prototypeId": "prototype:part:center-rail",
+            "occurrenceCount": 1,
+            "priority": 2
+          }
+        ]
       },
       "documents": [
         {

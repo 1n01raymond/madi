@@ -1,6 +1,6 @@
 {
   "schemaVersion": "phase-1-browser-matrix.1",
-  "capturedAt": "2026-08-23T06:13:56.415Z",
+  "capturedAt": "2026-08-23T06:41:35.783Z",
   "source": {
     "fixture": "fixtures/step/adafruit-pygamer.step",
     "sceneIr": "generated locally; not committed (80.6 MB JSON evidence)",
@@ -10,7 +10,7 @@
     "progressiveGltf": "artifacts/phase1/repeated-fasteners-ap242/scene.gltf",
     "progressiveCoarse": "artifacts/phase1/repeated-fasteners-ap242/coarse.bin",
     "progressiveTarget": "artifacts/phase1/repeated-fasteners-ap242/scene.bin",
-    "progressivePackageDigest": "c92abeee8e10e7373e64cb5e5c9ac84145bceb5272b329e6466137de6091cd2d",
+    "progressivePackageDigest": "e12163df8b95f401e866f002d170e9957ee350b8e768caad68969949746c241c",
     "progressiveSourceDigest": "sha256:87b7909984c635ffc02c61211b22380252d455ebbf7c8e18ab68a2d2f7ac4da3",
     "packageDigest": "300abb2446a19b9667cad6ed6d1e01a8178212e9f29232af233dfaa9ee2e3c4e",
     "sourceDigest": "sha256:f0caf940c27af5a409f7c964d50941f60a1cc6329de14407bedd5fabeb9f10c0"
@@ -81,20 +81,41 @@
           "coarseEdges": "36",
           "coarseScreenshot": {
             "path": "chrome-151-windows-coarse.png",
-            "bytes": 321325,
-            "sha256": "9f8a2dbd4161c73dbb7611c3369405d422a90dfb91ca5eb5b736c281db7ed68e"
+            "bytes": 321958,
+            "sha256": "fac99089f5838dfe01d4ef740958ee2fd4593f6389acf9aa5fd173607a87f467"
+          },
+          "firstTargetChunkPromoted": true,
+          "partialStatus": "Target detail 1/3 · 8 occurrences promoted · 31.7 KiB range-decoded",
+          "partialTriangles": "380",
+          "partialEdges": "61",
+          "partialScreenshot": {
+            "path": "chrome-151-windows-partial.png",
+            "bytes": 318519,
+            "sha256": "64bdda6ab5ff642f114d42e52d20fa3554134d0459af3afe52777b832115c329"
           },
           "targetPromoted": true,
           "targetStatus": "Compiled glTF ready · 3 shared meshes · 10 renderable occurrences",
           "targetTriangles": "2,076",
-          "targetEdges": "181"
+          "targetEdges": "181",
+          "targetRangeRequests": [
+            "bytes=1500-34007",
+            "bytes=34008-188043",
+            "bytes=0-1499"
+          ],
+          "targetResponsesPartial": true,
+          "cancellation": {
+            "activeRangeAborted": true,
+            "requestsBeforeCancel": 2,
+            "noFurtherRequests": true,
+            "status": "Scene load cancelled."
+          }
         }
       },
       "consoleIssues": [],
       "screenshot": {
         "path": "chrome-151-windows-selected.png",
-        "bytes": 380276,
-        "sha256": "c9897af7c118eaeb7d6cec7eda7395f2486f40cef1bca602e829295b5114cee5"
+        "bytes": 380524,
+        "sha256": "9f0a4a251b87eda1536bebf4fd4829f1e01a2833d66288e7a02a9f6257369288"
       }
     },
     {
@@ -144,20 +165,41 @@
           "coarseEdges": "36",
           "coarseScreenshot": {
             "path": "firefox-150-windows-coarse.png",
-            "bytes": 302284,
-            "sha256": "cff3e1cd4c70e9b49d76cc33056f66a7553c2c09dce99c97008409c6049dc796"
+            "bytes": 303373,
+            "sha256": "6b35ee40ea1cc9756c22d5d38e8695f25476272bb995b89b05fa66862951d595"
+          },
+          "firstTargetChunkPromoted": true,
+          "partialStatus": "Target detail 1/3 · 8 occurrences promoted · 31.7 KiB range-decoded",
+          "partialTriangles": "380",
+          "partialEdges": "61",
+          "partialScreenshot": {
+            "path": "firefox-150-windows-partial.png",
+            "bytes": 298529,
+            "sha256": "2c8a314a9f671f94c3e3928abce0ea6897b5af95128baf60b2d74df18b07af97"
           },
           "targetPromoted": true,
           "targetStatus": "Compiled glTF ready · 3 shared meshes · 10 renderable occurrences",
           "targetTriangles": "2,076",
-          "targetEdges": "181"
+          "targetEdges": "181",
+          "targetRangeRequests": [
+            "bytes=1500-34007",
+            "bytes=34008-188043",
+            "bytes=0-1499"
+          ],
+          "targetResponsesPartial": true,
+          "cancellation": {
+            "activeRangeAborted": true,
+            "requestsBeforeCancel": 2,
+            "noFurtherRequests": true,
+            "status": "Scene load cancelled."
+          }
         }
       },
       "consoleIssues": [],
       "screenshot": {
         "path": "firefox-150-windows-selected.png",
-        "bytes": 354474,
-        "sha256": "ad9405854fd2395e35ae87215cbee80dd73ccdf9d84454f32dd165ce0a51a055"
+        "bytes": 354629,
+        "sha256": "1d0cb6bf6fafdcf72c58f1856363317a24d1e173523cc35688209a680d848553"
       }
     }
   ]

@@ -6,9 +6,12 @@ import {
 import type {
   CompiledGltfDocument,
   CompiledHierarchy,
+  CompiledBatchEvidence,
   CompiledObjectEvidence,
+  CompiledTargetChunk,
   DecodedCompiledScene,
   GeometryRepresentation,
+  GpuPrototypeBatch,
 } from "@madi/runtime-webgpu";
 
 import type { GeometryDecodeResponse } from "./geometry.worker.js";
@@ -49,6 +52,7 @@ function decodeGeometry(
   binary: GeometryBinarySource,
   representation: GeometryRepresentation,
   signal: AbortSignal,
+  targetChunkId?: string,
 ): Promise<{ readonly scene: DecodedCompiledScene; readonly decodeMilliseconds: number }> {
   return new Promise((resolve, reject) => {
     const worker = new Worker(new URL("./geometry.worker.ts", import.meta.url), {
@@ -85,8 +89,36 @@ function decodeGeometry(
       },
       { once: true },
     );
-    worker.postMessage({ type: "decode", document, binary, representation });
+    worker.postMessage({
+      type: "decode",
+      document,
+      binary,
+      representation,
+      ...(targetChunkId ? { targetChunkId } : {}),
+    });
   });
+}
+
+function binarySourceForChunk(
+  source: GeometryBinarySource,
+  chunk: CompiledTargetChunk,
+): GeometryBinarySource {
+  return {
+    ...source,
+    byteOffset: chunk.byteOffset,
+    byteLength: chunk.byteLength,
+  };
+}
+
+interface ResidentBatch {
+  readonly batch: GpuPrototypeBatch;
+  readonly evidence: Omit<CompiledBatchEvidence, "batchIndex">;
+}
+
+function orderedResidentBatches(
+  resident: ReadonlyMap<number, ResidentBatch>,
+): readonly [number, ResidentBatch][] {
+  return [...resident].sort(([left], [right]) => left - right);
 }
 
 function renderHierarchy(hierarchy: CompiledHierarchy): void {
@@ -152,17 +184,21 @@ const openSceneUrlButton = requireElement<HTMLButtonElement>("#open-scene-url");
 const localSceneFiles = requireElement<HTMLInputElement>("#local-scene-files");
 const localSceneButton = requireElement<HTMLElement>(".local-scene-button");
 const openDemoSceneButton = requireElement<HTMLButtonElement>("#open-demo-scene");
+const cancelSceneLoadButton = requireElement<HTMLButtonElement>("#cancel-scene-load");
 const defaultSceneUrl = new URL("/scene.gltf", window.location.href);
 requireElement<HTMLLinkElement>("#madi-favicon").href = faviconUrl;
 requireElement<HTMLImageElement>("#madi-brand-mark").src = inverseMarkUrl;
 
 let disposeActiveScene: (() => void) | undefined;
+let cancelPendingSceneLoad: (() => void) | undefined;
 
 function setSourceControlsBusy(busy: boolean): void {
   openSceneUrlButton.disabled = busy;
   sceneUrlInput.disabled = busy;
   localSceneFiles.disabled = busy;
   openDemoSceneButton.disabled = busy;
+  cancelSceneLoadButton.hidden = !busy;
+  cancelSceneLoadButton.disabled = !busy;
   if (busy) localSceneButton.dataset.disabled = "true";
   else delete localSceneButton.dataset.disabled;
   document.documentElement.dataset.sceneLoading = String(busy);
@@ -172,6 +208,8 @@ function resetSceneUi(): void {
   delete document.documentElement.dataset.coarseReady;
   delete document.documentElement.dataset.targetReady;
   delete document.documentElement.dataset.geometryRepresentation;
+  delete document.documentElement.dataset.targetChunksReady;
+  delete document.documentElement.dataset.targetChunksTotal;
   hierarchySearchInput.value = "";
   hierarchySearchResult.textContent = "Waiting for hierarchy";
   hierarchyEmpty.hidden = true;
@@ -196,11 +234,14 @@ function resetSceneUi(): void {
 
 async function loadScene(source: SceneSource): Promise<boolean> {
   setSourceControlsBusy(true);
+  const cancellation = new AbortController();
+  const cancel = (): void => cancellation.abort();
+  cancelPendingSceneLoad = cancel;
   let pendingCleanup: (() => void) | undefined;
   try {
     status.textContent = "Loading compiled glTF hierarchy…";
     status.dataset.state = "loading";
-    const loaded = await loadSceneHierarchy(source);
+    const loaded = await loadSceneHierarchy(source, cancellation.signal);
     const { document: gltf, hierarchy } = loaded;
     disposeActiveScene?.();
     disposeActiveScene = undefined;
@@ -214,7 +255,7 @@ async function loadScene(source: SceneSource): Promise<boolean> {
     sceneSourceLabel.textContent = loaded.label;
     sceneSourceLabel.title = loaded.label;
     document.documentElement.dataset.sceneSource = source.kind;
-    const interactions = new AbortController();
+    const interactions = cancellation;
     pendingCleanup = () => interactions.abort();
     const listenerOptions = { signal: interactions.signal };
     renderHierarchy(hierarchy);
@@ -322,19 +363,112 @@ async function loadScene(source: SceneSource): Promise<boolean> {
       requireElement<HTMLElement>("#stage-geometry").dataset.state = "ready";
       requireElement<HTMLElement>("#stage-webgpu").dataset.state = "ready";
 
-      const target = await decodeGeometry(
-        gltf,
-        loaded.targetBinary,
-        "target",
-        interactions.signal,
-      ).catch((error: unknown) => {
-        dispose();
-        throw error;
-      });
-      scene = target.scene;
-      decodeMilliseconds += target.decodeMilliseconds;
-      renderer.setScene(scene.gpuScene);
-      render();
+      if (hierarchy.targetChunks.length === 0) {
+        const target = await decodeGeometry(
+          gltf,
+          loaded.targetBinary,
+          "target",
+          interactions.signal,
+        ).catch((error: unknown) => {
+          dispose();
+          throw error;
+        });
+        scene = target.scene;
+        decodeMilliseconds += target.decodeMilliseconds;
+        renderer.setScene(scene.gpuScene);
+        render();
+      } else {
+        const resident = new Map<number, ResidentBatch>();
+        for (const batchIdentity of scene.batchEvidence) {
+          const batch = scene.gpuScene.batches[batchIdentity.batchIndex];
+          if (!batch) throw new Error("Coarse batch identity is incomplete.");
+          const { batchIndex: _, ...evidence } = batchIdentity;
+          resident.set(batchIdentity.targetMeshIndex, { batch, evidence });
+        }
+        const targetObjects = new Map<number, CompiledObjectEvidence>();
+        let targetTriangles = 0;
+        let targetEdges = 0;
+        let decodedTargetBytes = 0;
+        document.documentElement.dataset.targetChunksTotal = String(
+          hierarchy.targetChunks.length,
+        );
+
+        for (const [chunkIndex, chunk] of hierarchy.targetChunks.entries()) {
+          const target = await decodeGeometry(
+            gltf,
+            binarySourceForChunk(loaded.targetBinary, chunk),
+            "target",
+            interactions.signal,
+            chunk.id,
+          ).catch((error: unknown) => {
+            dispose();
+            throw error;
+          });
+          decodeMilliseconds += target.decodeMilliseconds;
+          decodedTargetBytes += target.scene.summary.binaryBytes;
+          targetTriangles += target.scene.summary.triangles;
+          targetEdges += target.scene.summary.edgeSegments;
+          for (const entry of target.scene.objectEvidence) {
+            targetObjects.set(entry.objectId, entry);
+          }
+          for (const batchIdentity of target.scene.batchEvidence) {
+            const batch = target.scene.gpuScene.batches[batchIdentity.batchIndex];
+            if (!batch) throw new Error(`Target chunk ${chunk.id} has incomplete batch identity.`);
+            const { batchIndex: _, ...evidence } = batchIdentity;
+            resident.set(batchIdentity.targetMeshIndex, { batch, evidence });
+          }
+          const ordered = orderedResidentBatches(resident);
+          renderer.setScene({ batches: ordered.map(([, entry]) => entry.batch) });
+          render();
+          const residentTriangles = ordered.reduce(
+            (total, [, entry]) => total + entry.batch.surfaceIndices.length / 3,
+            0,
+          );
+          const residentEdges = ordered.reduce(
+            (total, [, entry]) => total + entry.batch.edgeVertices.length / 6,
+            0,
+          );
+          const readyChunks = chunkIndex + 1;
+          document.documentElement.dataset.targetChunksReady = String(readyChunks);
+          document.documentElement.dataset.geometryRepresentation =
+            readyChunks === hierarchy.targetChunks.length ? "target" : "mixed";
+          status.textContent =
+            `Target detail ${readyChunks}/${hierarchy.targetChunks.length} · ` +
+            `${targetObjects.size} occurrences promoted · ` +
+            `${formatBytes(decodedTargetBytes)} range-decoded`;
+          status.dataset.stage = "target-chunks";
+          setText("#triangle-count", residentTriangles.toLocaleString("en-US"));
+          setText("#edge-count", residentEdges.toLocaleString("en-US"));
+          setText("#decode-time", `${decodeMilliseconds.toFixed(1)} ms`);
+          setText(
+            "#geometry-result",
+            `${formatBytes(decodedTargetBytes)} target ranges decoded off-thread`,
+          );
+          await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+        }
+
+        const ordered = orderedResidentBatches(resident);
+        scene = {
+          gpuScene: { batches: ordered.map(([, entry]) => entry.batch) },
+          bounds: scene.bounds,
+          hierarchy,
+          objectEvidence: [...targetObjects.values()].sort(
+            (left, right) => left.nodeIndex - right.nodeIndex,
+          ),
+          batchEvidence: ordered.map(([, entry], batchIndex) => ({
+            ...entry.evidence,
+            batchIndex,
+          })),
+          summary: {
+            prototypeBatches: ordered.length,
+            partOccurrences: targetObjects.size,
+            triangles: targetTriangles,
+            edgeSegments: targetEdges,
+            binaryBytes: hierarchy.binaryByteLength,
+            representation: "target",
+          },
+        };
+      }
     }
 
     document.documentElement.dataset.geometryRepresentation = "target";
@@ -717,6 +851,7 @@ async function loadScene(source: SceneSource): Promise<boolean> {
     status.dataset.state = "error";
     return false;
   } finally {
+    if (cancelPendingSceneLoad === cancel) cancelPendingSceneLoad = undefined;
     setSourceControlsBusy(false);
   }
 }
@@ -766,7 +901,18 @@ openDemoSceneButton.addEventListener("click", () => {
   });
 });
 
-window.addEventListener("beforeunload", () => disposeActiveScene?.(), { once: true });
+cancelSceneLoadButton.addEventListener("click", () => {
+  cancelPendingSceneLoad?.();
+});
+
+window.addEventListener(
+  "beforeunload",
+  () => {
+    cancelPendingSceneLoad?.();
+    disposeActiveScene?.();
+  },
+  { once: true },
+);
 
 const requestedScene = new URL(window.location.href).searchParams.get("scene");
 let initialSceneUrl = defaultSceneUrl;

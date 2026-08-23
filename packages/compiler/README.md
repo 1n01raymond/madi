@@ -37,6 +37,10 @@ OCCT STEPCAF/XDE, validates source identity across the adapter boundary, and
 writes `scene.gltf`, `scene.bin`, `coarse.bin`, `build-report.json`, and
 `adapter-report.json`. Target geometry remains the ordinary glTF node mesh;
 `extras.madi.coarseMesh` selects a bounds mesh backed only by `coarse.bin`.
+`extras.madi.progressive.targetChunks` maps each reusable target prototype mesh
+to a deterministic byte range in `scene.bin`, ordered by occurrence count and
+then payload size. This allows ordinary HTTP Range delivery without inventing
+another container or duplicating target geometry.
 Its expanded Scene IR is temporary and is deleted after the package passes
 validation. `phase1:compile:evidence` retains the historical small Scene IR
 regression path without coarse output. The evidence check validates both plus the
@@ -50,8 +54,9 @@ validation.
   adapter. Moving the proven extraction behavior into the native C++ adapter
   remains production hardening work.
 - The first coarse representation is a per-prototype AABB, not a
-  shape-preserving LOD. Spatial partitioning, compression, streaming manifests,
-  prioritization, and bounded residency are not implemented.
+  shape-preserving LOD. Target ranges are prototype-granular and use a static
+  initial priority; spatial partitioning, compression, view reprioritization,
+  and bounded residency are not implemented.
 - Geometry and node transforms are f32 in glTF; the large-coordinate precision
   profile remains an open ADR gate.
 - `extras.madi` is an experimental profile, not a public interchange standard.

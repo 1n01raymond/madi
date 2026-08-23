@@ -42,7 +42,13 @@ surfaces, explicit CAD edges, and the on-demand object-ID pass. Passing
 The current experimental decoder accepts a target-only package or a progressive
 package with separate target and coarse external buffers. The progressive slice
 uses `extras.madi.coarseMesh` and preserves node-derived object IDs while the
-renderer replaces prototype AABBs with target meshes. Per mesh, the decoder
+renderer replaces prototype AABBs with target meshes. When target chunk metadata
+is present, `targetChunkId` decodes only one declared byte range and its mesh
+occurrences. The browser requests those ranges sequentially, displays each
+promotion before requesting the next, and falls back safely when a host returns
+the complete buffer with HTTP 200. Changing scenes terminates the active Worker
+and its fetch; explicit cancellation uses the same boundary. Intentional
+renderer destruction does not surface as a device-loss error. Per mesh, the decoder
 accepts one indexed `TRIANGLES` primitive plus at most one indexed `LINES`
 primitive. It is not a general-purpose glTF loader. Unsupported profiles and
 layouts fail with a typed `CompiledGltfError` instead of silently dropping

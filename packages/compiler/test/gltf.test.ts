@@ -103,7 +103,16 @@ describe("Phase 1 glTF compiler slice", () => {
     expect(compiled.report.options).toMatchObject({
       coarseBinaryUri: "coarse.bin",
       progressiveRepresentation: "prototype-aabb-v1",
+      targetChunking: "prototype-range-v1",
     });
+    const progressive = (compiled.document.extras.madi as {
+      progressive: { targetChunks: readonly { byteOffset: number; byteLength: number }[] };
+    }).progressive;
+    expect(progressive.targetChunks).toHaveLength(3);
+    expect(
+      progressive.targetChunks.reduce((total, chunk) => total + chunk.byteLength, 0),
+    ).toBe(compiled.binary.byteLength);
+    expect(compiled.report.counts.targetChunkCount).toBe(3);
   });
 
   it("reproduces the committed compiler artifact byte for byte", async () => {

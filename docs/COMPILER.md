@@ -379,7 +379,9 @@ The build is deterministic for identical Scene IR and options. The normal check
 runs both MADI invariants and the official Khronos glTF Validator. The current
 slice keeps target geometry as the ordinary node mesh and records its coarse
 mesh index in standard `extras`. This proves representation-separated delivery,
-but not shape-preserving LOD, spatial partitioning, or bounded residency.
+and `targetChunks` maps target prototype meshes to deterministic, non-overlapping
+`scene.bin` byte ranges. This proves partial range delivery, but not
+shape-preserving LOD, spatial partitioning, or bounded residency.
 
 The public `madi compile` entry now accepts a local AP242 or AP214 Part 21 file,
 invokes the isolated OCCT adapter, verifies schema and source digest parity,
