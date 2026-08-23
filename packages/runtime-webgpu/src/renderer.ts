@@ -8,11 +8,15 @@ import {
 import type { GpuOccurrenceInstance, GpuPrototypeBatch, GpuScene } from "./layout.js";
 
 const surfaceShader = /* wgsl */ `
-struct Camera {
+struct SceneUniforms {
   viewProjection: mat4x4<f32>,
+  selectedObjectId: u32,
+  padding0: u32,
+  padding1: u32,
+  padding2: u32,
 };
 
-@group(0) @binding(0) var<uniform> camera: Camera;
+@group(0) @binding(0) var<uniform> scene: SceneUniforms;
 
 struct VertexInput {
   @location(0) position: vec3<f32>,
@@ -36,7 +40,7 @@ struct VertexOutput {
 fn vsMain(input: VertexInput) -> VertexOutput {
   let model = mat4x4<f32>(input.model0, input.model1, input.model2, input.model3);
   var output: VertexOutput;
-  output.position = camera.viewProjection * model * vec4<f32>(input.position, 1.0);
+  output.position = scene.viewProjection * model * vec4<f32>(input.position, 1.0);
   output.normal = normalize(mat3x3<f32>(input.model0.xyz, input.model1.xyz, input.model2.xyz) * input.normal);
   output.objectId = input.objectId;
   output.baseColor = input.baseColor;
@@ -46,7 +50,10 @@ fn vsMain(input: VertexInput) -> VertexOutput {
 @fragment
 fn fsSurface(input: VertexOutput) -> @location(0) vec4<f32> {
   let light = 0.35 + 0.65 * max(dot(normalize(input.normal), normalize(vec3<f32>(0.3, 0.5, 1.0))), 0.0);
-  return vec4<f32>(input.baseColor.rgb * light, input.baseColor.a);
+  let shaded = input.baseColor.rgb * light;
+  let selected = scene.selectedObjectId != 0u && input.objectId == scene.selectedObjectId;
+  let color = select(shaded, mix(shaded, vec3<f32>(0.05, 0.72, 1.0), 0.68), selected);
+  return vec4<f32>(color, input.baseColor.a);
 }
 
 @fragment
@@ -57,11 +64,15 @@ fn fsPick(input: VertexOutput) -> @location(0) vec4<u32> {
 `;
 
 const edgeShader = /* wgsl */ `
-struct Camera {
+struct SceneUniforms {
   viewProjection: mat4x4<f32>,
+  selectedObjectId: u32,
+  padding0: u32,
+  padding1: u32,
+  padding2: u32,
 };
 
-@group(0) @binding(0) var<uniform> camera: Camera;
+@group(0) @binding(0) var<uniform> scene: SceneUniforms;
 
 struct VertexInput {
   @location(0) position: vec3<f32>,
@@ -73,15 +84,25 @@ struct VertexInput {
   @location(7) baseColor: vec4<f32>,
 };
 
+struct VertexOutput {
+  @builtin(position) position: vec4<f32>,
+  @location(0) @interpolate(flat) objectId: u32,
+};
+
 @vertex
-fn vsMain(input: VertexInput) -> @builtin(position) vec4<f32> {
+fn vsMain(input: VertexInput) -> VertexOutput {
   let model = mat4x4<f32>(input.model0, input.model1, input.model2, input.model3);
-  return camera.viewProjection * model * vec4<f32>(input.position, 1.0);
+  var output: VertexOutput;
+  output.position = scene.viewProjection * model * vec4<f32>(input.position, 1.0);
+  output.objectId = input.objectId;
+  return output;
 }
 
 @fragment
-fn fsMain() -> @location(0) vec4<f32> {
-  return vec4<f32>(0.015, 0.035, 0.055, 1.0);
+fn fsMain(input: VertexOutput) -> @location(0) vec4<f32> {
+  let selected = scene.selectedObjectId != 0u && input.objectId == scene.selectedObjectId;
+  let color = select(vec3<f32>(0.015, 0.035, 0.055), vec3<f32>(0.0, 0.45, 0.72), selected);
+  return vec4<f32>(color, 1.0);
 }
 `;
 
@@ -180,8 +201,12 @@ export class Phase0Renderer {
   private readonly pickPipeline: GPURenderPipeline;
   private readonly pixelRatio?: number;
   private readonly lastViewProjection = new Float32Array(16);
+  private readonly uniformData = new ArrayBuffer(80);
+  private readonly uniformMatrix = new Float32Array(this.uniformData, 0, 16);
+  private readonly uniformSelection = new Uint32Array(this.uniformData, 64, 4);
   private batches: GpuBatchResources[] = [];
   private hasRendered = false;
+  private selectedObjectId = 0;
   private depthTexture?: GPUTexture;
   private pickTexture?: GPUTexture;
   private targetWidth = 0;
@@ -215,8 +240,8 @@ export class Phase0Renderer {
       code: edgeShader,
     });
     this.cameraBuffer = device.createBuffer({
-      label: "MADI camera",
-      size: 64,
+      label: "MADI scene uniforms",
+      size: this.uniformData.byteLength,
       usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
     });
     const bindGroupLayout = device.createBindGroupLayout({
@@ -224,7 +249,7 @@ export class Phase0Renderer {
       entries: [
         {
           binding: 0,
-          visibility: GPUShaderStage.VERTEX,
+          visibility: GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT,
           buffer: { type: "uniform" },
         },
       ],
@@ -423,6 +448,14 @@ export class Phase0Renderer {
     });
   }
 
+  /** Selects an occurrence for surface and explicit-edge highlighting. Zero clears selection. */
+  setSelection(objectId: number): void {
+    if (!Number.isInteger(objectId) || objectId < 0 || objectId > 0xffff_ffff) {
+      throw new RangeError("Selected object ID must fit in uint32.");
+    }
+    this.selectedObjectId = objectId;
+  }
+
   render(viewProjection: Float32Array, options: RenderOptions = {}): void {
     if (this.batches.length === 0) {
       throw new MadiWebGpuError("SCENE_NOT_SET", "Call setScene before render.");
@@ -435,7 +468,7 @@ export class Phase0Renderer {
     this.ensureTargets();
     if (!this.depthTexture) return;
 
-    this.device.queue.writeBuffer(this.cameraBuffer, 0, viewProjection);
+    this.writeUniforms(viewProjection);
     const encoder = this.device.createCommandEncoder({ label: "MADI frame" });
     const colorView = this.context.getCurrentTexture().createView();
     const depthView = this.depthTexture.createView();
@@ -497,7 +530,7 @@ export class Phase0Renderer {
       0,
       Math.min(this.targetHeight - 1, Math.floor(((clientY - rect.top) / rect.height) * this.targetHeight)),
     );
-    this.device.queue.writeBuffer(this.cameraBuffer, 0, this.lastViewProjection);
+    this.writeUniforms(this.lastViewProjection);
     const readback = this.device.createBuffer({
       label: "MADI pick readback",
       size: 256,
@@ -558,6 +591,12 @@ export class Phase0Renderer {
     pass.setVertexBuffer(0, batch.surfaceVertex);
     pass.setVertexBuffer(1, batch.instance);
     pass.setIndexBuffer(batch.surfaceIndex, "uint32");
+  }
+
+  private writeUniforms(viewProjection: Float32Array): void {
+    this.uniformMatrix.set(viewProjection);
+    this.uniformSelection[0] = this.selectedObjectId;
+    this.device.queue.writeBuffer(this.cameraBuffer, 0, this.uniformData);
   }
 
   private ensureTargets(): void {

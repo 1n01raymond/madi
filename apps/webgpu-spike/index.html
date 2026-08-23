@@ -55,6 +55,10 @@
 
       <section class="viewport" aria-label="Compiled glTF WebGPU viewport">
         <div class="viewport-label"><span></span> LIVE GPU VIEW</div>
+        <div class="viewport-tools" aria-label="Viewport controls">
+          <span>Drag orbit · Shift/middle drag pan · Wheel zoom</span>
+          <button id="fit-view" type="button">Fit view <kbd>F</kbd></button>
+        </div>
         <canvas id="viewport"></canvas>
         <div class="hud">
           <span id="status" data-state="loading">Loading compiled glTF hierarchy…</span>

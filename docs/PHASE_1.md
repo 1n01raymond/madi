@@ -35,6 +35,7 @@ direct WebGPU renderer. The Phase 0 Scene IR JSON is no longer a browser input.
 | Prototype reuse | 34 GPU batches render 85 parts; 26 tiny 0603 components share one mesh/buffer set | Passed |
 | Engineering rendering | 162,838 unique triangles and 13,897 explicit edge segments reproduce the compiler report | Passed |
 | Source picking | PyGamer joystick resolves glTF node 56, object ID 57, and 524 revision-local CAD edge refs | Passed |
+| Review interaction | Orthographic orbit/pan/zoom/fit plus canvas/tree selection share one occurrence state; surfaces and explicit edges highlight without instance-buffer repacking | Passed by camera unit tests and browser interaction review |
 | Browser conformance | Headed Chrome/Blink and Firefox/Gecko emit no console warnings or errors | Passed by `pnpm browser:matrix` |
 
 ## Reproduce
@@ -55,7 +56,7 @@ See `artifacts/phase1/README.md` for the compiled package,
 - Direct local STEP AP242 input into the Phase 1 compiler entry point.
 - Coarse and target LODs, partitioning, compression, and progressive loading.
 - Useful first render before a delayed or large target-geometry payload completes.
-- Orbit/pan/zoom, tree-driven selection, hide/isolate, and section interaction.
+- Hide/isolate and section interaction; hierarchy search and properties remain pending.
 - A repeated reference-hardware and integrated-GPU decision matrix for ADR-0003.
 - Large-coordinate precision behavior required by ADR-0005.
 - A public end-to-end review workflow and reproducible performance report.
