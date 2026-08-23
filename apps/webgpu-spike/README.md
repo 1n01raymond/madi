@@ -26,3 +26,10 @@ existing instance buffers rather than rebuilding scene resources. Adafruit does
 not endorse MADI. Press `C` to enable one world-space section plane; choose its
 X/Y/Z axis, drag the normalized position, or flip the retained side. Surfaces,
 explicit edges, and GPU picking share the same clipping equation.
+
+The Scene Inspector searches hierarchy names, occurrence/prototype IDs, and
+source references as soon as `scene.gltf` is available; geometry residency is
+not required. Press `/` to focus search and Enter to select its first renderable
+result. Viewport, tree, and search selection populate the same source-identity
+property panel, including glTF node/object IDs and a bounded preview of
+revision-local CAD edge references.

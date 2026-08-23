@@ -77,9 +77,22 @@ async function recordBrowser(definition) {
       consoleIssues.push({ level: "pageerror", message: error.message });
     });
     let hierarchyFirst = false;
+    let hierarchySearchBeforeGeometry = false;
     await page.route("**/scene.bin", async (route) => {
       hierarchyFirst = await page
         .evaluate(() => document.documentElement.dataset.hierarchyReady === "true")
+        .catch(() => false);
+      hierarchySearchBeforeGeometry = await page
+        .evaluate(() => {
+          const input = document.querySelector("#hierarchy-search");
+          if (!(input instanceof HTMLInputElement)) return false;
+          input.value = "MICROSD";
+          input.dispatchEvent(new InputEvent("input", { bubbles: true }));
+          const matched = document.documentElement.dataset.hierarchyMatches === "1";
+          input.value = "";
+          input.dispatchEvent(new InputEvent("input", { bubbles: true }));
+          return matched;
+        })
         .catch(() => false);
       await route.continue();
     });
@@ -96,6 +109,7 @@ async function recordBrowser(definition) {
       binarySize: await page.locator("#binary-size").innerText(),
       sourceFormat: await page.locator("#source-format").innerText(),
       hierarchyFirst,
+      hierarchySearchBeforeGeometry,
       brandMarkLoaded: await page.locator("#madi-brand-mark").evaluate(
         (element) =>
           element instanceof HTMLImageElement &&
@@ -119,6 +133,9 @@ async function recordBrowser(definition) {
     for (const [label, expectedValue] of Object.entries(expected)) {
       if (label === "selection") continue;
       assertEqual(observed[label], expectedValue, `${definition.id} ${label}`);
+    }
+    if (!hierarchySearchBeforeGeometry) {
+      throw new Error(`${definition.id} hierarchy search was unavailable before geometry.`);
     }
 
     const canvas = page.locator("#viewport");
@@ -172,6 +189,46 @@ async function recordBrowser(definition) {
     );
     await page.locator("#toggle-section").click();
     observed.sectionInteraction = true;
+
+    const hierarchySearch = page.locator("#hierarchy-search");
+    await hierarchySearch.fill("MICROSD");
+    assertEqual(
+      await page.locator("#hierarchy-search-result").textContent(),
+      "1 match",
+      `${definition.id} hierarchy search`,
+    );
+    assertEqual(
+      await page.locator("#hierarchy li:visible").count(),
+      3,
+      `${definition.id} visible hierarchy search path`,
+    );
+    await hierarchySearch.press("Enter");
+    assertEqual(
+      await page.locator("#property-name").innerText(),
+      "MICROSD:X5",
+      `${definition.id} searched property name`,
+    );
+    assertEqual(
+      await page.locator("#property-node").innerText(),
+      "67",
+      `${definition.id} searched property node`,
+    );
+    await hierarchySearch.fill("");
+    await canvas.click({
+      position: {
+        x: Math.round(canvasBounds.width * 0.6),
+        y: Math.round(canvasBounds.height * 0.35),
+      },
+    });
+    await page.locator("#selection").filter({ hasText: expected.selection }).waitFor({
+      timeout: 5_000,
+    });
+    assertEqual(
+      await page.locator("#property-edge-count").innerText(),
+      "524",
+      `${definition.id} picked edge properties`,
+    );
+    observed.hierarchySearchAndProperties = true;
 
     const webGpu = await page.evaluate(async () => {
       const adapter = await navigator.gpu?.requestAdapter();

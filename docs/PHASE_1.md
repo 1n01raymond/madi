@@ -36,6 +36,7 @@ direct WebGPU renderer. The Phase 0 Scene IR JSON is no longer a browser input.
 | Engineering rendering | 162,838 unique triangles and 13,897 explicit edge segments reproduce the compiler report | Passed |
 | Source picking | PyGamer joystick resolves glTF node 56, object ID 57, and 524 revision-local CAD edge refs | Passed |
 | Review interaction | Orthographic orbit/pan/zoom/fit, synchronized canvas/tree selection, hide/isolate/show-all, and one axis-controlled section plane; surfaces, explicit edges, and picking share the clipping equation without rebuilding GPU resources | Passed by camera/visibility/section unit tests and browser interaction review |
+| Scene inspection | Tokenized hierarchy search covers names and source identity before geometry residency; viewport/tree/search selection share an occurrence property panel with bounded edge-reference previews | Passed by search unit tests and cross-browser interaction review |
 | Browser conformance | Headed Chrome/Blink and Firefox/Gecko emit no console warnings or errors | Passed by `pnpm browser:matrix` |
 
 ## Reproduce
@@ -56,7 +57,7 @@ See `artifacts/phase1/README.md` for the compiled package,
 - Direct local STEP AP242 input into the Phase 1 compiler entry point.
 - Coarse and target LODs, partitioning, compression, and progressive loading.
 - Useful first render before a delayed or large target-geometry payload completes.
-- Hierarchy search and properties remain pending.
+- Full material, mass, PMI, and domain-specific property schemas remain pending.
 - A repeated reference-hardware and integrated-GPU decision matrix for ADR-0003.
 - Large-coordinate precision behavior required by ADR-0005.
 - A public end-to-end review workflow and reproducible performance report.
