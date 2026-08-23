@@ -263,3 +263,16 @@ frustum culling and LOD are disabled, frame cadence is display-refresh limited,
 and WebGPU timestamp queries are not yet collected. The values validate the
 harness only; they are not a performance claim or an ADR outcome. See
 `artifacts/benchmarks/industrial-baseline/`.
+
+The second committed slice reaches the public 100k/10M floor with 256
+deterministic prototypes and a local-review trace that leaves roughly 34% of
+occurrences visible in the final frame. MADI uses reusable dense visibility
+tables plus CPU instance compaction; the stronger Three.js baseline uses one
+`BatchedMesh` with per-object culling and default opaque sorting. Headed Chrome
+and Firefox complete both paths with matching per-browser visibility and no
+requests outside the local static origin.
+
+This is still not decision evidence. It has one host session, no integrated-GPU
+profile, GPU timestamps, isolated retained-memory measurement, streaming/LOD,
+or real design-partner assembly. Whole-page Chrome memory readings are recorded
+only as diagnostics. See `artifacts/benchmarks/heterogeneous-culling/`.

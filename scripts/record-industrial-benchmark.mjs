@@ -18,10 +18,18 @@ function argument(name, fallback) {
 
 const outputArgument = argument("--output", "output/playwright/industrial-benchmark");
 const scale = argument("--scale", "gate");
+const profile = argument("--profile", "repeated");
+const culling = argument("--culling", profile === "heterogeneous" ? "frustum" : "disabled");
 const frames = Number(argument("--frames", "90"));
 const warmup = Number(argument("--warmup", "30"));
 if (!new Set(["smoke", "gate", "target"]).has(scale)) {
   throw new TypeError("--scale must be smoke, gate, or target.");
+}
+if (!new Set(["repeated", "heterogeneous"]).has(profile)) {
+  throw new TypeError("--profile must be repeated or heterogeneous.");
+}
+if (!new Set(["disabled", "frustum"]).has(culling)) {
+  throw new TypeError("--culling must be disabled or frustum.");
 }
 if (!Number.isInteger(frames) || frames <= 0 || !Number.isInteger(warmup) || warmup <= 0) {
   throw new TypeError("--frames and --warmup must be positive integers.");
@@ -79,12 +87,19 @@ async function record(definition, backend) {
       scale,
       frames: String(frames),
       warmup: String(warmup),
+      profile,
+      culling,
     });
     await page.goto(`${url}?${query}`, { waitUntil: "domcontentloaded" });
     await page.locator("#status[data-state='ready']").waitFor({ timeout: 120_000 });
     const result = await page.evaluate(() => window.__MADI_BENCHMARK_RESULT__);
     if (!result) throw new Error(`${definition.id}/${backend} did not publish a result.`);
-    if (result.backend !== backend || result.scale !== scale) {
+    if (
+      result.backend !== backend ||
+      result.scale !== scale ||
+      result.profile !== profile ||
+      result.features.frustumCulling !== culling
+    ) {
       throw new Error(`${definition.id}/${backend} published mismatched metadata.`);
     }
     if (consoleIssues.length > 0) {
@@ -121,7 +136,7 @@ async function record(definition, backend) {
     }
 
     const browserMajor = browserVersion.split(".")[0];
-    const screenshotName = `${definition.id}-${browserMajor}-${backend}-${scale}-${operatingSystem}.png`;
+    const screenshotName = `${definition.id}-${browserMajor}-${backend}-${scale}-${profile}-${culling}-${operatingSystem}.png`;
     const screenshot = await page.screenshot({ fullPage: true, type: "png" });
     await writeFile(resolve(outputDirectory, screenshotName), screenshot);
 
@@ -183,11 +198,11 @@ try {
   }
 
   const evidence = {
-    schemaVersion: "madi.industrial-browser-matrix.1",
+    schemaVersion: "madi.industrial-browser-matrix.2",
     status: "exploratory-not-adr-decision",
     capturedAt: new Date().toISOString(),
     host: { platform: process.platform, architecture: process.arch },
-    config: { scale, frames, warmup },
+    config: { scale, profile, culling, frames, warmup },
     comparisonContract: {
       sameWorkload: true,
       sameCameraTrace: true,
@@ -195,7 +210,8 @@ try {
       surfaces: true,
       explicitEdges: false,
       picking: "on-demand-not-sampled",
-      frustumCulling: "disabled",
+      frustumCulling: culling,
+      cameraTrace: culling === "frustum" ? "local-review" : "overview-orbit",
       lod: false,
       selfHostedStaticOrigin: true,
       outboundRequestCount: 0,
@@ -204,6 +220,9 @@ try {
     notes: [
       "This run validates parity and measurement plumbing; it does not accept or reject ADR-0003.",
       "Absolute performance varies by host load. Decision runs require reference hardware and repeated clean sessions.",
+      culling === "frustum"
+        ? "MADI uses dense CPU sphere culling and instance compaction; Three.js uses BatchedMesh per-object culling with its default opaque sorting."
+        : "Both paths disable frustum culling.",
     ],
   };
   await writeFile(

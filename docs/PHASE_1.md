@@ -56,7 +56,7 @@ See `artifacts/phase1/README.md` for the compiled package,
 - Coarse and target LODs, partitioning, compression, and progressive loading.
 - Useful first render before a delayed or large target-geometry payload completes.
 - Orbit/pan/zoom, tree-driven selection, hide/isolate, and section interaction.
-- The Three.js comparison required by ADR-0003.
+- A repeated reference-hardware and integrated-GPU decision matrix for ADR-0003.
 - Large-coordinate precision behavior required by ADR-0005.
 - A public end-to-end review workflow and reproducible performance report.
 
@@ -68,9 +68,10 @@ and bounded residency.
 
 ## Next slice
 
-Advance the ADR-0003 industrial benchmark before widening Studio UI. Extend the
-shared 1k/10k/100k scale ladder with spatial bins and a heterogeneous prototype
-tier, then compare MADI and optimized Three.js under equivalent CPU culling,
-edges, on-demand picking, memory accounting, and scripted exterior/interior
-camera traces. Keep the first committed 10k surface-only run labeled as
-exploratory evidence, not a renderer decision.
+Advance the new 100k heterogeneous/culling record into decision-quality evidence
+before widening Studio UI. Replace procedural variants with a redistributable
+engineering assembly or design-partner aggregate, isolate retained scene memory,
+add GPU timestamp queries, and repeat clean runs on discrete and integrated GPU
+profiles. Then add equivalent explicit-edge and bounded-residency slices. Keep
+both committed browser matrices labeled as exploratory evidence until that
+contract is complete.

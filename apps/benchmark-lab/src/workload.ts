@@ -11,6 +11,7 @@ export const industrialScaleTiers = {
 } as const;
 
 export type IndustrialScaleTier = keyof typeof industrialScaleTiers;
+export type IndustrialWorkloadProfile = "repeated" | "heterogeneous";
 
 interface GeometryData {
   readonly surfaceVertices: Float32Array;
@@ -19,9 +20,12 @@ interface GeometryData {
 }
 
 export interface IndustrialWorkload {
-  readonly id: "madi.industrial-pipe-rack.1";
+  readonly id: "madi.industrial-pipe-rack.1" | "madi.industrial-heterogeneous.1";
   readonly scale: IndustrialScaleTier;
+  readonly profile: IndustrialWorkloadProfile;
   readonly scene: GpuScene;
+  /** World-space sphere records (center.xyz + radius), parallel to scene batches. */
+  readonly instanceBounds: readonly Float32Array[];
   readonly bounds: {
     readonly min: readonly [number, number, number];
     readonly max: readonly [number, number, number];
@@ -33,6 +37,7 @@ export interface IndustrialWorkload {
     readonly submittedTriangleCount: number;
     readonly explicitEdgeSegmentCount: number;
     readonly instanceBytes: number;
+    readonly profile: IndustrialWorkloadProfile;
   };
 }
 
@@ -203,9 +208,77 @@ function prototypeForOccurrence(index: number): number {
   return 3;
 }
 
-export function createIndustrialWorkload(scale: IndustrialScaleTier): IndustrialWorkload {
+function createHeterogeneousGeometries(): GeometryData[] {
+  const geometries: GeometryData[] = [];
+  for (let variant = 0; variant < 64; variant += 1) {
+    const length = 2.2 + (variant % 8) * 0.18;
+    const radius = 0.12 + (Math.floor(variant / 8) % 8) * 0.018;
+    geometries.push(createCylinderX(length, radius, 24 + (variant % 8)));
+  }
+  for (let variant = 0; variant < 64; variant += 1) {
+    geometries.push(
+      createCylinderX(
+        0.22 + (variant % 8) * 0.025,
+        0.34 + (Math.floor(variant / 8) % 8) * 0.035,
+        28 + (variant % 8),
+      ),
+    );
+  }
+  for (let variant = 0; variant < 64; variant += 1) {
+    const width = 0.65 + (variant % 8) * 0.055;
+    const height = 0.55 + (Math.floor(variant / 8) % 8) * 0.045;
+    geometries.push(combineGeometry([
+      createBox([width, height, 0.58]),
+      createBox([0.16, 0.16, 0.65], [0, 0, 0.6]),
+      createBox([width, 0.12, 0.12], [0, 0, 0.96]),
+      createBox([0.12, height, 0.12], [0, 0, 0.96]),
+    ]));
+  }
+  for (let variant = 0; variant < 64; variant += 1) {
+    geometries.push(
+      createCylinderX(
+        1.8 + (variant % 8) * 0.16,
+        0.48 + (Math.floor(variant / 8) % 8) * 0.04,
+        28 + (variant % 8),
+      ),
+    );
+  }
+  return geometries;
+}
+
+function geometryRadius(geometry: GeometryData): number {
+  let radiusSquared = 0;
+  for (let index = 0; index < geometry.surfaceVertices.length; index += 6) {
+    const x = geometry.surfaceVertices[index] ?? 0;
+    const y = geometry.surfaceVertices[index + 1] ?? 0;
+    const z = geometry.surfaceVertices[index + 2] ?? 0;
+    radiusSquared = Math.max(radiusSquared, x * x + y * y + z * z);
+  }
+  return Math.sqrt(radiusSquared);
+}
+
+function heterogeneousPrototypeForOccurrence(index: number): number {
+  return (index * 73 + Math.floor(index / 17) * 19) % 256;
+}
+
+function colorForPrototype(prototype: number, profile: IndustrialWorkloadProfile) {
+  const family = profile === "heterogeneous" ? Math.floor(prototype / 64) : prototype;
+  const base = colors[family] ?? colors[0];
+  const shade = profile === "heterogeneous" ? 0.88 + ((prototype % 8) / 7) * 0.18 : 1;
+  return [
+    Math.min(1, base[0] * shade),
+    Math.min(1, base[1] * shade),
+    Math.min(1, base[2] * shade),
+    base[3],
+  ] as const;
+}
+
+export function createIndustrialWorkload(
+  scale: IndustrialScaleTier,
+  profile: IndustrialWorkloadProfile = "repeated",
+): IndustrialWorkload {
   const occurrenceCount = industrialScaleTiers[scale];
-  const geometries = [
+  const geometries = profile === "heterogeneous" ? createHeterogeneousGeometries() : [
     createCylinderX(3, 0.18, 28),
     createCylinderX(0.32, 0.5, 32),
     combineGeometry([
@@ -216,6 +289,8 @@ export function createIndustrialWorkload(scale: IndustrialScaleTier): Industrial
     createCylinderX(2.4, 0.7, 32),
   ];
   const instances = geometries.map(() => [] as GpuOccurrenceInstance[]);
+  const instanceBounds = geometries.map(() => [] as number[]);
+  const prototypeRadii = geometries.map(geometryRadius);
   const rackSize = 100;
   const columns = 20;
   const levels = 5;
@@ -224,7 +299,9 @@ export function createIndustrialWorkload(scale: IndustrialScaleTier): Industrial
   let maxZ = 0;
 
   for (let index = 0; index < occurrenceCount; index += 1) {
-    const prototype = prototypeForOccurrence(index);
+    const prototype = profile === "heterogeneous"
+      ? heterogeneousPrototypeForOccurrence(index)
+      : prototypeForOccurrence(index);
     const rack = Math.floor(index / rackSize);
     const local = index % rackSize;
     const module = Math.floor(rack / 100);
@@ -244,8 +321,9 @@ export function createIndustrialWorkload(scale: IndustrialScaleTier): Industrial
     instances[prototype]?.push({
       transform: createTransform(x, y, z, index + prototype),
       objectId: index + 1,
-      baseColor: colors[prototype],
+      baseColor: colorForPrototype(prototype, profile),
     });
+    instanceBounds[prototype]?.push(x, y, z, prototypeRadii[prototype] ?? 0);
   }
 
   const batches: GpuPrototypeBatch[] = geometries.map((geometry, index) => ({
@@ -265,9 +343,13 @@ export function createIndustrialWorkload(scale: IndustrialScaleTier): Industrial
     0,
   );
   return {
-    id: "madi.industrial-pipe-rack.1",
+    id: profile === "heterogeneous"
+      ? "madi.industrial-heterogeneous.1"
+      : "madi.industrial-pipe-rack.1",
     scale,
+    profile,
     scene: { batches },
+    instanceBounds: instanceBounds.map((values) => new Float32Array(values)),
     bounds: {
       min: [-2, -2, -2],
       max: [maxX + 2, maxY + 2, maxZ + 2],
@@ -279,6 +361,7 @@ export function createIndustrialWorkload(scale: IndustrialScaleTier): Industrial
       submittedTriangleCount,
       explicitEdgeSegmentCount,
       instanceBytes: occurrenceCount * 96,
+      profile,
     },
   };
 }

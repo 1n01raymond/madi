@@ -21,6 +21,11 @@ when requested. The renderer also accepts a fixed pixel ratio and can omit edge
 uploads so cross-backend benchmark profiles do not silently compare different
 resolution or resource contracts.
 
+For allocation-stable visibility experiments, `updateVisibleInstances()` accepts
+dense per-prototype `Int32Array` index tables and counts. It repacks visible
+occurrences into reusable CPU staging storage and updates only the active prefix
+of each existing GPU instance buffer; prototype geometry buffers remain intact.
+
 The current experimental decoder accepts one external buffer and, per mesh, one
 indexed `TRIANGLES` primitive plus at most one indexed `LINES` primitive. It is
 not a general-purpose glTF loader. Unsupported profiles and layouts fail with a

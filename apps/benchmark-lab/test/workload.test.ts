@@ -24,4 +24,21 @@ describe("industrial benchmark workload", () => {
     expect(workload.stats.occurrenceCount).toBe(100_000);
     expect(workload.stats.submittedTriangleCount).toBeGreaterThanOrEqual(10_000_000);
   });
+
+  it.each(["gate", "target"] as const)(
+    "builds the %s heterogeneous workload with 256 prototypes",
+    (scale) => {
+      const workload = createIndustrialWorkload(scale, "heterogeneous");
+      expect(() => validateGpuScene(workload.scene)).not.toThrow();
+      expect(workload.stats.prototypeCount).toBe(256);
+      expect(workload.stats.occurrenceCount).toBe(industrialScaleTiers[scale]);
+      expect(workload.instanceBounds).toHaveLength(256);
+      expect(
+        workload.instanceBounds.reduce((count, bounds) => count + bounds.length / 4, 0),
+      ).toBe(industrialScaleTiers[scale]);
+      if (scale === "target") {
+        expect(workload.stats.submittedTriangleCount).toBeGreaterThanOrEqual(10_000_000);
+      }
+    },
+  );
 });
