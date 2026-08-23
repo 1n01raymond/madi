@@ -11,6 +11,12 @@ import re
 from pathlib import Path
 
 import cadquery as cq
+from OCP.IFSelect import IFSelect_ReturnStatus
+from OCP.Interface import Interface_Static
+from OCP.STEPCAFControl import STEPCAFControl_Writer
+from OCP.STEPControl import STEPControl_StepModelType
+from OCP.XSControl import XSControl_WorkSession
+from cadquery.occ_impl.assembly import toCAF
 from cadquery.occ_impl.exporters.assembly import exportAssembly
 
 
@@ -93,6 +99,29 @@ def repeated_fastener_assembly() -> cq.Assembly:
     return assembly
 
 
+def export_ap242_assembly(assembly: cq.Assembly, path: Path) -> None:
+    """Export an XDE assembly with OCCT's AP242 DIS schema selection."""
+
+    _, document = toCAF(assembly, True)
+    session = XSControl_WorkSession()
+    writer = STEPCAFControl_Writer(session, False)
+    writer.SetColorMode(True)
+    writer.SetLayerMode(True)
+    writer.SetNameMode(True)
+    Interface_Static.SetIVal_s("write.surfacecurve.mode", 1)
+    Interface_Static.SetIVal_s("write.precision.mode", 0)
+    Interface_Static.SetIVal_s("write.stepcaf.subshapes.name", 1)
+    Interface_Static.SetCVal_s("xstep.cascade.unit", "MM")
+    Interface_Static.SetCVal_s("write.step.unit", "MM")
+    if not Interface_Static.SetCVal_s("write.step.schema", "AP242DIS"):
+        raise RuntimeError("OCCT did not accept the AP242 schema selection")
+    writer.ChangeWriter().Model(True)
+    if not writer.Transfer(document, STEPControl_StepModelType.STEPControl_AsIs):
+        raise RuntimeError("OCCT failed to transfer the AP242 assembly")
+    if writer.Write(str(path)) != IFSelect_ReturnStatus.IFSelect_RetDone:
+        raise RuntimeError(f"OCCT failed to write {path}")
+
+
 def canonicalize_header(path: Path) -> None:
     """Remove machine path and wall-clock variance from an exported STEP header."""
 
@@ -155,6 +184,7 @@ def add_unsupported_layer_assignment(source: Path, target: Path) -> None:
 def main() -> None:
     precision_path = FIXTURE_DIRECTORY / "precision-bracket.step"
     assembly_path = FIXTURE_DIRECTORY / "repeated-fasteners.step"
+    ap242_assembly_path = FIXTURE_DIRECTORY / "repeated-fasteners-ap242.step"
     unsupported_path = FIXTURE_DIRECTORY / "unsupported-layer-assignment.step"
 
     cq.exporters.export(
@@ -172,14 +202,17 @@ def main() -> None:
         precision_mode=0,
     ):
         raise RuntimeError("CadQuery failed to export repeated-fasteners.step")
+    export_ap242_assembly(repeated_fastener_assembly(), ap242_assembly_path)
 
     canonicalize_header(precision_path)
     canonicalize_header(assembly_path)
+    canonicalize_header(ap242_assembly_path)
     add_unsupported_layer_assignment(assembly_path, unsupported_path)
     canonicalize_header(unsupported_path)
 
     print(f"generated {precision_path}")
     print(f"generated {assembly_path}")
+    print(f"generated {ap242_assembly_path}")
     print(f"generated {unsupported_path}")
 
 

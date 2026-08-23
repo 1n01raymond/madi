@@ -58,6 +58,29 @@ UNSUPPORTED_STEP_ENTITIES = {
 }
 
 
+def detect_step_schema(source_text: str) -> dict[str, Any]:
+    """Return the declared STEP application protocol without guessing from entities."""
+
+    declaration = re.search(
+        r"FILE_SCHEMA\s*\(\s*\((?P<identifiers>.*?)\)\s*\)",
+        source_text,
+        re.IGNORECASE | re.DOTALL,
+    )
+    if declaration is None:
+        raise ValueError("STEP source does not declare FILE_SCHEMA.")
+    identifiers = re.findall(r"'([^']+)'", declaration.group("identifiers"))
+    normalized = " ".join(identifiers).upper()
+    if "AP242" in normalized or re.search(r"10303\s+242\b", normalized):
+        version = "AP242"
+    elif "AUTOMOTIVE_DESIGN" in normalized or re.search(r"10303\s+214\b", normalized):
+        version = "AP214"
+    elif "CONFIG_CONTROL_DESIGN" in normalized or re.search(r"10303\s+203\b", normalized):
+        version = "AP203"
+    else:
+        version = "UNKNOWN"
+    return {"version": version, "identifiers": identifiers}
+
+
 def rounded(value: float) -> float:
     result = round(float(value), 9)
     return 0.0 if result == 0 else result
@@ -375,9 +398,14 @@ def extract(
     source: Path,
     linear_tolerance: float,
     angular_tolerance: float,
+    source_uri_hint: str | None = None,
 ) -> tuple[dict[str, Any], dict[str, Any]]:
     source_bytes = source.read_bytes()
-    source_text = source_bytes.decode("utf-8")
+    # STEP Part 21 headers are ASCII-compatible; latin-1 keeps byte positions
+    # stable for vendor files that contain non-UTF-8 legacy metadata.
+    source_text = source_bytes.decode("latin-1")
+    source_schema = detect_step_schema(source_text)
+    uri_hint = source_uri_hint or source.as_posix()
     source_digest = hashlib.sha256(source_bytes).hexdigest()
     options_text = (
         f"linearTolerance={linear_tolerance:.9g};"
@@ -592,11 +620,11 @@ def extract(
         "documents": [
             {
                 "id": document_id,
-                "uriHint": source.as_posix(),
+                "uriHint": uri_hint,
                 "displayName": source.name,
                 "mediaType": "model/step",
                 "format": "STEP",
-                "formatVersion": "AP214",
+                "formatVersion": source_schema["version"],
                 "sourceDigest": f"sha256:{source_digest}",
                 "units": {"length": "mm", "angle": "rad", "scaleToMeters": 0.001},
                 "sourceFrame": ROOT_FRAME,
@@ -667,9 +695,10 @@ def extract(
     report = {
         "schemaVersion": "phase-0-occt-evidence.2",
         "source": {
-            "path": source.as_posix(),
+            "path": uri_hint,
             "sha256": source_digest,
-            "format": "STEP AP214",
+            "format": f"STEP {source_schema['version']}",
+            "schemaIdentifiers": source_schema["identifiers"],
             "units": "mm",
         },
         "toolchain": {
@@ -744,12 +773,17 @@ def main() -> None:
     parser.add_argument("--report", required=True, type=Path)
     parser.add_argument("--linear-tolerance", type=float, default=0.15)
     parser.add_argument("--angular-tolerance", type=float, default=0.15)
+    parser.add_argument(
+        "--uri-hint",
+        help="Non-sensitive source label stored in Scene IR and the adapter report.",
+    )
     arguments = parser.parse_args()
 
     scene, report = extract(
         arguments.source,
         arguments.linear_tolerance,
         arguments.angular_tolerance,
+        arguments.uri_hint,
     )
     write_json(arguments.scene, scene)
     write_json(arguments.report, report)

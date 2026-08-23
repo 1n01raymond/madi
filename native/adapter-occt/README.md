@@ -8,7 +8,9 @@ paths:
   Python binding for OCCT 7.9.3 STEPCAF/XDE.
 
 Neither output defines a serialized MADI format, and no OCCT type crosses into
-the browser packages.
+the browser packages. Phase 1 now orchestrates the Python path behind the
+public `madi compile` command while the C++ adapter remains the production-boundary
+target.
 
 ## Prerequisites
 
@@ -38,6 +40,8 @@ Create and activate a temporary virtual environment, then run:
 
 ```sh
 python -m pip install -r tools/requirements-evidence.txt
+pnpm madi compile fixtures/step/repeated-fasteners-ap242.step \
+  --output output/repeated-fasteners-ap242
 python tools/extract_scene_ir.py \
   ../../fixtures/step/adafruit-pygamer.step \
   --scene ../../output/occt/adafruit-pygamer.scene.json \
@@ -51,6 +55,11 @@ python tools/extract_scene_ir.py \
   --scene ../../artifacts/occt/unsupported-layer-assignment.scene.json \
   --report ../../artifacts/occt/unsupported-layer-assignment.report.json
 ```
+
+`madi compile` preflights the STEP Part 21 header, accepts AP242 and AP214,
+checks the adapter schema and SHA-256 identity against the source bytes, and
+deletes the expanded Scene IR after writing a validated package. The lower-level
+commands remain useful for adapter diagnostics and evidence regeneration.
 
 The generated logical scene preserves assembly containers, reusable part
 prototypes, occurrence transforms, names, millimetre units, source colors,

@@ -1,0 +1,1783 @@
+{
+  "asset": {
+    "version": "2.0",
+    "generator": "MADI compiler 0.0.0 / experimental glTF profile 1"
+  },
+  "scene": 0,
+  "scenes": [
+    {
+      "name": "scene:occt:87b7909984c635ff",
+      "nodes": [
+        0
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "name": "MADI source frame",
+      "children": [
+        1
+      ],
+      "matrix": [
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        -1,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1
+      ],
+      "extras": {
+        "madi": {
+          "kind": "source-frame",
+          "sourceUpAxis": "Z",
+          "targetUpAxis": "Y",
+          "sourceLengthUnit": "mm",
+          "scaleToMeters": 0.001
+        }
+      }
+    },
+    {
+      "name": "madi-repeated-fasteners",
+      "children": [
+        2,
+        3,
+        12
+      ],
+      "matrix": [
+        1,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        1
+      ],
+      "extras": {
+        "madi": {
+          "occurrenceId": "occurrence:madi-repeated-fasteners",
+          "prototypeId": "prototype:assembly:madi-repeated-fasteners",
+          "semanticId": "semantic:prototype:assembly:madi-repeated-fasteners",
+          "sourceRef": "source:occurrence:madi-repeated-fasteners",
+          "initialVisibility": true,
+          "tags": [
+            "phase-0",
+            "occt-xde",
+            "assembly"
+          ]
+        }
+      }
+    },
+    {
+      "name": "center-rail",
+      "matrix": [
+        1,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        1
+      ],
+      "mesh": 0,
+      "extras": {
+        "madi": {
+          "occurrenceId": "occurrence:madi-repeated-fasteners/center-rail",
+          "prototypeId": "prototype:part:center-rail",
+          "semanticId": "semantic:prototype:part:center-rail",
+          "sourceRef": "source:occurrence:madi-repeated-fasteners/center-rail",
+          "initialVisibility": true,
+          "tags": [
+            "phase-0",
+            "occt-xde",
+            "part"
+          ]
+        }
+      }
+    },
+    {
+      "name": "fastener-bank",
+      "children": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11
+      ],
+      "matrix": [
+        1,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        1
+      ],
+      "extras": {
+        "madi": {
+          "occurrenceId": "occurrence:madi-repeated-fasteners/fastener-bank",
+          "prototypeId": "prototype:assembly:madi-repeated-fasteners/fastener-bank",
+          "semanticId": "semantic:prototype:assembly:madi-repeated-fasteners/fastener-bank",
+          "sourceRef": "source:occurrence:madi-repeated-fasteners/fastener-bank",
+          "initialVisibility": true,
+          "tags": [
+            "phase-0",
+            "occt-xde",
+            "assembly"
+          ]
+        }
+      }
+    },
+    {
+      "name": "fastener-01",
+      "matrix": [
+        1,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        -0.03200000151991844,
+        -0.01600000075995922,
+        0.006000000052154064,
+        1
+      ],
+      "mesh": 1,
+      "extras": {
+        "madi": {
+          "occurrenceId": "occurrence:madi-repeated-fasteners/fastener-bank/fastener-01",
+          "prototypeId": "prototype:part:fastener-01",
+          "semanticId": "semantic:prototype:part:fastener-01",
+          "sourceRef": "source:occurrence:madi-repeated-fasteners/fastener-bank/fastener-01",
+          "initialVisibility": true,
+          "tags": [
+            "phase-0",
+            "occt-xde",
+            "part"
+          ]
+        }
+      }
+    },
+    {
+      "name": "fastener-02",
+      "matrix": [
+        1,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        -0.03200000151991844,
+        0.01600000075995922,
+        0.006000000052154064,
+        1
+      ],
+      "mesh": 1,
+      "extras": {
+        "madi": {
+          "occurrenceId": "occurrence:madi-repeated-fasteners/fastener-bank/fastener-02",
+          "prototypeId": "prototype:part:fastener-01",
+          "semanticId": "semantic:prototype:part:fastener-01",
+          "sourceRef": "source:occurrence:madi-repeated-fasteners/fastener-bank/fastener-02",
+          "initialVisibility": true,
+          "tags": [
+            "phase-0",
+            "occt-xde",
+            "part"
+          ]
+        }
+      }
+    },
+    {
+      "name": "fastener-03",
+      "matrix": [
+        1,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0.03200000151991844,
+        -0.01600000075995922,
+        0.006000000052154064,
+        1
+      ],
+      "mesh": 1,
+      "extras": {
+        "madi": {
+          "occurrenceId": "occurrence:madi-repeated-fasteners/fastener-bank/fastener-03",
+          "prototypeId": "prototype:part:fastener-01",
+          "semanticId": "semantic:prototype:part:fastener-01",
+          "sourceRef": "source:occurrence:madi-repeated-fasteners/fastener-bank/fastener-03",
+          "initialVisibility": true,
+          "tags": [
+            "phase-0",
+            "occt-xde",
+            "part"
+          ]
+        }
+      }
+    },
+    {
+      "name": "fastener-04",
+      "matrix": [
+        1,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0.03200000151991844,
+        0.01600000075995922,
+        0.006000000052154064,
+        1
+      ],
+      "mesh": 1,
+      "extras": {
+        "madi": {
+          "occurrenceId": "occurrence:madi-repeated-fasteners/fastener-bank/fastener-04",
+          "prototypeId": "prototype:part:fastener-01",
+          "semanticId": "semantic:prototype:part:fastener-01",
+          "sourceRef": "source:occurrence:madi-repeated-fasteners/fastener-bank/fastener-04",
+          "initialVisibility": true,
+          "tags": [
+            "phase-0",
+            "occt-xde",
+            "part"
+          ]
+        }
+      }
+    },
+    {
+      "name": "fastener-05",
+      "matrix": [
+        1,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        -0.024000000208616257,
+        0,
+        0.006000000052154064,
+        1
+      ],
+      "mesh": 1,
+      "extras": {
+        "madi": {
+          "occurrenceId": "occurrence:madi-repeated-fasteners/fastener-bank/fastener-05",
+          "prototypeId": "prototype:part:fastener-01",
+          "semanticId": "semantic:prototype:part:fastener-01",
+          "sourceRef": "source:occurrence:madi-repeated-fasteners/fastener-bank/fastener-05",
+          "initialVisibility": true,
+          "tags": [
+            "phase-0",
+            "occt-xde",
+            "part"
+          ]
+        }
+      }
+    },
+    {
+      "name": "fastener-06",
+      "matrix": [
+        1,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        -0.00800000037997961,
+        0,
+        0.006000000052154064,
+        1
+      ],
+      "mesh": 1,
+      "extras": {
+        "madi": {
+          "occurrenceId": "occurrence:madi-repeated-fasteners/fastener-bank/fastener-06",
+          "prototypeId": "prototype:part:fastener-01",
+          "semanticId": "semantic:prototype:part:fastener-01",
+          "sourceRef": "source:occurrence:madi-repeated-fasteners/fastener-bank/fastener-06",
+          "initialVisibility": true,
+          "tags": [
+            "phase-0",
+            "occt-xde",
+            "part"
+          ]
+        }
+      }
+    },
+    {
+      "name": "fastener-07",
+      "matrix": [
+        1,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0.00800000037997961,
+        0,
+        0.006000000052154064,
+        1
+      ],
+      "mesh": 1,
+      "extras": {
+        "madi": {
+          "occurrenceId": "occurrence:madi-repeated-fasteners/fastener-bank/fastener-07",
+          "prototypeId": "prototype:part:fastener-01",
+          "semanticId": "semantic:prototype:part:fastener-01",
+          "sourceRef": "source:occurrence:madi-repeated-fasteners/fastener-bank/fastener-07",
+          "initialVisibility": true,
+          "tags": [
+            "phase-0",
+            "occt-xde",
+            "part"
+          ]
+        }
+      }
+    },
+    {
+      "name": "fastener-08",
+      "matrix": [
+        1,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0.024000000208616257,
+        0,
+        0.006000000052154064,
+        1
+      ],
+      "mesh": 1,
+      "extras": {
+        "madi": {
+          "occurrenceId": "occurrence:madi-repeated-fasteners/fastener-bank/fastener-08",
+          "prototypeId": "prototype:part:fastener-01",
+          "semanticId": "semantic:prototype:part:fastener-01",
+          "sourceRef": "source:occurrence:madi-repeated-fasteners/fastener-bank/fastener-08",
+          "initialVisibility": true,
+          "tags": [
+            "phase-0",
+            "occt-xde",
+            "part"
+          ]
+        }
+      }
+    },
+    {
+      "name": "mounting-plate",
+      "matrix": [
+        1,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        1
+      ],
+      "mesh": 2,
+      "extras": {
+        "madi": {
+          "occurrenceId": "occurrence:madi-repeated-fasteners/mounting-plate",
+          "prototypeId": "prototype:part:mounting-plate",
+          "semanticId": "semantic:prototype:part:mounting-plate",
+          "sourceRef": "source:occurrence:madi-repeated-fasteners/mounting-plate",
+          "initialVisibility": true,
+          "tags": [
+            "phase-0",
+            "occt-xde",
+            "part"
+          ]
+        }
+      }
+    }
+  ],
+  "meshes": [
+    {
+      "name": "center-rail",
+      "primitives": [
+        {
+          "attributes": {
+            "POSITION": 0,
+            "NORMAL": 1
+          },
+          "indices": 3,
+          "material": 8,
+          "mode": 4,
+          "extras": {
+            "madi": {
+              "kind": "surface",
+              "representationId": "representation:prototype:part:center-rail:display",
+              "firstIndex": 0,
+              "indexCount": 36,
+              "faceSourceAccessor": 2,
+              "sourceRefs": [
+                "source:prototype:part:center-rail:face:000",
+                "source:prototype:part:center-rail:face:001",
+                "source:prototype:part:center-rail:face:002",
+                "source:prototype:part:center-rail:face:003",
+                "source:prototype:part:center-rail:face:004",
+                "source:prototype:part:center-rail:face:005",
+                "source:prototype:part:center-rail:edge:000",
+                "source:prototype:part:center-rail:edge:001",
+                "source:prototype:part:center-rail:edge:002",
+                "source:prototype:part:center-rail:edge:003",
+                "source:prototype:part:center-rail:edge:004",
+                "source:prototype:part:center-rail:edge:005",
+                "source:prototype:part:center-rail:edge:006",
+                "source:prototype:part:center-rail:edge:007",
+                "source:prototype:part:center-rail:edge:008",
+                "source:prototype:part:center-rail:edge:009",
+                "source:prototype:part:center-rail:edge:010",
+                "source:prototype:part:center-rail:edge:011"
+              ]
+            }
+          }
+        },
+        {
+          "attributes": {
+            "POSITION": 4
+          },
+          "indices": 5,
+          "material": 9,
+          "mode": 1,
+          "extras": {
+            "madi": {
+              "kind": "explicit-cad-edges",
+              "representationId": "representation:prototype:part:center-rail:display",
+              "edgeClassAccessor": 6,
+              "edgeSourceAccessor": 7,
+              "sourceRefs": [
+                "source:prototype:part:center-rail:face:000",
+                "source:prototype:part:center-rail:face:001",
+                "source:prototype:part:center-rail:face:002",
+                "source:prototype:part:center-rail:face:003",
+                "source:prototype:part:center-rail:face:004",
+                "source:prototype:part:center-rail:face:005",
+                "source:prototype:part:center-rail:edge:000",
+                "source:prototype:part:center-rail:edge:001",
+                "source:prototype:part:center-rail:edge:002",
+                "source:prototype:part:center-rail:edge:003",
+                "source:prototype:part:center-rail:edge:004",
+                "source:prototype:part:center-rail:edge:005",
+                "source:prototype:part:center-rail:edge:006",
+                "source:prototype:part:center-rail:edge:007",
+                "source:prototype:part:center-rail:edge:008",
+                "source:prototype:part:center-rail:edge:009",
+                "source:prototype:part:center-rail:edge:010",
+                "source:prototype:part:center-rail:edge:011"
+              ],
+              "curveHints": [
+                {
+                  "kind": "line",
+                  "sourceRef": "source:prototype:part:center-rail:edge:000"
+                },
+                {
+                  "kind": "line",
+                  "sourceRef": "source:prototype:part:center-rail:edge:001"
+                },
+                {
+                  "kind": "line",
+                  "sourceRef": "source:prototype:part:center-rail:edge:002"
+                },
+                {
+                  "kind": "line",
+                  "sourceRef": "source:prototype:part:center-rail:edge:003"
+                },
+                {
+                  "kind": "line",
+                  "sourceRef": "source:prototype:part:center-rail:edge:004"
+                },
+                {
+                  "kind": "line",
+                  "sourceRef": "source:prototype:part:center-rail:edge:005"
+                },
+                {
+                  "kind": "line",
+                  "sourceRef": "source:prototype:part:center-rail:edge:006"
+                },
+                {
+                  "kind": "line",
+                  "sourceRef": "source:prototype:part:center-rail:edge:007"
+                },
+                {
+                  "kind": "line",
+                  "sourceRef": "source:prototype:part:center-rail:edge:008"
+                },
+                {
+                  "kind": "line",
+                  "sourceRef": "source:prototype:part:center-rail:edge:009"
+                },
+                {
+                  "kind": "line",
+                  "sourceRef": "source:prototype:part:center-rail:edge:010"
+                },
+                {
+                  "kind": "line",
+                  "sourceRef": "source:prototype:part:center-rail:edge:011"
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "extras": {
+        "madi": {
+          "prototypeId": "prototype:part:center-rail",
+          "representationId": "representation:prototype:part:center-rail:display",
+          "sourceRef": "source:prototype:part:center-rail",
+          "materialOverrideId": "material:rgb-eb7a1f"
+        }
+      }
+    },
+    {
+      "name": "fastener-01",
+      "primitives": [
+        {
+          "attributes": {
+            "POSITION": 8,
+            "NORMAL": 9
+          },
+          "indices": 11,
+          "material": 6,
+          "mode": 4,
+          "extras": {
+            "madi": {
+              "kind": "surface",
+              "representationId": "representation:prototype:part:fastener-01:display",
+              "firstIndex": 0,
+              "indexCount": 1068,
+              "faceSourceAccessor": 10,
+              "sourceRefs": [
+                "source:prototype:part:fastener-01:face:000",
+                "source:prototype:part:fastener-01:face:001",
+                "source:prototype:part:fastener-01:face:002",
+                "source:prototype:part:fastener-01:face:003",
+                "source:prototype:part:fastener-01:face:004",
+                "source:prototype:part:fastener-01:face:005",
+                "source:prototype:part:fastener-01:face:006",
+                "source:prototype:part:fastener-01:face:007",
+                "source:prototype:part:fastener-01:face:008",
+                "source:prototype:part:fastener-01:face:009",
+                "source:prototype:part:fastener-01:edge:000",
+                "source:prototype:part:fastener-01:edge:001",
+                "source:prototype:part:fastener-01:edge:002",
+                "source:prototype:part:fastener-01:edge:003",
+                "source:prototype:part:fastener-01:edge:004",
+                "source:prototype:part:fastener-01:edge:005",
+                "source:prototype:part:fastener-01:edge:006",
+                "source:prototype:part:fastener-01:edge:007",
+                "source:prototype:part:fastener-01:edge:008",
+                "source:prototype:part:fastener-01:edge:009",
+                "source:prototype:part:fastener-01:edge:010",
+                "source:prototype:part:fastener-01:edge:011",
+                "source:prototype:part:fastener-01:edge:012",
+                "source:prototype:part:fastener-01:edge:013",
+                "source:prototype:part:fastener-01:edge:014",
+                "source:prototype:part:fastener-01:edge:015",
+                "source:prototype:part:fastener-01:edge:016",
+                "source:prototype:part:fastener-01:edge:017",
+                "source:prototype:part:fastener-01:edge:018",
+                "source:prototype:part:fastener-01:edge:019",
+                "source:prototype:part:fastener-01:edge:020"
+              ]
+            }
+          }
+        },
+        {
+          "attributes": {
+            "POSITION": 12
+          },
+          "indices": 13,
+          "material": 7,
+          "mode": 1,
+          "extras": {
+            "madi": {
+              "kind": "explicit-cad-edges",
+              "representationId": "representation:prototype:part:fastener-01:display",
+              "edgeClassAccessor": 14,
+              "edgeSourceAccessor": 15,
+              "sourceRefs": [
+                "source:prototype:part:fastener-01:face:000",
+                "source:prototype:part:fastener-01:face:001",
+                "source:prototype:part:fastener-01:face:002",
+                "source:prototype:part:fastener-01:face:003",
+                "source:prototype:part:fastener-01:face:004",
+                "source:prototype:part:fastener-01:face:005",
+                "source:prototype:part:fastener-01:face:006",
+                "source:prototype:part:fastener-01:face:007",
+                "source:prototype:part:fastener-01:face:008",
+                "source:prototype:part:fastener-01:face:009",
+                "source:prototype:part:fastener-01:edge:000",
+                "source:prototype:part:fastener-01:edge:001",
+                "source:prototype:part:fastener-01:edge:002",
+                "source:prototype:part:fastener-01:edge:003",
+                "source:prototype:part:fastener-01:edge:004",
+                "source:prototype:part:fastener-01:edge:005",
+                "source:prototype:part:fastener-01:edge:006",
+                "source:prototype:part:fastener-01:edge:007",
+                "source:prototype:part:fastener-01:edge:008",
+                "source:prototype:part:fastener-01:edge:009",
+                "source:prototype:part:fastener-01:edge:010",
+                "source:prototype:part:fastener-01:edge:011",
+                "source:prototype:part:fastener-01:edge:012",
+                "source:prototype:part:fastener-01:edge:013",
+                "source:prototype:part:fastener-01:edge:014",
+                "source:prototype:part:fastener-01:edge:015",
+                "source:prototype:part:fastener-01:edge:016",
+                "source:prototype:part:fastener-01:edge:017",
+                "source:prototype:part:fastener-01:edge:018",
+                "source:prototype:part:fastener-01:edge:019",
+                "source:prototype:part:fastener-01:edge:020"
+              ],
+              "curveHints": [
+                {
+                  "kind": "line",
+                  "sourceRef": "source:prototype:part:fastener-01:edge:000"
+                },
+                {
+                  "kind": "line",
+                  "sourceRef": "source:prototype:part:fastener-01:edge:001"
+                },
+                {
+                  "kind": "line",
+                  "sourceRef": "source:prototype:part:fastener-01:edge:002"
+                },
+                {
+                  "kind": "line",
+                  "sourceRef": "source:prototype:part:fastener-01:edge:003"
+                },
+                {
+                  "kind": "line",
+                  "sourceRef": "source:prototype:part:fastener-01:edge:004"
+                },
+                {
+                  "kind": "line",
+                  "sourceRef": "source:prototype:part:fastener-01:edge:005"
+                },
+                {
+                  "kind": "line",
+                  "sourceRef": "source:prototype:part:fastener-01:edge:006"
+                },
+                {
+                  "kind": "line",
+                  "sourceRef": "source:prototype:part:fastener-01:edge:007"
+                },
+                {
+                  "kind": "line",
+                  "sourceRef": "source:prototype:part:fastener-01:edge:008"
+                },
+                {
+                  "kind": "line",
+                  "sourceRef": "source:prototype:part:fastener-01:edge:009"
+                },
+                {
+                  "kind": "line",
+                  "sourceRef": "source:prototype:part:fastener-01:edge:010"
+                },
+                {
+                  "kind": "line",
+                  "sourceRef": "source:prototype:part:fastener-01:edge:011"
+                },
+                {
+                  "kind": "line",
+                  "sourceRef": "source:prototype:part:fastener-01:edge:012"
+                },
+                {
+                  "kind": "circle",
+                  "sourceRef": "source:prototype:part:fastener-01:edge:013"
+                },
+                {
+                  "kind": "line",
+                  "sourceRef": "source:prototype:part:fastener-01:edge:014"
+                },
+                {
+                  "kind": "line",
+                  "sourceRef": "source:prototype:part:fastener-01:edge:015"
+                },
+                {
+                  "kind": "line",
+                  "sourceRef": "source:prototype:part:fastener-01:edge:016"
+                },
+                {
+                  "kind": "line",
+                  "sourceRef": "source:prototype:part:fastener-01:edge:017"
+                },
+                {
+                  "kind": "line",
+                  "sourceRef": "source:prototype:part:fastener-01:edge:018"
+                },
+                {
+                  "kind": "circle",
+                  "sourceRef": "source:prototype:part:fastener-01:edge:019"
+                },
+                {
+                  "kind": "line",
+                  "sourceRef": "source:prototype:part:fastener-01:edge:020"
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "extras": {
+        "madi": {
+          "prototypeId": "prototype:part:fastener-01",
+          "representationId": "representation:prototype:part:fastener-01:display",
+          "sourceRef": "source:prototype:part:fastener-01",
+          "materialOverrideId": "material:rgb-b8bdc7"
+        }
+      }
+    },
+    {
+      "name": "mounting-plate",
+      "primitives": [
+        {
+          "attributes": {
+            "POSITION": 16,
+            "NORMAL": 17
+          },
+          "indices": 19,
+          "material": 4,
+          "mode": 4,
+          "extras": {
+            "madi": {
+              "kind": "surface",
+              "representationId": "representation:prototype:part:mounting-plate:display",
+              "firstIndex": 0,
+              "indexCount": 5124,
+              "faceSourceAccessor": 18,
+              "sourceRefs": [
+                "source:prototype:part:mounting-plate:face:000",
+                "source:prototype:part:mounting-plate:face:001",
+                "source:prototype:part:mounting-plate:face:002",
+                "source:prototype:part:mounting-plate:face:003",
+                "source:prototype:part:mounting-plate:face:004",
+                "source:prototype:part:mounting-plate:face:005",
+                "source:prototype:part:mounting-plate:face:006",
+                "source:prototype:part:mounting-plate:face:007",
+                "source:prototype:part:mounting-plate:face:008",
+                "source:prototype:part:mounting-plate:face:009",
+                "source:prototype:part:mounting-plate:face:010",
+                "source:prototype:part:mounting-plate:face:011",
+                "source:prototype:part:mounting-plate:face:012",
+                "source:prototype:part:mounting-plate:face:013",
+                "source:prototype:part:mounting-plate:edge:000",
+                "source:prototype:part:mounting-plate:edge:001",
+                "source:prototype:part:mounting-plate:edge:002",
+                "source:prototype:part:mounting-plate:edge:003",
+                "source:prototype:part:mounting-plate:edge:004",
+                "source:prototype:part:mounting-plate:edge:005",
+                "source:prototype:part:mounting-plate:edge:006",
+                "source:prototype:part:mounting-plate:edge:007",
+                "source:prototype:part:mounting-plate:edge:008",
+                "source:prototype:part:mounting-plate:edge:009",
+                "source:prototype:part:mounting-plate:edge:010",
+                "source:prototype:part:mounting-plate:edge:011",
+                "source:prototype:part:mounting-plate:edge:012",
+                "source:prototype:part:mounting-plate:edge:013",
+                "source:prototype:part:mounting-plate:edge:014",
+                "source:prototype:part:mounting-plate:edge:015",
+                "source:prototype:part:mounting-plate:edge:016",
+                "source:prototype:part:mounting-plate:edge:017",
+                "source:prototype:part:mounting-plate:edge:018",
+                "source:prototype:part:mounting-plate:edge:019",
+                "source:prototype:part:mounting-plate:edge:020",
+                "source:prototype:part:mounting-plate:edge:021",
+                "source:prototype:part:mounting-plate:edge:022",
+                "source:prototype:part:mounting-plate:edge:023",
+                "source:prototype:part:mounting-plate:edge:024",
+                "source:prototype:part:mounting-plate:edge:025",
+                "source:prototype:part:mounting-plate:edge:026",
+                "source:prototype:part:mounting-plate:edge:027",
+                "source:prototype:part:mounting-plate:edge:028",
+                "source:prototype:part:mounting-plate:edge:029",
+                "source:prototype:part:mounting-plate:edge:030",
+                "source:prototype:part:mounting-plate:edge:031",
+                "source:prototype:part:mounting-plate:edge:032",
+                "source:prototype:part:mounting-plate:edge:033",
+                "source:prototype:part:mounting-plate:edge:034",
+                "source:prototype:part:mounting-plate:edge:035"
+              ]
+            }
+          }
+        },
+        {
+          "attributes": {
+            "POSITION": 20
+          },
+          "indices": 21,
+          "material": 5,
+          "mode": 1,
+          "extras": {
+            "madi": {
+              "kind": "explicit-cad-edges",
+              "representationId": "representation:prototype:part:mounting-plate:display",
+              "edgeClassAccessor": 22,
+              "edgeSourceAccessor": 23,
+              "sourceRefs": [
+                "source:prototype:part:mounting-plate:face:000",
+                "source:prototype:part:mounting-plate:face:001",
+                "source:prototype:part:mounting-plate:face:002",
+                "source:prototype:part:mounting-plate:face:003",
+                "source:prototype:part:mounting-plate:face:004",
+                "source:prototype:part:mounting-plate:face:005",
+                "source:prototype:part:mounting-plate:face:006",
+                "source:prototype:part:mounting-plate:face:007",
+                "source:prototype:part:mounting-plate:face:008",
+                "source:prototype:part:mounting-plate:face:009",
+                "source:prototype:part:mounting-plate:face:010",
+                "source:prototype:part:mounting-plate:face:011",
+                "source:prototype:part:mounting-plate:face:012",
+                "source:prototype:part:mounting-plate:face:013",
+                "source:prototype:part:mounting-plate:edge:000",
+                "source:prototype:part:mounting-plate:edge:001",
+                "source:prototype:part:mounting-plate:edge:002",
+                "source:prototype:part:mounting-plate:edge:003",
+                "source:prototype:part:mounting-plate:edge:004",
+                "source:prototype:part:mounting-plate:edge:005",
+                "source:prototype:part:mounting-plate:edge:006",
+                "source:prototype:part:mounting-plate:edge:007",
+                "source:prototype:part:mounting-plate:edge:008",
+                "source:prototype:part:mounting-plate:edge:009",
+                "source:prototype:part:mounting-plate:edge:010",
+                "source:prototype:part:mounting-plate:edge:011",
+                "source:prototype:part:mounting-plate:edge:012",
+                "source:prototype:part:mounting-plate:edge:013",
+                "source:prototype:part:mounting-plate:edge:014",
+                "source:prototype:part:mounting-plate:edge:015",
+                "source:prototype:part:mounting-plate:edge:016",
+                "source:prototype:part:mounting-plate:edge:017",
+                "source:prototype:part:mounting-plate:edge:018",
+                "source:prototype:part:mounting-plate:edge:019",
+                "source:prototype:part:mounting-plate:edge:020",
+                "source:prototype:part:mounting-plate:edge:021",
+                "source:prototype:part:mounting-plate:edge:022",
+                "source:prototype:part:mounting-plate:edge:023",
+                "source:prototype:part:mounting-plate:edge:024",
+                "source:prototype:part:mounting-plate:edge:025",
+                "source:prototype:part:mounting-plate:edge:026",
+                "source:prototype:part:mounting-plate:edge:027",
+                "source:prototype:part:mounting-plate:edge:028",
+                "source:prototype:part:mounting-plate:edge:029",
+                "source:prototype:part:mounting-plate:edge:030",
+                "source:prototype:part:mounting-plate:edge:031",
+                "source:prototype:part:mounting-plate:edge:032",
+                "source:prototype:part:mounting-plate:edge:033",
+                "source:prototype:part:mounting-plate:edge:034",
+                "source:prototype:part:mounting-plate:edge:035"
+              ],
+              "curveHints": [
+                {
+                  "kind": "line",
+                  "sourceRef": "source:prototype:part:mounting-plate:edge:000"
+                },
+                {
+                  "kind": "line",
+                  "sourceRef": "source:prototype:part:mounting-plate:edge:001"
+                },
+                {
+                  "kind": "line",
+                  "sourceRef": "source:prototype:part:mounting-plate:edge:002"
+                },
+                {
+                  "kind": "line",
+                  "sourceRef": "source:prototype:part:mounting-plate:edge:003"
+                },
+                {
+                  "kind": "circle",
+                  "sourceRef": "source:prototype:part:mounting-plate:edge:004"
+                },
+                {
+                  "kind": "line",
+                  "sourceRef": "source:prototype:part:mounting-plate:edge:005"
+                },
+                {
+                  "kind": "circle",
+                  "sourceRef": "source:prototype:part:mounting-plate:edge:006"
+                },
+                {
+                  "kind": "line",
+                  "sourceRef": "source:prototype:part:mounting-plate:edge:007"
+                },
+                {
+                  "kind": "circle",
+                  "sourceRef": "source:prototype:part:mounting-plate:edge:008"
+                },
+                {
+                  "kind": "line",
+                  "sourceRef": "source:prototype:part:mounting-plate:edge:009"
+                },
+                {
+                  "kind": "circle",
+                  "sourceRef": "source:prototype:part:mounting-plate:edge:010"
+                },
+                {
+                  "kind": "circle",
+                  "sourceRef": "source:prototype:part:mounting-plate:edge:011"
+                },
+                {
+                  "kind": "circle",
+                  "sourceRef": "source:prototype:part:mounting-plate:edge:012"
+                },
+                {
+                  "kind": "circle",
+                  "sourceRef": "source:prototype:part:mounting-plate:edge:013"
+                },
+                {
+                  "kind": "circle",
+                  "sourceRef": "source:prototype:part:mounting-plate:edge:014"
+                },
+                {
+                  "kind": "circle",
+                  "sourceRef": "source:prototype:part:mounting-plate:edge:015"
+                },
+                {
+                  "kind": "line",
+                  "sourceRef": "source:prototype:part:mounting-plate:edge:016"
+                },
+                {
+                  "kind": "line",
+                  "sourceRef": "source:prototype:part:mounting-plate:edge:017"
+                },
+                {
+                  "kind": "circle",
+                  "sourceRef": "source:prototype:part:mounting-plate:edge:018"
+                },
+                {
+                  "kind": "line",
+                  "sourceRef": "source:prototype:part:mounting-plate:edge:019"
+                },
+                {
+                  "kind": "circle",
+                  "sourceRef": "source:prototype:part:mounting-plate:edge:020"
+                },
+                {
+                  "kind": "line",
+                  "sourceRef": "source:prototype:part:mounting-plate:edge:021"
+                },
+                {
+                  "kind": "circle",
+                  "sourceRef": "source:prototype:part:mounting-plate:edge:022"
+                },
+                {
+                  "kind": "line",
+                  "sourceRef": "source:prototype:part:mounting-plate:edge:023"
+                },
+                {
+                  "kind": "circle",
+                  "sourceRef": "source:prototype:part:mounting-plate:edge:024"
+                },
+                {
+                  "kind": "circle",
+                  "sourceRef": "source:prototype:part:mounting-plate:edge:025"
+                },
+                {
+                  "kind": "circle",
+                  "sourceRef": "source:prototype:part:mounting-plate:edge:026"
+                },
+                {
+                  "kind": "circle",
+                  "sourceRef": "source:prototype:part:mounting-plate:edge:027"
+                },
+                {
+                  "kind": "line",
+                  "sourceRef": "source:prototype:part:mounting-plate:edge:028"
+                },
+                {
+                  "kind": "line",
+                  "sourceRef": "source:prototype:part:mounting-plate:edge:029"
+                },
+                {
+                  "kind": "line",
+                  "sourceRef": "source:prototype:part:mounting-plate:edge:030"
+                },
+                {
+                  "kind": "line",
+                  "sourceRef": "source:prototype:part:mounting-plate:edge:031"
+                },
+                {
+                  "kind": "line",
+                  "sourceRef": "source:prototype:part:mounting-plate:edge:032"
+                },
+                {
+                  "kind": "line",
+                  "sourceRef": "source:prototype:part:mounting-plate:edge:033"
+                },
+                {
+                  "kind": "line",
+                  "sourceRef": "source:prototype:part:mounting-plate:edge:034"
+                },
+                {
+                  "kind": "line",
+                  "sourceRef": "source:prototype:part:mounting-plate:edge:035"
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "extras": {
+        "madi": {
+          "prototypeId": "prototype:part:mounting-plate",
+          "representationId": "representation:prototype:part:mounting-plate:display",
+          "sourceRef": "source:prototype:part:mounting-plate",
+          "materialOverrideId": "material:rgb-2e579e"
+        }
+      }
+    }
+  ],
+  "materials": [
+    {
+      "name": "MADI fallback surface",
+      "pbrMetallicRoughness": {
+        "baseColorFactor": [
+          0.55,
+          0.62,
+          0.68,
+          1
+        ],
+        "metallicFactor": 0.05,
+        "roughnessFactor": 0.72
+      },
+      "extras": {
+        "madi": {
+          "role": "surface",
+          "fallback": true
+        }
+      }
+    },
+    {
+      "name": "MADI fallback edges",
+      "pbrMetallicRoughness": {
+        "baseColorFactor": [
+          0.025,
+          0.045,
+          0.06,
+          1
+        ],
+        "metallicFactor": 0,
+        "roughnessFactor": 1
+      },
+      "extras": {
+        "madi": {
+          "role": "edge",
+          "fallback": true
+        }
+      }
+    },
+    {
+      "name": "MADI neutral",
+      "pbrMetallicRoughness": {
+        "baseColorFactor": [
+          0.55,
+          0.62,
+          0.68,
+          1
+        ],
+        "metallicFactor": 0.05,
+        "roughnessFactor": 0.72
+      },
+      "extras": {
+        "madi": {
+          "materialId": "material:neutral",
+          "role": "surface"
+        }
+      }
+    },
+    {
+      "name": "MADI neutral edges",
+      "pbrMetallicRoughness": {
+        "baseColorFactor": [
+          0.025,
+          0.045,
+          0.06,
+          1
+        ],
+        "metallicFactor": 0,
+        "roughnessFactor": 1
+      },
+      "extras": {
+        "madi": {
+          "materialId": "material:neutral",
+          "role": "edge"
+        }
+      }
+    },
+    {
+      "name": "rgb-2e579e",
+      "pbrMetallicRoughness": {
+        "baseColorFactor": [
+          0.180000002,
+          0.339999994,
+          0.62,
+          1
+        ],
+        "metallicFactor": 0.08,
+        "roughnessFactor": 0.62
+      },
+      "extras": {
+        "madi": {
+          "materialId": "material:rgb-2e579e",
+          "role": "surface"
+        }
+      }
+    },
+    {
+      "name": "rgb-2e579e edges",
+      "pbrMetallicRoughness": {
+        "baseColorFactor": [
+          0.025,
+          0.045,
+          0.06,
+          1
+        ],
+        "metallicFactor": 0,
+        "roughnessFactor": 1
+      },
+      "extras": {
+        "madi": {
+          "materialId": "material:rgb-2e579e",
+          "role": "edge"
+        }
+      }
+    },
+    {
+      "name": "rgb-b8bdc7",
+      "pbrMetallicRoughness": {
+        "baseColorFactor": [
+          0.720000003,
+          0.740000012,
+          0.780000002,
+          1
+        ],
+        "metallicFactor": 0.08,
+        "roughnessFactor": 0.62
+      },
+      "extras": {
+        "madi": {
+          "materialId": "material:rgb-b8bdc7",
+          "role": "surface"
+        }
+      }
+    },
+    {
+      "name": "rgb-b8bdc7 edges",
+      "pbrMetallicRoughness": {
+        "baseColorFactor": [
+          0.025,
+          0.045,
+          0.06,
+          1
+        ],
+        "metallicFactor": 0,
+        "roughnessFactor": 1
+      },
+      "extras": {
+        "madi": {
+          "materialId": "material:rgb-b8bdc7",
+          "role": "edge"
+        }
+      }
+    },
+    {
+      "name": "rgb-eb7a1f",
+      "pbrMetallicRoughness": {
+        "baseColorFactor": [
+          0.920000012,
+          0.480000005,
+          0.120000001,
+          1
+        ],
+        "metallicFactor": 0.08,
+        "roughnessFactor": 0.62
+      },
+      "extras": {
+        "madi": {
+          "materialId": "material:rgb-eb7a1f",
+          "role": "surface"
+        }
+      }
+    },
+    {
+      "name": "rgb-eb7a1f edges",
+      "pbrMetallicRoughness": {
+        "baseColorFactor": [
+          0.025,
+          0.045,
+          0.06,
+          1
+        ],
+        "metallicFactor": 0,
+        "roughnessFactor": 1
+      },
+      "extras": {
+        "madi": {
+          "materialId": "material:rgb-eb7a1f",
+          "role": "edge"
+        }
+      }
+    }
+  ],
+  "buffers": [
+    {
+      "uri": "scene.bin",
+      "byteLength": 188044
+    }
+  ],
+  "bufferViews": [
+    {
+      "buffer": 0,
+      "byteOffset": 0,
+      "byteLength": 432,
+      "target": 34962,
+      "name": "representation:prototype:part:center-rail:display surface positions"
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 432,
+      "byteLength": 432,
+      "target": 34962,
+      "name": "representation:prototype:part:center-rail:display surface normals"
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 864,
+      "byteLength": 48,
+      "name": "representation:prototype:part:center-rail:display face source IDs"
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 912,
+      "byteLength": 144,
+      "target": 34963,
+      "name": "representation:prototype:part:center-rail:display surface indices 0"
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 1056,
+      "byteLength": 288,
+      "target": 34962,
+      "name": "representation:prototype:part:center-rail:display edge positions"
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 1344,
+      "byteLength": 96,
+      "target": 34963,
+      "name": "representation:prototype:part:center-rail:display edge indices"
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 1440,
+      "byteLength": 12,
+      "name": "representation:prototype:part:center-rail:display edge classes"
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 1452,
+      "byteLength": 48,
+      "name": "representation:prototype:part:center-rail:display edge source IDs"
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 1500,
+      "byteLength": 12816,
+      "target": 34962,
+      "name": "representation:prototype:part:fastener-01:display surface positions"
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 14316,
+      "byteLength": 12816,
+      "target": 34962,
+      "name": "representation:prototype:part:fastener-01:display surface normals"
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 27132,
+      "byteLength": 1424,
+      "name": "representation:prototype:part:fastener-01:display face source IDs"
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 28556,
+      "byteLength": 4272,
+      "target": 34963,
+      "name": "representation:prototype:part:fastener-01:display surface indices 0"
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 32828,
+      "byteLength": 696,
+      "target": 34962,
+      "name": "representation:prototype:part:fastener-01:display edge positions"
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 33524,
+      "byteLength": 296,
+      "target": 34963,
+      "name": "representation:prototype:part:fastener-01:display edge indices"
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 33820,
+      "byteLength": 37,
+      "name": "representation:prototype:part:fastener-01:display edge classes"
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 33860,
+      "byteLength": 148,
+      "name": "representation:prototype:part:fastener-01:display edge source IDs"
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 34008,
+      "byteLength": 61488,
+      "target": 34962,
+      "name": "representation:prototype:part:mounting-plate:display surface positions"
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 95496,
+      "byteLength": 61488,
+      "target": 34962,
+      "name": "representation:prototype:part:mounting-plate:display surface normals"
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 156984,
+      "byteLength": 6832,
+      "name": "representation:prototype:part:mounting-plate:display face source IDs"
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 163816,
+      "byteLength": 20496,
+      "target": 34963,
+      "name": "representation:prototype:part:mounting-plate:display surface indices 0"
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 184312,
+      "byteLength": 2016,
+      "target": 34962,
+      "name": "representation:prototype:part:mounting-plate:display edge positions"
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 186328,
+      "byteLength": 1056,
+      "target": 34963,
+      "name": "representation:prototype:part:mounting-plate:display edge indices"
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 187384,
+      "byteLength": 132,
+      "name": "representation:prototype:part:mounting-plate:display edge classes"
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 187516,
+      "byteLength": 528,
+      "name": "representation:prototype:part:mounting-plate:display edge source IDs"
+    }
+  ],
+  "accessors": [
+    {
+      "bufferView": 0,
+      "componentType": 5126,
+      "count": 36,
+      "type": "VEC3",
+      "min": [
+        -0.03500000014901161,
+        -0.004999999888241291,
+        0.0010000000474974513
+      ],
+      "max": [
+        0.03500000014901161,
+        0.004999999888241291,
+        0.010999999940395355
+      ],
+      "name": "representation:prototype:part:center-rail:display surface positions"
+    },
+    {
+      "bufferView": 1,
+      "componentType": 5126,
+      "count": 36,
+      "type": "VEC3",
+      "name": "representation:prototype:part:center-rail:display surface normals"
+    },
+    {
+      "bufferView": 2,
+      "componentType": 5125,
+      "count": 12,
+      "type": "SCALAR",
+      "name": "representation:prototype:part:center-rail:display face source IDs"
+    },
+    {
+      "bufferView": 3,
+      "componentType": 5125,
+      "count": 36,
+      "type": "SCALAR",
+      "min": [
+        0
+      ],
+      "max": [
+        35
+      ],
+      "name": "representation:prototype:part:center-rail:display surface indices 0"
+    },
+    {
+      "bufferView": 4,
+      "componentType": 5126,
+      "count": 24,
+      "type": "VEC3",
+      "min": [
+        -0.03500000014901161,
+        -0.004999999888241291,
+        0.0010000000474974513
+      ],
+      "max": [
+        0.03500000014901161,
+        0.004999999888241291,
+        0.010999999940395355
+      ],
+      "name": "representation:prototype:part:center-rail:display edge positions"
+    },
+    {
+      "bufferView": 5,
+      "componentType": 5125,
+      "count": 24,
+      "type": "SCALAR",
+      "min": [
+        0
+      ],
+      "max": [
+        23
+      ],
+      "name": "representation:prototype:part:center-rail:display edge indices"
+    },
+    {
+      "bufferView": 6,
+      "componentType": 5121,
+      "count": 12,
+      "type": "SCALAR",
+      "name": "representation:prototype:part:center-rail:display edge classes"
+    },
+    {
+      "bufferView": 7,
+      "componentType": 5125,
+      "count": 12,
+      "type": "SCALAR",
+      "name": "representation:prototype:part:center-rail:display edge source IDs"
+    },
+    {
+      "bufferView": 8,
+      "componentType": 5126,
+      "count": 1068,
+      "type": "VEC3",
+      "min": [
+        -0.004999999888241291,
+        -0.0043301270343363285,
+        0
+      ],
+      "max": [
+        0.004999999888241291,
+        0.0043301270343363285,
+        0.01600000075995922
+      ],
+      "name": "representation:prototype:part:fastener-01:display surface positions"
+    },
+    {
+      "bufferView": 9,
+      "componentType": 5126,
+      "count": 1068,
+      "type": "VEC3",
+      "name": "representation:prototype:part:fastener-01:display surface normals"
+    },
+    {
+      "bufferView": 10,
+      "componentType": 5125,
+      "count": 356,
+      "type": "SCALAR",
+      "name": "representation:prototype:part:fastener-01:display face source IDs"
+    },
+    {
+      "bufferView": 11,
+      "componentType": 5125,
+      "count": 1068,
+      "type": "SCALAR",
+      "min": [
+        0
+      ],
+      "max": [
+        1067
+      ],
+      "name": "representation:prototype:part:fastener-01:display surface indices 0"
+    },
+    {
+      "bufferView": 12,
+      "componentType": 5126,
+      "count": 58,
+      "type": "VEC3",
+      "min": [
+        -0.004999999888241291,
+        -0.0043301270343363285,
+        0
+      ],
+      "max": [
+        0.004999999888241291,
+        0.0043301270343363285,
+        0.01600000075995922
+      ],
+      "name": "representation:prototype:part:fastener-01:display edge positions"
+    },
+    {
+      "bufferView": 13,
+      "componentType": 5125,
+      "count": 74,
+      "type": "SCALAR",
+      "min": [
+        0
+      ],
+      "max": [
+        57
+      ],
+      "name": "representation:prototype:part:fastener-01:display edge indices"
+    },
+    {
+      "bufferView": 14,
+      "componentType": 5121,
+      "count": 37,
+      "type": "SCALAR",
+      "name": "representation:prototype:part:fastener-01:display edge classes"
+    },
+    {
+      "bufferView": 15,
+      "componentType": 5125,
+      "count": 37,
+      "type": "SCALAR",
+      "name": "representation:prototype:part:fastener-01:display edge source IDs"
+    },
+    {
+      "bufferView": 16,
+      "componentType": 5126,
+      "count": 5124,
+      "type": "VEC3",
+      "min": [
+        -0.04800000041723251,
+        -0.02800000086426735,
+        0
+      ],
+      "max": [
+        0.04800000041723251,
+        0.02800000086426735,
+        0.006000000052154064
+      ],
+      "name": "representation:prototype:part:mounting-plate:display surface positions"
+    },
+    {
+      "bufferView": 17,
+      "componentType": 5126,
+      "count": 5124,
+      "type": "VEC3",
+      "name": "representation:prototype:part:mounting-plate:display surface normals"
+    },
+    {
+      "bufferView": 18,
+      "componentType": 5125,
+      "count": 1708,
+      "type": "SCALAR",
+      "name": "representation:prototype:part:mounting-plate:display face source IDs"
+    },
+    {
+      "bufferView": 19,
+      "componentType": 5125,
+      "count": 5124,
+      "type": "SCALAR",
+      "min": [
+        0
+      ],
+      "max": [
+        5123
+      ],
+      "name": "representation:prototype:part:mounting-plate:display surface indices 0"
+    },
+    {
+      "bufferView": 20,
+      "componentType": 5126,
+      "count": 168,
+      "type": "VEC3",
+      "min": [
+        -0.04800000041723251,
+        -0.02800000086426735,
+        0
+      ],
+      "max": [
+        0.04800000041723251,
+        0.02800000086426735,
+        0.006000000052154064
+      ],
+      "name": "representation:prototype:part:mounting-plate:display edge positions"
+    },
+    {
+      "bufferView": 21,
+      "componentType": 5125,
+      "count": 264,
+      "type": "SCALAR",
+      "min": [
+        0
+      ],
+      "max": [
+        167
+      ],
+      "name": "representation:prototype:part:mounting-plate:display edge indices"
+    },
+    {
+      "bufferView": 22,
+      "componentType": 5121,
+      "count": 132,
+      "type": "SCALAR",
+      "name": "representation:prototype:part:mounting-plate:display edge classes"
+    },
+    {
+      "bufferView": 23,
+      "componentType": 5125,
+      "count": 132,
+      "type": "SCALAR",
+      "name": "representation:prototype:part:mounting-plate:display edge source IDs"
+    }
+  ],
+  "extras": {
+    "madi": {
+      "profile": "madi.experimental.gltf.1",
+      "status": "experimental-not-interchange",
+      "sceneId": "scene:occt:87b7909984c635ff",
+      "revisionId": "revision:occt:87b7909984c635ff:14b35fda",
+      "sourceDigest": "sha256:87b7909984c635ffc02c61211b22380252d455ebbf7c8e18ab68a2d2f7ac4da3",
+      "optionsDigest": "sha256:14b35fda584ddfbfe5614edd5a32be03938610e8b3ffbd51acdc8c8cc9df9abd",
+      "documents": [
+        {
+          "id": "document:sha256:87b7909984c635ff",
+          "displayName": "repeated-fasteners-ap242.step",
+          "format": "STEP",
+          "formatVersion": "AP242",
+          "sourceDigest": "sha256:87b7909984c635ffc02c61211b22380252d455ebbf7c8e18ab68a2d2f7ac4da3"
+        }
+      ],
+      "diagnostics": [
+        {
+          "severity": "info",
+          "code": "PHASE0_OCCT_PYTHON_BINDING",
+          "message": "Evidence was extracted with the OCP Python binding; the production native C++ adapter remains a separate build target.",
+          "documentId": "document:sha256:87b7909984c635ff",
+          "sourceRef": "source:document:sha256:87b7909984c635ff:document"
+        }
+      ]
+    }
+  }
+}

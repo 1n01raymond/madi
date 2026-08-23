@@ -120,6 +120,21 @@ CAD edge、Worker 解码，以及在 Chrome 与 Firefox 中保留源引用的摇
 未经修改的 CAD 按 MIT 许可证再分发，并固定上游 commit 与许可证声明；这不
 表示 Adafruit 对 MADI 的认可。请查看[已审核的浏览器证据](artifacts/browser-matrix/README.md)。
 
+## 当前编译器验证
+
+仓库现在不仅包含预先提取的 Scene IR，还提供可执行的本地 AP242/AP214 路径。
+安装固定版本的 OCCT Python 适配器依赖后，一条命令即可读取 STEP、保留装配复用
+与 CAD edge、验证源标识，并输出编译后的 glTF 文件对：
+
+```sh
+python -m pip install -r native/adapter-occt/tools/requirements-evidence.txt
+pnpm madi compile fixtures/step/repeated-fasteners-ap242.step \
+  --output output/repeated-fasteners-ap242
+```
+
+提交的 AP242 结果经独立验证，Khronos glTF 错误和警告均为 0。展开的 Scene IR
+只是临时数据，并非 MADI 文件格式。请查看[编译器证据](artifacts/phase1/README.md)。
+
 ## 从设计文档开始
 
 | 你想了解… | 请阅读… |

@@ -129,6 +129,23 @@ triangle, 13,897개 명시적 CAD edge, Worker 디코딩, 원본 참조가 유�
 MADI를 보증한다는 의미는 아닙니다. [검토된 브라우저 증거](artifacts/browser-matrix/README.md)를
 확인하세요.
 
+## 현재 컴파일러 증거
+
+저장소에는 이제 미리 추출된 Scene IR뿐 아니라 실행 가능한 로컬 AP242/AP214
+경로가 있습니다. 고정된 OCCT Python 어댑터 의존성을 설치하면 하나의 명령으로
+STEP을 읽고, 어셈블리 재사용과 CAD 엣지를 보존하고, 원본 식별자를 검증한 뒤
+컴파일된 glTF 파일 쌍을 생성합니다.
+
+```sh
+python -m pip install -r native/adapter-occt/tools/requirements-evidence.txt
+pnpm madi compile fixtures/step/repeated-fasteners-ap242.step \
+  --output output/repeated-fasteners-ap242
+```
+
+커밋된 AP242 결과는 Khronos glTF 오류·경고 0건으로 독립 검증됩니다. 확장된
+Scene IR은 임시 데이터이며 MADI 파일 포맷이 아닙니다. [컴파일러 증거](artifacts/phase1/README.md)를
+확인하세요.
+
 ## 설계 문서부터 시작하기
 
 | 알고 싶은 내용 | 문서 |

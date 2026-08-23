@@ -1,6 +1,6 @@
 # Fixture license
 
-`precision-bracket.step`, `repeated-fasteners.step`,
+`precision-bracket.step`, `repeated-fasteners.step`, `repeated-fasteners-ap242.step`,
 `unsupported-layer-assignment.step`, and their generator source are original
 MADI project contributions. They are distributed under the Apache License 2.0
 with the rest of this repository.

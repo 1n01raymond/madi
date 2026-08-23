@@ -8,9 +8,11 @@ evidence from planned behavior.
 
 ## First compiler slice
 
-The first slice compiles the real OCCT-derived `EngineeringScene` into standard
-glTF 2.0 JSON plus an external binary resource and a machine-readable build
-report. It intentionally avoids defining a MADI CAD or delivery container.
+The first slice accepts local STEP AP242/AP214 through the isolated OCCT adapter
+and compiles its validated `EngineeringScene` into standard glTF 2.0 JSON plus
+an external binary resource and machine-readable adapter/compiler reports. The
+expanded Scene IR is temporary. This intentionally avoids defining a MADI CAD
+or delivery container.
 
 | Signal | Evidence | Status |
 |---|---|---|
@@ -20,6 +22,7 @@ report. It intentionally avoids defining a MADI CAD or delivery container.
 | Engineering edges | Canonical glTF line primitives retain 13,897 explicit OCCT edge segments | Passed |
 | Source identity | Report source digest matches OCCT evidence; node/mesh `extras` retain IDs and refs | Passed for experimental profile |
 | Independent package validation | Hashes, ranges, hierarchy, counts, and report parity are checked without compiler state | Passed by `pnpm phase1:evidence:check` |
+| Direct AP242 input | `pnpm madi compile` preflights the Part 21 schema, runs OCCT STEPCAF/XDE, cross-checks source SHA-256, and removes temporary Scene IR | Passed with the checksum-locked `repeated-fasteners-ap242.step` package |
 
 ## First browser runtime slice
 
@@ -44,6 +47,8 @@ direct WebGPU renderer. The Phase 0 Scene IR JSON is no longer a browser input.
 
 ```sh
 pnpm phase1:compile:evidence
+pnpm madi compile fixtures/step/repeated-fasteners-ap242.step \
+  --output output/repeated-fasteners-ap242
 pnpm phase1:evidence:check
 pnpm browser:matrix
 pnpm check
@@ -55,7 +60,6 @@ See `artifacts/phase1/README.md` for the compiled package,
 
 ## Not yet proven
 
-- Direct local STEP AP242 input into the Phase 1 compiler entry point.
 - Coarse and target LODs, partitioning, compression, and progressive loading.
 - Useful first render before a delayed or large target-geometry payload completes.
 - Full material, mass, PMI, and domain-specific property schemas remain pending.

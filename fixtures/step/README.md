@@ -5,7 +5,7 @@ committed here merely because it can be downloaded without authentication. Its
 redistribution terms, source, checksum, and intended test purpose must all be
 reviewable.
 
-Three focused fixtures are original MADI project assets generated from the
+Four focused fixtures are original MADI project assets generated from the
 auditable Python source in `generators/generate_fixtures.py`. The canonical
 visual and electronics fixture is an unmodified Adafruit PyGamer STEP assembly
 from the MIT-licensed `Adafruit_CAD_Parts` repository. Its exact upstream commit
@@ -45,6 +45,7 @@ and license notice are committed alongside the model.
 |---|---|
 | `precision-bracket.step` | curved seams, through-holes, fillets, explicit source edges, tolerance-sensitive B-rep traversal |
 | `repeated-fasteners.step` | nested hierarchy, eight occurrences of one prototype, transforms, names, and colors |
+| `repeated-fasteners-ap242.step` | the same authored assembly exported by OCCT as AP242 DIS for the direct STEP compiler entry point |
 | `adafruit-pygamer.step` | canonical real-world electronics assembly, 85 part occurrences, dense thin features, source colors, and repeated SMD packages |
 | `unsupported-layer-assignment.step` | the same supported assembly geometry plus one AP214 presentation-layer assignment that Phase 0 intentionally does not map |
 
