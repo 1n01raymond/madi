@@ -419,6 +419,14 @@ pairs, preflights their Part 21 envelopes, invokes pinned IfcOpenShell 0.8.5,
 cross-checks every source digest, validates the resulting Scene IR, and uses the
 same standards-first glTF compiler as STEP.
 
+The adapter boundary uses a split Scene IR transport rather than one expanded
+JSON document. The adapter writes structure-only JSON whose representation
+surfaces reference a separate little-endian geometry file, and reports a
+SHA-256 for each half; the compiler verifies both and resolves the references
+into typed-array views without copying. On Digital Hub this replaced an
+81,805,061-byte document with a 39,135,637-byte structure and a 28,134,848-byte
+geometry file, and reproduced the same compiled package digest.
+
 The qualified Digital Hub result combines four IFC4 documents into 13,681
 occurrences, including 5,152 renderable products. It preserves 3,383 unique
 geometric prototypes and 1,769 reused occurrences, reducing 2,534,364 submitted
@@ -432,3 +440,13 @@ only changed GPU batches, and fixed decoded/GPU admission caps retain coarse
 fallbacks when pressure is reached. It is not yet a spatial scheduler: LOD,
 camera reprioritization, eviction, cache tiers, and explicit IFC CAD-edge
 classification remain deferred.
+
+### 21.1 Measured real-large boundary
+
+The split transport removes geometry from the structure document, but the
+compiler still parses that document as one JSON string. The qualified
+`ifc-bench-sixty5` federation crosses that ceiling, so `madi compile-ifc`
+reports the measured limit instead of surfacing an opaque V8 allocation error.
+Streaming the structure and encoding flattened properties as binary streams are
+the named follow-up slices; until then, real-large IFC input is a source
+qualification and adapter result, not a compiled package.

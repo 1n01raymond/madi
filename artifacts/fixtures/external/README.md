@@ -10,6 +10,10 @@ They are not renderer benchmarks.
 |---|---:|---:|---:|
 | `nist-pmi-step-files.json` | 2 members from the official ZIP | 4,065,743 | 30,100 |
 | `ifc-bench-digital-hub.json` | 4 discipline IFC files | 67,829,367 | 482,994 |
+| `ifc-bench-sixty5.json` | 7 discipline IFC files | 839,866,782 | 11,376,756 |
+
+The `real-large` sixty5 federation is seven IFC2X3 documents whose largest
+member is a 342.7 MB architecture model. Fetching it requires `--allow-large`.
 
 Reproduce after explicitly fetching the corresponding source:
 
@@ -18,6 +22,8 @@ pnpm fixtures:external inspect nist-pmi-step-files \
   --output artifacts/fixtures/external/nist-pmi-step-files.json
 pnpm fixtures:external inspect ifc-bench-digital-hub \
   --output artifacts/fixtures/external/ifc-bench-digital-hub.json
+pnpm fixtures:external inspect ifc-bench-sixty5 \
+  --output artifacts/fixtures/external/ifc-bench-sixty5.json
 pnpm fixtures:external:check
 ```
 

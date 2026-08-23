@@ -60,14 +60,17 @@ support a benchmark claim.
 |---|---|---|
 | NIST MBE PMI STEP files | smoke, qualified | AP242 B-rep/PMI and tessellated-geometry conformance |
 | IFC-Bench Digital Hub | real-medium, qualified | four-file IFC4 architecture/MEP federation and semantic ingestion |
-| IFC-Bench sixty5 | real-large, registered | opt-in 839.9 MB multi-discipline BIM candidate |
+| IFC-Bench sixty5 | real-large, qualified | opt-in 839.9 MB seven-discipline IFC2X3 federation |
 
 The real sources complement, rather than replace, deterministic generated
 workloads. Digital Hub is suitable for building the IFC adapter and checking
 federation identity, hierarchy, mapped representations, and properties. It is
 not a plant/ship dataset and is not large enough by itself to decide ADR-0003.
-The `sixty5` tier must be fetched, inspected, compiled, and visually reviewed
-before promotion to qualified evidence. See `fixtures/external/README.md`.
+The `sixty5` tier is now qualified as a source: every file is checksum-verified
+and its Part 21 envelope inspected. Qualification covers source identity and
+complexity only; compiled output, visual review, and a hardware matrix are still
+required before it supports an ADR-0003 claim. See
+`fixtures/external/README.md`.
 
 ### 4.2 Industrial scale ladder
 

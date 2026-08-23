@@ -20,7 +20,15 @@ Digital Hub dataset.
 | Submitted triangles before reuse | 2,534,364 |
 | Coalesced target requests | 45 |
 | Target request budget | 512 KiB (except one indivisible 1.12 MiB prototype) |
+| Intermediate structure bytes | 39,135,637 |
+| Intermediate geometry bytes | 28,134,848 |
 | Compiled package bytes | 59,679,456 |
+
+The adapter hands the compiler a split Scene IR transport: a structure-only
+JSON document plus a little-endian geometry file, each digest-linked in the
+adapter report. That pair replaced a single 81,805,061-byte JSON document, so
+the structure the compiler must parse as one string is 52.2% smaller while the
+compiled package stays byte-identical.
 
 IfcOpenShell 0.8.5 generated local prototype geometry and occurrence
 placements in metres. MADI retained document-scoped GlobalIds, hierarchy,
@@ -54,6 +62,8 @@ pnpm madi compile-ifc \
   --threads 4 \
   --retain-scene-ir \
   --output output/ifc/digital-hub
+# --retain-scene-ir writes scene-ir.json and scene-ir-geometry.bin together;
+# the structure JSON alone is not a loadable scene.
 
 pnpm ifc:federation:evidence
 pnpm ifc:federation:check

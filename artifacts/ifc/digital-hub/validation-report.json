@@ -8,8 +8,8 @@
   "reports": {
     "adapter": {
       "path": "adapter-report.json",
-      "bytes": 19917,
-      "sha256": "ca716dc99084e90431288a6d14ef37cd4e2132cd5aed2c1ea975fca4eeb3b3cf"
+      "bytes": 20136,
+      "sha256": "164bcae492e6e6ffcfe9c55b646125f1baf8df3ee242f1c3bea0f303fe453918"
     },
     "compiler": {
       "path": "build-report.json",

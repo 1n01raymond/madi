@@ -119,9 +119,10 @@ claims will be published with redistributable models, exact hardware and browser
 details, cold/warm states, and reproducible commands.
 
 Real reference sources are now checksum-locked without committing their large
-binaries: two NIST AP242 conformance cases and IFC-Bench's four-discipline
-Digital Hub federation are qualified, while the 839.9 MB `sixty5` federation is
-an explicit opt-in candidate. See the
+binaries: two NIST AP242 conformance cases, IFC-Bench's four-discipline Digital
+Hub federation, and the 839.9 MB seven-discipline `sixty5` federation are
+qualified against pinned per-file digests. The `sixty5` download stays an
+explicit opt-in. See the
 [external fixture registry](fixtures/external/README.md).
 
 ## Current runtime proof

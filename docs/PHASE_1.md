@@ -43,6 +43,26 @@ reports `IFC_EDGE_EXTRACTION_DEFERRED` and zero explicit edge segments. The
 compact result is checked by `pnpm ifc:federation:check`; large source and
 compiled binaries remain outside Git.
 
+### Split Scene IR transport and the real-large boundary
+
+The adapter no longer hands the compiler one expanded JSON document. It writes
+structure-only JSON whose representation surfaces hold
+`{encoding, byteOffset, byteLength}` references into a separate little-endian
+geometry file, reports a SHA-256 for each half, and the compiler resolves those
+references into typed-array views without copying.
+
+| Signal | Evidence | Status |
+|---|---|---|
+| Transport equivalence | Digital Hub recompiles to the same `a6d5c0eecebf` package digest from the split pair | Passed |
+| Intermediate reduction | One 81,805,061-byte document became a 39,135,637-byte structure plus a 28,134,848-byte geometry file | Passed |
+| Hydration contract | Stream bounds, encodings, element alignment, unaligned buffers, and unencodable members are unit-checked | Passed in `packages/compiler/test/ifc-scene.test.ts` |
+| Real-large extraction | The seven-document IFC2X3 sixty5 federation extracts 192,316 semantic entities, 78,173 geometric occurrences, 42,435 prototypes, and 4,866,386 unique triangles from 40,310,966 submitted | Passed, recorded in `artifacts/ifc/sixty5/` |
+| Real-large compile | Its 631,929,038-byte structure exceeds the 536,870,888-byte maximum string length, so `madi compile-ifc` reports the measured limit instead of failing opaquely | Blocked, boundary recorded |
+
+Splitting geometry out was necessary but not sufficient. The remaining bulk is
+4,503,078 flattened property values and 188,319 occurrence records, so the named
+follow-up is a streamed structure section format rather than a larger string.
+
 ## First browser runtime slice
 
 The browser now consumes that compiled package directly. It reads the glTF node
@@ -87,6 +107,8 @@ See `artifacts/phase1/README.md` for the compiled package,
   residency budget. The current selection path can only restore retained coarse
   fallback batches.
 - Full material, mass, PMI, and domain-specific property schemas remain pending.
+- A compiled package, Khronos validation, or browser result for the qualified
+  real-large sixty5 federation. Only its adapter-side extraction is recorded.
 - A repeated reference-hardware and integrated-GPU decision matrix for ADR-0003.
 - Large-coordinate precision behavior required by ADR-0005.
 - A public end-to-end review workflow and reproducible performance report.
@@ -105,6 +127,11 @@ and the browser reconciles only changed GPU batches under fixed 64 MiB decoded
 and GPU admission caps. A selected target now pins its detail and evicts colder
 target groups to their retained coarse fallbacks. The next scheduler increment
 is persistent cache tiers and camera/view reprioritization.
+
+On the compiler side the next increment is a streamed structure section format
+for the adapter boundary, so a real-large federation no longer has to be
+resident as one JSON string or one object graph. The sixty5 measurement in
+`artifacts/ifc/sixty5/` is the gate that increment has to clear.
 
 In parallel, advance the repeated 100k record onto genuinely different hardware
 before widening Studio UI. Add GPU timestamp queries and allocator/GPU retained-
