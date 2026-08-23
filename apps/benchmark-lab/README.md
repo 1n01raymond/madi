@@ -21,6 +21,7 @@ pnpm --filter @madi/benchmark-lab dev
 # ?backend=madi&scale=gate
 # ?backend=madi&scale=target&profile=heterogeneous&culling=frustum
 # ?backend=three&scale=target&profile=heterogeneous&culling=frustum
+# ?backend=madi&scale=target&profile=heterogeneous&culling=frustum&memory=scene-delta
 ```
 
 Scale tiers contain 1k, 10k, and 100k occurrences. The target tier submits at
@@ -30,3 +31,9 @@ The heterogeneous profile retains 256 deterministic equipment variants and
 uses a local-review trace so culling removes a material part of the 10k and
 100k scenes. Every run remains `exploratory-not-adr-decision` until the full
 hardware, repetition, GPU timing, and retained-memory contract is met.
+
+`memory=scene-delta` measures browser-wide memory after backend initialization
+and again after the first rendered scene while retaining the same generated
+workload. The runner subtracts measurement overhead from startup metrics and
+performs warmup afterward. Use `pnpm benchmark:repeatability` for three fresh
+browser processes per path with alternating backend order.

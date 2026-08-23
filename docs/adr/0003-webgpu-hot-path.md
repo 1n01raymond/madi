@@ -103,3 +103,17 @@ without integrated-GPU coverage, GPU timestamps, repeated clean sessions,
 isolated retained-memory accounting, bounded residency, or a real partner
 assembly. Its outcome chooses the next experiment but does not satisfy the
 industrial decision contract above.
+
+### Fresh-process repeatability harness
+
+The third record launches a new browser process for each of three repeats per
+browser/backend and alternates backend order. Chrome shows a 27.0% median paired
+CPU-p95 reduction and a 38.2% lower median backend scene-activation memory delta;
+the CPU threshold holds in two of three pairs and the diagnostic memory
+threshold in all three. Firefox shows a 10.0% median CPU reduction and exposes no
+compatible memory measurement API.
+
+The result supports continuing the investigation but does not accept this ADR.
+It is still one host and adapter, browser behavior differs, the public workload
+is procedural, and GPU timestamps, integrated-GPU coverage, bounded residency,
+and a real industrial assembly remain missing.
