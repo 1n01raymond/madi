@@ -20,12 +20,18 @@ The registry deliberately separates two states:
 |---|---|---:|---|---|
 | `nist-pmi-step-files` | qualified smoke | 14.0 MB archive | AP242 edition 3 B-rep/PMI and an AP242 tessellated-geometry edge case | assembly or runtime scale |
 | `ifc-bench-digital-hub` | qualified real-medium | 67.8 MB / 4 IFC files | real IFC4 federation across architecture, heating, plumbing, and ventilation | ship/plant scale or ADR-0003 performance |
-| `ifc-bench-sixty5` | registered real-large | 839.9 MB / 7 IFC files | opt-in large multi-discipline BIM candidate with exact per-file hashes | nothing until it is fetched, inspected, compiled, and benchmarked |
+| `ifc-bench-sixty5` | qualified real-large | 839.9 MB / 7 IFC files | real IFC2X3 federation an order of magnitude larger than Digital Hub, across architecture, structure, facade, kitchen, electrical, plumbing, and ventilation | IFC4-only semantics, renderer performance, or ADR-0003 evidence |
 
 The qualified Digital Hub files contain 482,994 Part 21 entities in total,
 including 79,663 `IfcRel*` relationships, 2,567 mapped items, twelve building
-storeys, and 161,695 single-value properties. These are source-complexity
-signals, not triangle, occurrence, memory, or frame-time measurements.
+storeys, and 161,695 single-value properties. The qualified sixty5 files contain
+11,376,756 entities across 167 distinct types, including 732,401 `IfcRel*`
+relationships, 38,812 mapped items, seven buildings, 129 building storeys, and
+2,867,886 single-value properties. These are source-complexity signals, not
+triangle, occurrence, memory, or frame-time measurements.
+
+Every sixty5 document declares `IFC2X3`, so the federation qualifies the older
+schema path rather than IFC4 additions such as `IfcProjectedCRS`.
 
 ## Commands
 
@@ -40,6 +46,7 @@ pnpm fixtures:external inspect ifc-bench-digital-hub
 
 # Deliberate 839.9 MB opt-in; never run by CI or the normal repository check.
 pnpm fixtures:external fetch ifc-bench-sixty5 --allow-large
+pnpm fixtures:external inspect ifc-bench-sixty5
 ```
 
 `pnpm fixtures:external:check` is offline. It validates manifest structure,
@@ -62,9 +69,9 @@ members and verifies each member independently.
   is useful because it preserves each project's own license and
   federation boundaries. Digital Hub is small enough for contributor workflows
   and contains the architecture/MEP split needed for an IFC adapter slice.
-- `sixty5` is large enough to become a meaningful ingestion and memory-pressure
-  tier, but remains opt-in until MADI has the IFC compiler path and a reviewed
-  qualification run.
+- `sixty5` is large enough to be a meaningful ingestion and memory-pressure
+  tier. Its download stays opt-in, but its qualification run is reviewed and its
+  per-file identity is committed.
 
 Discovery catalogs are not automatically fixtures. [BIMData's R&D
 list](https://github.com/bimdata/BIMData-Research-and-Development/blob/master/pages/IFC_FILES.md)

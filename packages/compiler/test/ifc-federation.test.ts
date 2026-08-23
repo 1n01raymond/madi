@@ -48,10 +48,45 @@ scene.documents = scene.documents.map((document) => ({
   formatVersion: "IFC4",
   sourceDigest: "sha256:" + sourceDigest,
 }));
-const serializedScene = JSON.stringify(scene) + "\\n";
-await writeFile(option("--scene"), serializedScene);
+
+// Mirrors the adapter transport: surface-only representations whose streams
+// are little-endian references into one concatenated geometry file.
+const streams = [];
+let geometryLength = 0;
+const append = (values, Ctor, encoding) => {
+  while (geometryLength % 8) {
+    streams.push(Buffer.alloc(1));
+    geometryLength += 1;
+  }
+  const payload = Buffer.from(Ctor.from(values).buffer);
+  const entry = { encoding, byteOffset: geometryLength, byteLength: payload.byteLength };
+  streams.push(payload);
+  geometryLength += payload.byteLength;
+  return entry;
+};
+scene.representations = scene.representations.map((representation) => {
+  const { edges, ...rest } = representation;
+  const { faceSourceIds, uvs, colorIds, ...surface } = representation.surface;
+  return {
+    ...rest,
+    surface: {
+      ...surface,
+      positions: append(surface.positions, Float64Array, "f64le"),
+      indices: append(surface.indices, Uint32Array, "u32le"),
+      normals: append(surface.normals, Float32Array, "f32le"),
+    },
+  };
+});
+const structure = Buffer.from(JSON.stringify(scene) + "\\n", "utf8");
+const geometry = Buffer.concat(streams);
+await writeFile(option("--scene"), structure);
+await writeFile(option("--geometry"), geometry);
+const identify = (bytes) => ({
+  byteLength: bytes.byteLength,
+  sha256: createHash("sha256").update(bytes).digest("hex"),
+});
 await writeFile(option("--report"), JSON.stringify({
-  schemaVersion: "madi.ifc-adapter-report.1",
+  schemaVersion: "madi.ifc-adapter-report.2",
   federation: { sourceDigest: federationDigest },
   sources: [{
     discipline,
@@ -61,8 +96,9 @@ await writeFile(option("--report"), JSON.stringify({
     schema: "IFC4",
   }],
   scene: {
-    byteLength: Buffer.byteLength(serializedScene),
-    sha256: createHash("sha256").update(serializedScene).digest("hex"),
+    encodingVersion: "madi.ifc-scene-ir-split.1",
+    structure: identify(structure),
+    geometry: identify(geometry),
   },
 }));
 `,
@@ -96,14 +132,23 @@ await writeFile(option("--report"), JSON.stringify({
         renderableOccurrenceCount: 10,
         triangleCount: 2076,
       });
-      const [gltf, retainedScene, adapterReport] = await Promise.all([
+      const [gltf, retainedScene, retainedGeometry, adapterReport] = await Promise.all([
         readFile(join(outputDirectory, "scene.gltf"), "utf8").then(JSON.parse),
         readFile(join(outputDirectory, "scene-ir.json"), "utf8").then(JSON.parse),
+        readFile(join(outputDirectory, "scene-ir-geometry.bin")),
         readFile(join(outputDirectory, "adapter-report.json"), "utf8").then(JSON.parse),
       ]);
       expect(gltf.asset.generator).toContain("IfcOpenShell federation slice");
       expect(retainedScene.documents[0].format).toBe("IFC");
       expect(adapterReport.sceneIrValidation.ok).toBe(true);
+      // The retained structure keeps references, not expanded coordinate arrays.
+      expect(retainedScene.representations[0].surface.positions).toMatchObject({
+        encoding: "f64le",
+        byteOffset: 0,
+      });
+      expect(retainedGeometry.byteLength).toBeGreaterThan(
+        retainedScene.representations[0].surface.positions.byteLength,
+      );
     } finally {
       await rm(temporaryDirectory, { recursive: true, force: true });
     }

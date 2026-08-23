@@ -43,10 +43,15 @@ pnpm madi compile-ifc \
   --output output/ifc/digital-hub
 ```
 
-The full Scene IR is a large disposable intermediate and stays under
-`output/`. Reviewed counts and hashes live under `artifacts/ifc/`; normal CI
-validates those compact records without installing IfcOpenShell or downloading
-the IFC sources.
+The Scene IR is a large disposable intermediate and stays under `output/`. The
+adapter writes it as a split pair rather than one document: `--scene` receives
+structure-only JSON whose representation surfaces hold
+`{encoding, byteOffset, byteLength}` references, and `--geometry` receives the
+concatenated little-endian streams those references point into. Every stream
+starts on an eight-byte boundary so the compiler can take typed-array views
+without copying, and the report carries a SHA-256 for each half. Reviewed
+counts and hashes live under `artifacts/ifc/`; normal CI validates those
+compact records without installing IfcOpenShell or downloading the IFC sources.
 
 IfcOpenShell is LGPL-3.0-or-later. It is an adapter dependency and is not
 bundled into MADI's browser runtime.

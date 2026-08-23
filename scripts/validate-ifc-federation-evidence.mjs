@@ -1,9 +1,11 @@
+import { constants as bufferConstants } from "node:buffer";
 import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 
 const repositoryRoot = resolve(import.meta.dirname, "..");
 const artifactDirectory = resolve(repositoryRoot, "artifacts/ifc/digital-hub");
+const sixty5Directory = resolve(repositoryRoot, "artifacts/ifc/sixty5");
 
 function assert(condition, message) {
   if (!condition) throw new TypeError(`[ifc-federation] ${message}`);
@@ -35,7 +37,7 @@ assert(
   dataset.source.revision === "4b37e5d77f12f30dfd7cb7375e15278e1037c808",
   "Digital Hub source revision changed.",
 );
-assert(adapter.schemaVersion === "madi.ifc-adapter-report.1", "Unknown adapter report.");
+assert(adapter.schemaVersion === "madi.ifc-adapter-report.2", "Unknown adapter report.");
 assert(
   adapter.adapter.name === "IfcOpenShell" && adapter.adapter.version === "0.8.5",
   "IfcOpenShell evidence version changed.",
@@ -161,9 +163,20 @@ assert(
   "IFC target range coalescing contract changed.",
 );
 assert(
-  adapter.scene.sha256 === "0f9b1e65d81370c283da4313312568da53a77373dd8f87486bb8b912d8fdaec1" &&
-    adapter.scene.byteLength === 81805061,
-  "Scene IR evidence changed.",
+  adapter.scene.encodingVersion === "madi.ifc-scene-ir-split.1",
+  "Scene IR transport encoding changed.",
+);
+assert(
+  adapter.scene.structure.sha256 ===
+    "38dd0f03affa65e1165ac84853645ed6b1e7939fc07d72cae5bcb8da2997025c" &&
+    adapter.scene.structure.byteLength === 39135637,
+  "Scene IR structure evidence changed.",
+);
+assert(
+  adapter.scene.geometry.sha256 ===
+    "247ae94d95883b1b65c5cc00e35048379fb8adbb22999cee9a13858945e84c2b" &&
+    adapter.scene.geometry.byteLength === 28134848,
+  "Scene IR geometry evidence changed.",
 );
 
 assert(
@@ -199,7 +212,108 @@ assert(
   "Khronos validation evidence failed or changed.",
 );
 
-for (const text of [adapterBytes.toString("utf8"), compilerBytes.toString("utf8")]) {
+
+// The real-large federation is adapter-only evidence: extraction completes, but
+// its structure document is larger than one JavaScript string, so no compiled
+// package exists for it yet.
+const sixty5Bytes = await readFile(resolve(sixty5Directory, "adapter-report.json"));
+const sixty5 = JSON.parse(sixty5Bytes.toString("utf8"));
+const sixty5Dataset = manifest.datasets.find(({ id }) => id === "ifc-bench-sixty5");
+
+assert(sixty5Dataset?.status === "qualified", "sixty5 fixture is not qualified.");
+assert(sixty5Dataset.tier === "real-large", "sixty5 fixture tier changed.");
+assert(sixty5Dataset.source.license === "CC-BY-4.0", "sixty5 source license changed.");
+assert(
+  sixty5Dataset.source.revision === "4b37e5d77f12f30dfd7cb7375e15278e1037c808",
+  "sixty5 source revision changed.",
+);
+assert(sixty5.schemaVersion === "madi.ifc-adapter-report.2", "Unknown sixty5 adapter report.");
+assert(
+  sixty5.adapter.name === "IfcOpenShell" && sixty5.adapter.version === "0.8.5",
+  "sixty5 IfcOpenShell evidence version changed.",
+);
+assert(
+  sixty5.federation.sourceDigest ===
+    "e334c6a9295a0adbf8ffbb15c61ea05c47b0135a319ee370f853bb9a36d21dec",
+  "sixty5 federation source digest changed.",
+);
+assert(
+  JSON.stringify(sixty5.federation.documentOrder) ===
+    JSON.stringify([
+      "architecture",
+      "electrical",
+      "facade",
+      "kitchen",
+      "plumbing",
+      "structure",
+      "ventilation",
+    ]),
+  "sixty5 federation document order changed.",
+);
+assert(
+  sixty5.sources.length === sixty5Dataset.assets.length,
+  "sixty5 source document count changed.",
+);
+for (const source of sixty5.sources) {
+  const asset = sixty5Dataset.assets.find(({ discipline }) => discipline === source.discipline);
+  assert(asset, `Unknown sixty5 discipline ${source.discipline}.`);
+  assert(
+    source.path === `projects/sixty5/${asset.path}`,
+    `sixty5 ${source.discipline} URI changed.`,
+  );
+  assert(source.schema === "IFC2X3", `sixty5 ${source.discipline} IFC schema changed.`);
+  assert(source.byteLength === asset.byteLength, `sixty5 ${source.discipline} byte count changed.`);
+  assert(source.sha256 === asset.sha256, `sixty5 ${source.discipline} digest changed.`);
+}
+assertCounts(
+  sixty5.counts,
+  {
+    documentCount: 7,
+    part21EntityCount: 11376756,
+    semanticEntityCount: 192316,
+    occurrenceCount: 188319,
+    geometricOccurrenceCount: 78173,
+    prototypeCount: 42469,
+    geometricPrototypeCount: 42435,
+    mappedItemCount: 38812,
+    reusedGeometryOccurrenceCount: 35738,
+    submittedTriangleCount: 40310966,
+    triangleCount: 4866386,
+    vertexCount: 2596268,
+    propertyValueCount: 4503078,
+    duplicateGlobalIdCount: 0,
+  },
+  "sixty5 adapter",
+);
+assert(
+  sixty5.scene.encodingVersion === "madi.ifc-scene-ir-split.1",
+  "sixty5 Scene IR transport encoding changed.",
+);
+assert(
+  sixty5.scene.structure.sha256 ===
+    "51520c8064a35b3f1a33cc815dff7758d195779cfa50b51a7f03c0b595240aa7" &&
+    sixty5.scene.structure.byteLength === 631929038,
+  "sixty5 Scene IR structure evidence changed.",
+);
+assert(
+  sixty5.scene.geometry.sha256 ===
+    "d4960401750f7e67b9c0387c846636e7d63e4bdba099e78886f0bf439d9a8d0d" &&
+    sixty5.scene.geometry.byteLength === 151864848,
+  "sixty5 Scene IR geometry evidence changed.",
+);
+assert(
+  sixty5.scene.structure.byteLength > bufferConstants.MAX_STRING_LENGTH,
+  "sixty5 structure now fits one string; the documented compiler boundary is stale.",
+);
+assert(
+  sixty5.diagnostics.codes.includes("IFC_EDGE_EXTRACTION_DEFERRED"),
+  "sixty5 deferred IFC edge limitation is no longer explicit.",
+);
+for (const text of [
+  adapterBytes.toString("utf8"),
+  compilerBytes.toString("utf8"),
+  sixty5Bytes.toString("utf8"),
+]) {
   assert(!/[A-Za-z]:[\\/]/u.test(text), "Evidence leaks an absolute Windows path.");
   assert(!text.includes("output/external-fixtures"), "Evidence leaks a local cache path.");
 }
@@ -212,4 +326,11 @@ console.log(
 console.log(
   `[ifc-federation] Khronos glTF Validator ${evidence.khronosValidation.version} ` +
     `(0 errors / 0 warnings)`,
+);
+console.log(
+  `[ifc-federation] verified sixty5 adapter extraction ` +
+    `(${sixty5.counts.geometricOccurrenceCount.toLocaleString("en-US")} geometric ` +
+    `occurrences, ${sixty5.counts.triangleCount.toLocaleString("en-US")} unique triangles); ` +
+    `its ${sixty5.scene.structure.byteLength.toLocaleString("en-US")}-byte structure stays ` +
+    `above the ${bufferConstants.MAX_STRING_LENGTH.toLocaleString("en-US")}-byte string limit`,
 );

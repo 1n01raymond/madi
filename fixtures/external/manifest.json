@@ -143,7 +143,7 @@
       "id": "ifc-bench-sixty5",
       "name": "IFC-Bench sixty5 multi-discipline federation",
       "kind": "federated-bim",
-      "status": "registered",
+      "status": "qualified",
       "tier": "real-large",
       "requiresAllowLarge": true,
       "expectedDownloadBytes": 839866782,
@@ -156,6 +156,7 @@
         "spatial-hierarchy",
         "properties"
       ],
+      "evidenceFile": "artifacts/fixtures/external/ifc-bench-sixty5.json",
       "source": {
         "landingPage": "https://huggingface.co/datasets/sylvainHellin/ifc-bench/tree/main/projects/sixty5",
         "repository": "https://huggingface.co/datasets/sylvainHellin/ifc-bench",
