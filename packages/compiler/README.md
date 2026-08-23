@@ -1,8 +1,9 @@
 # MADI compiler
 
 `@madi/compiler` is the first Phase 1 source-to-Web compiler slice. Its public
-CLI accepts local STEP AP242 or AP214 through the OCCT Python adapter; its
-library boundary accepts a validated in-memory `EngineeringScene`. Both emit:
+CLI accepts local STEP AP242/AP214 through the OCCT Python adapter and
+multi-document IFC2X3/IFC4/IFC4X3 federations through IfcOpenShell; its library
+boundary accepts a validated in-memory `EngineeringScene`. These paths emit:
 
 - `scene.gltf`: glTF 2.0 hierarchy, nodes, shared meshes, materials, and MADI
   source/identity metadata in `extras`;
@@ -48,11 +49,40 @@ canonical PyGamer package: source and resource hashes, buffer/accessor ranges,
 hierarchy, prototype reuse, triangle/edge counts, and official Khronos glTF
 validation.
 
+## Compile an IFC federation
+
+Install the separate pinned adapter environment, then repeat `--document` for
+each discipline. `--uri-hint` records a stable non-sensitive source label
+instead of a local machine path.
+
+```sh
+python -m venv output/venv-ifc
+output/venv-ifc/Scripts/python -m pip install \
+  -r native/adapter-ifc/tools/requirements-evidence.txt
+
+pnpm madi compile-ifc \
+  --document architecture=path/to/architecture.ifc \
+  --uri-hint architecture=models/architecture.ifc \
+  --document plumbing=path/to/plumbing.ifc \
+  --uri-hint plumbing=models/plumbing.ifc \
+  --python output/venv-ifc/Scripts/python \
+  --threads 4 \
+  --output output/ifc/federation
+```
+
+The command preflights every Part 21 envelope, verifies adapter/source digests,
+validates the expanded Scene IR, emits the compiled package and adapter report,
+and deletes Scene IR unless `--retain-scene-ir` is requested. The qualified
+four-discipline result is under `artifacts/ifc/digital-hub/`.
+
 ## Current limits
 
 - The direct STEP command currently depends on the pinned CadQuery/OCP Python
   adapter. Moving the proven extraction behavior into the native C++ adapter
   remains production hardening work.
+- The IFC command currently depends on pinned IfcOpenShell 0.8.5. IFC topology
+  edge classification, non-flattened property indexing, and cross-document
+  reconciliation remain explicit follow-up work.
 - The first coarse representation is a per-prototype AABB, not a
   shape-preserving LOD. Target ranges are prototype-granular and use a static
   initial priority; spatial partitioning, compression, view reprioritization,

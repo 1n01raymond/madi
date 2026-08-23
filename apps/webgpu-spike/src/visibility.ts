@@ -32,7 +32,10 @@ export class OccurrenceVisibility {
     this.counts = new Uint32Array(scene.batches.length);
     for (const batch of scene.batches) {
       for (const instance of batch.instances) {
-        if (this.objectIds.has(instance.objectId)) {
+        if (
+          !scene.sharedObjectIdsAcrossBatches &&
+          this.objectIds.has(instance.objectId)
+        ) {
           throw new RangeError(`Duplicate scene object ID ${instance.objectId}.`);
         }
         this.objectIds.add(instance.objectId);
@@ -86,7 +89,7 @@ export class OccurrenceVisibility {
   }
 
   private rebuildTables(): void {
-    let totalVisible = 0;
+    const visibleObjectIds = new Set<number>();
     this.scene.batches.forEach((batch, batchIndex) => {
       const indices = this.indicesByBatch[batchIndex];
       if (!indices) throw new RangeError(`Missing visibility table ${batchIndex}.`);
@@ -95,12 +98,12 @@ export class OccurrenceVisibility {
         if (this.isVisible(instance.objectId)) {
           indices[count] = sourceIndex;
           count += 1;
+          visibleObjectIds.add(instance.objectId);
         }
       });
       this.counts[batchIndex] = count;
-      totalVisible += count;
     });
-    this.visibleOccurrences = totalVisible;
+    this.visibleOccurrences = visibleObjectIds.size;
   }
 
   private requireObject(objectId: number): void {

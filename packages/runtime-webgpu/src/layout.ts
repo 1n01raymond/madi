@@ -20,6 +20,8 @@ export interface GpuPrototypeBatch {
 export interface GpuScene {
   /** One immutable geometry batch per renderable prototype. */
   readonly batches: readonly GpuPrototypeBatch[];
+  /** One logical object may span material-separated prototype batches. */
+  readonly sharedObjectIdsAcrossBatches?: boolean;
 }
 
 export const instanceStride = 96;
@@ -79,7 +81,7 @@ export function validateGpuScene(scene: GpuScene): void {
   for (const batch of scene.batches) {
     validatePrototypeBatch(batch);
     for (const instance of batch.instances) {
-      if (objectIds.has(instance.objectId)) {
+      if (!scene.sharedObjectIdsAcrossBatches && objectIds.has(instance.objectId)) {
         throw new RangeError(`Duplicate scene object ID ${instance.objectId}.`);
       }
       objectIds.add(instance.objectId);

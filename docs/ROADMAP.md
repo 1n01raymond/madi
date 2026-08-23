@@ -45,6 +45,13 @@ The direct AP242 package also records deterministic prototype byte ranges over
 coarse batches for unresolved prototypes. The current order is static;
 camera-driven reprioritization and eviction remain pending.
 
+An early IFC risk slice now compiles the qualified four-discipline Digital Hub
+federation through isolated IfcOpenShell into the same Scene IR and glTF path.
+It proves document-scoped identity, hierarchy, mapped geometry reuse, material
+groups, and flattened properties. It is not the Phase 3 BIM workflow or a
+Phase 2 performance result; explicit IFC edges, property indexing, spatial
+chunks, range coalescing, and bounded residency remain pending.
+
 - local STEP AP242 input;
 - XDE hierarchy, names, colors, units, transforms;
 - coarse and target display tessellation;
@@ -116,7 +123,7 @@ residency remain pending.
 
 - plugin manifest, capabilities, commands, panels, namespaced workspace data;
 - worker analysis API and bounded overlays;
-- IFC adapter and BIM property workflow;
+- production-grade IFC adapter and BIM property workflow;
 - glTF/standards-based input/output profile;
 - self-host deployment example;
 - source resolver/compile service contract;

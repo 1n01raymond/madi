@@ -479,3 +479,24 @@ is intentionally generated under ignored `output/` storage instead of being
 treated as a disk format or committed artifact. The checksum-locked STEP,
 compact report, compiled glTF resources, and independent validators preserve
 the reproducible evidence chain.
+
+## 20. IFC federation extraction evidence
+
+The isolated IfcOpenShell adapter is the second independent producer of the
+same logical IR. Its Digital Hub slice covers multiple source documents,
+document-scoped GlobalIds, spatial containment, type/group/classification
+relationships, inherited property sets, local transforms, mapped geometry, and
+material-separated surface representations.
+
+The validated intermediate contains 14,675 semantic entities, 13,681
+occurrences, 3,405 prototypes, 3,383 geometric representations, and 273,188
+property values. Its 81.8 MB JSON is retained only when explicitly requested;
+compact evidence under `artifacts/ifc/digital-hub/` binds the source documents,
+adapter output, and compiled package by SHA-256.
+
+This satisfies the “two independent adapters produce the IR” serialization
+precondition, but does not freeze JSON or any other disk schema. Profiling,
+schema-evolution tests, and larger-scene partitioning evidence are still
+required. The first IFC slice also makes edge-classification absence explicit
+with `IFC_EDGE_EXTRACTION_DEFERRED` instead of manufacturing CAD topology from
+mesh edges.

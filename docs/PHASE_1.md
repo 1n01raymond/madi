@@ -3,8 +3,9 @@
 Status: In progress
 
 Phase 1 turns the feasibility path into a reproducible STEP-to-browser vertical
-slice. The roadmap remains authoritative; this record distinguishes committed
-evidence from planned behavior.
+slice and retires selected source-adapter risks before Phase 2. The roadmap
+remains authoritative; this record distinguishes committed evidence from
+planned behavior.
 
 ## First compiler slice
 
@@ -25,6 +26,22 @@ or delivery container.
 | Direct AP242 input | `pnpm madi compile` preflights the Part 21 schema, runs OCCT STEPCAF/XDE, cross-checks source SHA-256, and removes temporary Scene IR | Passed with the checksum-locked `repeated-fasteners-ap242.step` package |
 | Coarse/target split | Direct STEP output keeps target meshes in `scene.bin` and emits 3 reusable prototype AABBs in a 2.7 KiB `coarse.bin`; both remain standard external glTF buffers | Passed with 0 Khronos validator errors/warnings |
 | Partial target delivery | Compiler records three non-overlapping prototype ranges that cover `scene.bin`; the Worker issues exact HTTP Range requests and promotes one target batch per completed range | Passed by package/runtime tests and headed Chrome/Firefox evidence |
+
+### Early IFC federation risk slice
+
+The separate `madi compile-ifc` entry now accepts repeated discipline/document
+pairs and compiles IFC2X3/IFC4/IFC4X3 through pinned IfcOpenShell. The qualified
+Digital Hub evidence covers four IFC4 documents, 14,675 semantic entities,
+13,681 occurrences, 3,383 unique geometric prototypes, 913,520 unique
+triangles, and 273,188 property values. All source hashes, the 81.8 MB temporary
+Scene IR, and the 60.7 MB compiled package are digest-linked; Khronos validation
+reports zero errors and warnings.
+
+This slice also forced the runtime boundary to support one pickable IFC object
+across multiple material-separated glTF surface primitives. It deliberately
+reports `IFC_EDGE_EXTRACTION_DEFERRED` and zero explicit edge segments. The
+compact result is checked by `pnpm ifc:federation:check`; large source and
+compiled binaries remain outside Git.
 
 ## First browser runtime slice
 
@@ -80,10 +97,10 @@ and bounded residency.
 
 ## Next slice
 
-Advance the new 100k heterogeneous/culling record into decision-quality evidence
-before widening Studio UI. Replace procedural variants with a redistributable
-engineering assembly or design-partner aggregate, isolate retained scene memory,
-add GPU timestamp queries, and repeat clean runs on discrete and integrated GPU
-profiles. Then add equivalent explicit-edge and bounded-residency slices. Keep
-both committed browser matrices labeled as exploratory evidence until that
-contract is complete.
+Turn the IFC-discovered 3,383 prototype ranges into a practical Phase 2
+scheduler path: coalesce small adjacent ranges, stop rebuilding all resident GPU
+batches for each arrival, and enforce decoded/GPU memory budgets. In parallel,
+advance the 100k heterogeneous/culling record into decision-quality evidence
+with retained-memory isolation, GPU timestamps, and repeated discrete and
+integrated GPU runs. Keep current browser matrices labeled exploratory until
+those contracts are complete.

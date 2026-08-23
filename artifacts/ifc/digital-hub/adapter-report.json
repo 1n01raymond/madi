@@ -1,0 +1,736 @@
+{
+  "adapter": {
+    "geometryLibrary": "opencascade",
+    "name": "IfcOpenShell",
+    "version": "0.8.5"
+  },
+  "counts": {
+    "documentCount": 4,
+    "duplicateGlobalIdCount": 0,
+    "geometricOccurrenceCount": 5152,
+    "geometricPrototypeCount": 3383,
+    "mappedItemCount": 2567,
+    "maxHierarchyDepth": 5,
+    "occurrenceCount": 13681,
+    "part21EntityCount": 482994,
+    "productCount": 13677,
+    "propertyValueCount": 273188,
+    "prototypeCount": 3405,
+    "representationCount": 3383,
+    "representationMapCount": 777,
+    "reusedGeometryOccurrenceCount": 1769,
+    "semanticEntityCount": 14675,
+    "submittedTriangleCount": 2534364,
+    "triangleCount": 913520,
+    "vertexCount": 477005
+  },
+  "diagnostics": {
+    "codes": [
+      "IFC_EDGE_EXTRACTION_DEFERRED"
+    ],
+    "counts": {
+      "info": 1
+    }
+  },
+  "federation": {
+    "documentOrder": [
+      "architecture",
+      "heating",
+      "plumbing",
+      "ventilation"
+    ],
+    "options": {
+      "geometryLibrary": "opencascade",
+      "includeEdges": false,
+      "includeSurfaces": true,
+      "normalizeSceneToMeters": true,
+      "propertyMode": "flattened-inherited-psets",
+      "useWorldCoordinates": false,
+      "weldVertices": true
+    },
+    "sourceDigest": "89fae107a28fc5f86494cb9ce788f62789b9f4ace46c42b1bb7a9e54265d4785"
+  },
+  "limitations": [
+    "IFC curve and boundary-edge classification is deferred.",
+    "Properties are flattened for the first queryable semantic slice.",
+    "Cross-document object reconciliation is document-scoped and not inferred from names."
+  ],
+  "prototypeReuse": [
+    {
+      "materialGroups": 1,
+      "occurrenceCount": 45,
+      "prototypeId": "prototype:ifc:architecture-19d7d02d53c2:69047",
+      "triangles": 12,
+      "vertices": 8
+    },
+    {
+      "materialGroups": 11,
+      "occurrenceCount": 34,
+      "prototypeId": "prototype:ifc:architecture-19d7d02d53c2:164485",
+      "triangles": 1100,
+      "vertices": 560
+    },
+    {
+      "materialGroups": 1,
+      "occurrenceCount": 26,
+      "prototypeId": "prototype:ifc:architecture-19d7d02d53c2:97833",
+      "triangles": 1200,
+      "vertices": 602
+    },
+    {
+      "materialGroups": 1,
+      "occurrenceCount": 22,
+      "prototypeId": "prototype:ifc:architecture-19d7d02d53c2:139352",
+      "triangles": 108,
+      "vertices": 114
+    },
+    {
+      "materialGroups": 1,
+      "occurrenceCount": 20,
+      "prototypeId": "prototype:ifc:architecture-19d7d02d53c2:51141",
+      "triangles": 12,
+      "vertices": 8
+    },
+    {
+      "materialGroups": 3,
+      "occurrenceCount": 16,
+      "prototypeId": "prototype:ifc:architecture-19d7d02d53c2:189855",
+      "triangles": 1200,
+      "vertices": 616
+    },
+    {
+      "materialGroups": 1,
+      "occurrenceCount": 16,
+      "prototypeId": "prototype:ifc:architecture-19d7d02d53c2:51787",
+      "triangles": 12,
+      "vertices": 8
+    },
+    {
+      "materialGroups": 3,
+      "occurrenceCount": 15,
+      "prototypeId": "prototype:ifc:architecture-19d7d02d53c2:187496",
+      "triangles": 1200,
+      "vertices": 616
+    },
+    {
+      "materialGroups": 1,
+      "occurrenceCount": 13,
+      "prototypeId": "prototype:ifc:architecture-19d7d02d53c2:67294",
+      "triangles": 24,
+      "vertices": 16
+    },
+    {
+      "materialGroups": 1,
+      "occurrenceCount": 13,
+      "prototypeId": "prototype:ifc:architecture-19d7d02d53c2:68207",
+      "triangles": 24,
+      "vertices": 16
+    },
+    {
+      "materialGroups": 4,
+      "occurrenceCount": 13,
+      "prototypeId": "prototype:ifc:architecture-19d7d02d53c2:94535",
+      "triangles": 7798,
+      "vertices": 3911
+    },
+    {
+      "materialGroups": 1,
+      "occurrenceCount": 12,
+      "prototypeId": "prototype:ifc:architecture-19d7d02d53c2:52971",
+      "triangles": 12,
+      "vertices": 8
+    },
+    {
+      "materialGroups": 3,
+      "occurrenceCount": 8,
+      "prototypeId": "prototype:ifc:architecture-19d7d02d53c2:63382",
+      "triangles": 1200,
+      "vertices": 616
+    },
+    {
+      "materialGroups": 1,
+      "occurrenceCount": 6,
+      "prototypeId": "prototype:ifc:architecture-19d7d02d53c2:52239",
+      "triangles": 12,
+      "vertices": 8
+    },
+    {
+      "materialGroups": 1,
+      "occurrenceCount": 5,
+      "prototypeId": "prototype:ifc:architecture-19d7d02d53c2:100207",
+      "triangles": 140,
+      "vertices": 80
+    },
+    {
+      "materialGroups": 3,
+      "occurrenceCount": 5,
+      "prototypeId": "prototype:ifc:architecture-19d7d02d53c2:60899",
+      "triangles": 1200,
+      "vertices": 616
+    },
+    {
+      "materialGroups": 7,
+      "occurrenceCount": 4,
+      "prototypeId": "prototype:ifc:architecture-19d7d02d53c2:168843",
+      "triangles": 668,
+      "vertices": 342
+    },
+    {
+      "materialGroups": 7,
+      "occurrenceCount": 4,
+      "prototypeId": "prototype:ifc:architecture-19d7d02d53c2:179881",
+      "triangles": 668,
+      "vertices": 342
+    },
+    {
+      "materialGroups": 4,
+      "occurrenceCount": 4,
+      "prototypeId": "prototype:ifc:architecture-19d7d02d53c2:211827",
+      "triangles": 1840,
+      "vertices": 948
+    },
+    {
+      "materialGroups": 4,
+      "occurrenceCount": 4,
+      "prototypeId": "prototype:ifc:architecture-19d7d02d53c2:215236",
+      "triangles": 1840,
+      "vertices": 948
+    },
+    {
+      "materialGroups": 1,
+      "occurrenceCount": 161,
+      "prototypeId": "prototype:ifc:heating-a5603e8f6aa4:7508",
+      "triangles": 312,
+      "vertices": 162
+    },
+    {
+      "materialGroups": 1,
+      "occurrenceCount": 73,
+      "prototypeId": "prototype:ifc:heating-a5603e8f6aa4:301369",
+      "triangles": 272,
+      "vertices": 142
+    },
+    {
+      "materialGroups": 1,
+      "occurrenceCount": 54,
+      "prototypeId": "prototype:ifc:heating-a5603e8f6aa4:35706",
+      "triangles": 420,
+      "vertices": 218
+    },
+    {
+      "materialGroups": 1,
+      "occurrenceCount": 37,
+      "prototypeId": "prototype:ifc:heating-a5603e8f6aa4:11581",
+      "triangles": 308,
+      "vertices": 160
+    },
+    {
+      "materialGroups": 1,
+      "occurrenceCount": 35,
+      "prototypeId": "prototype:ifc:heating-a5603e8f6aa4:302004",
+      "triangles": 276,
+      "vertices": 144
+    },
+    {
+      "materialGroups": 1,
+      "occurrenceCount": 28,
+      "prototypeId": "prototype:ifc:heating-a5603e8f6aa4:152541",
+      "triangles": 304,
+      "vertices": 158
+    },
+    {
+      "materialGroups": 1,
+      "occurrenceCount": 24,
+      "prototypeId": "prototype:ifc:heating-a5603e8f6aa4:24643",
+      "triangles": 252,
+      "vertices": 132
+    },
+    {
+      "materialGroups": 1,
+      "occurrenceCount": 23,
+      "prototypeId": "prototype:ifc:heating-a5603e8f6aa4:2716",
+      "triangles": 172,
+      "vertices": 92
+    },
+    {
+      "materialGroups": 1,
+      "occurrenceCount": 23,
+      "prototypeId": "prototype:ifc:heating-a5603e8f6aa4:302641",
+      "triangles": 276,
+      "vertices": 144
+    },
+    {
+      "materialGroups": 1,
+      "occurrenceCount": 18,
+      "prototypeId": "prototype:ifc:heating-a5603e8f6aa4:171139",
+      "triangles": 506,
+      "vertices": 259
+    },
+    {
+      "materialGroups": 1,
+      "occurrenceCount": 16,
+      "prototypeId": "prototype:ifc:heating-a5603e8f6aa4:23905",
+      "triangles": 172,
+      "vertices": 92
+    },
+    {
+      "materialGroups": 1,
+      "occurrenceCount": 15,
+      "prototypeId": "prototype:ifc:heating-a5603e8f6aa4:441902",
+      "triangles": 310,
+      "vertices": 161
+    },
+    {
+      "materialGroups": 1,
+      "occurrenceCount": 14,
+      "prototypeId": "prototype:ifc:heating-a5603e8f6aa4:297756",
+      "triangles": 256,
+      "vertices": 134
+    },
+    {
+      "materialGroups": 1,
+      "occurrenceCount": 14,
+      "prototypeId": "prototype:ifc:heating-a5603e8f6aa4:331913",
+      "triangles": 256,
+      "vertices": 134
+    },
+    {
+      "materialGroups": 1,
+      "occurrenceCount": 14,
+      "prototypeId": "prototype:ifc:heating-a5603e8f6aa4:520224",
+      "triangles": 530,
+      "vertices": 271
+    },
+    {
+      "materialGroups": 1,
+      "occurrenceCount": 12,
+      "prototypeId": "prototype:ifc:heating-a5603e8f6aa4:203891",
+      "triangles": 506,
+      "vertices": 259
+    },
+    {
+      "materialGroups": 1,
+      "occurrenceCount": 11,
+      "prototypeId": "prototype:ifc:heating-a5603e8f6aa4:165232",
+      "triangles": 522,
+      "vertices": 267
+    },
+    {
+      "materialGroups": 1,
+      "occurrenceCount": 9,
+      "prototypeId": "prototype:ifc:heating-a5603e8f6aa4:1945",
+      "triangles": 418,
+      "vertices": 215
+    },
+    {
+      "materialGroups": 1,
+      "occurrenceCount": 8,
+      "prototypeId": "prototype:ifc:heating-a5603e8f6aa4:294876",
+      "triangles": 2256,
+      "vertices": 1134
+    },
+    {
+      "materialGroups": 1,
+      "occurrenceCount": 8,
+      "prototypeId": "prototype:ifc:heating-a5603e8f6aa4:4648",
+      "triangles": 418,
+      "vertices": 215
+    },
+    {
+      "materialGroups": 1,
+      "occurrenceCount": 79,
+      "prototypeId": "prototype:ifc:plumbing-0b1d6b0abd8d:229839",
+      "triangles": 572,
+      "vertices": 292
+    },
+    {
+      "materialGroups": 1,
+      "occurrenceCount": 31,
+      "prototypeId": "prototype:ifc:plumbing-0b1d6b0abd8d:587859",
+      "triangles": 572,
+      "vertices": 292
+    },
+    {
+      "materialGroups": 1,
+      "occurrenceCount": 27,
+      "prototypeId": "prototype:ifc:plumbing-0b1d6b0abd8d:237577",
+      "triangles": 884,
+      "vertices": 444
+    },
+    {
+      "materialGroups": 1,
+      "occurrenceCount": 12,
+      "prototypeId": "prototype:ifc:plumbing-0b1d6b0abd8d:110260",
+      "triangles": 596,
+      "vertices": 316
+    },
+    {
+      "materialGroups": 1,
+      "occurrenceCount": 12,
+      "prototypeId": "prototype:ifc:plumbing-0b1d6b0abd8d:251124",
+      "triangles": 1378,
+      "vertices": 695
+    },
+    {
+      "materialGroups": 1,
+      "occurrenceCount": 12,
+      "prototypeId": "prototype:ifc:plumbing-0b1d6b0abd8d:73058",
+      "triangles": 47758,
+      "vertices": 25107
+    },
+    {
+      "materialGroups": 1,
+      "occurrenceCount": 11,
+      "prototypeId": "prototype:ifc:plumbing-0b1d6b0abd8d:227718",
+      "triangles": 736,
+      "vertices": 372
+    },
+    {
+      "materialGroups": 1,
+      "occurrenceCount": 10,
+      "prototypeId": "prototype:ifc:plumbing-0b1d6b0abd8d:589673",
+      "triangles": 884,
+      "vertices": 444
+    },
+    {
+      "materialGroups": 1,
+      "occurrenceCount": 8,
+      "prototypeId": "prototype:ifc:plumbing-0b1d6b0abd8d:182790",
+      "triangles": 516,
+      "vertices": 264
+    },
+    {
+      "materialGroups": 1,
+      "occurrenceCount": 8,
+      "prototypeId": "prototype:ifc:plumbing-0b1d6b0abd8d:686610",
+      "triangles": 728,
+      "vertices": 370
+    },
+    {
+      "materialGroups": 1,
+      "occurrenceCount": 7,
+      "prototypeId": "prototype:ifc:plumbing-0b1d6b0abd8d:125658",
+      "triangles": 1822,
+      "vertices": 919
+    },
+    {
+      "materialGroups": 1,
+      "occurrenceCount": 7,
+      "prototypeId": "prototype:ifc:plumbing-0b1d6b0abd8d:177491",
+      "triangles": 532,
+      "vertices": 272
+    },
+    {
+      "materialGroups": 1,
+      "occurrenceCount": 6,
+      "prototypeId": "prototype:ifc:plumbing-0b1d6b0abd8d:172663",
+      "triangles": 532,
+      "vertices": 272
+    },
+    {
+      "materialGroups": 1,
+      "occurrenceCount": 6,
+      "prototypeId": "prototype:ifc:plumbing-0b1d6b0abd8d:173706",
+      "triangles": 76,
+      "vertices": 40
+    },
+    {
+      "materialGroups": 1,
+      "occurrenceCount": 5,
+      "prototypeId": "prototype:ifc:plumbing-0b1d6b0abd8d:585550",
+      "triangles": 736,
+      "vertices": 372
+    },
+    {
+      "materialGroups": 1,
+      "occurrenceCount": 4,
+      "prototypeId": "prototype:ifc:plumbing-0b1d6b0abd8d:169694",
+      "triangles": 490,
+      "vertices": 253
+    },
+    {
+      "materialGroups": 1,
+      "occurrenceCount": 4,
+      "prototypeId": "prototype:ifc:plumbing-0b1d6b0abd8d:231894",
+      "triangles": 504,
+      "vertices": 258
+    },
+    {
+      "materialGroups": 1,
+      "occurrenceCount": 4,
+      "prototypeId": "prototype:ifc:plumbing-0b1d6b0abd8d:474645",
+      "triangles": 47758,
+      "vertices": 25107
+    },
+    {
+      "materialGroups": 1,
+      "occurrenceCount": 4,
+      "prototypeId": "prototype:ifc:plumbing-0b1d6b0abd8d:511632",
+      "triangles": 596,
+      "vertices": 316
+    },
+    {
+      "materialGroups": 1,
+      "occurrenceCount": 4,
+      "prototypeId": "prototype:ifc:plumbing-0b1d6b0abd8d:570831",
+      "triangles": 490,
+      "vertices": 253
+    },
+    {
+      "materialGroups": 1,
+      "occurrenceCount": 75,
+      "prototypeId": "prototype:ifc:ventilation-c0a180787595:42560",
+      "triangles": 416,
+      "vertices": 218
+    },
+    {
+      "materialGroups": 1,
+      "occurrenceCount": 35,
+      "prototypeId": "prototype:ifc:ventilation-c0a180787595:45159",
+      "triangles": 48,
+      "vertices": 32
+    },
+    {
+      "materialGroups": 1,
+      "occurrenceCount": 30,
+      "prototypeId": "prototype:ifc:ventilation-c0a180787595:41681",
+      "triangles": 48,
+      "vertices": 32
+    },
+    {
+      "materialGroups": 1,
+      "occurrenceCount": 23,
+      "prototypeId": "prototype:ifc:ventilation-c0a180787595:43766",
+      "triangles": 132,
+      "vertices": 76
+    },
+    {
+      "materialGroups": 1,
+      "occurrenceCount": 21,
+      "prototypeId": "prototype:ifc:ventilation-c0a180787595:16142",
+      "triangles": 132,
+      "vertices": 72
+    },
+    {
+      "materialGroups": 1,
+      "occurrenceCount": 21,
+      "prototypeId": "prototype:ifc:ventilation-c0a180787595:16605",
+      "triangles": 132,
+      "vertices": 72
+    },
+    {
+      "materialGroups": 1,
+      "occurrenceCount": 16,
+      "prototypeId": "prototype:ifc:ventilation-c0a180787595:58077",
+      "triangles": 416,
+      "vertices": 218
+    },
+    {
+      "materialGroups": 1,
+      "occurrenceCount": 14,
+      "prototypeId": "prototype:ifc:ventilation-c0a180787595:17286",
+      "triangles": 132,
+      "vertices": 72
+    },
+    {
+      "materialGroups": 1,
+      "occurrenceCount": 13,
+      "prototypeId": "prototype:ifc:ventilation-c0a180787595:83939",
+      "triangles": 60,
+      "vertices": 40
+    },
+    {
+      "materialGroups": 1,
+      "occurrenceCount": 12,
+      "prototypeId": "prototype:ifc:ventilation-c0a180787595:19259",
+      "triangles": 132,
+      "vertices": 72
+    },
+    {
+      "materialGroups": 1,
+      "occurrenceCount": 12,
+      "prototypeId": "prototype:ifc:ventilation-c0a180787595:240040",
+      "triangles": 132,
+      "vertices": 72
+    },
+    {
+      "materialGroups": 1,
+      "occurrenceCount": 12,
+      "prototypeId": "prototype:ifc:ventilation-c0a180787595:83200",
+      "triangles": 180,
+      "vertices": 104
+    },
+    {
+      "materialGroups": 1,
+      "occurrenceCount": 8,
+      "prototypeId": "prototype:ifc:ventilation-c0a180787595:111475",
+      "triangles": 132,
+      "vertices": 72
+    },
+    {
+      "materialGroups": 1,
+      "occurrenceCount": 8,
+      "prototypeId": "prototype:ifc:ventilation-c0a180787595:122449",
+      "triangles": 132,
+      "vertices": 72
+    },
+    {
+      "materialGroups": 1,
+      "occurrenceCount": 8,
+      "prototypeId": "prototype:ifc:ventilation-c0a180787595:124798",
+      "triangles": 132,
+      "vertices": 76
+    },
+    {
+      "materialGroups": 1,
+      "occurrenceCount": 8,
+      "prototypeId": "prototype:ifc:ventilation-c0a180787595:160572",
+      "triangles": 132,
+      "vertices": 72
+    },
+    {
+      "materialGroups": 1,
+      "occurrenceCount": 8,
+      "prototypeId": "prototype:ifc:ventilation-c0a180787595:8484",
+      "triangles": 132,
+      "vertices": 76
+    },
+    {
+      "materialGroups": 1,
+      "occurrenceCount": 8,
+      "prototypeId": "prototype:ifc:ventilation-c0a180787595:99210",
+      "triangles": 132,
+      "vertices": 72
+    },
+    {
+      "materialGroups": 1,
+      "occurrenceCount": 6,
+      "prototypeId": "prototype:ifc:ventilation-c0a180787595:24391",
+      "triangles": 156,
+      "vertices": 80
+    },
+    {
+      "materialGroups": 1,
+      "occurrenceCount": 6,
+      "prototypeId": "prototype:ifc:ventilation-c0a180787595:37117",
+      "triangles": 132,
+      "vertices": 72
+    }
+  ],
+  "scene": {
+    "byteLength": 81805061,
+    "sha256": "0f9b1e65d81370c283da4313312568da53a77373dd8f87486bb8b912d8fdaec1"
+  },
+  "schemaVersion": "madi.ifc-adapter-report.1",
+  "sources": [
+    {
+      "byteLength": 9022255,
+      "counts": {
+        "duplicateGlobalIdCount": 0,
+        "geometricOccurrenceCount": 1013,
+        "geometricPrototypeCount": 719,
+        "mappedItemCount": 465,
+        "maxHierarchyDepth": 5,
+        "occurrenceCount": 1027,
+        "part21EntityCount": 91602,
+        "productCount": 1026,
+        "propertyValueCount": 51031,
+        "prototypeCount": 726,
+        "representationCount": 719,
+        "representationMapCount": 150,
+        "semanticEntityCount": 1322,
+        "submittedTriangleCount": 343300,
+        "triangleCount": 95680,
+        "vertexCount": 52745
+      },
+      "discipline": "architecture",
+      "path": "projects/digital_hub/arc.ifc",
+      "schema": "IFC4",
+      "sha256": "19d7d02d53c2b88e86890ee236297b12bbb0f7748030cd32ff6a22762e9966bb",
+      "unitScaleToMeters": 1
+    },
+    {
+      "byteLength": 20890415,
+      "counts": {
+        "duplicateGlobalIdCount": 0,
+        "geometricOccurrenceCount": 1795,
+        "geometricPrototypeCount": 1073,
+        "mappedItemCount": 881,
+        "maxHierarchyDepth": 5,
+        "occurrenceCount": 5561,
+        "part21EntityCount": 161831,
+        "productCount": 5560,
+        "propertyValueCount": 90377,
+        "prototypeCount": 1078,
+        "representationCount": 1073,
+        "representationMapCount": 159,
+        "semanticEntityCount": 5763,
+        "submittedTriangleCount": 618056,
+        "triangleCount": 303854,
+        "vertexCount": 158294
+      },
+      "discipline": "heating",
+      "path": "projects/digital_hub/heating.ifc",
+      "schema": "IFC4",
+      "sha256": "a5603e8f6aa4cbf63aece92f92f503e9a578702d8fe96a6d4661490f1843710d",
+      "unitScaleToMeters": 0.001
+    },
+    {
+      "byteLength": 25178864,
+      "counts": {
+        "duplicateGlobalIdCount": 0,
+        "geometricOccurrenceCount": 1034,
+        "geometricPrototypeCount": 715,
+        "mappedItemCount": 506,
+        "maxHierarchyDepth": 5,
+        "occurrenceCount": 3121,
+        "part21EntityCount": 94171,
+        "productCount": 3120,
+        "propertyValueCount": 52058,
+        "prototypeCount": 720,
+        "representationCount": 715,
+        "representationMapCount": 187,
+        "semanticEntityCount": 3330,
+        "submittedTriangleCount": 1414048,
+        "triangleCount": 436138,
+        "vertexCount": 223048
+      },
+      "discipline": "plumbing",
+      "path": "projects/digital_hub/plumbing.ifc",
+      "schema": "IFC4",
+      "sha256": "0b1d6b0abd8d4cc3f5f798c7581bed2b39b40110ba6348d5470bbef646cfed79",
+      "unitScaleToMeters": 0.001
+    },
+    {
+      "byteLength": 12737833,
+      "counts": {
+        "duplicateGlobalIdCount": 0,
+        "geometricOccurrenceCount": 1310,
+        "geometricPrototypeCount": 876,
+        "mappedItemCount": 715,
+        "maxHierarchyDepth": 5,
+        "occurrenceCount": 3972,
+        "part21EntityCount": 135390,
+        "productCount": 3971,
+        "propertyValueCount": 79722,
+        "prototypeCount": 881,
+        "representationCount": 876,
+        "representationMapCount": 281,
+        "semanticEntityCount": 4260,
+        "submittedTriangleCount": 158960,
+        "triangleCount": 77848,
+        "vertexCount": 42918
+      },
+      "discipline": "ventilation",
+      "path": "projects/digital_hub/ventilation.ifc",
+      "schema": "IFC4",
+      "sha256": "c0a1807875957c4154d45d14a3b5ed480dd3178a5bdc3262302a7eccf76d5cb1",
+      "unitScaleToMeters": 0.001
+    }
+  ],
+  "sceneIrValidation": {
+    "ok": true,
+    "errorCount": 0,
+    "warningCount": 0
+  }
+}

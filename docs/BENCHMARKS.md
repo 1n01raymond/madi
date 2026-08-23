@@ -302,5 +302,14 @@ The external-source registry now supplies two qualified correctness layers:
 two NIST AP242 cases (30,100 Part 21 entities) and the four-discipline IFC-Bench
 Digital Hub federation (482,994 Part 21 entities). Their source files remain in
 an ignored local cache; only provenance, license snapshots, checksums, and
-aggregate inspections are committed. No renderer result is claimed from these
-records. See `artifacts/fixtures/external/`.
+aggregate inspections are committed. See `artifacts/fixtures/external/`.
+
+Digital Hub now also has a compiled correctness record under
+`artifacts/ifc/digital-hub/`: 5,152 renderable occurrences, 3,383 unique
+geometric prototypes, 913,520 unique triangles, 1,769 reused geometry
+occurrences, and 273,188 property values across four IFC4 documents. Source,
+adapter, Scene IR, glTF resources, and Khronos validation are digest-linked.
+This is not an ADR-0003 renderer benchmark: it records no controlled frame,
+memory, startup, or Three.js/IFC baseline measurements. Its 3,383
+prototype-granular ranges instead identify chunk coalescing and incremental GPU
+residency as prerequisites for Phase 2 performance evidence.
