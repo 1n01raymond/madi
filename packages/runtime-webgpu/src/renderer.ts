@@ -11,9 +11,10 @@ const surfaceShader = /* wgsl */ `
 struct SceneUniforms {
   viewProjection: mat4x4<f32>,
   selectedObjectId: u32,
+  sectionEnabled: u32,
   padding0: u32,
   padding1: u32,
-  padding2: u32,
+  sectionPlane: vec4<f32>,
 };
 
 @group(0) @binding(0) var<uniform> scene: SceneUniforms;
@@ -34,21 +35,31 @@ struct VertexOutput {
   @location(0) normal: vec3<f32>,
   @location(1) @interpolate(flat) objectId: u32,
   @location(2) @interpolate(flat) baseColor: vec4<f32>,
+  @location(3) worldPosition: vec3<f32>,
 };
 
 @vertex
 fn vsMain(input: VertexInput) -> VertexOutput {
   let model = mat4x4<f32>(input.model0, input.model1, input.model2, input.model3);
+  let worldPosition = model * vec4<f32>(input.position, 1.0);
   var output: VertexOutput;
-  output.position = scene.viewProjection * model * vec4<f32>(input.position, 1.0);
+  output.position = scene.viewProjection * worldPosition;
   output.normal = normalize(mat3x3<f32>(input.model0.xyz, input.model1.xyz, input.model2.xyz) * input.normal);
   output.objectId = input.objectId;
   output.baseColor = input.baseColor;
+  output.worldPosition = worldPosition.xyz;
   return output;
+}
+
+fn clipBySectionPlane(worldPosition: vec3<f32>) {
+  if (scene.sectionEnabled != 0u && dot(scene.sectionPlane.xyz, worldPosition) > scene.sectionPlane.w) {
+    discard;
+  }
 }
 
 @fragment
 fn fsSurface(input: VertexOutput) -> @location(0) vec4<f32> {
+  clipBySectionPlane(input.worldPosition);
   let light = 0.35 + 0.65 * max(dot(normalize(input.normal), normalize(vec3<f32>(0.3, 0.5, 1.0))), 0.0);
   let shaded = input.baseColor.rgb * light;
   let selected = scene.selectedObjectId != 0u && input.objectId == scene.selectedObjectId;
@@ -58,6 +69,7 @@ fn fsSurface(input: VertexOutput) -> @location(0) vec4<f32> {
 
 @fragment
 fn fsPick(input: VertexOutput) -> @location(0) vec4<u32> {
+  clipBySectionPlane(input.worldPosition);
   let id = input.objectId;
   return vec4<u32>(id & 255u, (id >> 8u) & 255u, (id >> 16u) & 255u, (id >> 24u) & 255u);
 }
@@ -67,9 +79,10 @@ const edgeShader = /* wgsl */ `
 struct SceneUniforms {
   viewProjection: mat4x4<f32>,
   selectedObjectId: u32,
+  sectionEnabled: u32,
   padding0: u32,
   padding1: u32,
-  padding2: u32,
+  sectionPlane: vec4<f32>,
 };
 
 @group(0) @binding(0) var<uniform> scene: SceneUniforms;
@@ -87,19 +100,25 @@ struct VertexInput {
 struct VertexOutput {
   @builtin(position) position: vec4<f32>,
   @location(0) @interpolate(flat) objectId: u32,
+  @location(1) worldPosition: vec3<f32>,
 };
 
 @vertex
 fn vsMain(input: VertexInput) -> VertexOutput {
   let model = mat4x4<f32>(input.model0, input.model1, input.model2, input.model3);
+  let worldPosition = model * vec4<f32>(input.position, 1.0);
   var output: VertexOutput;
-  output.position = scene.viewProjection * model * vec4<f32>(input.position, 1.0);
+  output.position = scene.viewProjection * worldPosition;
   output.objectId = input.objectId;
+  output.worldPosition = worldPosition.xyz;
   return output;
 }
 
 @fragment
 fn fsMain(input: VertexOutput) -> @location(0) vec4<f32> {
+  if (scene.sectionEnabled != 0u && dot(scene.sectionPlane.xyz, input.worldPosition) > scene.sectionPlane.w) {
+    discard;
+  }
   let selected = scene.selectedObjectId != 0u && input.objectId == scene.selectedObjectId;
   let color = select(vec3<f32>(0.015, 0.035, 0.055), vec3<f32>(0.0, 0.45, 0.72), selected);
   return vec4<f32>(color, 1.0);
@@ -149,6 +168,32 @@ export interface SetSceneOptions {
 export interface RenderOptions {
   /** Draw uploaded explicit CAD edge streams. Defaults to true. */
   readonly edges?: boolean;
+}
+
+/** A world-space half-space that keeps points where dot(normal, position) <= offset. */
+export interface SectionPlane {
+  readonly normal: readonly [number, number, number];
+  readonly offset: number;
+}
+
+export interface NormalizedSectionPlane extends SectionPlane {
+  readonly normal: readonly [number, number, number];
+}
+
+/** Validates and normalizes a section plane without changing its half-space. */
+export function normalizeSectionPlane(plane: SectionPlane): NormalizedSectionPlane {
+  const [x, y, z] = plane.normal;
+  if (![x, y, z, plane.offset].every(Number.isFinite)) {
+    throw new TypeError("Section plane values must be finite.");
+  }
+  const length = Math.hypot(x, y, z);
+  if (length <= Number.EPSILON) {
+    throw new RangeError("Section plane normal must be non-zero.");
+  }
+  return {
+    normal: [x / length, y / length, z / length],
+    offset: plane.offset / length,
+  };
 }
 
 interface GpuBatchResources {
@@ -201,12 +246,14 @@ export class Phase0Renderer {
   private readonly pickPipeline: GPURenderPipeline;
   private readonly pixelRatio?: number;
   private readonly lastViewProjection = new Float32Array(16);
-  private readonly uniformData = new ArrayBuffer(80);
+  private readonly uniformData = new ArrayBuffer(96);
   private readonly uniformMatrix = new Float32Array(this.uniformData, 0, 16);
-  private readonly uniformSelection = new Uint32Array(this.uniformData, 64, 4);
+  private readonly uniformFlags = new Uint32Array(this.uniformData, 64, 4);
+  private readonly uniformSectionPlane = new Float32Array(this.uniformData, 80, 4);
   private batches: GpuBatchResources[] = [];
   private hasRendered = false;
   private selectedObjectId = 0;
+  private sectionPlane?: NormalizedSectionPlane;
   private depthTexture?: GPUTexture;
   private pickTexture?: GPUTexture;
   private targetWidth = 0;
@@ -456,6 +503,11 @@ export class Phase0Renderer {
     this.selectedObjectId = objectId;
   }
 
+  /** Enables one world-space section plane. Passing undefined disables clipping. */
+  setSectionPlane(plane?: SectionPlane): void {
+    this.sectionPlane = plane ? normalizeSectionPlane(plane) : undefined;
+  }
+
   render(viewProjection: Float32Array, options: RenderOptions = {}): void {
     if (this.batches.length === 0) {
       throw new MadiWebGpuError("SCENE_NOT_SET", "Call setScene before render.");
@@ -596,7 +648,12 @@ export class Phase0Renderer {
 
   private writeUniforms(viewProjection: Float32Array): void {
     this.uniformMatrix.set(viewProjection);
-    this.uniformSelection[0] = this.selectedObjectId;
+    this.uniformFlags[0] = this.selectedObjectId;
+    this.uniformFlags[1] = this.sectionPlane ? 1 : 0;
+    if (this.sectionPlane) {
+      this.uniformSectionPlane.set(this.sectionPlane.normal, 0);
+      this.uniformSectionPlane[3] = this.sectionPlane.offset;
+    }
     this.device.queue.writeBuffer(this.cameraBuffer, 0, this.uniformData);
   }
 

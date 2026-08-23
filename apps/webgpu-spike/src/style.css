@@ -200,10 +200,17 @@ h1 span {
   top: 12px;
   right: 12px;
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  align-items: flex-end;
   gap: 10px;
   color: #617986;
   font: 10px/1.4 ui-monospace, "Cascadia Code", monospace;
+}
+
+.viewport-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .viewport-actions {
@@ -229,6 +236,12 @@ h1 span {
   background: #fff;
 }
 
+.viewport-tools button[aria-pressed="true"] {
+  border-color: #168cb6;
+  color: #ecfaff;
+  background: #087a9f;
+}
+
 .viewport-tools button:disabled {
   border-color: #cbd5da;
   color: #9aabb3;
@@ -242,6 +255,66 @@ h1 span {
   border: 1px solid #b8c7ce;
   border-radius: 3px;
   font: inherit;
+}
+
+.section-controls {
+  width: 292px;
+  padding: 9px 10px;
+  border: 1px solid rgb(22 140 182 / 34%);
+  border-radius: 8px;
+  color: #37525e;
+  background: rgb(250 253 254 / 94%);
+  box-shadow: 0 8px 24px rgb(7 27 36 / 14%);
+  backdrop-filter: blur(12px);
+}
+
+.section-controls[hidden] {
+  display: none;
+}
+
+.section-axis,
+.section-controls label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.section-axis > span,
+.section-controls label > span {
+  width: 48px;
+  color: #6d838d;
+  text-transform: uppercase;
+}
+
+.section-controls button {
+  padding: 5px 8px;
+}
+
+.section-axis #flip-section {
+  margin-left: auto;
+}
+
+.section-controls label {
+  margin-top: 8px;
+}
+
+.section-controls input[type="range"] {
+  min-width: 0;
+  flex: 1;
+  accent-color: #087a9f;
+}
+
+.section-controls output {
+  width: 58px;
+  color: #1f556a;
+  text-align: right;
+}
+
+.section-controls small {
+  display: block;
+  margin-top: 5px;
+  color: #778d96;
+  text-align: right;
 }
 
 canvas {
@@ -481,7 +554,7 @@ code {
     height: 420px;
   }
 
-  .viewport-tools > span {
+  .viewport-toolbar > span {
     display: none;
   }
 

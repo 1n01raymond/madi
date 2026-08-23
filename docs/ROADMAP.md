@@ -50,8 +50,8 @@ the [Phase 1 tracker](PHASE_1.md).
 Current evidence: the browser reads the compiled glTF hierarchy first, decodes
 `scene.bin` in a Worker, transfers shared typed-array batches to direct WebGPU,
 and preserves source-aware object picking in headed Chrome and Firefox. Orbit,
-pan, zoom, fit, synchronized selection, and hide/isolate are implemented;
-section interaction, progressive resources, and bounded residency are pending.
+pan, zoom, fit, synchronized selection, hide/isolate, and one section plane are
+implemented; progressive resources and bounded residency are pending.
 
 - manifest/hierarchy-first loading;
 - Worker decode;

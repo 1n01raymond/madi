@@ -136,6 +136,43 @@ async function recordBrowser(definition) {
     observed.selection = await page.locator("#selection").innerText();
     assertEqual(observed.selection, expected.selection, `${definition.id} selection`);
 
+    await page.locator("#toggle-section").click();
+    assertEqual(
+      await page.locator("html").getAttribute("data-section-enabled"),
+      "true",
+      `${definition.id} section enabled`,
+    );
+    const sectionPosition = page.locator("#section-position");
+    await sectionPosition.fill("0");
+    await canvas.click({
+      position: {
+        x: Math.round(canvasBounds.width * 0.6),
+        y: Math.round(canvasBounds.height * 0.35),
+      },
+    });
+    await page.locator("#selection").filter({ hasText: "No occurrence at that pixel." }).waitFor({
+      timeout: 5_000,
+    });
+    await sectionPosition.fill("100");
+    await canvas.click({
+      position: {
+        x: Math.round(canvasBounds.width * 0.6),
+        y: Math.round(canvasBounds.height * 0.35),
+      },
+    });
+    await page.locator("#selection").filter({ hasText: expected.selection }).waitFor({
+      timeout: 5_000,
+    });
+    await page.locator("[data-section-axis='x']").click();
+    await page.locator("#flip-section").click();
+    assertEqual(
+      await page.locator("#section-direction").innerText(),
+      "Keep +X side",
+      `${definition.id} section flip`,
+    );
+    await page.locator("#toggle-section").click();
+    observed.sectionInteraction = true;
+
     const webGpu = await page.evaluate(async () => {
       const adapter = await navigator.gpu?.requestAdapter();
       return {
