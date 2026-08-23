@@ -142,7 +142,8 @@ export type MadiWebGpuErrorCode =
   | "WEBGPU_UNAVAILABLE"
   | "ADAPTER_UNAVAILABLE"
   | "CONTEXT_UNAVAILABLE"
-  | "SCENE_NOT_SET";
+  | "SCENE_NOT_SET"
+  | "TIMESTAMP_QUERY_UNSUPPORTED";
 
 export class MadiWebGpuError extends Error {
   readonly code: MadiWebGpuErrorCode;
@@ -158,6 +159,13 @@ export interface Phase0RendererOptions {
   readonly onDeviceLost?: (message: string) => void;
   /** Override the browser device pixel ratio for reproducible benchmark profiles. */
   readonly pixelRatio?: number;
+  /**
+   * Request the WebGPU "timestamp-query" feature when the adapter exposes it.
+   * Render passes may then receive caller-owned timestamp writes. Devices
+   * without the feature are still created; passing timestamp writes to
+   * render() on such a device raises a typed error.
+   */
+  readonly requestTimestampQueries?: boolean;
 }
 
 export interface SetSceneOptions {
@@ -179,6 +187,21 @@ export interface ReconcileSceneOptions extends SetSceneOptions {
 export interface RenderOptions {
   /** Draw uploaded explicit CAD edge streams. Defaults to true. */
   readonly edges?: boolean;
+  /**
+   * Attach caller-owned GPU timestamp writes to the surface render pass.
+   * Requires a device created with requestTimestampQueries and adapter support.
+   */
+  readonly timestampWrites?: GPURenderPassTimestampWrites;
+}
+
+/** Exact allocation census of renderer-owned scene resources. */
+export interface RendererResourceStats {
+  /** Sum of live GPUBuffer allocations owned by the renderer, in bytes. */
+  readonly gpuBufferBytes: number;
+  /** CPU staging memory retained for per-prototype instance re-packing. */
+  readonly cpuStagingBytes: number;
+  /** Current depth/pick attachment size in pixels, when a frame has rendered. */
+  readonly attachmentSizePx: readonly [number, number] | null;
 }
 
 /** A world-space half-space that keeps points where dot(normal, position) <= offset. */
@@ -430,7 +453,11 @@ export class Phase0Renderer {
         "No compatible WebGPU adapter was found.",
       );
     }
-    const device = await adapter.requestDevice();
+    const requestTimestamps =
+      (options.requestTimestampQueries ?? false) && adapter.features.has("timestamp-query");
+    const device = await adapter.requestDevice(
+      requestTimestamps ? { requiredFeatures: ["timestamp-query"] } : {},
+    );
     const context = canvas.getContext("webgpu");
     if (!context) {
       device.destroy();
@@ -547,6 +574,13 @@ export class Phase0Renderer {
     this.ensureTargets();
     if (!this.depthTexture) return;
 
+    if (options.timestampWrites && !this.device.features.has("timestamp-query")) {
+      throw new MadiWebGpuError(
+        "TIMESTAMP_QUERY_UNSUPPORTED",
+        "Pass timestamp writes require a device created with requestTimestampQueries.",
+      );
+    }
+
     this.writeUniforms(viewProjection);
     const encoder = this.device.createCommandEncoder({ label: "MADI frame" });
     const colorView = this.context.getCurrentTexture().createView();
@@ -568,6 +602,7 @@ export class Phase0Renderer {
         depthLoadOp: "clear",
         depthStoreOp: "store",
       },
+      ...(options.timestampWrites ? { timestampWrites: options.timestampWrites } : {}),
     });
     for (const batch of this.batches) {
       if (batch.instanceCount === 0) continue;
@@ -587,6 +622,30 @@ export class Phase0Renderer {
     surfacePass.end();
 
     this.device.queue.submit([encoder.finish()]);
+  }
+
+  /**
+   * Exact byte census of renderer-owned resources: GPU buffer allocations,
+   * CPU instance staging, and the current attachment size in pixels. It does
+   * not include caller-owned workload typed arrays or GPU attachments.
+   */
+  resourceStats(): RendererResourceStats {
+    let gpuBufferBytes = this.cameraBuffer.size;
+    let cpuStagingBytes = 0;
+    for (const batch of this.batches) {
+      gpuBufferBytes +=
+        batch.surfaceVertex.size + batch.surfaceIndex.size + batch.edgeVertex.size +
+        batch.instance.size;
+      cpuStagingBytes += batch.instanceStaging.byteLength;
+    }
+    return {
+      gpuBufferBytes,
+      cpuStagingBytes,
+      attachmentSizePx:
+        this.targetWidth > 0 && this.targetHeight > 0
+          ? [this.targetWidth, this.targetHeight]
+          : null,
+    };
   }
 
   async pick(clientX: number, clientY: number): Promise<number> {

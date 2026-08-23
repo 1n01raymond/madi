@@ -15,7 +15,7 @@
     "build": "pnpm --recursive --if-present run build",
     "browser:evidence:check": "node scripts/validate-browser-evidence.mjs",
     "browser:matrix": "node scripts/record-browser-matrix.mjs",
-    "check": "pnpm run adr:check && pnpm run fixtures:check && pnpm run fixtures:external:check && pnpm run occt:diagnostics:check && pnpm run phase1:evidence:check && pnpm run ifc:federation:check && pnpm run browser:evidence:check && pnpm run benchmark:industrial:check && pnpm run benchmark:heterogeneous:check && pnpm run benchmark:repeatability:check && pnpm run lint && pnpm run typecheck && pnpm run test && pnpm run build",
+    "check": "pnpm run adr:check && pnpm run fixtures:check && pnpm run fixtures:external:check && pnpm run occt:diagnostics:check && pnpm run phase1:evidence:check && pnpm run ifc:federation:check && pnpm run browser:evidence:check && pnpm run benchmark:industrial:check && pnpm run benchmark:heterogeneous:check && pnpm run benchmark:repeatability:check && pnpm run benchmark:gpu-timing:check && pnpm run lint && pnpm run typecheck && pnpm run test && pnpm run build",
     "dev": "pnpm --filter @madi/webgpu-spike run dev",
     "fixtures:check": "node scripts/validate-fixture-manifest.mjs",
     "fixtures:external": "node scripts/external-fixtures.mjs",
@@ -37,7 +37,11 @@
     "benchmark:heterogeneous": "node scripts/record-industrial-benchmark.mjs --output artifacts/benchmarks/heterogeneous-culling --scale target --profile heterogeneous --culling frustum --frames 90 --warmup 30",
     "benchmark:heterogeneous:check": "node scripts/validate-heterogeneous-culling-evidence.mjs",
     "benchmark:repeatability": "node scripts/record-industrial-benchmark.mjs --output artifacts/benchmarks/heterogeneous-repeatability --scale target --profile heterogeneous --culling frustum --frames 90 --warmup 30 --repeats 3 --memory scene-delta",
-    "benchmark:repeatability:check": "node scripts/validate-heterogeneous-repeatability-evidence.mjs"
+    "benchmark:repeatability:check": "node scripts/validate-heterogeneous-repeatability-evidence.mjs",
+    "benchmark:gpu-timing": "node scripts/record-industrial-benchmark.mjs --output artifacts/benchmarks/heterogeneous-gpu-timing --scale target --profile heterogeneous --culling frustum --frames 90 --warmup 30 --repeats 3 --memory scene-delta",
+    "benchmark:gpu-timing:check": "node scripts/validate-heterogeneous-gpu-timing-evidence.mjs",
+    "benchmark:gpu-timing:integrated": "node scripts/record-industrial-benchmark.mjs --output artifacts/benchmarks/heterogeneous-gpu-timing-integrated --scale target --profile heterogeneous --culling frustum --frames 90 --warmup 30 --repeats 3 --memory scene-delta",
+    "benchmark:gpu-timing:integrated:check": "node scripts/validate-heterogeneous-gpu-timing-evidence.mjs --directory artifacts/benchmarks/heterogeneous-gpu-timing-integrated"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",

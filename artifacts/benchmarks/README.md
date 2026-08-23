@@ -19,6 +19,13 @@ The third record,
 that target three times per browser/backend in fresh processes, alternates
 backend order, and measures backend scene-activation memory deltas in Chrome.
 
+The fourth record,
+[`heterogeneous-gpu-timing`](heterogeneous-gpu-timing/README.md), adds WebGPU
+pass timestamps and a backend-owned retained-resource census to the same
+repeated matrix. It proves the MADI surface pass is sub-millisecond on this
+host, so the ADR-0003 comparison at this tier is CPU-side; the integrated-GPU
+profile run remains outstanding.
+
 Source qualification is tracked separately under
 [`../fixtures/external`](../fixtures/external/README.md). Those records verify
 public STEP/IFC identity and inspectability; they contain no renderer timings.

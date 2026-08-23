@@ -45,6 +45,7 @@ export type {
   GpuSceneBatchEntry,
   ReconcileSceneOptions,
   RenderOptions,
+  RendererResourceStats,
   SectionPlane,
   SetSceneOptions,
 } from "./renderer.js";

@@ -37,3 +37,14 @@ and again after the first rendered scene while retaining the same generated
 workload. The runner subtracts measurement overhead from startup metrics and
 performs warmup afterward. Use `pnpm benchmark:repeatability` for three fresh
 browser processes per path with alternating backend order.
+
+Every MADI run additionally records two ADR signals when the browser exposes
+them. WebGPU `timestamp-query` pass timing is attached to the surface pass,
+reset after warmup, and resolved once after sampling, so per-frame readback
+never stalls the loop; Three.js runs report the signal as unsupported because
+its command encoding is not caller-instrumentable. Both backends also
+self-report a backend-owned retained-resource census: MADI sums its exact
+live GPUBuffer allocations and CPU instance staging, while the Three.js
+figure is a constructed floor over the arrays and reservations it creates.
+Use `pnpm benchmark:gpu-timing` for the committed discrete record and
+`pnpm benchmark:gpu-timing:integrated` on an integrated-GPU host.

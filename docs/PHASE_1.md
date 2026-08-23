@@ -133,10 +133,13 @@ for the adapter boundary, so a real-large federation no longer has to be
 resident as one JSON string or one object graph. The sixty5 measurement in
 `artifacts/ifc/sixty5/` is the gate that increment has to clear.
 
-In parallel, advance the repeated 100k record onto genuinely different hardware
-before widening Studio UI. Add GPU timestamp queries and allocator/GPU retained-
-memory accounting, run the locked matrix on an integrated-GPU profile, and
-replace procedural variants with a redistributable engineering assembly or
-design-partner aggregate. Then add equivalent explicit-edge and bounded-
-residency slices. Keep the committed browser matrices labeled exploratory until
-those independent signals converge.
+In parallel, the repeated 100k record now carries GPU pass timestamps and a
+backend-owned retained-resource census on the discrete host: the MADI surface
+pass is sub-millisecond, so the ADR-0003 comparison at this tier is CPU-side,
+and cross-session CPU-p95 variance (27.0% then 23.9% Chrome medians) is
+itself recorded evidence. Remaining before the renderer decision: run the
+locked matrix on an integrated-GPU profile (procedure committed with the
+GPU-timing record), replace procedural variants with a redistributable
+engineering assembly or design-partner aggregate, and add equivalent
+explicit-edge and bounded-residency slices. Keep the committed browser
+matrices labeled exploratory until those independent signals converge.
