@@ -83,7 +83,9 @@ See `artifacts/phase1/README.md` for the compiled package,
 ## Not yet proven
 
 - Shape-preserving LODs, spatial partitioning, compression, camera-driven
-  reprioritization, and eviction under a bounded residency budget.
+  reprioritization, and a general cache-aware eviction policy under a bounded
+  residency budget. The current selection path can only restore retained coarse
+  fallback batches.
 - Full material, mass, PMI, and domain-specific property schemas remain pending.
 - A repeated reference-hardware and integrated-GPU decision matrix for ADR-0003.
 - Large-coordinate precision behavior required by ADR-0005.
@@ -100,8 +102,9 @@ and bounded residency.
 The IFC-discovered 3,383 prototype ranges now coalesce into 45 deterministic
 512 KiB target requests (one indivisible 1.12 MiB prototype remains whole),
 and the browser reconciles only changed GPU batches under fixed 64 MiB decoded
-and GPU admission caps. The next scheduler increment is eviction, cache tiers,
-and camera/selection reprioritization. In parallel, advance the 100k
+and GPU admission caps. A selected target now pins its detail and evicts colder
+target groups to their retained coarse fallbacks. The next scheduler increment
+is persistent cache tiers and camera/view reprioritization. In parallel, advance the 100k
 heterogeneous/culling record into decision-quality evidence with retained-memory
 isolation, GPU timestamps, and repeated discrete and integrated GPU runs. Keep
 current browser matrices labeled exploratory until those contracts are complete.

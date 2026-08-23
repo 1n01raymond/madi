@@ -421,10 +421,13 @@ opening are implemented. A progressive package can now decode and render
 prototype AABBs from `coarse.bin`, then replace GPU batches with `scene.bin`
 target geometry while preserving node-derived object IDs. Target prototype
 ranges are fetched and decoded one at a time; unresolved prototypes keep their
-coarse batches. Scene replacement or an explicit user cancellation aborts the
-active range, terminates its Worker, and prevents later ranges from starting.
-Camera-driven scheduling across spatial chunks, cancellation of obsolete view
-work, and resource-budget eviction remain unimplemented.
+coarse batches. Selecting an unresolved occurrence can pin its requested target
+and demote colder target groups to their retained coarse fallbacks within the
+same decoded/GPU budgets. Scene replacement or an explicit user cancellation
+aborts the active range, terminates its Worker, and prevents later ranges from
+starting. Camera-driven scheduling across spatial chunks, cancellation of
+obsolete view work, persistent cache tiers, and broader eviction policy remain
+unimplemented.
 
 The reproducible browser smoke command is `pnpm browser:matrix`. Its committed
 Phase 1 run covers Chrome/Blink and Firefox/Gecko with the same compiled package,

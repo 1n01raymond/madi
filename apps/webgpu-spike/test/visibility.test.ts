@@ -87,4 +87,23 @@ describe("occurrence visibility", () => {
       hiddenOccurrences: 1,
     });
   });
+
+  it("preserves hidden and isolated intent across a replacement scene", () => {
+    const first = new OccurrenceVisibility(scene());
+    first.hide(1);
+    const hidden = first.snapshot();
+    const replacement = new OccurrenceVisibility(scene());
+
+    replacement.restore(hidden);
+    expect(replacement.state()).toMatchObject({ mode: "hidden", visibleOccurrences: 2 });
+    expect(replacement.isVisible(1)).toBe(false);
+
+    first.isolate(3);
+    replacement.restore(first.snapshot());
+    expect(replacement.state()).toMatchObject({
+      mode: "isolated",
+      visibleOccurrences: 1,
+      isolatedObjectId: 3,
+    });
+  });
 });

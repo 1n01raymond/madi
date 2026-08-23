@@ -52,9 +52,13 @@ The runtime preserves one pickable occurrence ID across material-separated
 surface batches. IFC compilation coalesces adjacent prototype ranges into
 deterministic requests (512 KiB by default) and the runtime reconciles them by
 stable batch key, so an arriving request does not re-upload every existing
-batch. The browser enforces separate 64 MiB decoded and GPU admission budgets;
-on pressure it stops target promotion and keeps the remaining coarse fallbacks.
-Eviction, cache tiers, and camera-driven reprioritization remain Phase 2 work.
+batch. The browser enforces separate 64 MiB decoded and GPU admission budgets.
+It keeps the coarse fallback for every promoted target group. When a selected
+occurrence needs detail under pressure, the runtime pins that target and
+replaces colder target groups with their retained coarse batches; visibility
+intent and stable object IDs survive the batch update. Add `?residencyMiB=5`
+to force a small budget during local exploration. Persistent cache tiers and
+camera-driven reprioritization remain Phase 2 work.
 
 ## Open another compiled scene
 
