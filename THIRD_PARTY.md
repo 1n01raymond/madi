@@ -48,6 +48,16 @@ Industries and is redistributed under the MIT License. The full notice is in
 artifact path, and SHA-256 digest are locked in the fixture manifest. Adafruit
 does not endorse MADI.
 
+## External reference fixtures
+
+Large NIST and IFC-Bench reference sources are download-on-demand and remain in
+the ignored `output/external-fixtures/` cache; MADI does not redistribute those
+binaries. `fixtures/external/manifest.json` pins source identity, byte length,
+SHA-256, license, and attribution. The repository retains the NIST use notice,
+the Digital Hub MIT notice, and the `sixty5` CC BY 4.0 notice next to the
+manifest. Committed qualification artifacts contain aggregate inspection data,
+not source geometry.
+
 ## Open CASCADE Technology
 
 The current local STEP adapter uses Open CASCADE Technology (OCCT) through the

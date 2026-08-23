@@ -48,7 +48,28 @@ Public or explicitly redistributable fixtures only.
 
 Private partner datasets may guide optimization but cannot be the only evidence.
 
-### 4.1 Industrial scale ladder
+### 4.1 Public reference-source ladder
+
+Large third-party source files are registered in
+`fixtures/external/manifest.json` and cached outside Git. A `qualified` source
+has pinned revision, URL, byte length, SHA-256, per-model license, attribution,
+and committed Part 21 inspection evidence. A merely `registered` source cannot
+support a benchmark claim.
+
+| Dataset | Tier | Current role |
+|---|---|---|
+| NIST MBE PMI STEP files | smoke, qualified | AP242 B-rep/PMI and tessellated-geometry conformance |
+| IFC-Bench Digital Hub | real-medium, qualified | four-file IFC4 architecture/MEP federation and semantic ingestion |
+| IFC-Bench sixty5 | real-large, registered | opt-in 839.9 MB multi-discipline BIM candidate |
+
+The real sources complement, rather than replace, deterministic generated
+workloads. Digital Hub is suitable for building the IFC adapter and checking
+federation identity, hierarchy, mapped representations, and properties. It is
+not a plant/ship dataset and is not large enough by itself to decide ADR-0003.
+The `sixty5` tier must be fetched, inspected, compiled, and visually reviewed
+before promotion to qualified evidence. See `fixtures/external/README.md`.
+
+### 4.2 Industrial scale ladder
 
 The deterministic `madi.industrial-pipe-rack.1` workload provides a public,
 license-independent scale control. It is benchmark data, not the canonical
@@ -65,7 +86,7 @@ heterogeneous tier must add many unique pipe spools, plates, and equipment
 prototypes before ADR-0003 can be decided. Repetition-only results are not
 representative because optimized engine instancing is already strong there.
 
-### 4.2 Evidence layers
+### 4.3 Evidence layers
 
 1. **Public scale control:** deterministic and redistributable at every tier.
 2. **Public real model:** license-audited STEP or IFC industrial surrogate.
@@ -276,3 +297,10 @@ This is still not decision evidence. It has one host session, no integrated-GPU
 profile, GPU timestamps, isolated retained-memory measurement, streaming/LOD,
 or real design-partner assembly. Whole-page Chrome memory readings are recorded
 only as diagnostics. See `artifacts/benchmarks/heterogeneous-culling/`.
+
+The external-source registry now supplies two qualified correctness layers:
+two NIST AP242 cases (30,100 Part 21 entities) and the four-discipline IFC-Bench
+Digital Hub federation (482,994 Part 21 entities). Their source files remain in
+an ignored local cache; only provenance, license snapshots, checksums, and
+aggregate inspections are committed. No renderer result is claimed from these
+records. See `artifacts/fixtures/external/`.

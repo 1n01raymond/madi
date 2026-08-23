@@ -1,0 +1,242 @@
+{
+  "schemaVersion": "1.0",
+  "storagePolicy": "external-cache-only",
+  "cacheDirectory": "output/external-fixtures",
+  "datasets": [
+    {
+      "id": "nist-pmi-step-files",
+      "name": "NIST MBE PMI STEP test files",
+      "kind": "step-conformance",
+      "status": "qualified",
+      "tier": "smoke",
+      "requiresAllowLarge": false,
+      "expectedDownloadBytes": 13976599,
+      "purposes": [
+        "ap242",
+        "brep",
+        "pmi",
+        "tessellated-geometry",
+        "conformance"
+      ],
+      "evidenceFile": "artifacts/fixtures/external/nist-pmi-step-files.json",
+      "source": {
+        "landingPage": "https://www.nist.gov/ctl/smart-connected-systems-division/smart-connected-manufacturing-systems-group/mbe-pmi-0",
+        "repository": "https://www.nist.gov/document/nist-pmi-step-files",
+        "revision": "2024-06-19",
+        "license": "LicenseRef-NIST-Unrestricted",
+        "licenseUrl": "https://www.nist.gov/ctl/smart-connected-systems-division/smart-connected-manufacturing-systems-group/mbe-pmi-0#disclaimers",
+        "licenseFile": "licenses/nist-pmi-step-files-NOTICE.md",
+        "attribution": "National Institute of Standards and Technology (NIST)"
+      },
+      "assets": [
+        {
+          "id": "nist-pmi-step-archive",
+          "role": "archive",
+          "format": "zip",
+          "path": "NIST-PMI-STEP-Files.zip",
+          "url": "https://www.nist.gov/system/files/documents/noindex/2024/06/19/NIST-PMI-STEP-Files.zip",
+          "byteLength": 13976599,
+          "sha256": "8fa78429e6d8d9b0d7681d223b6aa9ec98c3772185c55b1a0e3679b21c181911",
+          "archiveMembers": [
+            {
+              "id": "nist-stc-07-ap242-e3",
+              "archivePath": "NIST-PMI-STEP-Files/nist_stc_07_asme1_ap242-e3.stp",
+              "cachePath": "selected/nist_stc_07_asme1_ap242-e3.stp",
+              "format": "step",
+              "byteLength": 1945387,
+              "sha256": "2dddf9b8894bc241f7ffddf3dc4502baa3d49c374e8784039d14b86473d54832",
+              "purposes": [
+                "ap242",
+                "brep",
+                "pmi",
+                "conformance"
+              ]
+            },
+            {
+              "id": "nist-ftc-08-ap242-tessellated",
+              "archivePath": "NIST-PMI-STEP-Files/nist_ftc_08_asme1_ap242-e1-tg.stp",
+              "cachePath": "selected/nist_ftc_08_asme1_ap242-e1-tg.stp",
+              "format": "step",
+              "byteLength": 2120356,
+              "sha256": "841a9ac51a32fe25b872f283b0b8770c77fee4e34adc8499f88a6e1bafd8e578",
+              "purposes": [
+                "ap242",
+                "pmi",
+                "tessellated-geometry",
+                "conformance"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ifc-bench-digital-hub",
+      "name": "IFC-Bench Digital Hub federation",
+      "kind": "federated-bim",
+      "status": "qualified",
+      "tier": "real-medium",
+      "requiresAllowLarge": false,
+      "expectedDownloadBytes": 67829367,
+      "purposes": [
+        "ifc",
+        "bim",
+        "federation",
+        "mep",
+        "spatial-hierarchy",
+        "properties"
+      ],
+      "evidenceFile": "artifacts/fixtures/external/ifc-bench-digital-hub.json",
+      "source": {
+        "landingPage": "https://huggingface.co/datasets/sylvainHellin/ifc-bench/tree/main/projects/digital_hub",
+        "repository": "https://huggingface.co/datasets/sylvainHellin/ifc-bench",
+        "revision": "4b37e5d77f12f30dfd7cb7375e15278e1037c808",
+        "license": "MIT",
+        "licenseUrl": "https://huggingface.co/datasets/sylvainHellin/ifc-bench/blob/4b37e5d77f12f30dfd7cb7375e15278e1037c808/projects/digital_hub/license.txt",
+        "licenseFile": "licenses/ifc-bench-digital-hub-MIT.txt",
+        "attribution": "RWTH Aachen University, E3D Institute of Energy Efficiency and Sustainable Building"
+      },
+      "assets": [
+        {
+          "id": "architecture",
+          "role": "source",
+          "format": "ifc",
+          "discipline": "architecture",
+          "path": "arc.ifc",
+          "url": "https://huggingface.co/datasets/sylvainHellin/ifc-bench/resolve/4b37e5d77f12f30dfd7cb7375e15278e1037c808/projects/digital_hub/arc.ifc?download=true",
+          "byteLength": 9022255,
+          "sha256": "19d7d02d53c2b88e86890ee236297b12bbb0f7748030cd32ff6a22762e9966bb"
+        },
+        {
+          "id": "heating",
+          "role": "source",
+          "format": "ifc",
+          "discipline": "heating",
+          "path": "heating.ifc",
+          "url": "https://huggingface.co/datasets/sylvainHellin/ifc-bench/resolve/4b37e5d77f12f30dfd7cb7375e15278e1037c808/projects/digital_hub/heating.ifc?download=true",
+          "byteLength": 20890415,
+          "sha256": "a5603e8f6aa4cbf63aece92f92f503e9a578702d8fe96a6d4661490f1843710d"
+        },
+        {
+          "id": "plumbing",
+          "role": "source",
+          "format": "ifc",
+          "discipline": "plumbing",
+          "path": "plumbing.ifc",
+          "url": "https://huggingface.co/datasets/sylvainHellin/ifc-bench/resolve/4b37e5d77f12f30dfd7cb7375e15278e1037c808/projects/digital_hub/plumbing.ifc?download=true",
+          "byteLength": 25178864,
+          "sha256": "0b1d6b0abd8d4cc3f5f798c7581bed2b39b40110ba6348d5470bbef646cfed79"
+        },
+        {
+          "id": "ventilation",
+          "role": "source",
+          "format": "ifc",
+          "discipline": "ventilation",
+          "path": "ventilation.ifc",
+          "url": "https://huggingface.co/datasets/sylvainHellin/ifc-bench/resolve/4b37e5d77f12f30dfd7cb7375e15278e1037c808/projects/digital_hub/ventilation.ifc?download=true",
+          "byteLength": 12737833,
+          "sha256": "c0a1807875957c4154d45d14a3b5ed480dd3178a5bdc3262302a7eccf76d5cb1"
+        }
+      ]
+    },
+    {
+      "id": "ifc-bench-sixty5",
+      "name": "IFC-Bench sixty5 multi-discipline federation",
+      "kind": "federated-bim",
+      "status": "registered",
+      "tier": "real-large",
+      "requiresAllowLarge": true,
+      "expectedDownloadBytes": 839866782,
+      "purposes": [
+        "ifc",
+        "bim",
+        "federation",
+        "large-scene",
+        "mep",
+        "spatial-hierarchy",
+        "properties"
+      ],
+      "source": {
+        "landingPage": "https://huggingface.co/datasets/sylvainHellin/ifc-bench/tree/main/projects/sixty5",
+        "repository": "https://huggingface.co/datasets/sylvainHellin/ifc-bench",
+        "revision": "4b37e5d77f12f30dfd7cb7375e15278e1037c808",
+        "license": "CC-BY-4.0",
+        "licenseUrl": "https://huggingface.co/datasets/sylvainHellin/ifc-bench/blob/4b37e5d77f12f30dfd7cb7375e15278e1037c808/projects/sixty5/license.txt",
+        "licenseFile": "licenses/ifc-bench-sixty5-CC-BY-4.0.txt",
+        "attribution": "Selahattin Doelger; buildingSMART Community Sample Test Files"
+      },
+      "assets": [
+        {
+          "id": "architecture",
+          "role": "source",
+          "format": "ifc",
+          "discipline": "architecture",
+          "path": "arc.ifc",
+          "url": "https://huggingface.co/datasets/sylvainHellin/ifc-bench/resolve/4b37e5d77f12f30dfd7cb7375e15278e1037c808/projects/sixty5/arc.ifc?download=true",
+          "byteLength": 342657851,
+          "sha256": "e91ddbbd672bbde946af14631de4c732f0cf8a7cfae5dbbf06fbeab03b5c46df"
+        },
+        {
+          "id": "electrical",
+          "role": "source",
+          "format": "ifc",
+          "discipline": "electrical",
+          "path": "electrical.ifc",
+          "url": "https://huggingface.co/datasets/sylvainHellin/ifc-bench/resolve/4b37e5d77f12f30dfd7cb7375e15278e1037c808/projects/sixty5/electrical.ifc?download=true",
+          "byteLength": 97058912,
+          "sha256": "adb8d5eda2c706a1fded2a00bd38d845e35f513e2f6ba048fc6228274dfb3986"
+        },
+        {
+          "id": "facade",
+          "role": "source",
+          "format": "ifc",
+          "discipline": "facade",
+          "path": "facade.ifc",
+          "url": "https://huggingface.co/datasets/sylvainHellin/ifc-bench/resolve/4b37e5d77f12f30dfd7cb7375e15278e1037c808/projects/sixty5/facade.ifc?download=true",
+          "byteLength": 6067026,
+          "sha256": "a9a1b20214da8ac1e1bea1f8670bef24f20a0d53a8ebaef4eb20b5a447640c79"
+        },
+        {
+          "id": "kitchen",
+          "role": "source",
+          "format": "ifc",
+          "discipline": "kitchen",
+          "path": "kitchen.ifc",
+          "url": "https://huggingface.co/datasets/sylvainHellin/ifc-bench/resolve/4b37e5d77f12f30dfd7cb7375e15278e1037c808/projects/sixty5/kitchen.ifc?download=true",
+          "byteLength": 49670229,
+          "sha256": "1905b992071729d1c780b18f6103e4d1d08307a4707d5f33a4413216f36776ac"
+        },
+        {
+          "id": "plumbing",
+          "role": "source",
+          "format": "ifc",
+          "discipline": "plumbing",
+          "path": "plumbing.ifc",
+          "url": "https://huggingface.co/datasets/sylvainHellin/ifc-bench/resolve/4b37e5d77f12f30dfd7cb7375e15278e1037c808/projects/sixty5/plumbing.ifc?download=true",
+          "byteLength": 222099255,
+          "sha256": "15382b06d0a63464b95ba451ce7d5fa981bf6c236ebe3f4f62bb9d2b9abfd821"
+        },
+        {
+          "id": "structure",
+          "role": "source",
+          "format": "ifc",
+          "discipline": "structure",
+          "path": "str.ifc",
+          "url": "https://huggingface.co/datasets/sylvainHellin/ifc-bench/resolve/4b37e5d77f12f30dfd7cb7375e15278e1037c808/projects/sixty5/str.ifc?download=true",
+          "byteLength": 7422441,
+          "sha256": "79f294c643438ac7a494e4871857244c2de0eefa536eda5977af20640a301a22"
+        },
+        {
+          "id": "ventilation",
+          "role": "source",
+          "format": "ifc",
+          "discipline": "ventilation",
+          "path": "ventilation.ifc",
+          "url": "https://huggingface.co/datasets/sylvainHellin/ifc-bench/resolve/4b37e5d77f12f30dfd7cb7375e15278e1037c808/projects/sixty5/ventilation.ifc?download=true",
+          "byteLength": 114891068,
+          "sha256": "c78f6ad085961500f0890bbffda9e171c1342c5865ca152f64098dd4da644cca"
+        }
+      ]
+    }
+  ]
+}

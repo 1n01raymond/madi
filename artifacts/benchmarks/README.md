@@ -13,3 +13,7 @@ The second reviewed record is
 [`heterogeneous-culling`](heterogeneous-culling/README.md): 256 prototypes,
 100,000 occurrences, a local-review camera trace, and equivalent MADI dense CPU
 culling versus Three.js `BatchedMesh` per-object culling. It remains exploratory.
+
+Source qualification is tracked separately under
+[`../fixtures/external`](../fixtures/external/README.md). Those records verify
+public STEP/IFC identity and inspectability; they contain no renderer timings.
