@@ -56,12 +56,30 @@
       <section class="viewport" aria-label="Compiled glTF WebGPU viewport">
         <div class="viewport-label"><span></span> LIVE GPU VIEW</div>
         <div class="viewport-tools" aria-label="Viewport controls">
-          <span id="visibility-status">Waiting for occurrences</span>
-          <div class="viewport-actions">
-            <button id="hide-selection" type="button" disabled>Hide <kbd>H</kbd></button>
-            <button id="isolate-selection" type="button" disabled>Isolate <kbd>I</kbd></button>
-            <button id="show-all" type="button" disabled>Show all <kbd>⇧H</kbd></button>
-            <button id="fit-view" type="button">Fit <kbd>F</kbd></button>
+          <div class="viewport-toolbar">
+            <span id="visibility-status">Waiting for occurrences</span>
+            <div class="viewport-actions">
+              <button id="hide-selection" type="button" disabled>Hide <kbd>H</kbd></button>
+              <button id="isolate-selection" type="button" disabled>Isolate <kbd>I</kbd></button>
+              <button id="show-all" type="button" disabled>Show all <kbd>⇧H</kbd></button>
+              <button id="toggle-section" type="button" aria-pressed="false">Section <kbd>C</kbd></button>
+              <button id="fit-view" type="button">Fit <kbd>F</kbd></button>
+            </div>
+          </div>
+          <div id="section-controls" class="section-controls" hidden>
+            <div class="section-axis" role="group" aria-label="Section axis">
+              <span>Axis</span>
+              <button type="button" data-section-axis="x" aria-pressed="false">X</button>
+              <button type="button" data-section-axis="y" aria-pressed="false">Y</button>
+              <button type="button" data-section-axis="z" aria-pressed="true">Z</button>
+              <button id="flip-section" type="button">Flip</button>
+            </div>
+            <label for="section-position">
+              <span>Position</span>
+              <input id="section-position" type="range" min="0" max="100" value="50" />
+              <output id="section-position-value" for="section-position">Z · 50%</output>
+            </label>
+            <small id="section-direction">Keep −Z side</small>
           </div>
         </div>
         <canvas id="viewport"></canvas>

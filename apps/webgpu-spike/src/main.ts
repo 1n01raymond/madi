@@ -11,6 +11,8 @@ import type {
 } from "@madi/runtime-webgpu";
 
 import type { GeometryDecodeResponse } from "./geometry.worker.js";
+import { AxisSectionPlane } from "./section-plane.js";
+import type { SectionAxis } from "./section-plane.js";
 import { OrthographicOrbitCamera } from "./view.js";
 import { OccurrenceVisibility } from "./visibility.js";
 import faviconUrl from "../../../docs/media/madi-favicon.svg?url";
@@ -106,6 +108,13 @@ const visibilityStatus = requireElement<HTMLElement>("#visibility-status");
 const hideSelectionButton = requireElement<HTMLButtonElement>("#hide-selection");
 const isolateSelectionButton = requireElement<HTMLButtonElement>("#isolate-selection");
 const showAllButton = requireElement<HTMLButtonElement>("#show-all");
+const toggleSectionButton = requireElement<HTMLButtonElement>("#toggle-section");
+const sectionControls = requireElement<HTMLElement>("#section-controls");
+const sectionPosition = requireElement<HTMLInputElement>("#section-position");
+const sectionPositionValue = requireElement<HTMLOutputElement>("#section-position-value");
+const sectionDirection = requireElement<HTMLElement>("#section-direction");
+const flipSectionButton = requireElement<HTMLButtonElement>("#flip-section");
+const sectionAxisButtons = document.querySelectorAll<HTMLButtonElement>("[data-section-axis]");
 requireElement<HTMLLinkElement>("#madi-favicon").href = faviconUrl;
 requireElement<HTMLImageElement>("#madi-brand-mark").src = inverseMarkUrl;
 
@@ -173,6 +182,7 @@ async function start(): Promise<void> {
     const evidence = new Map(scene.objectEvidence.map((entry) => [entry.objectId, entry]));
     const evidenceByNode = new Map(scene.objectEvidence.map((entry) => [entry.nodeIndex, entry]));
     const visibility = new OccurrenceVisibility(scene.gpuScene);
+    const section = new AxisSectionPlane(scene.bounds);
     let selectedObjectId = 0;
 
     const updateSelectionText = (): void => {
@@ -262,6 +272,30 @@ async function start(): Promise<void> {
     };
     updateVisibilityControls();
 
+    const applySection = (): void => {
+      const state = section.state();
+      renderer.setSectionPlane(section.plane());
+      toggleSectionButton.setAttribute("aria-pressed", String(state.enabled));
+      sectionControls.hidden = !state.enabled;
+      sectionPosition.value = String(Math.round(state.fraction * 100));
+      sectionPositionValue.textContent =
+        `${state.axis.toUpperCase()} · ${Math.round(state.fraction * 100)}%`;
+      sectionDirection.textContent =
+        `Keep ${state.direction === 1 ? "−" : "+"}${state.axis.toUpperCase()} side`;
+      for (const button of sectionAxisButtons) {
+        button.setAttribute("aria-pressed", String(button.dataset.sectionAxis === state.axis));
+      }
+      document.documentElement.dataset.sectionEnabled = String(state.enabled);
+      document.documentElement.dataset.sectionAxis = state.axis;
+      scheduleRender();
+    };
+
+    const toggleSection = (): void => {
+      section.toggle();
+      applySection();
+    };
+    applySection();
+
     const interactions = new AbortController();
     const listenerOptions = { signal: interactions.signal };
     let activePointer: number | undefined;
@@ -335,6 +369,33 @@ async function start(): Promise<void> {
     hideSelectionButton.addEventListener("click", hideSelection, listenerOptions);
     isolateSelectionButton.addEventListener("click", isolateSelection, listenerOptions);
     showAllButton.addEventListener("click", showAll, listenerOptions);
+    toggleSectionButton.addEventListener("click", toggleSection, listenerOptions);
+    flipSectionButton.addEventListener(
+      "click",
+      () => {
+        section.flip();
+        applySection();
+      },
+      listenerOptions,
+    );
+    sectionPosition.addEventListener(
+      "input",
+      () => {
+        section.setFraction(Number(sectionPosition.value) / 100);
+        applySection();
+      },
+      listenerOptions,
+    );
+    for (const button of sectionAxisButtons) {
+      button.addEventListener(
+        "click",
+        () => {
+          section.setAxis(button.dataset.sectionAxis as SectionAxis);
+          applySection();
+        },
+        listenerOptions,
+      );
+    }
     window.addEventListener(
       "keydown",
       (event) => {
@@ -349,6 +410,7 @@ async function start(): Promise<void> {
         }
         const key = event.key.toLowerCase();
         if (key === "f") fitView();
+        else if (key === "c") toggleSection();
         else if (key === "h" && event.shiftKey) showAll();
         else if (key === "h") hideSelection();
         else if (key === "i") isolateSelection();

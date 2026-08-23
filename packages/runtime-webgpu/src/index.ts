@@ -29,13 +29,16 @@ export type {
 } from "./compiled-gltf.js";
 export {
   MadiWebGpuError,
+  normalizeSectionPlane,
   Phase0Renderer,
   Phase0Renderer as MadiWebGpuRenderer,
 } from "./renderer.js";
 export type {
   MadiWebGpuErrorCode,
+  NormalizedSectionPlane,
   Phase0RendererOptions,
   Phase0RendererOptions as MadiWebGpuRendererOptions,
   RenderOptions,
+  SectionPlane,
   SetSceneOptions,
 } from "./renderer.js";

@@ -23,4 +23,6 @@ viewport or hierarchy highlights the same occurrence and preserves its source
 identity. `H` hides the selection, `I` isolates it, and `Shift+H` restores all
 occurrences. These actions compact stable per-prototype visibility tables into
 existing instance buffers rather than rebuilding scene resources. Adafruit does
-not endorse MADI.
+not endorse MADI. Press `C` to enable one world-space section plane; choose its
+X/Y/Z axis, drag the normalized position, or flip the retained side. Surfaces,
+explicit edges, and GPU picking share the same clipping equation.
