@@ -1,7 +1,8 @@
 # MADI compiler
 
-`@madi/compiler` is the first Phase 1 source-independent compiler slice. It
-accepts a validated in-memory `EngineeringScene` and emits:
+`@madi/compiler` is the first Phase 1 source-to-Web compiler slice. Its public
+CLI accepts local STEP AP242 or AP214 through the OCCT Python adapter; its
+library boundary accepts a validated in-memory `EngineeringScene`. Both emit:
 
 - `scene.gltf`: glTF 2.0 hierarchy, nodes, shared meshes, materials, and MADI
   source/identity metadata in `extras`;
@@ -21,21 +22,29 @@ interoperability requirements are measured.
 From the repository root:
 
 ```sh
+python -m pip install -r native/adapter-occt/tools/requirements-evidence.txt
+pnpm madi compile fixtures/step/repeated-fasteners-ap242.step \
+  --output output/repeated-fasteners-ap242
 pnpm phase1:compile:evidence
 pnpm phase1:evidence:check
 pnpm test
 ```
 
-The first command compiles the small committed OCCT Scene IR regression into
-`artifacts/phase1/repeated-fasteners`. The second independently checks that
-package and the canonical `artifacts/phase1/adafruit-pygamer` package: source
-and resource hashes, buffer/accessor ranges, hierarchy, prototype reuse,
-triangle/edge counts, and official Khronos glTF validation.
+The `madi compile` command reads the checksum-locked AP242 assembly through
+OCCT STEPCAF/XDE, validates source identity across the adapter boundary, and
+writes `scene.gltf`, `scene.bin`, `build-report.json`, and
+`adapter-report.json`. Its expanded Scene IR is temporary and is deleted after
+the package passes validation. `phase1:compile:evidence` retains the historical
+small Scene IR regression path. The evidence check validates both plus the
+canonical PyGamer package: source and resource hashes, buffer/accessor ranges,
+hierarchy, prototype reuse, triangle/edge counts, and official Khronos glTF
+validation.
 
 ## Current limits
 
-- The executable CLI hydrates Phase 0 evidence JSON only; the production entry
-  point will receive Scene IR directly from source adapters.
+- The direct STEP command currently depends on the pinned CadQuery/OCP Python
+  adapter. Moving the proven extraction behavior into the native C++ adapter
+  remains production hardening work.
 - One target display representation is emitted. Coarse LOD, progressive
   partitioning, compression, and streaming manifests are not implemented.
 - Geometry and node transforms are f32 in glTF; the large-coordinate precision

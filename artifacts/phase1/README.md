@@ -1,11 +1,12 @@
 # Phase 1 compiler evidence
 
-Two deterministic, standards-first packages cover complementary risks.
+Three deterministic, standards-first packages cover complementary risks.
 
 | Package | Role |
 |---|---|
 | `adafruit-pygamer/` | Canonical real-world electronics and browser demo fixture |
 | `repeated-fasteners/` | Small MADI-authored deterministic compiler regression fixture |
+| `repeated-fasteners-ap242/` | Direct local AP242 → OCCT → glTF compiler-entry evidence |
 
 Each package contains:
 
@@ -14,6 +15,7 @@ Each package contains:
 | `scene.gltf` | glTF 2.0 hierarchy, shared meshes, materials, and experimental MADI `extras` |
 | `scene.bin` | external little-endian geometry and source-map accessors |
 | `build-report.json` | source/compiler/options identity, SHA-256 hashes, counts, diagnostics, reuse, and limits |
+| `adapter-report.json` | AP242 source identity, OCCT toolchain/options, extraction counts, and diagnostics (direct-input package only) |
 
 ## Canonical PyGamer result
 
@@ -32,10 +34,20 @@ that gap is now measurable rather than hypothetical.
 The package is marked `experimental-not-interchange`. It is standard glTF 2.0
 plus an external binary and does not define a `.madi` file format.
 
+## Direct AP242 result
+
+`repeated-fasteners-ap242/` is produced from the checksum-locked local STEP
+file by one public command. OCCT reads AP242 DIS through STEPCAF/XDE, extracts
+three reusable part meshes and ten renderable occurrences, and the compiler
+emits 2,076 triangles plus 181 explicit CAD edge segments. The expanded Scene
+IR exists only in a temporary directory and is removed after validation.
+
 ## Reproduce and validate
 
 ```sh
 pnpm phase1:compile:evidence
+pnpm madi compile fixtures/step/repeated-fasteners-ap242.step \
+  --output output/repeated-fasteners-ap242
 pnpm phase1:evidence:check
 ```
 

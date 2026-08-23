@@ -33,6 +33,7 @@ artifacts/benchmarks/*.json
 Thumbs.db
 
 # Local environment
+.venv/
 .env
 .env.*
 !.env.example

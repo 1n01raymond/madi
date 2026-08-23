@@ -23,15 +23,16 @@ Versions are pinned in `package.json` and `pnpm-lock.yaml`. Updates must pass
 the complete check and browser smoke path and must not introduce an incompatible
 runtime license.
 
-## STEP fixture authoring tools
+## STEP adapter and fixture authoring tools
 
-These tools generated the committed Phase 0 STEP fixtures. They are not pnpm
-dependencies, are not required by normal CI, and are not bundled into MADI.
+These tools generate the committed STEP fixtures and implement the current
+local STEP compiler adapter. They are not pnpm dependencies, are not required
+by normal CI, and are not bundled into the browser runtime.
 
 | Dependency | Version | Package license | Purpose |
 |---|---:|---|---|
-| CadQuery | 2.8.0 | Apache-2.0 | authored and exported the synthetic B-rep and assembly fixtures |
-| `cadquery-ocp` | 7.9.3.1.1 | Apache-2.0 package metadata | Python OCCT binding used by CadQuery during fixture generation |
+| CadQuery | 2.8.0 | Apache-2.0 | XDE assembly import/tessellation helpers and authored fixture export |
+| `cadquery-ocp` | 7.9.3.1.1 | Apache-2.0 package metadata | Python OCCT binding for the local STEP adapter and fixture generation |
 
 The generated models and generator source are original MADI contributions under
 Apache-2.0. Their provenance, exact checksums, and regeneration policy are in
@@ -49,11 +50,12 @@ does not endorse MADI.
 
 ## Open CASCADE Technology
 
-The initial STEP/IGES adapter is expected to use Open CASCADE Technology
-(OCCT). OCCT is licensed under LGPL-2.1 with an additional exception. The
-adapter and distribution process must preserve required notices and make the
-license available to recipients. OCCT types must not cross the neutral adapter
-boundary into the browser runtime API.
+The current local STEP adapter uses Open CASCADE Technology (OCCT) through the
+pinned Python binding; the production-boundary C++ target remains in progress.
+OCCT is licensed under LGPL-2.1 with an additional exception. The adapter and
+distribution process must preserve required notices and make the license
+available to recipients. OCCT types must not cross the neutral adapter boundary
+into the browser runtime API.
 
 ## TypeGPU and WebGPU
 

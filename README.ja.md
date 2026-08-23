@@ -129,6 +129,23 @@ Engineering Scene IRは新しい交換形式ではなく、論理的なシステ
 MADIの推奨を意味しません。[検証済みブラウザ証拠](artifacts/browser-matrix/README.md)を
 参照してください。
 
+## 現在のコンパイラ検証
+
+リポジトリには、事前抽出済みScene IRだけでなく、実行可能なローカル
+AP242/AP214経路が追加されました。固定されたOCCT Pythonアダプター依存関係を
+導入すると、1つのコマンドでSTEPを読み、アセンブリ再利用とCAD edgeを保持し、
+ソース識別子を検証して、コンパイル済みglTFペアを出力します。
+
+```sh
+python -m pip install -r native/adapter-occt/tools/requirements-evidence.txt
+pnpm madi compile fixtures/step/repeated-fasteners-ap242.step \
+  --output output/repeated-fasteners-ap242
+```
+
+コミット済みAP242結果は、Khronos glTFのerror・warningともに0件です。展開された
+Scene IRは一時データであり、MADIファイル形式ではありません。
+[コンパイラ証拠](artifacts/phase1/README.md)を参照してください。
+
 ## 設計から読み始める
 
 | 知りたいこと | 文書 |

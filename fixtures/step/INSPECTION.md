@@ -2,7 +2,7 @@
 
 Inspection date: 2026-08-23
 
-The three MADI-authored files were generated from
+The four MADI-authored files were generated from
 `generators/generate_fixtures.py` with CadQuery 2.8.0 and `cadquery-ocp`
 7.9.3.1.1. The upstream Adafruit PyGamer was imported byte-for-byte from the
 pinned MIT-licensed source. Every file was then read through the same OCCT
@@ -12,12 +12,13 @@ binding. Counts below describe the occurrence-expanded B-rep import.
 |---|---|---|---:|---:|---:|---:|---|
 | `precision-bracket.step` | mm | one part | 1 / 1 | 1 | 18 | 40 | none |
 | `repeated-fasteners.step` | mm | root → fastener bank → fastener | 3 / 10 | 10 | 100 | 216 | none |
+| `repeated-fasteners-ap242.step` | mm | root → fastener bank → fastener | 3 / 10 | 10 | 100 | 216 | none |
 | `adafruit-pygamer.step` | mm | Adafruit PyGamer v12 → PCB Component → parts | 34 / 85 | 177 | 6,351 | 16,486 | none |
 | `unsupported-layer-assignment.step` | mm | root → fastener bank → fastener | 3 / 10 | 10 | 100 | 216 | `OCCT_UNSUPPORTED_PRESENTATION_LAYER_ASSIGNMENT` × 1 |
 
-The assembly contains one mounting-plate occurrence, one center-rail
+The AP214 and AP242 assembly variants contain one mounting-plate occurrence, one center-rail
 occurrence, and eight transformed occurrences of the same fastener shape. It
-has three distinct RGB colors and eleven AP214
+has three distinct RGB colors and eleven
 `NEXT_ASSEMBLY_USAGE_OCCURRENCE` relationships: three below the root and eight
 below the fastener bank. The file contains three `MANIFOLD_SOLID_BREP`
 definitions rather than ten copied geometric definitions.

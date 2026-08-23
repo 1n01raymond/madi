@@ -33,10 +33,10 @@ Status: Current.
 ### Compiler
 
 Current evidence: the first deterministic package emits standard glTF 2.0 JSON,
-external binary geometry, and a build report from real OCCT Scene IR. It
-preserves hierarchy, prototype reuse, explicit edges, and source identity, but
-does not yet provide direct AP242 input, coarse LOD, or progressive chunks. See
-the [Phase 1 tracker](PHASE_1.md).
+external binary geometry, and build reports from local AP242/AP214 through the
+isolated OCCT adapter. It preserves hierarchy, prototype reuse, explicit edges,
+and source identity; expanded Scene IR is temporary. Coarse LOD and progressive
+chunks remain pending. See the [Phase 1 tracker](PHASE_1.md).
 
 - local STEP AP242 input;
 - XDE hierarchy, names, colors, units, transforms;

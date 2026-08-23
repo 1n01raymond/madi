@@ -13,17 +13,18 @@ a declared runtime profile and can be rebuilt from authoritative sources.
 
 ## 2. Command-line concept
 
-```text
-madi compile assembly.step \
-  --adapter occt \
-  --profile webgpu-desktop \
+```sh
+pnpm madi compile assembly.step \
   --output ./dist/assembly \
-  --linear-deflection 0.1mm \
-  --angular-deflection 0.5deg \
-  --coarse-error 4px@10m \
-  --max-chunk-gpu-bytes 32MiB \
-  --deterministic
+  --linear-tolerance 0.1 \
+  --angular-tolerance 0.15
 ```
+
+This local AP242/AP214 command is executable. It requires the pinned
+CadQuery/OCP environment documented in `packages/compiler/README.md`, records
+both adapter and compiler reports, and removes its temporary expanded Scene IR.
+Profile, coarse-error, chunk-budget, and service-oriented options remain future
+compiler work.
 
 Other commands:
 
@@ -34,8 +35,7 @@ madi diff old/manifest.json new/manifest.json
 madi benchmark ./dist/assembly --scenario review-default
 ```
 
-The general `madi compile` names and options remain illustrative. The first
-executable evidence command is `pnpm phase1:compile:evidence`.
+The inspection, diff, and benchmark commands below remain illustrative.
 
 ## 3. Pipeline
 
@@ -377,6 +377,11 @@ The build is deterministic for identical Scene IR and options. The normal check
 runs both MADI invariants and the official Khronos glTF Validator. The current
 slice has one target representation and no progressive partitions, so it proves
 the compiler output boundary but not the complete Phase 1 compiler roadmap.
+
+The public `madi compile` entry now accepts a local AP242 or AP214 Part 21 file,
+invokes the isolated OCCT adapter, verifies schema and source digest parity,
+and writes the compiled package plus `adapter-report.json`. The committed
+`repeated-fasteners-ap242` package is generated through that exact command.
 
 The PyGamer baseline contains 34 shared meshes, 85 renderable occurrences,
 162,838 triangles, and 13,897 explicit edge segments. Its 14.8 MB binary is

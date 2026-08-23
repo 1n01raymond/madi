@@ -59,6 +59,37 @@
       }
     },
     {
+      "id": "repeated-fasteners-ap242",
+      "kind": "assembly",
+      "provenanceType": "generated",
+      "path": "repeated-fasteners-ap242.step",
+      "sourcePath": "generators/generate_fixtures.py",
+      "sourceUrl": "https://github.com/1n01raymond/madi/blob/main/fixtures/step/generators/generate_fixtures.py",
+      "license": "Apache-2.0",
+      "licenseUrl": "https://github.com/1n01raymond/madi/blob/main/LICENSE",
+      "licenseFile": "LICENSE.md",
+      "sha256": "87b7909984c635ffc02c61211b22380252d455ebbf7c8e18ab68a2d2f7ac4da3",
+      "purposes": [
+        "ap242",
+        "direct-compiler-input",
+        "assembly",
+        "instancing",
+        "hierarchy",
+        "transforms",
+        "names",
+        "colors"
+      ],
+      "attribution": "MADI Contributors",
+      "generatedWith": {
+        "tool": "CadQuery",
+        "toolVersion": "2.8.0",
+        "binding": "cadquery-ocp",
+        "bindingVersion": "7.9.3.1.1",
+        "kernel": "Open CASCADE Technology",
+        "kernelVersion": "7.9.3"
+      }
+    },
+    {
       "id": "adafruit-pygamer",
       "kind": "assembly",
       "provenanceType": "upstream",

@@ -129,6 +129,23 @@ joystick picking in Chrome and Firefox. The unmodified CAD is redistributed
 under MIT with a pinned upstream commit and notice; Adafruit does not endorse
 MADI. See the [reviewed browser evidence](artifacts/browser-matrix/README.md).
 
+## Current compiler proof
+
+The repository now includes an executable local AP242/AP214 path rather than
+only a pre-extracted Scene IR fixture. After installing the pinned OCCT Python
+adapter dependencies, one command reads STEP, preserves assembly reuse and CAD
+edges, validates source identity, and emits the compiled glTF pair:
+
+```sh
+python -m pip install -r native/adapter-occt/tools/requirements-evidence.txt
+pnpm madi compile fixtures/step/repeated-fasteners-ap242.step \
+  --output output/repeated-fasteners-ap242
+```
+
+The committed AP242 result is independently checked with zero Khronos glTF
+errors or warnings. The expanded Scene IR is temporary and is not a MADI file
+format. See the [compiler evidence](artifacts/phase1/README.md).
+
 ## Start with the design
 
 | If you want to… | Read… |

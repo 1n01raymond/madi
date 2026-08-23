@@ -19,6 +19,22 @@ const fixtures = [
     reuse: [{ prototypeId: "prototype:part:fastener-01", occurrenceCount: 8 }],
   },
   {
+    id: "repeated-fasteners-ap242",
+    sourceId: "repeated-fasteners-ap242",
+    adapterReport: "artifacts/phase1/repeated-fasteners-ap242/adapter-report.json",
+    stepSchema: "AP242",
+    counts: {
+      compiledPrototypeCount: 3,
+      occurrenceCount: 12,
+      renderableOccurrenceCount: 10,
+      gltfNodeCount: 13,
+      gltfMeshCount: 3,
+      triangleCount: 2076,
+      edgeSegmentCount: 181,
+    },
+    reuse: [{ prototypeId: "prototype:part:fastener-01", occurrenceCount: 8 }],
+  },
+  {
     id: "adafruit-pygamer",
     counts: {
       compiledPrototypeCount: 34,
@@ -52,12 +68,16 @@ function sha256(bytes) {
 
 async function validateFixture(definition) {
   const artifact = (name) => path(`artifacts/phase1/${definition.id}/${name}`);
-  const [gltfBytes, binary, report, occtReport, sourceBytes] = await Promise.all([
+  const sourceId = definition.sourceId ?? definition.id;
+  const [gltfBytes, binary, report, adapterReport, sourceBytes] = await Promise.all([
     readFile(artifact("scene.gltf")),
     readFile(artifact("scene.bin")),
     readFile(artifact("build-report.json"), "utf8").then(JSON.parse),
-    readFile(path(`artifacts/occt/${definition.id}.report.json`), "utf8").then(JSON.parse),
-    readFile(path(`fixtures/step/${definition.id}.step`)),
+    readFile(
+      path(definition.adapterReport ?? `artifacts/occt/${definition.id}.report.json`),
+      "utf8",
+    ).then(JSON.parse),
+    readFile(path(`fixtures/step/${sourceId}.step`)),
   ]);
   const gltf = JSON.parse(gltfBytes.toString("utf8"));
   const officialValidation = await validateBytes(new Uint8Array(gltfBytes), {
@@ -102,7 +122,17 @@ async function validateFixture(definition) {
   );
 
   const sourceDigest = sha256(sourceBytes);
-  assert(occtReport.source.sha256 === sourceDigest, `${label} OCCT source digest changed.`);
+  assert(adapterReport.source.sha256 === sourceDigest, `${label} OCCT source digest changed.`);
+  if (definition.stepSchema) {
+    assert(
+      adapterReport.source.format === `STEP ${definition.stepSchema}`,
+      `${label} STEP schema changed.`,
+    );
+    assert(
+      adapterReport.source.path === `${sourceId}.step`,
+      `${label} adapter report leaked or changed the source path.`,
+    );
+  }
   assert(
     report.source.sourceDigest === `sha256:${sourceDigest}`,
     `${label} compiler source digest changed.`,
