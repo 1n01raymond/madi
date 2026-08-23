@@ -10,6 +10,11 @@ export interface VisibilityState {
   readonly isolatedObjectId?: number;
 }
 
+export interface OccurrenceVisibilitySnapshot {
+  readonly hiddenObjectIds: readonly number[];
+  readonly isolatedObjectId?: number;
+}
+
 /**
  * Builds dense per-prototype instance tables without allocating during review
  * actions. The renderer consumes these tables through updateVisibleInstances().
@@ -86,6 +91,28 @@ export class OccurrenceVisibility {
         ? {}
         : { isolatedObjectId: this.isolatedObjectId }),
     };
+  }
+
+  /** Captures user visibility intent before residency changes rebuild batch tables. */
+  snapshot(): OccurrenceVisibilitySnapshot {
+    return {
+      hiddenObjectIds: [...this.hiddenObjectIds].sort((left, right) => left - right),
+      ...(this.isolatedObjectId === undefined ? {} : { isolatedObjectId: this.isolatedObjectId }),
+    };
+  }
+
+  /** Reapplies visibility intent to a scene with replacement GPU batches. */
+  restore(snapshot: OccurrenceVisibilitySnapshot): void {
+    this.hiddenObjectIds.clear();
+    for (const objectId of snapshot.hiddenObjectIds) {
+      this.requireObject(objectId);
+      this.hiddenObjectIds.add(objectId);
+    }
+    if (snapshot.isolatedObjectId !== undefined) {
+      this.requireObject(snapshot.isolatedObjectId);
+    }
+    this.isolatedObjectId = snapshot.isolatedObjectId;
+    this.rebuildTables();
   }
 
   private rebuildTables(): void {

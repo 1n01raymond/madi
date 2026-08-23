@@ -42,18 +42,21 @@ buffers. Shape-preserving LOD and spatial chunks remain pending. See the
 
 The direct AP242 package also records deterministic prototype byte ranges over
 `scene.bin`. The browser promotes each completed HTTP Range while retaining
-coarse batches for unresolved prototypes. The current order is static;
-camera-driven reprioritization and eviction remain pending.
+coarse batches for unresolved prototypes. The current streaming order is static,
+but a selected occurrence can pin its target detail and demote colder target
+groups back to retained coarse batches under the same budgets. Camera-driven
+reprioritization remains pending.
 
 An early IFC risk slice now compiles the qualified four-discipline Digital Hub
 federation through isolated IfcOpenShell into the same Scene IR and glTF path.
 It proves document-scoped identity, hierarchy, mapped geometry reuse, material
 groups, and flattened properties. Its 3,383 prototype ranges now coalesce into
 45 static target requests; the browser reconciles stable GPU batches under
-separate 64 MiB decoded/GPU admission budgets. It is not the Phase 3 BIM
-workflow or a Phase 2 performance result: explicit IFC edges, property
-indexing, spatial chunks, view-driven scheduling, cache tiers, and eviction
-remain pending.
+separate 64 MiB decoded/GPU admission budgets. A selected target can replace
+colder detail with retained coarse fallbacks, preserving visibility and picking
+identity. It is not the Phase 3 BIM workflow or a Phase 2 performance result:
+explicit IFC edges, property indexing, spatial chunks, view-driven scheduling,
+and cache tiers remain pending.
 
 - local STEP AP242 input;
 - XDE hierarchy, names, colors, units, transforms;
@@ -75,8 +78,10 @@ them. A delayed-network browser record proves a coarse WebGPU frame before the
 target request completes and a mixed coarse/target frame after one prototype
 range. User/scene replacement cancellation now stops an active range and its
 Worker. Coalesced range promotion does not rebuild unchanged GPU buffers and
-has a fixed admission cap; camera-driven reprioritization, obsolete-work
-cancellation, cache tiers, and eviction remain pending.
+has a fixed admission cap. A selected occurrence can pin a requested target
+chunk and replace colder target detail with retained coarse fallbacks;
+camera-driven reprioritization, obsolete-work cancellation, and cache tiers
+remain pending.
 
 - manifest/hierarchy-first loading;
 - Worker decode;
@@ -107,10 +112,11 @@ cancellation, cache tiers, and eviction remain pending.
 
 - content-addressed persistent cache;
 - view-prioritized scheduling and cancellation of obsolete camera work;
-- dynamic memory budgets, eviction, and cache tiers (fixed admission budgets implemented);
+- dynamic memory budgets and persistent cache tiers (fixed admission budgets and
+  selected-target eviction implemented);
 - spatial/draw clustering;
 - screen-space LOD policy;
-- selected-object residency boost;
+- broader selected-object residency policy and multi-selection pinning;
 - multi-view support;
 - improved sections, measurement, and snapping;
 - workspace with sources, views, selection sets, and annotations;

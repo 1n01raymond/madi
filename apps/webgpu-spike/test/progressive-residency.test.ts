@@ -72,19 +72,38 @@ describe("progressive residency", () => {
     const coarse = decoded([batch(1), batch(2)], [0, 1]);
     const targetMeshZero = decoded([batch(1, 20)], [0]);
     const targetMeshOneTooLarge = decoded([batch(2, 30)], [1]);
-    const residency = new ProgressiveResidency(coarse, { decodedBytes: 600, gpuBytes: 600 });
+    const residency = new ProgressiveResidency(coarse, { decodedBytes: 800, gpuBytes: 800 });
 
-    const promoted = residency.promote(targetMeshZero);
+    const promoted = residency.promote(targetMeshZero, { priority: 0 });
     expect(promoted.admitted).toBe(true);
     expect(promoted.entries.map(({ key }) => key)).toEqual(["0:0", "1:0"]);
     expect(promoted.triangles).toBe(21);
-    expect(promoted.decodedBytes).toBeLessThanOrEqual(600);
-    expect(promoted.gpuBytes).toBeLessThanOrEqual(600);
+    expect(promoted.decodedBytes).toBeLessThanOrEqual(800);
+    expect(promoted.gpuBytes).toBeLessThanOrEqual(800);
 
-    const rejected = residency.promote(targetMeshOneTooLarge);
+    const rejected = residency.promote(targetMeshOneTooLarge, { priority: 1 });
     expect(rejected.admitted).toBe(false);
     expect(rejected.entries.map(({ key }) => key)).toEqual(["0:0", "1:0"]);
     expect(rejected.triangles).toBe(21);
+  });
+
+  it("evicts colder detail for a selected target while retaining its coarse fallback", () => {
+    const coarse = decoded([batch(1), batch(2)], [0, 1]);
+    const firstTarget = decoded([batch(1, 20)], [0]);
+    const selectedTarget = decoded([batch(2, 20)], [1]);
+    const residency = new ProgressiveResidency(coarse, { decodedBytes: 800, gpuBytes: 800 });
+
+    expect(residency.promote(firstTarget, { priority: 0 }).admitted).toBe(true);
+    const selected = residency.promote(selectedTarget, { priority: 1, pin: true });
+
+    expect(selected.admitted).toBe(true);
+    expect(selected.evictedTargetMeshIndexes).toEqual([0]);
+    expect(selected.targetMeshIndexes).toEqual([1]);
+    expect(selected.pinnedTargetMeshIndexes).toEqual([1]);
+    expect(selected.entries.map(({ key }) => key)).toEqual(["0:0", "1:0"]);
+    expect(selected.triangles).toBe(21);
+    expect(selected.decodedBytes).toBeLessThanOrEqual(800);
+    expect(selected.gpuBytes).toBeLessThanOrEqual(800);
   });
 
   it("accounts for decoder payload and aligned GPU buffers separately", () => {

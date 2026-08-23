@@ -49,6 +49,16 @@ function formatBytes(bytes: number): string {
   })} KiB`;
 }
 
+function residencyBudgetFromLocation(): number {
+  const value = new URL(window.location.href).searchParams.get("residencyMiB");
+  if (value === null) return defaultProgressiveResidencyBudget;
+  const mebibytes = Number(value);
+  if (!Number.isFinite(mebibytes) || mebibytes < 4 || mebibytes > 1024) {
+    throw new RangeError("residencyMiB must be between 4 and 1024.");
+  }
+  return Math.round(mebibytes * 1024 * 1024);
+}
+
 function decodeGeometry(
   document: CompiledGltfDocument,
   binary: GeometryBinarySource,
@@ -110,6 +120,21 @@ function binarySourceForChunk(
     byteOffset: chunk.byteOffset,
     byteLength: chunk.byteLength,
   };
+}
+
+function targetChunkByPrototype(
+  hierarchy: CompiledHierarchy,
+): ReadonlyMap<string, CompiledTargetChunk> {
+  const chunks = new Map<string, CompiledTargetChunk>();
+  for (const chunk of hierarchy.targetChunks) {
+    for (const prototypeId of chunk.prototypeIds) {
+      if (chunks.has(prototypeId)) {
+        throw new Error(`Prototype ${prototypeId} belongs to multiple target chunks.`);
+      }
+      chunks.set(prototypeId, chunk);
+    }
+  }
+  return chunks;
 }
 
 function renderHierarchy(hierarchy: CompiledHierarchy): void {
@@ -205,6 +230,8 @@ function resetSceneUi(): void {
   delete document.documentElement.dataset.residentDecodedBytes;
   delete document.documentElement.dataset.residentGpuBytes;
   delete document.documentElement.dataset.residencyBudgetBytes;
+  delete document.documentElement.dataset.selectionResidency;
+  delete document.documentElement.dataset.evictedTargetMeshCount;
   hierarchySearchInput.value = "";
   hierarchySearchResult.textContent = "Waiting for hierarchy";
   hierarchyEmpty.hidden = true;
@@ -238,6 +265,8 @@ async function loadScene(source: SceneSource): Promise<boolean> {
     status.dataset.state = "loading";
     const loaded = await loadSceneHierarchy(source, cancellation.signal);
     const { document: gltf, hierarchy } = loaded;
+    const chunksByPrototype = targetChunkByPrototype(hierarchy);
+    const residencyBudget = residencyBudgetFromLocation();
     disposeActiveScene?.();
     disposeActiveScene = undefined;
     resetSceneUi();
@@ -336,8 +365,8 @@ async function loadScene(source: SceneSource): Promise<boolean> {
     const progressiveResidency =
       initialRepresentation === "coarse" && hierarchy.targetChunks.length > 0
         ? new ProgressiveResidency(scene, {
-            decodedBytes: defaultProgressiveResidencyBudget,
-            gpuBytes: defaultProgressiveResidencyBudget,
+            decodedBytes: residencyBudget,
+            gpuBytes: residencyBudget,
           })
         : undefined;
     if (progressiveResidency) {
@@ -399,7 +428,7 @@ async function loadScene(source: SceneSource): Promise<boolean> {
           hierarchy.targetChunks.length,
         );
         document.documentElement.dataset.residencyBudgetBytes = String(
-          defaultProgressiveResidencyBudget,
+          residencyBudget,
         );
 
         for (const chunk of hierarchy.targetChunks) {
@@ -414,7 +443,7 @@ async function loadScene(source: SceneSource): Promise<boolean> {
             throw error;
           });
           decodeMilliseconds += target.decodeMilliseconds;
-          const promotion = residency.promote(target.scene);
+          const promotion = residency.promote(target.scene, { priority: chunk.priority });
           if (!promotion.admitted) {
             residencyBudgetReached = true;
             break;
@@ -497,13 +526,13 @@ async function loadScene(source: SceneSource): Promise<boolean> {
       residentDecodedBytes === undefined || residentGpuBytes === undefined
         ? `${formatBytes(scene.summary.binaryBytes)} decoded off-thread`
         : `${formatBytes(residentDecodedBytes)} CPU / ${formatBytes(residentGpuBytes)} GPU resident ` +
-          `(budget ${formatBytes(defaultProgressiveResidencyBudget)})`,
+          `(budget ${formatBytes(residencyBudget)})`,
     );
     requireElement<HTMLElement>("#stage-geometry").dataset.state = "ready";
     requireElement<HTMLElement>("#stage-webgpu").dataset.state = "ready";
     const evidence = new Map(scene.objectEvidence.map((entry) => [entry.objectId, entry]));
     const evidenceByNode = new Map(scene.objectEvidence.map((entry) => [entry.nodeIndex, entry]));
-    const visibility = new OccurrenceVisibility(scene.gpuScene);
+    let visibility = new OccurrenceVisibility(scene.gpuScene);
     const section = new AxisSectionPlane(scene.bounds);
     let selectedObjectId = 0;
 
@@ -589,6 +618,101 @@ async function loadScene(source: SceneSource): Promise<boolean> {
       scheduleRender();
     };
 
+    let selectionRequest = 0;
+    const promoteSelectedResidency = async (picked: CompiledObjectEvidence): Promise<void> => {
+      if (!progressiveResidency) return;
+      const chunk = chunksByPrototype.get(picked.prototypeId);
+      if (!chunk) return;
+      const request = ++selectionRequest;
+      if (progressiveResidency.hasTargetMeshes(chunk.meshIndexes)) {
+        progressiveResidency.pinTargetMeshes(chunk.meshIndexes);
+        document.documentElement.dataset.selectionResidency = "retained";
+        return;
+      }
+
+      document.documentElement.dataset.selectionResidency = "loading";
+      status.textContent = `Loading selected target detail · ${formatBytes(chunk.byteLength)}…`;
+      status.dataset.stage = "selection-residency";
+      let target: { readonly scene: DecodedCompiledScene; readonly decodeMilliseconds: number };
+      try {
+        target = await decodeGeometry(
+          gltf,
+          binarySourceForChunk(loaded.targetBinary, chunk),
+          "target",
+          interactions.signal,
+          chunk.id,
+        );
+      } catch (error) {
+        if (error instanceof DOMException && error.name === "AbortError") return;
+        throw error;
+      }
+      if (disposed || request !== selectionRequest || selectedObjectId !== picked.objectId) return;
+      decodeMilliseconds += target.decodeMilliseconds;
+      const promotion = progressiveResidency.promote(target.scene, {
+        priority: chunk.priority,
+        pin: true,
+      });
+      if (!promotion.admitted) {
+        document.documentElement.dataset.selectionResidency = "coarse";
+        status.textContent =
+          `Selected target request exceeds the ${formatBytes(residencyBudget)} residency budget · ` +
+          "coarse fallback retained";
+        status.dataset.stage = "selection-residency";
+        return;
+      }
+
+      const visibilitySnapshot = visibility.snapshot();
+      scene = {
+        ...scene,
+        gpuScene: {
+          batches: promotion.entries.map(({ batch }) => batch),
+          sharedObjectIdsAcrossBatches: true,
+        },
+        batchEvidence: promotion.entries.map(({ evidence }, batchIndex) => ({
+          ...evidence,
+          batchIndex,
+        })),
+        summary: {
+          ...scene.summary,
+          prototypeBatches: promotion.entries.length,
+          triangles: promotion.triangles,
+          edgeSegments: promotion.edgeSegments,
+        },
+      };
+      renderer.reconcileBatches(
+        promotion.entries.map(({ key, batch }) => ({ key, batch })),
+        { sharedObjectIdsAcrossBatches: true },
+      );
+      visibility = new OccurrenceVisibility(scene.gpuScene);
+      visibility.restore(visibilitySnapshot);
+      renderer.updateVisibleInstances(visibility.indicesByBatch, visibility.counts);
+      residentDecodedBytes = promotion.decodedBytes;
+      residentGpuBytes = promotion.gpuBytes;
+      residencyBudgetReached = true;
+      document.documentElement.dataset.residencyBudgetReached = "true";
+      document.documentElement.dataset.residentDecodedBytes = String(promotion.decodedBytes);
+      document.documentElement.dataset.residentGpuBytes = String(renderer.residentGpuBytes);
+      document.documentElement.dataset.geometryRepresentation = "mixed";
+      document.documentElement.dataset.targetReady = "limited";
+      document.documentElement.dataset.selectionResidency = "target";
+      document.documentElement.dataset.evictedTargetMeshCount = String(
+        promotion.evictedTargetMeshIndexes.length,
+      );
+      status.textContent =
+        `Selected target detail resident · ${promotion.evictedTargetMeshIndexes.length} colder ` +
+        `target groups evicted · ${formatBytes(promotion.gpuBytes)} GPU resident`;
+      status.dataset.stage = "selection-residency";
+      setText("#triangle-count", promotion.triangles.toLocaleString("en-US"));
+      setText("#edge-count", promotion.edgeSegments.toLocaleString("en-US"));
+      setText("#decode-time", `${decodeMilliseconds.toFixed(1)} ms`);
+      setText(
+        "#geometry-result",
+        `${formatBytes(promotion.decodedBytes)} CPU / ${formatBytes(promotion.gpuBytes)} GPU resident ` +
+          `(budget ${formatBytes(residencyBudget)})`,
+      );
+      applyVisibility();
+    };
+
     const selectObject = (objectId: number): void => {
       const picked = evidence.get(objectId);
       selectedObjectId = picked ? objectId : 0;
@@ -620,6 +744,14 @@ async function loadScene(source: SceneSource): Promise<boolean> {
       updateSelectionText();
       updateVisibilityControls();
       scheduleRender();
+      if (picked) {
+        void promoteSelectedResidency(picked).catch((error: unknown) => {
+          status.textContent =
+            `Could not promote selected target detail: ` +
+            (error instanceof Error ? error.message : String(error));
+          status.dataset.state = "error";
+        });
+      }
     };
 
     const hideSelection = (): void => {
