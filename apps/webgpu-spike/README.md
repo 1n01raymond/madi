@@ -20,4 +20,7 @@ occurrences, 162,838 triangles, 13,897 explicit CAD edge segments, and direct
 joystick-to-source picking. Drag to orbit, Shift-drag or middle-drag to pan,
 use the wheel to zoom, and press `F` to fit the current view. Selecting from the
 viewport or hierarchy highlights the same occurrence and preserves its source
-identity. Adafruit does not endorse MADI.
+identity. `H` hides the selection, `I` isolates it, and `Shift+H` restores all
+occurrences. These actions compact stable per-prototype visibility tables into
+existing instance buffers rather than rebuilding scene resources. Adafruit does
+not endorse MADI.

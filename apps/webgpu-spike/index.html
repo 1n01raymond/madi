@@ -56,8 +56,13 @@
       <section class="viewport" aria-label="Compiled glTF WebGPU viewport">
         <div class="viewport-label"><span></span> LIVE GPU VIEW</div>
         <div class="viewport-tools" aria-label="Viewport controls">
-          <span>Drag orbit · Shift/middle drag pan · Wheel zoom</span>
-          <button id="fit-view" type="button">Fit view <kbd>F</kbd></button>
+          <span id="visibility-status">Waiting for occurrences</span>
+          <div class="viewport-actions">
+            <button id="hide-selection" type="button" disabled>Hide <kbd>H</kbd></button>
+            <button id="isolate-selection" type="button" disabled>Isolate <kbd>I</kbd></button>
+            <button id="show-all" type="button" disabled>Show all <kbd>⇧H</kbd></button>
+            <button id="fit-view" type="button">Fit <kbd>F</kbd></button>
+          </div>
         </div>
         <canvas id="viewport"></canvas>
         <div class="hud">
