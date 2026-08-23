@@ -118,6 +118,12 @@ See the full [roadmap](docs/ROADMAP.md), [Phase 1 evidence](docs/PHASE_1.md),
 claims will be published with redistributable models, exact hardware and browser
 details, cold/warm states, and reproducible commands.
 
+Real reference sources are now checksum-locked without committing their large
+binaries: two NIST AP242 conformance cases and IFC-Bench's four-discipline
+Digital Hub federation are qualified, while the 839.9 MB `sixty5` federation is
+an explicit opt-in candidate. See the
+[external fixture registry](fixtures/external/README.md).
+
 ## Current runtime proof
 
 ![Adafruit PyGamer STEP assembly rendered directly with MADI WebGPU](artifacts/browser-matrix/chrome-151-windows-selected.png)
@@ -256,6 +262,7 @@ native/
   adapter-occt/       Isolated STEP/XDE extraction spike
 fixtures/
   step/               Redistributable STEP manifest and review policy
+  external/           Download-on-demand STEP/IFC registry and license records
 tools/
   benchmark/          Reproducible benchmark result harness
 docs/
