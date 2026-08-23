@@ -13,6 +13,9 @@ risk are as valuable as code.
 5. Do not commit proprietary CAD models or data derived from them without
    explicit redistribution rights.
 
+Coding-agent guidance and the AI-assisted contribution rules live in
+`AGENTS.md`; `CLAUDE.md` imports it for Claude Code.
+
 ## Branch and pull request workflow
 
 MADI uses a lightweight GitHub Flow with `main` as its only permanent
