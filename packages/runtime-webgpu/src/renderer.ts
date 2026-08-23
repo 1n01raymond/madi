@@ -497,7 +497,7 @@ export class Phase0Renderer {
     }
     if (options.edges ?? true) {
       for (const batch of this.batches) {
-        if (batch.edgeVertexCount === 0) continue;
+        if (batch.edgeVertexCount === 0 || batch.instanceCount === 0) continue;
         surfacePass.setPipeline(this.edgePipeline);
         surfacePass.setBindGroup(0, this.cameraBindGroup);
         surfacePass.setVertexBuffer(0, batch.edgeVertex);
@@ -555,6 +555,7 @@ export class Phase0Renderer {
       },
     });
     for (const batch of this.batches) {
+      if (batch.instanceCount === 0) continue;
       this.bindBatch(pickPass, this.pickPipeline, batch);
       pickPass.drawIndexed(batch.indexCount, batch.instanceCount);
     }

@@ -1,0 +1,74 @@
+import { describe, expect, it } from "vitest";
+
+import type { GpuPrototypeBatch, GpuScene } from "@madi/runtime-webgpu";
+
+import { OccurrenceVisibility } from "../src/visibility.js";
+
+const identity = new Float32Array([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]);
+
+function batch(objectIds: readonly number[]): GpuPrototypeBatch {
+  return {
+    surfaceVertices: new Float32Array(),
+    surfaceIndices: new Uint32Array(),
+    edgeVertices: new Float32Array(),
+    instances: objectIds.map((objectId) => ({ transform: identity, objectId })),
+  };
+}
+
+function scene(): GpuScene {
+  return { batches: [batch([1, 2]), batch([3])] };
+}
+
+describe("occurrence visibility", () => {
+  it("builds full dense tables initially", () => {
+    const visibility = new OccurrenceVisibility(scene());
+
+    expect(Array.from(visibility.counts)).toEqual([2, 1]);
+    expect(Array.from(visibility.indicesByBatch[0] ?? [])).toEqual([0, 1]);
+    expect(visibility.state()).toEqual({
+      mode: "all",
+      totalOccurrences: 3,
+      visibleOccurrences: 3,
+      hiddenOccurrences: 0,
+    });
+  });
+
+  it("hides one occurrence and reuses the allocated tables", () => {
+    const visibility = new OccurrenceVisibility(scene());
+    const firstTable = visibility.indicesByBatch[0];
+    const counts = visibility.counts;
+
+    visibility.hide(1);
+
+    expect(visibility.indicesByBatch[0]).toBe(firstTable);
+    expect(visibility.counts).toBe(counts);
+    expect(Array.from(visibility.counts)).toEqual([1, 1]);
+    expect(visibility.indicesByBatch[0]?.[0]).toBe(1);
+    expect(visibility.isVisible(1)).toBe(false);
+    expect(visibility.state().mode).toBe("hidden");
+  });
+
+  it("isolates across prototypes and restores all occurrences", () => {
+    const visibility = new OccurrenceVisibility(scene());
+
+    visibility.isolate(3);
+    expect(Array.from(visibility.counts)).toEqual([0, 1]);
+    expect(visibility.state()).toEqual({
+      mode: "isolated",
+      totalOccurrences: 3,
+      visibleOccurrences: 1,
+      hiddenOccurrences: 2,
+      isolatedObjectId: 3,
+    });
+
+    visibility.showAll();
+    expect(Array.from(visibility.counts)).toEqual([2, 1]);
+    expect(visibility.state().mode).toBe("all");
+  });
+
+  it("rejects unknown occurrence IDs", () => {
+    const visibility = new OccurrenceVisibility(scene());
+    expect(() => visibility.hide(99)).toThrow(/Unknown scene object ID 99/u);
+    expect(() => visibility.isolate(0)).toThrow(/Unknown scene object ID 0/u);
+  });
+});

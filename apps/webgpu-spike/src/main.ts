@@ -12,6 +12,7 @@ import type {
 
 import type { GeometryDecodeResponse } from "./geometry.worker.js";
 import { OrthographicOrbitCamera } from "./view.js";
+import { OccurrenceVisibility } from "./visibility.js";
 import faviconUrl from "../../../docs/media/madi-favicon.svg?url";
 import inverseMarkUrl from "../../../docs/media/madi-mark-inverse.svg?url";
 
@@ -101,6 +102,10 @@ const canvas = requireElement<HTMLCanvasElement>("#viewport");
 const status = requireElement<HTMLElement>("#status");
 const selection = requireElement<HTMLElement>("#selection");
 const hierarchyList = requireElement<HTMLOListElement>("#hierarchy");
+const visibilityStatus = requireElement<HTMLElement>("#visibility-status");
+const hideSelectionButton = requireElement<HTMLButtonElement>("#hide-selection");
+const isolateSelectionButton = requireElement<HTMLButtonElement>("#isolate-selection");
+const showAllButton = requireElement<HTMLButtonElement>("#show-all");
 requireElement<HTMLLinkElement>("#madi-favicon").href = faviconUrl;
 requireElement<HTMLImageElement>("#madi-brand-mark").src = inverseMarkUrl;
 
@@ -167,9 +172,55 @@ async function start(): Promise<void> {
 
     const evidence = new Map(scene.objectEvidence.map((entry) => [entry.objectId, entry]));
     const evidenceByNode = new Map(scene.objectEvidence.map((entry) => [entry.nodeIndex, entry]));
+    const visibility = new OccurrenceVisibility(scene.gpuScene);
+    let selectedObjectId = 0;
+
+    const updateSelectionText = (): void => {
+      const picked = evidence.get(selectedObjectId);
+      selection.textContent = picked
+        ? `Selected ${picked.label} · node ${picked.nodeIndex} · ID ${selectedObjectId} · ` +
+          `${picked.edgeSourceRefs.length} CAD edge refs` +
+          (visibility.isVisible(selectedObjectId) ? "" : " · hidden")
+        : "No occurrence at that pixel.";
+    };
+
+    const updateVisibilityControls = (): void => {
+      const state = visibility.state();
+      visibilityStatus.textContent =
+        state.mode === "all"
+          ? `${state.visibleOccurrences} / ${state.totalOccurrences} visible`
+          : state.mode === "isolated"
+            ? `${state.visibleOccurrences} / ${state.totalOccurrences} visible · isolated`
+            : `${state.visibleOccurrences} / ${state.totalOccurrences} visible · ` +
+              `${state.hiddenOccurrences} hidden`;
+      hideSelectionButton.disabled =
+        selectedObjectId === 0 || !visibility.isVisible(selectedObjectId);
+      isolateSelectionButton.disabled =
+        selectedObjectId === 0 || state.isolatedObjectId === selectedObjectId;
+      showAllButton.disabled = state.mode === "all";
+      document.documentElement.dataset.visibilityMode = state.mode;
+      document.documentElement.dataset.visibleOccurrences = String(state.visibleOccurrences);
+    };
+
+    const applyVisibility = (): void => {
+      renderer.updateVisibleInstances(visibility.indicesByBatch, visibility.counts);
+      for (const entry of scene.objectEvidence) {
+        const item = hierarchyList.querySelector<HTMLElement>(
+          `[data-node-index="${entry.nodeIndex}"]`,
+        );
+        if (!item) continue;
+        if (visibility.isVisible(entry.objectId)) delete item.dataset.hidden;
+        else item.dataset.hidden = "true";
+      }
+      updateSelectionText();
+      updateVisibilityControls();
+      scheduleRender();
+    };
+
     const selectObject = (objectId: number): void => {
       const picked = evidence.get(objectId);
-      renderer.setSelection(picked ? objectId : 0);
+      selectedObjectId = picked ? objectId : 0;
+      renderer.setSelection(selectedObjectId);
       for (const item of hierarchyList.querySelectorAll<HTMLElement>("[data-selected='true']")) {
         delete item.dataset.selected;
         item.removeAttribute("aria-current");
@@ -190,12 +241,26 @@ async function start(): Promise<void> {
           }
         }
       }
-      selection.textContent = picked
-        ? `Selected ${picked.label} · node ${picked.nodeIndex} · ID ${objectId} · ` +
-          `${picked.edgeSourceRefs.length} CAD edge refs`
-        : "No occurrence at that pixel.";
+      updateSelectionText();
+      updateVisibilityControls();
       scheduleRender();
     };
+
+    const hideSelection = (): void => {
+      if (selectedObjectId === 0) return;
+      visibility.hide(selectedObjectId);
+      applyVisibility();
+    };
+    const isolateSelection = (): void => {
+      if (selectedObjectId === 0) return;
+      visibility.isolate(selectedObjectId);
+      applyVisibility();
+    };
+    const showAll = (): void => {
+      visibility.showAll();
+      applyVisibility();
+    };
+    updateVisibilityControls();
 
     const interactions = new AbortController();
     const listenerOptions = { signal: interactions.signal };
@@ -267,12 +332,14 @@ async function start(): Promise<void> {
       scheduleRender();
     };
     requireElement<HTMLButtonElement>("#fit-view").addEventListener("click", fitView, listenerOptions);
+    hideSelectionButton.addEventListener("click", hideSelection, listenerOptions);
+    isolateSelectionButton.addEventListener("click", isolateSelection, listenerOptions);
+    showAllButton.addEventListener("click", showAll, listenerOptions);
     window.addEventListener(
       "keydown",
       (event) => {
         const target = event.target;
         if (
-          event.key.toLowerCase() !== "f" ||
           event.ctrlKey ||
           event.metaKey ||
           target instanceof HTMLInputElement ||
@@ -280,7 +347,13 @@ async function start(): Promise<void> {
         ) {
           return;
         }
-        fitView();
+        const key = event.key.toLowerCase();
+        if (key === "f") fitView();
+        else if (key === "h" && event.shiftKey) showAll();
+        else if (key === "h") hideSelection();
+        else if (key === "i") isolateSelection();
+        else if (key === "escape" && visibility.state().mode !== "all") showAll();
+        else return;
         event.preventDefault();
       },
       listenerOptions,

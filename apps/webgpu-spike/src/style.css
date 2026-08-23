@@ -206,6 +206,11 @@ h1 span {
   font: 10px/1.4 ui-monospace, "Cascadia Code", monospace;
 }
 
+.viewport-actions {
+  display: flex;
+  gap: 5px;
+}
+
 .viewport-tools button {
   padding: 7px 9px;
   border: 1px solid #b6c5cc;
@@ -222,6 +227,13 @@ h1 span {
   outline: none;
   color: #075a78;
   background: #fff;
+}
+
+.viewport-tools button:disabled {
+  border-color: #cbd5da;
+  color: #9aabb3;
+  background: rgb(238 243 245 / 72%);
+  cursor: default;
 }
 
 .viewport-tools kbd {
@@ -399,6 +411,21 @@ code {
   box-shadow: inset 0 0 0 1px rgb(86 212 255 / 18%);
 }
 
+#hierarchy li[data-hidden="true"] {
+  color: #556e79;
+  opacity: 0.52;
+}
+
+#hierarchy li[data-hidden="true"]::before {
+  border: 1px solid #556e79;
+  background: transparent;
+}
+
+#hierarchy li[data-hidden="true"][data-selected="true"] {
+  color: #8ca5b0;
+  opacity: 0.8;
+}
+
 #hierarchy li::before {
   position: absolute;
   top: 11px;
@@ -455,6 +482,10 @@ code {
   }
 
   .viewport-tools > span {
+    display: none;
+  }
+
+  .viewport-tools kbd {
     display: none;
   }
 
