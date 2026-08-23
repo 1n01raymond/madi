@@ -146,14 +146,19 @@ assertCounts(
     materialCount: 88,
     triangleCount: 913520,
     edgeSegmentCount: 0,
-    targetChunkCount: 3383,
+    targetChunkCount: 45,
   },
   "compiler",
 );
 assert(
   compiler.output.packageDigest ===
-    "32c5cf2183db37e6d2718e603f4ad833df72e684b94a98ce4086ee32d7d0451c",
+    "a6d5c0eecebf286208e151d281af26e6747e8a163ba3eb4a3b5cfe9353260d5d",
   "Compiled package digest changed.",
+);
+assert(
+  compiler.options.targetChunking === "coalesced-prototype-range-v1" &&
+    compiler.options.targetChunkByteBudget === 524288,
+  "IFC target range coalescing contract changed.",
 );
 assert(
   adapter.scene.sha256 === "0f9b1e65d81370c283da4313312568da53a77373dd8f87486bb8b912d8fdaec1" &&

@@ -48,9 +48,12 @@ camera-driven reprioritization and eviction remain pending.
 An early IFC risk slice now compiles the qualified four-discipline Digital Hub
 federation through isolated IfcOpenShell into the same Scene IR and glTF path.
 It proves document-scoped identity, hierarchy, mapped geometry reuse, material
-groups, and flattened properties. It is not the Phase 3 BIM workflow or a
-Phase 2 performance result; explicit IFC edges, property indexing, spatial
-chunks, range coalescing, and bounded residency remain pending.
+groups, and flattened properties. Its 3,383 prototype ranges now coalesce into
+45 static target requests; the browser reconciles stable GPU batches under
+separate 64 MiB decoded/GPU admission budgets. It is not the Phase 3 BIM
+workflow or a Phase 2 performance result: explicit IFC edges, property
+indexing, spatial chunks, view-driven scheduling, cache tiers, and eviction
+remain pending.
 
 - local STEP AP242 input;
 - XDE hierarchy, names, colors, units, transforms;
@@ -71,8 +74,9 @@ local `.gltf` packages with all declared `.bin` resources without uploading
 them. A delayed-network browser record proves a coarse WebGPU frame before the
 target request completes and a mixed coarse/target frame after one prototype
 range. User/scene replacement cancellation now stops an active range and its
-Worker; camera-driven reprioritization, obsolete-work cancellation, and bounded
-residency remain pending.
+Worker. Coalesced range promotion does not rebuild unchanged GPU buffers and
+has a fixed admission cap; camera-driven reprioritization, obsolete-work
+cancellation, cache tiers, and eviction remain pending.
 
 - manifest/hierarchy-first loading;
 - Worker decode;
@@ -103,7 +107,7 @@ residency remain pending.
 
 - content-addressed persistent cache;
 - view-prioritized scheduling and cancellation of obsolete camera work;
-- memory budgets and eviction;
+- dynamic memory budgets, eviction, and cache tiers (fixed admission budgets implemented);
 - spatial/draw clustering;
 - screen-space LOD policy;
 - selected-object residency boost;

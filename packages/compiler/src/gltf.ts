@@ -74,12 +74,76 @@ interface TargetGeometryRange {
   readonly byteLength: number;
 }
 
+interface TargetChunkCandidate extends TargetGeometryRange {
+  readonly meshIndexes: readonly number[];
+  readonly occurrenceCount: number;
+}
+
+interface TargetChunkGroup {
+  readonly byteOffset: number;
+  readonly byteLength: number;
+  readonly meshIndexes: readonly number[];
+  readonly prototypeIds: readonly string[];
+  readonly occurrenceCount: number;
+}
+
 function compareId(left: { readonly id: string }, right: { readonly id: string }): number {
   return left.id.localeCompare(right.id, "en");
 }
 
 function sha256(value: string | Uint8Array): string {
   return createHash("sha256").update(value).digest("hex");
+}
+
+function targetChunkGroups(
+  candidates: readonly TargetChunkCandidate[],
+  byteBudget: number | undefined,
+): readonly TargetChunkGroup[] {
+  const sourceOrder = [...candidates].sort(
+    (left, right) =>
+      left.byteOffset - right.byteOffset || left.prototypeId.localeCompare(right.prototypeId, "en"),
+  );
+  if (byteBudget === undefined) {
+    return sourceOrder.map((candidate) => ({
+      byteOffset: candidate.byteOffset,
+      byteLength: candidate.byteLength,
+      meshIndexes: candidate.meshIndexes,
+      prototypeIds: [candidate.prototypeId],
+      occurrenceCount: candidate.occurrenceCount,
+    }));
+  }
+
+  const groups: TargetChunkGroup[] = [];
+  let members: TargetChunkCandidate[] = [];
+  let byteOffset = 0;
+  let byteEnd = 0;
+  const finish = (): void => {
+    if (members.length === 0) return;
+    groups.push({
+      byteOffset,
+      byteLength: byteEnd - byteOffset,
+      meshIndexes: members.flatMap(({ meshIndexes }) => meshIndexes),
+      prototypeIds: members.map(({ prototypeId }) => prototypeId),
+      occurrenceCount: members.reduce((total, { occurrenceCount }) => total + occurrenceCount, 0),
+    });
+    members = [];
+  };
+
+  for (const candidate of sourceOrder) {
+    const candidateEnd = candidate.byteOffset + candidate.byteLength;
+    const contiguous = members.length === 0 || candidate.byteOffset === byteEnd;
+    const nextLength = candidateEnd - byteOffset;
+    if (members.length > 0 && (!contiguous || nextLength > byteBudget)) finish();
+    if (members.length === 0) {
+      byteOffset = candidate.byteOffset;
+      byteEnd = candidateEnd;
+    } else {
+      byteEnd = candidateEnd;
+    }
+    members.push(candidate);
+  }
+  finish();
+  return groups;
 }
 
 function assertCanonicalFrame(scene: EngineeringScene): void {
@@ -393,6 +457,12 @@ export function compileSceneToGltf(
   scene: EngineeringScene,
   options: CompileGltfOptions = {},
 ): CompiledGltfPackage {
+  if (
+    options.targetChunkByteBudget !== undefined &&
+    (!Number.isSafeInteger(options.targetChunkByteBudget) || options.targetChunkByteBudget < 4)
+  ) {
+    throw new TypeError("targetChunkByteBudget must be an integer of at least four bytes.");
+  }
   const validation = validateScene(scene);
   if (!validation.ok) {
     const errors = validation.issues
@@ -677,7 +747,8 @@ export function compileSceneToGltf(
   const binary = builder.finish();
   const coarseBinary = coarseBuilder?.finish();
   const targetChunks = coarseBinary
-    ? [...targetRangesByPrototype.values()]
+    ? [...targetChunkGroups(
+        [...targetRangesByPrototype.values()]
         .map((range) => ({
           ...range,
           meshIndexes: [...(targetMeshesByPrototype.get(range.prototypeId) ?? [])].sort(
@@ -685,20 +756,23 @@ export function compileSceneToGltf(
           ),
           occurrenceCount: occurrenceCounts.get(range.prototypeId) ?? 0,
         }))
-        .filter(({ meshIndexes }) => meshIndexes.length > 0)
+        .filter(({ meshIndexes }) => meshIndexes.length > 0),
+        options.targetChunkByteBudget,
+      )]
         .sort(
           (left, right) =>
             right.occurrenceCount - left.occurrenceCount ||
             right.byteLength - left.byteLength ||
-            left.prototypeId.localeCompare(right.prototypeId, "en"),
+            (left.prototypeIds[0] ?? "").localeCompare(right.prototypeIds[0] ?? "", "en"),
         )
         .map((chunk, priority) => ({
-          id: `target:${String(priority).padStart(4, "0")}:${chunk.prototypeId}`,
+          id: `target:${String(priority).padStart(4, "0")}:${chunk.prototypeIds[0]}`,
           buffer: 0,
           byteOffset: chunk.byteOffset,
           byteLength: chunk.byteLength,
           meshIndexes: chunk.meshIndexes,
-          prototypeId: chunk.prototypeId,
+          prototypeId: chunk.prototypeIds[0],
+          prototypeIds: chunk.prototypeIds,
           occurrenceCount: chunk.occurrenceCount,
           priority,
         }))
@@ -786,7 +860,16 @@ export function compileSceneToGltf(
       coordinateSystem: "right-handed-y-up-meters",
       geometryEncoding: "gltf-f32",
       ...(coarseBinary ? { progressiveRepresentation: "prototype-aabb-v1" as const } : {}),
-      ...(coarseBinary ? { targetChunking: "prototype-range-v1" as const } : {}),
+      ...(coarseBinary
+        ? {
+            targetChunking: options.targetChunkByteBudget === undefined
+              ? "prototype-range-v1" as const
+              : "coalesced-prototype-range-v1" as const,
+            ...(options.targetChunkByteBudget === undefined
+              ? {}
+              : { targetChunkByteBudget: options.targetChunkByteBudget }),
+          }
+        : {}),
     },
     source: {
       sceneId: scene.sceneId,

@@ -18,9 +18,9 @@ const compiledArtifactUrl = new URL(
   import.meta.url,
 );
 
-async function compileEvidence() {
+async function compileEvidence(options: Parameters<typeof compileSceneToGltf>[1] = {}) {
   const serialized = JSON.parse(await readFile(evidenceUrl, "utf8")) as unknown;
-  return compileSceneToGltf(hydratePhase0Evidence(serialized));
+  return compileSceneToGltf(hydratePhase0Evidence(serialized), options);
 }
 
 function madiExtras(value: { readonly extras?: Readonly<Record<string, unknown>> }) {
@@ -113,6 +113,37 @@ describe("Phase 1 glTF compiler slice", () => {
       progressive.targetChunks.reduce((total, chunk) => total + chunk.byteLength, 0),
     ).toBe(compiled.binary.byteLength);
     expect(compiled.report.counts.targetChunkCount).toBe(3);
+  });
+
+  it("coalesces adjacent target prototype ranges when a request budget is declared", async () => {
+    const compiled = await compileEvidence({
+      coarseBounds: true,
+      targetChunkByteBudget: 100_000,
+    });
+    const progressive = (compiled.document.extras.madi as {
+      progressive: {
+        targetChunks: readonly {
+          byteOffset: number;
+          byteLength: number;
+          prototypeId: string;
+          prototypeIds: readonly string[];
+        }[];
+      };
+    }).progressive;
+
+    expect(compiled.report.options).toMatchObject({
+      targetChunking: "coalesced-prototype-range-v1",
+      targetChunkByteBudget: 100_000,
+    });
+    expect(progressive.targetChunks).toHaveLength(2);
+    expect(progressive.targetChunks[0]).toMatchObject({
+      prototypeId: "prototype:part:center-rail",
+      prototypeIds: ["prototype:part:center-rail", "prototype:part:fastener-01"],
+    });
+    expect(
+      progressive.targetChunks.reduce((total, chunk) => total + chunk.byteLength, 0),
+    ).toBe(compiled.binary.byteLength);
+    expect(compiled.report.counts.targetChunkCount).toBe(2);
   });
 
   it("reproduces the committed compiler artifact byte for byte", async () => {

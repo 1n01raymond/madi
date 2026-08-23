@@ -165,6 +165,17 @@ export interface SetSceneOptions {
   readonly includeEdges?: boolean;
 }
 
+export interface GpuSceneBatchEntry {
+  /** Stable application-owned identity used to retain an uploaded batch. */
+  readonly key: string;
+  readonly batch: GpuPrototypeBatch;
+}
+
+export interface ReconcileSceneOptions extends SetSceneOptions {
+  /** Allow material-separated batches to retain the same logical occurrence ID. */
+  readonly sharedObjectIdsAcrossBatches?: boolean;
+}
+
 export interface RenderOptions {
   /** Draw uploaded explicit CAD edge streams. Defaults to true. */
   readonly edges?: boolean;
@@ -197,6 +208,9 @@ export function normalizeSectionPlane(plane: SectionPlane): NormalizedSectionPla
 }
 
 interface GpuBatchResources {
+  readonly key: string;
+  readonly source: GpuPrototypeBatch;
+  readonly includeEdges: boolean;
   readonly surfaceVertex: GPUBuffer;
   readonly surfaceIndex: GPUBuffer;
   readonly edgeVertex: GPUBuffer;
@@ -206,7 +220,12 @@ interface GpuBatchResources {
   readonly instanceStagingView: DataView;
   readonly indexCount: number;
   readonly edgeVertexCount: number;
+  readonly gpuByteLength: number;
   instanceCount: number;
+}
+
+function alignedBufferByteLength(byteLength: number): number {
+  return Math.max(4, Math.ceil(byteLength / 4) * 4);
 }
 
 function createBuffer(
@@ -218,7 +237,7 @@ function createBuffer(
   const byteLength = source.byteLength;
   const buffer = device.createBuffer({
     label,
-    size: Math.max(4, Math.ceil(byteLength / 4) * 4),
+    size: alignedBufferByteLength(byteLength),
     usage: usage | GPUBufferUsage.COPY_DST,
   });
   if (byteLength > 0) {
@@ -432,41 +451,48 @@ export class Phase0Renderer {
     validateGpuScene(scene);
     const includeEdges = options.includeEdges ?? true;
     this.destroyBatches();
-    this.batches = scene.batches.map((batch, index) => {
-      const instanceStaging = new ArrayBuffer(batch.instances.length * instanceStride);
-      return {
-        surfaceVertex: createBuffer(
-          this.device,
-          `MADI prototype ${index} surface vertices`,
-          batch.surfaceVertices,
-          GPUBufferUsage.VERTEX,
-        ),
-        surfaceIndex: createBuffer(
-          this.device,
-          `MADI prototype ${index} surface indices`,
-          batch.surfaceIndices,
-          GPUBufferUsage.INDEX,
-        ),
-        edgeVertex: createBuffer(
-          this.device,
-          `MADI prototype ${index} explicit edges`,
-          includeEdges ? batch.edgeVertices : new Float32Array(),
-          GPUBufferUsage.VERTEX,
-        ),
-        instance: createBuffer(
-          this.device,
-          `MADI prototype ${index} occurrences`,
-          packInstanceData(batch.instances),
-          GPUBufferUsage.VERTEX,
-        ),
-        instances: batch.instances,
-        instanceStaging,
-        instanceStagingView: new DataView(instanceStaging),
-        indexCount: batch.surfaceIndices.length,
-        edgeVertexCount: includeEdges ? batch.edgeVertices.length / 3 : 0,
-        instanceCount: batch.instances.length,
-      };
+    this.batches = scene.batches.map((batch, index) =>
+      this.createBatchResources(`scene:${String(index)}`, batch, includeEdges),
+    );
+  }
+
+  /**
+   * Reconciles application-keyed batches without re-uploading untouched GPU
+   * resources. This is the residency boundary used by progressive loaders.
+   */
+  reconcileBatches(
+    entries: readonly GpuSceneBatchEntry[],
+    options: ReconcileSceneOptions = {},
+  ): void {
+    const keys = new Set<string>();
+    for (const { key } of entries) {
+      if (key.trim() === "" || keys.has(key)) {
+        throw new TypeError("Reconciled GPU batch keys must be unique and non-empty.");
+      }
+      keys.add(key);
+    }
+    validateGpuScene({
+      batches: entries.map(({ batch }) => batch),
+      ...(options.sharedObjectIdsAcrossBatches ? { sharedObjectIdsAcrossBatches: true } : {}),
     });
+    const includeEdges = options.includeEdges ?? true;
+    const remaining = new Map(this.batches.map((resource) => [resource.key, resource]));
+    const next = entries.map(({ key, batch }) => {
+      const current = remaining.get(key);
+      remaining.delete(key);
+      if (current && current.source === batch && current.includeEdges === includeEdges) {
+        return current;
+      }
+      if (current) this.destroyBatch(current);
+      return this.createBatchResources(key, batch, includeEdges);
+    });
+    for (const stale of remaining.values()) this.destroyBatch(stale);
+    this.batches = next;
+  }
+
+  /** Estimated buffer allocation currently retained by this renderer. */
+  get residentGpuBytes(): number {
+    return this.batches.reduce((total, batch) => total + batch.gpuByteLength, 0);
   }
 
   /** Re-packs visible occurrences from dense per-prototype index tables. */
@@ -687,12 +713,64 @@ export class Phase0Renderer {
   }
 
   private destroyBatches(): void {
-    for (const batch of this.batches) {
-      batch.surfaceVertex.destroy();
-      batch.surfaceIndex.destroy();
-      batch.edgeVertex.destroy();
-      batch.instance.destroy();
-    }
+    for (const batch of this.batches) this.destroyBatch(batch);
     this.batches = [];
+  }
+
+  private createBatchResources(
+    key: string,
+    batch: GpuPrototypeBatch,
+    includeEdges: boolean,
+  ): GpuBatchResources {
+    const uploadedEdges = includeEdges ? batch.edgeVertices : new Float32Array();
+    const instanceData = packInstanceData(batch.instances);
+    const instanceStaging = new ArrayBuffer(batch.instances.length * instanceStride);
+    return {
+      key,
+      source: batch,
+      includeEdges,
+      surfaceVertex: createBuffer(
+        this.device,
+        `MADI ${key} surface vertices`,
+        batch.surfaceVertices,
+        GPUBufferUsage.VERTEX,
+      ),
+      surfaceIndex: createBuffer(
+        this.device,
+        `MADI ${key} surface indices`,
+        batch.surfaceIndices,
+        GPUBufferUsage.INDEX,
+      ),
+      edgeVertex: createBuffer(
+        this.device,
+        `MADI ${key} explicit edges`,
+        uploadedEdges,
+        GPUBufferUsage.VERTEX,
+      ),
+      instance: createBuffer(
+        this.device,
+        `MADI ${key} occurrences`,
+        instanceData,
+        GPUBufferUsage.VERTEX,
+      ),
+      instances: batch.instances,
+      instanceStaging,
+      instanceStagingView: new DataView(instanceStaging),
+      indexCount: batch.surfaceIndices.length,
+      edgeVertexCount: uploadedEdges.length / 3,
+      gpuByteLength:
+        alignedBufferByteLength(batch.surfaceVertices.byteLength) +
+        alignedBufferByteLength(batch.surfaceIndices.byteLength) +
+        alignedBufferByteLength(uploadedEdges.byteLength) +
+        alignedBufferByteLength(instanceData.byteLength),
+      instanceCount: batch.instances.length,
+    };
+  }
+
+  private destroyBatch(batch: GpuBatchResources): void {
+    batch.surfaceVertex.destroy();
+    batch.surfaceIndex.destroy();
+    batch.edgeVertex.destroy();
+    batch.instance.destroy();
   }
 }

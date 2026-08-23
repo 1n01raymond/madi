@@ -97,10 +97,11 @@ and bounded residency.
 
 ## Next slice
 
-Turn the IFC-discovered 3,383 prototype ranges into a practical Phase 2
-scheduler path: coalesce small adjacent ranges, stop rebuilding all resident GPU
-batches for each arrival, and enforce decoded/GPU memory budgets. In parallel,
-advance the 100k heterogeneous/culling record into decision-quality evidence
-with retained-memory isolation, GPU timestamps, and repeated discrete and
-integrated GPU runs. Keep current browser matrices labeled exploratory until
-those contracts are complete.
+The IFC-discovered 3,383 prototype ranges now coalesce into 45 deterministic
+512 KiB target requests (one indivisible 1.12 MiB prototype remains whole),
+and the browser reconciles only changed GPU batches under fixed 64 MiB decoded
+and GPU admission caps. The next scheduler increment is eviction, cache tiers,
+and camera/selection reprioritization. In parallel, advance the 100k
+heterogeneous/culling record into decision-quality evidence with retained-memory
+isolation, GPU timestamps, and repeated discrete and integrated GPU runs. Keep
+current browser matrices labeled exploratory until those contracts are complete.

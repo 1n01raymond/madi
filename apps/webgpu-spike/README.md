@@ -14,7 +14,8 @@ scene.bin
 
 progressive package
   └─ coarse.bin → first WebGPU frame
-       └─ scene.bin Range chunks → prototype-by-prototype promotion
+       └─ scene.bin Range chunks → coalesced-request promotion
+            └─ stable GPU batch reconciliation → bounded residency admission
 ```
 
 Run it with `pnpm dev`. Use `pnpm browser:matrix` for the reproducible headed
@@ -48,9 +49,12 @@ pnpm dev
 ```
 
 The runtime preserves one pickable occurrence ID across material-separated
-surface batches. Prototype-granular progressive packages are still promoted
-one range at a time; range coalescing and incremental GPU residency remain
-Phase 2 work.
+surface batches. IFC compilation coalesces adjacent prototype ranges into
+deterministic requests (512 KiB by default) and the runtime reconciles them by
+stable batch key, so an arriving request does not re-upload every existing
+batch. The browser enforces separate 64 MiB decoded and GPU admission budgets;
+on pressure it stops target promotion and keeps the remaining coarse fallbacks.
+Eviction, cache tiers, and camera-driven reprioritization remain Phase 2 work.
 
 ## Open another compiled scene
 

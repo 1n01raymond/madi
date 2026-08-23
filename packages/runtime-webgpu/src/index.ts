@@ -42,6 +42,8 @@ export type {
   NormalizedSectionPlane,
   Phase0RendererOptions,
   Phase0RendererOptions as MadiWebGpuRendererOptions,
+  GpuSceneBatchEntry,
+  ReconcileSceneOptions,
   RenderOptions,
   SectionPlane,
   SetSceneOptions,

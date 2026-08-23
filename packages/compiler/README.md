@@ -38,10 +38,13 @@ OCCT STEPCAF/XDE, validates source identity across the adapter boundary, and
 writes `scene.gltf`, `scene.bin`, `coarse.bin`, `build-report.json`, and
 `adapter-report.json`. Target geometry remains the ordinary glTF node mesh;
 `extras.madi.coarseMesh` selects a bounds mesh backed only by `coarse.bin`.
-`extras.madi.progressive.targetChunks` maps each reusable target prototype mesh
-to a deterministic byte range in `scene.bin`, ordered by occurrence count and
-then payload size. This allows ordinary HTTP Range delivery without inventing
-another container or duplicating target geometry.
+`extras.madi.progressive.targetChunks` maps reusable target prototype meshes to
+deterministic byte ranges in `scene.bin`, ordered by occurrence count and then
+payload size. The IFC command coalesces adjacent prototype ranges into 512 KiB
+requests by default; an oversized individual prototype stays whole rather than
+splitting its accessors. Use `--target-chunk-kib` to change that budget. This
+allows ordinary HTTP Range delivery without inventing another container or
+duplicating target geometry.
 Its expanded Scene IR is temporary and is deleted after the package passes
 validation. `phase1:compile:evidence` retains the historical small Scene IR
 regression path without coarse output. The evidence check validates both plus the
@@ -67,6 +70,7 @@ pnpm madi compile-ifc \
   --uri-hint plumbing=models/plumbing.ifc \
   --python output/venv-ifc/Scripts/python \
   --threads 4 \
+  --target-chunk-kib 512 \
   --output output/ifc/federation
 ```
 
@@ -84,9 +88,11 @@ four-discipline result is under `artifacts/ifc/digital-hub/`.
   edge classification, non-flattened property indexing, and cross-document
   reconciliation remain explicit follow-up work.
 - The first coarse representation is a per-prototype AABB, not a
-  shape-preserving LOD. Target ranges are prototype-granular and use a static
-  initial priority; spatial partitioning, compression, view reprioritization,
-  and bounded residency are not implemented.
+  shape-preserving LOD. IFC target ranges are coalesced with a static initial
+  priority; spatial partitioning, compression, and view reprioritization are
+  still pending. The browser applies a fixed decoded/GPU admission budget and
+  retains coarse fallbacks when it reaches that cap; eviction and cache policy
+  are Phase 2 follow-up work.
 - Geometry and node transforms are f32 in glTF; the large-coordinate precision
   profile remains an open ADR gate.
 - `extras.madi` is an experimental profile, not a public interchange standard.

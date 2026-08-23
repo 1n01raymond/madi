@@ -6,12 +6,10 @@ import {
 import type {
   CompiledGltfDocument,
   CompiledHierarchy,
-  CompiledBatchEvidence,
   CompiledObjectEvidence,
   CompiledTargetChunk,
   DecodedCompiledScene,
   GeometryRepresentation,
-  GpuPrototypeBatch,
 } from "@madi/runtime-webgpu";
 
 import type { GeometryDecodeResponse } from "./geometry.worker.js";
@@ -27,6 +25,10 @@ import {
 import type { GeometryBinarySource, SceneSource } from "./scene-source.js";
 import { OrthographicOrbitCamera } from "./view.js";
 import { OccurrenceVisibility } from "./visibility.js";
+import {
+  defaultProgressiveResidencyBudget,
+  ProgressiveResidency,
+} from "./progressive-residency.js";
 import faviconUrl from "../../../docs/media/madi-favicon.svg?url";
 import inverseMarkUrl from "../../../docs/media/madi-mark-inverse.svg?url";
 
@@ -108,24 +110,6 @@ function binarySourceForChunk(
     byteOffset: chunk.byteOffset,
     byteLength: chunk.byteLength,
   };
-}
-
-interface ResidentBatch {
-  readonly batch: GpuPrototypeBatch;
-  readonly evidence: Omit<CompiledBatchEvidence, "batchIndex">;
-}
-
-function orderedResidentBatches(
-  resident: ReadonlyMap<string, ResidentBatch>,
-): readonly [string, ResidentBatch][] {
-  return [...resident].sort(([, left], [, right]) =>
-    left.evidence.targetMeshIndex - right.evidence.targetMeshIndex ||
-    left.evidence.surfacePrimitiveIndex - right.evidence.surfacePrimitiveIndex,
-  );
-}
-
-function residentBatchKey(evidence: Omit<CompiledBatchEvidence, "batchIndex">): string {
-  return `${evidence.targetMeshIndex}:${evidence.surfacePrimitiveIndex}`;
 }
 
 function renderHierarchy(hierarchy: CompiledHierarchy): void {
@@ -217,6 +201,10 @@ function resetSceneUi(): void {
   delete document.documentElement.dataset.geometryRepresentation;
   delete document.documentElement.dataset.targetChunksReady;
   delete document.documentElement.dataset.targetChunksTotal;
+  delete document.documentElement.dataset.residencyBudgetReached;
+  delete document.documentElement.dataset.residentDecodedBytes;
+  delete document.documentElement.dataset.residentGpuBytes;
+  delete document.documentElement.dataset.residencyBudgetBytes;
   hierarchySearchInput.value = "";
   hierarchySearchResult.textContent = "Waiting for hierarchy";
   hierarchyEmpty.hidden = true;
@@ -342,7 +330,24 @@ async function loadScene(source: SceneSource): Promise<boolean> {
     });
     let scene = initial.scene;
     let decodeMilliseconds = initial.decodeMilliseconds;
-    renderer.setScene(scene.gpuScene);
+    let residencyBudgetReached = false;
+    let residentDecodedBytes: number | undefined;
+    let residentGpuBytes: number | undefined;
+    const progressiveResidency =
+      initialRepresentation === "coarse" && hierarchy.targetChunks.length > 0
+        ? new ProgressiveResidency(scene, {
+            decodedBytes: defaultProgressiveResidencyBudget,
+            gpuBytes: defaultProgressiveResidencyBudget,
+          })
+        : undefined;
+    if (progressiveResidency) {
+      renderer.reconcileBatches(
+        progressiveResidency.current().entries.map(({ key, batch }) => ({ key, batch })),
+        { sharedObjectIdsAcrossBatches: true },
+      );
+    } else {
+      renderer.setScene(scene.gpuScene);
+    }
 
     const camera = new OrthographicOrbitCamera(scene.bounds);
     const render = (): void => {
@@ -385,22 +390,19 @@ async function loadScene(source: SceneSource): Promise<boolean> {
         renderer.setScene(scene.gpuScene);
         render();
       } else {
-        const resident = new Map<string, ResidentBatch>();
-        for (const batchIdentity of scene.batchEvidence) {
-          const batch = scene.gpuScene.batches[batchIdentity.batchIndex];
-          if (!batch) throw new Error("Coarse batch identity is incomplete.");
-          const { batchIndex: _, ...evidence } = batchIdentity;
-          resident.set(residentBatchKey(evidence), { batch, evidence });
-        }
-        const targetObjects = new Map<number, CompiledObjectEvidence>();
-        let targetTriangles = 0;
-        let targetEdges = 0;
+        const coarseScene = scene;
+        if (!progressiveResidency) throw new Error("Missing progressive residency state.");
+        const residency = progressiveResidency;
         let decodedTargetBytes = 0;
+        let readyChunks = 0;
         document.documentElement.dataset.targetChunksTotal = String(
           hierarchy.targetChunks.length,
         );
+        document.documentElement.dataset.residencyBudgetBytes = String(
+          defaultProgressiveResidencyBudget,
+        );
 
-        for (const [chunkIndex, chunk] of hierarchy.targetChunks.entries()) {
+        for (const chunk of hierarchy.targetChunks) {
           const target = await decodeGeometry(
             gltf,
             binarySourceForChunk(loaded.targetBinary, chunk),
@@ -412,71 +414,62 @@ async function loadScene(source: SceneSource): Promise<boolean> {
             throw error;
           });
           decodeMilliseconds += target.decodeMilliseconds;
+          const promotion = residency.promote(target.scene);
+          if (!promotion.admitted) {
+            residencyBudgetReached = true;
+            break;
+          }
           decodedTargetBytes += target.scene.summary.binaryBytes;
-          targetTriangles += target.scene.summary.triangles;
-          targetEdges += target.scene.summary.edgeSegments;
-          for (const entry of target.scene.objectEvidence) {
-            targetObjects.set(entry.objectId, entry);
-          }
-          for (const batchIdentity of target.scene.batchEvidence) {
-            const batch = target.scene.gpuScene.batches[batchIdentity.batchIndex];
-            if (!batch) throw new Error(`Target chunk ${chunk.id} has incomplete batch identity.`);
-            const { batchIndex: _, ...evidence } = batchIdentity;
-            resident.set(residentBatchKey(evidence), { batch, evidence });
-          }
-          const ordered = orderedResidentBatches(resident);
-          renderer.setScene({
-            batches: ordered.map(([, entry]) => entry.batch),
-            sharedObjectIdsAcrossBatches: true,
-          });
+          readyChunks += 1;
+          renderer.reconcileBatches(
+            promotion.entries.map(({ key, batch }) => ({ key, batch })),
+            { sharedObjectIdsAcrossBatches: true },
+          );
           render();
-          const residentTriangles = ordered.reduce(
-            (total, [, entry]) => total + entry.batch.surfaceIndices.length / 3,
-            0,
-          );
-          const residentEdges = ordered.reduce(
-            (total, [, entry]) => total + entry.batch.edgeVertices.length / 6,
-            0,
-          );
-          const readyChunks = chunkIndex + 1;
           document.documentElement.dataset.targetChunksReady = String(readyChunks);
           document.documentElement.dataset.geometryRepresentation =
             readyChunks === hierarchy.targetChunks.length ? "target" : "mixed";
           status.textContent =
             `Target detail ${readyChunks}/${hierarchy.targetChunks.length} · ` +
-            `${targetObjects.size} occurrences promoted · ` +
-            `${formatBytes(decodedTargetBytes)} range-decoded`;
+            `${coarseScene.objectEvidence.length} occurrences retained · ` +
+            `${formatBytes(promotion.gpuBytes)} GPU resident`;
           status.dataset.stage = "target-chunks";
-          setText("#triangle-count", residentTriangles.toLocaleString("en-US"));
-          setText("#edge-count", residentEdges.toLocaleString("en-US"));
+          setText("#triangle-count", promotion.triangles.toLocaleString("en-US"));
+          setText("#edge-count", promotion.edgeSegments.toLocaleString("en-US"));
           setText("#decode-time", `${decodeMilliseconds.toFixed(1)} ms`);
           setText(
             "#geometry-result",
-            `${formatBytes(decodedTargetBytes)} target ranges decoded off-thread`,
+            `${formatBytes(decodedTargetBytes)} range-decoded · ` +
+              `${formatBytes(promotion.decodedBytes)} CPU / ${formatBytes(promotion.gpuBytes)} GPU`,
           );
           await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
         }
 
-        const ordered = orderedResidentBatches(resident);
+        const finalResidency = residency.current();
+        residentDecodedBytes = finalResidency.decodedBytes;
+        residentGpuBytes = finalResidency.gpuBytes;
+        document.documentElement.dataset.residentDecodedBytes = String(finalResidency.decodedBytes);
+        document.documentElement.dataset.residentGpuBytes = String(renderer.residentGpuBytes);
+        if (residencyBudgetReached) {
+          document.documentElement.dataset.residencyBudgetReached = "true";
+        }
         scene = {
           gpuScene: {
-            batches: ordered.map(([, entry]) => entry.batch),
+            batches: finalResidency.entries.map(({ batch }) => batch),
             sharedObjectIdsAcrossBatches: true,
           },
-          bounds: scene.bounds,
+          bounds: coarseScene.bounds,
           hierarchy,
-          objectEvidence: [...targetObjects.values()].sort(
-            (left, right) => left.nodeIndex - right.nodeIndex,
-          ),
-          batchEvidence: ordered.map(([, entry], batchIndex) => ({
-            ...entry.evidence,
+          objectEvidence: coarseScene.objectEvidence,
+          batchEvidence: finalResidency.entries.map(({ evidence }, batchIndex) => ({
+            ...evidence,
             batchIndex,
           })),
           summary: {
-            prototypeBatches: ordered.length,
-            partOccurrences: targetObjects.size,
-            triangles: targetTriangles,
-            edgeSegments: targetEdges,
+            prototypeBatches: finalResidency.entries.length,
+            partOccurrences: coarseScene.objectEvidence.length,
+            triangles: finalResidency.triangles,
+            edgeSegments: finalResidency.edgeSegments,
             binaryBytes: hierarchy.binaryByteLength,
             representation: "target",
           },
@@ -484,18 +477,28 @@ async function loadScene(source: SceneSource): Promise<boolean> {
       }
     }
 
-    document.documentElement.dataset.geometryRepresentation = "target";
-    document.documentElement.dataset.targetReady = "true";
+    document.documentElement.dataset.geometryRepresentation = residencyBudgetReached
+      ? "mixed"
+      : "target";
+    document.documentElement.dataset.targetReady = residencyBudgetReached ? "limited" : "true";
 
-    status.textContent =
-      `Compiled glTF ready · ${scene.summary.prototypeBatches} surface batches · ` +
-      `${scene.summary.partOccurrences} renderable occurrences`;
+    status.textContent = residencyBudgetReached
+      ? `Residency budget reached · ${scene.summary.prototypeBatches} surface batches retained · ` +
+        `${scene.summary.partOccurrences} renderable occurrences`
+      : `Compiled glTF ready · ${scene.summary.prototypeBatches} surface batches · ` +
+        `${scene.summary.partOccurrences} renderable occurrences`;
     status.dataset.state = "ready";
     status.dataset.stage = "rendered";
     setText("#triangle-count", scene.summary.triangles.toLocaleString("en-US"));
     setText("#edge-count", scene.summary.edgeSegments.toLocaleString("en-US"));
     setText("#decode-time", `${decodeMilliseconds.toFixed(1)} ms`);
-    setText("#geometry-result", `${formatBytes(scene.summary.binaryBytes)} decoded off-thread`);
+    setText(
+      "#geometry-result",
+      residentDecodedBytes === undefined || residentGpuBytes === undefined
+        ? `${formatBytes(scene.summary.binaryBytes)} decoded off-thread`
+        : `${formatBytes(residentDecodedBytes)} CPU / ${formatBytes(residentGpuBytes)} GPU resident ` +
+          `(budget ${formatBytes(defaultProgressiveResidencyBudget)})`,
+    );
     requireElement<HTMLElement>("#stage-geometry").dataset.state = "ready";
     requireElement<HTMLElement>("#stage-webgpu").dataset.state = "ready";
     const evidence = new Map(scene.objectEvidence.map((entry) => [entry.objectId, entry]));

@@ -17,6 +17,7 @@ IFC options:
   --uri-hint <name=value>        Optional non-sensitive source label
   --python <executable>          Python environment containing IfcOpenShell
   --threads <count>              Geometry iterator threads (default: up to 8)
+  --target-chunk-kib <count>     Coalesced target request budget (default: 512)
   --retain-scene-ir              Keep the large intermediate under output
 
 General options:
@@ -39,6 +40,7 @@ interface IfcCompileArguments {
   readonly outputDirectory: string;
   readonly pythonExecutable?: string;
   readonly threads?: number;
+  readonly targetChunkByteBudget?: number;
   readonly retainSceneIr: boolean;
 }
 
@@ -113,6 +115,7 @@ function parseIfcCompileArguments(arguments_: string[]): IfcCompileArguments {
   let outputDirectory: string | undefined;
   let pythonExecutable: string | undefined;
   let threads: number | undefined;
+  let targetChunkByteBudget: number | undefined;
   let retainSceneIr = false;
   for (let index = 0; index < arguments_.length; index += 1) {
     const option = arguments_[index];
@@ -145,6 +148,9 @@ function parseIfcCompileArguments(arguments_: string[]): IfcCompileArguments {
     } else if (option === "--threads") {
       threads = integerOption(optionValue(arguments_, index, option), option);
       index += 1;
+    } else if (option === "--target-chunk-kib") {
+      targetChunkByteBudget = integerOption(optionValue(arguments_, index, option), option) * 1024;
+      index += 1;
     } else if (option === "--retain-scene-ir") {
       retainSceneIr = true;
     } else {
@@ -167,6 +173,7 @@ function parseIfcCompileArguments(arguments_: string[]): IfcCompileArguments {
     outputDirectory,
     ...(pythonExecutable ? { pythonExecutable } : {}),
     ...(threads === undefined ? {} : { threads }),
+    ...(targetChunkByteBudget === undefined ? {} : { targetChunkByteBudget }),
     retainSceneIr,
   };
 }

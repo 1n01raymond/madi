@@ -13,7 +13,8 @@
     "coordinateSystem": "right-handed-y-up-meters",
     "geometryEncoding": "gltf-f32",
     "progressiveRepresentation": "prototype-aabb-v1",
-    "targetChunking": "prototype-range-v1"
+    "targetChunking": "coalesced-prototype-range-v1",
+    "targetChunkByteBudget": 524288
   },
   "source": {
     "sceneId": "scene:ifc-federation:89fae107a28fc5f8",
@@ -23,13 +24,13 @@
     "optionsDigest": "sha256:3f40390a2668e98b181e51e858112bff37a67e88646742957a0b540fea47409f"
   },
   "output": {
-    "packageDigest": "32c5cf2183db37e6d2718e603f4ad833df72e684b94a98ce4086ee32d7d0451c",
+    "packageDigest": "a6d5c0eecebf286208e151d281af26e6747e8a163ba3eb4a3b5cfe9353260d5d",
     "resources": [
       {
         "path": "scene.gltf",
         "mediaType": "model/gltf+json",
-        "bytes": 35225820,
-        "sha256": "f7e65e474f8861bfea8fb8eec96d885414bf607b686bed33c7bf13e9e46444b5"
+        "bytes": 34183800,
+        "sha256": "b5b3e2e662b3636426c8e73cf4eba0518345ab8ee5a7d7c35abac2411aaa84d3"
       },
       {
         "path": "scene.bin",
@@ -55,7 +56,7 @@
     "materialCount": 88,
     "triangleCount": 913520,
     "edgeSegmentCount": 0,
-    "targetChunkCount": 3383
+    "targetChunkCount": 45
   },
   "prototypeReuse": [
     {
