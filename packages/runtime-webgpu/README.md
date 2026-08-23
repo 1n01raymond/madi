@@ -15,6 +15,12 @@ Direct WebGPU rendering and the Phase 1 compiled glTF runtime boundary.
 - `MadiWebGpuRenderer` uploads those batches and renders surfaces, edges, and an
   integer object-ID picking pass directly with WebGPU.
 
+Object-ID rendering is on demand: navigation frames submit surfaces and
+optional explicit edges, while a click renders and reads the ID target only
+when requested. The renderer also accepts a fixed pixel ratio and can omit edge
+uploads so cross-backend benchmark profiles do not silently compare different
+resolution or resource contracts.
+
 The current experimental decoder accepts one external buffer and, per mesh, one
 indexed `TRIANGLES` primitive plus at most one indexed `LINES` primitive. It is
 not a general-purpose glTF loader. Unsupported profiles and layouts fail with a

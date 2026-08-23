@@ -1,0 +1,340 @@
+{
+  "schemaVersion": "madi.industrial-browser-matrix.1",
+  "status": "exploratory-not-adr-decision",
+  "capturedAt": "2026-08-22T19:06:08.985Z",
+  "host": {
+    "platform": "win32",
+    "architecture": "x64"
+  },
+  "config": {
+    "scale": "gate",
+    "frames": 90,
+    "warmup": 30
+  },
+  "comparisonContract": {
+    "sameWorkload": true,
+    "sameCameraTrace": true,
+    "sameResolution": true,
+    "surfaces": true,
+    "explicitEdges": false,
+    "picking": "on-demand-not-sampled",
+    "frustumCulling": "disabled",
+    "lod": false,
+    "selfHostedStaticOrigin": true,
+    "outboundRequestCount": 0
+  },
+  "results": [
+    {
+      "browser": "chrome",
+      "browserEngine": "Blink",
+      "browserVersion": "151.0.7922.139",
+      "headless": false,
+      "viewport": {
+        "width": 1440,
+        "height": 960
+      },
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36",
+      "platform": "Win32",
+      "adapter": {
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "device": "",
+        "description": "",
+        "isFallbackAdapter": false
+      },
+      "consoleIssues": [],
+      "outboundRequests": [],
+      "result": {
+        "schemaVersion": "madi.industrial-browser-benchmark.1",
+        "backend": "madi",
+        "scale": "gate",
+        "features": {
+          "surfaces": true,
+          "explicitEdges": false,
+          "picking": "on-demand-not-sampled",
+          "frustumCulling": "disabled",
+          "lod": false
+        },
+        "workload": {
+          "id": "madi.industrial-pipe-rack.1",
+          "prototypeCount": 4,
+          "occurrenceCount": 10000,
+          "uniqueTriangleCount": 404,
+          "submittedTriangleCount": 1046000,
+          "explicitEdgeSegmentCount": 584000,
+          "instanceBytes": 960000
+        },
+        "config": {
+          "warmupFrames": 30,
+          "sampleFrames": 90
+        },
+        "milestones": {
+          "workloadReadyMs": 5.820000052452087,
+          "backendReadyMs": 316.7150000333786,
+          "firstFrameMs": 317.29500007629395
+        },
+        "frameIntervals": {
+          "samples": 89,
+          "medianMs": 6.944999999999936,
+          "p95Ms": 6.9650000000001455,
+          "p99Ms": 6.985000000000127,
+          "worstMs": 6.985000000000127
+        },
+        "cpuSubmit": {
+          "samples": 90,
+          "medianMs": 0.059999942779541016,
+          "p95Ms": 0.14499998092651367,
+          "p99Ms": 0.16499996185302734,
+          "worstMs": 0.16499996185302734
+        },
+        "renderer": {
+          "logicalDrawCalls": 4,
+          "submittedTriangles": 1046000
+        },
+        "memory": {
+          "usedJsHeapBytes": 5069269
+        }
+      },
+      "screenshot": {
+        "path": "chrome-151-madi-gate-windows.png",
+        "bytes": 161566,
+        "sha256": "446ee049133b8aa3f7e8ecba01c826437176e4df6a3a1ba03a8ec8e166ada1a3"
+      }
+    },
+    {
+      "browser": "chrome",
+      "browserEngine": "Blink",
+      "browserVersion": "151.0.7922.139",
+      "headless": false,
+      "viewport": {
+        "width": 1440,
+        "height": 960
+      },
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36",
+      "platform": "Win32",
+      "adapter": {
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "device": "",
+        "description": "",
+        "isFallbackAdapter": false
+      },
+      "consoleIssues": [],
+      "outboundRequests": [],
+      "result": {
+        "schemaVersion": "madi.industrial-browser-benchmark.1",
+        "backend": "three",
+        "scale": "gate",
+        "features": {
+          "surfaces": true,
+          "explicitEdges": false,
+          "picking": "on-demand-not-sampled",
+          "frustumCulling": "disabled",
+          "lod": false
+        },
+        "workload": {
+          "id": "madi.industrial-pipe-rack.1",
+          "prototypeCount": 4,
+          "occurrenceCount": 10000,
+          "uniqueTriangleCount": 404,
+          "submittedTriangleCount": 1046000,
+          "explicitEdgeSegmentCount": 584000,
+          "instanceBytes": 960000
+        },
+        "config": {
+          "warmupFrames": 30,
+          "sampleFrames": 90
+        },
+        "milestones": {
+          "workloadReadyMs": 5.820000052452087,
+          "backendReadyMs": 367.3200000524521,
+          "firstFrameMs": 390.81000006198883
+        },
+        "frameIntervals": {
+          "samples": 89,
+          "medianMs": 6.944999999999936,
+          "p95Ms": 6.970000000000027,
+          "p99Ms": 7.085000000000036,
+          "worstMs": 7.085000000000036
+        },
+        "cpuSubmit": {
+          "samples": 90,
+          "medianMs": 0.3049999475479126,
+          "p95Ms": 0.4750000238418579,
+          "p99Ms": 0.565000057220459,
+          "worstMs": 0.565000057220459
+        },
+        "renderer": {
+          "logicalDrawCalls": 4,
+          "submittedTriangles": 1046000
+        },
+        "memory": {
+          "usedJsHeapBytes": 27451921
+        }
+      },
+      "screenshot": {
+        "path": "chrome-151-three-gate-windows.png",
+        "bytes": 159303,
+        "sha256": "53e8ecd4c6e2ce35762109d42e8fe153c7c66feaecf96cdd6d30b139d2facdbe"
+      }
+    },
+    {
+      "browser": "firefox",
+      "browserEngine": "Gecko",
+      "browserVersion": "150.0.2",
+      "headless": false,
+      "viewport": {
+        "width": 1440,
+        "height": 960
+      },
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:150.0) Gecko/20100101 Firefox/150.0",
+      "platform": "Win32",
+      "adapter": {
+        "vendor": "",
+        "architecture": "",
+        "device": "",
+        "description": "",
+        "isFallbackAdapter": false
+      },
+      "consoleIssues": [],
+      "outboundRequests": [],
+      "result": {
+        "schemaVersion": "madi.industrial-browser-benchmark.1",
+        "backend": "madi",
+        "scale": "gate",
+        "features": {
+          "surfaces": true,
+          "explicitEdges": false,
+          "picking": "on-demand-not-sampled",
+          "frustumCulling": "disabled",
+          "lod": false
+        },
+        "workload": {
+          "id": "madi.industrial-pipe-rack.1",
+          "prototypeCount": 4,
+          "occurrenceCount": 10000,
+          "uniqueTriangleCount": 404,
+          "submittedTriangleCount": 1046000,
+          "explicitEdgeSegmentCount": 584000,
+          "instanceBytes": 960000
+        },
+        "config": {
+          "warmupFrames": 30,
+          "sampleFrames": 90
+        },
+        "milestones": {
+          "workloadReadyMs": 4.5,
+          "backendReadyMs": 308.29999999999995,
+          "firstFrameMs": 308.64
+        },
+        "frameIntervals": {
+          "samples": 89,
+          "medianMs": 6.940000000000055,
+          "p95Ms": 6.960000000000036,
+          "p99Ms": 6.960000000000036,
+          "worstMs": 6.960000000000036
+        },
+        "cpuSubmit": {
+          "samples": 90,
+          "medianMs": 0.08000000000004093,
+          "p95Ms": 0.14000000000010004,
+          "p99Ms": 0.31999999999993634,
+          "worstMs": 0.31999999999993634
+        },
+        "renderer": {
+          "logicalDrawCalls": 4,
+          "submittedTriangles": 1046000
+        },
+        "memory": {
+          "usedJsHeapBytes": null
+        }
+      },
+      "screenshot": {
+        "path": "firefox-150-madi-gate-windows.png",
+        "bytes": 150864,
+        "sha256": "76319ab484b300ee010fb4b3c76f10c667b979c89f5b7ea67ecd3cf74bef9df7"
+      }
+    },
+    {
+      "browser": "firefox",
+      "browserEngine": "Gecko",
+      "browserVersion": "150.0.2",
+      "headless": false,
+      "viewport": {
+        "width": 1440,
+        "height": 960
+      },
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:150.0) Gecko/20100101 Firefox/150.0",
+      "platform": "Win32",
+      "adapter": {
+        "vendor": "",
+        "architecture": "",
+        "device": "",
+        "description": "",
+        "isFallbackAdapter": false
+      },
+      "consoleIssues": [],
+      "outboundRequests": [],
+      "result": {
+        "schemaVersion": "madi.industrial-browser-benchmark.1",
+        "backend": "three",
+        "scale": "gate",
+        "features": {
+          "surfaces": true,
+          "explicitEdges": false,
+          "picking": "on-demand-not-sampled",
+          "frustumCulling": "disabled",
+          "lod": false
+        },
+        "workload": {
+          "id": "madi.industrial-pipe-rack.1",
+          "prototypeCount": 4,
+          "occurrenceCount": 10000,
+          "uniqueTriangleCount": 404,
+          "submittedTriangleCount": 1046000,
+          "explicitEdgeSegmentCount": 584000,
+          "instanceBytes": 960000
+        },
+        "config": {
+          "warmupFrames": 30,
+          "sampleFrames": 90
+        },
+        "milestones": {
+          "workloadReadyMs": 4.319999999999993,
+          "backendReadyMs": 524.4200000000001,
+          "firstFrameMs": 548.98
+        },
+        "frameIntervals": {
+          "samples": 89,
+          "medianMs": 6.940000000000055,
+          "p95Ms": 6.960000000000036,
+          "p99Ms": 6.960000000000036,
+          "worstMs": 6.960000000000036
+        },
+        "cpuSubmit": {
+          "samples": 90,
+          "medianMs": 0.4600000000000364,
+          "p95Ms": 0.8600000000001273,
+          "p99Ms": 1.240000000000009,
+          "worstMs": 1.240000000000009
+        },
+        "renderer": {
+          "logicalDrawCalls": 4,
+          "submittedTriangles": 1046000
+        },
+        "memory": {
+          "usedJsHeapBytes": null
+        }
+      },
+      "screenshot": {
+        "path": "firefox-150-three-gate-windows.png",
+        "bytes": 150452,
+        "sha256": "e8d621c1ad518b3af0c0d69f59badd29f7a9db59f9fddfd74aea89d2744ea5f5"
+      }
+    }
+  ],
+  "notes": [
+    "This run validates parity and measurement plumbing; it does not accept or reject ADR-0003.",
+    "Absolute performance varies by host load. Decision runs require reference hardware and repeated clean sessions."
+  ]
+}

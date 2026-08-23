@@ -1,5 +1,10 @@
 # Local benchmark artifacts
 
-Machine-readable benchmark results can be written here during local runs. JSON
-outputs are ignored by Git because results are meaningful only when the command,
-commit, fixture, and environment metadata are captured together.
+Machine-readable benchmark results can be written here during local runs. The
+top-level ad hoc JSON outputs remain ignored because results are meaningful only
+when command, commit, workload, and environment metadata travel together.
+
+Reviewed evidence lives in a named subdirectory with its validator and scope.
+The first such record is [`industrial-baseline`](industrial-baseline/README.md),
+an exploratory 10k-occurrence MADI/Three.js browser matrix. It validates the
+comparison harness but does not decide ADR-0003.

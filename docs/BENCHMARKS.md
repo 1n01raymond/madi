@@ -48,6 +48,34 @@ Public or explicitly redistributable fixtures only.
 
 Private partner datasets may guide optimization but cannot be the only evidence.
 
+### 4.1 Industrial scale ladder
+
+The deterministic `madi.industrial-pipe-rack.1` workload provides a public,
+license-independent scale control. It is benchmark data, not the canonical
+product demo or a substitute for a real design-partner model.
+
+| Tier | Occurrences | Purpose |
+|---|---:|---|
+| `smoke` | 1,000 | browser and visual parity checks |
+| `gate` | 10,000 | fast local cross-backend regression evidence |
+| `target` | 100,000 | ADR scale floor; 10M+ submitted triangles |
+
+The first generator has four heavily reused pipe/equipment prototypes. A later
+heterogeneous tier must add many unique pipe spools, plates, and equipment
+prototypes before ADR-0003 can be decided. Repetition-only results are not
+representative because optimized engine instancing is already strong there.
+
+### 4.2 Evidence layers
+
+1. **Public scale control:** deterministic and redistributable at every tier.
+2. **Public real model:** license-audited STEP or IFC industrial surrogate.
+3. **Private shadow model:** customer-controlled source stays private; only
+   approved aggregate metrics, configuration, and source digest are published.
+
+The private profile is compiled and served entirely inside the customer
+network. It records outbound requests and fails if the core runtime requires an
+external MADI service.
+
 ## 5. Baselines
 
 Candidates are pinned per benchmark release:
@@ -59,6 +87,11 @@ Candidates are pinned per benchmark release:
 - glTF + meshopt loaded through a representative standards-based path;
 - MADI runtime with CPU culling;
 - MADI runtime with each optional GPU optimization independently enabled.
+
+ADR-0003 release baselines pin the exact Three.js version and use
+`InstancedMesh` for repeated prototypes and `BatchedMesh` where heterogeneous
+geometry makes it applicable. A scene graph with one `Object3D` per occurrence
+is recorded only as a diagnostic anti-pattern, never as the optimized baseline.
 
 The suite does not claim universal superiority from one workload.
 
@@ -167,6 +200,21 @@ Initial CI gates focus on regression rather than aspirational absolute numbers:
 
 Release claims require reference-profile runs and published artifacts.
 
+### 10.1 ADR-0003 material-advantage gate
+
+The direct hot path continues when a strategic industrial workload shows at
+least one of:
+
+- 25% lower main-thread p95;
+- 30% lower retained browser scene memory; or
+- successful bounded-residency navigation under a published memory budget that
+  the optimized baseline cannot satisfy;
+
+and frame-time p95 is no more than 10% worse. If all differences remain within
+10% and no residency advantage appears, the renderer decision is revised
+toward Three.js. The gate requires discrete and integrated-GPU reproduction;
+one run, average FPS, or one browser is insufficient.
+
 ## 11. Result format
 
 Each run writes machine-readable JSON plus a concise report:
@@ -201,3 +249,17 @@ Do not:
 - report only average FPS;
 - preload data in one implementation but not another;
 - optimize for triangle count while ignoring occurrence/semantic scale.
+
+## 13. Current executable evidence
+
+`apps/benchmark-lab` now submits the same generated arrays, transforms, colors,
+camera trace, resolution, and four logical surface draws through MADI direct
+WebGPU and Three.js WebGPURenderer 0.180.0. The committed 10k gate captures both
+paths in headed Chrome and Firefox with no browser errors and no HTTP requests
+outside the local static origin.
+
+This evidence is explicitly exploratory. Its workload is heavily instanced,
+frustum culling and LOD are disabled, frame cadence is display-refresh limited,
+and WebGPU timestamp queries are not yet collected. The values validate the
+harness only; they are not a performance claim or an ADR outcome. See
+`artifacts/benchmarks/industrial-baseline/`.
