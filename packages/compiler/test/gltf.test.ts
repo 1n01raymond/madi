@@ -80,6 +80,32 @@ describe("Phase 1 glTF compiler slice", () => {
     expect(second.report).toEqual(first.report);
   });
 
+  it("emits deterministic prototype bounds in a separate standard glTF buffer", async () => {
+    const serialized = JSON.parse(await readFile(evidenceUrl, "utf8")) as unknown;
+    const compiled = compileSceneToGltf(hydratePhase0Evidence(serialized), {
+      coarseBounds: true,
+    });
+    expect(compiled.coarseBinary).toBeDefined();
+    const validation = validateCompiledGltf(compiled.document, [
+      compiled.binary,
+      compiled.coarseBinary ?? new Uint8Array(),
+    ]);
+
+    expect(validation).toEqual({ ok: true, issues: [] });
+    expect(compiled.document.buffers).toEqual([
+      { uri: "scene.bin", byteLength: compiled.binary.byteLength },
+      { uri: "coarse.bin", byteLength: compiled.coarseBinary?.byteLength },
+    ]);
+    expect(compiled.document.bufferViews.some(({ buffer }) => buffer === 0)).toBe(true);
+    expect(compiled.document.bufferViews.some(({ buffer }) => buffer === 1)).toBe(true);
+    expect(compiled.document.nodes.filter((node) => madiExtras(node)?.coarseMesh !== undefined))
+      .toHaveLength(10);
+    expect(compiled.report.options).toMatchObject({
+      coarseBinaryUri: "coarse.bin",
+      progressiveRepresentation: "prototype-aabb-v1",
+    });
+  });
+
   it("reproduces the committed compiler artifact byte for byte", async () => {
     const compiled = await compileEvidence();
     const [json, binary, report] = await Promise.all([

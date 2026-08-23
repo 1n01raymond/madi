@@ -14,6 +14,7 @@ Each package contains:
 |---|---|
 | `scene.gltf` | glTF 2.0 hierarchy, shared meshes, materials, and experimental MADI `extras` |
 | `scene.bin` | external little-endian geometry and source-map accessors |
+| `coarse.bin` | optional external prototype AABB surface/edge accessors for progressive first frame |
 | `build-report.json` | source/compiler/options identity, SHA-256 hashes, counts, diagnostics, reuse, and limits |
 | `adapter-report.json` | AP242 source identity, OCCT toolchain/options, extraction counts, and diagnostics (direct-input package only) |
 
@@ -40,7 +41,9 @@ plus an external binary and does not define a `.madi` file format.
 file by one public command. OCCT reads AP242 DIS through STEPCAF/XDE, extracts
 three reusable part meshes and ten renderable occurrences, and the compiler
 emits 2,076 triangles plus 181 explicit CAD edge segments. The expanded Scene
-IR exists only in a temporary directory and is removed after validation.
+IR exists only in a temporary directory and is removed after validation. Its
+2.7 KiB `coarse.bin` contains 36 triangles and 36 edge segments across three
+shared prototype bounds; `scene.bin` remains the 183.6 KiB target payload.
 
 ## Reproduce and validate
 

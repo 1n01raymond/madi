@@ -9,7 +9,7 @@ export interface UrlSceneSource {
 export interface LocalSceneSource {
   readonly kind: "local";
   readonly gltfFile: File;
-  readonly binaryFile: File;
+  readonly binaryFiles: readonly File[];
 }
 
 export type SceneSource = UrlSceneSource | LocalSceneSource;
@@ -21,7 +21,8 @@ export type GeometryBinarySource =
 export interface LoadedSceneHierarchy {
   readonly document: CompiledGltfDocument;
   readonly hierarchy: CompiledHierarchy;
-  readonly binary: GeometryBinarySource;
+  readonly targetBinary: GeometryBinarySource;
+  readonly coarseBinary?: GeometryBinarySource;
   readonly label: string;
 }
 
@@ -46,29 +47,36 @@ export function selectLocalSceneFiles(files: readonly File[]): LocalSceneSource 
   const binaryFiles = files.filter((file) =>
     file.name.toLocaleLowerCase("en-US").endsWith(".bin"),
   );
-  if (unsupported.length > 0 || gltfFiles.length !== 1 || binaryFiles.length !== 1) {
-    throw new TypeError("Select exactly one .gltf file and its one .bin resource.");
+  if (unsupported.length > 0 || gltfFiles.length !== 1 || binaryFiles.length < 1) {
+    throw new TypeError("Select exactly one .gltf file and all of its .bin resources.");
   }
   const gltfFile = gltfFiles[0];
-  const binaryFile = binaryFiles[0];
-  if (!gltfFile || !binaryFile) throw new TypeError("The local scene pair is incomplete.");
-  return { kind: "local", gltfFile, binaryFile };
+  if (!gltfFile) throw new TypeError("The local scene package is incomplete.");
+  return { kind: "local", gltfFile, binaryFiles };
 }
 
 export function validateLocalBinary(
   hierarchy: CompiledHierarchy,
   binaryFile: Pick<File, "name" | "size">,
+  representation: "target" | "coarse" = "target",
 ): void {
-  const binaryUrl = new URL(hierarchy.binaryUri, "https://madi.local/");
+  const uri = representation === "coarse" ? hierarchy.coarseBinaryUri : hierarchy.binaryUri;
+  const byteLength = representation === "coarse"
+    ? hierarchy.coarseBinaryByteLength
+    : hierarchy.binaryByteLength;
+  if (!uri || byteLength === undefined) {
+    throw new TypeError(`The compiled scene has no ${representation} binary resource.`);
+  }
+  const binaryUrl = new URL(uri, "https://madi.local/");
   const expectedName = decodeURIComponent(binaryUrl.pathname.split("/").pop() ?? "");
   if (binaryFile.name !== expectedName) {
     throw new TypeError(
       `The glTF expects ${expectedName}; selected binary is ${binaryFile.name}.`,
     );
   }
-  if (binaryFile.size !== hierarchy.binaryByteLength) {
+  if (binaryFile.size !== byteLength) {
     throw new TypeError(
-      `${binaryFile.name} must be ${hierarchy.binaryByteLength.toLocaleString("en-US")} bytes; ` +
+      `${binaryFile.name} must be ${byteLength.toLocaleString("en-US")} bytes; ` +
         `received ${binaryFile.size.toLocaleString("en-US")}.`,
     );
   }
@@ -92,7 +100,15 @@ export async function loadSceneHierarchy(source: SceneSource): Promise<LoadedSce
     return {
       document,
       hierarchy,
-      binary: { kind: "url", href: new URL(hierarchy.binaryUri, source.gltfUrl).href },
+      targetBinary: { kind: "url", href: new URL(hierarchy.binaryUri, source.gltfUrl).href },
+      ...(hierarchy.coarseBinaryUri
+        ? {
+            coarseBinary: {
+              kind: "url" as const,
+              href: new URL(hierarchy.coarseBinaryUri, source.gltfUrl).href,
+            },
+          }
+        : {}),
       label: source.gltfUrl.href,
     };
   }
@@ -100,11 +116,34 @@ export async function loadSceneHierarchy(source: SceneSource): Promise<LoadedSce
   const { document, hierarchy } = inspectCompiledHierarchy(
     parseJson(await source.gltfFile.text(), source.gltfFile.name),
   );
-  validateLocalBinary(hierarchy, source.binaryFile);
+  const fileFor = (uri: string): File | undefined => {
+    const expectedName = decodeURIComponent(
+      new URL(uri, "https://madi.local/").pathname.split("/").pop() ?? "",
+    );
+    return source.binaryFiles.find(({ name }) => name === expectedName);
+  };
+  const targetFile = fileFor(hierarchy.binaryUri);
+  if (!targetFile) throw new TypeError(`Select ${hierarchy.binaryUri} with the glTF file.`);
+  validateLocalBinary(hierarchy, targetFile);
+  const coarseFile = hierarchy.coarseBinaryUri
+    ? fileFor(hierarchy.coarseBinaryUri)
+    : undefined;
+  if (hierarchy.coarseBinaryUri && !coarseFile) {
+    throw new TypeError(`Select ${hierarchy.coarseBinaryUri} with the glTF file.`);
+  }
+  if (coarseFile) validateLocalBinary(hierarchy, coarseFile, "coarse");
+  const expectedResourceCount = hierarchy.coarseBinaryUri ? 2 : 1;
+  if (source.binaryFiles.length !== expectedResourceCount) {
+    throw new TypeError(
+      `The glTF declares ${expectedResourceCount} external binary ` +
+        `${expectedResourceCount === 1 ? "resource" : "resources"}.`,
+    );
+  }
   return {
     document,
     hierarchy,
-    binary: { kind: "file", file: source.binaryFile },
-    label: `${source.gltfFile.name} + ${source.binaryFile.name}`,
+    targetBinary: { kind: "file", file: targetFile },
+    ...(coarseFile ? { coarseBinary: { kind: "file" as const, file: coarseFile } } : {}),
+    label: [source.gltfFile, ...source.binaryFiles].map(({ name }) => name).join(" + "),
   };
 }

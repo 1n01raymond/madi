@@ -7,6 +7,8 @@ library boundary accepts a validated in-memory `EngineeringScene`. Both emit:
 - `scene.gltf`: glTF 2.0 hierarchy, nodes, shared meshes, materials, and MADI
   source/identity metadata in `extras`;
 - `scene.bin`: little-endian f32/u32/u8 geometry and mapping accessors; and
+- `coarse.bin`: optional prototype AABB surfaces and edges for an early useful
+  frame; and
 - `build-report.json`: source/compiler identity, options, hashes, counts,
   diagnostics, reuse, and known limits.
 
@@ -32,10 +34,12 @@ pnpm test
 
 The `madi compile` command reads the checksum-locked AP242 assembly through
 OCCT STEPCAF/XDE, validates source identity across the adapter boundary, and
-writes `scene.gltf`, `scene.bin`, `build-report.json`, and
-`adapter-report.json`. Its expanded Scene IR is temporary and is deleted after
-the package passes validation. `phase1:compile:evidence` retains the historical
-small Scene IR regression path. The evidence check validates both plus the
+writes `scene.gltf`, `scene.bin`, `coarse.bin`, `build-report.json`, and
+`adapter-report.json`. Target geometry remains the ordinary glTF node mesh;
+`extras.madi.coarseMesh` selects a bounds mesh backed only by `coarse.bin`.
+Its expanded Scene IR is temporary and is deleted after the package passes
+validation. `phase1:compile:evidence` retains the historical small Scene IR
+regression path without coarse output. The evidence check validates both plus the
 canonical PyGamer package: source and resource hashes, buffer/accessor ranges,
 hierarchy, prototype reuse, triangle/edge counts, and official Khronos glTF
 validation.
@@ -45,10 +49,11 @@ validation.
 - The direct STEP command currently depends on the pinned CadQuery/OCP Python
   adapter. Moving the proven extraction behavior into the native C++ adapter
   remains production hardening work.
-- One target display representation is emitted. Coarse LOD, progressive
-  partitioning, compression, and streaming manifests are not implemented.
+- The first coarse representation is a per-prototype AABB, not a
+  shape-preserving LOD. Spatial partitioning, compression, streaming manifests,
+  prioritization, and bounded residency are not implemented.
 - Geometry and node transforms are f32 in glTF; the large-coordinate precision
   profile remains an open ADR gate.
 - `extras.madi` is an experimental profile, not a public interchange standard.
-- The browser runtime directly consumes the canonical PyGamer package; coarse
-  LOD and progressive partitioning are still pending.
+- The browser runtime proves coarse-first promotion on the direct AP242 package;
+  the canonical PyGamer benchmark remains a monolithic target-only baseline.

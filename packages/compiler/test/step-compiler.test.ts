@@ -70,13 +70,22 @@ await writeFile(option("--report"), JSON.stringify({
         triangleCount: 2076,
         edgeSegmentCount: 181,
       });
-      const [gltf, binary, buildReport, adapterReport] = await Promise.all([
+      const [gltf, binary, coarseBinary, buildReport, adapterReport] = await Promise.all([
         readFile(join(outputDirectory, "scene.gltf"), "utf8").then(JSON.parse),
         readFile(join(outputDirectory, "scene.bin")),
+        readFile(join(outputDirectory, "coarse.bin")),
         readFile(join(outputDirectory, "build-report.json"), "utf8").then(JSON.parse),
         readFile(join(outputDirectory, "adapter-report.json"), "utf8").then(JSON.parse),
       ]);
-      expect(gltf.buffers).toEqual([{ uri: "scene.bin", byteLength: binary.byteLength }]);
+      expect(gltf.buffers).toEqual([
+        { uri: "scene.bin", byteLength: binary.byteLength },
+        { uri: "coarse.bin", byteLength: coarseBinary.byteLength },
+      ]);
+      expect(buildReport.options).toMatchObject({
+        coarseBinaryUri: "coarse.bin",
+        progressiveRepresentation: "prototype-aabb-v1",
+      });
+      expect(buildReport.counts.gltfMeshCount).toBe(6);
       expect(buildReport.source.sourceDigest).toBe(`sha256:${result.source.sha256}`);
       expect(adapterReport.source).toMatchObject({
         path: "assembly.step",

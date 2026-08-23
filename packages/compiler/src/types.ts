@@ -12,7 +12,7 @@ export interface GltfBuffer {
 }
 
 export interface GltfBufferView {
-  readonly buffer: 0;
+  readonly buffer: number;
   readonly byteOffset: number;
   readonly byteLength: number;
   readonly target?: 34962 | 34963;
@@ -70,7 +70,7 @@ export interface GltfDocument {
   readonly nodes: readonly GltfNode[];
   readonly meshes: readonly GltfMesh[];
   readonly materials: readonly GltfMaterial[];
-  readonly buffers: readonly [GltfBuffer];
+  readonly buffers: readonly GltfBuffer[];
   readonly bufferViews: readonly GltfBufferView[];
   readonly accessors: readonly GltfAccessor[];
   readonly extras: Readonly<Record<string, unknown>>;
@@ -94,8 +94,10 @@ export interface CompilerBuildReport {
   };
   readonly options: {
     readonly binaryUri: string;
+    readonly coarseBinaryUri?: string;
     readonly coordinateSystem: "right-handed-y-up-meters";
     readonly geometryEncoding: "gltf-f32";
+    readonly progressiveRepresentation?: "prototype-aabb-v1";
   };
   readonly source: {
     readonly sceneId: string;
@@ -134,11 +136,14 @@ export interface CompiledGltfPackage {
   readonly document: GltfDocument;
   readonly json: string;
   readonly binary: Uint8Array;
+  readonly coarseBinary?: Uint8Array;
   readonly report: CompilerBuildReport;
 }
 
 export interface CompileGltfOptions {
   readonly binaryUri?: string;
+  readonly coarseBounds?: boolean;
+  readonly coarseBinaryUri?: string;
   readonly generator?: string;
 }
 

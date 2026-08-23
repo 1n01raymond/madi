@@ -31,12 +31,18 @@ describe("compiled scene sources", () => {
     expect(selectLocalSceneFiles([binary, gltf])).toEqual({
       kind: "local",
       gltfFile: gltf,
-      binaryFile: binary,
+      binaryFiles: [binary],
     });
     expect(() => selectLocalSceneFiles([gltf])).toThrow(/exactly one/u);
     expect(() => selectLocalSceneFiles([gltf, binary, new File([""], "report.json")])).toThrow(
       /exactly one/u,
     );
+    const coarse = new File([new Uint8Array(8)], "coarse.bin");
+    expect(selectLocalSceneFiles([coarse, gltf, binary])).toEqual({
+      kind: "local",
+      gltfFile: gltf,
+      binaryFiles: [coarse, binary],
+    });
   });
 
   it("checks local binary identity and declared byte length", () => {
@@ -47,5 +53,13 @@ describe("compiled scene sources", () => {
     expect(() => validateLocalBinary(hierarchy, { name: "scene.bin", size: 3 })).toThrow(
       /must be 4 bytes/u,
     );
+    const progressiveHierarchy = {
+      ...hierarchy,
+      coarseBinaryUri: "geometry/coarse.bin",
+      coarseBinaryByteLength: 8,
+    } as CompiledHierarchy;
+    expect(() =>
+      validateLocalBinary(progressiveHierarchy, { name: "coarse.bin", size: 8 }, "coarse"),
+    ).not.toThrow();
   });
 });

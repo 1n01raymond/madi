@@ -19,8 +19,11 @@ const typeComponents = new Map([
 
 export function validateCompiledGltf(
   document: GltfDocument,
-  binary: Uint8Array,
+  binaryOrResources: Uint8Array | readonly Uint8Array[],
 ): PackageValidationResult {
+  const resources = binaryOrResources instanceof Uint8Array
+    ? [binaryOrResources]
+    : binaryOrResources;
   const issues: PackageValidationIssue[] = [];
   const add = (code: string, path: string, message: string): void => {
     issues.push({ code, path, message });
@@ -38,13 +41,22 @@ export function validateCompiledGltf(
   ) {
     add("MADI_PROFILE", "extras.madi.profile", "The experimental MADI profile is missing.");
   }
-  if (document.buffers.length !== 1 || document.buffers[0].byteLength !== binary.byteLength) {
-    add("BUFFER_LENGTH", "buffers[0]", "Declared and actual binary lengths differ.");
+  document.buffers.forEach((buffer, index) => {
+    if (buffer.byteLength !== resources[index]?.byteLength) {
+      add("BUFFER_LENGTH", `buffers[${index}]`, "Declared and actual binary lengths differ.");
+    }
+  });
+  if (resources.length !== document.buffers.length) {
+    add("BUFFER_COUNT", "buffers", "Declared and supplied binary resource counts differ.");
   }
 
   document.bufferViews.forEach((bufferView, index) => {
     const path = `bufferViews[${index}]`;
-    if (bufferView.buffer !== 0) add("BUFFER_REFERENCE", `${path}.buffer`, "Unknown buffer.");
+    const binary = resources[bufferView.buffer];
+    if (!document.buffers[bufferView.buffer] || !binary) {
+      add("BUFFER_REFERENCE", `${path}.buffer`, "Unknown buffer.");
+      return;
+    }
     if (bufferView.byteOffset % 4 !== 0) {
       add("BUFFER_ALIGNMENT", `${path}.byteOffset`, "Buffer views must be 4-byte aligned.");
     }
@@ -123,6 +135,16 @@ export function validateCompiledGltf(
     }
     if (node.mesh !== undefined && !document.meshes[node.mesh]) {
       add("NODE_MESH", `${path}.mesh`, "Unknown mesh.");
+    }
+    const nodeMadi = node.extras?.madi;
+    if (
+      typeof nodeMadi === "object" &&
+      nodeMadi !== null &&
+      "coarseMesh" in nodeMadi &&
+      (!Number.isInteger(nodeMadi.coarseMesh) ||
+        !document.meshes[nodeMadi.coarseMesh as number])
+    ) {
+      add("NODE_COARSE_MESH", `${path}.extras.madi.coarseMesh`, "Unknown coarse mesh.");
     }
     for (const child of node.children ?? []) {
       if (!document.nodes[child]) {

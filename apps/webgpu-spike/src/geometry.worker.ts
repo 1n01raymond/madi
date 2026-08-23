@@ -5,6 +5,7 @@ import {
 import type {
   CompiledGltfDocument,
   DecodedCompiledScene,
+  GeometryRepresentation,
 } from "@madi/runtime-webgpu";
 import type { GeometryBinarySource } from "./scene-source.js";
 
@@ -12,6 +13,7 @@ interface GeometryDecodeRequest {
   readonly type: "decode";
   readonly document: CompiledGltfDocument;
   readonly binary: GeometryBinarySource;
+  readonly representation: GeometryRepresentation;
 }
 
 export type GeometryDecodeResponse =
@@ -53,7 +55,9 @@ async function decode(request: GeometryDecodeRequest): Promise<void> {
     } else {
       binary = await request.binary.file.arrayBuffer();
     }
-    const scene = decodeCompiledGltf(request.document, binary);
+    const scene = decodeCompiledGltf(request.document, binary, {
+      representation: request.representation,
+    });
     worker.postMessage(
       {
         type: "ready",

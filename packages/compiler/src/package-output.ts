@@ -12,13 +12,20 @@ export async function writeCompiledPackage(
   await mkdir(outputDirectory, { recursive: true });
   const writes: Promise<void>[] = [
     writeFile(resolve(outputDirectory, "scene.gltf"), compiled.json, "utf8"),
-    writeFile(resolve(outputDirectory, "scene.bin"), compiled.binary),
+    writeFile(resolve(outputDirectory, compiled.report.options.binaryUri), compiled.binary),
     writeFile(
       resolve(outputDirectory, "build-report.json"),
       `${JSON.stringify(compiled.report, null, 2)}\n`,
       "utf8",
     ),
   ];
+  if (compiled.coarseBinary) {
+    const coarseBinaryUri = compiled.report.options.coarseBinaryUri;
+    if (!coarseBinaryUri) {
+      throw new TypeError("Progressive package is missing its coarse resource URI.");
+    }
+    writes.push(writeFile(resolve(outputDirectory, coarseBinaryUri), compiled.coarseBinary));
+  }
   if (adapterReport !== undefined) {
     writes.push(
       writeFile(

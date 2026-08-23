@@ -50,6 +50,13 @@ const compilerReport = JSON.parse(
     "utf8",
   ),
 );
+const progressiveDirectory = resolve(
+  repositoryRoot,
+  "artifacts/phase1/repeated-fasteners-ap242",
+);
+const progressiveCompilerReport = JSON.parse(
+  await readFile(resolve(progressiveDirectory, "build-report.json"), "utf8"),
+);
 
 function assertEqual(actual, expectedValue, label) {
   if (actual !== expectedValue) {
@@ -288,6 +295,99 @@ async function recordBrowser(definition) {
       localBinaryDecodedWithoutNetworkFetch: true,
     };
 
+    const progressivePage = await context.newPage();
+    progressivePage.on("console", (message) => {
+      if (message.type() === "warning" || message.type() === "error") {
+        consoleIssues.push({ level: message.type(), message: message.text() });
+      }
+    });
+    progressivePage.on("pageerror", (error) => {
+      consoleIssues.push({ level: "pageerror", message: error.message });
+    });
+    await progressivePage.route("**/progressive/scene.gltf", (route) =>
+      route.fulfill({
+        path: resolve(progressiveDirectory, "scene.gltf"),
+        contentType: "model/gltf+json",
+      }),
+    );
+    await progressivePage.route("**/progressive/coarse.bin", (route) =>
+      route.fulfill({
+        path: resolve(progressiveDirectory, "coarse.bin"),
+        contentType: "application/octet-stream",
+      }),
+    );
+    let releaseTarget;
+    const targetGate = new Promise((resolveGate) => {
+      releaseTarget = resolveGate;
+    });
+    let targetRequestedResolve;
+    const targetRequested = new Promise((resolveRequest) => {
+      targetRequestedResolve = resolveRequest;
+    });
+    let targetRequestSawCoarseReady = false;
+    await progressivePage.route("**/progressive/scene.bin", async (route) => {
+      targetRequestSawCoarseReady = await progressivePage.evaluate(
+        () => document.documentElement.dataset.coarseReady === "true",
+      );
+      targetRequestedResolve();
+      await targetGate;
+      await route.fulfill({
+        path: resolve(progressiveDirectory, "scene.bin"),
+        contentType: "application/octet-stream",
+      });
+    });
+    const progressiveSceneUrl = new URL("progressive/scene.gltf", url);
+    const progressiveViewerUrl = new URL(url);
+    progressiveViewerUrl.searchParams.set("scene", progressiveSceneUrl.href);
+    await progressivePage.goto(progressiveViewerUrl.href, { waitUntil: "domcontentloaded" });
+    await Promise.all([
+      progressivePage.waitForFunction(
+        () =>
+          document.documentElement.dataset.coarseReady === "true" &&
+          document.documentElement.dataset.geometryRepresentation === "coarse" &&
+          document.querySelector("#status")?.getAttribute("data-stage") === "coarse",
+      ),
+      targetRequested,
+    ]);
+    const progressiveScreenshotName =
+      `${definition.id}-${browserVersion.split(".")[0]}-${operatingSystem}-coarse.png`;
+    const progressiveScreenshot = await progressivePage.screenshot({
+      fullPage: true,
+      type: "png",
+    });
+    await writeFile(resolve(outputDirectory, progressiveScreenshotName), progressiveScreenshot);
+    observed.progressive = {
+      coarseVisibleBeforeTarget: true,
+      targetRequestSawCoarseReady,
+      coarseStatus: await progressivePage.locator("#status").innerText(),
+      coarseTriangles: await progressivePage.locator("#triangle-count").innerText(),
+      coarseEdges: await progressivePage.locator("#edge-count").innerText(),
+      coarseScreenshot: {
+        path: progressiveScreenshotName,
+        bytes: progressiveScreenshot.byteLength,
+        sha256: sha256(progressiveScreenshot),
+      },
+    };
+    if (!targetRequestSawCoarseReady) {
+      throw new Error(`${definition.id} requested target geometry before the coarse frame.`);
+    }
+    releaseTarget();
+    await progressivePage.locator("#status[data-state='ready']").waitFor({ timeout: 15_000 });
+    Object.assign(observed.progressive, {
+      targetPromoted: await progressivePage.evaluate(
+        () =>
+          document.documentElement.dataset.targetReady === "true" &&
+          document.documentElement.dataset.geometryRepresentation === "target",
+      ),
+      targetStatus: await progressivePage.locator("#status").innerText(),
+      targetTriangles: await progressivePage.locator("#triangle-count").innerText(),
+      targetEdges: await progressivePage.locator("#edge-count").innerText(),
+    });
+    if (!observed.progressive.targetPromoted) {
+      throw new Error(`${definition.id} did not promote coarse bounds to target geometry.`);
+    }
+    await progressivePage.close();
+
     const webGpu = await page.evaluate(async () => {
       const adapter = await navigator.gpu?.requestAdapter();
       return {
@@ -375,6 +475,11 @@ try {
       occtReport: "artifacts/occt/adafruit-pygamer.report.json",
       gltf: "artifacts/phase1/adafruit-pygamer/scene.gltf",
       binary: "artifacts/phase1/adafruit-pygamer/scene.bin",
+      progressiveGltf: "artifacts/phase1/repeated-fasteners-ap242/scene.gltf",
+      progressiveCoarse: "artifacts/phase1/repeated-fasteners-ap242/coarse.bin",
+      progressiveTarget: "artifacts/phase1/repeated-fasteners-ap242/scene.bin",
+      progressivePackageDigest: progressiveCompilerReport.output.packageDigest,
+      progressiveSourceDigest: progressiveCompilerReport.source.sourceDigest,
       packageDigest: compilerReport.output.packageDigest,
       sourceDigest: compilerReport.source.sourceDigest,
     },

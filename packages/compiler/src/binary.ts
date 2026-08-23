@@ -1,10 +1,21 @@
 import type { GltfAccessor, GltfBufferView } from "./types.js";
 
 export class GltfBinaryBuilder {
-  readonly bufferViews: GltfBufferView[] = [];
-  readonly accessors: GltfAccessor[] = [];
+  readonly bufferViews: GltfBufferView[];
+  readonly accessors: GltfAccessor[];
+  readonly #bufferIndex: number;
   readonly #chunks: { readonly offset: number; readonly bytes: Uint8Array }[] = [];
   #byteLength = 0;
+
+  constructor(options: {
+    readonly bufferIndex?: number;
+    readonly bufferViews?: GltfBufferView[];
+    readonly accessors?: GltfAccessor[];
+  } = {}) {
+    this.#bufferIndex = options.bufferIndex ?? 0;
+    this.bufferViews = options.bufferViews ?? [];
+    this.accessors = options.accessors ?? [];
+  }
 
   append(
     bytes: Uint8Array,
@@ -23,7 +34,7 @@ export class GltfBinaryBuilder {
     this.#byteLength += padding;
     const bufferView = this.bufferViews.length;
     this.bufferViews.push({
-      buffer: 0,
+      buffer: this.#bufferIndex,
       byteOffset: this.#byteLength,
       byteLength: bytes.byteLength,
       ...(options.target === undefined ? {} : { target: options.target }),

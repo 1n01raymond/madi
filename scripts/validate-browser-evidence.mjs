@@ -18,6 +18,17 @@ const compilerReport = JSON.parse(
     "utf8",
   ),
 );
+const progressiveCompilerReport = JSON.parse(
+  await readFile(
+    fileURLToPath(
+      new URL(
+        "../artifacts/phase1/repeated-fasteners-ap242/build-report.json",
+        import.meta.url,
+      ),
+    ),
+    "utf8",
+  ),
+);
 const fixtureManifest = JSON.parse(
   await readFile(
     fileURLToPath(new URL("../fixtures/step/manifest.json", import.meta.url)),
@@ -45,6 +56,12 @@ assert(Array.isArray(evidence.results) && evidence.results.length === 2, "Expect
 assert(
   evidence.source.packageDigest === compilerReport.output.packageDigest,
   "Browser evidence and compiled glTF evidence must reference the same package digest.",
+);
+assert(
+  evidence.source.progressivePackageDigest ===
+    progressiveCompilerReport.output.packageDigest &&
+    evidence.source.progressiveSourceDigest === progressiveCompilerReport.source.sourceDigest,
+  "Browser progressive evidence and direct AP242 package identity differ.",
 );
 assert(
   fixture?.license === "MIT" && fixture.provenanceType === "upstream",
@@ -115,6 +132,58 @@ for (const [resultIndex, result] of evidence.results.entries()) {
   assert(
     createHash("sha256").update(screenshotBytes).digest("hex") === result.screenshot.sha256,
     `${label} screenshot digest changed.`,
+  );
+
+  const progressive = result.observed?.progressive;
+  assert(progressive?.coarseVisibleBeforeTarget === true, `${label} missed the coarse frame.`);
+  assert(
+    progressive?.targetRequestSawCoarseReady === true,
+    `${label} requested target geometry before coarse readiness.`,
+  );
+  assert(progressive?.targetPromoted === true, `${label} did not promote target geometry.`);
+  assert(
+    progressive?.coarseTriangles === "36" && progressive?.coarseEdges === "36",
+    `${label} coarse geometry counts changed.`,
+  );
+  assert(
+    progressive?.targetTriangles === "2,076" && progressive?.targetEdges === "181",
+    `${label} target geometry counts changed.`,
+  );
+  const coarseScreenshotPath = progressive?.coarseScreenshot?.path;
+  assertNonEmptyString(coarseScreenshotPath, `${label}.progressive.coarseScreenshot.path`);
+  assert(!isAbsolute(coarseScreenshotPath), `${label} coarse screenshot path must be relative.`);
+  assert(extname(coarseScreenshotPath).toLowerCase() === ".png", `${label} coarse screenshot must be PNG.`);
+  const coarseScreenshot = resolve(evidenceDirectory, coarseScreenshotPath);
+  const coarseFromRoot = relative(evidenceDirectory, coarseScreenshot);
+  assert(
+    coarseFromRoot !== "" &&
+      coarseFromRoot !== ".." &&
+      !coarseFromRoot.startsWith(`..${sep}`) &&
+      !isAbsolute(coarseFromRoot),
+    `${label} coarse screenshot path escapes the evidence directory.`,
+  );
+  const realCoarseScreenshot = await realpath(coarseScreenshot);
+  const realCoarseFromRoot = relative(realEvidenceDirectory, realCoarseScreenshot);
+  assert(
+    realCoarseFromRoot !== "" &&
+      realCoarseFromRoot !== ".." &&
+      !realCoarseFromRoot.startsWith(`..${sep}`) &&
+      !isAbsolute(realCoarseFromRoot),
+    `${label} coarse screenshot resolves outside the evidence directory.`,
+  );
+  const coarseScreenshotBytes = await readFile(realCoarseScreenshot);
+  assert(
+    coarseScreenshotBytes.byteLength === progressive.coarseScreenshot.bytes,
+    `${label} coarse screenshot size changed.`,
+  );
+  assert(
+    coarseScreenshotBytes.subarray(0, 8).equals(Buffer.from("89504e470d0a1a0a", "hex")),
+    `${label} coarse screenshot has an invalid PNG signature.`,
+  );
+  assert(
+    createHash("sha256").update(coarseScreenshotBytes).digest("hex") ===
+      progressive.coarseScreenshot.sha256,
+    `${label} coarse screenshot digest changed.`,
   );
 }
 
