@@ -942,5 +942,6 @@ export function compileSceneToGltf(
     binary,
     ...(coarseBinary ? { coarseBinary } : {}),
     report,
+    sceneValidation: validation,
   };
 }

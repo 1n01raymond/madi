@@ -1,3 +1,5 @@
+import type { ValidationResult } from "@madi/scene-ir";
+
 export const experimentalGltfProfile = "madi.experimental.gltf.1";
 export const compilerEvidenceSchema = "madi.phase1.compiler-report.1";
 
@@ -142,6 +144,11 @@ export interface CompiledGltfPackage {
   readonly binary: Uint8Array;
   readonly coarseBinary?: Uint8Array;
   readonly report: CompilerBuildReport;
+  /**
+   * The Scene IR validation the compiler already ran on its input. Exposed so
+   * callers can report on it without validating the scene a second time.
+   */
+  readonly sceneValidation: ValidationResult;
 }
 
 export interface CompileGltfOptions {

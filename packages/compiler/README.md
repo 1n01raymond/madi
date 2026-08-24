@@ -88,12 +88,16 @@ geometry file, and reports a SHA-256 for each half. The compiler verifies both
 digests and then resolves the references into typed-array views without copying
 the coordinate data.
 
-This keeps the structure document far below the JavaScript maximum string
-length that a real-large federation otherwise exceeds, and it removes the
-decimal round-trip for every coordinate. The observable `EngineeringScene`
-contract is unchanged, so the split exists only between the adapter and the
-compiler. `--retain-scene-ir` therefore writes both `scene-ir.json` and
-`scene-ir-geometry.bin`; the JSON alone is not a loadable scene.
+This removes the decimal round-trip for every coordinate, and the compiler
+never holds the structure document as one string either: a record-streaming
+reader (`src/ifc-structure-stream.ts`) walks the file in bounded chunks and
+parses one record at a time, so a structure above the JavaScript maximum
+string length (a real-large federation reaches 632 MB against the 536,870,888
+code-unit ceiling) compiles the same way a small one does. The observable
+`EngineeringScene` contract is unchanged, so the split exists only between the
+adapter and the compiler. `--retain-scene-ir` therefore writes both
+`scene-ir.json` and `scene-ir-geometry.bin`; the JSON alone is not a loadable
+scene.
 
 ## Current limits
 
@@ -107,10 +111,10 @@ compiler. `--retain-scene-ir` therefore writes both `scene-ir.json` and
   identity transform and reported as `IFC_DEGENERATE_PLACEMENT`; the adapter
   never hands the compiler a non-finite matrix
   (`native/adapter-ifc/README.md`).
-- The split transport moves geometry out of the structure document but still
-  parses that document as one JSON string, and it requires a little-endian
-  host. Streaming the structure and encoding flattened properties as binary
-  streams remain follow-up work.
+- The split transport requires a little-endian host. The structure document
+  streams record by record, but the hydrated scene, including every flattened
+  property value, stays resident during compilation; encoding flattened
+  properties as an indexed binary form remains follow-up work.
 - The first coarse representation is a per-prototype AABB, not a
   shape-preserving LOD. IFC target ranges are coalesced with a static initial
   priority; spatial partitioning, compression, and view reprioritization are
