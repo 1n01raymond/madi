@@ -30,6 +30,67 @@
 > 이 문서는 영문 [`README.md`](README.md)의 번역본입니다. 내용이 다를 경우
 > 영문 문서를 기준으로 하며, 용어와 문장에 대한 번역 검토를 환영합니다.
 
+## 지금 브라우저에서 실제로 동작하는 것
+
+아래 내용은 목업이나 로드맵 항목이 아닙니다. 모든 수치는 CI가 재검증하는
+커밋된 증거 기록으로 연결되며, 스크린샷은 그 기록이 다이제스트로 고정한
+캡처 그대로입니다.
+
+<table>
+  <tr>
+    <td width="50%" valign="top">
+      <a href="artifacts/browser-matrix/README.md">
+        <img src="artifacts/browser-matrix/chrome-151-windows-selected.png" alt="Chrome에서 NARU WebGPU 런타임으로 렌더링·picking한 Adafruit PyGamer STEP 어셈블리" />
+      </a>
+      <br />
+      <sub><strong>실제 STEP 어셈블리, 끝까지.</strong> Adafruit PyGamer
+      보드: 34개 mesh를 공유하는 85개 part occurrence, 162,838개 고유
+      triangle, 13,897개 명시적 CAD edge segment, 원본 참조가 유지되는
+      조이스틱 picking — Chrome과 Firefox에서 동일하게 동작합니다.
+      <a href="artifacts/browser-matrix/README.md">브라우저 증거</a></sub>
+    </td>
+    <td width="50%" valign="top">
+      <a href="artifacts/ifc/sixty5-browser/README.md">
+        <img src="artifacts/ifc/sixty5-browser/picked.png" alt="고정 residency 예산 아래 렌더링된 7개 분야 sixty5 IFC federation과 IFC 속성을 resolve한 선택 요소" />
+      </a>
+      <br />
+      <sub><strong>실물 대형 IFC federation.</strong> 839.9 MB 7개 분야
+      <code>sixty5</code> 모델: 3.3초 만에 계층과 검색 준비, 렌더링 가능한
+      78,173개 occurrence 전체 표시, 고정 64 MiB 예산 안에 유지되는
+      geometry, 그리고 선택된 기초 보가 자신의 IFC 속성을 resolve합니다.
+      <a href="artifacts/ifc/sixty5-browser/README.md">residency 증거</a></sub>
+    </td>
+  </tr>
+</table>
+
+<sub>PyGamer CAD의 저작권은 Adafruit Industries에 있으며, 고정된 upstream
+commit과 고지를 보존해 수정 없이 MIT로 재배포합니다. Adafruit가 NARU를
+보증한다는 의미는 아닙니다. 두 캡처는 NARU 개명 이전에 기록되어 프로젝트의
+이전 이름이 보입니다.</sub>
+
+## 이 증거가 당신의 모델에 의미하는 것
+
+| 얻는 것 | 측정된 근거 |
+|---|---|
+| 반복 부품은 중복 없이 한 번만 저장·업로드됩니다 | 85개 occurrence가 34개 mesh를 공유 ([브라우저 matrix](artifacts/browser-matrix/README.md)) |
+| CAD 경계는 삼각형에서 추측하지 않고 원본 edge에서 그립니다 | 13,897개 명시적 edge segment가 브라우저까지 유지 ([브라우저 matrix](artifacts/browser-matrix/README.md)) |
+| 트리·검색·속성은 geometry가 도착하기 전에 동작합니다 | 839.9 MB federation에서 188,319개 레코드 계층이 3.3초 만에 준비 ([sixty5 브라우저 기록](artifacts/ifc/sixty5-browser/README.md)) |
+| 상세 형상은 일반 HTTP 위에서 점진적으로 스트리밍됩니다 | 28건의 `scene.bin` 요청이 전부 HTTP 206 `bytes=` Range 응답 ([sixty5 브라우저 기록](artifacts/ifc/sixty5-browser/README.md)) |
+| 장면 크기와 무관하게 메모리는 선언된 예산 안에 머뭅니다 | promotion이 234개 중 26번째 chunk에서 정지, 디코드·GPU 바이트 모두 64 MiB 미만 유지 ([sixty5 브라우저 기록](artifacts/ifc/sixty5-browser/README.md)) |
+| 선택은 원본 CAD/BIM 식별자로 이어집니다 | 선택된 기초 보가 6개 IFC 속성 항목을 지연 resolve ([sixty5 브라우저 기록](artifacts/ifc/sixty5-browser/README.md)) |
+| 컴파일은 바이트 단위로 재현 가능합니다 | 두 번의 전체 sixty5 컴파일이 바이트 동일 패키지 생성 ([컴파일 증거](artifacts/ifc/sixty5/README.md)) |
+| **아직 아닌 것:** 실물 대형 규모의 빠른 첫 프레임 | sixty5 첫 coarse frame이 268.0초 — 다음 단계가 넘어야 할 경계로 의도적으로 기록 ([기록된 경계](artifacts/ifc/sixty5-browser/README.md)) |
+
+## 어디서 시작할까요
+
+| 하고 싶은 것 | 시작점 |
+|---|---|
+| 모델이 동작하는 것을 보기 | `pnpm install && pnpm dev`가 PyGamer 어셈블리가 로드된 Studio를 엽니다 ([Studio 안내](apps/webgpu-spike/README.md)); 호스팅된 공개 데모는 Phase 1 목표입니다 ([로드맵](docs/ROADMAP.md)) |
+| 뷰어를 내 앱에 임베드하기 | [Runtime 패키지](packages/runtime-webgpu/README.md) — 컴파일된 glTF 로더와 직접 WebGPU 렌더러 |
+| 내 STEP·IFC 컴파일하기 | [Compiler 패키지](packages/compiler/README.md)와 아래 [컴파일러 증거](#현재-컴파일러-증거) |
+| 아키텍처 이해하기 | 읽기 순서대로 정리된 [설계 문서](docs/README.md) |
+| 기여하거나 결정에 이의 제기하기 | [CONTRIBUTING.md](CONTRIBUTING.md)와 [ADR 색인](docs/adr/README.md) |
+
 ## 엔지니어링 모델에도 열린 웹 플랫폼이 필요합니다
 
 엔지니어링 팀은 이미 SolidWorks, CATIA, NX, Creo, Fusion, Onshape, Revit을
@@ -116,18 +177,6 @@ Engineering Scene IR은 새로운 교환 포맷이 아니라 논리적인 시스
 [벤치마크 계약](docs/BENCHMARKS.md)을 확인하세요. 성능 수치는 재배포 가능한
 모델, 정확한 하드웨어·브라우저 정보, cold/warm 상태, 재현 명령과 함께
 공개합니다.
-
-## 현재 런타임 증거
-
-![NARU WebGPU에서 직접 렌더링한 Adafruit PyGamer STEP 어셈블리](artifacts/browser-matrix/chrome-151-windows-selected.png)
-
-대표 데모는 이제 합성 마스코트 대신 실제 Adafruit PyGamer 전자기기
-어셈블리를 사용합니다. 34개 공유 mesh, 85개 part occurrence, 162,838개 고유
-triangle, 13,897개 명시적 CAD edge, Worker 디코딩, 원본 참조가 유지되는
-조이스틱 picking을 Chrome과 Firefox에서 검증했습니다. 수정하지 않은 CAD는
-고정된 upstream commit과 라이선스 고지를 보존해 MIT로 재배포하며, Adafruit가
-NARU를 보증한다는 의미는 아닙니다. [검토된 브라우저 증거](artifacts/browser-matrix/README.md)를
-확인하세요.
 
 ## 현재 컴파일러 증거
 

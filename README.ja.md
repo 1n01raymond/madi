@@ -30,6 +30,67 @@
 > この文書は英語版 [`README.md`](README.md) の翻訳です。内容に差異がある
 > 場合は英語版を正とします。用語や表現のレビューを歓迎します。
 
+## いま実際にブラウザで動くもの
+
+以下はモックアップでもロードマップ項目でもありません。すべての数値はCIが
+再検証するコミット済みの証拠記録につながっており、スクリーンショットは
+その記録がダイジェストで固定したキャプチャそのものです。
+
+<table>
+  <tr>
+    <td width="50%" valign="top">
+      <a href="artifacts/browser-matrix/README.md">
+        <img src="artifacts/browser-matrix/chrome-151-windows-selected.png" alt="ChromeでNARU WebGPUランタイムにより描画・pickingされたAdafruit PyGamer STEPアセンブリ" />
+      </a>
+      <br />
+      <sub><strong>実在するSTEPアセンブリを、最後まで。</strong> Adafruit
+      PyGamerボード:34個のmeshを共有する85個のpart occurrence、162,838個の
+      固有triangle、13,897個の明示的CAD edge segment、ソース参照を保持した
+      joystick picking — ChromeとFirefoxで同一の挙動です。
+      <a href="artifacts/browser-matrix/README.md">ブラウザ証拠</a></sub>
+    </td>
+    <td width="50%" valign="top">
+      <a href="artifacts/ifc/sixty5-browser/README.md">
+        <img src="artifacts/ifc/sixty5-browser/picked.png" alt="固定residency予算の下で描画された7分野sixty5 IFC federationと、IFCプロパティをresolveした選択要素" />
+      </a>
+      <br />
+      <sub><strong>実物大のIFC federation。</strong> 839.9 MB・7分野の
+      <code>sixty5</code>モデル:3.3秒で階層と検索が準備完了、描画可能な
+      78,173個のoccurrenceをすべて表示、geometryは固定64 MiB予算内に維持、
+      選択した基礎梁が自身のIFCプロパティをresolveします。
+      <a href="artifacts/ifc/sixty5-browser/README.md">residency証拠</a></sub>
+    </td>
+  </tr>
+</table>
+
+<sub>PyGamerのCADの著作権はAdafruit Industriesにあり、固定upstream commitと
+通知を保持して未変更のままMITで再配布しています。AdafruitによるNARUの推奨を
+意味しません。両キャプチャはNARU改名前の記録であり、プロジェクトの旧名称が
+表示されています。</sub>
+
+## この証拠があなたのモデルに意味すること
+
+| 得られるもの | 測定された根拠 |
+|---|---|
+| 繰り返し部品は重複せず一度だけ保存・アップロードされます | 85個のoccurrenceが34個のmeshを共有 ([ブラウザmatrix](artifacts/browser-matrix/README.md)) |
+| CAD境界は三角形から推測せず、ソースのedgeから描画します | 13,897個の明示的edge segmentがブラウザまで維持 ([ブラウザmatrix](artifacts/browser-matrix/README.md)) |
+| ツリー・検索・プロパティはgeometryの到着前に動作します | 839.9 MBのfederationで188,319レコードの階層が3.3秒で準備完了 ([sixty5ブラウザ記録](artifacts/ifc/sixty5-browser/README.md)) |
+| 詳細形状はプレーンなHTTP上で漸進的にストリーミングされます | 28件の`scene.bin`リクエストがすべてHTTP 206 `bytes=` Range応答 ([sixty5ブラウザ記録](artifacts/ifc/sixty5-browser/README.md)) |
+| シーン規模によらずメモリは宣言された予算内に収まります | promotionは234個中26番目のchunkで停止、デコード・GPUバイトとも64 MiB未満を維持 ([sixty5ブラウザ記録](artifacts/ifc/sixty5-browser/README.md)) |
+| 選択はソースCAD/BIM識別子へ解決されます | 選択した基礎梁が6件のIFCプロパティ項目を遅延resolve ([sixty5ブラウザ記録](artifacts/ifc/sixty5-browser/README.md)) |
+| コンパイルはバイト単位で再現可能です | 2回の完全なsixty5コンパイルがバイト同一のパッケージを生成 ([コンパイル証拠](artifacts/ifc/sixty5/README.md)) |
+| **まだ達成していないこと:** 実物大スケールでの高速な初回フレーム | sixty5の初回coarse frameは268.0秒 — 次フェーズが超えるべき境界として意図的に記録 ([記録された境界](artifacts/ifc/sixty5-browser/README.md)) |
+
+## どこから始めるか
+
+| やりたいこと | 開始地点 |
+|---|---|
+| モデルが動くところを見る | `pnpm install && pnpm dev`でPyGamerアセンブリが読み込まれたStudioが開きます ([Studioガイド](apps/webgpu-spike/README.md));ホスティングされた公開デモはPhase 1の目標です ([ロードマップ](docs/ROADMAP.md)) |
+| ビューアを自分のアプリに組み込む | [Runtimeパッケージ](packages/runtime-webgpu/README.md) — コンパイル済みglTFローダーと直接WebGPUレンダラー |
+| 自分のSTEP・IFCをコンパイルする | [Compilerパッケージ](packages/compiler/README.md)と下記の[コンパイラ検証](#現在のコンパイラ検証) |
+| アーキテクチャを理解する | 読む順序で整理された[設計文書](docs/README.md) |
+| コントリビュートする・決定に異議を唱える | [CONTRIBUTING.md](CONTRIBUTING.md)と[ADR索引](docs/adr/README.md) |
+
 ## エンジニアリングモデルにも、オープンなWebプラットフォームを
 
 エンジニアリングチームは、SolidWorks、CATIA、NX、Creo、Fusion、
@@ -116,18 +177,6 @@ Engineering Scene IRは新しい交換形式ではなく、論理的なシステ
 [ベンチマーク仕様](docs/BENCHMARKS.md)をご覧ください。性能値は再配布可能な
 モデル、正確なハードウェア・ブラウザ情報、cold/warm状態、再現コマンドと
 ともに公開します。
-
-## 現在のランタイム検証
-
-![NARU WebGPUで直接描画したAdafruit PyGamer STEPアセンブリ](artifacts/browser-matrix/chrome-151-windows-selected.png)
-
-標準デモは合成マスコットではなく、実在するAdafruit PyGamer電子機器
-アセンブリを使用します。34個の共有mesh、85個のpart occurrence、162,838
-個の固有triangle、13,897個の明示的CAD edge、Worker decode、ソース参照を
-保持したjoystick pickingをChromeとFirefoxで検証しました。未変更のCADは
-固定upstream commitと通知を保持してMITで再配布しており、Adafruitによる
-NARUの推奨を意味しません。[検証済みブラウザ証拠](artifacts/browser-matrix/README.md)を
-参照してください。
 
 ## 現在のコンパイラ検証
 
