@@ -58,7 +58,7 @@ references into typed-array views without copying.
 | Hydration contract | Stream bounds, encodings, element alignment, unaligned buffers, and unencodable members are unit-checked | Passed in `packages/compiler/test/ifc-scene.test.ts` |
 | Real-large extraction | The seven-document IFC2X3 sixty5 federation extracts 192,316 semantic entities, 78,173 geometric occurrences, 42,435 prototypes, and 4,866,386 unique triangles from 40,310,966 submitted | Passed, recorded in `artifacts/ifc/sixty5/` |
 | Structure streaming | The compiler parses the structure document record by record in bounded chunks instead of one string, and reproduces the Digital Hub package digest byte for byte | Passed in `packages/compiler/test/ifc-structure-stream.test.ts` and the recompiled `artifacts/ifc/digital-hub/` record |
-| Real-large compile | Its 631,943,761-byte structure exceeds the 536,870,888-byte maximum string length; the streaming reader removes that ceiling, but the compiled sixty5 package is not yet recorded | Evidence pending |
+| Real-large compile | Its 631,943,761-byte structure exceeds the 536,870,888-byte maximum string length; the streaming reader compiles it into a Khronos-clean (0 errors / 0 warnings) 608.2 MB package — 78,173 renderable occurrences, 4,866,386 unique triangles — byte-identical across two full runs, peaking at ≈3.8 GB compiler RSS inside the default V8 heap | Passed, recorded in `artifacts/ifc/sixty5/` |
 
 Splitting geometry out was necessary but not sufficient: the remaining bulk is
 4,503,078 flattened property values and 188,319 occurrence records. The
@@ -110,8 +110,9 @@ See `artifacts/phase1/README.md` for the compiled package,
   residency budget. The current selection path can only restore retained coarse
   fallback batches.
 - Full material, mass, PMI, and domain-specific property schemas remain pending.
-- A compiled package, Khronos validation, or browser result for the qualified
-  real-large sixty5 federation. Only its adapter-side extraction is recorded.
+- A browser, residency, or benchmark result for the compiled real-large sixty5
+  federation. Its 608.2 MB package now exists with Khronos validation, but no
+  runtime has consumed it.
 - A repeated reference-hardware and integrated-GPU decision matrix for ADR-0003.
 - Large-coordinate precision behavior required by ADR-0005.
 - A public end-to-end review workflow and reproducible performance report.
@@ -131,11 +132,12 @@ and GPU admission caps. A selected target now pins its detail and evicts colder
 target groups to their retained coarse fallbacks. The next scheduler increment
 is persistent cache tiers and camera/view reprioritization.
 
-On the compiler side the structure document now streams record by record, so a
-real-large federation no longer has to be resident as one JSON string. The
-next increment is the sixty5 end-to-end compile evidence (package digest,
-Khronos validation, peak memory) that retires the "Evidence pending" row above;
-the sixty5 measurement in `artifacts/ifc/sixty5/` is the gate it has to clear.
+On the compiler side the structure document now streams record by record, and
+the sixty5 end-to-end compile evidence (package digest, Khronos validation,
+determinism, peak memory) is recorded in `artifacts/ifc/sixty5/`. The next
+compiler increment is shrinking the structure itself — the 4,503,078 flattened
+property values dominate the resident scene — and the next evidence gate is a
+browser result for that compiled real-large package.
 
 In parallel, the repeated 100k record now carries GPU pass timestamps and a
 backend-owned retained-resource census on the discrete host: the MADI surface

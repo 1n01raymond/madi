@@ -114,7 +114,12 @@ scene.
 - The split transport requires a little-endian host. The structure document
   streams record by record, but the hydrated scene, including every flattened
   property value, stays resident during compilation; encoding flattened
-  properties as an indexed binary form remains follow-up work.
+  properties as an indexed binary form remains follow-up work. The largest
+  recorded compile — the sixty5 federation's 631.9 MB structure with 4,503,078
+  property values (`artifacts/ifc/sixty5/`) — peaked at 4,043,804,672 bytes
+  (≈3.8 GB) compiler working set inside the default 64-bit Node 22 heap, with
+  no `--max-old-space-size` override; expect peak memory to scale with
+  occurrence and property counts, not with geometry bytes.
 - The first coarse representation is a per-prototype AABB, not a
   shape-preserving LOD. IFC target ranges are coalesced with a static initial
   priority; spatial partitioning, compression, and view reprioritization are

@@ -10,6 +10,7 @@ const artifactDirectory = resolve(
   repositoryRoot,
   process.argv[3] ?? "artifacts/ifc/digital-hub",
 );
+const datasetId = process.argv[4] ?? "ifc-bench-digital-hub";
 
 function assert(condition, message) {
   if (!condition) throw new TypeError(message);
@@ -18,6 +19,12 @@ function assert(condition, message) {
 function sha256(bytes) {
   return createHash("sha256").update(bytes).digest("hex");
 }
+
+const manifest = JSON.parse(
+  await readFile(resolve(repositoryRoot, "fixtures/external/manifest.json"), "utf8"),
+);
+const dataset = manifest.datasets.find(({ id }) => id === datasetId);
+assert(dataset, `Unknown external fixture dataset ${datasetId}.`);
 
 const [gltfBytes, binary, coarseBinary, adapterReportBytes, buildReportBytes] =
   await Promise.all([
@@ -29,6 +36,12 @@ const [gltfBytes, binary, coarseBinary, adapterReportBytes, buildReportBytes] =
   ]);
 const adapterReport = JSON.parse(adapterReportBytes.toString("utf8"));
 const buildReport = JSON.parse(buildReportBytes.toString("utf8"));
+for (const source of adapterReport.sources) {
+  assert(
+    dataset.assets.some(({ sha256: digest }) => digest === source.sha256),
+    `Adapter source ${source.discipline} is not an asset of ${datasetId}.`,
+  );
+}
 const resources = new Map(
   buildReport.output.resources.map((resource) => [resource.path, resource]),
 );
@@ -78,8 +91,8 @@ const issueCodes = Object.entries(
 const evidence = {
   schemaVersion: "madi.ifc-federation-evidence.1",
   dataset: {
-    id: "ifc-bench-digital-hub",
-    revision: "4b37e5d77f12f30dfd7cb7375e15278e1037c808",
+    id: dataset.id,
+    revision: dataset.source.revision,
     sourceDigest: adapterReport.federation.sourceDigest,
   },
   reports: {

@@ -23,6 +23,7 @@
     "fixtures:external:check": "node scripts/validate-external-fixture-manifest.mjs",
     "ifc:federation:check": "node scripts/validate-ifc-federation-evidence.mjs",
     "ifc:federation:evidence": "node scripts/record-ifc-federation-evidence.mjs",
+    "ifc:federation:evidence:sixty5": "node scripts/record-ifc-federation-evidence.mjs output/ifc/sixty5 artifacts/ifc/sixty5 ifc-bench-sixty5",
     "lint": "eslint .",
     "madi": "pnpm --filter @madi/compiler... run build && node packages/compiler/dist/cli.js",
     "native:check": "node scripts/check-native-tools.mjs",

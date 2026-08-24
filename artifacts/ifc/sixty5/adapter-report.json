@@ -1237,5 +1237,10 @@
       "sha256": "c78f6ad085961500f0890bbffda9e171c1342c5865ca152f64098dd4da644cca",
       "unitScaleToMeters": 0.001
     }
-  ]
+  ],
+  "sceneIrValidation": {
+    "ok": true,
+    "errorCount": 0,
+    "warningCount": 0
+  }
 }
