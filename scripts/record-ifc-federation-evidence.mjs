@@ -26,14 +26,23 @@ const manifest = JSON.parse(
 const dataset = manifest.datasets.find(({ id }) => id === datasetId);
 assert(dataset, `Unknown external fixture dataset ${datasetId}.`);
 
-const [gltfBytes, binary, coarseBinary, adapterReportBytes, buildReportBytes] =
-  await Promise.all([
-    readFile(resolve(inputDirectory, "scene.gltf")),
-    readFile(resolve(inputDirectory, "scene.bin")),
-    readFile(resolve(inputDirectory, "coarse.bin")),
-    readFile(resolve(inputDirectory, "adapter-report.json")),
-    readFile(resolve(inputDirectory, "build-report.json")),
-  ]);
+const [
+  gltfBytes,
+  binary,
+  coarseBinary,
+  propertiesJsonBytes,
+  propertiesBinary,
+  adapterReportBytes,
+  buildReportBytes,
+] = await Promise.all([
+  readFile(resolve(inputDirectory, "scene.gltf")),
+  readFile(resolve(inputDirectory, "scene.bin")),
+  readFile(resolve(inputDirectory, "coarse.bin")),
+  readFile(resolve(inputDirectory, "properties.json")),
+  readFile(resolve(inputDirectory, "properties.bin")),
+  readFile(resolve(inputDirectory, "adapter-report.json")),
+  readFile(resolve(inputDirectory, "build-report.json")),
+]);
 const adapterReport = JSON.parse(adapterReportBytes.toString("utf8"));
 const buildReport = JSON.parse(buildReportBytes.toString("utf8"));
 for (const source of adapterReport.sources) {
@@ -49,6 +58,8 @@ const resourceBytes = new Map([
   ["scene.gltf", gltfBytes],
   ["scene.bin", binary],
   ["coarse.bin", coarseBinary],
+  ["properties.json", propertiesJsonBytes],
+  ["properties.bin", propertiesBinary],
 ]);
 
 for (const [resourcePath, bytes] of resourceBytes) {
@@ -62,6 +73,8 @@ const packageHash = createHash("sha256")
   .update(gltfBytes)
   .update(binary)
   .update(coarseBinary)
+  .update(propertiesJsonBytes)
+  .update(propertiesBinary)
   .digest("hex");
 assert(packageHash === buildReport.output.packageDigest, "Package digest changed.");
 

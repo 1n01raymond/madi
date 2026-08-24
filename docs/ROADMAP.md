@@ -69,13 +69,17 @@ and key combinations at scene level shrank the structure to 419.5 MB — back
 under one string, with the boundary crossing preserved in history — and
 moving the property values into a deduplicated binary column file shrank it
 further to 345.5 MB, with the compiler verifying the columns without ever
-materializing a value.
+materializing a value. The compiled package republishes those properties as a
+`madi.package-properties.1` sidecar (`properties.json` + the column file byte
+for byte), so viewers resolve a picked occurrence's property sets without any
+Scene IR intermediate; the Studio does exactly that, lazily per selection.
 sixty5 compiles end to end into a recorded, Khronos-validated 608.2 MB
 package. Headed Chrome now consumes that package: all 78,173 renderable
 occurrences render, the fixed 64 MiB residency budgets hold with 26 of 234
-target chunks promoted, and picking resolves — while the recorded 270.2 s
-first coarse frame states the real-large first-frame boundary that Phase 2
-scheduling work must beat (`artifacts/ifc/sixty5-browser/`).
+target chunks promoted, and picking resolves the selected occurrence's lazily
+fetched property sets — while the recorded 268.0 s first coarse frame states
+the real-large first-frame boundary that Phase 2 scheduling work must beat
+(`artifacts/ifc/sixty5-browser/`).
 
 - local STEP AP242 input;
 - XDE hierarchy, names, colors, units, transforms;
@@ -91,8 +95,10 @@ Current evidence: the browser reads the compiled glTF hierarchy first, decodes
 and preserves source-aware object picking in headed Chrome and Firefox. Orbit,
 pan, zoom, fit, synchronized selection, hide/isolate, and one section plane are
 implemented. Hierarchy/source-identity search and occurrence properties are
-also available. The Studio opens shareable HTTP(S) scene URLs and validated
-local `.gltf` packages with all declared `.bin` resources without uploading
+also available, including lazily resolved IFC property sets from the package
+sidecar (search over property values is a deliberate Phase 1 exclusion). The
+Studio opens shareable HTTP(S) scene URLs and validated local `.gltf`
+packages with all declared `.bin` and `.json` resources without uploading
 them. A delayed-network browser record proves a coarse WebGPU frame before the
 target request completes and a mixed coarse/target frame after one prototype
 range. User/scene replacement cancellation now stops an active range and its

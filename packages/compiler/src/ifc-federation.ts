@@ -300,6 +300,10 @@ export async function compileIfcFederation(
       generator: "MADI compiler 0.0.0 / IfcOpenShell federation slice",
       targetChunkByteBudget:
         options.targetChunkByteBudget ?? defaultIfcTargetChunkByteBudget,
+      // The package carries the adapter's value column file byte-verbatim as
+      // a lazy property sidecar; the compiler still never materializes a
+      // property value.
+      propertyColumns: properties,
     });
     const validation = validateCompiledGltf(
       compiled.document,

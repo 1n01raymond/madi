@@ -1,12 +1,18 @@
 import { createHash } from "node:crypto";
 
-import { validateScene } from "@madi/scene-ir";
+import {
+  isColumnPropertyBag,
+  packagePropertiesSchema,
+  validateScene,
+} from "@madi/scene-ir";
 import type {
+  ColumnPropertyBag,
   EngineeringScene,
   Material,
   MaterialId,
   Matrix4d,
   Occurrence,
+  PackagePropertiesDocument,
   Prototype,
   Representation,
 } from "@madi/scene-ir";
@@ -453,6 +459,95 @@ function appendCoarseBounds(
   };
 }
 
+interface PropertySidecar {
+  readonly json: string;
+  readonly jsonBytes: Uint8Array;
+  readonly jsonDigest: string;
+  readonly binary: Uint8Array;
+  readonly binaryDigest: string;
+}
+
+function codeUnitCompare(left: string, right: string): number {
+  return left < right ? -1 : left > right ? 1 : 0;
+}
+
+/**
+ * Builds the compiled-package property sidecar
+ * (`madi.package-properties.1`): a compact-JSON document holding the scene's
+ * property key/key-set index and a columnar table of every column-bag
+ * semantic, next to the adapter's `madi.property-columns.1` file carried
+ * byte-verbatim. Values are never materialized — only the u32 stream bounds
+ * are checked against the provided file.
+ */
+function buildPropertySidecar(
+  scene: EngineeringScene,
+  columns: Uint8Array,
+  columnsUri: string,
+): PropertySidecar {
+  const propertyValues = scene.propertyValues;
+  const propertyIndex = scene.propertyIndex;
+  if (propertyValues === undefined || propertyIndex === undefined) {
+    throw new TypeError(
+      "Property columns were provided, but the scene declares no property value columns.",
+    );
+  }
+  for (const stream of [
+    propertyValues.rows,
+    propertyValues.rowOffsets,
+    propertyValues.valueOffsets,
+    propertyValues.valueHeap,
+  ]) {
+    if (stream.byteOffset + stream.byteLength > columns.byteLength) {
+      throw new RangeError("Property column stream exceeds the provided column file.");
+    }
+  }
+  const semantics = scene.semantics
+    .filter((semantic) => isColumnPropertyBag(semantic.properties))
+    .sort((left, right) => codeUnitCompare(left.id, right.id));
+  const schemas = [
+    ...new Set(
+      semantics
+        .map(({ properties }) => (properties as ColumnPropertyBag).schema)
+        .filter((schema): schema is string => schema !== undefined),
+    ),
+  ].sort(codeUnitCompare);
+  const schemaIndexes = new Map(schemas.map((schema, index) => [schema, index]));
+  const document: PackagePropertiesDocument = {
+    schemaVersion: packagePropertiesSchema,
+    status: "experimental-not-interchange",
+    sceneId: scene.sceneId,
+    revisionId: scene.revision.id,
+    sourceDigest: scene.revision.sourceDigest,
+    propertyIndex,
+    schemas,
+    semanticIds: semantics.map(({ id }) => id),
+    semanticSchemas: semantics.map(({ properties }) => {
+      const schema = (properties as ColumnPropertyBag).schema;
+      return schema === undefined ? null : (schemaIndexes.get(schema) as number);
+    }),
+    semanticSets: semantics.map(({ properties }) => (properties as ColumnPropertyBag).set),
+    semanticRows: semantics.map(({ properties }) => (properties as ColumnPropertyBag).row),
+    columns: {
+      uri: columnsUri,
+      byteLength: columns.byteLength,
+      sha256: sha256(columns),
+    },
+    propertyValues,
+  };
+  // Compact on purpose: the semantic table is columnar and real-large
+  // federations reach hundreds of thousands of rows, so pretty-printing
+  // would multiply the document by line-per-number formatting.
+  const json = `${JSON.stringify(document)}\n`;
+  const jsonBytes = new TextEncoder().encode(json);
+  return {
+    json,
+    jsonBytes,
+    jsonDigest: sha256(jsonBytes),
+    binary: columns,
+    binaryDigest: document.columns.sha256,
+  };
+}
+
 export function compileSceneToGltf(
   scene: EngineeringScene,
   options: CompileGltfOptions = {},
@@ -479,6 +574,26 @@ export function compileSceneToGltf(
   const coarseBinaryUri = options.coarseBinaryUri ?? "coarse.bin";
   if (coarseBounds && coarseBinaryUri === binaryUri) {
     throw new TypeError("Target and coarse glTF buffers must use different URIs.");
+  }
+  if (scene.propertyValues !== undefined && options.propertyColumns === undefined) {
+    throw new TypeError(
+      "A scene with property value columns requires options.propertyColumns.",
+    );
+  }
+  const propertiesUri = options.propertiesUri ?? "properties.json";
+  const propertiesBinaryUri = options.propertiesBinaryUri ?? "properties.bin";
+  const propertySidecar = options.propertyColumns
+    ? buildPropertySidecar(scene, options.propertyColumns, propertiesBinaryUri)
+    : undefined;
+  if (propertySidecar) {
+    const uris = new Set([binaryUri, ...(coarseBounds ? [coarseBinaryUri] : []), "scene.gltf"]);
+    if (
+      propertiesUri === propertiesBinaryUri ||
+      uris.has(propertiesUri) ||
+      uris.has(propertiesBinaryUri)
+    ) {
+      throw new TypeError("Property sidecar resources must use distinct URIs.");
+    }
   }
   const generator = options.generator ?? "MADI compiler 0.0.0 / experimental glTF profile 1";
   const scaleToMeters = scene.units.scaleToMeters;
@@ -814,6 +929,16 @@ export function compileSceneToGltf(
               },
             }
           : {}),
+        ...(propertySidecar
+          ? {
+              properties: {
+                schemaVersion: packagePropertiesSchema,
+                uri: propertiesUri,
+                byteLength: propertySidecar.jsonBytes.byteLength,
+                sha256: propertySidecar.jsonDigest,
+              },
+            }
+          : {}),
         documents: [...scene.documents]
           .sort(compareId)
           .map(({ id, displayName, format, formatVersion, sourceDigest }) => ({
@@ -842,6 +967,9 @@ export function compileSceneToGltf(
   const coarseBinaryDigest = coarseBinary ? sha256(coarseBinary) : undefined;
   const packageHash = createHash("sha256").update(json).update(binary);
   if (coarseBinary) packageHash.update(coarseBinary);
+  if (propertySidecar) {
+    packageHash.update(propertySidecar.jsonBytes).update(propertySidecar.binary);
+  }
   const packageDigest = packageHash.digest("hex");
   const diagnosticCounts = { info: 0, warning: 0, error: 0 };
   for (const diagnostic of diagnostics) diagnosticCounts[diagnostic.severity] += 1;
@@ -857,6 +985,7 @@ export function compileSceneToGltf(
     options: {
       binaryUri,
       ...(coarseBinary ? { coarseBinaryUri } : {}),
+      ...(propertySidecar ? { propertiesUri, propertiesBinaryUri } : {}),
       coordinateSystem: "right-handed-y-up-meters",
       geometryEncoding: "gltf-f32",
       ...(coarseBinary ? { progressiveRepresentation: "prototype-aabb-v1" as const } : {}),
@@ -903,6 +1032,22 @@ export function compileSceneToGltf(
               },
             ]
           : []),
+        ...(propertySidecar
+          ? [
+              {
+                path: propertiesUri,
+                mediaType: "application/json",
+                bytes: propertySidecar.jsonBytes.byteLength,
+                sha256: propertySidecar.jsonDigest,
+              },
+              {
+                path: propertiesBinaryUri,
+                mediaType: "application/octet-stream",
+                bytes: propertySidecar.binary.byteLength,
+                sha256: propertySidecar.binaryDigest,
+              },
+            ]
+          : []),
       ],
     },
     counts: {
@@ -941,6 +1086,12 @@ export function compileSceneToGltf(
     json,
     binary,
     ...(coarseBinary ? { coarseBinary } : {}),
+    ...(propertySidecar
+      ? {
+          propertiesJson: propertySidecar.json,
+          propertiesBinary: propertySidecar.binary,
+        }
+      : {}),
     report,
     sceneValidation: validation,
   };

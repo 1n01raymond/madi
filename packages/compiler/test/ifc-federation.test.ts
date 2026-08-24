@@ -3,7 +3,11 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { openPropertyValueColumns, resolvePropertyEntries } from "@madi/scene-ir";
+import {
+  openPropertyValueColumns,
+  parsePackageProperties,
+  resolvePropertyEntries,
+} from "@madi/scene-ir";
 import { describe, expect, it } from "vitest";
 
 import { compileIfcFederation } from "../src/ifc-federation.js";
@@ -212,15 +216,48 @@ await writeFile(option("--report"), JSON.stringify({
         renderableOccurrenceCount: 10,
         triangleCount: 2076,
       });
-      const [gltf, retainedScene, retainedGeometry, retainedProperties, adapterReport] =
-        await Promise.all([
-          readFile(join(outputDirectory, "scene.gltf"), "utf8").then(JSON.parse),
-          readFile(join(outputDirectory, "scene-ir.json"), "utf8").then(JSON.parse),
-          readFile(join(outputDirectory, "scene-ir-geometry.bin")),
-          readFile(join(outputDirectory, "scene-ir-properties.bin")),
-          readFile(join(outputDirectory, "adapter-report.json"), "utf8").then(JSON.parse),
-        ]);
+      const [
+        gltf,
+        retainedScene,
+        retainedGeometry,
+        retainedProperties,
+        adapterReport,
+        packageProperties,
+        packageColumns,
+      ] = await Promise.all([
+        readFile(join(outputDirectory, "scene.gltf"), "utf8").then(JSON.parse),
+        readFile(join(outputDirectory, "scene-ir.json"), "utf8").then(JSON.parse),
+        readFile(join(outputDirectory, "scene-ir-geometry.bin")),
+        readFile(join(outputDirectory, "scene-ir-properties.bin")),
+        readFile(join(outputDirectory, "adapter-report.json"), "utf8").then(JSON.parse),
+        readFile(join(outputDirectory, "properties.json"), "utf8"),
+        readFile(join(outputDirectory, "properties.bin")),
+      ]);
       expect(gltf.asset.generator).toContain("IfcOpenShell federation slice");
+      // The package carries the property sidecar: a pointer in the glTF
+      // extras, the parsed document, and the adapter column file verbatim.
+      expect(gltf.extras.madi.properties).toMatchObject({
+        schemaVersion: "madi.package-properties.1",
+        uri: "properties.json",
+        byteLength: Buffer.byteLength(packageProperties, "utf8"),
+      });
+      expect(packageColumns.equals(retainedProperties)).toBe(true);
+      const sidecar = parsePackageProperties(JSON.parse(packageProperties));
+      const sidecarReader = openPropertyValueColumns(sidecar.propertyValues, packageColumns);
+      const sidecarIndex = sidecar.semanticIds.indexOf(retainedScene.semantics[0].id);
+      expect(sidecarIndex).toBeGreaterThanOrEqual(0);
+      expect(
+        resolvePropertyEntries(
+          {
+            set: sidecar.semanticSets[sidecarIndex] as number,
+            row: sidecar.semanticRows[sidecarIndex] as number,
+          },
+          sidecar.propertyIndex,
+          sidecarReader,
+        ),
+      ).toEqual(
+        JSON.parse(await readFile(sceneTemplatePath, "utf8")).semantics[0].properties.entries,
+      );
       expect(retainedScene.documents[0].format).toBe("IFC");
       expect(adapterReport.sceneIrValidation.ok).toBe(true);
       // The retained structure keeps column properties plus the scene tables;

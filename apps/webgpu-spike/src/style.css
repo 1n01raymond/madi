@@ -670,6 +670,34 @@ dd {
   color: #50bddf;
 }
 
+.semantic-properties {
+  margin-top: 14px;
+  padding-top: 11px;
+  border-top: 1px solid #1c3541;
+}
+
+.semantic-properties > span {
+  color: #58727e;
+  font: 9px/1.4 ui-monospace, "Cascadia Code", monospace;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.semantic-properties em {
+  color: #50bddf;
+  font-style: normal;
+}
+
+.semantic-properties p {
+  margin: 7px 0 0;
+  color: #78939e;
+  font-size: 9px;
+}
+
+.semantic-properties p[data-state="error"] {
+  color: #e08f7c;
+}
+
 .evidence h2 {
   margin: 0;
   color: #edf5f7;

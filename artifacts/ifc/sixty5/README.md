@@ -55,10 +55,12 @@ materializing a single value.
 
 | Measure | Result |
 |---|---:|
-| Package digest | `773652cf45658ec0179b0eec9f0f3628177abd194d413b5f0dc7a883f7ad6049` |
-| `scene.gltf` bytes | 448,823,616 |
+| Package digest | `a2d6c72a6e936ac3ea2a183a1028cc4a06b20985c6d90b16058954323b7c3347` |
+| `scene.gltf` bytes | 448,823,852 |
 | `scene.bin` bytes | 120,707,064 |
 | `coarse.bin` bytes | 38,700,720 |
+| `properties.json` bytes | 17,705,010 |
+| `properties.bin` bytes | 31,179,862 |
 | glTF nodes | 188,320 |
 | glTF meshes | 84,870 |
 | Compiled prototypes | 42,435 |
@@ -76,14 +78,19 @@ extraction, produced byte-identical `scene.gltf`, `scene.bin`, `coarse.bin`,
 recording machine (16 CPUs, `--threads 6`, warm OS file cache) took 302 s wall
 clock end to end; the Node compiler process peaked at 4,043,804,672 bytes
 working set (≈3.8 GB) inside the default V8 heap, with no
-`--max-old-space-size` override. The split.3 record here comes from one full
-run of the same command; `scene.bin`, `coarse.bin`, the geometry half, every
-compiler count, and all 4,503,078 property values match the earlier records
-byte for byte or count for count, and `scene.gltf` keeps its exact byte length
-with a digest change explained by the recorded `optionsDigest`
-(`propertyMode: "indexed-column-values"`). The recording run's Node process
-peaked at 3,845,181,440 bytes working set (≈3.6 GB, sampled at 2 s intervals)
-— a recording note, not a benchmark result.
+`--max-old-space-size` override. The record here comes from one full run of
+the same command; `scene.bin`, `coarse.bin`, the geometry half, every compiler
+count, and all 4,503,078 property values match the earlier records byte for
+byte or count for count. The package now carries the
+`madi.package-properties.1` sidecar: `properties.json` (17,705,010 B) holds
+the interned property index and per-occurrence row references keyed by
+`semanticId`, and `properties.bin` (31,179,862 B) is the adapter column file
+byte for byte, both digest-pinned to the adapter report in the evidence.
+`scene.gltf` grew by exactly the 236-byte `extras.madi.properties` pointer
+over the split.3 baseline, and the package digest chain gained both sidecar
+files. The recording run's Node process peaked at 3,452,604,416 bytes working
+set (≈3.2 GB, sampled at 2 s intervals; the earlier split.3 run peaked at
+3,845,181,440) — a recording note, not a benchmark result.
 
 ## Reproduce
 
@@ -118,7 +125,7 @@ pnpm ifc:federation:check
 
 The federation source digest is
 `e334c6a9295a0adbf8ffbb15c61ea05c47b0135a319ee370f853bb9a36d21dec`. The 528.5 MB
-intermediate triple and the 608.2 MB compiled package stay under ignored
+intermediate triple and the 657.1 MB compiled package stay under ignored
 `output/` storage; only the adapter report, the compiler build report, and the
 Khronos validation envelope are reviewed here.
 

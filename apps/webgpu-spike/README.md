@@ -39,6 +39,15 @@ result. Viewport, tree, and search selection populate the same source-identity
 property panel, including glTF node/object IDs and a bounded preview of
 revision-local CAD edge references.
 
+When the package carries the property sidecar (`properties.json` +
+`properties.bin`, `docs/COMPILER.md` section 21.2), selecting an occurrence
+also resolves its IFC property sets: the sidecar is fetched lazily on the
+first selection, validated once, and each lookup decodes only the selected
+occurrence's rows through `resolvePropertyEntries`. Search deliberately does
+not index property values in Phase 1 — it stays hierarchy-metadata-only, and
+property resolution stays selection-driven so the 31.2 MB sixty5 column file
+is never scanned wholesale on the main thread.
+
 To serve another locally compiled package as `/scene.gltf`, set
 `MADI_SCENE_DIR` to an absolute path or a repository-relative directory before
 starting Vite. For example, in PowerShell:
@@ -67,8 +76,10 @@ the page's `?scene=` query so the view can be reopened or shared; the remote
 host must allow cross-origin requests for both the glTF and its external binary.
 
 Use **Open local package** to select exactly one MADI-profile `.gltf` and all of
-its external `.bin` resources. The browser validates each declared file name
-and byte length before sending local `File` objects to the geometry Worker.
+its external `.bin` and `.json` resources (including the optional
+`properties.json` / `properties.bin` sidecar pair). The browser validates each
+declared file name and byte length before sending local `File` objects to the
+geometry Worker.
 Local files stay on the client and do not create a shareable URL. This is a
 compiled scene workflow; direct STEP AP242/AP214 input belongs to the compiler.
 For progressive packages, local `File.slice()` provides the same target chunk

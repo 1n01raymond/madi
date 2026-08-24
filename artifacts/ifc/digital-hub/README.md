@@ -25,7 +25,8 @@ Digital Hub dataset.
 | Intermediate structure bytes | 26,235,818 |
 | Intermediate geometry bytes | 28,134,848 |
 | Intermediate property column bytes | 2,260,991 |
-| Compiled package bytes | 59,679,456 |
+| Package property sidecar | `properties.json` 1,246,277 B + `properties.bin` 2,260,991 B |
+| Compiled package bytes | 63,186,959 |
 
 The adapter hands the compiler a split Scene IR transport
 (`madi.ifc-scene-ir-split.3`): a structure-only JSON document, a little-endian
@@ -38,11 +39,20 @@ property value columns (split.3) — 334,225 encoded value entries deduplicated
 into 48,649 distinct canonical-JSON values — shrank it again to 26,235,818
 bytes (67.9% below the single document). The geometry file, `scene.bin`,
 `coarse.bin`, every compiler count, and all 273,188 resolvable property values
-are unchanged from the earlier records; `scene.gltf` keeps its byte length
-with a digest change explained by the recorded `optionsDigest`
-(`propertyMode: "indexed-column-values"`). The compiler verifies the column
-file's arity against every interned key set through typed-array views without
-materializing the value table.
+are unchanged from the earlier records; the split.2→split.3 transition kept
+`scene.gltf`'s byte length with a digest change explained by the recorded
+`optionsDigest` (`propertyMode: "indexed-column-values"`). The compiler
+verifies the column file's arity against every interned key set through
+typed-array views without materializing the value table.
+
+The compiled package now republishes those properties as a
+`madi.package-properties.1` sidecar: `properties.json` (1,246,277 B) carries
+the interned property index plus per-occurrence row references keyed by
+`semanticId`, and `properties.bin` (2,260,991 B) is the adapter column file
+byte for byte — the evidence pins its bytes and SHA-256 to the adapter
+report. `scene.gltf` grew by the `extras.madi.properties` pointer, and the
+package digest chain gained both sidecar files, which is the whole digest
+change in this record.
 
 IfcOpenShell 0.8.5 generated local prototype geometry and occurrence
 placements in metres. MADI retained document-scoped GlobalIds, hierarchy,
@@ -52,7 +62,7 @@ compiled the scene into standards-first glTF 2.0. Khronos glTF Validator
 
 The three compact JSON files bind the qualified source revision and four source
 hashes to the adapter report, compiler report, package resources, and official
-validation result. They do not redistribute the source IFC or the 60.7 MB
+validation result. They do not redistribute the source IFC or the 63.2 MB
 compiled package.
 
 ## Reproduce
@@ -85,7 +95,7 @@ pnpm ifc:federation:check
 ```
 
 The checked package digest is
-`edf9050ff93165e715275f99a2d7e583f5256442a3a627672bd558f86dd99d36`.
+`9b98866671eb080fd1a34646b6225d27d1ee55bddecbaad58790d35a344c5f1c`.
 
 ## Deliberate limits
 

@@ -6,7 +6,12 @@ Direct WebGPU rendering and the Phase 1 compiled glTF runtime boundary.
 
 - `inspectCompiledHierarchy(value)` validates glTF 2.0 plus
   `madi.experimental.gltf.1` metadata and returns the active occurrence tree
-  without requiring geometry bytes.
+  without requiring geometry bytes. Hierarchy entries and pick evidence carry
+  each occurrence's `semanticId` when present, and a package-level
+  `extras.madi.properties` pointer (the `madi.package-properties.1` sidecar,
+  `docs/COMPILER.md` section 21.2) surfaces as `hierarchy.properties`
+  after shape validation — the runtime does not fetch or parse the sidecar
+  itself.
 - `decodeCompiledGltf(value, binary, { representation })` validates the selected
   external-buffer accessor ranges,
   decodes surface and explicit-edge streams, composes node transforms, preserves

@@ -1,5 +1,18 @@
+import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 
+import {
+  openPropertyValueColumns,
+  packagePropertiesSchema,
+  parsePackageProperties,
+  resolvePropertyEntries,
+} from "@madi/scene-ir";
+import type {
+  EngineeringScene,
+  PropertyBag,
+  PropertyValue,
+  PropertyValueColumns,
+} from "@madi/scene-ir";
 import { describe, expect, it } from "vitest";
 
 import {
@@ -170,5 +183,241 @@ describe("Phase 1 glTF compiler slice", () => {
     expect(validation.issues).toContainEqual(
       expect.objectContaining({ code: "BUFFER_LENGTH", path: "buffers[0]" }),
     );
+  });
+});
+
+/** Canonical compact JSON with sorted keys, matching the adapter encoder. */
+function canonical(value: PropertyValue): string {
+  if (Array.isArray(value)) {
+    return `[${value.map((entry) => canonical(entry as PropertyValue)).join(",")}]`;
+  }
+  if (value !== null && typeof value === "object") {
+    return `{${Object.keys(value)
+      .sort()
+      .map(
+        (key) =>
+          `${JSON.stringify(key)}:${canonical(
+            (value as Record<string, PropertyValue>)[key] as PropertyValue,
+          )}`,
+      )
+      .join(",")}}`;
+  }
+  return JSON.stringify(value);
+}
+
+/**
+ * Rewrites the evidence scene's inline property bags into split.3 column
+ * form: keys and key sets interned into the scene `propertyIndex`, semantics
+ * keeping `{set, row}`, and every value moved into an adapter-layout column
+ * file (8-aligned streams, byte-sorted distinct heap).
+ */
+function toColumnScene(base: EngineeringScene): {
+  readonly scene: EngineeringScene;
+  readonly columns: Uint8Array;
+} {
+  const inline = base.semantics.map((semantic) => semantic.properties as PropertyBag);
+  const keys = [...new Set(inline.flatMap((bag) => Object.keys(bag.entries)))].sort();
+  const keyIndexes = new Map(keys.map((key, index) => [key, index]));
+  const sets: (readonly number[])[] = [];
+  const setIndexes = new Map<string, number>();
+  const valueRows: PropertyValue[][] = [];
+  const semantics = base.semantics.map((semantic, row) => {
+    const bag = semantic.properties as PropertyBag;
+    const sorted = Object.keys(bag.entries).sort();
+    const tuple = sorted.map((key) => keyIndexes.get(key) as number);
+    const token = tuple.join(",");
+    if (!setIndexes.has(token)) {
+      setIndexes.set(token, sets.length);
+      sets.push(tuple);
+    }
+    valueRows.push(sorted.map((key) => bag.entries[key] as PropertyValue));
+    return {
+      ...semantic,
+      properties: {
+        ...(bag.schema === undefined ? {} : { schema: bag.schema }),
+        set: setIndexes.get(token) as number,
+        row,
+      },
+    };
+  });
+
+  const encoder = new TextEncoder();
+  const encodedRows = valueRows.map((row) => row.map((value) => encoder.encode(canonical(value))));
+  const byBytes = new Map<string, Uint8Array>();
+  for (const encoded of encodedRows.flat()) {
+    byBytes.set(String.fromCharCode(...encoded), encoded);
+  }
+  const distinct = [...byBytes.keys()].sort().map((token) => byBytes.get(token) as Uint8Array);
+  const positions = new Map(
+    distinct.map((encoded, index) => [String.fromCharCode(...encoded), index]),
+  );
+  const rowRefs: number[] = [];
+  const rowOffsets: number[] = [0];
+  for (const row of encodedRows) {
+    for (const encoded of row) {
+      rowRefs.push(positions.get(String.fromCharCode(...encoded)) as number);
+    }
+    rowOffsets.push(rowRefs.length);
+  }
+  const valueOffsets: number[] = [0];
+  for (const encoded of distinct) {
+    valueOffsets.push((valueOffsets.at(-1) as number) + encoded.byteLength);
+  }
+  const heap = new Uint8Array(valueOffsets.at(-1) as number);
+  distinct.forEach((encoded, index) => heap.set(encoded, valueOffsets[index] as number));
+
+  const chunks: Uint8Array[] = [];
+  let length = 0;
+  const append = (payload: Uint8Array, encoding: "u32le" | "utf8-json") => {
+    const padding = (8 - (length % 8)) % 8;
+    if (padding) {
+      chunks.push(new Uint8Array(padding));
+      length += padding;
+    }
+    const ref = { encoding, byteOffset: length, byteLength: payload.byteLength };
+    chunks.push(payload);
+    length += payload.byteLength;
+    return ref;
+  };
+  const header: PropertyValueColumns = {
+    encoding: "madi.property-columns.1",
+    valueCount: rowRefs.length,
+    rowCount: valueRows.length,
+    distinctValueCount: distinct.length,
+    rows: append(new Uint8Array(Uint32Array.from(rowRefs).buffer), "u32le"),
+    rowOffsets: append(new Uint8Array(Uint32Array.from(rowOffsets).buffer), "u32le"),
+    valueOffsets: append(new Uint8Array(Uint32Array.from(valueOffsets).buffer), "u32le"),
+    valueHeap: append(heap, "utf8-json"),
+  };
+  const columns = new Uint8Array(length);
+  let cursor = 0;
+  for (const chunk of chunks) {
+    columns.set(chunk, cursor);
+    cursor += chunk.byteLength;
+  }
+  return {
+    scene: {
+      ...base,
+      semantics,
+      propertyIndex: { keys, sets },
+      propertyValues: header,
+    } as EngineeringScene,
+    columns,
+  };
+}
+
+describe("compiled-package property sidecar", () => {
+  async function columnEvidence(): Promise<{
+    readonly base: EngineeringScene;
+    readonly scene: EngineeringScene;
+    readonly columns: Uint8Array;
+  }> {
+    const serialized = JSON.parse(await readFile(evidenceUrl, "utf8")) as unknown;
+    const base = hydratePhase0Evidence(serialized);
+    return { base, ...toColumnScene(base) };
+  }
+
+  it("emits both sidecar resources with a verifiable pointer and report", async () => {
+    const { base, scene, columns } = await columnEvidence();
+    const compiled = compileSceneToGltf(scene, { propertyColumns: columns });
+
+    expect(compiled.propertiesBinary).toEqual(columns);
+    expect(compiled.report.options).toMatchObject({
+      propertiesUri: "properties.json",
+      propertiesBinaryUri: "properties.bin",
+    });
+    const jsonBytes = new TextEncoder().encode(compiled.propertiesJson as string);
+    const pointer = (compiled.document.extras.madi as {
+      properties: Record<string, unknown>;
+    }).properties;
+    expect(pointer).toEqual({
+      schemaVersion: packagePropertiesSchema,
+      uri: "properties.json",
+      byteLength: jsonBytes.byteLength,
+      sha256: createHash("sha256").update(jsonBytes).digest("hex"),
+    });
+    expect(compiled.report.output.resources).toContainEqual({
+      path: "properties.json",
+      mediaType: "application/json",
+      bytes: jsonBytes.byteLength,
+      sha256: createHash("sha256").update(jsonBytes).digest("hex"),
+    });
+    expect(compiled.report.output.resources).toContainEqual({
+      path: "properties.bin",
+      mediaType: "application/octet-stream",
+      bytes: columns.byteLength,
+      sha256: createHash("sha256").update(columns).digest("hex"),
+    });
+
+    const document = parsePackageProperties(JSON.parse(compiled.propertiesJson as string));
+    expect(document.columns).toEqual({
+      uri: "properties.bin",
+      byteLength: columns.byteLength,
+      sha256: createHash("sha256").update(columns).digest("hex"),
+    });
+    const reader = openPropertyValueColumns(document.propertyValues, columns);
+    for (const semantic of base.semantics) {
+      const index = document.semanticIds.indexOf(semantic.id);
+      expect(index).toBeGreaterThanOrEqual(0);
+      const resolved = resolvePropertyEntries(
+        {
+          set: document.semanticSets[index] as number,
+          row: document.semanticRows[index] as number,
+        },
+        document.propertyIndex,
+        reader,
+      );
+      expect(resolved).toEqual((semantic.properties as PropertyBag).entries);
+    }
+  });
+
+  it("covers the sidecar in the package digest and stays deterministic", async () => {
+    const { base, scene, columns } = await columnEvidence();
+    const first = compileSceneToGltf(scene, { propertyColumns: columns });
+    const second = compileSceneToGltf(scene, { propertyColumns: columns });
+    const withoutProperties = compileSceneToGltf(base, {});
+
+    expect(second.propertiesJson).toBe(first.propertiesJson);
+    expect(second.propertiesBinary).toEqual(first.propertiesBinary);
+    expect(second.report).toEqual(first.report);
+    expect(first.report.output.packageDigest).toBe(
+      createHash("sha256")
+        .update(first.json)
+        .update(first.binary)
+        .update(new TextEncoder().encode(first.propertiesJson as string))
+        .update(columns)
+        .digest("hex"),
+    );
+    expect(first.report.output.packageDigest).not.toBe(
+      withoutProperties.report.output.packageDigest,
+    );
+  });
+
+  it("requires the column file for scenes with property value columns", async () => {
+    const { scene } = await columnEvidence();
+    expect(() => compileSceneToGltf(scene, {})).toThrow(
+      /requires options\.propertyColumns/u,
+    );
+  });
+
+  it("rejects a column file without scene property tables", async () => {
+    const serialized = JSON.parse(await readFile(evidenceUrl, "utf8")) as unknown;
+    const base = hydratePhase0Evidence(serialized);
+    expect(() =>
+      compileSceneToGltf(base, { propertyColumns: new Uint8Array(8) }),
+    ).toThrow(/property value columns|propertyIndex/u);
+  });
+
+  it("rejects sidecar URIs that collide with package resources", async () => {
+    const { scene, columns } = await columnEvidence();
+    expect(() =>
+      compileSceneToGltf(scene, { propertyColumns: columns, propertiesUri: "scene.bin" }),
+    ).toThrow(/distinct URIs/u);
+    expect(() =>
+      compileSceneToGltf(scene, {
+        propertyColumns: columns,
+        propertiesBinaryUri: "properties.json",
+      }),
+    ).toThrow(/distinct URIs/u);
   });
 });

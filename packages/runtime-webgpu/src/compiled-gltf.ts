@@ -78,7 +78,16 @@ export interface CompiledHierarchyEntry {
   readonly renderable: boolean;
   readonly occurrenceId: string;
   readonly prototypeId: string;
+  readonly semanticId?: string;
   readonly sourceRef?: string;
+}
+
+/** Pointer to the package's `madi.package-properties.1` sidecar, when present. */
+export interface CompiledPropertiesRef {
+  readonly schemaVersion: string;
+  readonly uri: string;
+  readonly byteLength: number;
+  readonly sha256: string;
 }
 
 export interface CompiledTargetChunk {
@@ -103,6 +112,7 @@ export interface CompiledHierarchy {
   readonly binaryByteLength: number;
   readonly coarseBinaryUri?: string;
   readonly coarseBinaryByteLength?: number;
+  readonly properties?: CompiledPropertiesRef;
   readonly targetChunks: readonly CompiledTargetChunk[];
   readonly entries: readonly CompiledHierarchyEntry[];
   readonly renderableOccurrences: number;
@@ -120,6 +130,7 @@ export interface CompiledObjectEvidence {
   readonly label: string;
   readonly occurrenceId: string;
   readonly prototypeId: string;
+  readonly semanticId?: string;
   readonly sourceRef?: string;
   readonly edgeSourceRefs: readonly string[];
 }
@@ -420,6 +431,33 @@ function targetChunksFor(
   );
 }
 
+function propertiesRefFor(rootMadi: JsonRecord): CompiledPropertiesRef | undefined {
+  if (rootMadi.properties === undefined) return undefined;
+  const properties = recordAt(rootMadi, "properties");
+  if (
+    !properties ||
+    typeof properties.schemaVersion !== "string" ||
+    properties.schemaVersion.trim() === "" ||
+    typeof properties.uri !== "string" ||
+    properties.uri.trim() === "" ||
+    !Number.isInteger(properties.byteLength) ||
+    (properties.byteLength as number) <= 0 ||
+    typeof properties.sha256 !== "string" ||
+    !/^[0-9a-f]{64}$/u.test(properties.sha256)
+  ) {
+    throw new CompiledGltfError(
+      "INVALID_GLTF",
+      "extras.madi.properties must carry schemaVersion, uri, byteLength, and sha256.",
+    );
+  }
+  return {
+    schemaVersion: properties.schemaVersion,
+    uri: properties.uri,
+    byteLength: properties.byteLength as number,
+    sha256: properties.sha256,
+  };
+}
+
 export function inspectCompiledHierarchy(value: unknown): {
   readonly document: CompiledGltfDocument;
   readonly hierarchy: CompiledHierarchy;
@@ -448,6 +486,7 @@ export function inspectCompiledHierarchy(value: unknown): {
       renderable: node.mesh !== undefined,
       occurrenceId: madi.occurrenceId,
       prototypeId: typeof madi.prototypeId === "string" ? madi.prototypeId : "unknown",
+      ...(typeof madi.semanticId === "string" ? { semanticId: madi.semanticId } : {}),
       ...(typeof madi.sourceRef === "string" ? { sourceRef: madi.sourceRef } : {}),
     });
   });
@@ -462,6 +501,7 @@ export function inspectCompiledHierarchy(value: unknown): {
   const coarseBuffer = coarseBufferIndex === undefined
     ? undefined
     : document.buffers[coarseBufferIndex];
+  const properties = propertiesRefFor(rootMadi);
   if (
     targetChunks.length > 0 &&
     [...renderedMeshes].some(
@@ -491,6 +531,7 @@ export function inspectCompiledHierarchy(value: unknown): {
             coarseBinaryByteLength: coarseBuffer.byteLength,
           }
         : {}),
+      ...(properties ? { properties } : {}),
       targetChunks,
       entries,
       renderableOccurrences: entries.filter(({ renderable }) => renderable).length,
@@ -945,6 +986,7 @@ export function decodeCompiledGltf(
         label: node.name ?? occurrenceId,
         occurrenceId,
         prototypeId,
+        ...(typeof nodeMadi.semanticId === "string" ? { semanticId: nodeMadi.semanticId } : {}),
         ...(typeof nodeMadi.sourceRef === "string" ? { sourceRef: nodeMadi.sourceRef } : {}),
         edgeSourceRefs: geometry.edgeSourceRefs,
       });

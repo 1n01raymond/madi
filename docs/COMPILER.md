@@ -512,3 +512,31 @@ through the recorded `optionsDigest`. The recording compile's Node process
 peaked at 3,845,181,440 bytes working set (≈3.6 GB, sampled at 2 s intervals)
 against the split.1 record's 4,043,804,672 bytes — a recording note, not a
 benchmark result.
+
+### 21.2 Package property sidecar
+
+A compiled package built from a column-bag scene republishes the semantic
+properties as two optional package resources, so a viewer can resolve
+`key -> value` entries for a picked occurrence without the Scene IR
+intermediate: `properties.bin` is the adapter column file byte for byte
+(same length and SHA-256 as `scene-ir-properties.bin`), and `properties.json`
+is a `madi.package-properties.1` document — compact single-line JSON carrying
+the scene/revision/source identity, the interned `propertyIndex`, a columnar
+semantic table (code-unit-sorted `semanticIds` aligned with interned schema
+references and `{set, row}` columns), the column file reference, and the
+`madi.property-columns.1` header verbatim (`docs/SCENE_IR.md` section 8).
+`scene.gltf` points at the sidecar through
+`extras.madi.properties = {schemaVersion, uri, byteLength, sha256}`, both
+resources join `output.resources` and the package digest
+(glTF → target → coarse → sidecar JSON → sidecar binary), and the sidecar is
+mandatory whenever the scene declares `propertyValues` — `compileSceneToGltf`
+refuses a column-bag scene without `options.propertyColumns` and vice versa
+(`packages/compiler/test/gltf.test.ts`). The STEP path is unchanged: inline
+`PropertyBag` scenes emit no sidecar, and the committed Phase 1 packages are
+byte-identical. The glTF profile and compiler-report schema are also
+unchanged — the sidecar is additive, and the occurrence nodes' existing
+`extras.madi.semanticId` is the join key the runtime and Studio use
+(`packages/runtime-webgpu/src/compiled-gltf.ts`,
+`apps/webgpu-spike/src/property-sidecar.ts`). Full-text search deliberately
+does not index property values in Phase 1; the Studio resolves properties
+lazily for the selected occurrence only.
