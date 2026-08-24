@@ -28,8 +28,9 @@ async function parseChunked(text: string, chunkBytes: number) {
  * chunks), scientific-notation numbers, empty arrays, and scalar members.
  */
 const representativeDocument = JSON.stringify({
-  schemaVersion: "madi.ifc-scene-ir-split.1",
+  schemaVersion: "madi.ifc-scene-ir-split.2",
   sceneId: "scene-🚀-가나다",
+  propertyIndex: { keys: ["off", "ok", "가:나"], sets: [[], [0, 1, 2]] },
   revision: { revisionId: "r1", sourceDigest: "sha256:ab", adapter: { name: "x" } },
   units: { scaleToMeters: 1e-3 },
   documents: [],

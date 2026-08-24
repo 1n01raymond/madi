@@ -53,17 +53,19 @@ references into typed-array views without copying.
 
 | Signal | Evidence | Status |
 |---|---|---|
-| Transport equivalence | Digital Hub recompiles to the same `a6d5c0eecebf` package digest from the split pair | Passed |
-| Intermediate reduction | One 81,805,061-byte document became a 39,135,637-byte structure plus a 28,134,848-byte geometry file | Passed |
+| Transport equivalence | Digital Hub recompiled to the same `a6d5c0eecebf` package digest from the split pair at split.1; under split.2 property indexing, `scene.bin`, `coarse.bin`, and every compiler count stay identical and `scene.gltf` differs only through the recorded `optionsDigest` (current digest `98399341020d`) | Passed |
+| Intermediate reduction | One 81,805,061-byte document became a 39,135,637-byte structure plus a 28,134,848-byte geometry file; property indexing (split.2) then shrank the structure to 30,592,935 bytes — 62.6 % below the single document | Passed |
 | Hydration contract | Stream bounds, encodings, element alignment, unaligned buffers, and unencodable members are unit-checked | Passed in `packages/compiler/test/ifc-scene.test.ts` |
 | Real-large extraction | The seven-document IFC2X3 sixty5 federation extracts 192,316 semantic entities, 78,173 geometric occurrences, 42,435 prototypes, and 4,866,386 unique triangles from 40,310,966 submitted | Passed, recorded in `artifacts/ifc/sixty5/` |
 | Structure streaming | The compiler parses the structure document record by record in bounded chunks instead of one string, and reproduces the Digital Hub package digest byte for byte | Passed in `packages/compiler/test/ifc-structure-stream.test.ts` and the recompiled `artifacts/ifc/digital-hub/` record |
-| Real-large compile | Its 631,943,761-byte structure exceeds the 536,870,888-byte maximum string length; the streaming reader compiles it into a Khronos-clean (0 errors / 0 warnings) 608.2 MB package — 78,173 renderable occurrences, 4,866,386 unique triangles — byte-identical across two full runs, peaking at ≈3.8 GB compiler RSS inside the default V8 heap | Passed, recorded in `artifacts/ifc/sixty5/` |
+| Real-large compile | The split.1 structure measured 631,943,761 bytes — past the 536,870,888-byte maximum string length — and the streaming reader compiled it into a Khronos-clean (0 errors / 0 warnings) 608.2 MB package, byte-identical across two full runs, peaking at ≈3.8 GB compiler RSS inside the default V8 heap (recorded at commit `41e6973`) | Passed; split.1 record preserved in history |
+| Property indexing | Interning 35,510 keys / 299 key-sets (sixty5) and 1,656 / 279 (Digital Hub) once at scene level shrinks the sixty5 structure to 419,502,749 bytes (−33.6 %) — back under the maximum string length — while geometry, `scene.bin`, `coarse.bin`, every compiler count, and all resolvable property values stay unchanged | Passed, recorded in `artifacts/ifc/sixty5/` and `artifacts/ifc/digital-hub/` |
 
 Splitting geometry out was necessary but not sufficient: the remaining bulk is
 4,503,078 flattened property values and 188,319 occurrence records. The
 record-streaming reader lifts the one-string ceiling without changing the
-transport format; shrinking the structure itself (indexed properties) remains
+transport format, and property-key indexing (split.2) removed the repeated key
+text; encoding the property values themselves in a binary column form remains
 a named follow-up.
 
 ## First browser runtime slice
@@ -133,11 +135,12 @@ target groups to their retained coarse fallbacks. The next scheduler increment
 is persistent cache tiers and camera/view reprioritization.
 
 On the compiler side the structure document now streams record by record, and
-the sixty5 end-to-end compile evidence (package digest, Khronos validation,
-determinism, peak memory) is recorded in `artifacts/ifc/sixty5/`. The next
-compiler increment is shrinking the structure itself — the 4,503,078 flattened
-property values dominate the resident scene — and the next evidence gate is a
-browser result for that compiled real-large package.
+property keys and key combinations are interned once at scene level — the
+sixty5 structure is down to 419,502,749 bytes with every downstream output
+invariant verified in `artifacts/ifc/sixty5/`. The next compiler increment is
+a binary column encoding for the property values themselves — they still
+dominate the resident scene — and the next evidence gate is a browser result
+for that compiled real-large package.
 
 In parallel, the repeated 100k record now carries GPU pass timestamps and a
 backend-owned retained-resource census on the discrete host: the MADI surface

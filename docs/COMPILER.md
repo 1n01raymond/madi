@@ -427,6 +427,15 @@ into typed-array views without copying. On Digital Hub this replaced an
 81,805,061-byte document with a 39,135,637-byte structure and a 28,134,848-byte
 geometry file, and reproduced the same compiled package digest.
 
+Since `madi.ifc-scene-ir-split.2` the adapter also interns semantic property
+keys: every distinct key (1,656 on Digital Hub) and key combination (279) is
+stored once in the scene-level `propertyIndex`, and each semantic entity
+references one combination plus its aligned values (`docs/SCENE_IR.md`
+section 8). That shrank the Digital Hub structure to 30,592,935 bytes (−21.8 %)
+while `scene.bin`, `coarse.bin`, every compiler count, and all 273,188
+resolvable property values stayed identical; `scene.gltf` changed only through
+the recorded `optionsDigest` (`propertyMode: "indexed-flattened-psets"`).
+
 The compiler never holds the structure document as one string. A
 record-streaming reader (`packages/compiler/src/ifc-structure-stream.ts`)
 walks the file in bounded chunks with a byte-level state machine, parses each
@@ -454,17 +463,25 @@ classification remain deferred.
 
 ### 21.1 Real-large compile status
 
-The qualified `ifc-bench-sixty5` federation's 631,943,761-byte structure
-exceeds the runtime's maximum string length, which used to stop
-`madi compile-ifc` at a measured limit. The record-streaming structure reader
-removed that ceiling, and the compiled result is recorded in
-`artifacts/ifc/sixty5/`: a 608.2 MB package (digest
-`bb58f9f8117f51fba3c7071160e3af938883ca41a86d1ec131241940cde5c281`) with
+The qualified `ifc-bench-sixty5` federation's split.1 structure measured
+631,943,761 bytes — past the runtime's maximum string length, which used to
+stop `madi compile-ifc` at a measured limit. The record-streaming structure
+reader removed that ceiling, and the split.1 compile is recorded in the
+repository history (commit `41e6973`): a 608.2 MB package byte-identical
+across two complete runs including adapter re-extraction, peaking at ≈3.8 GB
+compiler working set inside the default V8 heap.
+
+Property indexing (`madi.ifc-scene-ir-split.2`) then shrank the sixty5
+structure to 419,502,749 bytes (−33.6 %, interning 35,510 distinct keys and
+299 key combinations) — back under the maximum string length, so the boundary
+crossing itself is now historical; the streaming reader remains the compile
+path and still protects against any future federation crossing it again. The
+current record in `artifacts/ifc/sixty5/` carries package digest
+`638aaf1784efebe5b4ce041fe3dc56674c7f99a1f7248eaa86739d7c7143333f` with
 188,320 glTF nodes, 84,870 meshes, 78,173 renderable occurrences, and
 4,866,386 unique triangles, passing the Khronos validator with zero errors and
-warnings. Two complete runs — each re-running the adapter — produced
-byte-identical outputs, and the compiler process peaked at ≈3.8 GB working set
-inside the default V8 heap. Encoding flattened properties as an indexed binary
-form is a separate follow-up that shrinks the structure document itself; the
-hydrated scene, including 4,503,078 property values, still stays resident
-during compilation.
+warnings; `scene.bin`, `coarse.bin`, every compiler count, the geometry half,
+and all 4,503,078 resolvable property values are unchanged from the split.1
+record, with `scene.gltf` differing only through the recorded `optionsDigest`.
+Encoding property values themselves in a binary column form is a separate
+follow-up; the hydrated scene still stays resident during compilation.

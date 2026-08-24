@@ -23,8 +23,9 @@ It is an adapter and compiler result, not a renderer benchmark.
 | Unique triangles | 4,866,386 |
 | Unique vertices | 2,596,268 |
 | Property values | 4,503,078 |
+| Property index keys / key-sets | 35,510 / 299 |
 | Duplicate GlobalIds | 0 |
-| Intermediate structure bytes | 631,943,761 |
+| Intermediate structure bytes | 419,502,749 |
 | Intermediate geometry bytes | 151,864,848 |
 
 Every document declares `IFC2X3`, so this federation also qualifies the older
@@ -34,15 +35,20 @@ scale rather than only in the smaller Digital Hub federation.
 
 ## Reviewed compiled result
 
-The 631,943,761-byte structure document exceeds the 536,870,888-code-unit
-maximum string length on the 64-bit V8 this repository pins, so it cannot be
-parsed as one JavaScript string. The compiler's record-streaming reader
-(`packages/compiler/src/ifc-structure-stream.ts`) walks it in bounded chunks
-and parses one record at a time, which is what makes this compile possible.
+The split.1 structure document measured 631,943,761 bytes — past the
+536,870,888-code-unit maximum string length on the 64-bit V8 this repository
+pins — so it could not be parsed as one JavaScript string; the compiler's
+record-streaming reader (`packages/compiler/src/ifc-structure-stream.ts`),
+which walks the file in bounded chunks and parses one record at a time, is
+what made that compile possible (recorded at commit `41e6973`). Property
+indexing (`madi.ifc-scene-ir-split.2`) — 35,510 distinct keys and 299 key
+combinations interned once at scene level — then shrank the structure to
+419,502,749 bytes (−33.6 %), back under the string limit; the reader remains
+the compile path and the guard against any future crossing.
 
 | Measure | Result |
 |---|---:|
-| Package digest | `bb58f9f8117f51fba3c7071160e3af938883ca41a86d1ec131241940cde5c281` |
+| Package digest | `638aaf1784efebe5b4ce041fe3dc56674c7f99a1f7248eaa86739d7c7143333f` |
 | `scene.gltf` bytes | 448,823,616 |
 | `scene.bin` bytes | 120,707,064 |
 | `coarse.bin` bytes | 38,700,720 |
@@ -56,13 +62,19 @@ and parses one record at a time, which is what makes this compile possible.
 | Coalesced target chunks (512 KiB budget) | 234 |
 | Khronos glTF Validator 2.0.0-dev.3.10 | 0 errors / 0 warnings |
 
-Determinism was verified at full scale: two complete `madi compile-ifc` runs,
-each re-running the adapter extraction, produced byte-identical `scene.gltf`,
-`scene.bin`, `coarse.bin`, `build-report.json`, and `adapter-report.json`. The
-measured second run on the recording machine (16 CPUs, `--threads 6`, warm OS
-file cache) took 302 s wall clock end to end; the Node compiler process peaked
-at 4,043,804,672 bytes working set (≈3.8 GB) inside the default V8 heap, with
-no `--max-old-space-size` override.
+Determinism was verified at full scale on the split.1 record (commit
+`41e6973`): two complete `madi compile-ifc` runs, each re-running the adapter
+extraction, produced byte-identical `scene.gltf`, `scene.bin`, `coarse.bin`,
+`build-report.json`, and `adapter-report.json`. The measured second run on the
+recording machine (16 CPUs, `--threads 6`, warm OS file cache) took 302 s wall
+clock end to end; the Node compiler process peaked at 4,043,804,672 bytes
+working set (≈3.8 GB) inside the default V8 heap, with no
+`--max-old-space-size` override. The split.2 record here comes from one full
+run of the same command; `scene.bin`, `coarse.bin`, the geometry half, every
+compiler count, and all 4,503,078 property values match the split.1 record
+byte for byte or count for count, and `scene.gltf` keeps its exact byte length
+with a digest change explained by the recorded `optionsDigest`
+(`propertyMode: "indexed-flattened-psets"`).
 
 ## Reproduce
 
@@ -96,7 +108,7 @@ pnpm ifc:federation:check
 ```
 
 The federation source digest is
-`e334c6a9295a0adbf8ffbb15c61ea05c47b0135a319ee370f853bb9a36d21dec`. The 783.8 MB
+`e334c6a9295a0adbf8ffbb15c61ea05c47b0135a319ee370f853bb9a36d21dec`. The 571.4 MB
 intermediate pair and the 608.2 MB compiled package stay under ignored
 `output/` storage; only the adapter report, the compiler build report, and the
 Khronos validation envelope are reviewed here.
@@ -106,10 +118,10 @@ Khronos validation envelope are reviewed here.
 - IFC curve and boundary-edge classification is deferred, as in Digital Hub.
   This federation reports zero explicit CAD edge segments.
 - Extraction is single-pass and resident: the adapter holds the whole federation
-  in memory before writing. The compiler streams the structure document, but
-  the hydrated scene — including all 4,503,078 flattened property values —
-  stays resident during compilation; indexed properties are separate follow-up
-  work.
+  in memory before writing. The compiler streams the structure document and
+  property keys are interned at scene level, but the hydrated scene — including
+  all 4,503,078 property values — stays resident during compilation; a binary
+  column encoding for the values themselves is separate follow-up work.
 - No browser, residency, or timing benchmark exists for this package. The
   302 s compile time above is a recording note, not a benchmark result; this
   record must not be cited as ADR-0003 evidence.

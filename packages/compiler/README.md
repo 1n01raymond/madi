@@ -92,12 +92,16 @@ This removes the decimal round-trip for every coordinate, and the compiler
 never holds the structure document as one string either: a record-streaming
 reader (`src/ifc-structure-stream.ts`) walks the file in bounded chunks and
 parses one record at a time, so a structure above the JavaScript maximum
-string length (a real-large federation reaches 632 MB against the 536,870,888
-code-unit ceiling) compiles the same way a small one does. The observable
-`EngineeringScene` contract is unchanged, so the split exists only between the
-adapter and the compiler. `--retain-scene-ir` therefore writes both
-`scene-ir.json` and `scene-ir-geometry.bin`; the JSON alone is not a loadable
-scene.
+string length compiles the same way a small one does (the sixty5 federation's
+split.1 structure measured 631.9 MB against the 536,870,888 code-unit ceiling;
+property indexing has since brought it to 419.5 MB, and the reader still
+protects against any future crossing). Since `madi.ifc-scene-ir-split.2` the
+structure also interns property keys and key combinations once into a
+scene-level `propertyIndex` instead of repeating key text per entity. The
+observable `EngineeringScene` contract is unchanged apart from that index, so
+the split exists only between the adapter and the compiler.
+`--retain-scene-ir` therefore writes both `scene-ir.json` and
+`scene-ir-geometry.bin`; the JSON alone is not a loadable scene.
 
 ## Current limits
 
@@ -105,21 +109,22 @@ scene.
   adapter. Moving the proven extraction behavior into the native C++ adapter
   remains production hardening work.
 - The IFC command currently depends on pinned IfcOpenShell 0.8.5. IFC topology
-  edge classification, non-flattened property indexing, and cross-document
+  edge classification, binary property-value encoding, and cross-document
   reconciliation remain explicit follow-up work. A degenerate source
   `IfcAxis2Placement` (zero-length or parallel axes) is replaced with an
   identity transform and reported as `IFC_DEGENERATE_PLACEMENT`; the adapter
   never hands the compiler a non-finite matrix
   (`native/adapter-ifc/README.md`).
 - The split transport requires a little-endian host. The structure document
-  streams record by record, but the hydrated scene, including every flattened
-  property value, stays resident during compilation; encoding flattened
-  properties as an indexed binary form remains follow-up work. The largest
-  recorded compile — the sixty5 federation's 631.9 MB structure with 4,503,078
-  property values (`artifacts/ifc/sixty5/`) — peaked at 4,043,804,672 bytes
-  (≈3.8 GB) compiler working set inside the default 64-bit Node 22 heap, with
-  no `--max-old-space-size` override; expect peak memory to scale with
-  occurrence and property counts, not with geometry bytes.
+  streams record by record and interns property keys, but the hydrated scene,
+  including every property value, stays resident during compilation; a binary
+  column encoding for the values themselves remains follow-up work. The
+  largest recorded compile — the sixty5 federation with 4,503,078 property
+  values (`artifacts/ifc/sixty5/`) — peaked at 4,043,804,672 bytes (≈3.8 GB)
+  compiler working set inside the default 64-bit Node 22 heap with no
+  `--max-old-space-size` override, measured on the split.1 631.9 MB structure
+  (commit `41e6973`); expect peak memory to scale with occurrence and property
+  counts, not with geometry bytes.
 - The first coarse representation is a per-prototype AABB, not a
   shape-preserving LOD. IFC target ranges are coalesced with a static initial
   priority; spatial partitioning, compression, and view reprioritization are

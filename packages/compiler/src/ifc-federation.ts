@@ -166,7 +166,7 @@ function assertAdapterIdentity(
   geometry: Buffer,
 ): { readonly report: Record<string, unknown>; readonly federationDigest: string } {
   const report = asRecord(adapterReport, "IFC adapter report");
-  if (report.schemaVersion !== "madi.ifc-adapter-report.2") {
+  if (report.schemaVersion !== "madi.ifc-adapter-report.3") {
     throw new TypeError("IFC adapter report has an unsupported schema version.");
   }
   if (!Array.isArray(report.sources) || report.sources.length !== sources.length) {
@@ -251,10 +251,12 @@ export async function compileIfcFederation(
       ],
       options.environment ?? process.env,
     );
-    // The structure document can exceed the runtime's maximum string length
-    // (a real-large federation reaches 632 MB against V8's 536,870,888 code
-    // units), so it is never read or parsed as one string: the streaming
-    // reader parses it record by record and hashes it on the way through.
+    // The structure document is never read or parsed as one string: the
+    // streaming reader parses it record by record and hashes it on the way
+    // through. Before property indexing (`madi.ifc-scene-ir-split.2`) a
+    // real-large federation reached 632 MB against V8's 536,870,888-code-unit
+    // string limit, and the reader keeps the compiler safe if a future
+    // federation crosses it again.
     const [structure, geometry, serializedAdapterReport] = await Promise.all([
       readIfcStructure(scenePath),
       readFile(geometryPath),

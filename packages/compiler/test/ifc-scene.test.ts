@@ -22,6 +22,7 @@ function splitScene(
 ): Record<string, unknown> {
   return {
     schemaVersion: "madi.scene-ir.0",
+    propertyIndex: { keys: ["a"], sets: [[0]] },
     representations: [
       {
         id: "representation:one",
@@ -51,6 +52,8 @@ describe("split IFC Scene IR hydration", () => {
     expect(Array.from(surface?.normals ?? [])).toEqual(Array.from(normals));
     // Views alias the file rather than copying it.
     expect(surface?.positions.buffer).toBe(geometry.buffer);
+    // Non-geometry members such as the property index pass through untouched.
+    expect(scene.propertyIndex).toEqual({ keys: ["a"], sets: [[0]] });
   });
 
   it("hydrates a geometry buffer that starts unaligned inside a pool", () => {

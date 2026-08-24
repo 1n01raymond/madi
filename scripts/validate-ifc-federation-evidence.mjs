@@ -37,7 +37,7 @@ assert(
   dataset.source.revision === "4b37e5d77f12f30dfd7cb7375e15278e1037c808",
   "Digital Hub source revision changed.",
 );
-assert(adapter.schemaVersion === "madi.ifc-adapter-report.2", "Unknown adapter report.");
+assert(adapter.schemaVersion === "madi.ifc-adapter-report.3", "Unknown adapter report.");
 assert(
   adapter.adapter.name === "IfcOpenShell" && adapter.adapter.version === "0.8.5",
   "IfcOpenShell evidence version changed.",
@@ -57,7 +57,8 @@ assert(
   adapter.federation.options.includeSurfaces === true &&
     adapter.federation.options.includeEdges === false &&
     adapter.federation.options.useWorldCoordinates === false &&
-    adapter.federation.options.normalizeSceneToMeters === true,
+    adapter.federation.options.normalizeSceneToMeters === true &&
+    adapter.federation.options.propertyMode === "indexed-flattened-psets",
   "Federation extraction contract changed.",
 );
 
@@ -109,6 +110,8 @@ assertCounts(
     submittedTriangleCount: 2534364,
     vertexCount: 477005,
     propertyValueCount: 273188,
+    propertyKeyCount: 1656,
+    propertySetCount: 279,
     duplicateGlobalIdCount: 0,
     maxHierarchyDepth: 5,
   },
@@ -154,7 +157,7 @@ assertCounts(
 );
 assert(
   compiler.output.packageDigest ===
-    "a6d5c0eecebf286208e151d281af26e6747e8a163ba3eb4a3b5cfe9353260d5d",
+    "98399341020db499115aa5b7962dbca82cfdd839b7a6b1aea70a1af7517a6e63",
   "Compiled package digest changed.",
 );
 assert(
@@ -163,13 +166,15 @@ assert(
   "IFC target range coalescing contract changed.",
 );
 assert(
-  adapter.scene.encodingVersion === "madi.ifc-scene-ir-split.1",
+  adapter.scene.encodingVersion === "madi.ifc-scene-ir-split.2",
   "Scene IR transport encoding changed.",
 );
+// Property indexing (split.2) interned key strings into the scene-level
+// propertyIndex, shrinking the structure from 39,135,637 bytes (split.1).
 assert(
   adapter.scene.structure.sha256 ===
-    "38dd0f03affa65e1165ac84853645ed6b1e7939fc07d72cae5bcb8da2997025c" &&
-    adapter.scene.structure.byteLength === 39135637,
+    "42b3316b94809ab978ec8fcffc260a83943e93a6ba4e7213de5346a26793b6a7" &&
+    adapter.scene.structure.byteLength === 30592935,
   "Scene IR structure evidence changed.",
 );
 assert(
@@ -233,7 +238,11 @@ assert(
   sixty5Dataset.source.revision === "4b37e5d77f12f30dfd7cb7375e15278e1037c808",
   "sixty5 source revision changed.",
 );
-assert(sixty5.schemaVersion === "madi.ifc-adapter-report.2", "Unknown sixty5 adapter report.");
+assert(sixty5.schemaVersion === "madi.ifc-adapter-report.3", "Unknown sixty5 adapter report.");
+assert(
+  sixty5.federation.options.propertyMode === "indexed-flattened-psets",
+  "sixty5 property transport mode changed.",
+);
 assert(
   sixty5.adapter.name === "IfcOpenShell" && sixty5.adapter.version === "0.8.5",
   "sixty5 IfcOpenShell evidence version changed.",
@@ -287,18 +296,26 @@ assertCounts(
     triangleCount: 4866386,
     vertexCount: 2596268,
     propertyValueCount: 4503078,
+    propertyKeyCount: 35510,
+    propertySetCount: 299,
     duplicateGlobalIdCount: 0,
   },
   "sixty5 adapter",
 );
 assert(
-  sixty5.scene.encodingVersion === "madi.ifc-scene-ir-split.1",
+  sixty5.scene.encodingVersion === "madi.ifc-scene-ir-split.2",
   "sixty5 Scene IR transport encoding changed.",
 );
+// Property indexing (split.2) shrank the structure from the split.1 record's
+// 631,943,761 bytes (sha256 c82f2dd2…) to 419,502,749 bytes. The split.1
+// structure exceeded V8's 536,870,888-byte string limit; that boundary
+// crossing is preserved as history in the E1.9 record at commit 41e6973 and
+// the streaming reader still protects the compiler if a future federation
+// crosses it again.
 assert(
   sixty5.scene.structure.sha256 ===
-    "c82f2dd2f5e5243655d7e14103393f2ee3041402e465545f630f56b01a09adc1" &&
-    sixty5.scene.structure.byteLength === 631943761,
+    "d9bc76f1e13c66b3f7757e5614a593e934cae6b13125ae5d493ad65f6b7b8331" &&
+    sixty5.scene.structure.byteLength === 419502749,
   "sixty5 Scene IR structure evidence changed.",
 );
 assert(
@@ -308,8 +325,8 @@ assert(
   "sixty5 Scene IR geometry evidence changed.",
 );
 assert(
-  sixty5.scene.structure.byteLength > bufferConstants.MAX_STRING_LENGTH,
-  "sixty5 structure now fits one string; the streaming-reader claim below is stale.",
+  sixty5.scene.structure.byteLength < bufferConstants.MAX_STRING_LENGTH,
+  "sixty5 structure exceeds one string again; restate the streaming-reader boundary claim.",
 );
 assert(sixty5.sceneIrValidation.ok === true, "sixty5 Scene IR validation failed.");
 assert(
@@ -359,7 +376,7 @@ assertCounts(
 );
 assert(
   sixty5Compiler.output.packageDigest ===
-    "bb58f9f8117f51fba3c7071160e3af938883ca41a86d1ec131241940cde5c281",
+    "638aaf1784efebe5b4ce041fe3dc56674c7f99a1f7248eaa86739d7c7143333f",
   "sixty5 compiled package digest changed.",
 );
 assert(
@@ -424,7 +441,7 @@ console.log(
   `[ifc-federation] verified sixty5 ${sixty5Compiler.output.packageDigest.slice(0, 12)} ` +
     `(${sixty5Compiler.counts.renderableOccurrenceCount.toLocaleString("en-US")} renderable ` +
     `occurrences, ${sixty5Compiler.counts.triangleCount.toLocaleString("en-US")} unique ` +
-    `triangles) compiled from a ` +
-    `${sixty5.scene.structure.byteLength.toLocaleString("en-US")}-byte structure streamed ` +
-    `past the ${bufferConstants.MAX_STRING_LENGTH.toLocaleString("en-US")}-byte string limit`,
+    `triangles) from a ${sixty5.scene.structure.byteLength.toLocaleString("en-US")}-byte ` +
+    `indexed structure (${sixty5.counts.propertyKeyCount.toLocaleString("en-US")} keys / ` +
+    `${sixty5.counts.propertySetCount.toLocaleString("en-US")} key-sets)`,
 );

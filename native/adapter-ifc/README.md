@@ -8,7 +8,9 @@ The first executable slice preserves:
 
 - one source document and SHA-256 identity per discipline;
 - IFC GlobalId-backed semantic entities, types, groups, classifications, and
-  flattened inherited property sets;
+  flattened inherited property sets, with keys and key combinations interned
+  once into the scene-level `propertyIndex`
+  (`madi.ifc-scene-ir-split.2`, `tools/property_index.py`);
 - project/site/building/storey/product containment and local transforms;
 - IfcOpenShell local triangulation separated from occurrence placement;
 - prototype reuse keyed by IfcOpenShell's geometry identity; and
@@ -33,8 +35,8 @@ time (`ValueError`) instead of emitting invalid JSON with a bare `NaN` token.
 
 ## Adapter unit tests
 
-`placement_math.py` has no IfcOpenShell import, so its tests run without the
-pinned adapter environment:
+`placement_math.py` and `property_index.py` have no IfcOpenShell import, so
+their tests run without the pinned adapter environment:
 
 ```sh
 python -m venv output/venv-ifc-test  # or reuse output/venv-ifc

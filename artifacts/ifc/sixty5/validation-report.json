@@ -8,23 +8,23 @@
   "reports": {
     "adapter": {
       "path": "adapter-report.json",
-      "bytes": 33826,
-      "sha256": "a083ed803ce8e3af33728ceef9be037ca3a08bb448a11dc137d9fbd820b775d9"
+      "bytes": 33945,
+      "sha256": "c115fcaefa4982d7055cc6eda5a9c20dafdc0446a22e259ae736d6bac179d074"
     },
     "compiler": {
       "path": "build-report.json",
       "bytes": 140903,
-      "sha256": "5b50c0e0466ca1036247ca0f30ff8d4454d3cb9b4aa2157fcef513d1327271f9"
+      "sha256": "a085b3270f923791cd937213ee99685d8eb70fb10b46a143477d5ef90c5548c1"
     }
   },
   "package": {
-    "digest": "bb58f9f8117f51fba3c7071160e3af938883ca41a86d1ec131241940cde5c281",
+    "digest": "638aaf1784efebe5b4ce041fe3dc56674c7f99a1f7248eaa86739d7c7143333f",
     "resources": [
       {
         "path": "scene.gltf",
         "mediaType": "model/gltf+json",
         "bytes": 448823616,
-        "sha256": "ca1191a11dc6105cdfc7be9e7c88de54fd9c38f7a575c7b225f8205c39169187"
+        "sha256": "92938609bb0696ab9e1d17bebf831447cf55c20644f71877727117be096eb841"
       },
       {
         "path": "scene.bin",

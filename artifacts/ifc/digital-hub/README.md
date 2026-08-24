@@ -13,6 +13,7 @@ Digital Hub dataset.
 | Part 21 entities | 482,994 |
 | Semantic entities | 14,675 |
 | Property values | 273,188 |
+| Property index keys / key-sets | 1,656 / 279 |
 | Renderable occurrences | 5,152 |
 | Unique geometric prototypes | 3,383 |
 | Reused geometry occurrences | 1,769 |
@@ -20,15 +21,20 @@ Digital Hub dataset.
 | Submitted triangles before reuse | 2,534,364 |
 | Coalesced target requests | 45 |
 | Target request budget | 512 KiB (except one indivisible 1.12 MiB prototype) |
-| Intermediate structure bytes | 39,135,637 |
+| Intermediate structure bytes | 30,592,935 |
 | Intermediate geometry bytes | 28,134,848 |
 | Compiled package bytes | 59,679,456 |
 
-The adapter hands the compiler a split Scene IR transport: a structure-only
-JSON document plus a little-endian geometry file, each digest-linked in the
-adapter report. That pair replaced a single 81,805,061-byte JSON document, so
-the structure the compiler must parse as one string is 52.2% smaller while the
-compiled package stays byte-identical.
+The adapter hands the compiler a split Scene IR transport
+(`madi.ifc-scene-ir-split.2`): a structure-only JSON document plus a
+little-endian geometry file, each digest-linked in the adapter report. The
+split replaced a single 81,805,061-byte JSON document, and property indexing —
+1,656 distinct keys and 279 key combinations interned once at scene level —
+then shrank the structure from 39,135,637 to 30,592,935 bytes (62.6% below the
+single document). `scene.bin`, `coarse.bin`, every compiler count, and all
+273,188 resolvable property values are unchanged from the split.1 record;
+`scene.gltf` differs only through the recorded `optionsDigest`
+(`propertyMode: "indexed-flattened-psets"`).
 
 IfcOpenShell 0.8.5 generated local prototype geometry and occurrence
 placements in metres. MADI retained document-scoped GlobalIds, hierarchy,
@@ -70,13 +76,14 @@ pnpm ifc:federation:check
 ```
 
 The checked package digest is
-`a6d5c0eecebf286208e151d281af26e6747e8a163ba3eb4a3b5cfe9353260d5d`.
+`98399341020db499115aa5b7962dbca82cfdd839b7a6b1aea70a1af7517a6e63`.
 
 ## Deliberate limits
 
 - IFC curve and boundary-edge classification is deferred; this slice reports
   zero explicit CAD edge segments instead of guessing from triangle edges.
-- Properties are flattened for the first queryable semantic path.
+- Properties are flattened for the first queryable semantic path; keys and
+  key combinations are interned into the scene-level property index.
 - Cross-document identity stays document-scoped; names are not used to infer
   object equivalence.
 - The compiler coalesces the 3,383 prototype ranges into 45 deterministic

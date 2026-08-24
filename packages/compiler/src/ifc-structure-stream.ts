@@ -4,7 +4,7 @@ import { createReadStream } from "node:fs";
 /**
  * Streaming reader for the IFC Scene IR structure document.
  *
- * The split transport (`madi.ifc-scene-ir-split.1`) keeps geometry out of the
+ * The split transport (`madi.ifc-scene-ir-split.2`) keeps geometry out of the
  * structure JSON, but a real-large federation's structure document can still
  * exceed the runtime's maximum string length (sixty5 is 631,943,761 B against
  * a 536,870,888 code-unit ceiling — `packages/compiler/src/ifc-federation.ts`
