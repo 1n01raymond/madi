@@ -15,7 +15,7 @@ const explicitPython = pythonFlagIndex === -1 ? undefined : arguments_[pythonFla
 
 const candidates = [
   explicitPython,
-  process.env.MADI_PYTHON,
+  process.env.NARU_PYTHON,
   process.platform === "win32" ? "python" : "python3",
 ].filter((candidate) => Boolean(candidate));
 
@@ -33,7 +33,7 @@ if (!pythonCommand) {
     "[adapter:ifc:test] no Python interpreter with pytest + numpy found " +
     `(tried: ${candidates.length > 0 ? candidates.join(", ") : "(none)"}). ` +
     "Install native/adapter-ifc/tools/requirements-dev.txt, or pass " +
-    "--python <path> / set MADI_PYTHON.";
+    "--python <path> / set NARU_PYTHON.";
   if (allowMissing) {
     console.warn(`${message} Skipping (--allow-missing).`);
     process.exit(0);

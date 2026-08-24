@@ -1,6 +1,6 @@
-# Contributing to MADI
+# Contributing to NARU
 
-MADI is in an early vertical-slice phase. Contributions that sharpen a use case,
+NARU is in an early vertical-slice phase. Contributions that sharpen a use case,
 add reproducible evidence, challenge an assumption, or reduce implementation
 risk are as valuable as code.
 
@@ -18,7 +18,7 @@ Coding-agent guidance and the AI-assisted contribution rules live in
 
 ## Branch and pull request workflow
 
-MADI uses a lightweight GitHub Flow with `main` as its only permanent
+NARU uses a lightweight GitHub Flow with `main` as its only permanent
 development branch.
 
 1. Create a short-lived work branch from the latest `main`.

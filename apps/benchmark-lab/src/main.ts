@@ -80,7 +80,7 @@ type BenchmarkMemoryMode = "final" | "scene-delta";
 
 declare global {
   interface Window {
-    __MADI_BENCHMARK_RESULT__?: BenchmarkResult;
+    __NARU_BENCHMARK_RESULT__?: BenchmarkResult;
   }
 }
 
@@ -285,7 +285,7 @@ async function run(): Promise<void> {
           : "diagnostic-not-retained-scene-memory",
       },
     };
-    window.__MADI_BENCHMARK_RESULT__ = result;
+    window.__NARU_BENCHMARK_RESULT__ = result;
     document.documentElement.dataset.benchmarkStatus = "complete";
     status.textContent = "Exploratory run complete — not an ADR decision";
     status.dataset.state = "ready";

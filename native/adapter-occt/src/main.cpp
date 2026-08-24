@@ -177,7 +177,7 @@ class Extractor {
 
 int main(const int argc, const char* const argv[]) {
   if (argc != 2) {
-    std::cerr << "usage: madi-occt-spike <assembly.step>\n";
+    std::cerr << "usage: naru-occt-spike <assembly.step>\n";
     return EXIT_FAILURE;
   }
 

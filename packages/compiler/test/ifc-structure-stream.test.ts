@@ -117,7 +117,7 @@ describe("IFC structure streaming reader", () => {
   });
 
   it("reads a document straight off disk in bounded chunks", async () => {
-    const directory = await mkdtemp(join(tmpdir(), "madi-structure-stream-"));
+    const directory = await mkdtemp(join(tmpdir(), "naru-structure-stream-"));
     try {
       const path = join(directory, "scene-ir.json");
       const bytes = Buffer.from(representativeDocument, "utf8");
@@ -132,7 +132,7 @@ describe("IFC structure streaming reader", () => {
   });
 
   it("closes the file when the document fails to parse", async () => {
-    const directory = await mkdtemp(join(tmpdir(), "madi-structure-stream-"));
+    const directory = await mkdtemp(join(tmpdir(), "naru-structure-stream-"));
     try {
       const path = join(directory, "scene-ir.json");
       await writeFile(path, '{"a":[', "utf8");

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import type { CompiledHierarchy } from "@madi/runtime-webgpu";
+import type { CompiledHierarchy } from "@naru3d/runtime-webgpu";
 
 import {
   parseSceneUrl,

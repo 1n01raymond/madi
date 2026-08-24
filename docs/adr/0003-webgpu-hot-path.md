@@ -31,7 +31,7 @@ can make CPU traversal, memory, and state updates scale with total object count.
 ### Negative
 
 - More renderer, compatibility, testing, and debugging work.
-- MADI cannot inherit every mature feature of a general engine.
+- NARU cannot inherit every mature feature of a general engine.
 - WebGPU implementation differences require broad conformance testing.
 
 ## Alternatives considered
@@ -94,7 +94,7 @@ automation, and result integrity but cannot accept or reject this ADR.
 
 The second committed record reaches 100,000 occurrences and 10,223,768
 unculled triangles across 256 deterministic equipment variants. A shared
-local-review trace exercises material frustum rejection. MADI uses reusable
+local-review trace exercises material frustum rejection. NARU uses reusable
 dense CPU visibility tables and instance compaction; Three.js 0.180.0 uses one
 optimized `BatchedMesh` with per-object culling and default opaque sorting.
 
@@ -123,12 +123,12 @@ and a real industrial assembly remain missing.
 The fourth record keeps the fresh-process, alternating-order matrix and adds
 WebGPU `timestamp-query` pass timing plus a backend-owned retained-resource
 census. Both Chrome and Firefox expose the feature on the discrete reference
-host. The MADI surface pass is sub-millisecond there (Chrome median 0.459 ms,
+host. The NARU surface pass is sub-millisecond there (Chrome median 0.459 ms,
 p95 0.852 ms; Firefox median 0.297 ms), which relocates this decision to the
 CPU side: with the GPU pass holding more than an order of magnitude of frame
 headroom, the acceptance question is main-thread cost and retained memory,
 not raster throughput. The census attributes scene memory symmetrically with
-disclosed accounting (MADI exact allocations; Three.js a constructed floor
+disclosed accounting (NARU exact allocations; Three.js a constructed floor
 because its internals are not enumerable).
 
 Cross-session variance is now measured rather than assumed: paired CPU-p95

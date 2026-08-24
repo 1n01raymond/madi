@@ -135,13 +135,13 @@ export async function compileStepFile(
     0.15,
     "Angular tolerance",
   );
-  const temporaryDirectory = await mkdtemp(join(tmpdir(), "madi-step-"));
+  const temporaryDirectory = await mkdtemp(join(tmpdir(), "naru-step-"));
   const scenePath = join(temporaryDirectory, "scene-ir.json");
   const adapterReportPath = join(temporaryDirectory, "adapter-report.json");
   try {
     await runAdapter(
       options.pythonExecutable ??
-        process.env.MADI_PYTHON ??
+        process.env.NARU_PYTHON ??
         (process.platform === "win32" ? "python" : "python3"),
       [
         resolve(options.adapterScriptPath ?? defaultAdapterScript),

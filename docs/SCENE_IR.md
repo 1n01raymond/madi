@@ -553,7 +553,7 @@ slice produced from the licensed STEP assembly through OCCT 7.9.3 STEPCAF/XDE.
 The repository test hydrates its numeric arrays, runs the normal validator, and
 then compiles three part representations into ten render occurrences. The file
 is intentionally evidence for this logical contract, not a declaration that
-JSON is MADI's delivery format.
+JSON is NARU's delivery format.
 
 `artifacts/occt/unsupported-layer-assignment.scene.json` repeats that slice
 with one known unsupported semantic entity. Its validator-clean scene retains

@@ -71,7 +71,7 @@ console.log(
 );
 
 await mkdir(outputDirectory, { recursive: true });
-process.env.MADI_SCENE_DIR = relative(repositoryRoot, sceneDirectory);
+process.env.NARU_SCENE_DIR = relative(repositoryRoot, sceneDirectory);
 const vite = await createServer({
   configFile: resolve(repositoryRoot, "apps/webgpu-spike/vite.config.ts"),
   logLevel: "error",
@@ -90,14 +90,14 @@ try {
 
   const context = await browser.newContext({ viewport: { width: 1320, height: 1000 } });
   await context.addInitScript(() => {
-    window.__madiTimeline = [];
+    window.__naruTimeline = [];
     new MutationObserver((mutations) => {
-      if (window.__madiTimeline.length >= 2000) return;
+      if (window.__naruTimeline.length >= 2000) return;
       for (const mutation of mutations) {
         const element = mutation.target;
         if (!(element instanceof Element)) continue;
         if (element !== document.documentElement && element.id !== "status") continue;
-        window.__madiTimeline.push({
+        window.__naruTimeline.push({
           milliseconds: Math.round(performance.now()),
           target: element.id || element.tagName.toLowerCase(),
           attribute: mutation.attributeName,
@@ -208,7 +208,7 @@ try {
       dataset: { ...document.documentElement.dataset },
       usedJsHeapBytes: memory ? memory.usedJSHeapSize : null,
       totalJsHeapBytes: memory ? memory.totalJSHeapSize : null,
-      timeline: window.__madiTimeline,
+      timeline: window.__naruTimeline,
     };
   });
 

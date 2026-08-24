@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/media/madi-hero.svg" alt="MADI — Open engineering for the Web" width="100%" />
+  <img src="docs/media/naru-hero.svg" alt="NARU — A WebGPU-native engine for massive CAD and BIM" width="100%" />
 </p>
 
 <p align="center">
@@ -23,7 +23,7 @@
 </p>
 
 > [!IMPORTANT]
-> MADI is currently at the architecture and prototyping stage. This repository
+> NARU is currently at the architecture and prototyping stage. This repository
 > defines the product, system boundaries, benchmarks, and implementation path;
 > it does not yet contain an installable production viewer.
 
@@ -35,7 +35,7 @@ not inventing another CAD file format. It is making that data fast, inspectable,
 scriptable, and embeddable in a browser—without losing assembly identity or
 engineering meaning.
 
-MADI provides the open layer between source tools and Web applications. Its
+NARU provides the open layer between source tools and Web applications. Its
 long-term ambition is Blender-like in spirit: a community-built engineering
 workspace with a capable core and a broad extension ecosystem. Its immediate
 focus is deliberately narrower—excellent large-scene delivery and interaction.
@@ -44,7 +44,7 @@ focus is deliberately narrower—excellent large-scene delivery and interaction.
   <tr>
     <td width="33%" valign="top">
       <h3>Keep the source of truth</h3>
-      Native CAD/BIM and neutral exchange files remain authoritative. MADI
+      Native CAD/BIM and neutral exchange files remain authoritative. NARU
       workspaces store references, views, annotations, and plugin state—not a
       replacement CAD format.
     </td>
@@ -85,10 +85,10 @@ is introduced only when public benchmarks demonstrate a material gap.
 
 | Layer | Responsibility | First vertical slice |
 |---|---|---|
-| **MADI Studio** | Reference engineering workspace | Assembly tree, search, properties, selection, hide/isolate, section, measurement |
-| **MADI Runtime** | Headless browser and GPU engine | Progressive streaming, Worker decode, instancing, culling, picking, bounded GPU memory |
-| **MADI Compiler** | Reproducible source-to-Web build pipeline | STEP AP242 through OCCT, hierarchy and edge preservation, LOD and chunk generation |
-| **MADI SDK** | Stable embedding and extension surface | Framework-neutral TypeScript API, commands, panels, analysis Workers, capability-scoped plugins |
+| **NARU Studio** | Reference engineering workspace | Assembly tree, search, properties, selection, hide/isolate, section, measurement |
+| **NARU Runtime** | Headless browser and GPU engine | Progressive streaming, Worker decode, instancing, culling, picking, bounded GPU memory |
+| **NARU Compiler** | Reproducible source-to-Web build pipeline | STEP AP242 through OCCT, hierarchy and edge preservation, LOD and chunk generation |
+| **NARU SDK** | Stable embedding and extension surface | Framework-neutral TypeScript API, commands, panels, analysis Workers, capability-scoped plugins |
 
 ### Designed for engineering work
 
@@ -127,14 +127,14 @@ explicit opt-in. See the
 
 ## Current runtime proof
 
-![Adafruit PyGamer STEP assembly rendered directly with MADI WebGPU](artifacts/browser-matrix/chrome-151-windows-selected.png)
+![Adafruit PyGamer STEP assembly rendered directly with NARU WebGPU](artifacts/browser-matrix/chrome-151-windows-selected.png)
 
 The canonical demo now uses Adafruit's real PyGamer electronics assembly rather
 than a synthetic mascot: 34 shared meshes, 85 part occurrences, 162,838 unique
 triangles, 13,897 explicit CAD edge segments, Worker decoding, and source-aware
 joystick picking in Chrome and Firefox. The unmodified CAD is redistributed
 under MIT with a pinned upstream commit and notice; Adafruit does not endorse
-MADI. See the [reviewed browser evidence](artifacts/browser-matrix/README.md).
+NARU. See the [reviewed browser evidence](artifacts/browser-matrix/README.md).
 
 ## Current compiler proof
 
@@ -145,12 +145,12 @@ edges, validates source identity, and emits the compiled glTF pair:
 
 ```sh
 python -m pip install -r native/adapter-occt/tools/requirements-evidence.txt
-pnpm madi compile fixtures/step/repeated-fasteners-ap242.step \
+pnpm naru compile fixtures/step/repeated-fasteners-ap242.step \
   --output output/repeated-fasteners-ap242
 ```
 
 The committed AP242 result is independently checked with zero Khronos glTF
-errors or warnings. The expanded Scene IR is temporary and is not a MADI file
+errors or warnings. The expanded Scene IR is temporary and is not a NARU file
 format. See the [compiler evidence](artifacts/phase1/README.md).
 
 The same compiler boundary now has an early multi-document IFC path. The
@@ -178,7 +178,7 @@ All design documents are indexed in [`docs/README.md`](docs/README.md).
 
 ## Principles
 
-1. **Source tools remain authoritative.** MADI complements existing engineering
+1. **Source tools remain authoritative.** NARU complements existing engineering
    systems instead of forcing a format migration.
 2. **Semantics and render geometry are separate.** Objects can be discovered
    and queried before their highest-detail geometry is resident.
@@ -197,15 +197,15 @@ All design documents are indexed in [`docs/README.md`](docs/README.md).
 ## Frequently asked questions
 
 <details>
-<summary><strong>Is MADI a new CAD file format?</strong></summary>
+<summary><strong>Is NARU a new CAD file format?</strong></summary>
 <br />
-No. Existing CAD/BIM documents remain the source of truth. MADI defines a
+No. Existing CAD/BIM documents remain the source of truth. NARU defines a
 neutral in-memory boundary and may generate disposable, versioned delivery
 caches optimized for the browser.
 </details>
 
 <details>
-<summary><strong>Is MADI trying to replace Fusion, Onshape, or desktop CAD?</strong></summary>
+<summary><strong>Is NARU trying to replace Fusion, Onshape, or desktop CAD?</strong></summary>
 <br />
 Not in its initial scope. The first product is a large-scene engineering
 workspace and embeddable runtime. Exact parametric authoring may arrive later as
@@ -226,7 +226,7 @@ separate avoids shipping a geometry kernel in the rendering hot path.
 <summary><strong>Why not build the entire viewer on Three.js?</strong></summary>
 <br />
 Three.js remains useful around the ecosystem and may appear in tools or
-experiments. MADI's large-scene renderer uses direct WebGPU data structures so
+experiments. NARU's large-scene renderer uses direct WebGPU data structures so
 its batching, residency, picking, and memory policies are explicit. This is an
 architectural focus, not a claim that general-purpose scene graphs are wrong.
 </details>
@@ -234,17 +234,17 @@ architectural focus, not a claim that general-purpose scene graphs are wrong.
 <details>
 <summary><strong>Where does glTF fit?</strong></summary>
 <br />
-glTF is an important standards-based delivery and interoperability option. MADI
+glTF is an important standards-based delivery and interoperability option. NARU
 reuses glTF, meshopt, KTX2, 3D Tiles concepts, and metadata standards where they
 meet engineering identity, edge, streaming, and precision requirements. The
 first Phase 1 compiler slice emits glTF 2.0 plus an external binary resource;
 the browser now opens its hierarchy first and decodes geometry in a Worker.
-MADI identity and source mappings remain explicitly experimental `extras`.
+NARU identity and source mappings remain explicitly experimental `extras`.
 </details>
 
 ## Contributing
 
-MADI is early enough that evidence can still change the architecture. Useful
+NARU is early enough that evidence can still change the architecture. Useful
 contributions right now include:
 
 - redistributable STEP or IFC fixtures with documented edge cases;
@@ -255,7 +255,7 @@ contributions right now include:
 - documentation and translation review.
 
 Read [CONTRIBUTING.md](CONTRIBUTING.md), browse the
-[open issues](https://github.com/1n01raymond/madi/issues), or improve a
+[open issues](https://github.com/1n01raymond/naru/issues), or improve a
 [translation](docs/TRANSLATIONS.md). Large changes should begin with a design
 issue so assumptions are visible before implementation.
 
@@ -292,10 +292,10 @@ docs/
 
 ## License
 
-MADI is available under the [Apache License 2.0](LICENSE). Planned third-party
+NARU is available under the [Apache License 2.0](LICENSE). Planned third-party
 dependencies may use other compatible licenses; see
 [THIRD_PARTY.md](THIRD_PARTY.md).
 
 <p align="center">
-  <sub>Open engineering for the Web.</sub>
+  <sub>A WebGPU-native engine for massive CAD and BIM.</sub>
 </p>

@@ -1,9 +1,9 @@
-import { instanceStride } from "@madi/runtime-webgpu";
+import { instanceStride } from "@naru3d/runtime-webgpu";
 import type {
   CompiledBatchEvidence,
   DecodedCompiledScene,
   GpuPrototypeBatch,
-} from "@madi/runtime-webgpu";
+} from "@naru3d/runtime-webgpu";
 
 export const defaultProgressiveResidencyBudget = 64 * 1024 * 1024;
 

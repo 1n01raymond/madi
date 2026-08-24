@@ -19,8 +19,8 @@ target/
 out/
 
 # Generated engineering assets and caches
-*.madi-cache
-*.madi-cache/
+*.naru-cache
+*.naru-cache/
 *.wgeo
 benchmarks/data/private/
 benchmarks/results/local/

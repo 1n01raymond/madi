@@ -12,7 +12,7 @@ planned behavior.
 The first slice accepts local STEP AP242/AP214 through the isolated OCCT adapter
 and compiles its validated `EngineeringScene` into standard glTF 2.0 JSON plus
 an external binary resource and machine-readable adapter/compiler reports. The
-expanded Scene IR is temporary. This intentionally avoids defining a MADI CAD
+expanded Scene IR is temporary. This intentionally avoids defining a NARU CAD
 or delivery container.
 
 | Signal | Evidence | Status |
@@ -23,13 +23,13 @@ or delivery container.
 | Engineering edges | Canonical glTF line primitives retain 13,897 explicit OCCT edge segments | Passed |
 | Source identity | Report source digest matches OCCT evidence; node/mesh `extras` retain IDs and refs | Passed for experimental profile |
 | Independent package validation | Hashes, ranges, hierarchy, counts, and report parity are checked without compiler state | Passed by `pnpm phase1:evidence:check` |
-| Direct AP242 input | `pnpm madi compile` preflights the Part 21 schema, runs OCCT STEPCAF/XDE, cross-checks source SHA-256, and removes temporary Scene IR | Passed with the checksum-locked `repeated-fasteners-ap242.step` package |
+| Direct AP242 input | `pnpm naru compile` preflights the Part 21 schema, runs OCCT STEPCAF/XDE, cross-checks source SHA-256, and removes temporary Scene IR | Passed with the checksum-locked `repeated-fasteners-ap242.step` package |
 | Coarse/target split | Direct STEP output keeps target meshes in `scene.bin` and emits 3 reusable prototype AABBs in a 2.7 KiB `coarse.bin`; both remain standard external glTF buffers | Passed with 0 Khronos validator errors/warnings |
 | Partial target delivery | Compiler records three non-overlapping prototype ranges that cover `scene.bin`; the Worker issues exact HTTP Range requests and promotes one target batch per completed range | Passed by package/runtime tests and headed Chrome/Firefox evidence |
 
 ### Early IFC federation risk slice
 
-The separate `madi compile-ifc` entry now accepts repeated discipline/document
+The separate `naru compile-ifc` entry now accepts repeated discipline/document
 pairs and compiles IFC2X3/IFC4/IFC4X3 through pinned IfcOpenShell. The qualified
 Digital Hub evidence covers four IFC4 documents, 14,675 semantic entities,
 13,681 occurrences, 3,383 unique geometric prototypes, 913,520 unique
@@ -69,7 +69,7 @@ record-streaming reader lifts the one-string ceiling without changing the
 transport format, property-key indexing (split.2) removed the repeated key
 text, and property value columns (split.3) moved the values themselves into a
 deduplicated binary file the compiler and browser resolve lazily
-(`resolvePropertyEntries` in `@madi/scene-ir`); the remaining resident bulk is
+(`resolvePropertyEntries` in `@naru3d/scene-ir`); the remaining resident bulk is
 the occurrence and semantic records themselves.
 
 ### Real-large browser residency
@@ -91,7 +91,7 @@ recording. The record is `artifacts/ifc/sixty5-browser/`, checked by
 ## First browser runtime slice
 
 The browser now consumes that compiled package directly. It reads the glTF node
-graph and MADI identity metadata on the main thread, then fetches and decodes the
+graph and NARU identity metadata on the main thread, then fetches and decodes the
 external binary in a Worker before transferring packed typed arrays to the
 direct WebGPU renderer. The Phase 0 Scene IR JSON is no longer a browser input.
 
@@ -115,7 +115,7 @@ direct WebGPU renderer. The Phase 0 Scene IR JSON is no longer a browser input.
 
 ```sh
 pnpm phase1:compile:evidence
-pnpm madi compile fixtures/step/repeated-fasteners-ap242.step \
+pnpm naru compile fixtures/step/repeated-fasteners-ap242.step \
   --output output/repeated-fasteners-ap242
 pnpm phase1:evidence:check
 pnpm browser:matrix

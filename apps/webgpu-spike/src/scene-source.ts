@@ -1,5 +1,5 @@
-import { inspectCompiledHierarchy } from "@madi/runtime-webgpu";
-import type { CompiledGltfDocument, CompiledHierarchy } from "@madi/runtime-webgpu";
+import { inspectCompiledHierarchy } from "@naru3d/runtime-webgpu";
+import type { CompiledGltfDocument, CompiledHierarchy } from "@naru3d/runtime-webgpu";
 
 import { resourceFileName } from "./property-sidecar.js";
 import type { PropertySidecarSource } from "./property-sidecar.js";
@@ -89,7 +89,7 @@ export function validateLocalBinary(
   if (!uri || byteLength === undefined) {
     throw new TypeError(`The compiled scene has no ${representation} binary resource.`);
   }
-  const binaryUrl = new URL(uri, "https://madi.local/");
+  const binaryUrl = new URL(uri, "https://naru.local/");
   const expectedName = decodeURIComponent(binaryUrl.pathname.split("/").pop() ?? "");
   if (binaryFile.name !== expectedName) {
     throw new TypeError(
@@ -152,7 +152,7 @@ export async function loadSceneHierarchy(
   );
   const fileFor = (uri: string): File | undefined => {
     const expectedName = decodeURIComponent(
-      new URL(uri, "https://madi.local/").pathname.split("/").pop() ?? "",
+      new URL(uri, "https://naru.local/").pathname.split("/").pop() ?? "",
     );
     return source.binaryFiles.find(({ name }) => name === expectedName);
   };

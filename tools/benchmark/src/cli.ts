@@ -3,7 +3,7 @@ import { hostname, platform, release, totalmem } from "node:os";
 import { dirname, resolve } from "node:path";
 import { performance } from "node:perf_hooks";
 
-import { createRepeatedTriangleScene, validateScene } from "@madi/scene-ir";
+import { createRepeatedTriangleScene, validateScene } from "@naru3d/scene-ir";
 
 import { summarize } from "./stats.js";
 

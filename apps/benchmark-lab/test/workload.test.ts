@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { validateGpuScene } from "@madi/runtime-webgpu";
+import { validateGpuScene } from "@naru3d/runtime-webgpu";
 
 import { createIndustrialWorkload, industrialScaleTiers } from "../src/workload.js";
 

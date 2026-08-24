@@ -1,6 +1,6 @@
-# Translating MADI
+# Translating NARU
 
-MADI welcomes readers and contributors in their preferred language. During the
+NARU welcomes readers and contributors in their preferred language. During the
 early vertical-slice phase, the repository localizes the project landing page while
 keeping detailed design documents in English so technical decisions have one
 reviewable source of truth.
@@ -14,7 +14,7 @@ reviewable source of truth.
 | Japanese | [`README.ja.md`](../README.ja.md) | Initial translation; native-speaker review requested |
 | Simplified Chinese | [`README.zh-CN.md`](../README.zh-CN.md) | Initial translation; native-speaker review requested |
 
-Translation status describes editorial review, not completeness of the MADI
+Translation status describes editorial review, not completeness of the NARU
 software. Every README must show the same project-stage warning prominently.
 
 ## File naming
@@ -48,7 +48,7 @@ Some terms are intentionally left in English because they are identifiers or
 widely used technical concepts. Use surrounding prose to clarify them where
 needed.
 
-| Canonical term | Meaning in MADI |
+| Canonical term | Meaning in NARU |
 |---|---|
 | source of truth | The authoritative native document or upstream system |
 | Engineering Scene IR | The logical internal boundary; not a CAD exchange format |
@@ -56,7 +56,7 @@ needed.
 | occurrence | One placed instance in an assembly hierarchy |
 | hot path | Per-frame or interaction-critical work |
 | residency | Which decoded resources currently occupy CPU/GPU memory |
-| Studio | The reference MADI end-user application |
+| Studio | The reference NARU end-user application |
 | Runtime | The embeddable browser and GPU engine |
 
 ## Keeping translations current

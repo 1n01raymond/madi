@@ -1,4 +1,4 @@
-# Working in the MADI repository
+# Working in the NARU repository
 
 Guidance for coding agents and new contributors. It condenses rules that live in
 `CONTRIBUTING.md`, `docs/BRANCHING.md`, `docs/README.md`, and the phase
@@ -6,7 +6,7 @@ trackers; those documents win whenever this file disagrees with them.
 
 ## What this is
 
-MADI compiles CAD/BIM sources (STEP through an isolated OCCT adapter, IFC
+NARU compiles CAD/BIM sources (STEP through an isolated OCCT adapter, IFC
 through an isolated IfcOpenShell adapter) into a neutral Engineering Scene IR,
 packages it as standard glTF 2.0, and renders it in the browser through a
 direct, data-oriented WebGPU runtime. Status: Phase 1 vertical slice
@@ -34,10 +34,10 @@ Coding agents are welcome under the same rules as every contributor, plus:
 | Path | What lives there |
 |---|---|
 | `packages/scene-ir` | Engineering Scene IR types and `validateScene` |
-| `packages/compiler` | Scene IR to glTF packaging, the `madi` CLI (`compile`, `compile-ifc`), adapter/build reports, evidence CLI |
+| `packages/compiler` | Scene IR to glTF packaging, the `naru` CLI (`compile`, `compile-ifc`), adapter/build reports, evidence CLI |
 | `packages/runtime-webgpu` | Direct WebGPU renderer, compiled-glTF loader, Worker decode, bounded residency |
 | `apps/webgpu-spike` | Studio prototype: tree, search, properties, section plane, residency controls |
-| `apps/benchmark-lab` | MADI vs Three.js industrial benchmark harness |
+| `apps/benchmark-lab` | NARU vs Three.js industrial benchmark harness |
 | `native/adapter-occt` | C++/Python OCCT STEP adapter (isolated, not a browser dependency) |
 | `native/adapter-ifc` | Python IfcOpenShell federation adapter (isolated) |
 | `scripts/` | Evidence recorders (`record-*.mjs`) and validators (`validate-*.mjs`) |
@@ -57,8 +57,8 @@ Node 22.12+ and pnpm 11 (`packageManager` pin). If `pnpm` is not on PATH, use
 | `pnpm test` / `pnpm test:watch` | Vitest over `{apps,packages,tools}/**/*.test.ts` |
 | `pnpm lint` / `pnpm typecheck` / `pnpm build` | Individual gates |
 | `pnpm dev` | Studio prototype (Vite) |
-| `pnpm madi compile <file.step> --output <dir>` | Compile a local STEP source |
-| `pnpm madi compile-ifc ...` | Compile an IFC federation from discipline/document pairs |
+| `pnpm naru compile <file.step> --output <dir>` | Compile a local STEP source |
+| `pnpm naru compile-ifc ...` | Compile an IFC federation from discipline/document pairs |
 | `pnpm <record>:check` | Validate one evidence record (`phase1:evidence`, `ifc:federation`, `browser:evidence`, `benchmark:industrial`, `benchmark:heterogeneous`, `fixtures`, `fixtures:external`, `occt:diagnostics`, `adr`) |
 | `pnpm ifc:federation:evidence`, `pnpm phase1:compile:evidence`, `pnpm benchmark:*`, `pnpm browser:matrix` | Re-record evidence (slow; headed browsers for the last two) |
 | `pnpm native:check` | Verify native toolchains before configuring adapters |
@@ -91,6 +91,11 @@ Rules that recur:
   changes, bump the schema ID (for example `madi.ifc-adapter-report.N`,
   `madi.ifc-scene-ir-split.N`) and update the validator deliberately; never
   loosen a check to make it pass.
+- Serialized identifiers still spelled `madi` (schema IDs, the glTF
+  `extras.madi` key, generator strings, benchmark backend/workload IDs) are
+  frozen deliberately — see ADR-0007. Do not rename them in isolation; each
+  family migrates to a `naru.` ID at its next schema bump, together with its
+  validator and re-recorded evidence.
 - Editing `fixtures/external/manifest.json` changes its SHA-256 and invalidates
   every `artifacts/fixtures/external/*.json` record; regenerate all of them with
   `pnpm fixtures:external inspect <id> --output <path>`.

@@ -138,19 +138,19 @@ const instanceBufferLayout: GPUVertexBufferLayout = {
   ],
 };
 
-export type MadiWebGpuErrorCode =
+export type NaruWebGpuErrorCode =
   | "WEBGPU_UNAVAILABLE"
   | "ADAPTER_UNAVAILABLE"
   | "CONTEXT_UNAVAILABLE"
   | "SCENE_NOT_SET"
   | "TIMESTAMP_QUERY_UNSUPPORTED";
 
-export class MadiWebGpuError extends Error {
-  readonly code: MadiWebGpuErrorCode;
+export class NaruWebGpuError extends Error {
+  readonly code: NaruWebGpuErrorCode;
 
-  constructor(code: MadiWebGpuErrorCode, message: string) {
+  constructor(code: NaruWebGpuErrorCode, message: string) {
     super(message);
-    this.name = "MadiWebGpuError";
+    this.name = "NaruWebGpuError";
     this.code = code;
   }
 }
@@ -322,20 +322,20 @@ export class Phase0Renderer {
     });
 
     const surfaceModule = device.createShaderModule({
-      label: "MADI surface + picking shader",
+      label: "NARU surface + picking shader",
       code: surfaceShader,
     });
     const edgeModule = device.createShaderModule({
-      label: "MADI explicit edge shader",
+      label: "NARU explicit edge shader",
       code: edgeShader,
     });
     this.cameraBuffer = device.createBuffer({
-      label: "MADI scene uniforms",
+      label: "NARU scene uniforms",
       size: this.uniformData.byteLength,
       usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
     });
     const bindGroupLayout = device.createBindGroupLayout({
-      label: "MADI camera bind-group layout",
+      label: "NARU camera bind-group layout",
       entries: [
         {
           binding: 0,
@@ -345,11 +345,11 @@ export class Phase0Renderer {
       ],
     });
     const pipelineLayout = device.createPipelineLayout({
-      label: "MADI pipeline layout",
+      label: "NARU pipeline layout",
       bindGroupLayouts: [bindGroupLayout],
     });
     this.cameraBindGroup = device.createBindGroup({
-      label: "MADI camera bind group",
+      label: "NARU camera bind group",
       layout: bindGroupLayout,
       entries: [{ binding: 0, resource: { buffer: this.cameraBuffer } }],
     });
@@ -366,7 +366,7 @@ export class Phase0Renderer {
       instanceBufferLayout,
     ];
     this.surfacePipeline = device.createRenderPipeline({
-      label: "MADI shaded surface pipeline",
+      label: "NARU shaded surface pipeline",
       layout: pipelineLayout,
       vertex: { module: surfaceModule, entryPoint: "vsMain", buffers: surfaceBuffers },
       fragment: {
@@ -382,7 +382,7 @@ export class Phase0Renderer {
       },
     });
     this.pickPipeline = device.createRenderPipeline({
-      label: "MADI object ID pipeline",
+      label: "NARU object ID pipeline",
       layout: pipelineLayout,
       vertex: { module: surfaceModule, entryPoint: "vsMain", buffers: surfaceBuffers },
       fragment: {
@@ -398,7 +398,7 @@ export class Phase0Renderer {
       },
     });
     this.edgePipeline = device.createRenderPipeline({
-      label: "MADI explicit edge pipeline",
+      label: "NARU explicit edge pipeline",
       layout: pipelineLayout,
       vertex: {
         module: edgeModule,
@@ -441,14 +441,14 @@ export class Phase0Renderer {
       throw new RangeError("pixelRatio must be a positive finite number.");
     }
     if (!navigator.gpu) {
-      throw new MadiWebGpuError(
+      throw new NaruWebGpuError(
         "WEBGPU_UNAVAILABLE",
         "WebGPU is unavailable in this browser.",
       );
     }
     const adapter = await navigator.gpu.requestAdapter();
     if (!adapter) {
-      throw new MadiWebGpuError(
+      throw new NaruWebGpuError(
         "ADAPTER_UNAVAILABLE",
         "No compatible WebGPU adapter was found.",
       );
@@ -461,7 +461,7 @@ export class Phase0Renderer {
     const context = canvas.getContext("webgpu");
     if (!context) {
       device.destroy();
-      throw new MadiWebGpuError(
+      throw new NaruWebGpuError(
         "CONTEXT_UNAVAILABLE",
         "The canvas could not create a WebGPU context.",
       );
@@ -564,7 +564,7 @@ export class Phase0Renderer {
 
   render(viewProjection: Float32Array, options: RenderOptions = {}): void {
     if (this.batches.length === 0) {
-      throw new MadiWebGpuError("SCENE_NOT_SET", "Call setScene before render.");
+      throw new NaruWebGpuError("SCENE_NOT_SET", "Call setScene before render.");
     }
     if (viewProjection.length !== 16) {
       throw new TypeError("viewProjection must contain 16 float32 values.");
@@ -575,19 +575,19 @@ export class Phase0Renderer {
     if (!this.depthTexture) return;
 
     if (options.timestampWrites && !this.device.features.has("timestamp-query")) {
-      throw new MadiWebGpuError(
+      throw new NaruWebGpuError(
         "TIMESTAMP_QUERY_UNSUPPORTED",
         "Pass timestamp writes require a device created with requestTimestampQueries.",
       );
     }
 
     this.writeUniforms(viewProjection);
-    const encoder = this.device.createCommandEncoder({ label: "MADI frame" });
+    const encoder = this.device.createCommandEncoder({ label: "NARU frame" });
     const colorView = this.context.getCurrentTexture().createView();
     const depthView = this.depthTexture.createView();
 
     const surfacePass = encoder.beginRenderPass({
-      label: "MADI surfaces and explicit edges",
+      label: "NARU surfaces and explicit edges",
       colorAttachments: [
         {
           view: colorView,
@@ -670,13 +670,13 @@ export class Phase0Renderer {
     );
     this.writeUniforms(this.lastViewProjection);
     const readback = this.device.createBuffer({
-      label: "MADI pick readback",
+      label: "NARU pick readback",
       size: 256,
       usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ,
     });
-    const encoder = this.device.createCommandEncoder({ label: "MADI on-demand pick" });
+    const encoder = this.device.createCommandEncoder({ label: "NARU on-demand pick" });
     const pickPass = encoder.beginRenderPass({
-      label: "MADI object ID pass",
+      label: "NARU object ID pass",
       colorAttachments: [
         {
           view: this.pickTexture.createView(),
@@ -758,13 +758,13 @@ export class Phase0Renderer {
     this.depthTexture?.destroy();
     this.pickTexture?.destroy();
     this.depthTexture = this.device.createTexture({
-      label: "MADI depth target",
+      label: "NARU depth target",
       size: [width, height],
       format: "depth24plus",
       usage: GPUTextureUsage.RENDER_ATTACHMENT,
     });
     this.pickTexture = this.device.createTexture({
-      label: "MADI object ID target",
+      label: "NARU object ID target",
       size: [width, height],
       format: "rgba8uint",
       usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.COPY_SRC,
@@ -790,25 +790,25 @@ export class Phase0Renderer {
       includeEdges,
       surfaceVertex: createBuffer(
         this.device,
-        `MADI ${key} surface vertices`,
+        `NARU ${key} surface vertices`,
         batch.surfaceVertices,
         GPUBufferUsage.VERTEX,
       ),
       surfaceIndex: createBuffer(
         this.device,
-        `MADI ${key} surface indices`,
+        `NARU ${key} surface indices`,
         batch.surfaceIndices,
         GPUBufferUsage.INDEX,
       ),
       edgeVertex: createBuffer(
         this.device,
-        `MADI ${key} explicit edges`,
+        `NARU ${key} explicit edges`,
         uploadedEdges,
         GPUBufferUsage.VERTEX,
       ),
       instance: createBuffer(
         this.device,
-        `MADI ${key} occurrences`,
+        `NARU ${key} occurrences`,
         instanceData,
         GPUBufferUsage.VERTEX,
       ),

@@ -1,4 +1,4 @@
-# MADI compiled-scene browser proof
+# NARU compiled-scene browser proof
 
 This Vite app is the current Phase 1 runtime evidence, despite the historical
 `webgpu-spike` directory name. It deliberately does not fetch the Phase 0 Scene
@@ -28,7 +28,7 @@ viewport or hierarchy highlights the same occurrence and preserves its source
 identity. `H` hides the selection, `I` isolates it, and `Shift+H` restores all
 occurrences. These actions compact stable per-prototype visibility tables into
 existing instance buffers rather than rebuilding scene resources. Adafruit does
-not endorse MADI. Press `C` to enable one world-space section plane; choose its
+not endorse NARU. Press `C` to enable one world-space section plane; choose its
 X/Y/Z axis, drag the normalized position, or flip the retained side. Surfaces,
 explicit edges, and GPU picking share the same clipping equation.
 
@@ -49,11 +49,11 @@ property resolution stays selection-driven so the 31.2 MB sixty5 column file
 is never scanned wholesale on the main thread.
 
 To serve another locally compiled package as `/scene.gltf`, set
-`MADI_SCENE_DIR` to an absolute path or a repository-relative directory before
+`NARU_SCENE_DIR` to an absolute path or a repository-relative directory before
 starting Vite. For example, in PowerShell:
 
 ```powershell
-$env:MADI_SCENE_DIR = "output/ifc/digital-hub"
+$env:NARU_SCENE_DIR = "output/ifc/digital-hub"
 pnpm dev
 ```
 
@@ -75,7 +75,7 @@ Use **Open URL** for an HTTP(S) `scene.gltf`. A successful URL is retained in
 the page's `?scene=` query so the view can be reopened or shared; the remote
 host must allow cross-origin requests for both the glTF and its external binary.
 
-Use **Open local package** to select exactly one MADI-profile `.gltf` and all of
+Use **Open local package** to select exactly one NARU-profile `.gltf` and all of
 its external `.bin` and `.json` resources (including the optional
 `properties.json` / `properties.bin` sidecar pair). The browser validates each
 declared file name and byte length before sending local `File` objects to the

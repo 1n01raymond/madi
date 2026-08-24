@@ -1,4 +1,4 @@
-import { Phase0Renderer } from "@madi/runtime-webgpu";
+import { Phase0Renderer } from "@naru3d/runtime-webgpu";
 
 import type { BenchmarkCamera } from "./camera.js";
 import { DenseFrustumCuller } from "./culling.js";
@@ -30,7 +30,7 @@ export interface BenchmarkRetainedResources {
   readonly scope: "backend-owned-scene-upload-resources";
   /** CPU typed arrays the backend itself allocated and still retains. */
   readonly cpuBytes: number;
-  /** GPU scene-upload buffer bytes. Exact for MADI, a constructed floor for Three.js. */
+  /** GPU scene-upload buffer bytes. Exact for NARU, a constructed floor for Three.js. */
   readonly gpuBytes: number;
   readonly gpuAttachmentPx: readonly [number, number] | null;
   readonly accounting:
@@ -59,7 +59,7 @@ function visibleTriangles(workload: IndustrialWorkload, counts: Uint32Array): nu
   );
 }
 
-async function createMadiBackend(
+async function createNaruBackend(
   canvas: HTMLCanvasElement,
   workload: IndustrialWorkload,
   culling: BenchmarkCullingMode,
@@ -327,6 +327,6 @@ export function createBenchmarkBackend(
   memoryProbe?: BenchmarkMemoryProbe,
 ): Promise<BenchmarkBackend> {
   return id === "madi"
-    ? createMadiBackend(canvas, workload, culling, memoryProbe)
+    ? createNaruBackend(canvas, workload, culling, memoryProbe)
     : createThreeBackend(canvas, workload, culling, memoryProbe);
 }

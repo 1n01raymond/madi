@@ -1,6 +1,6 @@
-# MADI brand assets
+# NARU brand assets
 
-The MADI mark is an engineering solid that extends past a viewport frame. The
+The NARU mark is an engineering solid that extends past a viewport frame. The
 frame is the browser; the solid is a scene larger than any single view. Faces
 are unshaded — form is carried by explicit edges, the same principle the runtime
 applies to CAD geometry.
@@ -11,10 +11,10 @@ viewers, and any host application's chrome.
 
 | Asset | Intended use |
 |---|---|
-| [`madi-hero.svg`](madi-hero.svg) | Repository, documentation, and presentation headers |
-| [`madi-mark.svg`](madi-mark.svg) | Square avatars, application icons, and compact placements |
-| [`madi-mark-inverse.svg`](madi-mark-inverse.svg) | The mark on dark surfaces |
-| [`madi-favicon.svg`](madi-favicon.svg) | Simplified variant for 16–32 px placements |
+| [`naru-hero.svg`](naru-hero.svg) | Repository, documentation, and presentation headers |
+| [`naru-mark.svg`](naru-mark.svg) | Square avatars, application icons, and compact placements |
+| [`naru-mark-inverse.svg`](naru-mark-inverse.svg) | The mark on dark surfaces |
+| [`naru-favicon.svg`](naru-favicon.svg) | Simplified variant for 16–32 px placements |
 
 ## Palette
 
@@ -35,7 +35,7 @@ Open Font License. Fall back to the system sans and mono stacks.
 
 Keep the mark's proportions. Provide clear space equal to the height of the
 viewport frame's corner radius on all sides. Below 32 px use
-`madi-favicon.svg`, which merges the internal edges into a single stroke
+`naru-favicon.svg`, which merges the internal edges into a single stroke
 weight. Do not add a hue, gradient, or shadow to the mark, and do not separate
 the solid from the frame — the overlap is the idea.
 

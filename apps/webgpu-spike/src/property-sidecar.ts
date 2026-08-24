@@ -3,14 +3,14 @@ import {
   packagePropertiesSchema,
   parsePackageProperties,
   resolvePropertyEntries,
-} from "@madi/scene-ir";
+} from "@naru3d/scene-ir";
 import type {
   ColumnPropertyBag,
   PackagePropertiesDocument,
   PropertyValue,
   PropertyValueColumnReader,
-} from "@madi/scene-ir";
-import type { CompiledPropertiesRef } from "@madi/runtime-webgpu";
+} from "@naru3d/scene-ir";
+import type { CompiledPropertiesRef } from "@naru3d/runtime-webgpu";
 
 /**
  * Where a scene's `madi.package-properties.1` sidecar can be loaded from. URL
@@ -59,7 +59,7 @@ export function formatPropertyValue(value: PropertyValue): string {
 }
 
 export function resourceFileName(uri: string): string {
-  return decodeURIComponent(new URL(uri, "https://madi.local/").pathname.split("/").pop() ?? "");
+  return decodeURIComponent(new URL(uri, "https://naru.local/").pathname.split("/").pop() ?? "");
 }
 
 async function fetchBytes(url: URL): Promise<Uint8Array> {

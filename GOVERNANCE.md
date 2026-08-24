@@ -1,6 +1,6 @@
 # Governance
 
-MADI begins as a maintainer-led open-source project. Governance should remain
+NARU begins as a maintainer-led open-source project. Governance should remain
 lightweight while the architecture and first vertical slice are being proven.
 
 ## Roles

@@ -6,13 +6,13 @@ import {
   packagePropertiesSchema,
   parsePackageProperties,
   resolvePropertyEntries,
-} from "@madi/scene-ir";
+} from "@naru3d/scene-ir";
 import type {
   EngineeringScene,
   PropertyBag,
   PropertyValue,
   PropertyValueColumns,
-} from "@madi/scene-ir";
+} from "@naru3d/scene-ir";
 import { describe, expect, it } from "vitest";
 
 import {

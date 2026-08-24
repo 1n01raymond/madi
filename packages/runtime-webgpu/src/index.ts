@@ -33,16 +33,16 @@ export type {
   SceneBounds,
 } from "./compiled-gltf.js";
 export {
-  MadiWebGpuError,
+  NaruWebGpuError,
   normalizeSectionPlane,
   Phase0Renderer,
-  Phase0Renderer as MadiWebGpuRenderer,
+  Phase0Renderer as NaruWebGpuRenderer,
 } from "./renderer.js";
 export type {
-  MadiWebGpuErrorCode,
+  NaruWebGpuErrorCode,
   NormalizedSectionPlane,
   Phase0RendererOptions,
-  Phase0RendererOptions as MadiWebGpuRendererOptions,
+  Phase0RendererOptions as NaruWebGpuRendererOptions,
   GpuSceneBatchEntry,
   ReconcileSceneOptions,
   RenderOptions,

@@ -4,7 +4,7 @@ Status: Draft 0.1
 
 ## 1. Purpose
 
-MADI's technical premise depends on measurable gains, not the word WebGPU. The
+NARU's technical premise depends on measurable gains, not the word WebGPU. The
 benchmark suite must show where time and memory go, compare equivalent visual
 and semantic workloads, and remain reproducible by external contributors.
 
@@ -98,7 +98,7 @@ representative because optimized engine instancing is already strong there.
 
 The private profile is compiled and served entirely inside the customer
 network. It records outbound requests and fails if the core runtime requires an
-external MADI service.
+external NARU service.
 
 ## 5. Baselines
 
@@ -109,8 +109,8 @@ Candidates are pinned per benchmark release:
 - xeokit/XKT for applicable BIM/CAD scenes;
 - That Open Fragments for applicable IFC/BIM scenes;
 - glTF + meshopt loaded through a representative standards-based path;
-- MADI runtime with CPU culling;
-- MADI runtime with each optional GPU optimization independently enabled.
+- NARU runtime with CPU culling;
+- NARU runtime with each optional GPU optimization independently enabled.
 
 ADR-0003 release baselines pin the exact Three.js version and use
 `InstancedMesh` for repeated prototypes and `BatchedMesh` where heterogeneous
@@ -277,7 +277,7 @@ Do not:
 ## 13. Current executable evidence
 
 `apps/benchmark-lab` now submits the same generated arrays, transforms, colors,
-camera trace, resolution, and four logical surface draws through MADI direct
+camera trace, resolution, and four logical surface draws through NARU direct
 WebGPU and Three.js WebGPURenderer 0.180.0. The committed 10k gate captures both
 paths in headed Chrome and Firefox with no browser errors and no HTTP requests
 outside the local static origin.
@@ -290,7 +290,7 @@ harness only; they are not a performance claim or an ADR outcome. See
 
 The second committed slice reaches the public 100k/10M floor with 256
 deterministic prototypes and a local-review trace that leaves roughly 34% of
-occurrences visible in the final frame. MADI uses reusable dense visibility
+occurrences visible in the final frame. NARU uses reusable dense visibility
 tables plus CPU instance compaction; the stronger Three.js baseline uses one
 `BatchedMesh` with per-object culling and default opaque sorting. Headed Chrome
 and Firefox complete both paths with matching per-browser visibility and no
@@ -315,10 +315,10 @@ See `artifacts/benchmarks/heterogeneous-repeatability/`.
 
 The fourth record adds two decision-quality signals to the same repeated
 matrix. WebGPU `timestamp-query` pass timing (Chrome and Firefox both exposed
-the feature) shows the MADI surface pass is sub-millisecond — median 0.459 ms
+the feature) shows the NARU surface pass is sub-millisecond — median 0.459 ms
 in Chrome, p95 0.852 ms — so at this tier the frame budget is CPU-side and
 any renderer difference is decided on main-thread cost, not GPU raster work.
-A backend-owned retained-resource census attributes scene memory: MADI
+A backend-owned retained-resource census attributes scene memory: NARU
 reports exact allocations (10.92 MiB GPU, 9.16 MiB CPU staging) while the
 Three.js figure is a constructed floor (10.78 MiB GPU, 1.47 MiB enumerable
 CPU) because its internals are not enumerable. This session's paired CPU-p95

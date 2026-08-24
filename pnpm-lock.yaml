@@ -53,7 +53,7 @@ importers:
 
   apps/benchmark-lab:
     dependencies:
-      '@madi/runtime-webgpu':
+      '@naru3d/runtime-webgpu':
         specifier: workspace:*
         version: link:../../packages/runtime-webgpu
       three:
@@ -72,10 +72,10 @@ importers:
 
   apps/webgpu-spike:
     dependencies:
-      '@madi/runtime-webgpu':
+      '@naru3d/runtime-webgpu':
         specifier: workspace:*
         version: link:../../packages/runtime-webgpu
-      '@madi/scene-ir':
+      '@naru3d/scene-ir':
         specifier: workspace:*
         version: link:../../packages/scene-ir
     devDependencies:
@@ -88,7 +88,7 @@ importers:
 
   packages/compiler:
     dependencies:
-      '@madi/scene-ir':
+      '@naru3d/scene-ir':
         specifier: workspace:*
         version: link:../scene-ir
     devDependencies:
@@ -106,7 +106,7 @@ importers:
 
   tools/benchmark:
     dependencies:
-      '@madi/scene-ir':
+      '@naru3d/scene-ir':
         specifier: workspace:*
         version: link:../../packages/scene-ir
     devDependencies:

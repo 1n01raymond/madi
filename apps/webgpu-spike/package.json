@@ -1,5 +1,5 @@
 {
-  "name": "@madi/webgpu-spike",
+  "name": "@naru3d/webgpu-spike",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -9,8 +9,8 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
-    "@madi/runtime-webgpu": "workspace:*",
-    "@madi/scene-ir": "workspace:*"
+    "@naru3d/runtime-webgpu": "workspace:*",
+    "@naru3d/scene-ir": "workspace:*"
   },
   "devDependencies": {
     "@webgpu/types": "catalog:",

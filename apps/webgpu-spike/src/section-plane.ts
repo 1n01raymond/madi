@@ -1,4 +1,4 @@
-import type { SceneBounds, SectionPlane } from "@madi/runtime-webgpu";
+import type { SceneBounds, SectionPlane } from "@naru3d/runtime-webgpu";
 
 export type SectionAxis = "x" | "y" | "z";
 

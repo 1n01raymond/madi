@@ -49,7 +49,7 @@ pnpm adapter:ifc:test
 ```
 
 `pnpm adapter:ifc:test` looks for a Python interpreter with `pytest` and
-`numpy` importable via `--python <path>`, `MADI_PYTHON`, then plain `python`/
+`numpy` importable via `--python <path>`, `NARU_PYTHON`, then plain `python`/
 `python3` on `PATH`, and runs `native/adapter-ifc/tests/`. This is separate
 from `pnpm check`, the same way `native:check` is: it needs a Python
 interpreter present, and CI runs it in its own `python-adapter` job.
@@ -65,7 +65,7 @@ python -m venv output/venv-ifc
 output/venv-ifc/Scripts/python -m pip install \
   -r native/adapter-ifc/tools/requirements-evidence.txt
 
-pnpm madi compile-ifc \
+pnpm naru compile-ifc \
   --document architecture=output/external-fixtures/ifc-bench-digital-hub/arc.ifc \
   --uri-hint architecture=projects/digital_hub/arc.ifc \
   --document heating=output/external-fixtures/ifc-bench-digital-hub/heating.ifc \
@@ -95,4 +95,4 @@ normal CI validates those compact records without installing IfcOpenShell or
 downloading the IFC sources.
 
 IfcOpenShell is LGPL-3.0-or-later. It is an adapter dependency and is not
-bundled into MADI's browser runtime.
+bundled into NARU's browser runtime.

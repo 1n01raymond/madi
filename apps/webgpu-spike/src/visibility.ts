@@ -1,4 +1,4 @@
-import type { GpuScene } from "@madi/runtime-webgpu";
+import type { GpuScene } from "@naru3d/runtime-webgpu";
 
 export type VisibilityMode = "all" | "hidden" | "isolated";
 
