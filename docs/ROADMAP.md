@@ -68,7 +68,11 @@ compiler streams that document record by record, and interning property keys
 and key combinations at scene level has since shrunk the structure to 419.5 MB
 — back under one string, with the boundary crossing preserved in history.
 sixty5 compiles end to end into a recorded, Khronos-validated 608.2 MB
-package; a browser result for that package remains pending.
+package. Headed Chrome now consumes that package: all 78,173 renderable
+occurrences render, the fixed 64 MiB residency budgets hold with 26 of 234
+target chunks promoted, and picking resolves — while the recorded 264.6 s
+first coarse frame states the real-large first-frame boundary that Phase 2
+scheduling work must beat (`artifacts/ifc/sixty5-browser/`).
 
 - local STEP AP242 input;
 - XDE hierarchy, names, colors, units, transforms;

@@ -68,6 +68,21 @@ transport format, and property-key indexing (split.2) removed the repeated key
 text; encoding the property values themselves in a binary column form remains
 a named follow-up.
 
+### Real-large browser residency
+
+Headed Chrome now consumes that compiled sixty5 package end to end, with the
+served bytes digest-verified against the committed build report before
+recording. The record is `artifacts/ifc/sixty5-browser/`, checked by
+`pnpm ifc:browser:check`.
+
+| Signal | Evidence | Status |
+|---|---|---|
+| Real-large load | The 448.8 MB `scene.gltf` parses and lists 188,319 occurrence records in 3.5 s; the first coarse WebGPU frame with all 78,173 renderable occurrences appears at 264.6 s and the ready state at 323.8 s | Passed, recorded in headed Chrome 151 |
+| Bounded residency | Under the default 64 MiB decoded/GPU budgets, promotion stops at 26 of 234 target chunks with 66,951,636 decoded / 60,644,136 GPU resident bytes; the other 208 chunks retain coarse fallbacks and `targetReady` reports `limited` | Passed; the resident set reproduced exactly across two runs |
+| Standard delivery | All 27 `scene.bin` requests are HTTP 206 `bytes=` Ranges; the budget-limited frame renders 975,013 triangles and 466,452 coarse edge segments with zero console issues | Passed |
+| Source picking | A center-canvas click resolves one concrete foundation beam to glTF node 148735, object ID 148736 | Passed |
+| First-frame boundary | The Worker decode of the 37.8 MB `coarse.bin` takes 7.3 s; the rest of the 261.1 s to the first frame sits on the main-thread document handoff and 42,588-batch construction path | Recorded as the named Phase 2 optimization input |
+
 ## First browser runtime slice
 
 The browser now consumes that compiled package directly. It reads the glTF node
@@ -112,9 +127,12 @@ See `artifacts/phase1/README.md` for the compiled package,
   residency budget. The current selection path can only restore retained coarse
   fallback batches.
 - Full material, mass, PMI, and domain-specific property schemas remain pending.
-- A browser, residency, or benchmark result for the compiled real-large sixty5
-  federation. Its 608.2 MB package now exists with Khronos validation, but no
-  runtime has consumed it.
+- A useful first frame at real-large scale. The recorded sixty5 browser result
+  (`artifacts/ifc/sixty5-browser/`) proves loading, bounded residency, and
+  picking, but its 264.6 s first coarse frame is dominated by the main-thread
+  per-prototype batch path; no run yet demonstrates an early frame there. A
+  Firefox repeat and any benchmark or ADR-0003 claim for sixty5 also remain
+  unrecorded.
 - A repeated reference-hardware and integrated-GPU decision matrix for ADR-0003.
 - Large-coordinate precision behavior required by ADR-0005.
 - A public end-to-end review workflow and reproducible performance report.
@@ -139,8 +157,11 @@ property keys and key combinations are interned once at scene level — the
 sixty5 structure is down to 419,502,749 bytes with every downstream output
 invariant verified in `artifacts/ifc/sixty5/`. The next compiler increment is
 a binary column encoding for the property values themselves — they still
-dominate the resident scene — and the next evidence gate is a browser result
-for that compiled real-large package.
+dominate the resident scene. The browser gate for that package is now
+recorded (`artifacts/ifc/sixty5-browser/`): loading, bounded residency, and
+picking hold at real-large scale, and the 264.6 s first coarse frame names the
+next runtime increment — cutting the main-thread per-prototype batch path
+that dominates it.
 
 In parallel, the repeated 100k record now carries GPU pass timestamps and a
 backend-owned retained-resource census on the discrete host: the MADI surface

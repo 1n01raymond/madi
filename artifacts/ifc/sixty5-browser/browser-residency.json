@@ -1,0 +1,811 @@
+{
+  "schemaVersion": "madi.ifc-browser-residency.1",
+  "capturedAt": "2026-08-24T06:37:22.165Z",
+  "browser": {
+    "id": "chrome",
+    "engine": "Blink",
+    "version": "151.0.7922.139",
+    "headless": false,
+    "viewport": {
+      "width": 1320,
+      "height": 1000
+    }
+  },
+  "host": {
+    "platform": "win32",
+    "architecture": "x64"
+  },
+  "source": {
+    "buildReport": "artifacts/ifc/sixty5/build-report.json",
+    "packageDigest": "638aaf1784efebe5b4ce041fe3dc56674c7f99a1f7248eaa86739d7c7143333f",
+    "resources": [
+      {
+        "path": "scene.gltf",
+        "mediaType": "model/gltf+json",
+        "bytes": 448823616,
+        "sha256": "92938609bb0696ab9e1d17bebf831447cf55c20644f71877727117be096eb841"
+      },
+      {
+        "path": "scene.bin",
+        "mediaType": "application/octet-stream",
+        "bytes": 120707064,
+        "sha256": "7a04489cfadb39706b7b8c3832402991e8d6f1e15983547d71939cc924fad913"
+      },
+      {
+        "path": "coarse.bin",
+        "mediaType": "application/octet-stream",
+        "bytes": 38700720,
+        "sha256": "258e085d4f3d0b380bb89c3596b2e3bfc4a43177afe9fc7e92d6e1046db9031b"
+      }
+    ],
+    "servedFrom": "Vite dev static hosting with HTTP Range support"
+  },
+  "milestones": {
+    "hierarchyReadyMs": 3462,
+    "coarseFrameMs": 264603,
+    "readyMs": 323844
+  },
+  "snapshot": {
+    "status": "Residency budget reached · 42588 surface batches retained · 78173 renderable occurrences",
+    "statusState": "ready",
+    "statusStage": "rendered",
+    "prototypeCount": "42435",
+    "occurrenceCount": "78173",
+    "triangleCount": "975,013",
+    "edgeCount": "466,452",
+    "binarySize": "117,878.0 KiB",
+    "decodeTime": "7300.6 ms",
+    "geometryResult": "65,382.5 KiB CPU / 59,222.8 KiB GPU resident (budget 65,536.0 KiB)",
+    "gpuAdapter": "nvidia",
+    "dataset": {
+      "sceneLoading": "false",
+      "sceneSource": "url",
+      "hierarchyMatches": "0",
+      "hierarchyReady": "true",
+      "coarseReady": "true",
+      "geometryRepresentation": "mixed",
+      "targetChunksTotal": "234",
+      "residencyBudgetBytes": "67108864",
+      "targetChunksReady": "26",
+      "residentDecodedBytes": "66951636",
+      "residentGpuBytes": "60644136",
+      "residencyBudgetReached": "true",
+      "targetReady": "limited",
+      "visibilityMode": "all",
+      "visibleOccurrences": "78173",
+      "selectedObjectId": "0",
+      "sectionEnabled": "false",
+      "sectionAxis": "z"
+    },
+    "usedJsHeapBytes": 1027346535,
+    "totalJsHeapBytes": 1110598527,
+    "timeline": [
+      {
+        "milliseconds": 126,
+        "target": "html",
+        "attribute": "data-scene-loading",
+        "value": "true"
+      },
+      {
+        "milliseconds": 126,
+        "target": "status",
+        "attribute": "data-state",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 3458,
+        "target": "html",
+        "attribute": "data-hierarchy-ready",
+        "value": "true"
+      },
+      {
+        "milliseconds": 3458,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "hierarchy"
+      },
+      {
+        "milliseconds": 264155,
+        "target": "html",
+        "attribute": "data-coarse-ready",
+        "value": "true"
+      },
+      {
+        "milliseconds": 264155,
+        "target": "html",
+        "attribute": "data-geometry-representation",
+        "value": "coarse"
+      },
+      {
+        "milliseconds": 264155,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "coarse"
+      },
+      {
+        "milliseconds": 264155,
+        "target": "html",
+        "attribute": "data-target-chunks-total",
+        "value": "234"
+      },
+      {
+        "milliseconds": 266177,
+        "target": "html",
+        "attribute": "data-target-chunks-ready",
+        "value": "1"
+      },
+      {
+        "milliseconds": 266177,
+        "target": "html",
+        "attribute": "data-geometry-representation",
+        "value": "mixed"
+      },
+      {
+        "milliseconds": 266177,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "target-chunks"
+      },
+      {
+        "milliseconds": 268365,
+        "target": "html",
+        "attribute": "data-target-chunks-ready",
+        "value": "2"
+      },
+      {
+        "milliseconds": 268365,
+        "target": "html",
+        "attribute": "data-geometry-representation",
+        "value": "mixed"
+      },
+      {
+        "milliseconds": 268365,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "target-chunks"
+      },
+      {
+        "milliseconds": 270591,
+        "target": "html",
+        "attribute": "data-target-chunks-ready",
+        "value": "3"
+      },
+      {
+        "milliseconds": 270591,
+        "target": "html",
+        "attribute": "data-geometry-representation",
+        "value": "mixed"
+      },
+      {
+        "milliseconds": 270591,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "target-chunks"
+      },
+      {
+        "milliseconds": 272816,
+        "target": "html",
+        "attribute": "data-target-chunks-ready",
+        "value": "4"
+      },
+      {
+        "milliseconds": 272816,
+        "target": "html",
+        "attribute": "data-geometry-representation",
+        "value": "mixed"
+      },
+      {
+        "milliseconds": 272816,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "target-chunks"
+      },
+      {
+        "milliseconds": 275078,
+        "target": "html",
+        "attribute": "data-target-chunks-ready",
+        "value": "5"
+      },
+      {
+        "milliseconds": 275078,
+        "target": "html",
+        "attribute": "data-geometry-representation",
+        "value": "mixed"
+      },
+      {
+        "milliseconds": 275078,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "target-chunks"
+      },
+      {
+        "milliseconds": 277207,
+        "target": "html",
+        "attribute": "data-target-chunks-ready",
+        "value": "6"
+      },
+      {
+        "milliseconds": 277207,
+        "target": "html",
+        "attribute": "data-geometry-representation",
+        "value": "mixed"
+      },
+      {
+        "milliseconds": 277207,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "target-chunks"
+      },
+      {
+        "milliseconds": 279498,
+        "target": "html",
+        "attribute": "data-target-chunks-ready",
+        "value": "7"
+      },
+      {
+        "milliseconds": 279498,
+        "target": "html",
+        "attribute": "data-geometry-representation",
+        "value": "mixed"
+      },
+      {
+        "milliseconds": 279498,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "target-chunks"
+      },
+      {
+        "milliseconds": 281716,
+        "target": "html",
+        "attribute": "data-target-chunks-ready",
+        "value": "8"
+      },
+      {
+        "milliseconds": 281716,
+        "target": "html",
+        "attribute": "data-geometry-representation",
+        "value": "mixed"
+      },
+      {
+        "milliseconds": 281716,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "target-chunks"
+      },
+      {
+        "milliseconds": 283850,
+        "target": "html",
+        "attribute": "data-target-chunks-ready",
+        "value": "9"
+      },
+      {
+        "milliseconds": 283850,
+        "target": "html",
+        "attribute": "data-geometry-representation",
+        "value": "mixed"
+      },
+      {
+        "milliseconds": 283850,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "target-chunks"
+      },
+      {
+        "milliseconds": 286142,
+        "target": "html",
+        "attribute": "data-target-chunks-ready",
+        "value": "10"
+      },
+      {
+        "milliseconds": 286142,
+        "target": "html",
+        "attribute": "data-geometry-representation",
+        "value": "mixed"
+      },
+      {
+        "milliseconds": 286142,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "target-chunks"
+      },
+      {
+        "milliseconds": 288261,
+        "target": "html",
+        "attribute": "data-target-chunks-ready",
+        "value": "11"
+      },
+      {
+        "milliseconds": 288261,
+        "target": "html",
+        "attribute": "data-geometry-representation",
+        "value": "mixed"
+      },
+      {
+        "milliseconds": 288261,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "target-chunks"
+      },
+      {
+        "milliseconds": 290530,
+        "target": "html",
+        "attribute": "data-target-chunks-ready",
+        "value": "12"
+      },
+      {
+        "milliseconds": 290530,
+        "target": "html",
+        "attribute": "data-geometry-representation",
+        "value": "mixed"
+      },
+      {
+        "milliseconds": 290530,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "target-chunks"
+      },
+      {
+        "milliseconds": 292688,
+        "target": "html",
+        "attribute": "data-target-chunks-ready",
+        "value": "13"
+      },
+      {
+        "milliseconds": 292688,
+        "target": "html",
+        "attribute": "data-geometry-representation",
+        "value": "mixed"
+      },
+      {
+        "milliseconds": 292688,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "target-chunks"
+      },
+      {
+        "milliseconds": 294940,
+        "target": "html",
+        "attribute": "data-target-chunks-ready",
+        "value": "14"
+      },
+      {
+        "milliseconds": 294940,
+        "target": "html",
+        "attribute": "data-geometry-representation",
+        "value": "mixed"
+      },
+      {
+        "milliseconds": 294940,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "target-chunks"
+      },
+      {
+        "milliseconds": 297076,
+        "target": "html",
+        "attribute": "data-target-chunks-ready",
+        "value": "15"
+      },
+      {
+        "milliseconds": 297076,
+        "target": "html",
+        "attribute": "data-geometry-representation",
+        "value": "mixed"
+      },
+      {
+        "milliseconds": 297076,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "target-chunks"
+      },
+      {
+        "milliseconds": 299353,
+        "target": "html",
+        "attribute": "data-target-chunks-ready",
+        "value": "16"
+      },
+      {
+        "milliseconds": 299353,
+        "target": "html",
+        "attribute": "data-geometry-representation",
+        "value": "mixed"
+      },
+      {
+        "milliseconds": 299353,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "target-chunks"
+      },
+      {
+        "milliseconds": 301501,
+        "target": "html",
+        "attribute": "data-target-chunks-ready",
+        "value": "17"
+      },
+      {
+        "milliseconds": 301501,
+        "target": "html",
+        "attribute": "data-geometry-representation",
+        "value": "mixed"
+      },
+      {
+        "milliseconds": 301501,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "target-chunks"
+      },
+      {
+        "milliseconds": 303763,
+        "target": "html",
+        "attribute": "data-target-chunks-ready",
+        "value": "18"
+      },
+      {
+        "milliseconds": 303763,
+        "target": "html",
+        "attribute": "data-geometry-representation",
+        "value": "mixed"
+      },
+      {
+        "milliseconds": 303763,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "target-chunks"
+      },
+      {
+        "milliseconds": 305971,
+        "target": "html",
+        "attribute": "data-target-chunks-ready",
+        "value": "19"
+      },
+      {
+        "milliseconds": 305971,
+        "target": "html",
+        "attribute": "data-geometry-representation",
+        "value": "mixed"
+      },
+      {
+        "milliseconds": 305971,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "target-chunks"
+      },
+      {
+        "milliseconds": 308233,
+        "target": "html",
+        "attribute": "data-target-chunks-ready",
+        "value": "20"
+      },
+      {
+        "milliseconds": 308234,
+        "target": "html",
+        "attribute": "data-geometry-representation",
+        "value": "mixed"
+      },
+      {
+        "milliseconds": 308234,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "target-chunks"
+      },
+      {
+        "milliseconds": 310517,
+        "target": "html",
+        "attribute": "data-target-chunks-ready",
+        "value": "21"
+      },
+      {
+        "milliseconds": 310517,
+        "target": "html",
+        "attribute": "data-geometry-representation",
+        "value": "mixed"
+      },
+      {
+        "milliseconds": 310517,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "target-chunks"
+      },
+      {
+        "milliseconds": 312962,
+        "target": "html",
+        "attribute": "data-target-chunks-ready",
+        "value": "22"
+      },
+      {
+        "milliseconds": 312962,
+        "target": "html",
+        "attribute": "data-geometry-representation",
+        "value": "mixed"
+      },
+      {
+        "milliseconds": 312962,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "target-chunks"
+      },
+      {
+        "milliseconds": 315299,
+        "target": "html",
+        "attribute": "data-target-chunks-ready",
+        "value": "23"
+      },
+      {
+        "milliseconds": 315299,
+        "target": "html",
+        "attribute": "data-geometry-representation",
+        "value": "mixed"
+      },
+      {
+        "milliseconds": 315299,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "target-chunks"
+      },
+      {
+        "milliseconds": 317454,
+        "target": "html",
+        "attribute": "data-target-chunks-ready",
+        "value": "24"
+      },
+      {
+        "milliseconds": 317454,
+        "target": "html",
+        "attribute": "data-geometry-representation",
+        "value": "mixed"
+      },
+      {
+        "milliseconds": 317454,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "target-chunks"
+      },
+      {
+        "milliseconds": 319598,
+        "target": "html",
+        "attribute": "data-target-chunks-ready",
+        "value": "25"
+      },
+      {
+        "milliseconds": 319598,
+        "target": "html",
+        "attribute": "data-geometry-representation",
+        "value": "mixed"
+      },
+      {
+        "milliseconds": 319598,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "target-chunks"
+      },
+      {
+        "milliseconds": 321733,
+        "target": "html",
+        "attribute": "data-target-chunks-ready",
+        "value": "26"
+      },
+      {
+        "milliseconds": 321733,
+        "target": "html",
+        "attribute": "data-geometry-representation",
+        "value": "mixed"
+      },
+      {
+        "milliseconds": 321733,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "target-chunks"
+      },
+      {
+        "milliseconds": 323845,
+        "target": "html",
+        "attribute": "data-residency-budget-reached",
+        "value": "true"
+      },
+      {
+        "milliseconds": 323845,
+        "target": "html",
+        "attribute": "data-geometry-representation",
+        "value": "mixed"
+      },
+      {
+        "milliseconds": 323845,
+        "target": "html",
+        "attribute": "data-target-ready",
+        "value": "limited"
+      },
+      {
+        "milliseconds": 323845,
+        "target": "status",
+        "attribute": "data-state",
+        "value": "ready"
+      },
+      {
+        "milliseconds": 323845,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "rendered"
+      },
+      {
+        "milliseconds": 323845,
+        "target": "html",
+        "attribute": "data-scene-loading",
+        "value": "false"
+      }
+    ]
+  },
+  "picking": {
+    "selection": "Selected 16_SFO_AT_balk vierkant beton:fundbalk 1000x600 (C30/37):975347 · node 148735 · ID 148736 · 0 CAD edge refs",
+    "selectedObjectId": "148736"
+  },
+  "binaryRequests": [
+    {
+      "resource": "?scene=http%3A%2F%2F127.0.0.1%3A4174%2Fscene.gltf",
+      "status": 200,
+      "range": null
+    },
+    {
+      "resource": "scene.gltf",
+      "status": 200,
+      "range": null
+    },
+    {
+      "resource": "coarse.bin",
+      "status": 200,
+      "range": null
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=42207408-42730943"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=67817520-68325167"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=46347360-46869191"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=67301712-67817519"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=44300976-44812943"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=43777680-44300975"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=93075156-93597923"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=118107708-118289819"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=118942848-119419703"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=44812944-45330575"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=68325168-68848319"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=24486288-25009199"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=92555124-93075155"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=120637416-120707063"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=98922588-99422891"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=23962128-24486287"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=91511076-92034179"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=97224924-97741859"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=96700716-97224923"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=119419704-119875139"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=55933740-56457755"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=25009200-25531535"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=68848320-69371471"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=49886172-50362379"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=102041820-102565499"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=46869192-47383991"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=2093940-2603543"
+    }
+  ],
+  "consoleIssues": [],
+  "screenshots": {
+    "coarse": {
+      "path": "coarse-frame.png",
+      "bytes": 237034,
+      "sha256": "f20a5def537c85dd3ac4e783df5dc484d5876e8bdaf2c89e71706da0e94fcf1d"
+    },
+    "budgetLimited": {
+      "path": "budget-limited.png",
+      "bytes": 251037,
+      "sha256": "89ee769d1ec63c754334de987672addf9470141d3f663b75d46080f25f23cca4"
+    },
+    "picked": {
+      "path": "picked.png",
+      "bytes": 251037,
+      "sha256": "4c0a491171dfa7ee885969b4869a5d7ac3532a00023e3ddda38bf2f112a983d0"
+    }
+  }
+}
