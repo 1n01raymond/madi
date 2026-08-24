@@ -22,9 +22,14 @@ backend order, and measures backend scene-activation memory deltas in Chrome.
 The fourth record,
 [`heterogeneous-gpu-timing`](heterogeneous-gpu-timing/README.md), adds WebGPU
 pass timestamps and a backend-owned retained-resource census to the same
-repeated matrix. It proves the MADI surface pass is sub-millisecond on this
-host, so the ADR-0003 comparison at this tier is CPU-side; the integrated-GPU
-profile run remains outstanding.
+repeated matrix. It proves the MADI surface pass is sub-millisecond on that
+discrete host, so the ADR-0003 comparison at that tier is CPU-side.
+
+The fifth record,
+[`heterogeneous-gpu-timing-integrated`](heterogeneous-gpu-timing-integrated/README.md),
+repeats the locked matrix on an Apple M4 Pro integrated GPU. Chrome reproduces
+the CPU-p95 and memory continuation signals, while Firefox does not reproduce
+the CPU-p95 advantage; the cross-host records remain exploratory.
 
 Source qualification is tracked separately under
 [`../fixtures/external`](../fixtures/external/README.md). Those records verify

@@ -434,4 +434,8 @@ Phase 1 run covers Chrome/Blink and Firefox/Gecko with the same compiled package
 hierarchy-before-binary assertion, viewport, pick coordinate, expected
 occurrence/source mapping, and console-error policy. See
 `artifacts/browser-matrix` for exact versions, adapter disclosure, screenshots,
-and hashes.
+and hashes. A separate real-Safari probe, `pnpm safari:compatibility`, uses the
+macOS-provided SafariDriver. The reviewed Safari 18.6 default-settings run loads
+all 87 hierarchy records but does not expose `navigator.gpu`, then reaches the
+expected unsupported-browser diagnostic; it is capability/failure evidence,
+not rendering conformance.

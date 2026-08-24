@@ -74,3 +74,7 @@ pnpm browser:matrix -- --output artifacts/browser-matrix
 
 The Chrome channel must be installed on the host. Use `--headless` only as an
 additional diagnostic; it does not replace the headed visual record.
+
+Real Safari is recorded separately through macOS SafariDriver rather than a
+Playwright WebKit substitute. See `../browser-safari/README.md` for the current
+default-settings capability result.

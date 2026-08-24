@@ -1,0 +1,1639 @@
+{
+  "schemaVersion": "madi.industrial-browser-matrix.4",
+  "status": "exploratory-not-adr-decision",
+  "capturedAt": "2026-08-24T06:39:21.432Z",
+  "host": {
+    "platform": "darwin",
+    "architecture": "arm64"
+  },
+  "config": {
+    "scale": "target",
+    "profile": "heterogeneous",
+    "culling": "frustum",
+    "frames": 90,
+    "warmup": 30,
+    "repeats": 3,
+    "memory": "scene-delta"
+  },
+  "comparisonContract": {
+    "sameWorkload": true,
+    "sameCameraTrace": true,
+    "sameResolution": true,
+    "surfaces": true,
+    "explicitEdges": false,
+    "picking": "on-demand-not-sampled",
+    "frustumCulling": "frustum",
+    "cameraTrace": "local-review",
+    "lod": false,
+    "selfHostedStaticOrigin": true,
+    "outboundRequestCount": 0,
+    "freshBrowserProcessPerRun": true,
+    "alternatingBackendOrder": true,
+    "sceneMemoryDelta": true,
+    "gpuTimestamps": "madi-surface-pass-only",
+    "retainedResourceCensus": true
+  },
+  "results": [
+    {
+      "repeat": 1,
+      "browser": "chrome",
+      "browserEngine": "Blink",
+      "browserVersion": "151.0.7922.170",
+      "headless": false,
+      "viewport": {
+        "width": 1440,
+        "height": 960
+      },
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36",
+      "platform": "MacIntel",
+      "adapter": {
+        "vendor": "apple",
+        "architecture": "metal-3",
+        "device": "",
+        "description": "",
+        "isFallbackAdapter": false
+      },
+      "consoleIssues": [],
+      "outboundRequests": [],
+      "result": {
+        "schemaVersion": "madi.industrial-browser-benchmark.4",
+        "backend": "madi",
+        "scale": "target",
+        "profile": "heterogeneous",
+        "features": {
+          "surfaces": true,
+          "explicitEdges": false,
+          "picking": "on-demand-not-sampled",
+          "frustumCulling": "frustum",
+          "lod": false,
+          "cameraTrace": "local-review"
+        },
+        "workload": {
+          "id": "madi.industrial-heterogeneous.1",
+          "prototypeCount": 256,
+          "occurrenceCount": 100000,
+          "uniqueTriangleCount": 26240,
+          "submittedTriangleCount": 10223768,
+          "explicitEdgeSegmentCount": 6064765,
+          "instanceBytes": 9600000,
+          "profile": "heterogeneous"
+        },
+        "config": {
+          "warmupFrames": 30,
+          "sampleFrames": 90,
+          "memoryMode": "scene-delta"
+        },
+        "milestones": {
+          "workloadReadyMs": 32.955000042915344,
+          "backendReadyMs": 124.97500002384186,
+          "firstFrameMs": 134.84500002861023
+        },
+        "frameIntervals": {
+          "samples": 89,
+          "medianMs": 8.334999999999127,
+          "p95Ms": 16.3799999999992,
+          "p99Ms": 25.544999999998254,
+          "worstMs": 25.544999999998254
+        },
+        "cpuSubmit": {
+          "samples": 90,
+          "medianMs": 4.425000071525574,
+          "p95Ms": 16.014999985694885,
+          "p99Ms": 22.3400000333786,
+          "worstMs": 22.3400000333786
+        },
+        "renderer": {
+          "logicalDrawCalls": 256,
+          "visibleSubdraws": 256,
+          "unculledSubmittedTriangles": 10223768,
+          "visibleOccurrences": 34711,
+          "visibleTriangles": 3548756,
+          "cullingImplementation": "dense-cpu-compaction"
+        },
+        "gpuFrameTiming": {
+          "supported": true,
+          "timestampPeriodNs": 1,
+          "frameMs": {
+            "samples": 91,
+            "medianMs": 3.7355519999999998,
+            "p95Ms": 7.7987839999999995,
+            "p99Ms": 9.306111999999999,
+            "worstMs": 9.306111999999999
+          },
+          "scope": "madi-surface-pass"
+        },
+        "retainedResources": {
+          "scope": "backend-owned-scene-upload-resources",
+          "cpuBytes": 9600000,
+          "gpuBytes": 11453536,
+          "gpuAttachmentPx": [
+            915,
+            620
+          ],
+          "accounting": "exact-allocator-census"
+        },
+        "memory": {
+          "usedJsHeapBytes": 44041244,
+          "userAgentSpecificBytes": 45408301,
+          "backendCoreReadyBytes": 32836087,
+          "sceneActivatedBytes": 45370712,
+          "sceneActivationDeltaBytes": 12534625,
+          "measurementOverheadMs": 34014.23000001907,
+          "measurementScope": "diagnostic-backend-scene-activation-delta"
+        }
+      },
+      "screenshot": {
+        "path": "chrome-151-madi-target-heterogeneous-frustum-macos.png",
+        "bytes": 831909,
+        "sha256": "2c24c54f5c841bdfd1d813ea00606eceb2b29c2bfc0d07a764397c89aaa49f43"
+      }
+    },
+    {
+      "repeat": 1,
+      "browser": "chrome",
+      "browserEngine": "Blink",
+      "browserVersion": "151.0.7922.170",
+      "headless": false,
+      "viewport": {
+        "width": 1440,
+        "height": 960
+      },
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36",
+      "platform": "MacIntel",
+      "adapter": {
+        "vendor": "apple",
+        "architecture": "metal-3",
+        "device": "",
+        "description": "",
+        "isFallbackAdapter": false
+      },
+      "consoleIssues": [],
+      "outboundRequests": [],
+      "result": {
+        "schemaVersion": "madi.industrial-browser-benchmark.4",
+        "backend": "three",
+        "scale": "target",
+        "profile": "heterogeneous",
+        "features": {
+          "surfaces": true,
+          "explicitEdges": false,
+          "picking": "on-demand-not-sampled",
+          "frustumCulling": "frustum",
+          "lod": false,
+          "cameraTrace": "local-review"
+        },
+        "workload": {
+          "id": "madi.industrial-heterogeneous.1",
+          "prototypeCount": 256,
+          "occurrenceCount": 100000,
+          "uniqueTriangleCount": 26240,
+          "submittedTriangleCount": 10223768,
+          "explicitEdgeSegmentCount": 6064765,
+          "instanceBytes": 9600000,
+          "profile": "heterogeneous"
+        },
+        "config": {
+          "warmupFrames": 30,
+          "sampleFrames": 90,
+          "memoryMode": "scene-delta"
+        },
+        "milestones": {
+          "workloadReadyMs": 34.644999980926514,
+          "backendReadyMs": 210.98499989509583,
+          "firstFrameMs": 239.06499993801117
+        },
+        "frameIntervals": {
+          "samples": 89,
+          "medianMs": 8.335000000000946,
+          "p95Ms": 24.36499999999978,
+          "p99Ms": 25.295000000000073,
+          "worstMs": 25.295000000000073
+        },
+        "cpuSubmit": {
+          "samples": 90,
+          "medianMs": 9.164999961853027,
+          "p95Ms": 22.259999990463257,
+          "p99Ms": 24.269999980926514,
+          "worstMs": 24.269999980926514
+        },
+        "renderer": {
+          "logicalDrawCalls": 1,
+          "visibleSubdraws": 34711,
+          "unculledSubmittedTriangles": 10223768,
+          "visibleOccurrences": 34711,
+          "visibleTriangles": 3548756,
+          "cullingImplementation": "three-batched-mesh"
+        },
+        "gpuFrameTiming": {
+          "supported": false,
+          "timestampPeriodNs": null,
+          "frameMs": null,
+          "scope": "three-backend-not-instrumented"
+        },
+        "retainedResources": {
+          "scope": "backend-owned-scene-upload-resources",
+          "cpuBytes": 1537536,
+          "gpuBytes": 11304832,
+          "gpuAttachmentPx": [
+            915,
+            620
+          ],
+          "accounting": "constructed-floor-three-internals-not-enumerable"
+        },
+        "memory": {
+          "usedJsHeapBytes": 76560631,
+          "userAgentSpecificBytes": 86430468,
+          "backendCoreReadyBytes": 60048201,
+          "sceneActivatedBytes": 80333692,
+          "sceneActivationDeltaBytes": 20285491,
+          "measurementOverheadMs": 24443.895000100136,
+          "measurementScope": "diagnostic-backend-scene-activation-delta"
+        }
+      },
+      "screenshot": {
+        "path": "chrome-151-three-target-heterogeneous-frustum-macos.png",
+        "bytes": 803888,
+        "sha256": "e19fac6240021404e01fcb894b79a16be194592ff43ca6913c21a09274b4c99a"
+      }
+    },
+    {
+      "repeat": 2,
+      "browser": "chrome",
+      "browserEngine": "Blink",
+      "browserVersion": "151.0.7922.170",
+      "headless": false,
+      "viewport": {
+        "width": 1440,
+        "height": 960
+      },
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36",
+      "platform": "MacIntel",
+      "adapter": {
+        "vendor": "apple",
+        "architecture": "metal-3",
+        "device": "",
+        "description": "",
+        "isFallbackAdapter": false
+      },
+      "consoleIssues": [],
+      "outboundRequests": [],
+      "result": {
+        "schemaVersion": "madi.industrial-browser-benchmark.4",
+        "backend": "three",
+        "scale": "target",
+        "profile": "heterogeneous",
+        "features": {
+          "surfaces": true,
+          "explicitEdges": false,
+          "picking": "on-demand-not-sampled",
+          "frustumCulling": "frustum",
+          "lod": false,
+          "cameraTrace": "local-review"
+        },
+        "workload": {
+          "id": "madi.industrial-heterogeneous.1",
+          "prototypeCount": 256,
+          "occurrenceCount": 100000,
+          "uniqueTriangleCount": 26240,
+          "submittedTriangleCount": 10223768,
+          "explicitEdgeSegmentCount": 6064765,
+          "instanceBytes": 9600000,
+          "profile": "heterogeneous"
+        },
+        "config": {
+          "warmupFrames": 30,
+          "sampleFrames": 90,
+          "memoryMode": "scene-delta"
+        },
+        "milestones": {
+          "workloadReadyMs": 33.794999957084656,
+          "backendReadyMs": 159.19999992847443,
+          "firstFrameMs": 187.8049999475479
+        },
+        "frameIntervals": {
+          "samples": 89,
+          "medianMs": 8.335000000002765,
+          "p95Ms": 24.99499999999898,
+          "p99Ms": 25.00500000000102,
+          "worstMs": 25.00500000000102
+        },
+        "cpuSubmit": {
+          "samples": 90,
+          "medianMs": 9.149999976158142,
+          "p95Ms": 22.4099999666214,
+          "p99Ms": 23.209999918937683,
+          "worstMs": 23.209999918937683
+        },
+        "renderer": {
+          "logicalDrawCalls": 1,
+          "visibleSubdraws": 34711,
+          "unculledSubmittedTriangles": 10223768,
+          "visibleOccurrences": 34711,
+          "visibleTriangles": 3548756,
+          "cullingImplementation": "three-batched-mesh"
+        },
+        "gpuFrameTiming": {
+          "supported": false,
+          "timestampPeriodNs": null,
+          "frameMs": null,
+          "scope": "three-backend-not-instrumented"
+        },
+        "retainedResources": {
+          "scope": "backend-owned-scene-upload-resources",
+          "cpuBytes": 1537536,
+          "gpuBytes": 11304832,
+          "gpuAttachmentPx": [
+            915,
+            620
+          ],
+          "accounting": "constructed-floor-three-internals-not-enumerable"
+        },
+        "memory": {
+          "usedJsHeapBytes": 73749939,
+          "userAgentSpecificBytes": 86005747,
+          "backendCoreReadyBytes": 60042110,
+          "sceneActivatedBytes": 80268620,
+          "sceneActivationDeltaBytes": 20226510,
+          "measurementOverheadMs": 36709.77499997616,
+          "measurementScope": "diagnostic-backend-scene-activation-delta"
+        }
+      },
+      "screenshot": null
+    },
+    {
+      "repeat": 2,
+      "browser": "chrome",
+      "browserEngine": "Blink",
+      "browserVersion": "151.0.7922.170",
+      "headless": false,
+      "viewport": {
+        "width": 1440,
+        "height": 960
+      },
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36",
+      "platform": "MacIntel",
+      "adapter": {
+        "vendor": "apple",
+        "architecture": "metal-3",
+        "device": "",
+        "description": "",
+        "isFallbackAdapter": false
+      },
+      "consoleIssues": [],
+      "outboundRequests": [],
+      "result": {
+        "schemaVersion": "madi.industrial-browser-benchmark.4",
+        "backend": "madi",
+        "scale": "target",
+        "profile": "heterogeneous",
+        "features": {
+          "surfaces": true,
+          "explicitEdges": false,
+          "picking": "on-demand-not-sampled",
+          "frustumCulling": "frustum",
+          "lod": false,
+          "cameraTrace": "local-review"
+        },
+        "workload": {
+          "id": "madi.industrial-heterogeneous.1",
+          "prototypeCount": 256,
+          "occurrenceCount": 100000,
+          "uniqueTriangleCount": 26240,
+          "submittedTriangleCount": 10223768,
+          "explicitEdgeSegmentCount": 6064765,
+          "instanceBytes": 9600000,
+          "profile": "heterogeneous"
+        },
+        "config": {
+          "warmupFrames": 30,
+          "sampleFrames": 90,
+          "memoryMode": "scene-delta"
+        },
+        "milestones": {
+          "workloadReadyMs": 33.78500008583069,
+          "backendReadyMs": 118.51499998569489,
+          "firstFrameMs": 128.24000000953674
+        },
+        "frameIntervals": {
+          "samples": 89,
+          "medianMs": 8.329999999999927,
+          "p95Ms": 16.659999999999854,
+          "p99Ms": 25.05000000000109,
+          "worstMs": 25.05000000000109
+        },
+        "cpuSubmit": {
+          "samples": 90,
+          "medianMs": 4.524999976158142,
+          "p95Ms": 17.62000000476837,
+          "p99Ms": 18.450000047683716,
+          "worstMs": 18.450000047683716
+        },
+        "renderer": {
+          "logicalDrawCalls": 256,
+          "visibleSubdraws": 256,
+          "unculledSubmittedTriangles": 10223768,
+          "visibleOccurrences": 34711,
+          "visibleTriangles": 3548756,
+          "cullingImplementation": "dense-cpu-compaction"
+        },
+        "gpuFrameTiming": {
+          "supported": true,
+          "timestampPeriodNs": 1,
+          "frameMs": {
+            "samples": 91,
+            "medianMs": 2.359296,
+            "p95Ms": 7.536639999999999,
+            "p99Ms": 7.864319999999999,
+            "worstMs": 7.864319999999999
+          },
+          "scope": "madi-surface-pass"
+        },
+        "retainedResources": {
+          "scope": "backend-owned-scene-upload-resources",
+          "cpuBytes": 9600000,
+          "gpuBytes": 11453536,
+          "gpuAttachmentPx": [
+            915,
+            620
+          ],
+          "accounting": "exact-allocator-census"
+        },
+        "memory": {
+          "usedJsHeapBytes": 44028756,
+          "userAgentSpecificBytes": 47673181,
+          "backendCoreReadyBytes": 32836733,
+          "sceneActivatedBytes": 45367444,
+          "sceneActivationDeltaBytes": 12530711,
+          "measurementOverheadMs": 28016.269999980927,
+          "measurementScope": "diagnostic-backend-scene-activation-delta"
+        }
+      },
+      "screenshot": null
+    },
+    {
+      "repeat": 3,
+      "browser": "chrome",
+      "browserEngine": "Blink",
+      "browserVersion": "151.0.7922.170",
+      "headless": false,
+      "viewport": {
+        "width": 1440,
+        "height": 960
+      },
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36",
+      "platform": "MacIntel",
+      "adapter": {
+        "vendor": "apple",
+        "architecture": "metal-3",
+        "device": "",
+        "description": "",
+        "isFallbackAdapter": false
+      },
+      "consoleIssues": [],
+      "outboundRequests": [],
+      "result": {
+        "schemaVersion": "madi.industrial-browser-benchmark.4",
+        "backend": "madi",
+        "scale": "target",
+        "profile": "heterogeneous",
+        "features": {
+          "surfaces": true,
+          "explicitEdges": false,
+          "picking": "on-demand-not-sampled",
+          "frustumCulling": "frustum",
+          "lod": false,
+          "cameraTrace": "local-review"
+        },
+        "workload": {
+          "id": "madi.industrial-heterogeneous.1",
+          "prototypeCount": 256,
+          "occurrenceCount": 100000,
+          "uniqueTriangleCount": 26240,
+          "submittedTriangleCount": 10223768,
+          "explicitEdgeSegmentCount": 6064765,
+          "instanceBytes": 9600000,
+          "profile": "heterogeneous"
+        },
+        "config": {
+          "warmupFrames": 30,
+          "sampleFrames": 90,
+          "memoryMode": "scene-delta"
+        },
+        "milestones": {
+          "workloadReadyMs": 35.4799998998642,
+          "backendReadyMs": 140.22500002384186,
+          "firstFrameMs": 149.1450001001358
+        },
+        "frameIntervals": {
+          "samples": 89,
+          "medianMs": 8.334999999999127,
+          "p95Ms": 16.664999999999054,
+          "p99Ms": 25,
+          "worstMs": 25
+        },
+        "cpuSubmit": {
+          "samples": 90,
+          "medianMs": 4.524999976158142,
+          "p95Ms": 16.87999999523163,
+          "p99Ms": 20.25499999523163,
+          "worstMs": 20.25499999523163
+        },
+        "renderer": {
+          "logicalDrawCalls": 256,
+          "visibleSubdraws": 256,
+          "unculledSubmittedTriangles": 10223768,
+          "visibleOccurrences": 34711,
+          "visibleTriangles": 3548756,
+          "cullingImplementation": "dense-cpu-compaction"
+        },
+        "gpuFrameTiming": {
+          "supported": true,
+          "timestampPeriodNs": 1,
+          "frameMs": {
+            "samples": 91,
+            "medianMs": 3.801088,
+            "p95Ms": 8.192,
+            "p99Ms": 13.107199999999999,
+            "worstMs": 13.107199999999999
+          },
+          "scope": "madi-surface-pass"
+        },
+        "retainedResources": {
+          "scope": "backend-owned-scene-upload-resources",
+          "cpuBytes": 9600000,
+          "gpuBytes": 11453536,
+          "gpuAttachmentPx": [
+            915,
+            620
+          ],
+          "accounting": "exact-allocator-census"
+        },
+        "memory": {
+          "usedJsHeapBytes": 44015820,
+          "userAgentSpecificBytes": 47672969,
+          "backendCoreReadyBytes": 32836175,
+          "sceneActivatedBytes": 45367601,
+          "sceneActivationDeltaBytes": 12531426,
+          "measurementOverheadMs": 25012.709999918938,
+          "measurementScope": "diagnostic-backend-scene-activation-delta"
+        }
+      },
+      "screenshot": null
+    },
+    {
+      "repeat": 3,
+      "browser": "chrome",
+      "browserEngine": "Blink",
+      "browserVersion": "151.0.7922.170",
+      "headless": false,
+      "viewport": {
+        "width": 1440,
+        "height": 960
+      },
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36",
+      "platform": "MacIntel",
+      "adapter": {
+        "vendor": "apple",
+        "architecture": "metal-3",
+        "device": "",
+        "description": "",
+        "isFallbackAdapter": false
+      },
+      "consoleIssues": [],
+      "outboundRequests": [],
+      "result": {
+        "schemaVersion": "madi.industrial-browser-benchmark.4",
+        "backend": "three",
+        "scale": "target",
+        "profile": "heterogeneous",
+        "features": {
+          "surfaces": true,
+          "explicitEdges": false,
+          "picking": "on-demand-not-sampled",
+          "frustumCulling": "frustum",
+          "lod": false,
+          "cameraTrace": "local-review"
+        },
+        "workload": {
+          "id": "madi.industrial-heterogeneous.1",
+          "prototypeCount": 256,
+          "occurrenceCount": 100000,
+          "uniqueTriangleCount": 26240,
+          "submittedTriangleCount": 10223768,
+          "explicitEdgeSegmentCount": 6064765,
+          "instanceBytes": 9600000,
+          "profile": "heterogeneous"
+        },
+        "config": {
+          "warmupFrames": 30,
+          "sampleFrames": 90,
+          "memoryMode": "scene-delta"
+        },
+        "milestones": {
+          "workloadReadyMs": 34.2150000333786,
+          "backendReadyMs": 162.84500014781952,
+          "firstFrameMs": 192.08000004291534
+        },
+        "frameIntervals": {
+          "samples": 89,
+          "medianMs": 8.340000000000146,
+          "p95Ms": 23.43499999999767,
+          "p99Ms": 25,
+          "worstMs": 25
+        },
+        "cpuSubmit": {
+          "samples": 90,
+          "medianMs": 9.245000004768372,
+          "p95Ms": 23.47000002861023,
+          "p99Ms": 23.759999990463257,
+          "worstMs": 23.759999990463257
+        },
+        "renderer": {
+          "logicalDrawCalls": 1,
+          "visibleSubdraws": 34711,
+          "unculledSubmittedTriangles": 10223768,
+          "visibleOccurrences": 34711,
+          "visibleTriangles": 3548756,
+          "cullingImplementation": "three-batched-mesh"
+        },
+        "gpuFrameTiming": {
+          "supported": false,
+          "timestampPeriodNs": null,
+          "frameMs": null,
+          "scope": "three-backend-not-instrumented"
+        },
+        "retainedResources": {
+          "scope": "backend-owned-scene-upload-resources",
+          "cpuBytes": 1537536,
+          "gpuBytes": 11304832,
+          "gpuAttachmentPx": [
+            915,
+            620
+          ],
+          "accounting": "constructed-floor-three-internals-not-enumerable"
+        },
+        "memory": {
+          "usedJsHeapBytes": 76246335,
+          "userAgentSpecificBytes": 86005888,
+          "backendCoreReadyBytes": 60044654,
+          "sceneActivatedBytes": 80265184,
+          "sceneActivationDeltaBytes": 20220530,
+          "measurementOverheadMs": 30711.394999980927,
+          "measurementScope": "diagnostic-backend-scene-activation-delta"
+        }
+      },
+      "screenshot": null
+    },
+    {
+      "repeat": 1,
+      "browser": "firefox",
+      "browserEngine": "Gecko",
+      "browserVersion": "150.0.2",
+      "headless": false,
+      "viewport": {
+        "width": 1440,
+        "height": 960
+      },
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:150.0) Gecko/20100101 Firefox/150.0",
+      "platform": "MacIntel",
+      "adapter": {
+        "vendor": "",
+        "architecture": "",
+        "device": "",
+        "description": "",
+        "isFallbackAdapter": false
+      },
+      "consoleIssues": [],
+      "outboundRequests": [],
+      "result": {
+        "schemaVersion": "madi.industrial-browser-benchmark.4",
+        "backend": "madi",
+        "scale": "target",
+        "profile": "heterogeneous",
+        "features": {
+          "surfaces": true,
+          "explicitEdges": false,
+          "picking": "on-demand-not-sampled",
+          "frustumCulling": "frustum",
+          "lod": false,
+          "cameraTrace": "local-review"
+        },
+        "workload": {
+          "id": "madi.industrial-heterogeneous.1",
+          "prototypeCount": 256,
+          "occurrenceCount": 100000,
+          "uniqueTriangleCount": 26240,
+          "submittedTriangleCount": 10223768,
+          "explicitEdgeSegmentCount": 6064765,
+          "instanceBytes": 9600000,
+          "profile": "heterogeneous"
+        },
+        "config": {
+          "warmupFrames": 30,
+          "sampleFrames": 90,
+          "memoryMode": "scene-delta"
+        },
+        "milestones": {
+          "workloadReadyMs": 30.539999999999992,
+          "backendReadyMs": 148.61999999999998,
+          "firstFrameMs": 155.78
+        },
+        "frameIntervals": {
+          "samples": 89,
+          "medianMs": 8.339999999999918,
+          "p95Ms": 25,
+          "p99Ms": 25,
+          "worstMs": 25
+        },
+        "cpuSubmit": {
+          "samples": 90,
+          "medianMs": 5.259999999999991,
+          "p95Ms": 22.11999999999989,
+          "p99Ms": 24,
+          "worstMs": 24
+        },
+        "renderer": {
+          "logicalDrawCalls": 256,
+          "visibleSubdraws": 256,
+          "unculledSubmittedTriangles": 10223768,
+          "visibleOccurrences": 34711,
+          "visibleTriangles": 3548756,
+          "cullingImplementation": "dense-cpu-compaction"
+        },
+        "gpuFrameTiming": {
+          "supported": true,
+          "timestampPeriodNs": 1,
+          "frameMs": {
+            "samples": 90,
+            "medianMs": 3.1592499999999997,
+            "p95Ms": 7.326207999999999,
+            "p99Ms": 9.984542,
+            "worstMs": 9.984542
+          },
+          "scope": "madi-surface-pass"
+        },
+        "retainedResources": {
+          "scope": "backend-owned-scene-upload-resources",
+          "cpuBytes": 9600000,
+          "gpuBytes": 11453536,
+          "gpuAttachmentPx": [
+            915,
+            620
+          ],
+          "accounting": "exact-allocator-census"
+        },
+        "memory": {
+          "usedJsHeapBytes": null,
+          "userAgentSpecificBytes": null,
+          "backendCoreReadyBytes": null,
+          "sceneActivatedBytes": null,
+          "sceneActivationDeltaBytes": null,
+          "measurementOverheadMs": 0,
+          "measurementScope": "diagnostic-backend-scene-activation-delta"
+        }
+      },
+      "screenshot": {
+        "path": "firefox-150-madi-target-heterogeneous-frustum-macos.png",
+        "bytes": 2756441,
+        "sha256": "0fed3f2979e0af9655e6e17c994290a75e6a3e3a4665efd738f70e2dd4a09bfe"
+      }
+    },
+    {
+      "repeat": 1,
+      "browser": "firefox",
+      "browserEngine": "Gecko",
+      "browserVersion": "150.0.2",
+      "headless": false,
+      "viewport": {
+        "width": 1440,
+        "height": 960
+      },
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:150.0) Gecko/20100101 Firefox/150.0",
+      "platform": "MacIntel",
+      "adapter": {
+        "vendor": "",
+        "architecture": "",
+        "device": "",
+        "description": "",
+        "isFallbackAdapter": false
+      },
+      "consoleIssues": [],
+      "outboundRequests": [],
+      "result": {
+        "schemaVersion": "madi.industrial-browser-benchmark.4",
+        "backend": "three",
+        "scale": "target",
+        "profile": "heterogeneous",
+        "features": {
+          "surfaces": true,
+          "explicitEdges": false,
+          "picking": "on-demand-not-sampled",
+          "frustumCulling": "frustum",
+          "lod": false,
+          "cameraTrace": "local-review"
+        },
+        "workload": {
+          "id": "madi.industrial-heterogeneous.1",
+          "prototypeCount": 256,
+          "occurrenceCount": 100000,
+          "uniqueTriangleCount": 26240,
+          "submittedTriangleCount": 10223768,
+          "explicitEdgeSegmentCount": 6064765,
+          "instanceBytes": 9600000,
+          "profile": "heterogeneous"
+        },
+        "config": {
+          "warmupFrames": 30,
+          "sampleFrames": 90,
+          "memoryMode": "scene-delta"
+        },
+        "milestones": {
+          "workloadReadyMs": 30.580000000000013,
+          "backendReadyMs": 274.91999999999996,
+          "firstFrameMs": 300.65999999999997
+        },
+        "frameIntervals": {
+          "samples": 89,
+          "medianMs": 8.340000000000146,
+          "p95Ms": 24.980000000000018,
+          "p99Ms": 25.600000000000136,
+          "worstMs": 25.600000000000136
+        },
+        "cpuSubmit": {
+          "samples": 90,
+          "medianMs": 10.1400000000001,
+          "p95Ms": 21.460000000000036,
+          "p99Ms": 22.519999999999982,
+          "worstMs": 22.519999999999982
+        },
+        "renderer": {
+          "logicalDrawCalls": 1,
+          "visibleSubdraws": 34711,
+          "unculledSubmittedTriangles": 10223768,
+          "visibleOccurrences": 34711,
+          "visibleTriangles": 3548756,
+          "cullingImplementation": "three-batched-mesh"
+        },
+        "gpuFrameTiming": {
+          "supported": false,
+          "timestampPeriodNs": null,
+          "frameMs": null,
+          "scope": "three-backend-not-instrumented"
+        },
+        "retainedResources": {
+          "scope": "backend-owned-scene-upload-resources",
+          "cpuBytes": 1537536,
+          "gpuBytes": 11304832,
+          "gpuAttachmentPx": [
+            915,
+            620
+          ],
+          "accounting": "constructed-floor-three-internals-not-enumerable"
+        },
+        "memory": {
+          "usedJsHeapBytes": null,
+          "userAgentSpecificBytes": null,
+          "backendCoreReadyBytes": null,
+          "sceneActivatedBytes": null,
+          "sceneActivationDeltaBytes": null,
+          "measurementOverheadMs": 0,
+          "measurementScope": "diagnostic-backend-scene-activation-delta"
+        }
+      },
+      "screenshot": {
+        "path": "firefox-150-three-target-heterogeneous-frustum-macos.png",
+        "bytes": 2651550,
+        "sha256": "2b1e8c9fd6f5f9e736fbdb6e81eff9d31294b1769d0f0668cd9ac49cfccb7cff"
+      }
+    },
+    {
+      "repeat": 2,
+      "browser": "firefox",
+      "browserEngine": "Gecko",
+      "browserVersion": "150.0.2",
+      "headless": false,
+      "viewport": {
+        "width": 1440,
+        "height": 960
+      },
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:150.0) Gecko/20100101 Firefox/150.0",
+      "platform": "MacIntel",
+      "adapter": {
+        "vendor": "",
+        "architecture": "",
+        "device": "",
+        "description": "",
+        "isFallbackAdapter": false
+      },
+      "consoleIssues": [],
+      "outboundRequests": [],
+      "result": {
+        "schemaVersion": "madi.industrial-browser-benchmark.4",
+        "backend": "three",
+        "scale": "target",
+        "profile": "heterogeneous",
+        "features": {
+          "surfaces": true,
+          "explicitEdges": false,
+          "picking": "on-demand-not-sampled",
+          "frustumCulling": "frustum",
+          "lod": false,
+          "cameraTrace": "local-review"
+        },
+        "workload": {
+          "id": "madi.industrial-heterogeneous.1",
+          "prototypeCount": 256,
+          "occurrenceCount": 100000,
+          "uniqueTriangleCount": 26240,
+          "submittedTriangleCount": 10223768,
+          "explicitEdgeSegmentCount": 6064765,
+          "instanceBytes": 9600000,
+          "profile": "heterogeneous"
+        },
+        "config": {
+          "warmupFrames": 30,
+          "sampleFrames": 90,
+          "memoryMode": "scene-delta"
+        },
+        "milestones": {
+          "workloadReadyMs": 31.439999999999998,
+          "backendReadyMs": 231.24,
+          "firstFrameMs": 254.12
+        },
+        "frameIntervals": {
+          "samples": 89,
+          "medianMs": 8.340000000000146,
+          "p95Ms": 25,
+          "p99Ms": 33.319999999999936,
+          "worstMs": 33.319999999999936
+        },
+        "cpuSubmit": {
+          "samples": 90,
+          "medianMs": 10.279999999999973,
+          "p95Ms": 21.25999999999999,
+          "p99Ms": 22.560000000000173,
+          "worstMs": 22.560000000000173
+        },
+        "renderer": {
+          "logicalDrawCalls": 1,
+          "visibleSubdraws": 34711,
+          "unculledSubmittedTriangles": 10223768,
+          "visibleOccurrences": 34711,
+          "visibleTriangles": 3548756,
+          "cullingImplementation": "three-batched-mesh"
+        },
+        "gpuFrameTiming": {
+          "supported": false,
+          "timestampPeriodNs": null,
+          "frameMs": null,
+          "scope": "three-backend-not-instrumented"
+        },
+        "retainedResources": {
+          "scope": "backend-owned-scene-upload-resources",
+          "cpuBytes": 1537536,
+          "gpuBytes": 11304832,
+          "gpuAttachmentPx": [
+            915,
+            620
+          ],
+          "accounting": "constructed-floor-three-internals-not-enumerable"
+        },
+        "memory": {
+          "usedJsHeapBytes": null,
+          "userAgentSpecificBytes": null,
+          "backendCoreReadyBytes": null,
+          "sceneActivatedBytes": null,
+          "sceneActivationDeltaBytes": null,
+          "measurementOverheadMs": 0,
+          "measurementScope": "diagnostic-backend-scene-activation-delta"
+        }
+      },
+      "screenshot": null
+    },
+    {
+      "repeat": 2,
+      "browser": "firefox",
+      "browserEngine": "Gecko",
+      "browserVersion": "150.0.2",
+      "headless": false,
+      "viewport": {
+        "width": 1440,
+        "height": 960
+      },
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:150.0) Gecko/20100101 Firefox/150.0",
+      "platform": "MacIntel",
+      "adapter": {
+        "vendor": "",
+        "architecture": "",
+        "device": "",
+        "description": "",
+        "isFallbackAdapter": false
+      },
+      "consoleIssues": [],
+      "outboundRequests": [],
+      "result": {
+        "schemaVersion": "madi.industrial-browser-benchmark.4",
+        "backend": "madi",
+        "scale": "target",
+        "profile": "heterogeneous",
+        "features": {
+          "surfaces": true,
+          "explicitEdges": false,
+          "picking": "on-demand-not-sampled",
+          "frustumCulling": "frustum",
+          "lod": false,
+          "cameraTrace": "local-review"
+        },
+        "workload": {
+          "id": "madi.industrial-heterogeneous.1",
+          "prototypeCount": 256,
+          "occurrenceCount": 100000,
+          "uniqueTriangleCount": 26240,
+          "submittedTriangleCount": 10223768,
+          "explicitEdgeSegmentCount": 6064765,
+          "instanceBytes": 9600000,
+          "profile": "heterogeneous"
+        },
+        "config": {
+          "warmupFrames": 30,
+          "sampleFrames": 90,
+          "memoryMode": "scene-delta"
+        },
+        "milestones": {
+          "workloadReadyMs": 30.600000000000023,
+          "backendReadyMs": 114.54000000000002,
+          "firstFrameMs": 121.96000000000004
+        },
+        "frameIntervals": {
+          "samples": 89,
+          "medianMs": 8.339999999999918,
+          "p95Ms": 17.24000000000001,
+          "p99Ms": 25.019999999999982,
+          "worstMs": 25.019999999999982
+        },
+        "cpuSubmit": {
+          "samples": 90,
+          "medianMs": 5.319999999999936,
+          "p95Ms": 22,
+          "p99Ms": 24.180000000000064,
+          "worstMs": 24.180000000000064
+        },
+        "renderer": {
+          "logicalDrawCalls": 256,
+          "visibleSubdraws": 256,
+          "unculledSubmittedTriangles": 10223768,
+          "visibleOccurrences": 34711,
+          "visibleTriangles": 3548756,
+          "cullingImplementation": "dense-cpu-compaction"
+        },
+        "gpuFrameTiming": {
+          "supported": true,
+          "timestampPeriodNs": 1,
+          "frameMs": {
+            "samples": 90,
+            "medianMs": 3.420792,
+            "p95Ms": 8.599666,
+            "p99Ms": 9.369709,
+            "worstMs": 9.369709
+          },
+          "scope": "madi-surface-pass"
+        },
+        "retainedResources": {
+          "scope": "backend-owned-scene-upload-resources",
+          "cpuBytes": 9600000,
+          "gpuBytes": 11453536,
+          "gpuAttachmentPx": [
+            915,
+            620
+          ],
+          "accounting": "exact-allocator-census"
+        },
+        "memory": {
+          "usedJsHeapBytes": null,
+          "userAgentSpecificBytes": null,
+          "backendCoreReadyBytes": null,
+          "sceneActivatedBytes": null,
+          "sceneActivationDeltaBytes": null,
+          "measurementOverheadMs": 0,
+          "measurementScope": "diagnostic-backend-scene-activation-delta"
+        }
+      },
+      "screenshot": null
+    },
+    {
+      "repeat": 3,
+      "browser": "firefox",
+      "browserEngine": "Gecko",
+      "browserVersion": "150.0.2",
+      "headless": false,
+      "viewport": {
+        "width": 1440,
+        "height": 960
+      },
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:150.0) Gecko/20100101 Firefox/150.0",
+      "platform": "MacIntel",
+      "adapter": {
+        "vendor": "",
+        "architecture": "",
+        "device": "",
+        "description": "",
+        "isFallbackAdapter": false
+      },
+      "consoleIssues": [],
+      "outboundRequests": [],
+      "result": {
+        "schemaVersion": "madi.industrial-browser-benchmark.4",
+        "backend": "madi",
+        "scale": "target",
+        "profile": "heterogeneous",
+        "features": {
+          "surfaces": true,
+          "explicitEdges": false,
+          "picking": "on-demand-not-sampled",
+          "frustumCulling": "frustum",
+          "lod": false,
+          "cameraTrace": "local-review"
+        },
+        "workload": {
+          "id": "madi.industrial-heterogeneous.1",
+          "prototypeCount": 256,
+          "occurrenceCount": 100000,
+          "uniqueTriangleCount": 26240,
+          "submittedTriangleCount": 10223768,
+          "explicitEdgeSegmentCount": 6064765,
+          "instanceBytes": 9600000,
+          "profile": "heterogeneous"
+        },
+        "config": {
+          "warmupFrames": 30,
+          "sampleFrames": 90,
+          "memoryMode": "scene-delta"
+        },
+        "milestones": {
+          "workloadReadyMs": 30.47999999999999,
+          "backendReadyMs": 113.14000000000001,
+          "firstFrameMs": 120.03999999999999
+        },
+        "frameIntervals": {
+          "samples": 89,
+          "medianMs": 8.340000000000032,
+          "p95Ms": 16.680000000000064,
+          "p99Ms": 25.02000000000021,
+          "worstMs": 25.02000000000021
+        },
+        "cpuSubmit": {
+          "samples": 90,
+          "medianMs": 5.159999999999968,
+          "p95Ms": 19.920000000000073,
+          "p99Ms": 22.860000000000127,
+          "worstMs": 22.860000000000127
+        },
+        "renderer": {
+          "logicalDrawCalls": 256,
+          "visibleSubdraws": 256,
+          "unculledSubmittedTriangles": 10223768,
+          "visibleOccurrences": 34711,
+          "visibleTriangles": 3548756,
+          "cullingImplementation": "dense-cpu-compaction"
+        },
+        "gpuFrameTiming": {
+          "supported": true,
+          "timestampPeriodNs": 1,
+          "frameMs": {
+            "samples": 90,
+            "medianMs": 2.480542,
+            "p95Ms": 7.711459,
+            "p99Ms": 10.491541,
+            "worstMs": 10.491541
+          },
+          "scope": "madi-surface-pass"
+        },
+        "retainedResources": {
+          "scope": "backend-owned-scene-upload-resources",
+          "cpuBytes": 9600000,
+          "gpuBytes": 11453536,
+          "gpuAttachmentPx": [
+            915,
+            620
+          ],
+          "accounting": "exact-allocator-census"
+        },
+        "memory": {
+          "usedJsHeapBytes": null,
+          "userAgentSpecificBytes": null,
+          "backendCoreReadyBytes": null,
+          "sceneActivatedBytes": null,
+          "sceneActivationDeltaBytes": null,
+          "measurementOverheadMs": 0,
+          "measurementScope": "diagnostic-backend-scene-activation-delta"
+        }
+      },
+      "screenshot": null
+    },
+    {
+      "repeat": 3,
+      "browser": "firefox",
+      "browserEngine": "Gecko",
+      "browserVersion": "150.0.2",
+      "headless": false,
+      "viewport": {
+        "width": 1440,
+        "height": 960
+      },
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:150.0) Gecko/20100101 Firefox/150.0",
+      "platform": "MacIntel",
+      "adapter": {
+        "vendor": "",
+        "architecture": "",
+        "device": "",
+        "description": "",
+        "isFallbackAdapter": false
+      },
+      "consoleIssues": [],
+      "outboundRequests": [],
+      "result": {
+        "schemaVersion": "madi.industrial-browser-benchmark.4",
+        "backend": "three",
+        "scale": "target",
+        "profile": "heterogeneous",
+        "features": {
+          "surfaces": true,
+          "explicitEdges": false,
+          "picking": "on-demand-not-sampled",
+          "frustumCulling": "frustum",
+          "lod": false,
+          "cameraTrace": "local-review"
+        },
+        "workload": {
+          "id": "madi.industrial-heterogeneous.1",
+          "prototypeCount": 256,
+          "occurrenceCount": 100000,
+          "uniqueTriangleCount": 26240,
+          "submittedTriangleCount": 10223768,
+          "explicitEdgeSegmentCount": 6064765,
+          "instanceBytes": 9600000,
+          "profile": "heterogeneous"
+        },
+        "config": {
+          "warmupFrames": 30,
+          "sampleFrames": 90,
+          "memoryMode": "scene-delta"
+        },
+        "milestones": {
+          "workloadReadyMs": 31.039999999999992,
+          "backendReadyMs": 225.60000000000002,
+          "firstFrameMs": 248.95999999999998
+        },
+        "frameIntervals": {
+          "samples": 89,
+          "medianMs": 8.340000000000146,
+          "p95Ms": 24.960000000000036,
+          "p99Ms": 34.039999999999964,
+          "worstMs": 34.039999999999964
+        },
+        "cpuSubmit": {
+          "samples": 90,
+          "medianMs": 10.17999999999995,
+          "p95Ms": 21.59999999999991,
+          "p99Ms": 22.6400000000001,
+          "worstMs": 22.6400000000001
+        },
+        "renderer": {
+          "logicalDrawCalls": 1,
+          "visibleSubdraws": 34711,
+          "unculledSubmittedTriangles": 10223768,
+          "visibleOccurrences": 34711,
+          "visibleTriangles": 3548756,
+          "cullingImplementation": "three-batched-mesh"
+        },
+        "gpuFrameTiming": {
+          "supported": false,
+          "timestampPeriodNs": null,
+          "frameMs": null,
+          "scope": "three-backend-not-instrumented"
+        },
+        "retainedResources": {
+          "scope": "backend-owned-scene-upload-resources",
+          "cpuBytes": 1537536,
+          "gpuBytes": 11304832,
+          "gpuAttachmentPx": [
+            915,
+            620
+          ],
+          "accounting": "constructed-floor-three-internals-not-enumerable"
+        },
+        "memory": {
+          "usedJsHeapBytes": null,
+          "userAgentSpecificBytes": null,
+          "backendCoreReadyBytes": null,
+          "sceneActivatedBytes": null,
+          "sceneActivationDeltaBytes": null,
+          "measurementOverheadMs": 0.01999999999998181,
+          "measurementScope": "diagnostic-backend-scene-activation-delta"
+        }
+      },
+      "screenshot": null
+    }
+  ],
+  "aggregates": {
+    "byPath": [
+      {
+        "browser": "chrome",
+        "backend": "madi",
+        "runs": 3,
+        "cpuSubmitP95Ms": {
+          "samples": 3,
+          "median": 16.87999999523163,
+          "min": 16.014999985694885,
+          "max": 17.62000000476837,
+          "mean": 16.83833332856496,
+          "standardDeviation": 0.8033108667507282
+        },
+        "frameIntervalP95Ms": {
+          "samples": 3,
+          "median": 16.659999999999854,
+          "min": 16.3799999999992,
+          "max": 16.664999999999054,
+          "mean": 16.568333333332703,
+          "standardDeviation": 0.16312060977503515
+        },
+        "sceneActivationDeltaBytes": {
+          "samples": 3,
+          "median": 12531426,
+          "min": 12530711,
+          "max": 12534625,
+          "mean": 12532254,
+          "standardDeviation": 2084.235351393887
+        },
+        "gpuFrameP95Ms": {
+          "samples": 3,
+          "median": 7.7987839999999995,
+          "min": 7.536639999999999,
+          "max": 8.192,
+          "mean": 7.842474666666667,
+          "standardDeviation": 0.3298572996999363
+        },
+        "retainedResourceBytes": {
+          "cpuBytes": {
+            "samples": 3,
+            "median": 9600000,
+            "min": 9600000,
+            "max": 9600000,
+            "mean": 9600000,
+            "standardDeviation": 0
+          },
+          "gpuBytes": {
+            "samples": 3,
+            "median": 11453536,
+            "min": 11453536,
+            "max": 11453536,
+            "mean": 11453536,
+            "standardDeviation": 0
+          }
+        }
+      },
+      {
+        "browser": "chrome",
+        "backend": "three",
+        "runs": 3,
+        "cpuSubmitP95Ms": {
+          "samples": 3,
+          "median": 22.4099999666214,
+          "min": 22.259999990463257,
+          "max": 23.47000002861023,
+          "mean": 22.71333332856496,
+          "standardDeviation": 0.6595705947280451
+        },
+        "frameIntervalP95Ms": {
+          "samples": 3,
+          "median": 24.36499999999978,
+          "min": 23.43499999999767,
+          "max": 24.99499999999898,
+          "mean": 24.26499999999881,
+          "standardDeviation": 0.7847929663300807
+        },
+        "sceneActivationDeltaBytes": {
+          "samples": 3,
+          "median": 20226510,
+          "min": 20220530,
+          "max": 20285491,
+          "mean": 20244177,
+          "standardDeviation": 35903.69127262544
+        },
+        "gpuFrameP95Ms": {
+          "samples": 0,
+          "median": null,
+          "min": null,
+          "max": null,
+          "mean": null,
+          "standardDeviation": null
+        },
+        "retainedResourceBytes": {
+          "cpuBytes": {
+            "samples": 3,
+            "median": 1537536,
+            "min": 1537536,
+            "max": 1537536,
+            "mean": 1537536,
+            "standardDeviation": 0
+          },
+          "gpuBytes": {
+            "samples": 3,
+            "median": 11304832,
+            "min": 11304832,
+            "max": 11304832,
+            "mean": 11304832,
+            "standardDeviation": 0
+          }
+        }
+      },
+      {
+        "browser": "firefox",
+        "backend": "madi",
+        "runs": 3,
+        "cpuSubmitP95Ms": {
+          "samples": 3,
+          "median": 22,
+          "min": 19.920000000000073,
+          "max": 22.11999999999989,
+          "mean": 21.346666666666653,
+          "standardDeviation": 1.2369855833166146
+        },
+        "frameIntervalP95Ms": {
+          "samples": 3,
+          "median": 17.24000000000001,
+          "min": 16.680000000000064,
+          "max": 25,
+          "mean": 19.640000000000025,
+          "standardDeviation": 4.650333321386736
+        },
+        "sceneActivationDeltaBytes": {
+          "samples": 0,
+          "median": null,
+          "min": null,
+          "max": null,
+          "mean": null,
+          "standardDeviation": null
+        },
+        "gpuFrameP95Ms": {
+          "samples": 3,
+          "median": 7.711459,
+          "min": 7.326207999999999,
+          "max": 8.599666,
+          "mean": 7.879110999999999,
+          "standardDeviation": 0.6530729011902116
+        },
+        "retainedResourceBytes": {
+          "cpuBytes": {
+            "samples": 3,
+            "median": 9600000,
+            "min": 9600000,
+            "max": 9600000,
+            "mean": 9600000,
+            "standardDeviation": 0
+          },
+          "gpuBytes": {
+            "samples": 3,
+            "median": 11453536,
+            "min": 11453536,
+            "max": 11453536,
+            "mean": 11453536,
+            "standardDeviation": 0
+          }
+        }
+      },
+      {
+        "browser": "firefox",
+        "backend": "three",
+        "runs": 3,
+        "cpuSubmitP95Ms": {
+          "samples": 3,
+          "median": 21.460000000000036,
+          "min": 21.25999999999999,
+          "max": 21.59999999999991,
+          "mean": 21.43999999999998,
+          "standardDeviation": 0.17088007490631496
+        },
+        "frameIntervalP95Ms": {
+          "samples": 3,
+          "median": 24.980000000000018,
+          "min": 24.960000000000036,
+          "max": 25,
+          "mean": 24.980000000000018,
+          "standardDeviation": 0.01999999999998181
+        },
+        "sceneActivationDeltaBytes": {
+          "samples": 0,
+          "median": null,
+          "min": null,
+          "max": null,
+          "mean": null,
+          "standardDeviation": null
+        },
+        "gpuFrameP95Ms": {
+          "samples": 0,
+          "median": null,
+          "min": null,
+          "max": null,
+          "mean": null,
+          "standardDeviation": null
+        },
+        "retainedResourceBytes": {
+          "cpuBytes": {
+            "samples": 3,
+            "median": 1537536,
+            "min": 1537536,
+            "max": 1537536,
+            "mean": 1537536,
+            "standardDeviation": 0
+          },
+          "gpuBytes": {
+            "samples": 3,
+            "median": 11304832,
+            "min": 11304832,
+            "max": 11304832,
+            "mean": 11304832,
+            "standardDeviation": 0
+          }
+        }
+      }
+    ],
+    "pairedComparisons": [
+      {
+        "browser": "chrome",
+        "pairs": 3,
+        "cpuP95ReductionPercent": {
+          "samples": 3,
+          "median": 28.054806861832375,
+          "min": 21.37438629624051,
+          "max": 28.078398062826192,
+          "mean": 25.83586374029969,
+          "standardDeviation": 3.8637708102419492
+        },
+        "frameP95RegressionPercent": {
+          "samples": 3,
+          "median": -32.77241945413771,
+          "min": -33.34666933386464,
+          "max": -28.88841476423849,
+          "mean": -31.66916785074695,
+          "standardDeviation": 2.425259063932414
+        },
+        "sceneDeltaReductionPercent": {
+          "samples": 3,
+          "median": 38.048081453498405,
+          "min": 38.0262238427974,
+          "max": 38.20891493333832,
+          "mean": 38.09440674321137,
+          "standardDeviation": 0.09976739442824337
+        },
+        "continueThresholdCounts": {
+          "cpuP95AtLeast25Percent": 2,
+          "frameP95NoMoreThan10PercentWorse": 3,
+          "sceneDeltaAtLeast30Percent": 3
+        }
+      },
+      {
+        "browser": "firefox",
+        "pairs": 3,
+        "cpuP95ReductionPercent": {
+          "samples": 3,
+          "median": -3.0754892823851505,
+          "min": -3.480714957667024,
+          "max": 7.777777777777052,
+          "mean": 0.4071911792416258,
+          "standardDeviation": 6.386330093790911
+        },
+        "frameP95RegressionPercent": {
+          "samples": 3,
+          "median": -31.039999999999964,
+          "min": -33.17307692307676,
+          "max": 0.08006405124091992,
+          "mean": -21.3776709572786,
+          "standardDeviation": 18.613524600725782
+        },
+        "sceneDeltaReductionPercent": {
+          "samples": 0,
+          "median": null,
+          "min": null,
+          "max": null,
+          "mean": null,
+          "standardDeviation": null
+        },
+        "continueThresholdCounts": {
+          "cpuP95AtLeast25Percent": 0,
+          "frameP95NoMoreThan10PercentWorse": 3,
+          "sceneDeltaAtLeast30Percent": 0
+        }
+      }
+    ]
+  },
+  "notes": [
+    "This run validates parity and measurement plumbing; it does not accept or reject ADR-0003.",
+    "Absolute performance varies by host load. Decision runs require reference hardware and repeated clean sessions.",
+    "MADI uses dense CPU sphere culling and instance compaction; Three.js uses BatchedMesh per-object culling with its default opaque sorting.",
+    "Each repeat launches a fresh browser process and alternates backend order.",
+    "Scene activation delta is measured from a backend-ready shell with the shared workload retained to the first rendered frame; it remains browser-wide diagnostic memory, not an allocator census.",
+    "GPU pass timestamps instrument only the MADI surface pass through WebGPU timestamp-query; the Three.js WebGPURenderer path reports them as unsupported because its command encoding is not caller-instrumentable.",
+    "The retained-resource census counts backend-owned scene upload memory. MADI reports exact GPUBuffer allocations; the Three.js figure is a constructed floor because its internal buffers, sort structures, uniforms, and render targets are not enumerable."
+  ]
+}
