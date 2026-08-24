@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/media/madi-hero.svg" alt="MADI — 面向 Web 的开放工程平台" width="100%" />
+  <img src="docs/media/naru-hero.svg" alt="NARU — 面向海量 CAD 与 BIM 的 WebGPU 原生引擎" width="100%" />
 </p>
 
 <p align="center">
@@ -23,7 +23,7 @@
 </p>
 
 > [!IMPORTANT]
-> MADI 目前处于架构设计与原型验证阶段。本仓库定义产品方向、系统边界、
+> NARU 目前处于架构设计与原型验证阶段。本仓库定义产品方向、系统边界、
 > 基准测试和实现路径；目前尚不包含可安装的生产级查看器。
 
 > 本文是英文 [`README.md`](README.md) 的翻译。如内容存在差异，以英文版为准。
@@ -36,7 +36,7 @@
 而是在不丢失装配身份和工程语义的前提下，让这些数据能够在浏览器中快速打开、
 检查、自动化，并嵌入其他产品。
 
-MADI 在源工具和 Web 应用之间提供一个开放层。它的长期愿景在精神上类似
+NARU 在源工具和 Web 应用之间提供一个开放层。它的长期愿景在精神上类似
 Blender：由社区共同构建一个拥有强大核心和广泛扩展生态的工程工作空间。
 近期目标则更加聚焦——把大型工程场景的交付与交互做好。
 
@@ -44,7 +44,7 @@ Blender：由社区共同构建一个拥有强大核心和广泛扩展生态的�
   <tr>
     <td width="33%" valign="top">
       <h3>保留权威数据源</h3>
-      原生 CAD/BIM 和中性交换文件始终是 source of truth。MADI 工作空间保存
+      原生 CAD/BIM 和中性交换文件始终是 source of truth。NARU 工作空间保存
       引用、视图、批注和插件状态，而不是成为一种替代 CAD 格式。
     </td>
     <td width="33%" valign="top">
@@ -81,10 +81,10 @@ Engineering Scene IR 是逻辑系统边界，而不是新的交换格式。交�
 
 | 层 | 职责 | 首个垂直切片 |
 |---|---|---|
-| **MADI Studio** | 参考工程工作空间 | 装配树、搜索、属性、选择、隐藏/隔离、剖切、测量 |
-| **MADI Runtime** | Headless 浏览器与 GPU 引擎 | 渐进式流送、Worker 解码、实例化、剔除、拾取、GPU 内存预算 |
-| **MADI Compiler** | 可复现的 source-to-Web 构建管线 | 通过 OCCT 读取 STEP AP242，保留层级与边线，生成 LOD 与分块 |
-| **MADI SDK** | 稳定的嵌入与扩展接口 | 框架无关的 TypeScript API、命令、面板、分析 Worker、能力授权插件 |
+| **NARU Studio** | 参考工程工作空间 | 装配树、搜索、属性、选择、隐藏/隔离、剖切、测量 |
+| **NARU Runtime** | Headless 浏览器与 GPU 引擎 | 渐进式流送、Worker 解码、实例化、剔除、拾取、GPU 内存预算 |
+| **NARU Compiler** | 可复现的 source-to-Web 构建管线 | 通过 OCCT 读取 STEP AP242，保留层级与边线，生成 LOD 与分块 |
+| **NARU SDK** | 稳定的嵌入与扩展接口 | 框架无关的 TypeScript API、命令、面板、分析 Worker、能力授权插件 |
 
 ### 为工程工作而设计
 
@@ -112,13 +112,13 @@ Engineering Scene IR 是逻辑系统边界，而不是新的交换格式。交�
 
 ## 当前运行时验证
 
-![MADI WebGPU 直接渲染的 Adafruit PyGamer STEP 装配体](artifacts/browser-matrix/chrome-151-windows-selected.png)
+![NARU WebGPU 直接渲染的 Adafruit PyGamer STEP 装配体](artifacts/browser-matrix/chrome-151-windows-selected.png)
 
 标准演示现在使用真实的 Adafruit PyGamer 电子装配体，而非合成吉祥物：34 个
 共享 mesh、85 个 part occurrence、162,838 个唯一 triangle、13,897 条显式
 CAD edge、Worker 解码，以及在 Chrome 与 Firefox 中保留源引用的摇杆 picking。
 未经修改的 CAD 按 MIT 许可证再分发，并固定上游 commit 与许可证声明；这不
-表示 Adafruit 对 MADI 的认可。请查看[已审核的浏览器证据](artifacts/browser-matrix/README.md)。
+表示 Adafruit 对 NARU 的认可。请查看[已审核的浏览器证据](artifacts/browser-matrix/README.md)。
 
 ## 当前编译器验证
 
@@ -128,12 +128,12 @@ CAD edge、Worker 解码，以及在 Chrome 与 Firefox 中保留源引用的摇
 
 ```sh
 python -m pip install -r native/adapter-occt/tools/requirements-evidence.txt
-pnpm madi compile fixtures/step/repeated-fasteners-ap242.step \
+pnpm naru compile fixtures/step/repeated-fasteners-ap242.step \
   --output output/repeated-fasteners-ap242
 ```
 
 提交的 AP242 结果经独立验证，Khronos glTF 错误和警告均为 0。展开的 Scene IR
-只是临时数据，并非 MADI 文件格式。请查看[编译器证据](artifacts/phase1/README.md)。
+只是临时数据，并非 NARU 文件格式。请查看[编译器证据](artifacts/phase1/README.md)。
 
 ## 从设计文档开始
 
@@ -151,7 +151,7 @@ pnpm madi compile fixtures/step/repeated-fasteners-ap242.step \
 
 ## 原则
 
-1. **源工具保持权威。** MADI 补充现有工程系统，而不是强制迁移格式。
+1. **源工具保持权威。** NARU 补充现有工程系统，而不是强制迁移格式。
 2. **语义与渲染几何分离。** 即使最高精度几何尚未驻留，也能发现和查询对象。
 3. **不是简单转换，而是编译。** 在离线阶段减少浏览器启动时间、内存、带宽与
    draw overhead。
@@ -166,14 +166,14 @@ pnpm madi compile fixtures/step/repeated-fasteners-ap242.step \
 ## 常见问题
 
 <details>
-<summary><strong>MADI 是一种新的 CAD 文件格式吗？</strong></summary>
+<summary><strong>NARU 是一种新的 CAD 文件格式吗？</strong></summary>
 <br />
-不是。现有 CAD/BIM 文档仍是 source of truth。MADI 定义中立的内存边界，
+不是。现有 CAD/BIM 文档仍是 source of truth。NARU 定义中立的内存边界，
 并可生成针对浏览器交付优化、可丢弃重建且带版本的缓存。
 </details>
 
 <details>
-<summary><strong>MADI 想取代 Fusion、Onshape 或桌面 CAD 吗？</strong></summary>
+<summary><strong>NARU 想取代 Fusion、Onshape 或桌面 CAD 吗？</strong></summary>
 <br />
 不在初始范围内。首个产品是大型场景工程工作空间和可嵌入运行时。将来可以用
 独立工作台加入精确参数化创作，但这并不是核心平台产生价值的前提。
@@ -190,7 +190,7 @@ Open CASCADE 为读取精确几何、装配和源边线提供成熟的离线路�
 <details>
 <summary><strong>为什么不完全基于 Three.js 构建查看器？</strong></summary>
 <br />
-Three.js 在生态工具与实验中仍然很有价值。MADI 的大型场景渲染器使用直接
+Three.js 在生态工具与实验中仍然很有价值。NARU 的大型场景渲染器使用直接
 WebGPU 数据结构，使批处理、residency、拾取和内存策略都能被明确控制。
 这是架构重点的选择，并不是说通用 scene graph 是错误的。
 </details>
@@ -199,15 +199,15 @@ WebGPU 数据结构，使批处理、residency、拾取和内存策略都能被�
 <summary><strong>glTF 在哪里使用？</strong></summary>
 <br />
 glTF 是重要的标准化交付与互操作选项。在满足工程身份、边线、流送和精度要求
-时，MADI 会复用 glTF、meshopt、KTX2、3D Tiles 概念与元数据标准。首个
+时，NARU 会复用 glTF、meshopt、KTX2、3D Tiles 概念与元数据标准。首个
 Phase 1 编译器切片现已生成 glTF 2.0 与外部二进制资源。浏览器会先打开层级，
-再由 Worker 解码几何；MADI 身份和源映射仍存放在明确标记为实验性的
+再由 Worker 解码几何；NARU 身份和源映射仍存放在明确标记为实验性的
 `extras` 中。
 </details>
 
 ## 参与贡献
 
-MADI 尚处于可以通过证据改变架构的早期阶段。目前特别有价值的贡献包括：
+NARU 尚处于可以通过证据改变架构的早期阶段。目前特别有价值的贡献包括：
 
 - 记录边界情况、允许再分发的 STEP 或 IFC 测试模型
 - OCCT 提取和 WebGPU 渲染技术验证
@@ -217,15 +217,15 @@ MADI 尚处于可以通过证据改变架构的早期阶段。目前特别有价
 - 文档与翻译审校
 
 请阅读 [CONTRIBUTING.md](CONTRIBUTING.md)，浏览
-[未解决的 Issue](https://github.com/1n01raymond/madi/issues)，或帮助改进
+[未解决的 Issue](https://github.com/1n01raymond/naru/issues)，或帮助改进
 [翻译](docs/TRANSLATIONS.md)。大型变更应先创建设计 Issue，以便在实现前公开
 假设和方向。
 
 ## 许可证
 
-MADI 采用 [Apache License 2.0](LICENSE)。计划中的第三方依赖可能采用其他
+NARU 采用 [Apache License 2.0](LICENSE)。计划中的第三方依赖可能采用其他
 兼容许可证，详见 [THIRD_PARTY.md](THIRD_PARTY.md)。
 
 <p align="center">
-  <sub>面向 Web 的开放工程平台。</sub>
+  <sub>面向海量 CAD 与 BIM 的 WebGPU 原生引擎。</sub>
 </p>

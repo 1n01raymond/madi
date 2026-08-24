@@ -7,9 +7,9 @@ paths:
 - `tools/extract_scene_ir.py` is a reproducible evidence harness using the OCP
   Python binding for OCCT 7.9.3 STEPCAF/XDE.
 
-Neither output defines a serialized MADI format, and no OCCT type crosses into
+Neither output defines a serialized NARU format, and no OCCT type crosses into
 the browser packages. Phase 1 now orchestrates the Python path behind the
-public `madi compile` command while the C++ adapter remains the production-boundary
+public `naru compile` command while the C++ adapter remains the production-boundary
 target.
 
 ## Prerequisites
@@ -24,7 +24,7 @@ The current Windows workspace does not have these native prerequisites. Run
 ```sh
 cmake --preset dev
 cmake --build --preset dev
-../../build/adapter-occt/madi-occt-spike path/to/assembly.step
+../../build/adapter-occt/naru-occt-spike path/to/assembly.step
 ```
 
 Set `OpenCASCADE_DIR` when OCCT is installed outside CMake's normal search path.
@@ -40,7 +40,7 @@ Create and activate a temporary virtual environment, then run:
 
 ```sh
 python -m pip install -r tools/requirements-evidence.txt
-pnpm madi compile fixtures/step/repeated-fasteners-ap242.step \
+pnpm naru compile fixtures/step/repeated-fasteners-ap242.step \
   --output output/repeated-fasteners-ap242
 python tools/extract_scene_ir.py \
   ../../fixtures/step/adafruit-pygamer.step \
@@ -56,7 +56,7 @@ python tools/extract_scene_ir.py \
   --report ../../artifacts/occt/unsupported-layer-assignment.report.json
 ```
 
-`madi compile` preflights the STEP Part 21 header, accepts AP242 and AP214,
+`naru compile` preflights the STEP Part 21 header, accepts AP242 and AP214,
 checks the adapter schema and SHA-256 identity against the source bytes, and
 deletes the expanded Scene IR after writing a validated package. The lower-level
 commands remain useful for adapter diagnostics and evidence regeneration.
@@ -65,12 +65,12 @@ The generated logical scene preserves assembly containers, reusable part
 prototypes, occurrence transforms, names, millimetre units, source colors,
 tessellated surfaces, explicit edge polylines, and revision-local face/edge
 source references. `pnpm test` hydrates the JSON into typed arrays and runs the
-normal `@madi/scene-ir` validator.
+normal `@naru3d/scene-ir` validator.
 
 The canonical PyGamer extraction expands to roughly 80.6 MB of JSON, so that
 intermediate is generated under ignored `output/` storage. Its checksum-locked
 STEP source, compact OCCT report, compiled glTF package, and independent
-validation evidence are committed. The smaller MADI-authored scenes remain
+validation evidence are committed. The smaller NARU-authored scenes remain
 committed for fast regression tests.
 
 Before transfer, the harness scans addressable STEP entity declarations against

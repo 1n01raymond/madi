@@ -2,13 +2,13 @@
 
 Status: Active 1.0
 
-This policy keeps MADI easy to contribute to while protecting the history and
+This policy keeps NARU easy to contribute to while protecting the history and
 reliability of the default branch. It applies to maintainers, contributors, and
 automated agents.
 
 ## Model
 
-MADI uses a lightweight GitHub Flow:
+NARU uses a lightweight GitHub Flow:
 
 ```mermaid
 flowchart LR
@@ -23,7 +23,7 @@ flowchart LR
     M1 --> W --> P --> R --> S --> M2 --> D
 ```
 
-`main` is the only permanent development branch. MADI does not use a long-lived
+`main` is the only permanent development branch. NARU does not use a long-lived
 `develop`, `dev`, or integration branch during the architecture and early alpha
 phases. Release branches are added only when the project supports more than one
 release line.
@@ -110,7 +110,7 @@ dismisses stale approvals after new commits.
 
 ## Merge strategy
 
-MADI uses **squash merge** for ordinary pull requests.
+NARU uses **squash merge** for ordinary pull requests.
 
 - Merge commits and rebase merges are disabled in repository settings.
 - The PR title becomes the commit subject on `main`.
@@ -126,7 +126,7 @@ the normal process could not be used, and how recurrence will be prevented.
 
 ## Validation gates
 
-MADI enables required checks only after each check exists and has succeeded on a
+NARU enables required checks only after each check exists and has succeeded on a
 real pull request. This prevents a missing workflow from blocking every merge.
 
 The intended Phase 1 required checks are:
@@ -143,7 +143,7 @@ generic CI job is not a substitute for reproducible benchmark evidence.
 ## Release branches
 
 Do not create a release branch merely to organize unfinished work. Create
-`release/<major>.<minor>` only when MADI publishes and actively supports that
+`release/<major>.<minor>` only when NARU publishes and actively supports that
 release line while `main` moves toward the next one.
 
 - New features continue to target `main`.

@@ -8,13 +8,13 @@
   "configurePresets": [
     {
       "name": "dev",
-      "displayName": "MADI OCCT spike (development)",
+      "displayName": "NARU OCCT spike (development)",
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/../../build/adapter-occt",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug",
         "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
-        "MADI_OCCT_REQUIRED": "ON"
+        "NARU_OCCT_REQUIRED": "ON"
       }
     }
   ],

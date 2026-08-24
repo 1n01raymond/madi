@@ -80,17 +80,17 @@ export class GpuFrameTimer {
     const queryCount = capacity * 2;
     const byteLength = queryCount * 8;
     const querySet = device.createQuerySet({
-      label: "MADI benchmark timestamp queries",
+      label: "NARU benchmark timestamp queries",
       type: "timestamp",
       count: queryCount,
     });
     const resolveBuffer = device.createBuffer({
-      label: "MADI benchmark timestamp resolve",
+      label: "NARU benchmark timestamp resolve",
       size: byteLength,
       usage: GPUBufferUsage.QUERY_RESOLVE | GPUBufferUsage.COPY_SRC,
     });
     const readBuffer = device.createBuffer({
-      label: "MADI benchmark timestamp readback",
+      label: "NARU benchmark timestamp readback",
       size: byteLength,
       usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ,
     });
@@ -133,7 +133,7 @@ export class GpuFrameTimer {
     this.resolved = true;
     const used = this.cursor * 2;
     const encoder = this.device.createCommandEncoder({
-      label: "MADI benchmark timestamp resolve",
+      label: "NARU benchmark timestamp resolve",
     });
     encoder.resolveQuerySet(this.querySet, 0, used, this.resolveBuffer, 0);
     encoder.copyBufferToBuffer(this.resolveBuffer, 0, this.readBuffer, 0, used * 8);

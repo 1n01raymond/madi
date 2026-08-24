@@ -1,5 +1,5 @@
 {
-  "name": "@madi/compiler",
+  "name": "@naru3d/compiler",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -11,8 +11,8 @@
     }
   },
   "bin": {
-    "madi": "./dist/cli.js",
-    "madi-compile-phase1-evidence": "./dist/evidence-cli.js"
+    "naru": "./dist/cli.js",
+    "naru-compile-phase1-evidence": "./dist/evidence-cli.js"
   },
   "files": ["dist"],
   "scripts": {
@@ -20,7 +20,7 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
-    "@madi/scene-ir": "workspace:*"
+    "@naru3d/scene-ir": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "22.20.1"

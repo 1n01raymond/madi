@@ -4,7 +4,7 @@ Status: Draft 0.1
 
 ## 1. Goal
 
-MADI should become useful in domains the core maintainers do not understand.
+NARU should become useful in domains the core maintainers do not understand.
 Plugins allow organizations and communities to add importers, queries, tools,
 panels, overlays, analysis, and workflow automation without forking the runtime.
 
@@ -58,7 +58,7 @@ flowchart LR
   "id": "org.example.clearance-check",
   "name": "Clearance Check",
   "version": "0.1.0",
-  "madi": ">=0.3.0 <0.4.0",
+  "naru": ">=0.3.0 <0.4.0",
   "entry": "./dist/browser.js",
   "capabilities": [
     "scene.read",
@@ -103,7 +103,7 @@ invalidates the object and aborts outstanding operations.
 ## 5. Lifecycle
 
 ```ts
-export interface MadiPlugin {
+export interface NaruPlugin {
   activate(context: PluginContext): Promise<void> | void;
   deactivate(): Promise<void> | void;
 }

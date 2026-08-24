@@ -7,7 +7,7 @@ import {
   openPropertyValueColumns,
   parsePackageProperties,
   resolvePropertyEntries,
-} from "@madi/scene-ir";
+} from "@naru3d/scene-ir";
 import { describe, expect, it } from "vitest";
 
 import { compileIfcFederation } from "../src/ifc-federation.js";
@@ -18,7 +18,7 @@ const sceneTemplatePath = fileURLToPath(
 
 describe("IFC federation compiler orchestration", () => {
   it("validates adapter identity and writes a compiled package", async () => {
-    const temporaryDirectory = await mkdtemp(join(tmpdir(), "madi-ifc-test-"));
+    const temporaryDirectory = await mkdtemp(join(tmpdir(), "naru-ifc-test-"));
     try {
       const sourcePath = join(temporaryDirectory, "architecture.ifc");
       const adapterPath = join(temporaryDirectory, "fake-ifc-adapter.mjs");

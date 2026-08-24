@@ -1,6 +1,6 @@
 # Security Policy
 
-MADI processes complex, often proprietary engineering documents. Input files,
+NARU processes complex, often proprietary engineering documents. Input files,
 compiled caches, plugins, and remote endpoints are untrusted by default.
 
 ## Reporting

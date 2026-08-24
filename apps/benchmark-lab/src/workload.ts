@@ -2,7 +2,7 @@ import type {
   GpuOccurrenceInstance,
   GpuPrototypeBatch,
   GpuScene,
-} from "@madi/runtime-webgpu";
+} from "@naru3d/runtime-webgpu";
 
 export const industrialScaleTiers = {
   smoke: 1_000,

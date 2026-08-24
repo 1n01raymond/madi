@@ -1,4 +1,4 @@
-import type { CompiledHierarchyEntry } from "@madi/runtime-webgpu";
+import type { CompiledHierarchyEntry } from "@naru3d/runtime-webgpu";
 
 export interface HierarchySearchResult {
   readonly query: string;

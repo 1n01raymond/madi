@@ -14,7 +14,7 @@ a declared runtime profile and can be rebuilt from authoritative sources.
 ## 2. Command-line concept
 
 ```sh
-pnpm madi compile assembly.step \
+pnpm naru compile assembly.step \
   --output ./dist/assembly \
   --linear-tolerance 0.1 \
   --angular-tolerance 0.15
@@ -29,10 +29,10 @@ compiler work.
 Other commands:
 
 ```text
-madi inspect ./dist/assembly/manifest.json
-madi validate ./dist/assembly
-madi diff old/manifest.json new/manifest.json
-madi benchmark ./dist/assembly --scenario review-default
+naru inspect ./dist/assembly/manifest.json
+naru validate ./dist/assembly
+naru diff old/manifest.json new/manifest.json
+naru benchmark ./dist/assembly --scenario review-default
 ```
 
 The inspection, diff, and benchmark commands below remain illustrative.
@@ -377,7 +377,7 @@ only after the runtime proves the basic model.
 
 ## 20. Phase 1 standards-first slice
 
-`@madi/compiler` now compiles a validator-clean in-memory `EngineeringScene`
+`@naru3d/compiler` now compiles a validator-clean in-memory `EngineeringScene`
 into `scene.gltf`, external `scene.bin`, and `build-report.json`. Direct STEP
 compilation additionally emits `coarse.bin` with one reusable prototype AABB
 surface/edge mesh per target mesh. The first
@@ -389,10 +389,10 @@ The glTF profile uses standard node hierarchy, shared mesh references, triangle
 and line primitives, materials, metre units, and Y-up coordinates. Occurrence,
 prototype, semantic, diagnostic, and source-reference fields live in
 `extras.madi`; no custom extension is required. This is an experimental profile
-under ADR-0004, not a frozen MADI format.
+under ADR-0004, not a frozen NARU format.
 
 The build is deterministic for identical Scene IR and options. The normal check
-runs both MADI invariants and the official Khronos glTF Validator. The current
+runs both NARU invariants and the official Khronos glTF Validator. The current
 slice keeps target geometry as the ordinary node mesh and records its coarse
 mesh index in standard `extras`. This proves representation-separated delivery,
 and `targetChunks` maps target prototype meshes to deterministic, non-overlapping
@@ -402,7 +402,7 @@ turns the qualified Digital Hub package from 3,383 prototype ranges into 45
 network/decode units. This proves partial range delivery and static request
 scheduling, but not shape-preserving LOD or spatial partitioning.
 
-The public `madi compile` entry now accepts a local AP242 or AP214 Part 21 file,
+The public `naru compile` entry now accepts a local AP242 or AP214 Part 21 file,
 invokes the isolated OCCT adapter, verifies schema and source digest parity,
 and writes the compiled package plus `adapter-report.json`. The committed
 `repeated-fasteners-ap242` package is generated through that exact command.
@@ -414,7 +414,7 @@ work has a stable public baseline.
 
 ## 21. First IFC federation slice
 
-The executable `madi compile-ifc` path accepts repeated discipline/document
+The executable `naru compile-ifc` path accepts repeated discipline/document
 pairs, preflights their Part 21 envelopes, invokes pinned IfcOpenShell 0.8.5,
 cross-checks every source digest, validates the resulting Scene IR, and uses the
 same standards-first glTF compiler as STEP.
@@ -449,7 +449,7 @@ compiler verifies the column file structurally at hydrate time — header
 digests, offset tables monotone and bracketing, every row's arity matching its
 interned key set — through u32 typed-array views only, without materializing
 the value table; values decode lazily through
-`resolvePropertyEntries`/`openPropertyValueColumns` in `@madi/scene-ir`.
+`resolvePropertyEntries`/`openPropertyValueColumns` in `@naru3d/scene-ir`.
 `scene.gltf` kept its byte length with a digest change explained by the
 recorded `optionsDigest` (`propertyMode: "indexed-column-values"`).
 
@@ -482,7 +482,7 @@ classification remain deferred.
 
 The qualified `ifc-bench-sixty5` federation's split.1 structure measured
 631,943,761 bytes — past the runtime's maximum string length, which used to
-stop `madi compile-ifc` at a measured limit. The record-streaming structure
+stop `naru compile-ifc` at a measured limit. The record-streaming structure
 reader removed that ceiling, and the split.1 compile is recorded in the
 repository history (commit `41e6973`): a 608.2 MB package byte-identical
 across two complete runs including adapter re-extraction, peaking at ≈3.8 GB

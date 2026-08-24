@@ -49,13 +49,13 @@ function storedZip(name: string, contents: Buffer): Buffer {
 
 describe("external fixture paths", () => {
   it("rejects traversal and absolute paths", () => {
-    const base = join(tmpdir(), "madi-fixture-root");
+    const base = join(tmpdir(), "naru-fixture-root");
     expect(() => resolveInside(base, "../escape.ifc")).toThrow(/parent traversal/u);
     expect(() => resolveInside(base, join(tmpdir(), "escape.ifc"))).toThrow(/relative/u);
   });
 
   it("resolves a nested cache path", () => {
-    const base = join(tmpdir(), "madi-fixture-root");
+    const base = join(tmpdir(), "naru-fixture-root");
     expect(resolveInside(base, "selected/model.ifc")).toBe(
       join(base, "selected", "model.ifc"),
     );
@@ -74,7 +74,7 @@ describe("external fixture ZIP selection", () => {
 
 describe("Part 21 inspection", () => {
   it("records schemas, entities, and IFC semantic indicators", async () => {
-    const directory = await mkdtemp(join(tmpdir(), "madi-part21-"));
+    const directory = await mkdtemp(join(tmpdir(), "naru-part21-"));
     temporaryDirectories.push(directory);
     const path = join(directory, "model.ifc");
     await writeFile(

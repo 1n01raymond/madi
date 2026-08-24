@@ -12,7 +12,7 @@ render object for every CAD occurrence.
 ## 2. Public API sketch
 
 ```ts
-const runtime = await createMadiRuntime({
+const runtime = await createNaruRuntime({
   device,
   budgets: {
     networkConcurrency: 8,

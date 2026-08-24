@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/media/madi-hero.svg" alt="MADI — 웹을 위한 오픈 엔지니어링" width="100%" />
+  <img src="docs/media/naru-hero.svg" alt="NARU — 대규모 CAD·BIM을 위한 WebGPU 네이티브 엔진" width="100%" />
 </p>
 
 <p align="center">
@@ -23,7 +23,7 @@
 </p>
 
 > [!IMPORTANT]
-> MADI는 현재 아키텍처 설계 및 프로토타이핑 단계입니다. 이 저장소에는
+> NARU는 현재 아키텍처 설계 및 프로토타이핑 단계입니다. 이 저장소에는
 > 제품 방향, 시스템 경계, 벤치마크와 구현 계획이 담겨 있으며, 아직 설치
 > 가능한 프로덕션 뷰어는 없습니다.
 
@@ -38,7 +38,7 @@
 엔지니어링 의미를 잃지 않으면서 이 데이터를 브라우저에서 빠르게 열고,
 검사하고, 자동화하고, 다른 제품에 임베드하는 것입니다.
 
-MADI는 원본 도구와 웹 애플리케이션 사이의 열린 계층을 제공합니다. 장기적
+NARU는 원본 도구와 웹 애플리케이션 사이의 열린 계층을 제공합니다. 장기적
 비전은 Blender와 닮아 있습니다. 강력한 코어와 폭넓은 확장 생태계를 갖춘,
 커뮤니티가 함께 만드는 엔지니어링 워크스페이스입니다. 다만 첫 목표는 더
 명확합니다. 대형 엔지니어링 장면을 웹에서 탁월하게 전달하고 다루는 것입니다.
@@ -47,7 +47,7 @@ MADI는 원본 도구와 웹 애플리케이션 사이의 열린 계층을 제�
   <tr>
     <td width="33%" valign="top">
       <h3>원본을 그대로 기준으로</h3>
-      네이티브 CAD/BIM과 중립 교환 파일은 계속 source of truth입니다. MADI
+      네이티브 CAD/BIM과 중립 교환 파일은 계속 source of truth입니다. NARU
       워크스페이스는 원본 참조, 뷰, 주석, 플러그인 상태를 저장하며 대체 CAD
       포맷이 되려 하지 않습니다.
     </td>
@@ -87,10 +87,10 @@ Engineering Scene IR은 새로운 교환 포맷이 아니라 논리적인 시스
 
 | 계층 | 역할 | 첫 번째 수직 슬라이스 |
 |---|---|---|
-| **MADI Studio** | 레퍼런스 엔지니어링 워크스페이스 | 어셈블리 트리, 검색, 속성, 선택, 숨김/격리, 단면, 측정 |
-| **MADI Runtime** | Headless 브라우저·GPU 엔진 | 점진적 스트리밍, Worker 디코딩, 인스턴싱, 컬링, 피킹, GPU 메모리 제한 |
-| **MADI Compiler** | 재현 가능한 source-to-Web 빌드 파이프라인 | OCCT 기반 STEP AP242, 계층·엣지 보존, LOD·청크 생성 |
-| **MADI SDK** | 안정적인 임베딩·확장 인터페이스 | 프레임워크 중립 TypeScript API, 명령, 패널, 분석 Worker, 권한 기반 플러그인 |
+| **NARU Studio** | 레퍼런스 엔지니어링 워크스페이스 | 어셈블리 트리, 검색, 속성, 선택, 숨김/격리, 단면, 측정 |
+| **NARU Runtime** | Headless 브라우저·GPU 엔진 | 점진적 스트리밍, Worker 디코딩, 인스턴싱, 컬링, 피킹, GPU 메모리 제한 |
+| **NARU Compiler** | 재현 가능한 source-to-Web 빌드 파이프라인 | OCCT 기반 STEP AP242, 계층·엣지 보존, LOD·청크 생성 |
+| **NARU SDK** | 안정적인 임베딩·확장 인터페이스 | 프레임워크 중립 TypeScript API, 명령, 패널, 분석 Worker, 권한 기반 플러그인 |
 
 ### 엔지니어링 작업을 위한 설계
 
@@ -119,14 +119,14 @@ Engineering Scene IR은 새로운 교환 포맷이 아니라 논리적인 시스
 
 ## 현재 런타임 증거
 
-![MADI WebGPU에서 직접 렌더링한 Adafruit PyGamer STEP 어셈블리](artifacts/browser-matrix/chrome-151-windows-selected.png)
+![NARU WebGPU에서 직접 렌더링한 Adafruit PyGamer STEP 어셈블리](artifacts/browser-matrix/chrome-151-windows-selected.png)
 
 대표 데모는 이제 합성 마스코트 대신 실제 Adafruit PyGamer 전자기기
 어셈블리를 사용합니다. 34개 공유 mesh, 85개 part occurrence, 162,838개 고유
 triangle, 13,897개 명시적 CAD edge, Worker 디코딩, 원본 참조가 유지되는
 조이스틱 picking을 Chrome과 Firefox에서 검증했습니다. 수정하지 않은 CAD는
 고정된 upstream commit과 라이선스 고지를 보존해 MIT로 재배포하며, Adafruit가
-MADI를 보증한다는 의미는 아닙니다. [검토된 브라우저 증거](artifacts/browser-matrix/README.md)를
+NARU를 보증한다는 의미는 아닙니다. [검토된 브라우저 증거](artifacts/browser-matrix/README.md)를
 확인하세요.
 
 ## 현재 컴파일러 증거
@@ -138,12 +138,12 @@ STEP을 읽고, 어셈블리 재사용과 CAD 엣지를 보존하고, 원본 식
 
 ```sh
 python -m pip install -r native/adapter-occt/tools/requirements-evidence.txt
-pnpm madi compile fixtures/step/repeated-fasteners-ap242.step \
+pnpm naru compile fixtures/step/repeated-fasteners-ap242.step \
   --output output/repeated-fasteners-ap242
 ```
 
 커밋된 AP242 결과는 Khronos glTF 오류·경고 0건으로 독립 검증됩니다. 확장된
-Scene IR은 임시 데이터이며 MADI 파일 포맷이 아닙니다. [컴파일러 증거](artifacts/phase1/README.md)를
+Scene IR은 임시 데이터이며 NARU 파일 포맷이 아닙니다. [컴파일러 증거](artifacts/phase1/README.md)를
 확인하세요.
 
 ## 설계 문서부터 시작하기
@@ -182,9 +182,9 @@ Scene IR은 임시 데이터이며 MADI 파일 포맷이 아닙니다. [컴파�
 ## 자주 묻는 질문
 
 <details>
-<summary><strong>MADI는 새로운 CAD 파일 포맷인가요?</strong></summary>
+<summary><strong>NARU는 새로운 CAD 파일 포맷인가요?</strong></summary>
 <br />
-아닙니다. 기존 CAD/BIM 문서가 source of truth로 남습니다. MADI는 중립적인
+아닙니다. 기존 CAD/BIM 문서가 source of truth로 남습니다. NARU는 중립적인
 인메모리 경계를 정의하고 브라우저 전송에 최적화된, 폐기·재생성 가능한 버전드
 캐시를 만들 수 있습니다.
 </details>
@@ -209,7 +209,7 @@ Open CASCADE는 정밀 형상, 어셈블리, 원본 엣지를 읽는 성숙한 �
 <details>
 <summary><strong>왜 전체 뷰어를 Three.js로 만들지 않나요?</strong></summary>
 <br />
-Three.js는 여전히 생태계의 여러 도구와 실험에 유용합니다. MADI의 대형 장면
+Three.js는 여전히 생태계의 여러 도구와 실험에 유용합니다. NARU의 대형 장면
 렌더러는 배칭, residency, 피킹, 메모리 정책을 명시적으로 제어하기 위해 직접
 WebGPU 데이터 구조를 사용합니다. 이는 집중할 아키텍처를 고른 것이지,
 범용 scene graph가 잘못되었다는 뜻이 아닙니다.
@@ -222,13 +222,13 @@ glTF는 중요한 표준 기반 전송·상호운용 선택지입니다. 엔지�
 스트리밍, 정밀도 요구를 충족하는 범위에서 glTF, meshopt, KTX2, 3D Tiles의
 개념과 메타데이터 표준을 재사용합니다. 첫 Phase 1 컴파일러 슬라이스는 glTF
 2.0과 외부 binary 리소스를 생성합니다. 브라우저는 이제 계층을 먼저 열고
-Worker에서 geometry를 해석하며, MADI 식별자와 원본 매핑은 명시적으로 실험
+Worker에서 geometry를 해석하며, NARU 식별자와 원본 매핑은 명시적으로 실험
 상태인 `extras`에 보관합니다.
 </details>
 
 ## 기여하기
 
-MADI는 아직 근거에 따라 아키텍처를 바꿀 수 있는 초기 단계입니다. 지금 특히
+NARU는 아직 근거에 따라 아키텍처를 바꿀 수 있는 초기 단계입니다. 지금 특히
 도움이 되는 기여는 다음과 같습니다.
 
 - 엣지 케이스가 문서화된 재배포 가능 STEP·IFC 테스트 모델
@@ -239,7 +239,7 @@ MADI는 아직 근거에 따라 아키텍처를 바꿀 수 있는 초기 단계�
 - 문서 및 번역 검토
 
 [CONTRIBUTING.md](CONTRIBUTING.md)를 읽고,
-[열린 이슈](https://github.com/1n01raymond/madi/issues)를 살펴보거나
+[열린 이슈](https://github.com/1n01raymond/naru/issues)를 살펴보거나
 [번역](docs/TRANSLATIONS.md)을 개선해 주세요. 큰 변경은 구현 전에 가정과
 방향을 공유할 수 있도록 설계 이슈에서 시작하는 것을 권장합니다.
 
@@ -274,10 +274,10 @@ docs/
 
 ## 라이선스
 
-MADI는 [Apache License 2.0](LICENSE)으로 제공됩니다. 계획된 서드파티
+NARU는 [Apache License 2.0](LICENSE)으로 제공됩니다. 계획된 서드파티
 의존성은 다른 호환 라이선스를 사용할 수 있습니다. 자세한 내용은
 [THIRD_PARTY.md](THIRD_PARTY.md)를 확인하세요.
 
 <p align="center">
-  <sub>웹을 위한 오픈 엔지니어링.</sub>
+  <sub>대규모 CAD·BIM을 위한 WebGPU 네이티브 엔진.</sub>
 </p>

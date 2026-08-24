@@ -1,8 +1,8 @@
 import {
   CompiledGltfError,
-  MadiWebGpuError,
-  MadiWebGpuRenderer,
-} from "@madi/runtime-webgpu";
+  NaruWebGpuError,
+  NaruWebGpuRenderer,
+} from "@naru3d/runtime-webgpu";
 import type {
   CompiledGltfDocument,
   CompiledHierarchy,
@@ -10,7 +10,7 @@ import type {
   CompiledTargetChunk,
   DecodedCompiledScene,
   GeometryRepresentation,
-} from "@madi/runtime-webgpu";
+} from "@naru3d/runtime-webgpu";
 
 import type { GeometryDecodeResponse } from "./geometry.worker.js";
 import { HierarchySearchIndex } from "./hierarchy-search.js";
@@ -30,12 +30,12 @@ import {
   defaultProgressiveResidencyBudget,
   ProgressiveResidency,
 } from "./progressive-residency.js";
-import faviconUrl from "../../../docs/media/madi-favicon.svg?url";
-import inverseMarkUrl from "../../../docs/media/madi-mark-inverse.svg?url";
+import faviconUrl from "../../../docs/media/naru-favicon.svg?url";
+import inverseMarkUrl from "../../../docs/media/naru-mark-inverse.svg?url";
 
 function requireElement<ElementType extends Element>(selector: string): ElementType {
   const element = document.querySelector<ElementType>(selector);
-  if (!element) throw new Error(`The MADI runtime page is missing ${selector}.`);
+  if (!element) throw new Error(`The NARU runtime page is missing ${selector}.`);
   return element;
 }
 
@@ -70,7 +70,7 @@ function decodeGeometry(
   return new Promise((resolve, reject) => {
     const worker = new Worker(new URL("./geometry.worker.ts", import.meta.url), {
       type: "module",
-      name: "madi-compiled-geometry",
+      name: "naru-compiled-geometry",
     });
     const finish = (): void => {
       signal.removeEventListener("abort", abort);
@@ -206,8 +206,8 @@ const localSceneButton = requireElement<HTMLElement>(".local-scene-button");
 const openDemoSceneButton = requireElement<HTMLButtonElement>("#open-demo-scene");
 const cancelSceneLoadButton = requireElement<HTMLButtonElement>("#cancel-scene-load");
 const defaultSceneUrl = new URL("/scene.gltf", window.location.href);
-requireElement<HTMLLinkElement>("#madi-favicon").href = faviconUrl;
-requireElement<HTMLImageElement>("#madi-brand-mark").src = inverseMarkUrl;
+requireElement<HTMLLinkElement>("#naru-favicon").href = faviconUrl;
+requireElement<HTMLImageElement>("#naru-brand-mark").src = inverseMarkUrl;
 
 let disposeActiveScene: (() => void) | undefined;
 let cancelPendingSceneLoad: (() => void) | undefined;
@@ -325,7 +325,7 @@ async function loadScene(source: SceneSource): Promise<boolean> {
       `decoding ${formatBytes(hierarchy.binaryByteLength)} in Worker…`;
     status.dataset.stage = "hierarchy";
 
-    const renderer = await MadiWebGpuRenderer.create(canvas, {
+    const renderer = await NaruWebGpuRenderer.create(canvas, {
       onDeviceLost: (message) => {
         status.textContent = `WebGPU device lost: ${message}`;
         status.dataset.state = "error";
@@ -1061,7 +1061,7 @@ async function loadScene(source: SceneSource): Promise<boolean> {
     if (disposeActiveScene === cleanup) disposeActiveScene = undefined;
     const message =
       error instanceof CompiledGltfError ||
-      error instanceof MadiWebGpuError ||
+      error instanceof NaruWebGpuError ||
       error instanceof Error
         ? error.message
         : String(error);

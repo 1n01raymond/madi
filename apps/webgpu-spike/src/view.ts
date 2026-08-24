@@ -1,4 +1,4 @@
-import type { SceneBounds } from "@madi/runtime-webgpu";
+import type { SceneBounds } from "@naru3d/runtime-webgpu";
 
 type Vector3 = readonly [number, number, number];
 

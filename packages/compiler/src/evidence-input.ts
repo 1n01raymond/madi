@@ -3,7 +3,7 @@ import type {
   EngineeringScene,
   MaterialGroup,
   Representation,
-} from "@madi/scene-ir";
+} from "@naru3d/scene-ir";
 
 interface SerializedSurface {
   readonly primitive: "triangles";

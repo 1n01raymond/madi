@@ -1,11 +1,11 @@
-# MADI compiler
+# NARU compiler
 
-`@madi/compiler` is the first Phase 1 source-to-Web compiler slice. Its public
+`@naru3d/compiler` is the first Phase 1 source-to-Web compiler slice. Its public
 CLI accepts local STEP AP242/AP214 through the OCCT Python adapter and
 multi-document IFC2X3/IFC4/IFC4X3 federations through IfcOpenShell; its library
 boundary accepts a validated in-memory `EngineeringScene`. These paths emit:
 
-- `scene.gltf`: glTF 2.0 hierarchy, nodes, shared meshes, materials, and MADI
+- `scene.gltf`: glTF 2.0 hierarchy, nodes, shared meshes, materials, and NARU
   source/identity metadata in `extras`;
 - `scene.bin`: little-endian f32/u32/u8 geometry and mapping accessors; and
 - `coarse.bin`: optional prototype AABB surfaces and edges for an early useful
@@ -17,7 +17,7 @@ The geometry contract follows the
 [Khronos glTF 2.0 specification](https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html):
 triangle primitives use mode 4, explicit CAD edge line lists use mode 1, and
 multiple occurrence nodes may reference one mesh. The profile does not require
-a custom glTF extension. MADI-specific data uses standard `extras` while the
+a custom glTF extension. NARU-specific data uses standard `extras` while the
 interoperability requirements are measured.
 
 ## Reproduce the committed slice
@@ -26,14 +26,14 @@ From the repository root:
 
 ```sh
 python -m pip install -r native/adapter-occt/tools/requirements-evidence.txt
-pnpm madi compile fixtures/step/repeated-fasteners-ap242.step \
+pnpm naru compile fixtures/step/repeated-fasteners-ap242.step \
   --output output/repeated-fasteners-ap242
 pnpm phase1:compile:evidence
 pnpm phase1:evidence:check
 pnpm test
 ```
 
-The `madi compile` command reads the checksum-locked AP242 assembly through
+The `naru compile` command reads the checksum-locked AP242 assembly through
 OCCT STEPCAF/XDE, validates source identity across the adapter boundary, and
 writes `scene.gltf`, `scene.bin`, `coarse.bin`, `build-report.json`, and
 `adapter-report.json`. Target geometry remains the ordinary glTF node mesh;
@@ -63,7 +63,7 @@ python -m venv output/venv-ifc
 output/venv-ifc/Scripts/python -m pip install \
   -r native/adapter-ifc/tools/requirements-evidence.txt
 
-pnpm madi compile-ifc \
+pnpm naru compile-ifc \
   --document architecture=path/to/architecture.ifc \
   --uri-hint architecture=models/architecture.ifc \
   --document plumbing=path/to/plumbing.ifc \
@@ -103,7 +103,7 @@ third binary column file (`madi.property-columns.1`): each semantic entity
 carries only `{set, row}`, and the compiler checks every row's arity against
 its interned key set through typed-array views without materializing a single
 value (values decode lazily through `resolvePropertyEntries` /
-`openPropertyValueColumns` in `@madi/scene-ir`). The observable
+`openPropertyValueColumns` in `@naru3d/scene-ir`). The observable
 `EngineeringScene` contract is unchanged apart from those tables, so the split
 exists only between the adapter and its consumers. `--retain-scene-ir`
 therefore writes `scene-ir.json`, `scene-ir-geometry.bin`, and
@@ -116,7 +116,7 @@ two additional package resources (`docs/COMPILER.md` section 21.2):
 `properties.bin` — the adapter column file byte for byte — and
 `properties.json`, a `madi.package-properties.1` document holding the interned
 property index plus a sorted columnar semantic table, parsed and validated by
-`parsePackageProperties` in `@madi/scene-ir`. `scene.gltf` points at the
+`parsePackageProperties` in `@naru3d/scene-ir`. `scene.gltf` points at the
 sidecar through `extras.madi.properties`, both resources join
 `output.resources` and the package digest, and `compileSceneToGltf` refuses a
 column-bag scene without `options.propertyColumns` (and the reverse). Inline

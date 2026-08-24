@@ -1,4 +1,4 @@
-# `@madi/runtime-webgpu`
+# `@naru3d/runtime-webgpu`
 
 Direct WebGPU rendering and the Phase 1 compiled glTF runtime boundary.
 
@@ -18,7 +18,7 @@ Direct WebGPU rendering and the Phase 1 compiled glTF runtime boundary.
   picking identity, and groups nodes by shared mesh.
 - `compiledSceneTransferables(scene)` lists owned typed-array buffers for a
   zero-copy Worker-to-main-thread transfer.
-- `MadiWebGpuRenderer` uploads those batches and renders surfaces, edges, and an
+- `NaruWebGpuRenderer` uploads those batches and renders surfaces, edges, and an
   integer object-ID picking pass directly with WebGPU.
 
 `setSelection(objectId)` updates a small scene uniform so the selected

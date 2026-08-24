@@ -209,7 +209,7 @@ async function record(definition, backend, repeat, captureScreenshot) {
     });
     await page.goto(`${url}?${query}`, { waitUntil: "domcontentloaded" });
     await page.locator("#status[data-state='ready']").waitFor({ timeout: 120_000 });
-    const result = await page.evaluate(() => window.__MADI_BENCHMARK_RESULT__);
+    const result = await page.evaluate(() => window.__NARU_BENCHMARK_RESULT__);
     if (!result) throw new Error(`${definition.id}/${backend} did not publish a result.`);
     if (
       result.backend !== backend ||
@@ -357,7 +357,7 @@ try {
       "This run validates parity and measurement plumbing; it does not accept or reject ADR-0003.",
       "Absolute performance varies by host load. Decision runs require reference hardware and repeated clean sessions.",
       culling === "frustum"
-        ? "MADI uses dense CPU sphere culling and instance compaction; Three.js uses BatchedMesh per-object culling with its default opaque sorting."
+        ? "NARU uses dense CPU sphere culling and instance compaction; Three.js uses BatchedMesh per-object culling with its default opaque sorting."
         : "Both paths disable frustum culling.",
       repeats > 1
         ? "Each repeat launches a fresh browser process and alternates backend order."
@@ -365,8 +365,8 @@ try {
       memory === "scene-delta"
         ? "Scene activation delta is measured from a backend-ready shell with the shared workload retained to the first rendered frame; it remains browser-wide diagnostic memory, not an allocator census."
         : "Only final whole-page memory is sampled.",
-      "GPU pass timestamps instrument only the MADI surface pass through WebGPU timestamp-query; the Three.js WebGPURenderer path reports them as unsupported because its command encoding is not caller-instrumentable.",
-      "The retained-resource census counts backend-owned scene upload memory. MADI reports exact GPUBuffer allocations; the Three.js figure is a constructed floor because its internal buffers, sort structures, uniforms, and render targets are not enumerable.",
+      "GPU pass timestamps instrument only the NARU surface pass through WebGPU timestamp-query; the Three.js WebGPURenderer path reports them as unsupported because its command encoding is not caller-instrumentable.",
+      "The retained-resource census counts backend-owned scene upload memory. NARU reports exact GPUBuffer allocations; the Three.js figure is a constructed floor because its internal buffers, sort structures, uniforms, and render targets are not enumerable.",
     ],
   };
   await writeFile(

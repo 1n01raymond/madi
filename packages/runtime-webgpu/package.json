@@ -1,9 +1,9 @@
 {
-  "name": "@madi/runtime-webgpu",
+  "name": "@naru3d/runtime-webgpu",
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "description": "Direct data-oriented WebGPU runtime and compiled glTF loader for MADI.",
+  "description": "Direct data-oriented WebGPU runtime and compiled glTF loader for NARU.",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",

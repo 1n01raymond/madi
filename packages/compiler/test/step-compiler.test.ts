@@ -13,7 +13,7 @@ const sceneTemplatePath = fileURLToPath(
 
 describe("direct STEP compiler orchestration", () => {
   it("passes a local AP242 file through an adapter and writes a validated package", async () => {
-    const temporaryDirectory = await mkdtemp(join(tmpdir(), "madi-step-test-"));
+    const temporaryDirectory = await mkdtemp(join(tmpdir(), "naru-step-test-"));
     try {
       const sourcePath = join(temporaryDirectory, "assembly.step");
       const adapterPath = join(temporaryDirectory, "fake-adapter.mjs");
@@ -100,7 +100,7 @@ await writeFile(option("--report"), JSON.stringify({
   });
 
   it("rejects an adapter result that does not belong to the selected STEP file", async () => {
-    const temporaryDirectory = await mkdtemp(join(tmpdir(), "madi-step-mismatch-test-"));
+    const temporaryDirectory = await mkdtemp(join(tmpdir(), "naru-step-mismatch-test-"));
     try {
       const sourcePath = join(temporaryDirectory, "assembly.step");
       const adapterPath = join(temporaryDirectory, "mismatched-adapter.mjs");

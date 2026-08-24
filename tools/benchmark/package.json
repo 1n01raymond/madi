@@ -1,5 +1,5 @@
 {
-  "name": "@madi/benchmark",
+  "name": "@naru3d/benchmark",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -9,7 +9,7 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
-    "@madi/scene-ir": "workspace:*"
+    "@naru3d/scene-ir": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "22.20.1"

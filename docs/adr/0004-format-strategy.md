@@ -6,7 +6,7 @@ Accepted: 2026-08-23
 ## Context
 
 glTF, meshopt, KTX2, and 3D Tiles already address substantial parts of efficient
-3D delivery, metadata, compression, instancing, and spatial streaming. MADI also
+3D delivery, metadata, compression, instancing, and spatial streaming. NARU also
 needs CAD edges, occurrence identity, semantic/source mapping, GPU-ready data,
 and independent semantic/geometry loading. A new format would impose a lasting
 tooling and compatibility cost.
@@ -17,9 +17,9 @@ tooling and compatibility cost.
 2. Build the first vertical slice with inspectable experimental resources.
 3. Reuse existing specifications/codecs wherever they meet requirements.
 4. Compare a standards-based profile with optimized experimental chunks.
-5. Freeze a custom MADI cache/container only when benchmarks demonstrate a
+5. Freeze a custom NARU cache/container only when benchmarks demonstrate a
    material and recurring gap.
-6. Never present a derived MADI cache as a replacement CAD interchange format.
+6. Never present a derived NARU cache as a replacement CAD interchange format.
 
 ## Consequences
 
@@ -37,7 +37,7 @@ tooling and compatibility cost.
 
 ## Alternatives considered
 
-- Specify `.wgeo`/`.madi` binary format before implementation.
+- Specify `.wgeo`/`.naru` binary format before implementation.
 - Use glTF/GLB without any external semantic/spatial indexes.
 - Use one compressed monolithic archive with HTTP ranges only.
 
@@ -45,7 +45,7 @@ tooling and compatibility cost.
 
 Phase 0 uses standard STEP source documents, keeps the Engineering Scene IR
 independent of serialization, and labels committed JSON as inspectable evidence
-rather than a delivery format. No new CAD interchange or public MADI container
+rather than a delivery format. No new CAD interchange or public NARU container
 was introduced to complete the vertical feasibility slice.
 
 Phase 1 must publish size, startup, decode, peak-memory, and upload comparisons

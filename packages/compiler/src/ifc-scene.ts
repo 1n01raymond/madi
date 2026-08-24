@@ -1,11 +1,11 @@
 import { endianness } from "node:os";
 
-import { isColumnPropertyBag, openPropertyValueColumns } from "@madi/scene-ir";
+import { isColumnPropertyBag, openPropertyValueColumns } from "@naru3d/scene-ir";
 import type {
   EngineeringScene,
   MaterialGroup,
   Representation,
-} from "@madi/scene-ir";
+} from "@naru3d/scene-ir";
 
 /**
  * Split Scene IR transport hydration for large IFC federations.

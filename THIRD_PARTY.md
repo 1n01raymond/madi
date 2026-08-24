@@ -34,7 +34,7 @@ by normal CI, and are not bundled into the browser runtime.
 | CadQuery | 2.8.0 | Apache-2.0 | XDE assembly import/tessellation helpers and authored fixture export |
 | `cadquery-ocp` | 7.9.3.1.1 | Apache-2.0 package metadata | Python OCCT binding for the local STEP adapter and fixture generation |
 
-The generated models and generator source are original MADI contributions under
+The generated models and generator source are original NARU contributions under
 Apache-2.0. Their provenance, exact checksums, and regeneration policy are in
 `fixtures/step/`.
 
@@ -44,7 +44,7 @@ IfcOpenShell 0.8.5 is pinned in
 `native/adapter-ifc/tools/requirements-evidence.txt` and used by the isolated
 IFC federation adapter. Its package is LGPL-3.0-or-later and uses Open CASCADE
 for geometry processing. It is not installed by normal CI and is not bundled
-into MADI's browser runtime. Distribution of an adapter environment must retain
+into NARU's browser runtime. Distribution of an adapter environment must retain
 the applicable IfcOpenShell and Open CASCADE notices and license terms.
 
 ## Third-party STEP fixture
@@ -55,12 +55,12 @@ PyGamer CAD assembly from `adafruit/Adafruit_CAD_Parts`, pinned to commit
 Industries and is redistributed under the MIT License. The full notice is in
 `fixtures/step/licenses/adafruit-cad-parts-MIT.txt`; the source URL, license URL,
 artifact path, and SHA-256 digest are locked in the fixture manifest. Adafruit
-does not endorse MADI.
+does not endorse NARU.
 
 ## External reference fixtures
 
 Large NIST and IFC-Bench reference sources are download-on-demand and remain in
-the ignored `output/external-fixtures/` cache; MADI does not redistribute those
+the ignored `output/external-fixtures/` cache; NARU does not redistribute those
 binaries. `fixtures/external/manifest.json` pins source identity, byte length,
 SHA-256, license, and attribution. The repository retains the NIST use notice,
 the Digital Hub MIT notice, and the `sixty5` CC BY 4.0 notice next to the

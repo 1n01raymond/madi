@@ -1,4 +1,4 @@
-# MADI Design Documents
+# NARU Design Documents
 
 Read in this order:
 

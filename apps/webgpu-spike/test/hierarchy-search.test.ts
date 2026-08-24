@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import type { CompiledHierarchyEntry } from "@madi/runtime-webgpu";
+import type { CompiledHierarchyEntry } from "@naru3d/runtime-webgpu";
 
 import { HierarchySearchIndex } from "../src/hierarchy-search.js";
 

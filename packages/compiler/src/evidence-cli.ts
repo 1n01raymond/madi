@@ -11,7 +11,7 @@ import { validateCompiledGltf } from "./validate.js";
 const [sourceArgument, outputArgument] = process.argv.slice(2);
 if (!sourceArgument || !outputArgument) {
   throw new TypeError(
-    "Usage: madi-compile-phase1-evidence <phase0.scene.json> <output-directory>",
+    "Usage: naru-compile-phase1-evidence <phase0.scene.json> <output-directory>",
   );
 }
 

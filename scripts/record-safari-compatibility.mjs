@@ -93,7 +93,7 @@ async function waitForApplication(sessionId) {
     if (observed.hierarchyReady && observed.state !== "loading") return;
     await new Promise((resolveDelay) => setTimeout(resolveDelay, 100));
   }
-  throw new Error("Safari did not reach a stable MADI application state within 20 seconds.");
+  throw new Error("Safari did not reach a stable NARU application state within 20 seconds.");
 }
 
 await mkdir(outputDirectory, { recursive: true });
@@ -148,14 +148,14 @@ try {
       prototypeCount: document.querySelector("#prototype-count")?.textContent ?? null,
       occurrenceCount: document.querySelector("#occurrence-count")?.textContent ?? null,
       brandLoaded: (() => {
-        const image = document.querySelector("#madi-brand-mark");
+        const image = document.querySelector("#naru-brand-mark");
         return image instanceof HTMLImageElement && image.complete && image.naturalWidth > 0;
       })()
     };`,
   );
 
   if (!observed.hierarchyReady || observed.hierarchyRecords !== 87 || !observed.brandLoaded) {
-    throw new Error(`Safari did not load the expected MADI shell and hierarchy: ${JSON.stringify(observed)}.`);
+    throw new Error(`Safari did not load the expected NARU shell and hierarchy: ${JSON.stringify(observed)}.`);
   }
   const outcome = observed.webGpuAvailable ? "webgpu-ready" : "webgpu-unavailable";
   if (

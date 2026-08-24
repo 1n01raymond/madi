@@ -1,4 +1,4 @@
-import type { ValidationResult } from "@madi/scene-ir";
+import type { ValidationResult } from "@naru3d/scene-ir";
 
 export const experimentalGltfProfile = "madi.experimental.gltf.1";
 export const compilerEvidenceSchema = "madi.phase1.compiler-report.1";

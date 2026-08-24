@@ -4,7 +4,7 @@ import {
   isColumnPropertyBag,
   packagePropertiesSchema,
   validateScene,
-} from "@madi/scene-ir";
+} from "@naru3d/scene-ir";
 import type {
   ColumnPropertyBag,
   EngineeringScene,
@@ -15,7 +15,7 @@ import type {
   PackagePropertiesDocument,
   Prototype,
   Representation,
-} from "@madi/scene-ir";
+} from "@naru3d/scene-ir";
 
 import {
   encodeFloat32,
@@ -978,6 +978,8 @@ export function compileSceneToGltf(
     profile: experimentalGltfProfile,
     status: "experimental-not-interchange",
     compiler: {
+      // Serialized report identity: frozen at the historical "@madi/compiler"
+      // string so recompiles stay byte-identical to committed evidence.
       name: "@madi/compiler",
       version: "0.0.0",
       generator,

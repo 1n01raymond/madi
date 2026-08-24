@@ -4,7 +4,7 @@ import type {
   CompiledBatchEvidence,
   DecodedCompiledScene,
   GpuPrototypeBatch,
-} from "@madi/runtime-webgpu";
+} from "@naru3d/runtime-webgpu";
 
 import {
   estimateBatchDecodedBytes,

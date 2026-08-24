@@ -1,5 +1,5 @@
 name: Bug report
-description: Report a reproducible problem in MADI
+description: Report a reproducible problem in NARU
 title: "[Bug]: "
 labels: ["bug"]
 body:

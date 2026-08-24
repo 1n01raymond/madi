@@ -2,7 +2,7 @@
 
 This harness uses CadQuery's OCP binding to exercise OCCT STEPCAF/XDE on hosts
 that do not yet have a native C++ toolchain. It is evidence for the adapter
-boundary, not a stable serialized MADI format or the production adapter.
+boundary, not a stable serialized NARU format or the production adapter.
 """
 
 from __future__ import annotations

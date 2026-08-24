@@ -1,4 +1,4 @@
-# MADI Product Requirements
+# NARU Product Requirements
 
 Status: Draft 0.1
 Audience: maintainers, contributors, design partners, and embedding teams
@@ -11,7 +11,7 @@ data. Existing browser viewers are often vendor-specific, cloud-only,
 application-centric, or built on rendering abstractions that become expensive
 for very large assemblies.
 
-MADI will provide an open engineering workspace and an embeddable runtime whose
+NARU will provide an open engineering workspace and an embeddable runtime whose
 first distinctive capability is a direct, data-oriented WebGPU path for massive
 CAD/BIM scenes.
 
@@ -31,7 +31,7 @@ The product thesis has three parts:
 > Any engineering model, in any browser, at useful scale, under the user's
 > control.
 
-Long term, MADI should feel less like a file viewer and more like an open studio:
+Long term, NARU should feel less like a file viewer and more like an open studio:
 users can compose sources, build views, annotate decisions, run tools, automate
 repetitive work, and install domain workbenches. The reference application is a
 host for the ecosystem; the runtime and APIs are equally important products.
@@ -152,11 +152,11 @@ Needs:
 1. User adds multiple source documents.
 2. Each source is positioned through coordinate metadata or explicit transform.
 3. User creates selection sets, views, annotations, and presentation states.
-4. MADI saves only workspace intent plus source/cache references.
+4. NARU saves only workspace intent plus source/cache references.
 5. On reopen, sources are validated by revision/hash and caches are reused or
    rebuilt.
 
-### 5.4 Embed MADI in another application
+### 5.4 Embed NARU in another application
 
 1. Host creates a runtime with explicit CPU/GPU/network budgets.
 2. Host attaches a view to a canvas and loads a model.
@@ -263,7 +263,7 @@ Initial targets are hypotheses until the benchmark suite exists.
 
 ### 7.4 Security and privacy
 
-- Self-hosted operation is possible without a MADI-operated service.
+- Self-hosted operation is possible without a NARU-operated service.
 - No telemetry is enabled in the core runtime by default.
 - File and decoder limits prevent unbounded allocation and decompression.
 - Plugin capabilities are explicit and revocable.

@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/media/madi-hero.svg" alt="MADI — Webのためのオープンエンジニアリング" width="100%" />
+  <img src="docs/media/naru-hero.svg" alt="NARU — 大規模CAD・BIMのためのWebGPUネイティブエンジン" width="100%" />
 </p>
 
 <p align="center">
@@ -23,7 +23,7 @@
 </p>
 
 > [!IMPORTANT]
-> MADIは現在、アーキテクチャ設計とプロトタイピングの段階です。この
+> NARUは現在、アーキテクチャ設計とプロトタイピングの段階です。この
 > リポジトリは製品、システム境界、ベンチマーク、実装方針を定義するもので、
 > インストール可能な本番ビューアはまだ含まれていません。
 
@@ -38,7 +38,7 @@ Onshape、Revitなどの専門システムですでに正式なデータを作�
 アセンブリの識別情報やエンジニアリング上の意味を失わずに、そのデータを
 ブラウザで高速に表示・検査・自動化し、他の製品へ組み込むことです。
 
-MADIはソースツールとWebアプリケーションの間にオープンなレイヤーを
+NARUはソースツールとWebアプリケーションの間にオープンなレイヤーを
 提供します。長期的にはBlenderのように、強力なコアと幅広い拡張
 エコシステムをコミュニティで育てるエンジニアリングワークスペースを
 目指します。まずは、大規模シーンの配信と操作に集中します。
@@ -48,7 +48,7 @@ MADIはソースツールとWebアプリケーションの間にオープンな�
     <td width="33%" valign="top">
       <h3>原本を正とする</h3>
       ネイティブCAD/BIMと中間交換ファイルは引き続きsource of truthです。
-      MADIワークスペースが保存するのは参照、ビュー、注釈、プラグイン状態であり、
+      NARUワークスペースが保存するのは参照、ビュー、注釈、プラグイン状態であり、
       代替CAD形式ではありません。
     </td>
     <td width="33%" valign="top">
@@ -87,10 +87,10 @@ Engineering Scene IRは新しい交換形式ではなく、論理的なシステ
 
 | レイヤー | 役割 | 最初の垂直スライス |
 |---|---|---|
-| **MADI Studio** | リファレンスとなるエンジニアリングワークスペース | アセンブリツリー、検索、プロパティ、選択、表示/分離、断面、計測 |
-| **MADI Runtime** | Headlessブラウザ・GPUエンジン | 段階的ストリーミング、Workerデコード、インスタンシング、カリング、ピッキング、GPUメモリ制限 |
-| **MADI Compiler** | 再現可能なsource-to-Webビルドパイプライン | OCCT経由のSTEP AP242、階層・エッジ保持、LOD・チャンク生成 |
-| **MADI SDK** | 安定した組み込み・拡張インターフェース | フレームワーク非依存TypeScript API、コマンド、パネル、解析Worker、権限ベースのプラグイン |
+| **NARU Studio** | リファレンスとなるエンジニアリングワークスペース | アセンブリツリー、検索、プロパティ、選択、表示/分離、断面、計測 |
+| **NARU Runtime** | Headlessブラウザ・GPUエンジン | 段階的ストリーミング、Workerデコード、インスタンシング、カリング、ピッキング、GPUメモリ制限 |
+| **NARU Compiler** | 再現可能なsource-to-Webビルドパイプライン | OCCT経由のSTEP AP242、階層・エッジ保持、LOD・チャンク生成 |
+| **NARU SDK** | 安定した組み込み・拡張インターフェース | フレームワーク非依存TypeScript API、コマンド、パネル、解析Worker、権限ベースのプラグイン |
 
 ### エンジニアリング作業のための設計
 
@@ -119,14 +119,14 @@ Engineering Scene IRは新しい交換形式ではなく、論理的なシステ
 
 ## 現在のランタイム検証
 
-![MADI WebGPUで直接描画したAdafruit PyGamer STEPアセンブリ](artifacts/browser-matrix/chrome-151-windows-selected.png)
+![NARU WebGPUで直接描画したAdafruit PyGamer STEPアセンブリ](artifacts/browser-matrix/chrome-151-windows-selected.png)
 
 標準デモは合成マスコットではなく、実在するAdafruit PyGamer電子機器
 アセンブリを使用します。34個の共有mesh、85個のpart occurrence、162,838
 個の固有triangle、13,897個の明示的CAD edge、Worker decode、ソース参照を
 保持したjoystick pickingをChromeとFirefoxで検証しました。未変更のCADは
 固定upstream commitと通知を保持してMITで再配布しており、Adafruitによる
-MADIの推奨を意味しません。[検証済みブラウザ証拠](artifacts/browser-matrix/README.md)を
+NARUの推奨を意味しません。[検証済みブラウザ証拠](artifacts/browser-matrix/README.md)を
 参照してください。
 
 ## 現在のコンパイラ検証
@@ -138,12 +138,12 @@ AP242/AP214経路が追加されました。固定されたOCCT Pythonアダプ�
 
 ```sh
 python -m pip install -r native/adapter-occt/tools/requirements-evidence.txt
-pnpm madi compile fixtures/step/repeated-fasteners-ap242.step \
+pnpm naru compile fixtures/step/repeated-fasteners-ap242.step \
   --output output/repeated-fasteners-ap242
 ```
 
 コミット済みAP242結果は、Khronos glTFのerror・warningともに0件です。展開された
-Scene IRは一時データであり、MADIファイル形式ではありません。
+Scene IRは一時データであり、NARUファイル形式ではありません。
 [コンパイラ証拠](artifacts/phase1/README.md)を参照してください。
 
 ## 設計から読み始める
@@ -181,9 +181,9 @@ Scene IRは一時データであり、MADIファイル形式ではありませ�
 ## よくある質問
 
 <details>
-<summary><strong>MADIは新しいCADファイル形式ですか？</strong></summary>
+<summary><strong>NARUは新しいCADファイル形式ですか？</strong></summary>
 <br />
-いいえ。既存のCAD/BIM文書がsource of truthです。MADIは中立的な
+いいえ。既存のCAD/BIM文書がsource of truthです。NARUは中立的な
 インメモリ境界を定義し、ブラウザ配信用に最適化した、破棄・再生成可能な
 バージョン付きキャッシュを作成できます。
 </details>
@@ -209,7 +209,7 @@ Open CASCADEは、精密形状、アセンブリ、ソースエッジを読む�
 <details>
 <summary><strong>なぜビューア全体をThree.jsで作らないのですか？</strong></summary>
 <br />
-Three.jsは周辺ツールや実験で引き続き有用です。MADIの大規模シーン
+Three.jsは周辺ツールや実験で引き続き有用です。NARUの大規模シーン
 レンダラーは、バッチング、residency、ピッキング、メモリ方針を明示的に
 制御するため、直接WebGPUデータ構造を使います。これはアーキテクチャ上の
 焦点であり、汎用scene graphを否定するものではありません。
@@ -222,13 +222,13 @@ glTFは重要な標準ベースの配信・相互運用手段です。エンジ�
 識別情報、エッジ、ストリーミング、精度要件を満たす範囲で、glTF、meshopt、
 KTX2、3D Tilesの概念、メタデータ標準を再利用します。最初のPhase 1
 コンパイラースライスはglTF 2.0と外部バイナリを生成します。ブラウザーは
-階層を先に開き、Workerでジオメトリをデコードします。MADIの識別情報と
+階層を先に開き、Workerでジオメトリをデコードします。NARUの識別情報と
 ソース対応は、明示的に実験段階の`extras`へ保持します。
 </details>
 
 ## コントリビューション
 
-MADIは、根拠によってアーキテクチャを変えられる初期段階にあります。
+NARUは、根拠によってアーキテクチャを変えられる初期段階にあります。
 現在、特に価値のあるコントリビューションは次のとおりです。
 
 - エッジケースを文書化した再配布可能なSTEP・IFCテストモデル
@@ -239,16 +239,16 @@ MADIは、根拠によってアーキテクチャを変えられる初期段階�
 - 文書と翻訳のレビュー
 
 [CONTRIBUTING.md](CONTRIBUTING.md)を読み、
-[未解決のIssue](https://github.com/1n01raymond/madi/issues)を確認するか、
+[未解決のIssue](https://github.com/1n01raymond/naru/issues)を確認するか、
 [翻訳](docs/TRANSLATIONS.md)を改善してください。大きな変更は、実装前に
 前提と方向性を共有できるよう、設計Issueから始めることを推奨します。
 
 ## ライセンス
 
-MADIは [Apache License 2.0](LICENSE) で提供されます。予定している
+NARUは [Apache License 2.0](LICENSE) で提供されます。予定している
 サードパーティ依存関係は、互換性のある別ライセンスを使用する場合があります。
 詳しくは [THIRD_PARTY.md](THIRD_PARTY.md) をご覧ください。
 
 <p align="center">
-  <sub>Webのためのオープンエンジニアリング。</sub>
+  <sub>大規模CAD・BIMのためのWebGPUネイティブエンジン。</sub>
 </p>

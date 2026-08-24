@@ -1,7 +1,7 @@
 """Extract deterministic Engineering Scene IR from an IFC federation.
 
 IfcOpenShell remains behind this process boundary. The JSON output is an
-inspection/intermediate representation, not a stable MADI storage format.
+inspection/intermediate representation, not a stable NARU storage format.
 """
 
 from __future__ import annotations

@@ -41,7 +41,7 @@ export function createRepeatedTriangleScene(): EngineeringScene {
     revision: {
       id: ids.revision("revision:phase-0-repeated-triangle:v1"),
       sourceDigest: "sha256:phase-0-generated-fixture",
-      adapter: { name: "@madi/scene-ir fixture", version: "0.0.0" },
+      adapter: { name: "@naru3d/scene-ir fixture", version: "0.0.0" },
       createdAt: "1970-01-01T00:00:00.000Z",
       optionsDigest: "sha256:default-options",
     },

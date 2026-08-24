@@ -4,8 +4,8 @@ import { compileStepFile } from "./step-compiler.js";
 import { compileIfcFederation } from "./ifc-federation.js";
 
 const usage = `Usage:
-  madi compile <source.step> --output <directory> [options]
-  madi compile-ifc --document <discipline=source.ifc>... --output <directory> [options]
+  naru compile <source.step> --output <directory> [options]
+  naru compile-ifc --document <discipline=source.ifc>... --output <directory> [options]
 
 STEP options:
   --python <executable>          Python environment containing CadQuery/OCP
@@ -188,16 +188,16 @@ async function main(): Promise<void> {
   if (arguments_[0] === "compile") {
     const result = await compileStepFile(parseCompileArguments(arguments_.slice(1)));
     console.log(
-      `[madi] ${result.source.schema} ${result.source.displayName} ` +
+      `[naru] ${result.source.schema} ${result.source.displayName} ` +
         `(${result.source.sha256.slice(0, 12)})`,
     );
     console.log(
-      `[madi] wrote ${result.report.counts.compiledPrototypeCount} shared meshes, ` +
+      `[naru] wrote ${result.report.counts.compiledPrototypeCount} shared meshes, ` +
         `${result.report.counts.renderableOccurrenceCount} renderable occurrences, ` +
         `${result.report.counts.triangleCount.toLocaleString("en-US")} triangles`,
     );
-    console.log(`[madi] package ${result.report.output.packageDigest}`);
-    console.log(`[madi] output: ${result.outputDirectory}`);
+    console.log(`[naru] package ${result.report.output.packageDigest}`);
+    console.log(`[naru] output: ${result.outputDirectory}`);
     return;
   }
   if (arguments_[0] === "compile-ifc") {
@@ -205,15 +205,15 @@ async function main(): Promise<void> {
       parseIfcCompileArguments(arguments_.slice(1)),
     );
     console.log(
-      `[madi] IFC federation ${result.sources.map(({ discipline }) => discipline).join(", ")}`,
+      `[naru] IFC federation ${result.sources.map(({ discipline }) => discipline).join(", ")}`,
     );
     console.log(
-      `[madi] wrote ${result.report.counts.compiledPrototypeCount} shared meshes, ` +
+      `[naru] wrote ${result.report.counts.compiledPrototypeCount} shared meshes, ` +
         `${result.report.counts.renderableOccurrenceCount} renderable occurrences, ` +
         `${result.report.counts.triangleCount.toLocaleString("en-US")} unique triangles`,
     );
-    console.log(`[madi] package ${result.report.output.packageDigest}`);
-    console.log(`[madi] output: ${result.outputDirectory}`);
+    console.log(`[naru] package ${result.report.output.packageDigest}`);
+    console.log(`[naru] output: ${result.outputDirectory}`);
     return;
   }
   throw new TypeError(`Unknown command ${String(arguments_[0])}.\n\n${usage}`);
@@ -222,6 +222,6 @@ async function main(): Promise<void> {
 try {
   await main();
 } catch (error) {
-  console.error(`[madi] error: ${error instanceof Error ? error.message : String(error)}`);
+  console.error(`[naru] error: ${error instanceof Error ? error.message : String(error)}`);
   process.exitCode = 1;
 }

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import type { GpuPrototypeBatch, GpuScene } from "@madi/runtime-webgpu";
+import type { GpuPrototypeBatch, GpuScene } from "@naru3d/runtime-webgpu";
 
 import { OccurrenceVisibility } from "../src/visibility.js";
 

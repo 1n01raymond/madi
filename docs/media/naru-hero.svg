@@ -1,6 +1,6 @@
 <svg width="1200" height="360" viewBox="0 0 1200 360" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
-  <title id="title">MADI — Open engineering for the Web</title>
-  <desc id="desc">MADI wordmark beside an engineering solid extending beyond a viewport frame.</desc>
+  <title id="title">NARU — A WebGPU-native engine for massive CAD and BIM</title>
+  <desc id="desc">NARU wordmark beside an engineering solid extending beyond a viewport frame.</desc>
   <defs>
     <pattern id="grid" width="30" height="30" patternUnits="userSpaceOnUse">
       <path d="M30 0H0V30" stroke="#111111" stroke-opacity="0.06" fill="none"></path>
@@ -20,8 +20,8 @@
     </g>
   </g>
 
-  <text x="326" y="176" fill="#111111" font-family="Space Grotesk, Inter Tight, ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif" font-size="104" font-weight="700" letter-spacing="2">MADI</text>
-  <text x="331" y="215" fill="#6E6F73" font-family="JetBrains Mono, ui-monospace, SFMono-Regular, Menlo, monospace" font-size="19" font-weight="500" letter-spacing="6.4">OPEN ENGINEERING FOR THE WEB</text>
+  <text x="326" y="176" fill="#111111" font-family="Space Grotesk, Inter Tight, ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif" font-size="104" font-weight="700" letter-spacing="2">NARU</text>
+  <text x="331" y="215" fill="#6E6F73" font-family="JetBrains Mono, ui-monospace, SFMono-Regular, Menlo, monospace" font-size="19" font-weight="500" letter-spacing="3">A WEBGPU-NATIVE ENGINE FOR MASSIVE CAD AND BIM</text>
   <path d="M332 250H920" stroke="#111111" stroke-opacity="0.16"></path>
   <text x="332" y="281" fill="#8A8A8A" font-family="JetBrains Mono, ui-monospace, SFMono-Regular, Menlo, monospace" font-size="14" font-weight="400" letter-spacing="2.6">CAD / BIM / WEBGPU / APACHE-2.0</text>
 </svg>

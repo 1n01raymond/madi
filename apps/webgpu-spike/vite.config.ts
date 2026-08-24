@@ -5,7 +5,7 @@ import { resolve } from "node:path";
 const repositoryRoot = fileURLToPath(new URL("../..", import.meta.url));
 const compiledSceneDirectory = resolve(
   repositoryRoot,
-  process.env.MADI_SCENE_DIR ?? "artifacts/phase1/adafruit-pygamer",
+  process.env.NARU_SCENE_DIR ?? "artifacts/phase1/adafruit-pygamer",
 );
 
 export default defineConfig({

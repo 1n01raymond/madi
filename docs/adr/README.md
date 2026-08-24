@@ -19,7 +19,8 @@ reverse. They explain context and trade-offs rather than only the final choice.
 | [0003](0003-webgpu-hot-path.md) | Direct data-oriented WebGPU hot path | Proposed |
 | [0004](0004-format-strategy.md) | Standards-first delivery; defer custom format | Accepted |
 | [0005](0005-coordinate-precision.md) | Hierarchical local coordinates and camera-relative rendering | Proposed |
-| [0006](0006-license.md) | Apache-2.0 for MADI-owned code | Accepted |
+| [0006](0006-license.md) | Apache-2.0 for NARU-owned code | Accepted |
+| [0007](0007-rebrand-naru.md) | Rebrand to NARU; freeze serialized `madi.*` identifiers | Accepted |
 
 ## Phase 0 review
 

@@ -1,10 +1,10 @@
-# MADI System Architecture
+# NARU System Architecture
 
 Status: Draft 0.1
 
 ## 1. Architectural objective
 
-MADI converts engineering sources into a semantic scene that can be opened and
+NARU converts engineering sources into a semantic scene that can be opened and
 used progressively in a browser. It separates source interpretation, logical
 scene meaning, delivery representation, runtime residency, and user workspace
 state so each can evolve independently.
@@ -28,10 +28,10 @@ flowchart TB
     D[Application Developer]
     CAD[CAD & BIM Sources]
     PDM[PLM / PDM / Object Storage]
-    COMP[MADI Compiler]
+    COMP[NARU Compiler]
     STORE[Static Host / CDN / Local Cache]
-    RT[MADI Runtime]
-    STUDIO[MADI Studio or Embedded App]
+    RT[NARU Runtime]
+    STUDIO[NARU Studio or Embedded App]
     PLUG[Plugins]
 
     CAD --> COMP
@@ -45,7 +45,7 @@ flowchart TB
     D --> RT
 ```
 
-No central MADI service is required. An organization may run compilation in CI,
+No central NARU service is required. An organization may run compilation in CI,
 on a workstation, beside a PLM system, or as a private service. Output can be
 served from ordinary static storage.
 
@@ -54,7 +54,7 @@ served from ordinary static storage.
 ```mermaid
 flowchart TB
     subgraph Experience
-      Studio[MADI Studio]
+      Studio[NARU Studio]
       Embed[Embedded Host Apps]
       Automation[Automation & Plugins]
     end
@@ -143,7 +143,7 @@ The compiler performs deterministic transforms:
 ### 4.4 Delivery profile
 
 Delivery is a manifest plus immutable chunks. It may use glTF-compatible
-payloads, 3D Tiles concepts, and established codecs. A future `.madi` package or
+payloads, 3D Tiles concepts, and established codecs. A future `.naru` package or
 optimized cache container may bundle these resources, but it is not a source
 CAD format and is not frozen before benchmarks justify it.
 
@@ -433,13 +433,13 @@ not sent anywhere by the core runtime.
 The exact monorepo structure is deferred, but the intended dependency graph is:
 
 ```text
-@madi/schema        logical IDs, manifests, feature negotiation
-@madi/scene-ir      in-memory neutral model
-@madi/runtime       framework-neutral browser runtime
-@madi/runtime-webgpu WebGPU backend
-@madi/workspace     workspace transactions and persistence
-@madi/plugin-sdk    public extension contracts
-@madi/studio        reference web application
+@naru3d/schema        logical IDs, manifests, feature negotiation
+@naru3d/scene-ir      in-memory neutral model
+@naru3d/runtime       framework-neutral browser runtime
+@naru3d/runtime-webgpu WebGPU backend
+@naru3d/workspace     workspace transactions and persistence
+@naru3d/plugin-sdk    public extension contracts
+@naru3d/studio        reference web application
 native/compiler     compiler orchestration
 native/adapter-occt STEP/IGES implementation
 native/adapter-ifc  IFC federation implementation

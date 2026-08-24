@@ -2,7 +2,7 @@
 
 Status: Complete (2026-08-23)
 
-Phase 0 validates the riskiest boundaries before MADI commits to a delivery
+Phase 0 validates the riskiest boundaries before NARU commits to a delivery
 format or a full Studio product. The authoritative outcomes and exit criteria
 remain in [the roadmap](ROADMAP.md); this document links each claim to
 reproducible repository evidence.
@@ -12,10 +12,10 @@ reproducible repository evidence.
 | Area | Evidence | Current limit |
 |---|---|---|
 | Workspace | pnpm workspace, strict TypeScript, ESLint, Vitest, Vite, and CI | Native jobs are not yet gated in CI |
-| Scene IR | `@madi/scene-ir`, independent validator, and an OCCT-produced engineering scene artifact | The JSON evidence is not a frozen disk schema |
-| WebGPU | multi-prototype `@madi/runtime-webgpu` scene plus a reproducible Chrome/Blink and Firefox/Gecko visual/picking matrix | Evidence currently covers one Windows/NVIDIA workstation, not the supported hardware matrix |
+| Scene IR | `@naru3d/scene-ir`, independent validator, and an OCCT-produced engineering scene artifact | The JSON evidence is not a frozen disk schema |
+| WebGPU | multi-prototype `@naru3d/runtime-webgpu` scene plus a reproducible Chrome/Blink and Firefox/Gecko visual/picking matrix | Evidence currently covers one Windows/NVIDIA workstation, not the supported hardware matrix |
 | OCCT | isolated native boundary plus a reproducible OCCT 7.9.3 STEPCAF/XDE evidence harness | The local machine still lacks CMake, a C++ compiler, and a native OCCT development package |
-| Fixtures | three MADI-authored STEP files plus one pinned MIT-licensed Adafruit electronics assembly; all carry checksum and license checks | The unsupported case covers one AP214 semantic entity, not the broader STEP feature matrix |
+| Fixtures | three NARU-authored STEP files plus one pinned MIT-licensed Adafruit electronics assembly; all carry checksum and license checks | The unsupported case covers one AP214 semantic entity, not the broader STEP feature matrix |
 | Benchmarks | machine-readable Scene IR validation microbenchmark | Bootstrap smoke metric, not a rendering performance claim |
 
 ## Reproduce the bootstrap

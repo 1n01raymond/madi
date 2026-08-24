@@ -229,7 +229,7 @@ export async function compileIfcFederation(
   const sources = await inspectDocuments(options.documents);
   const threads = positiveThreads(options.threads);
   const outputDirectory = resolve(options.outputDirectory);
-  const temporaryDirectory = await mkdtemp(join(tmpdir(), "madi-ifc-"));
+  const temporaryDirectory = await mkdtemp(join(tmpdir(), "naru-ifc-"));
   const scenePath = join(temporaryDirectory, "scene-ir.json");
   const geometryPath = join(temporaryDirectory, "scene-ir-geometry.bin");
   const propertiesPath = join(temporaryDirectory, "scene-ir-properties.bin");
@@ -243,8 +243,8 @@ export async function compileIfcFederation(
     ]);
     await runAdapter(
       options.pythonExecutable ??
-        process.env.MADI_IFC_PYTHON ??
-        process.env.MADI_PYTHON ??
+        process.env.NARU_IFC_PYTHON ??
+        process.env.NARU_PYTHON ??
         (process.platform === "win32" ? "python" : "python3"),
       [
         resolve(options.adapterScriptPath ?? defaultAdapterScript),

@@ -126,18 +126,18 @@ async function recordBrowser(definition) {
       sourceFormat: await page.locator("#source-format").innerText(),
       hierarchyFirst,
       hierarchySearchBeforeGeometry,
-      brandMarkLoaded: await page.locator("#madi-brand-mark").evaluate(
+      brandMarkLoaded: await page.locator("#naru-brand-mark").evaluate(
         (element) =>
           element instanceof HTMLImageElement &&
           element.complete &&
           element.naturalWidth > 0,
       ),
       faviconLoaded: await page.evaluate(async () => {
-        const favicon = document.querySelector("#madi-favicon");
+        const favicon = document.querySelector("#naru-favicon");
         if (!(favicon instanceof HTMLLinkElement) || !favicon.href) return false;
         const response = await fetch(favicon.href);
         const source = await response.text();
-        return response.ok && source.includes("<svg") && source.includes("MADI");
+        return response.ok && source.includes("<svg") && source.includes("NARU");
       }),
       fixtureCreditLinked: await page.locator(".fixture-credit a").evaluate(
         (element) =>

@@ -227,6 +227,6 @@ measured gaps are material.
 
 ### After Phase 2
 
-Decide whether MADI's strongest adoption path is Studio, embedded runtime, or
+Decide whether NARU's strongest adoption path is Studio, embedded runtime, or
 compiler infrastructure. Preserve all three boundaries, but concentrate
 maintainer resources where external use appears.

@@ -1,12 +1,12 @@
 import {
   compiledSceneTransferables,
   decodeCompiledGltf,
-} from "@madi/runtime-webgpu";
+} from "@naru3d/runtime-webgpu";
 import type {
   CompiledGltfDocument,
   DecodedCompiledScene,
   GeometryRepresentation,
-} from "@madi/runtime-webgpu";
+} from "@naru3d/runtime-webgpu";
 import type { GeometryBinarySource } from "./scene-source.js";
 
 interface GeometryDecodeRequest {
