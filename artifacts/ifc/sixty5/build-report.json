@@ -21,16 +21,16 @@
     "revisionId": "revision:ifc-federation:e334c6a9295a0adb",
     "sourceDigest": "sha256:e334c6a9295a0adbf8ffbb15c61ea05c47b0135a319ee370f853bb9a36d21dec",
     "adapter": "IfcOpenShell 0.8.5",
-    "optionsDigest": "sha256:3f40390a2668e98b181e51e858112bff37a67e88646742957a0b540fea47409f"
+    "optionsDigest": "sha256:7e20199c083e73a51127d9922bacc85ebe8172ec7cf8dae20a4cbcb0a311657c"
   },
   "output": {
-    "packageDigest": "bb58f9f8117f51fba3c7071160e3af938883ca41a86d1ec131241940cde5c281",
+    "packageDigest": "638aaf1784efebe5b4ce041fe3dc56674c7f99a1f7248eaa86739d7c7143333f",
     "resources": [
       {
         "path": "scene.gltf",
         "mediaType": "model/gltf+json",
         "bytes": 448823616,
-        "sha256": "ca1191a11dc6105cdfc7be9e7c88de54fd9c38f7a575c7b225f8205c39169187"
+        "sha256": "92938609bb0696ab9e1d17bebf831447cf55c20644f71877727117be096eb841"
       },
       {
         "path": "scene.bin",

@@ -1,8 +1,10 @@
+import { isIndexedPropertyBag } from "./properties.js";
 import { edgeClassCode } from "./types.js";
 import type {
   Bounds3d,
   EngineeringScene,
   Matrix4d,
+  PropertyIndex,
   PropertyValue,
   Representation,
   UnitSystem,
@@ -120,6 +122,63 @@ function validatePropertyValue(
       validatePropertyValue(entry, `${path}.values[${index}]`, add),
     );
   }
+}
+
+function validatePropertyIndex(
+  propertyIndex: PropertyIndex,
+  add: (issue: ValidationIssue) => void,
+): void {
+  const seenKeys = new Set<string>();
+  propertyIndex.keys.forEach((key, index) => {
+    const path = `propertyIndex.keys[${index}]`;
+    if (!key) {
+      add({
+        severity: "error",
+        code: "EMPTY_PROPERTY_KEY",
+        path,
+        message: "Property keys cannot be empty.",
+      });
+      return;
+    }
+    if (seenKeys.has(key)) {
+      add({
+        severity: "error",
+        code: "DUPLICATE_PROPERTY_KEY",
+        path,
+        message: `Property key ${key} is declared more than once.`,
+      });
+      return;
+    }
+    seenKeys.add(key);
+  });
+  propertyIndex.sets.forEach((set, setIndex) => {
+    let previous = -1;
+    set.forEach((keyIndex, position) => {
+      const path = `propertyIndex.sets[${setIndex}][${position}]`;
+      if (
+        !Number.isInteger(keyIndex) ||
+        keyIndex < 0 ||
+        keyIndex >= propertyIndex.keys.length
+      ) {
+        add({
+          severity: "error",
+          code: "PROPERTY_KEY_OUT_OF_RANGE",
+          path,
+          message: `Key index ${String(keyIndex)} is not a valid propertyIndex.keys index.`,
+        });
+        return;
+      }
+      if (keyIndex <= previous) {
+        add({
+          severity: "error",
+          code: "PROPERTY_SET_NOT_ASCENDING",
+          path,
+          message: "Property sets must list key indexes in strictly ascending order.",
+        });
+      }
+      previous = keyIndex;
+    });
+  });
 }
 
 function validateRepresentationGeometry(
@@ -318,6 +377,7 @@ export function validateScene(scene: EngineeringScene): ValidationResult {
   }
   register(scene.revision.id, "revision.id");
   validateUnits(scene.units, "units", add);
+  if (scene.propertyIndex) validatePropertyIndex(scene.propertyIndex, add);
 
   scene.documents.forEach((document, documentIndex) => {
     const path = `documents[${documentIndex}]`;
@@ -440,9 +500,41 @@ export function validateScene(scene: EngineeringScene): ValidationResult {
         `${path}.relationIds[${relationIndex}].targetId`,
       ),
     );
-    Object.entries(semantic.properties.entries).forEach(([key, value]) =>
-      validatePropertyValue(value, `${path}.properties.entries.${key}`, add),
-    );
+    if (isIndexedPropertyBag(semantic.properties)) {
+      const { set, values } = semantic.properties;
+      const keySet = scene.propertyIndex?.sets[set];
+      if (!scene.propertyIndex) {
+        add({
+          severity: "error",
+          code: "MISSING_PROPERTY_INDEX",
+          path: `${path}.properties.set`,
+          message: "Indexed properties require a scene propertyIndex.",
+        });
+      } else if (!Number.isInteger(set) || keySet === undefined) {
+        add({
+          severity: "error",
+          code: "PROPERTY_SET_OUT_OF_RANGE",
+          path: `${path}.properties.set`,
+          message: `Set ${String(set)} is not a valid propertyIndex.sets index.`,
+        });
+      } else if (keySet.length !== values.length) {
+        add({
+          severity: "error",
+          code: "PROPERTY_VALUE_ARITY",
+          path: `${path}.properties.values`,
+          message:
+            `Set ${String(set)} expects ${String(keySet.length)} values, ` +
+            `found ${String(values.length)}.`,
+        });
+      }
+      values.forEach((value, valueIndex) =>
+        validatePropertyValue(value, `${path}.properties.values[${valueIndex}]`, add),
+      );
+    } else {
+      Object.entries(semantic.properties.entries).forEach(([key, value]) =>
+        validatePropertyValue(value, `${path}.properties.entries.${key}`, add),
+      );
+    }
   });
 
   const prototypeRepresentationPairs = new Set(

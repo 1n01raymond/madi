@@ -17,7 +17,7 @@ import type {
  * string limits.
  */
 
-export const ifcSceneSplitEncodingVersion = "madi.ifc-scene-ir-split.1";
+export const ifcSceneSplitEncodingVersion = "madi.ifc-scene-ir-split.2";
 
 interface GeometryStreamRef {
   readonly encoding: "f64le" | "f32le" | "u32le";

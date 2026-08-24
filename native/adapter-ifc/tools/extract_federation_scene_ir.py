@@ -30,6 +30,7 @@ from placement_math import (
     rounded,
     sanitized_matrix,
 )
+from property_index import index_property_bags
 
 
 ROOT_FRAME = {
@@ -864,7 +865,7 @@ def extract_federation(documents: Sequence[DocumentInput], threads: int) -> tupl
         "includeSurfaces": True,
         "includeEdges": False,
         "normalizeSceneToMeters": True,
-        "propertyMode": "flattened-inherited-psets",
+        "propertyMode": "indexed-flattened-psets",
     }
     created_at_candidates = sorted(
         item["timestamp"] for item in extracted if item["timestamp"]
@@ -926,6 +927,21 @@ def extract_federation(documents: Sequence[DocumentInput], threads: int) -> tupl
             },
         ],
     }
+    # Property keys repeat across entities, so the federation-level pass interns
+    # them once: distinct keys and key combinations move into `propertyIndex`
+    # and every semantic keeps only its set id plus values. The pass runs after
+    # the cross-document merge because the tables must span the federation.
+    property_index, property_references = index_property_bags(
+        [semantic["properties"]["entries"] for semantic in scene["semantics"]]
+    )
+    for semantic, reference in zip(
+        scene["semantics"], property_references, strict=True
+    ):
+        semantic["properties"] = {
+            "schema": semantic["properties"]["schema"],
+            **reference,
+        }
+    scene["propertyIndex"] = property_index
     totals: dict[str, int] = defaultdict(int)
     for item in extracted:
         for key, value in item["counts"].items():
@@ -941,8 +957,10 @@ def extract_federation(documents: Sequence[DocumentInput], threads: int) -> tupl
         for item in extracted
         for record in item["prototypeReuse"]
     )
+    totals["propertyKeyCount"] = len(property_index["keys"])
+    totals["propertySetCount"] = len(property_index["sets"])
     report = {
-        "schemaVersion": "madi.ifc-adapter-report.2",
+        "schemaVersion": "madi.ifc-adapter-report.3",
         "adapter": {
             "name": "IfcOpenShell",
             "version": ifcopenshell.version,
@@ -982,7 +1000,8 @@ def extract_federation(documents: Sequence[DocumentInput], threads: int) -> tupl
         },
         "limitations": [
             "IFC curve and boundary-edge classification is deferred.",
-            "Properties are flattened for the first queryable semantic slice.",
+            "Properties are flattened for the first queryable semantic slice; "
+            "keys and key-sets are interned into the scene propertyIndex.",
             "Cross-document object reconciliation is document-scoped and not inferred from names.",
         ],
     }
@@ -1018,7 +1037,8 @@ def write_scene(
     concatenated little-endian binary file while the observable Engineering
     Scene semantics stay unchanged. Streams go straight to disk and every
     start is padded to eight bytes so the reader can take typed-array views
-    without copying.
+    without copying. `madi.ifc-scene-ir-split.2` additionally interns semantic
+    property keys and key-sets into the scene-level `propertyIndex`.
     """
     geometry_path.parent.mkdir(parents=True, exist_ok=True)
     offset = 0
@@ -1061,7 +1081,7 @@ def write_scene(
         )
         output.write("\n")
     return {
-        "encodingVersion": "madi.ifc-scene-ir-split.1",
+        "encodingVersion": "madi.ifc-scene-ir-split.2",
         "structure": digest_file(structure_path),
         "geometry": digest_file(geometry_path),
     }

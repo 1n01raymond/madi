@@ -94,6 +94,7 @@ interface EngineeringScene {
   units: UnitSystem;
   rootFrame: CoordinateFrame;
   documents: SourceDocument[];
+  propertyIndex?: PropertyIndex;
   prototypes: Prototype[];
   occurrences: Occurrence[];
   semantics: SemanticEntity[];
@@ -211,7 +212,7 @@ interface SemanticEntity {
   sourceRef?: SourceRefId;
   parentIds: SemanticId[];
   relationIds: SemanticRelation[];
-  properties: PropertyBag;
+  properties: SemanticProperties;
   classification?: Classification[];
 }
 
@@ -242,10 +243,35 @@ interface PropertyBag {
   schema?: string;
   entries: Record<string, PropertyValue>;
 }
+
+interface PropertyIndex {
+  keys: string[]; // distinct, codepoint-sorted
+  sets: number[][]; // distinct strictly-ascending key-index tuples, sorted lexicographically
+}
+
+interface IndexedPropertyBag {
+  schema?: string;
+  set: number; // index into propertyIndex.sets
+  values: PropertyValue[]; // values[i] belongs to keys[sets[set][i]]
+}
+
+type SemanticProperties = PropertyBag | IndexedPropertyBag;
 ```
 
 Properties are typed and unit-aware. Compiler profiles may columnarize common
 properties and externalize cold property sets.
+
+Semantic property keys repeat heavily across entities of the same type, so a
+scene may intern them: the optional scene-level `propertyIndex` holds every
+distinct key and key combination once, and an `IndexedPropertyBag` references
+one combination plus its aligned values. `resolvePropertyEntries` in
+`packages/scene-ir` joins either form back to concrete `key -> value` entries
+losslessly, and `validateScene` checks index integrity (unique non-empty keys,
+in-range ascending tuples, set references, value arity). Inline `PropertyBag`
+entries stay valid — the STEP/OCCT adapter still emits them — while the IFC
+federation adapter emits indexed bags (validated per
+`scripts/validate-ifc-federation-evidence.mjs`, which pins the measured
+structure-size reduction).
 
 ## 9. Representations
 
@@ -465,9 +491,10 @@ transport: a structure-only JSON document whose representation surfaces hold
 geometry file, with a SHA-256 recorded for each half. The compiler verifies both
 digests and resolves the references into typed-array views without copying, so
 the observable `EngineeringScene` is unchanged. This is an adapter-to-compiler
-transport, not a delivery or cache format, and it is deliberately versioned
-(`madi.ifc-scene-ir-split.1`) so it can be replaced when the structure document
-itself needs streaming.
+transport, not a delivery or cache format, and it is deliberately versioned so
+it can be replaced deliberately: `madi.ifc-scene-ir-split.2` added the interned
+`propertyIndex` (section 8), shrinking the structure document that previously
+needed streaming past the engine string limit.
 
 ## 19. Phase 0 extraction evidence
 

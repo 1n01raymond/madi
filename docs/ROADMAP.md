@@ -55,18 +55,20 @@ groups, and flattened properties. Its 3,383 prototype ranges now coalesce into
 separate 64 MiB decoded/GPU admission budgets. A selected target can replace
 colder detail with retained coarse fallbacks, preserving visibility and picking
 identity. It is not the Phase 3 BIM workflow or a Phase 2 performance result:
-explicit IFC edges, property indexing, spatial chunks, view-driven scheduling,
-and cache tiers remain pending.
+explicit IFC edges, binary property-value encoding, spatial chunks,
+view-driven scheduling, and cache tiers remain pending.
 
 The adapter boundary now uses a split Scene IR transport — structure-only JSON
 plus a digest-linked binary geometry file — which reproduces the same compiled
 package while halving the document the compiler must parse. That was enough to
 qualify the 839.9 MB seven-discipline `sixty5` federation as a source and to
-extract 4.87M unique triangles from it, and it exposed the next boundary: its
-631.9 MB structure document is larger than one JavaScript string. The compiler
-now streams that document record by record and compiles sixty5 end to end into
-a recorded, Khronos-validated, deterministic 608.2 MB package; a browser result
-for that package remains pending.
+extract 4.87M unique triangles from it, and it exposed the next boundary: the
+initial 631.9 MB structure document was larger than one JavaScript string. The
+compiler streams that document record by record, and interning property keys
+and key combinations at scene level has since shrunk the structure to 419.5 MB
+— back under one string, with the boundary crossing preserved in history.
+sixty5 compiles end to end into a recorded, Khronos-validated 608.2 MB
+package; a browser result for that package remains pending.
 
 - local STEP AP242 input;
 - XDE hierarchy, names, colors, units, transforms;

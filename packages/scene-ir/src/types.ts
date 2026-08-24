@@ -132,6 +132,31 @@ export interface PropertyBag {
   readonly entries: Readonly<Record<string, PropertyValue>>;
 }
 
+/**
+ * Scene-level table for indexed semantic properties. `keys` holds every
+ * distinct property key once; `sets` holds every distinct key combination as
+ * a strictly ascending tuple of indexes into `keys`. An adapter that emits
+ * indexed bags writes both tables deterministically (keys codepoint-sorted,
+ * sets sorted lexicographically).
+ */
+export interface PropertyIndex {
+  readonly keys: readonly string[];
+  readonly sets: readonly (readonly number[])[];
+}
+
+/**
+ * A property bag that references the scene's `propertyIndex` instead of
+ * repeating key strings per entity: `values[i]` belongs to
+ * `propertyIndex.keys[propertyIndex.sets[set][i]]`.
+ */
+export interface IndexedPropertyBag {
+  readonly schema?: string;
+  readonly set: number;
+  readonly values: readonly PropertyValue[];
+}
+
+export type SemanticProperties = PropertyBag | IndexedPropertyBag;
+
 export interface SourceDocument {
   readonly id: DocumentId;
   readonly uriHint?: string;
@@ -194,7 +219,7 @@ export interface SemanticEntity {
   readonly sourceRef?: SourceRefId;
   readonly parentIds: readonly SemanticId[];
   readonly relationIds: readonly SemanticRelation[];
-  readonly properties: PropertyBag;
+  readonly properties: SemanticProperties;
   readonly classification?: readonly Classification[];
 }
 
@@ -310,6 +335,7 @@ export interface EngineeringScene {
   readonly units: UnitSystem;
   readonly rootFrame: CoordinateFrame;
   readonly documents: readonly SourceDocument[];
+  readonly propertyIndex?: PropertyIndex;
   readonly prototypes: readonly Prototype[];
   readonly occurrences: readonly Occurrence[];
   readonly semantics: readonly SemanticEntity[];

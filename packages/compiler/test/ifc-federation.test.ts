@@ -49,6 +49,33 @@ scene.documents = scene.documents.map((document) => ({
   sourceDigest: "sha256:" + sourceDigest,
 }));
 
+// Mirrors split.2 property indexing: distinct keys and key-sets interned into
+// the scene-level propertyIndex, semantics keeping only set ids plus values.
+const keys = [...new Set(
+  scene.semantics.flatMap((semantic) => Object.keys(semantic.properties.entries)),
+)].sort();
+const keyIndexes = new Map(keys.map((key, index) => [key, index]));
+const sets = [];
+const setIndexes = new Map();
+scene.semantics = scene.semantics.map((semantic) => {
+  const sorted = Object.keys(semantic.properties.entries).sort();
+  const tuple = sorted.map((key) => keyIndexes.get(key));
+  const token = tuple.join(",");
+  if (!setIndexes.has(token)) {
+    setIndexes.set(token, sets.length);
+    sets.push(tuple);
+  }
+  return {
+    ...semantic,
+    properties: {
+      schema: semantic.properties.schema,
+      set: setIndexes.get(token),
+      values: sorted.map((key) => semantic.properties.entries[key]),
+    },
+  };
+});
+scene.propertyIndex = { keys, sets };
+
 // Mirrors the adapter transport: surface-only representations whose streams
 // are little-endian references into one concatenated geometry file.
 const streams = [];
@@ -86,7 +113,7 @@ const identify = (bytes) => ({
   sha256: createHash("sha256").update(bytes).digest("hex"),
 });
 await writeFile(option("--report"), JSON.stringify({
-  schemaVersion: "madi.ifc-adapter-report.2",
+  schemaVersion: "madi.ifc-adapter-report.3",
   federation: { sourceDigest: federationDigest },
   sources: [{
     discipline,
@@ -96,7 +123,7 @@ await writeFile(option("--report"), JSON.stringify({
     schema: "IFC4",
   }],
   scene: {
-    encodingVersion: "madi.ifc-scene-ir-split.1",
+    encodingVersion: "madi.ifc-scene-ir-split.2",
     structure: identify(structure),
     geometry: identify(geometry),
   },
@@ -141,6 +168,10 @@ await writeFile(option("--report"), JSON.stringify({
       expect(gltf.asset.generator).toContain("IfcOpenShell federation slice");
       expect(retainedScene.documents[0].format).toBe("IFC");
       expect(adapterReport.sceneIrValidation.ok).toBe(true);
+      // The retained structure keeps indexed properties plus the scene table.
+      expect(retainedScene.propertyIndex.keys.length).toBeGreaterThan(0);
+      expect(retainedScene.semantics[0].properties.set).toBeTypeOf("number");
+      expect(retainedScene.semantics[0].properties.entries).toBeUndefined();
       // The retained structure keeps references, not expanded coordinate arrays.
       expect(retainedScene.representations[0].surface.positions).toMatchObject({
         encoding: "f64le",

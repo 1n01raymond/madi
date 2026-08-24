@@ -14,6 +14,8 @@
     "occurrenceCount": 13681,
     "part21EntityCount": 482994,
     "productCount": 13677,
+    "propertyKeyCount": 1656,
+    "propertySetCount": 279,
     "propertyValueCount": 273188,
     "prototypeCount": 3405,
     "representationCount": 3383,
@@ -44,7 +46,7 @@
       "includeEdges": false,
       "includeSurfaces": true,
       "normalizeSceneToMeters": true,
-      "propertyMode": "flattened-inherited-psets",
+      "propertyMode": "indexed-flattened-psets",
       "useWorldCoordinates": false,
       "weldVertices": true
     },
@@ -52,7 +54,7 @@
   },
   "limitations": [
     "IFC curve and boundary-edge classification is deferred.",
-    "Properties are flattened for the first queryable semantic slice.",
+    "Properties are flattened for the first queryable semantic slice; keys and key-sets are interned into the scene propertyIndex.",
     "Cross-document object reconciliation is document-scoped and not inferred from names."
   ],
   "prototypeReuse": [
@@ -618,17 +620,17 @@
     }
   ],
   "scene": {
-    "encodingVersion": "madi.ifc-scene-ir-split.1",
+    "encodingVersion": "madi.ifc-scene-ir-split.2",
     "geometry": {
       "byteLength": 28134848,
       "sha256": "247ae94d95883b1b65c5cc00e35048379fb8adbb22999cee9a13858945e84c2b"
     },
     "structure": {
-      "byteLength": 39135637,
-      "sha256": "38dd0f03affa65e1165ac84853645ed6b1e7939fc07d72cae5bcb8da2997025c"
+      "byteLength": 30592935,
+      "sha256": "42b3316b94809ab978ec8fcffc260a83943e93a6ba4e7213de5346a26793b6a7"
     }
   },
-  "schemaVersion": "madi.ifc-adapter-report.2",
+  "schemaVersion": "madi.ifc-adapter-report.3",
   "sources": [
     {
       "byteLength": 9022255,
