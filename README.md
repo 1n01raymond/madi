@@ -27,6 +27,68 @@
 > defines the product, system boundaries, benchmarks, and implementation path;
 > it does not yet contain an installable production viewer.
 
+## What already runs in the browser
+
+Nothing below is a mockup or a roadmap item: every number links to a committed
+evidence record that CI re-validates, and the screenshots are the exact
+captures those records pin by digest.
+
+<table>
+  <tr>
+    <td width="50%" valign="top">
+      <a href="artifacts/browser-matrix/README.md">
+        <img src="artifacts/browser-matrix/chrome-151-windows-selected.png" alt="Adafruit PyGamer STEP assembly rendered and picked through the NARU WebGPU runtime in Chrome" />
+      </a>
+      <br />
+      <sub><strong>A real STEP assembly, end to end.</strong> Adafruit's
+      PyGamer board: 85 part occurrences sharing 34 meshes, 162,838 unique
+      triangles, 13,897 explicit CAD edge segments, and source-aware joystick
+      picking — identical behavior in Chrome and Firefox.
+      <a href="artifacts/browser-matrix/README.md">Browser evidence</a></sub>
+    </td>
+    <td width="50%" valign="top">
+      <a href="artifacts/ifc/sixty5-browser/README.md">
+        <img src="artifacts/ifc/sixty5-browser/picked.png" alt="The seven-discipline sixty5 IFC federation rendered under a fixed residency budget, with a picked element resolving its IFC properties" />
+      </a>
+      <br />
+      <sub><strong>A real-large IFC federation.</strong> The 839.9 MB
+      seven-discipline <code>sixty5</code> model: hierarchy and search ready in
+      3.3 s, all 78,173 renderable occurrences on screen, geometry held inside
+      a fixed 64 MiB budget, and a picked foundation beam resolving its IFC
+      properties.
+      <a href="artifacts/ifc/sixty5-browser/README.md">Residency evidence</a></sub>
+    </td>
+  </tr>
+</table>
+
+<sub>The PyGamer CAD is copyright Adafruit Industries, redistributed unchanged
+under MIT with a pinned upstream commit and notice; Adafruit does not endorse
+NARU. Both captures predate the NARU rename and show the project's former
+name.</sub>
+
+## What the evidence means for your models
+
+| What you get | Measured proof |
+|---|---|
+| Repeated parts are stored and uploaded once, not duplicated | 85 occurrences share 34 meshes ([browser matrix](artifacts/browser-matrix/README.md)) |
+| CAD boundaries are drawn from source edges, not guessed from triangles | 13,897 explicit edge segments survive into the browser ([browser matrix](artifacts/browser-matrix/README.md)) |
+| The tree, search, and properties work before geometry arrives | a 188,319-record hierarchy is ready in 3.3 s on the 839.9 MB federation ([sixty5 browser record](artifacts/ifc/sixty5-browser/README.md)) |
+| Detail streams progressively over plain HTTP | 28 `scene.bin` requests, every one an HTTP 206 `bytes=` Range response ([sixty5 browser record](artifacts/ifc/sixty5-browser/README.md)) |
+| Memory stays inside a declared budget at any scene size | promotion stopped at chunk 26 of 234; decoded and GPU bytes both held under 64 MiB ([sixty5 browser record](artifacts/ifc/sixty5-browser/README.md)) |
+| Selection resolves to source CAD/BIM identity | a picked foundation beam lazily resolves its 6 IFC property entries ([sixty5 browser record](artifacts/ifc/sixty5-browser/README.md)) |
+| Compiles are reproducible, byte for byte | two full sixty5 compilations produced byte-identical packages ([compile evidence](artifacts/ifc/sixty5/README.md)) |
+| **Not yet:** a fast first frame at real-large scale | the sixty5 first coarse frame took 268.0 s, recorded deliberately as the boundary the next phase must beat ([the recorded boundary](artifacts/ifc/sixty5-browser/README.md)) |
+
+## Where to start
+
+| You want to… | Start here |
+|---|---|
+| See a model running | `pnpm install && pnpm dev` opens the Studio with the PyGamer assembly loaded ([Studio guide](apps/webgpu-spike/README.md)); a hosted public demo is a Phase 1 goal ([roadmap](docs/ROADMAP.md)) |
+| Embed the viewer in your app | [Runtime package](packages/runtime-webgpu/README.md) — the compiled-glTF loader and direct WebGPU renderer |
+| Compile your own STEP or IFC | [Compiler package](packages/compiler/README.md) and the [compiler proof](#current-compiler-proof) below |
+| Understand the architecture | [Design documents](docs/README.md) in reading order |
+| Contribute or challenge a decision | [CONTRIBUTING.md](CONTRIBUTING.md) and the [ADR index](docs/adr/README.md) |
+
 ## Engineering models deserve an open Web platform
 
 Engineering teams already create authoritative data in SolidWorks, CATIA, NX,
@@ -124,17 +186,6 @@ Hub federation, and the 839.9 MB seven-discipline `sixty5` federation are
 qualified against pinned per-file digests. The `sixty5` download stays an
 explicit opt-in. See the
 [external fixture registry](fixtures/external/README.md).
-
-## Current runtime proof
-
-![Adafruit PyGamer STEP assembly rendered directly with NARU WebGPU](artifacts/browser-matrix/chrome-151-windows-selected.png)
-
-The canonical demo now uses Adafruit's real PyGamer electronics assembly rather
-than a synthetic mascot: 34 shared meshes, 85 part occurrences, 162,838 unique
-triangles, 13,897 explicit CAD edge segments, Worker decoding, and source-aware
-joystick picking in Chrome and Firefox. The unmodified CAD is redistributed
-under MIT with a pinned upstream commit and notice; Adafruit does not endorse
-NARU. See the [reviewed browser evidence](artifacts/browser-matrix/README.md).
 
 ## Current compiler proof
 

@@ -29,6 +29,65 @@
 > 本文是英文 [`README.md`](README.md) 的翻译。如内容存在差异，以英文版为准。
 > 欢迎帮助审校术语和表达。
 
+## 浏览器中已经真实运行的内容
+
+以下内容不是效果图，也不是路线图条目：每个数字都链接到由 CI 反复校验的
+已提交证据记录，截图正是这些记录以摘要固定的原始捕获。
+
+<table>
+  <tr>
+    <td width="50%" valign="top">
+      <a href="artifacts/browser-matrix/README.md">
+        <img src="artifacts/browser-matrix/chrome-151-windows-selected.png" alt="Chrome 中由 NARU WebGPU 运行时渲染并 picking 的 Adafruit PyGamer STEP 装配体" />
+      </a>
+      <br />
+      <sub><strong>一个真实的 STEP 装配体，端到端。</strong> Adafruit
+      PyGamer 主板：85 个 part occurrence 共享 34 个 mesh、162,838 个唯一
+      triangle、13,897 条显式 CAD edge segment，以及保留源引用的摇杆
+      picking —— 在 Chrome 与 Firefox 中行为一致。
+      <a href="artifacts/browser-matrix/README.md">浏览器证据</a></sub>
+    </td>
+    <td width="50%" valign="top">
+      <a href="artifacts/ifc/sixty5-browser/README.md">
+        <img src="artifacts/ifc/sixty5-browser/picked.png" alt="在固定 residency 预算下渲染的七专业 sixty5 IFC federation，以及解析出 IFC 属性的被选构件" />
+      </a>
+      <br />
+      <sub><strong>真实的超大 IFC federation。</strong> 839.9 MB 的七专业
+      <code>sixty5</code> 模型：3.3 秒内层级与搜索就绪，78,173 个可渲染
+      occurrence 全部呈现，geometry 始终保持在固定的 64 MiB 预算之内，
+      被选中的基础梁解析出自身的 IFC 属性。
+      <a href="artifacts/ifc/sixty5-browser/README.md">residency 证据</a></sub>
+    </td>
+  </tr>
+</table>
+
+<sub>PyGamer CAD 版权归 Adafruit Industries 所有，按 MIT 许可证原样再分发，
+并固定上游 commit 与声明；这不表示 Adafruit 对 NARU 的认可。两张截图记录于
+NARU 更名之前，显示的是项目的旧名称。</sub>
+
+## 这些证据对你的模型意味着什么
+
+| 你得到什么 | 已测量的依据 |
+|---|---|
+| 重复零件只存储、上传一次，而不是重复复制 | 85 个 occurrence 共享 34 个 mesh（[浏览器 matrix](artifacts/browser-matrix/README.md)） |
+| CAD 边界取自源 edge 绘制，而非从三角形猜测 | 13,897 条显式 edge segment 一直保留到浏览器（[浏览器 matrix](artifacts/browser-matrix/README.md)） |
+| 树、搜索与属性在 geometry 到达之前即可使用 | 839.9 MB federation 上，188,319 条记录的层级 3.3 秒就绪（[sixty5 浏览器记录](artifacts/ifc/sixty5-browser/README.md)） |
+| 细节几何通过普通 HTTP 渐进流式传输 | 28 次 `scene.bin` 请求全部为 HTTP 206 `bytes=` Range 响应（[sixty5 浏览器记录](artifacts/ifc/sixty5-browser/README.md)） |
+| 无论场景多大，内存都保持在声明的预算内 | promotion 在 234 个 chunk 的第 26 个处停止；解码与 GPU 字节均保持在 64 MiB 以下（[sixty5 浏览器记录](artifacts/ifc/sixty5-browser/README.md)） |
+| 选择可解析回源 CAD/BIM 标识 | 被选中的基础梁按需解析出 6 条 IFC 属性条目（[sixty5 浏览器记录](artifacts/ifc/sixty5-browser/README.md)） |
+| 编译结果逐字节可复现 | 两次完整的 sixty5 编译产生逐字节相同的包（[编译证据](artifacts/ifc/sixty5/README.md)） |
+| **尚未做到：** 超大规模下的快速首帧 | sixty5 首个 coarse frame 耗时 268.0 秒 —— 作为下一阶段必须超越的边界被有意记录（[记录的边界](artifacts/ifc/sixty5-browser/README.md)） |
+
+## 从哪里开始
+
+| 你想做什么 | 入口 |
+|---|---|
+| 看模型实际运行 | `pnpm install && pnpm dev` 会打开已加载 PyGamer 装配体的 Studio（[Studio 指南](apps/webgpu-spike/README.md)）；托管的公开演示是 Phase 1 的目标（[路线图](docs/ROADMAP.md)） |
+| 把查看器嵌入你的应用 | [Runtime 包](packages/runtime-webgpu/README.md) —— 编译 glTF 加载器与直接 WebGPU 渲染器 |
+| 编译你自己的 STEP、IFC | [Compiler 包](packages/compiler/README.md)与下方的[编译器验证](#当前编译器验证) |
+| 理解整体架构 | 按阅读顺序整理的[设计文档](docs/README.md) |
+| 参与贡献或质疑某项决策 | [CONTRIBUTING.md](CONTRIBUTING.md)与 [ADR 索引](docs/adr/README.md) |
+
 ## 工程模型也需要一个开放的 Web 平台
 
 工程团队已经在 SolidWorks、CATIA、NX、Creo、Fusion、Onshape、Revit
@@ -109,16 +168,6 @@ Engineering Scene IR 是逻辑系统边界，而不是新的交换格式。交�
 请查看完整[路线图](docs/ROADMAP.md)、[Phase 1 进展](docs/PHASE_1.md)与
 [基准测试约定](docs/BENCHMARKS.md)。性能数据将与可再分发模型、准确的硬件和
 浏览器信息、cold/warm 状态及可复现命令一同发布。
-
-## 当前运行时验证
-
-![NARU WebGPU 直接渲染的 Adafruit PyGamer STEP 装配体](artifacts/browser-matrix/chrome-151-windows-selected.png)
-
-标准演示现在使用真实的 Adafruit PyGamer 电子装配体，而非合成吉祥物：34 个
-共享 mesh、85 个 part occurrence、162,838 个唯一 triangle、13,897 条显式
-CAD edge、Worker 解码，以及在 Chrome 与 Firefox 中保留源引用的摇杆 picking。
-未经修改的 CAD 按 MIT 许可证再分发，并固定上游 commit 与许可证声明；这不
-表示 Adafruit 对 NARU 的认可。请查看[已审核的浏览器证据](artifacts/browser-matrix/README.md)。
 
 ## 当前编译器验证
 
