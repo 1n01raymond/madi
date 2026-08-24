@@ -122,9 +122,10 @@ Khronos validation envelope are reviewed here.
   property keys are interned at scene level, but the hydrated scene — including
   all 4,503,078 property values — stays resident during compilation; a binary
   column encoding for the values themselves is separate follow-up work.
-- No browser, residency, or timing benchmark exists for this package. The
-  302 s compile time above is a recording note, not a benchmark result; this
-  record must not be cited as ADR-0003 evidence.
+- A browser and residency record for this package now exists under
+  `artifacts/ifc/sixty5-browser/`, but no timing benchmark does. The 302 s
+  compile time above is a recording note, not a benchmark result; neither
+  record may be cited as ADR-0003 evidence.
 - 56 source `IfcAxis2Placement` entities carry a zero-length or parallel axis
   vector, which IfcOpenShell's placement projection turns into a non-finite
   matrix component. `native/adapter-ifc/tools/placement_math.py` replaces each
