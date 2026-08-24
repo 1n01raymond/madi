@@ -55,8 +55,8 @@ groups, and flattened properties. Its 3,383 prototype ranges now coalesce into
 separate 64 MiB decoded/GPU admission budgets. A selected target can replace
 colder detail with retained coarse fallbacks, preserving visibility and picking
 identity. It is not the Phase 3 BIM workflow or a Phase 2 performance result:
-explicit IFC edges, binary property-value encoding, spatial chunks,
-view-driven scheduling, and cache tiers remain pending.
+explicit IFC edges, spatial chunks, view-driven scheduling, and cache tiers
+remain pending.
 
 The adapter boundary now uses a split Scene IR transport — structure-only JSON
 plus a digest-linked binary geometry file — which reproduces the same compiled
@@ -64,13 +64,16 @@ package while halving the document the compiler must parse. That was enough to
 qualify the 839.9 MB seven-discipline `sixty5` federation as a source and to
 extract 4.87M unique triangles from it, and it exposed the next boundary: the
 initial 631.9 MB structure document was larger than one JavaScript string. The
-compiler streams that document record by record, and interning property keys
-and key combinations at scene level has since shrunk the structure to 419.5 MB
-— back under one string, with the boundary crossing preserved in history.
+compiler streams that document record by record; interning property keys
+and key combinations at scene level shrank the structure to 419.5 MB — back
+under one string, with the boundary crossing preserved in history — and
+moving the property values into a deduplicated binary column file shrank it
+further to 345.5 MB, with the compiler verifying the columns without ever
+materializing a value.
 sixty5 compiles end to end into a recorded, Khronos-validated 608.2 MB
 package. Headed Chrome now consumes that package: all 78,173 renderable
 occurrences render, the fixed 64 MiB residency budgets hold with 26 of 234
-target chunks promoted, and picking resolves — while the recorded 264.6 s
+target chunks promoted, and picking resolves — while the recorded 270.2 s
 first coarse frame states the real-large first-frame boundary that Phase 2
 scheduling work must beat (`artifacts/ifc/sixty5-browser/`).
 

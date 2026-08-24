@@ -113,3 +113,75 @@ describe("split IFC Scene IR hydration", () => {
     );
   });
 });
+
+/**
+ * Property column file for two one-value rows (`"x"` and `"y"`), streams laid
+ * out in adapter order with every start 8-aligned.
+ */
+function propertiesFile(): Buffer {
+  return Buffer.concat([
+    Buffer.from(Uint32Array.from([0, 1]).buffer), // rows @0
+    Buffer.from(Uint32Array.from([0, 1, 2]).buffer), // rowOffsets @8
+    Buffer.alloc(4),
+    Buffer.from(Uint32Array.from([0, 3, 6]).buffer), // valueOffsets @24
+    Buffer.alloc(4),
+    Buffer.from('"x""y"', "utf8"), // valueHeap @40
+  ]);
+}
+
+function columnScene(rowOverride = 1): Record<string, unknown> {
+  return {
+    ...splitScene(),
+    semantics: [
+      {
+        id: "semantic:one",
+        documentId: "document:one",
+        type: "IfcWall",
+        parentIds: [],
+        relationIds: [],
+        properties: { set: 0, row: rowOverride },
+      },
+    ],
+    propertyValues: {
+      encoding: "madi.property-columns.1",
+      valueCount: 2,
+      rowCount: 2,
+      distinctValueCount: 2,
+      rows: { encoding: "u32le", byteOffset: 0, byteLength: 8 },
+      rowOffsets: { encoding: "u32le", byteOffset: 8, byteLength: 12 },
+      valueOffsets: { encoding: "u32le", byteOffset: 24, byteLength: 12 },
+      valueHeap: { encoding: "utf8-json", byteOffset: 40, byteLength: 6 },
+    },
+  };
+}
+
+describe("split IFC Scene IR property column verification", () => {
+  it("accepts a scene whose column rows match their key sets", () => {
+    const scene = hydrateIfcSceneSplit(columnScene(), geometryFile(), propertiesFile());
+    expect(scene.semantics[0]?.properties).toMatchObject({ set: 0, row: 1 });
+  });
+
+  it("rejects a declared column header without the column file", () => {
+    expect(() => hydrateIfcSceneSplit(columnScene(), geometryFile())).toThrow(
+      /require the column file/u,
+    );
+  });
+
+  it("rejects a column file the structure does not declare", () => {
+    expect(() =>
+      hydrateIfcSceneSplit(splitScene(), geometryFile(), propertiesFile()),
+    ).toThrow(/does not declare/u);
+  });
+
+  it("rejects a row that leaves the column table", () => {
+    expect(() =>
+      hydrateIfcSceneSplit(columnScene(7), geometryFile(), propertiesFile()),
+    ).toThrow(/Unknown property value row/u);
+  });
+
+  it("rejects a truncated column file", () => {
+    expect(() =>
+      hydrateIfcSceneSplit(columnScene(), geometryFile(), propertiesFile().subarray(0, 40)),
+    ).toThrow(/exceeds the column file/u);
+  });
+});

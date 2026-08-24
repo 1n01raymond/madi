@@ -1,5 +1,6 @@
 import { endianness } from "node:os";
 
+import { isColumnPropertyBag, openPropertyValueColumns } from "@madi/scene-ir";
 import type {
   EngineeringScene,
   MaterialGroup,
@@ -17,7 +18,7 @@ import type {
  * string limits.
  */
 
-export const ifcSceneSplitEncodingVersion = "madi.ifc-scene-ir-split.2";
+export const ifcSceneSplitEncodingVersion = "madi.ifc-scene-ir-split.3";
 
 interface GeometryStreamRef {
   readonly encoding: "f64le" | "f32le" | "u32le";
@@ -140,8 +141,40 @@ function hydrateSurface(
   };
 }
 
-/** Hydrates the split transport; the buffer must come from the same adapter run. */
-export function hydrateIfcSceneSplit(value: unknown, geometry: Buffer): EngineeringScene {
+/**
+ * Structurally verifies the property value column file against the scene it
+ * belongs to: `openPropertyValueColumns` checks the offset tables and
+ * references, and every column bag's row must hold exactly as many values as
+ * its key set expects. Property values are never materialized — the check
+ * reads only the u32 offset tables.
+ */
+function verifyPropertyColumns(scene: SerializedSplitScene, properties: Buffer): void {
+  // Buffer is a Uint8Array; `alignedGeometry` re-homes it when Node's pooled
+  // `readFile` slab breaks the file's own 8-byte stream alignment.
+  const reader = openPropertyValueColumns(scene.propertyValues, alignedGeometry(properties));
+  const sets = scene.propertyIndex?.sets;
+  (scene.semantics ?? []).forEach((semantic, index) => {
+    if (!isColumnPropertyBag(semantic.properties)) return;
+    const expected = sets?.[semantic.properties.set]?.length;
+    if (expected === undefined) {
+      throw new RangeError(
+        `Split IFC semantic ${String(index)} references an unknown property set.`,
+      );
+    }
+    if (reader.rowLength(semantic.properties.row) !== expected) {
+      throw new RangeError(
+        `Split IFC semantic ${String(index)} property row does not match its key set.`,
+      );
+    }
+  });
+}
+
+/** Hydrates the split transport; the buffers must come from the same adapter run. */
+export function hydrateIfcSceneSplit(
+  value: unknown,
+  geometry: Buffer,
+  properties?: Buffer,
+): EngineeringScene {
   if (endianness() !== "LE") {
     throw new TypeError("Split IFC Scene IR hydration requires a little-endian host.");
   }
@@ -150,6 +183,14 @@ export function hydrateIfcSceneSplit(value: unknown, geometry: Buffer): Engineer
   }
   const aligned = alignedGeometry(geometry);
   const scene = value as unknown as SerializedSplitScene;
+  if (scene.propertyValues !== undefined) {
+    if (properties === undefined) {
+      throw new TypeError("Split IFC Scene IR property columns require the column file.");
+    }
+    verifyPropertyColumns(scene, properties);
+  } else if (properties !== undefined) {
+    throw new TypeError("Split IFC Scene IR does not declare the provided property columns.");
+  }
   return {
     ...scene,
     representations: scene.representations.map((representation) => {

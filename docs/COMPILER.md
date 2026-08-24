@@ -436,6 +436,23 @@ while `scene.bin`, `coarse.bin`, every compiler count, and all 273,188
 resolvable property values stayed identical; `scene.gltf` changed only through
 the recorded `optionsDigest` (`propertyMode: "indexed-flattened-psets"`).
 
+Property value columns (`madi.ifc-scene-ir-split.3`) then moved the values
+themselves out of the structure JSON into a third binary adapter output
+(`scene-ir-properties.bin`, `madi.property-columns.1`): each semantic entity
+now carries only `{set, row}`, and the column file stores every distinct value
+once as canonical compact JSON — on Digital Hub, 334,225 encoded value entries
+deduplicate into 48,649 distinct values in a 670,783-byte heap, a
+2,260,991-byte column file overall. That shrank the Digital Hub structure
+again to 26,235,818 bytes (−14.2 % from split.2) while the geometry file,
+`scene.bin`, `coarse.bin`, and every compiler count stayed identical. The
+compiler verifies the column file structurally at hydrate time — header
+digests, offset tables monotone and bracketing, every row's arity matching its
+interned key set — through u32 typed-array views only, without materializing
+the value table; values decode lazily through
+`resolvePropertyEntries`/`openPropertyValueColumns` in `@madi/scene-ir`.
+`scene.gltf` kept its byte length with a digest change explained by the
+recorded `optionsDigest` (`propertyMode: "indexed-column-values"`).
+
 The compiler never holds the structure document as one string. A
 record-streaming reader (`packages/compiler/src/ifc-structure-stream.ts`)
 walks the file in bounded chunks with a byte-level state machine, parses each
@@ -475,13 +492,23 @@ Property indexing (`madi.ifc-scene-ir-split.2`) then shrank the sixty5
 structure to 419,502,749 bytes (−33.6 %, interning 35,510 distinct keys and
 299 key combinations) — back under the maximum string length, so the boundary
 crossing itself is now historical; the streaming reader remains the compile
-path and still protects against any future federation crossing it again. The
-current record in `artifacts/ifc/sixty5/` carries package digest
-`638aaf1784efebe5b4ce041fe3dc56674c7f99a1f7248eaa86739d7c7143333f` with
+path and still protects against any future federation crossing it again.
+
+Property value columns (`madi.ifc-scene-ir-split.3`) shrank the sixty5
+structure again to 345,472,410 bytes (−17.6 % from split.2, 45.3 % below
+split.1): the 5,225,296 encoded value entries deduplicate into 488,526
+distinct canonical-JSON values in a 7,555,294-byte heap, a 31,179,862-byte
+column file overall, and the hydrated scene no longer materializes a single
+property value — the compiler checks every row's arity against its interned
+key set through u32 typed-array views. The current record in
+`artifacts/ifc/sixty5/` carries package digest
+`773652cf45658ec0179b0eec9f0f3628177abd194d413b5f0dc7a883f7ad6049` with
 188,320 glTF nodes, 84,870 meshes, 78,173 renderable occurrences, and
 4,866,386 unique triangles, passing the Khronos validator with zero errors and
 warnings; `scene.bin`, `coarse.bin`, every compiler count, the geometry half,
-and all 4,503,078 resolvable property values are unchanged from the split.1
-record, with `scene.gltf` differing only through the recorded `optionsDigest`.
-Encoding property values themselves in a binary column form is a separate
-follow-up; the hydrated scene still stays resident during compilation.
+and all 4,503,078 resolvable property values are unchanged from the earlier
+records, with `scene.gltf` keeping its exact byte length and differing only
+through the recorded `optionsDigest`. The recording compile's Node process
+peaked at 3,845,181,440 bytes working set (≈3.6 GB, sampled at 2 s intervals)
+against the split.1 record's 4,043,804,672 bytes — a recording note, not a
+benchmark result.

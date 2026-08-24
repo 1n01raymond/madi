@@ -9,8 +9,9 @@ The first executable slice preserves:
 - one source document and SHA-256 identity per discipline;
 - IFC GlobalId-backed semantic entities, types, groups, classifications, and
   flattened inherited property sets, with keys and key combinations interned
-  once into the scene-level `propertyIndex`
-  (`madi.ifc-scene-ir-split.2`, `tools/property_index.py`);
+  once into the scene-level `propertyIndex` (`tools/property_index.py`) and
+  the values themselves deduplicated into the binary property column file
+  (`madi.ifc-scene-ir-split.3`, `tools/property_columns.py`);
 - project/site/building/storey/product containment and local transforms;
 - IfcOpenShell local triangulation separated from occurrence placement;
 - prototype reuse keyed by IfcOpenShell's geometry identity; and
@@ -35,8 +36,9 @@ time (`ValueError`) instead of emitting invalid JSON with a bare `NaN` token.
 
 ## Adapter unit tests
 
-`placement_math.py` and `property_index.py` have no IfcOpenShell import, so
-their tests run without the pinned adapter environment:
+`placement_math.py`, `property_index.py`, and `property_columns.py` have no
+IfcOpenShell import, so their tests run without the pinned adapter
+environment:
 
 ```sh
 python -m venv output/venv-ifc-test  # or reuse output/venv-ifc
@@ -78,14 +80,19 @@ pnpm madi compile-ifc \
 ```
 
 The Scene IR is a large disposable intermediate and stays under `output/`. The
-adapter writes it as a split pair rather than one document: `--scene` receives
-structure-only JSON whose representation surfaces hold
-`{encoding, byteOffset, byteLength}` references, and `--geometry` receives the
-concatenated little-endian streams those references point into. Every stream
-starts on an eight-byte boundary so the compiler can take typed-array views
-without copying, and the report carries a SHA-256 for each half. Reviewed
-counts and hashes live under `artifacts/ifc/`; normal CI validates those
-compact records without installing IfcOpenShell or downloading the IFC sources.
+adapter writes it as a split triple rather than one document: `--scene`
+receives structure-only JSON whose representation surfaces hold
+`{encoding, byteOffset, byteLength}` references, `--geometry` receives the
+concatenated little-endian streams those references point into, and
+`--properties` receives the binary property value columns
+(`madi.property-columns.1`): every distinct semantic property value encoded
+once as canonical compact JSON in a byte-sorted UTF-8 heap, with u32 reference
+and offset columns joining each semantic's row back to its interned key set.
+Every stream starts on an eight-byte boundary so the compiler can take
+typed-array views without copying, and the report carries a SHA-256 for each
+of the three files. Reviewed counts and hashes live under `artifacts/ifc/`;
+normal CI validates those compact records without installing IfcOpenShell or
+downloading the IFC sources.
 
 IfcOpenShell is LGPL-3.0-or-later. It is an adapter dependency and is not
 bundled into MADI's browser runtime.

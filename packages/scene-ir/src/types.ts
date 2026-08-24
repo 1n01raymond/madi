@@ -155,7 +155,50 @@ export interface IndexedPropertyBag {
   readonly values: readonly PropertyValue[];
 }
 
-export type SemanticProperties = PropertyBag | IndexedPropertyBag;
+/**
+ * A property bag whose values live in the scene's external property value
+ * columns (`scene.propertyValues`) instead of the scene document itself:
+ * the keys come from `propertyIndex.sets[set]` and the values from row `row`
+ * of the column file. Resolving entries requires a `PropertyValueColumnReader`
+ * opened over that file.
+ */
+export interface ColumnPropertyBag {
+  readonly schema?: string;
+  readonly set: number;
+  readonly row: number;
+}
+
+export type SemanticProperties = PropertyBag | IndexedPropertyBag | ColumnPropertyBag;
+
+/**
+ * One stream inside the property value column file. Byte ranges are absolute
+ * offsets into that file; every stream starts 8-byte aligned.
+ */
+export interface PropertyColumnStreamRef {
+  readonly encoding: "u32le" | "utf8-json";
+  readonly byteOffset: number;
+  readonly byteLength: number;
+}
+
+/**
+ * Scene-level header describing the external property value columns
+ * (`madi.property-columns.1`). Every distinct value is stored once in
+ * `valueHeap` as canonical compact JSON (UTF-8, keys sorted), sorted by
+ * encoded byte sequence; `valueOffsets` holds `distinctValueCount + 1` byte
+ * offsets bracketing each distinct value; `rows` holds one u32 distinct-value
+ * index per (bag, position) in row order; `rowOffsets` holds `rowCount + 1`
+ * offsets (in value counts) bracketing each row inside `rows`.
+ */
+export interface PropertyValueColumns {
+  readonly encoding: "madi.property-columns.1";
+  readonly valueCount: number;
+  readonly rowCount: number;
+  readonly distinctValueCount: number;
+  readonly rows: PropertyColumnStreamRef;
+  readonly rowOffsets: PropertyColumnStreamRef;
+  readonly valueOffsets: PropertyColumnStreamRef;
+  readonly valueHeap: PropertyColumnStreamRef;
+}
 
 export interface SourceDocument {
   readonly id: DocumentId;
@@ -336,6 +379,7 @@ export interface EngineeringScene {
   readonly rootFrame: CoordinateFrame;
   readonly documents: readonly SourceDocument[];
   readonly propertyIndex?: PropertyIndex;
+  readonly propertyValues?: PropertyValueColumns;
   readonly prototypes: readonly Prototype[];
   readonly occurrences: readonly Occurrence[];
   readonly semantics: readonly SemanticEntity[];
