@@ -1,0 +1,44 @@
+{
+  "schemaVersion": "madi.safari-compatibility.1",
+  "capturedAt": "2026-08-24T06:47:12.177Z",
+  "mode": "default-browser-settings",
+  "host": {
+    "platform": "darwin",
+    "architecture": "arm64"
+  },
+  "browser": {
+    "name": "Safari",
+    "version": "18.6",
+    "platformName": "macOS",
+    "platformVersion": "15.6",
+    "platformBuildVersion": "24G84",
+    "headless": false
+  },
+  "source": {
+    "fixture": "fixtures/step/adafruit-pygamer.step",
+    "gltf": "artifacts/phase1/adafruit-pygamer/scene.gltf"
+  },
+  "outcome": "webgpu-unavailable",
+  "observed": {
+    "status": "WebGPU is unavailable in this browser.",
+    "hierarchyReady": true,
+    "platform": "MacIntel",
+    "title": "MADI · Compiled glTF to WebGPU",
+    "hierarchyRecords": 87,
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.6 Safari/605.1.15",
+    "webGpuAvailable": false,
+    "prototypeCount": "34",
+    "brandLoaded": true,
+    "occurrenceCount": "85",
+    "state": "error"
+  },
+  "limitations": [
+    "Safari WebDriver does not expose the Chromium/Firefox console event stream used by the browser matrix recorder.",
+    "A webgpu-unavailable result verifies capability detection and hierarchy-first failure only; it is not rendering conformance evidence."
+  ],
+  "screenshot": {
+    "path": "safari-18-macos-webgpu-unavailable.png",
+    "bytes": 16772,
+    "sha256": "0a0e7814da61f497ee5d655ae8669fc6ef8e5cfd22697741afb07bfd56439514"
+  }
+}

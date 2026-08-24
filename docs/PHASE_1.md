@@ -104,6 +104,7 @@ direct WebGPU renderer. The Phase 0 Scene IR JSON is no longer a browser input.
 | Mixed-residency frame | Recorder releases only the first 31.7 KiB range, captures 8 detailed fasteners alongside two retained coarse batches at 380 triangles/61 edges, then completes the remaining ranges | Passed in headed Chrome and Firefox |
 | In-flight cancellation | A second browser run cancels while range 2/3 is pending, observes `Scene load cancelled.`, and proves that range 3/3 is never requested | Passed in headed Chrome and Firefox |
 | Browser conformance | Headed Chrome/Blink and Firefox/Gecko emit no console warnings or errors | Passed by `pnpm browser:matrix` |
+| Safari capability | Real Safari 18.6 loads 87 hierarchy records under default settings, then reports that WebGPU is unavailable because `navigator.gpu` is absent | Graceful unsupported-browser result; rendering conformance not yet available |
 
 ## Reproduce
 
@@ -113,11 +114,13 @@ pnpm madi compile fixtures/step/repeated-fasteners-ap242.step \
   --output output/repeated-fasteners-ap242
 pnpm phase1:evidence:check
 pnpm browser:matrix
+pnpm safari:compatibility
 pnpm check
 ```
 
 See `artifacts/phase1/README.md` for the compiled package,
-`artifacts/browser-matrix/README.md` for reviewed screenshots, and
+`artifacts/browser-matrix/README.md` for reviewed Chrome/Firefox screenshots,
+`artifacts/browser-safari/README.md` for the real-Safari capability record, and
 `packages/compiler/README.md` for the profile boundary.
 
 ## Not yet proven
@@ -133,7 +136,9 @@ See `artifacts/phase1/README.md` for the compiled package,
   per-prototype batch path; no run yet demonstrates an early frame there. A
   Firefox repeat and any benchmark or ADR-0003 claim for sixty5 also remain
   unrecorded.
-- A repeated reference-hardware and integrated-GPU decision matrix for ADR-0003.
+- Additional repeated reference-hardware profiles for ADR-0003; the first
+  Apple-Silicon integrated-GPU record now shows divergent Chrome and Firefox
+  CPU-p95 outcomes.
 - Large-coordinate precision behavior required by ADR-0005.
 - A public end-to-end review workflow and reproducible performance report.
 
@@ -164,12 +169,12 @@ next runtime increment — cutting the main-thread per-prototype batch path
 that dominates it.
 
 In parallel, the repeated 100k record now carries GPU pass timestamps and a
-backend-owned retained-resource census on the discrete host: the MADI surface
-pass is sub-millisecond, so the ADR-0003 comparison at this tier is CPU-side,
-and cross-session CPU-p95 variance (27.0% then 23.9% Chrome medians) is
-itself recorded evidence. Remaining before the renderer decision: run the
-locked matrix on an integrated-GPU profile (procedure committed with the
-GPU-timing record), replace procedural variants with a redistributable
-engineering assembly or design-partner aggregate, and add equivalent
-explicit-edge and bounded-residency slices. Keep the committed browser
-matrices labeled exploratory until those independent signals converge.
+backend-owned retained-resource census on both the discrete host and an Apple
+M4 Pro integrated-GPU host. Chrome reproduces the continuation signals on the
+integrated host, but Firefox does not reproduce the CPU-p95 advantage, making
+the cross-browser variance itself decision evidence. Remaining before the
+renderer decision: add more reference-hardware sessions, replace procedural
+variants with a redistributable engineering assembly or design-partner
+aggregate, and add equivalent explicit-edge and bounded-residency slices. Keep
+the committed browser matrices labeled exploratory until those independent
+signals converge.
