@@ -11,6 +11,7 @@
     "pnpm": ">=11.0.0"
   },
   "scripts": {
+    "adapter:ifc:test": "node scripts/run-adapter-ifc-tests.mjs",
     "adr:check": "node scripts/validate-adrs.mjs",
     "build": "pnpm --recursive --if-present run build",
     "browser:evidence:check": "node scripts/validate-browser-evidence.mjs",

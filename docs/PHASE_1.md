@@ -57,7 +57,7 @@ references into typed-array views without copying.
 | Intermediate reduction | One 81,805,061-byte document became a 39,135,637-byte structure plus a 28,134,848-byte geometry file | Passed |
 | Hydration contract | Stream bounds, encodings, element alignment, unaligned buffers, and unencodable members are unit-checked | Passed in `packages/compiler/test/ifc-scene.test.ts` |
 | Real-large extraction | The seven-document IFC2X3 sixty5 federation extracts 192,316 semantic entities, 78,173 geometric occurrences, 42,435 prototypes, and 4,866,386 unique triangles from 40,310,966 submitted | Passed, recorded in `artifacts/ifc/sixty5/` |
-| Real-large compile | Its 631,929,038-byte structure exceeds the 536,870,888-byte maximum string length, so `madi compile-ifc` reports the measured limit instead of failing opaquely | Blocked, boundary recorded |
+| Real-large compile | Its 631,943,761-byte structure exceeds the 536,870,888-byte maximum string length, so `madi compile-ifc` reports the measured limit instead of failing opaquely | Blocked, boundary recorded |
 
 Splitting geometry out was necessary but not sufficient. The remaining bulk is
 4,503,078 flattened property values and 188,319 occurrence records, so the named

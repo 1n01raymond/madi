@@ -23,7 +23,7 @@ not a compiled package and not a renderer benchmark.
 | Unique vertices | 2,596,268 |
 | Property values | 4,503,078 |
 | Duplicate GlobalIds | 0 |
-| Intermediate structure bytes | 631,929,038 |
+| Intermediate structure bytes | 631,943,761 |
 | Intermediate geometry bytes | 151,864,848 |
 
 Every document declares `IFC2X3`, so this federation also qualifies the older
@@ -35,7 +35,7 @@ scale rather than only in the smaller Digital Hub federation.
 
 The extraction completes, but `madi compile-ifc` stops before compiling it. The
 compiler parses the structure document as one JSON string, and this structure is
-631,929,038 bytes against a 536,870,888-byte maximum string length on the
+631,943,761 bytes against a 536,870,888-byte maximum string length on the
 64-bit V8 this repository pins. The compiler reports that limit with the
 measured size rather than surfacing an opaque allocation failure.
 
@@ -94,3 +94,10 @@ adapter report is reviewed here.
   in memory before writing. Streaming extraction is separate follow-up work.
 - No compiled package, Khronos validation, browser evidence, or timing result
   exists for this dataset. It must not be cited as ADR-0003 evidence.
+- 56 source `IfcAxis2Placement` entities carry a zero-length or parallel axis
+  vector, which IfcOpenShell's placement projection turns into a non-finite
+  matrix component. `native/adapter-ifc/tools/placement_math.py` replaces each
+  with an identity transform and records an `IFC_DEGENERATE_PLACEMENT` warning
+  naming the entity and document (`native/adapter-ifc/README.md`). Without this
+  guard the structure document held 448 bare `NaN` tokens across 60 occurrence
+  records and was not valid JSON.

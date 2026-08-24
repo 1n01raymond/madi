@@ -18,6 +18,38 @@ IFC curve and boundary-edge classification is intentionally deferred. The
 adapter emits surfaces and a stable diagnostic rather than labeling triangle or
 topological edges as explicit CAD edges.
 
+## Degenerate placement handling
+
+Some source `IfcAxis2Placement` entities carry zero-length or parallel axis
+vectors; IfcOpenShell's placement projection then divides by a zero-length
+normal and produces `NaN` components. `native/adapter-ifc/tools/placement_math.py`
+is the single choke point every world, parent, and derived local transform
+passes through before serialization: a matrix with any non-finite component is
+replaced with the identity matrix, and the adapter appends an
+`IFC_DEGENERATE_PLACEMENT` warning naming the affected document and entity.
+`write_scene`/`write_report` additionally call `json.dump(..., allow_nan=False)`
+as a backstop, so any future gap in the per-value guards fails loudly at write
+time (`ValueError`) instead of emitting invalid JSON with a bare `NaN` token.
+
+## Adapter unit tests
+
+`placement_math.py` has no IfcOpenShell import, so its tests run without the
+pinned adapter environment:
+
+```sh
+python -m venv output/venv-ifc-test  # or reuse output/venv-ifc
+output/venv-ifc-test/Scripts/python -m pip install \
+  -r native/adapter-ifc/tools/requirements-dev.txt
+
+pnpm adapter:ifc:test
+```
+
+`pnpm adapter:ifc:test` looks for a Python interpreter with `pytest` and
+`numpy` importable via `--python <path>`, `MADI_PYTHON`, then plain `python`/
+`python3` on `PATH`, and runs `native/adapter-ifc/tests/`. This is separate
+from `pnpm check`, the same way `native:check` is: it needs a Python
+interpreter present, and CI runs it in its own `python-adapter` job.
+
 ## Reproduce the Digital Hub extraction
 
 Fetch the external fixture, create an isolated Python environment, and use the

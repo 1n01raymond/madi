@@ -102,7 +102,11 @@ compiler. `--retain-scene-ir` therefore writes both `scene-ir.json` and
   remains production hardening work.
 - The IFC command currently depends on pinned IfcOpenShell 0.8.5. IFC topology
   edge classification, non-flattened property indexing, and cross-document
-  reconciliation remain explicit follow-up work.
+  reconciliation remain explicit follow-up work. A degenerate source
+  `IfcAxis2Placement` (zero-length or parallel axes) is replaced with an
+  identity transform and reported as `IFC_DEGENERATE_PLACEMENT`; the adapter
+  never hands the compiler a non-finite matrix
+  (`native/adapter-ifc/README.md`).
 - The split transport moves geometry out of the structure document but still
   parses that document as one JSON string, and it requires a little-endian
   host. Streaming the structure and encoding flattened properties as binary

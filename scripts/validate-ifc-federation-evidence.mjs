@@ -291,8 +291,8 @@ assert(
 );
 assert(
   sixty5.scene.structure.sha256 ===
-    "51520c8064a35b3f1a33cc815dff7758d195779cfa50b51a7f03c0b595240aa7" &&
-    sixty5.scene.structure.byteLength === 631929038,
+    "c82f2dd2f5e5243655d7e14103393f2ee3041402e465545f630f56b01a09adc1" &&
+    sixty5.scene.structure.byteLength === 631943761,
   "sixty5 Scene IR structure evidence changed.",
 );
 assert(
@@ -308,6 +308,15 @@ assert(
 assert(
   sixty5.diagnostics.codes.includes("IFC_EDGE_EXTRACTION_DEFERRED"),
   "sixty5 deferred IFC edge limitation is no longer explicit.",
+);
+assert(
+  sixty5.diagnostics.codes.includes("IFC_DEGENERATE_PLACEMENT"),
+  "sixty5 degenerate-placement diagnostic is no longer explicit.",
+);
+assertCounts(
+  sixty5.diagnostics.counts,
+  { info: 1, warning: 56 },
+  "sixty5 diagnostics",
 );
 for (const text of [
   adapterBytes.toString("utf8"),

@@ -26,10 +26,12 @@
   },
   "diagnostics": {
     "codes": [
+      "IFC_DEGENERATE_PLACEMENT",
       "IFC_EDGE_EXTRACTION_DEFERRED"
     ],
     "counts": {
-      "info": 1
+      "info": 1,
+      "warning": 56
     }
   },
   "federation": {
@@ -1047,8 +1049,8 @@
       "sha256": "d4960401750f7e67b9c0387c846636e7d63e4bdba099e78886f0bf439d9a8d0d"
     },
     "structure": {
-      "byteLength": 631929038,
-      "sha256": "51520c8064a35b3f1a33cc815dff7758d195779cfa50b51a7f03c0b595240aa7"
+      "byteLength": 631943761,
+      "sha256": "c82f2dd2f5e5243655d7e14103393f2ee3041402e465545f630f56b01a09adc1"
     }
   },
   "schemaVersion": "madi.ifc-adapter-report.2",
