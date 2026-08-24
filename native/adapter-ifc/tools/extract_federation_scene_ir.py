@@ -24,6 +24,13 @@ import ifcopenshell.util.placement
 import ifcopenshell.util.unit
 import numpy as np
 
+from placement_math import (
+    column_major_values,
+    matrix_from_column_major,
+    rounded,
+    sanitized_matrix,
+)
+
 
 ROOT_FRAME = {
     "origin": [0.0, 0.0, 0.0],
@@ -63,11 +70,6 @@ def sha256_json(value: Any) -> str:
         sort_keys=True,
     ).encode("utf-8")
     return sha256_bytes(encoded)
-
-
-def rounded(value: float) -> float:
-    result = round(float(value), 9)
-    return 0.0 if result == 0 else result
 
 
 def slug(value: str) -> str:
@@ -210,12 +212,6 @@ def semantic_relations(entity: Any, semantic_ids: dict[int, str]) -> list[dict[s
     return relations
 
 
-def matrix_from_column_major(values: Sequence[float]) -> np.ndarray[Any, Any]:
-    if len(values) != 16:
-        raise ValueError("IFC shape transformation must contain 16 values.")
-    return np.asarray(values, dtype=np.float64).reshape((4, 4), order="F")
-
-
 def project_placement_matrix(entity: Any, unit_scale: float) -> np.ndarray[Any, Any]:
     placement = getattr(entity, "ObjectPlacement", None)
     if placement is None:
@@ -226,10 +222,6 @@ def project_placement_matrix(entity: Any, unit_scale: float) -> np.ndarray[Any, 
     )
     matrix[:3, 3] *= unit_scale
     return matrix
-
-
-def column_major_values(matrix: np.ndarray[Any, Any]) -> list[float]:
-    return [rounded(value) for value in matrix.flatten(order="F")]
 
 
 def computed_normals(vertices: np.ndarray[Any, Any], faces: np.ndarray[Any, Any]) -> list[float]:
@@ -428,7 +420,19 @@ def inspect_document(
         prototype_id = f"prototype:ifc:{geometry_key}"
         representation_id = f"representation:ifc:{geometry_key}:display"
         body_ref_id = f"source:ifc:{geometry_key}:geometry"
-        world_by_entity[product_id] = matrix_from_column_major(shape.transformation.matrix)
+        world, degenerate = sanitized_matrix(matrix_from_column_major(shape.transformation.matrix))
+        world_by_entity[product_id] = world
+        if degenerate:
+            diagnostics.append(
+                {
+                    "severity": "warning",
+                    "code": "IFC_DEGENERATE_PLACEMENT",
+                    "message": f"Used identity placement for {product.is_a()}#{product_id}: "
+                    "shape transformation contained a non-finite component.",
+                    "documentId": document_id,
+                    "sourceRef": entity_source_ref_id(document_token, product),
+                }
+            )
 
         vertices = np.asarray(geometry.verts, dtype=np.float64).reshape((-1, 3))
         faces = np.asarray(geometry.faces, dtype=np.uint32).reshape((-1, 3))
@@ -582,7 +586,21 @@ def inspect_document(
         step_id = entity_id(entity)
         if step_id not in world_by_entity:
             try:
-                world_by_entity[step_id] = project_placement_matrix(entity, unit_scale)
+                placement, degenerate = sanitized_matrix(
+                    project_placement_matrix(entity, unit_scale)
+                )
+                world_by_entity[step_id] = placement
+                if degenerate:
+                    diagnostics.append(
+                        {
+                            "severity": "warning",
+                            "code": "IFC_DEGENERATE_PLACEMENT",
+                            "message": f"Used identity placement for {entity.is_a()}#{step_id}: "
+                            "placement matrix contained a non-finite component.",
+                            "documentId": document_id,
+                            "sourceRef": entity_source_ref_id(document_token, entity),
+                        }
+                    )
             except (AttributeError, RuntimeError, TypeError, ValueError) as error:
                 world_by_entity[step_id] = np.eye(4, dtype=np.float64)
                 diagnostics.append(
@@ -635,13 +653,37 @@ def inspect_document(
             parent_world = world_by_entity.get(parent_step_id)
             if parent_world is None:
                 try:
-                    parent_world = project_placement_matrix(parent, unit_scale)
+                    parent_world, parent_degenerate = sanitized_matrix(
+                        project_placement_matrix(parent, unit_scale)
+                    )
                 except (AttributeError, RuntimeError, TypeError, ValueError):
                     parent_world = np.eye(4, dtype=np.float64)
+                    parent_degenerate = False
+                    diagnostics.append(
+                        {
+                            "severity": "warning",
+                            "code": "IFC_PLACEMENT_FALLBACK",
+                            "message": f"Used identity placement for {parent.is_a()}#{parent_step_id}.",
+                            "documentId": document_id,
+                            "sourceRef": entity_source_ref_id(document_token, parent),
+                        }
+                    )
+                if parent_degenerate:
+                    diagnostics.append(
+                        {
+                            "severity": "warning",
+                            "code": "IFC_DEGENERATE_PLACEMENT",
+                            "message": f"Used identity placement for {parent.is_a()}#{parent_step_id}: "
+                            "placement matrix contained a non-finite component.",
+                            "documentId": document_id,
+                            "sourceRef": entity_source_ref_id(document_token, parent),
+                        }
+                    )
                 world_by_entity[parent_step_id] = parent_world
             try:
                 local = np.linalg.inv(parent_world) @ world
             except np.linalg.LinAlgError:
+                local = np.eye(4, dtype=np.float64)
                 diagnostics.append(
                     {
                         "severity": "warning",
@@ -651,6 +693,18 @@ def inspect_document(
                         "sourceRef": entity_source_ref_id(document_token, entity),
                     }
                 )
+        local, local_degenerate = sanitized_matrix(local)
+        if local_degenerate:
+            diagnostics.append(
+                {
+                    "severity": "warning",
+                    "code": "IFC_DEGENERATE_PLACEMENT",
+                    "message": f"Used identity local transform for {entity.is_a()}#{step_id}: "
+                    "derived matrix contained a non-finite component.",
+                    "documentId": document_id,
+                    "sourceRef": entity_source_ref_id(document_token, entity),
+                }
+            )
         occurrence = {
             "id": occurrence_id,
             "prototypeId": prototype_id,
@@ -997,7 +1051,14 @@ def write_scene(
 
     structure_path.parent.mkdir(parents=True, exist_ok=True)
     with structure_path.open("w", encoding="utf-8", newline="\n") as output:
-        json.dump(scene, output, ensure_ascii=False, separators=(",", ":"), sort_keys=True)
+        json.dump(
+            scene,
+            output,
+            ensure_ascii=False,
+            separators=(",", ":"),
+            sort_keys=True,
+            allow_nan=False,
+        )
         output.write("\n")
     return {
         "encodingVersion": "madi.ifc-scene-ir-split.1",
@@ -1009,7 +1070,7 @@ def write_scene(
 def write_report(path: Path, report: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8", newline="\n") as output:
-        json.dump(report, output, ensure_ascii=False, indent=2, sort_keys=True)
+        json.dump(report, output, ensure_ascii=False, indent=2, sort_keys=True, allow_nan=False)
         output.write("\n")
 
 
