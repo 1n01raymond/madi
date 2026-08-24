@@ -63,8 +63,9 @@ plus a digest-linked binary geometry file — which reproduces the same compiled
 package while halving the document the compiler must parse. That was enough to
 qualify the 839.9 MB seven-discipline `sixty5` federation as a source and to
 extract 4.87M unique triangles from it, and it exposed the next boundary: its
-631.9 MB structure document is larger than one JavaScript string. A streamed
-structure section format is the named follow-up.
+631.9 MB structure document is larger than one JavaScript string. The compiler
+now streams that document record by record, so the remaining gate is the
+recorded sixty5 end-to-end compile evidence.
 
 - local STEP AP242 input;
 - XDE hierarchy, names, colors, units, transforms;

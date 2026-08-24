@@ -1,15 +1,14 @@
-import { constants as bufferConstants } from "node:buffer";
 import { spawn } from "node:child_process";
 import { availableParallelism, tmpdir } from "node:os";
 import { createHash } from "node:crypto";
-import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { copyFile, mkdtemp, readFile, rm } from "node:fs/promises";
 import { basename, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { validateScene } from "@madi/scene-ir";
-
 import { compileSceneToGltf } from "./gltf.js";
 import { hydrateIfcSceneSplit, ifcSceneSplitEncodingVersion } from "./ifc-scene.js";
+import { readIfcStructure } from "./ifc-structure-stream.js";
+import type { IfcStructureRead } from "./ifc-structure-stream.js";
 import { inspectIfcFile } from "./ifc-source.js";
 import type { IfcSourceInspection } from "./ifc-source.js";
 import { writeCompiledPackage } from "./package-output.js";
@@ -163,7 +162,7 @@ async function runAdapter(
 function assertAdapterIdentity(
   adapterReport: unknown,
   sources: readonly InspectedIfcFederationDocument[],
-  structure: Buffer,
+  structure: IfcStructureRead,
   geometry: Buffer,
 ): { readonly report: Record<string, unknown>; readonly federationDigest: string } {
   const report = asRecord(adapterReport, "IFC adapter report");
@@ -200,33 +199,20 @@ function assertAdapterIdentity(
   }
   const structureIdentity = asRecord(scene.structure, "IFC scene structure identity");
   const geometryIdentity = asRecord(scene.geometry, "IFC scene geometry identity");
-  for (const [identity, payload, label] of [
-    [structureIdentity, structure, "structure"] as const,
-    [geometryIdentity, geometry, "geometry"] as const,
+  for (const [identity, byteLength, sha256, label] of [
+    [structureIdentity, structure.byteLength, structure.sha256, "structure"] as const,
+    [
+      geometryIdentity,
+      geometry.byteLength,
+      createHash("sha256").update(geometry).digest("hex"),
+      "geometry",
+    ] as const,
   ]) {
-    if (
-      identity.byteLength !== payload.byteLength ||
-      identity.sha256 !== createHash("sha256").update(payload).digest("hex")
-    ) {
+    if (identity.byteLength !== byteLength || identity.sha256 !== sha256) {
       throw new TypeError(`IFC adapter ${label} digest does not match its report.`);
     }
   }
   return { report, federationDigest: federation.sourceDigest };
-}
-
-/**
- * The split transport keeps geometry out of the structure document, but the
- * structure is still parsed as one JSON string. Report that runtime ceiling as
- * a measured limit instead of letting V8 raise an opaque allocation error.
- */
-function assertStructureIsParseable(structure: Buffer): void {
-  if (structure.byteLength <= bufferConstants.MAX_STRING_LENGTH) return;
-  const megabytes = (bytes: number) => (bytes / 1_000_000).toFixed(1);
-  throw new TypeError(
-    `The IFC Scene IR structure document is ${megabytes(structure.byteLength)} MB, above the ` +
-      `${megabytes(bufferConstants.MAX_STRING_LENGTH)} MB maximum this runtime can hold as one ` +
-      "JSON string. Compile fewer documents until the structure transport is streamed.",
-  );
 }
 
 export async function compileIfcFederation(
@@ -265,18 +251,18 @@ export async function compileIfcFederation(
       ],
       options.environment ?? process.env,
     );
+    // The structure document can exceed the runtime's maximum string length
+    // (a real-large federation reaches 632 MB against V8's 536,870,888 code
+    // units), so it is never read or parsed as one string: the streaming
+    // reader parses it record by record and hashes it on the way through.
     const [structure, geometry, serializedAdapterReport] = await Promise.all([
-      readFile(scenePath),
+      readIfcStructure(scenePath),
       readFile(geometryPath),
       readFile(adapterReportPath, "utf8"),
     ]);
     const parsedAdapterReport = parseJson(serializedAdapterReport, "IFC adapter report");
     const identity = assertAdapterIdentity(parsedAdapterReport, sources, structure, geometry);
-    assertStructureIsParseable(structure);
-    const scene = hydrateIfcSceneSplit(
-      parseJson(structure.toString("utf8"), "IFC Scene IR"),
-      geometry,
-    );
+    const scene = hydrateIfcSceneSplit(structure.value, geometry);
     if (scene.revision.sourceDigest !== `sha256:${identity.federationDigest}`) {
       throw new TypeError("IFC Scene IR federation digest does not match the adapter report.");
     }
@@ -289,7 +275,6 @@ export async function compileIfcFederation(
       }
     }
 
-    const sceneValidation = validateScene(scene);
     const compiled = compileSceneToGltf(scene, {
       coarseBounds: true,
       generator: "MADI compiler 0.0.0 / IfcOpenShell federation slice",
@@ -313,10 +298,13 @@ export async function compileIfcFederation(
 
     const adapterReport = {
       ...identity.report,
+      // Derived from the validation `compileSceneToGltf` already ran (it
+      // throws before reaching this point when the scene does not validate),
+      // so the scene is no longer validated twice.
       sceneIrValidation: {
         ok: true,
         errorCount: 0,
-        warningCount: sceneValidation.issues.filter(
+        warningCount: compiled.sceneValidation.issues.filter(
           ({ severity }) => severity === "warning",
         ).length,
       },
@@ -324,8 +312,8 @@ export async function compileIfcFederation(
     await writeCompiledPackage(compiled, outputDirectory, adapterReport);
     if (options.retainSceneIr) {
       await Promise.all([
-        writeFile(resolve(outputDirectory, "scene-ir.json"), structure),
-        writeFile(resolve(outputDirectory, "scene-ir-geometry.bin"), geometry),
+        copyFile(scenePath, resolve(outputDirectory, "scene-ir.json")),
+        copyFile(geometryPath, resolve(outputDirectory, "scene-ir-geometry.bin")),
       ]);
     }
     return {

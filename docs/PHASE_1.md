@@ -57,11 +57,14 @@ references into typed-array views without copying.
 | Intermediate reduction | One 81,805,061-byte document became a 39,135,637-byte structure plus a 28,134,848-byte geometry file | Passed |
 | Hydration contract | Stream bounds, encodings, element alignment, unaligned buffers, and unencodable members are unit-checked | Passed in `packages/compiler/test/ifc-scene.test.ts` |
 | Real-large extraction | The seven-document IFC2X3 sixty5 federation extracts 192,316 semantic entities, 78,173 geometric occurrences, 42,435 prototypes, and 4,866,386 unique triangles from 40,310,966 submitted | Passed, recorded in `artifacts/ifc/sixty5/` |
-| Real-large compile | Its 631,943,761-byte structure exceeds the 536,870,888-byte maximum string length, so `madi compile-ifc` reports the measured limit instead of failing opaquely | Blocked, boundary recorded |
+| Structure streaming | The compiler parses the structure document record by record in bounded chunks instead of one string, and reproduces the Digital Hub package digest byte for byte | Passed in `packages/compiler/test/ifc-structure-stream.test.ts` and the recompiled `artifacts/ifc/digital-hub/` record |
+| Real-large compile | Its 631,943,761-byte structure exceeds the 536,870,888-byte maximum string length; the streaming reader removes that ceiling, but the compiled sixty5 package is not yet recorded | Evidence pending |
 
-Splitting geometry out was necessary but not sufficient. The remaining bulk is
-4,503,078 flattened property values and 188,319 occurrence records, so the named
-follow-up is a streamed structure section format rather than a larger string.
+Splitting geometry out was necessary but not sufficient: the remaining bulk is
+4,503,078 flattened property values and 188,319 occurrence records. The
+record-streaming reader lifts the one-string ceiling without changing the
+transport format; shrinking the structure itself (indexed properties) remains
+a named follow-up.
 
 ## First browser runtime slice
 
@@ -128,10 +131,11 @@ and GPU admission caps. A selected target now pins its detail and evicts colder
 target groups to their retained coarse fallbacks. The next scheduler increment
 is persistent cache tiers and camera/view reprioritization.
 
-On the compiler side the next increment is a streamed structure section format
-for the adapter boundary, so a real-large federation no longer has to be
-resident as one JSON string or one object graph. The sixty5 measurement in
-`artifacts/ifc/sixty5/` is the gate that increment has to clear.
+On the compiler side the structure document now streams record by record, so a
+real-large federation no longer has to be resident as one JSON string. The
+next increment is the sixty5 end-to-end compile evidence (package digest,
+Khronos validation, peak memory) that retires the "Evidence pending" row above;
+the sixty5 measurement in `artifacts/ifc/sixty5/` is the gate it has to clear.
 
 In parallel, the repeated 100k record now carries GPU pass timestamps and a
 backend-owned retained-resource census on the discrete host: the MADI surface

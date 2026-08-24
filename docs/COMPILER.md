@@ -427,6 +427,17 @@ into typed-array views without copying. On Digital Hub this replaced an
 81,805,061-byte document with a 39,135,637-byte structure and a 28,134,848-byte
 geometry file, and reproduced the same compiled package digest.
 
+The compiler never holds the structure document as one string. A
+record-streaming reader (`packages/compiler/src/ifc-structure-stream.ts`)
+walks the file in bounded chunks with a byte-level state machine, parses each
+top-level array record individually, and hashes every byte on the way through
+for the adapter-identity check, producing exactly the object graph `JSON.parse`
+would. That removes the runtime's 536,870,888-code-unit maximum string length
+as a compile boundary; only the largest single record must fit one string.
+Chunk-boundary, malformed-record, and error-reporting behavior is unit-checked
+in `packages/compiler/test/ifc-structure-stream.test.ts`, and the reader
+reproduces the Digital Hub package digest byte for byte.
+
 The qualified Digital Hub result combines four IFC4 documents into 13,681
 occurrences, including 5,152 renderable products. It preserves 3,383 unique
 geometric prototypes and 1,769 reused occurrences, reducing 2,534,364 submitted
@@ -441,12 +452,13 @@ fallbacks when pressure is reached. It is not yet a spatial scheduler: LOD,
 camera reprioritization, eviction, cache tiers, and explicit IFC CAD-edge
 classification remain deferred.
 
-### 21.1 Measured real-large boundary
+### 21.1 Real-large boundary status
 
-The split transport removes geometry from the structure document, but the
-compiler still parses that document as one JSON string. The qualified
-`ifc-bench-sixty5` federation crosses that ceiling, so `madi compile-ifc`
-reports the measured limit instead of surfacing an opaque V8 allocation error.
-Streaming the structure and encoding flattened properties as binary streams are
-the named follow-up slices; until then, real-large IFC input is a source
-qualification and adapter result, not a compiled package.
+The qualified `ifc-bench-sixty5` federation's 631,943,761-byte structure
+exceeds the runtime's maximum string length, which used to stop
+`madi compile-ifc` at a measured limit. The record-streaming structure reader
+removed that ceiling; the compiled sixty5 package, its Khronos validation, and
+its peak-memory record are the named follow-up slice (until they are recorded,
+real-large IFC remains a source qualification and adapter result, not a
+compiled package). Encoding flattened properties as an indexed binary form is
+a separate follow-up that shrinks the structure document itself.
