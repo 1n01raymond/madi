@@ -1,0 +1,60 @@
+{
+  "schemaVersion": "madi.ifc-federation-evidence.1",
+  "dataset": {
+    "id": "ifc-bench-sixty5",
+    "revision": "4b37e5d77f12f30dfd7cb7375e15278e1037c808",
+    "sourceDigest": "e334c6a9295a0adbf8ffbb15c61ea05c47b0135a319ee370f853bb9a36d21dec"
+  },
+  "reports": {
+    "adapter": {
+      "path": "adapter-report.json",
+      "bytes": 33826,
+      "sha256": "a083ed803ce8e3af33728ceef9be037ca3a08bb448a11dc137d9fbd820b775d9"
+    },
+    "compiler": {
+      "path": "build-report.json",
+      "bytes": 140903,
+      "sha256": "5b50c0e0466ca1036247ca0f30ff8d4454d3cb9b4aa2157fcef513d1327271f9"
+    }
+  },
+  "package": {
+    "digest": "bb58f9f8117f51fba3c7071160e3af938883ca41a86d1ec131241940cde5c281",
+    "resources": [
+      {
+        "path": "scene.gltf",
+        "mediaType": "model/gltf+json",
+        "bytes": 448823616,
+        "sha256": "ca1191a11dc6105cdfc7be9e7c88de54fd9c38f7a575c7b225f8205c39169187"
+      },
+      {
+        "path": "scene.bin",
+        "mediaType": "application/octet-stream",
+        "bytes": 120707064,
+        "sha256": "7a04489cfadb39706b7b8c3832402991e8d6f1e15983547d71939cc924fad913"
+      },
+      {
+        "path": "coarse.bin",
+        "mediaType": "application/octet-stream",
+        "bytes": 38700720,
+        "sha256": "258e085d4f3d0b380bb89c3596b2e3bfc4a43177afe9fc7e92d6e1046db9031b"
+      }
+    ]
+  },
+  "khronosValidation": {
+    "validator": "Khronos glTF Validator",
+    "version": "2.0.0-dev.3.10",
+    "issues": {
+      "numErrors": 0,
+      "numWarnings": 0,
+      "numInfos": 100,
+      "numHints": 0,
+      "capturedMessageCount": 100,
+      "codes": [
+        {
+          "code": "NODE_MATRIX_DEFAULT",
+          "capturedCount": 100
+        }
+      ]
+    }
+  }
+}

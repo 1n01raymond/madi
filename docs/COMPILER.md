@@ -452,13 +452,19 @@ fallbacks when pressure is reached. It is not yet a spatial scheduler: LOD,
 camera reprioritization, eviction, cache tiers, and explicit IFC CAD-edge
 classification remain deferred.
 
-### 21.1 Real-large boundary status
+### 21.1 Real-large compile status
 
 The qualified `ifc-bench-sixty5` federation's 631,943,761-byte structure
 exceeds the runtime's maximum string length, which used to stop
 `madi compile-ifc` at a measured limit. The record-streaming structure reader
-removed that ceiling; the compiled sixty5 package, its Khronos validation, and
-its peak-memory record are the named follow-up slice (until they are recorded,
-real-large IFC remains a source qualification and adapter result, not a
-compiled package). Encoding flattened properties as an indexed binary form is
-a separate follow-up that shrinks the structure document itself.
+removed that ceiling, and the compiled result is recorded in
+`artifacts/ifc/sixty5/`: a 608.2 MB package (digest
+`bb58f9f8117f51fba3c7071160e3af938883ca41a86d1ec131241940cde5c281`) with
+188,320 glTF nodes, 84,870 meshes, 78,173 renderable occurrences, and
+4,866,386 unique triangles, passing the Khronos validator with zero errors and
+warnings. Two complete runs — each re-running the adapter — produced
+byte-identical outputs, and the compiler process peaked at ≈3.8 GB working set
+inside the default V8 heap. Encoding flattened properties as an indexed binary
+form is a separate follow-up that shrinks the structure document itself; the
+hydrated scene, including 4,503,078 property values, still stays resident
+during compilation.

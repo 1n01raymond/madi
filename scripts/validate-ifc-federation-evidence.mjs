@@ -213,11 +213,17 @@ assert(
 );
 
 
-// The real-large federation is adapter-only evidence: extraction completes, but
-// its structure document is larger than one JavaScript string, so no compiled
-// package exists for it yet.
-const sixty5Bytes = await readFile(resolve(sixty5Directory, "adapter-report.json"));
+// The real-large federation now carries end-to-end compile evidence: its
+// structure document is still larger than one JavaScript string, and the
+// compiler streams it record by record into the same compiled-package contract
+// the Digital Hub record proves.
+const [sixty5Bytes, sixty5CompilerBytes, sixty5Evidence] = await Promise.all([
+  readFile(resolve(sixty5Directory, "adapter-report.json")),
+  readFile(resolve(sixty5Directory, "build-report.json")),
+  readFile(resolve(sixty5Directory, "validation-report.json"), "utf8").then(JSON.parse),
+]);
 const sixty5 = JSON.parse(sixty5Bytes.toString("utf8"));
+const sixty5Compiler = JSON.parse(sixty5CompilerBytes.toString("utf8"));
 const sixty5Dataset = manifest.datasets.find(({ id }) => id === "ifc-bench-sixty5");
 
 assert(sixty5Dataset?.status === "qualified", "sixty5 fixture is not qualified.");
@@ -303,7 +309,12 @@ assert(
 );
 assert(
   sixty5.scene.structure.byteLength > bufferConstants.MAX_STRING_LENGTH,
-  "sixty5 structure now fits one string; the documented compiler boundary is stale.",
+  "sixty5 structure now fits one string; the streaming-reader claim below is stale.",
+);
+assert(sixty5.sceneIrValidation.ok === true, "sixty5 Scene IR validation failed.");
+assert(
+  sixty5.sceneIrValidation.errorCount === 0 && sixty5.sceneIrValidation.warningCount === 0,
+  "sixty5 Scene IR validation emitted diagnostics.",
 );
 assert(
   sixty5.diagnostics.codes.includes("IFC_EDGE_EXTRACTION_DEFERRED"),
@@ -318,10 +329,83 @@ assertCounts(
   { info: 1, warning: 56 },
   "sixty5 diagnostics",
 );
+
+assert(
+  sixty5Compiler.schemaVersion === "madi.phase1.compiler-report.1" &&
+    sixty5Compiler.profile === "madi.experimental.gltf.1" &&
+    sixty5Compiler.status === "experimental-not-interchange",
+  "sixty5 compiler profile changed.",
+);
+assert(
+  sixty5Compiler.source.sourceDigest === `sha256:${sixty5.federation.sourceDigest}` &&
+    sixty5Compiler.source.adapter === "IfcOpenShell 0.8.5",
+  "sixty5 compiler and adapter source identities differ.",
+);
+assertCounts(
+  sixty5Compiler.counts,
+  {
+    prototypeCount: 42469,
+    compiledPrototypeCount: 42435,
+    occurrenceCount: 188319,
+    renderableOccurrenceCount: 78173,
+    gltfNodeCount: 188320,
+    gltfMeshCount: 84870,
+    materialCount: 318,
+    triangleCount: 4866386,
+    edgeSegmentCount: 0,
+    targetChunkCount: 234,
+  },
+  "sixty5 compiler",
+);
+assert(
+  sixty5Compiler.output.packageDigest ===
+    "bb58f9f8117f51fba3c7071160e3af938883ca41a86d1ec131241940cde5c281",
+  "sixty5 compiled package digest changed.",
+);
+assert(
+  sixty5Compiler.options.targetChunking === "coalesced-prototype-range-v1" &&
+    sixty5Compiler.options.targetChunkByteBudget === 524288,
+  "sixty5 target range coalescing contract changed.",
+);
+
+assert(
+  sixty5Evidence.schemaVersion === "madi.ifc-federation-evidence.1",
+  "Unknown sixty5 evidence envelope.",
+);
+assert(
+  sixty5Evidence.dataset.id === sixty5Dataset.id &&
+    sixty5Evidence.dataset.revision === sixty5Dataset.source.revision &&
+    sixty5Evidence.dataset.sourceDigest === sixty5.federation.sourceDigest,
+  "sixty5 evidence dataset identity changed.",
+);
+assert(
+  sixty5Evidence.reports.adapter.bytes === sixty5Bytes.byteLength &&
+    sixty5Evidence.reports.adapter.sha256 === sha256(sixty5Bytes),
+  "sixty5 adapter report digest changed.",
+);
+assert(
+  sixty5Evidence.reports.compiler.bytes === sixty5CompilerBytes.byteLength &&
+    sixty5Evidence.reports.compiler.sha256 === sha256(sixty5CompilerBytes),
+  "sixty5 compiler report digest changed.",
+);
+assert(
+  sixty5Evidence.package.digest === sixty5Compiler.output.packageDigest &&
+    JSON.stringify(sixty5Evidence.package.resources) ===
+      JSON.stringify(sixty5Compiler.output.resources),
+  "sixty5 evidence package identity changed.",
+);
+assert(
+  sixty5Evidence.khronosValidation.validator === "Khronos glTF Validator" &&
+    sixty5Evidence.khronosValidation.version === "2.0.0-dev.3.10" &&
+    sixty5Evidence.khronosValidation.issues.numErrors === 0 &&
+    sixty5Evidence.khronosValidation.issues.numWarnings === 0,
+  "sixty5 Khronos validation evidence failed or changed.",
+);
 for (const text of [
   adapterBytes.toString("utf8"),
   compilerBytes.toString("utf8"),
   sixty5Bytes.toString("utf8"),
+  sixty5CompilerBytes.toString("utf8"),
 ]) {
   assert(!/[A-Za-z]:[\\/]/u.test(text), "Evidence leaks an absolute Windows path.");
   assert(!text.includes("output/external-fixtures"), "Evidence leaks a local cache path.");
@@ -337,9 +421,10 @@ console.log(
     `(0 errors / 0 warnings)`,
 );
 console.log(
-  `[ifc-federation] verified sixty5 adapter extraction ` +
-    `(${sixty5.counts.geometricOccurrenceCount.toLocaleString("en-US")} geometric ` +
-    `occurrences, ${sixty5.counts.triangleCount.toLocaleString("en-US")} unique triangles); ` +
-    `its ${sixty5.scene.structure.byteLength.toLocaleString("en-US")}-byte structure stays ` +
-    `above the ${bufferConstants.MAX_STRING_LENGTH.toLocaleString("en-US")}-byte string limit`,
+  `[ifc-federation] verified sixty5 ${sixty5Compiler.output.packageDigest.slice(0, 12)} ` +
+    `(${sixty5Compiler.counts.renderableOccurrenceCount.toLocaleString("en-US")} renderable ` +
+    `occurrences, ${sixty5Compiler.counts.triangleCount.toLocaleString("en-US")} unique ` +
+    `triangles) compiled from a ` +
+    `${sixty5.scene.structure.byteLength.toLocaleString("en-US")}-byte structure streamed ` +
+    `past the ${bufferConstants.MAX_STRING_LENGTH.toLocaleString("en-US")}-byte string limit`,
 );

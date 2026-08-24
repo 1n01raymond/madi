@@ -1,0 +1,5164 @@
+{
+  "schemaVersion": "madi.phase1.compiler-report.1",
+  "profile": "madi.experimental.gltf.1",
+  "status": "experimental-not-interchange",
+  "compiler": {
+    "name": "@madi/compiler",
+    "version": "0.0.0",
+    "generator": "MADI compiler 0.0.0 / IfcOpenShell federation slice"
+  },
+  "options": {
+    "binaryUri": "scene.bin",
+    "coarseBinaryUri": "coarse.bin",
+    "coordinateSystem": "right-handed-y-up-meters",
+    "geometryEncoding": "gltf-f32",
+    "progressiveRepresentation": "prototype-aabb-v1",
+    "targetChunking": "coalesced-prototype-range-v1",
+    "targetChunkByteBudget": 524288
+  },
+  "source": {
+    "sceneId": "scene:ifc-federation:e334c6a9295a0adb",
+    "revisionId": "revision:ifc-federation:e334c6a9295a0adb",
+    "sourceDigest": "sha256:e334c6a9295a0adbf8ffbb15c61ea05c47b0135a319ee370f853bb9a36d21dec",
+    "adapter": "IfcOpenShell 0.8.5",
+    "optionsDigest": "sha256:3f40390a2668e98b181e51e858112bff37a67e88646742957a0b540fea47409f"
+  },
+  "output": {
+    "packageDigest": "bb58f9f8117f51fba3c7071160e3af938883ca41a86d1ec131241940cde5c281",
+    "resources": [
+      {
+        "path": "scene.gltf",
+        "mediaType": "model/gltf+json",
+        "bytes": 448823616,
+        "sha256": "ca1191a11dc6105cdfc7be9e7c88de54fd9c38f7a575c7b225f8205c39169187"
+      },
+      {
+        "path": "scene.bin",
+        "mediaType": "application/octet-stream",
+        "bytes": 120707064,
+        "sha256": "7a04489cfadb39706b7b8c3832402991e8d6f1e15983547d71939cc924fad913"
+      },
+      {
+        "path": "coarse.bin",
+        "mediaType": "application/octet-stream",
+        "bytes": 38700720,
+        "sha256": "258e085d4f3d0b380bb89c3596b2e3bfc4a43177afe9fc7e92d6e1046db9031b"
+      }
+    ]
+  },
+  "counts": {
+    "prototypeCount": 42469,
+    "compiledPrototypeCount": 42435,
+    "occurrenceCount": 188319,
+    "renderableOccurrenceCount": 78173,
+    "gltfNodeCount": 188320,
+    "gltfMeshCount": 84870,
+    "materialCount": 318,
+    "triangleCount": 4866386,
+    "edgeSegmentCount": 0,
+    "targetChunkCount": 234
+  },
+  "prototypeReuse": [
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:1008674",
+      "occurrenceCount": 36
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:1011564",
+      "occurrenceCount": 14
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:1015343",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:101869",
+      "occurrenceCount": 10
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:1023026",
+      "occurrenceCount": 29
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:1023842",
+      "occurrenceCount": 29
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:119584",
+      "occurrenceCount": 18
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:121548",
+      "occurrenceCount": 53
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:123070",
+      "occurrenceCount": 49
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:132168",
+      "occurrenceCount": 59
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:133670",
+      "occurrenceCount": 53
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:1466858",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:1467575",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:1474104",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:147930",
+      "occurrenceCount": 85
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:187597",
+      "occurrenceCount": 39
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:1940863",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:1950700",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:1953549",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:1956398",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:1992166",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:2024221",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:2939832",
+      "occurrenceCount": 5
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:314009",
+      "occurrenceCount": 16
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:318035",
+      "occurrenceCount": 15
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:3222431",
+      "occurrenceCount": 9
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:3223320",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:3223636",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:3224152",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:3224652",
+      "occurrenceCount": 9
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:3429831",
+      "occurrenceCount": 8
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:3430063",
+      "occurrenceCount": 8
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:3431136",
+      "occurrenceCount": 46
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:3439575",
+      "occurrenceCount": 4
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:347155",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:350682",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:3510754",
+      "occurrenceCount": 16
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:351393",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:3552087",
+      "occurrenceCount": 40
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:357919",
+      "occurrenceCount": 8
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:3606079",
+      "occurrenceCount": 8
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:3606427",
+      "occurrenceCount": 8
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:360768",
+      "occurrenceCount": 15
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:3635952",
+      "occurrenceCount": 5
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:363617",
+      "occurrenceCount": 18
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:3636622",
+      "occurrenceCount": 5
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:3637336",
+      "occurrenceCount": 4
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:3639170",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:3645125",
+      "occurrenceCount": 8
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:3645293",
+      "occurrenceCount": 8
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:3654101",
+      "occurrenceCount": 16
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:3654421",
+      "occurrenceCount": 16
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:3699783",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:3713746",
+      "occurrenceCount": 7
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:3714823",
+      "occurrenceCount": 7
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:379318",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:379793",
+      "occurrenceCount": 12
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:380419",
+      "occurrenceCount": 5
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:3936061",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:3936655",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:3939316",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:3951793",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:3957679",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:3958268",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:4067204",
+      "occurrenceCount": 7
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:4068407",
+      "occurrenceCount": 4
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:4068910",
+      "occurrenceCount": 7
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:4069613",
+      "occurrenceCount": 4
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:4071203",
+      "occurrenceCount": 7
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:4071440",
+      "occurrenceCount": 7
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:4115057",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:4129082",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:450256",
+      "occurrenceCount": 49
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:50248",
+      "occurrenceCount": 62
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:52363",
+      "occurrenceCount": 52
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:5349560",
+      "occurrenceCount": 4
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:56342",
+      "occurrenceCount": 48
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:5688446",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:571861",
+      "occurrenceCount": 49
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:5919128",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:5919555",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:609205",
+      "occurrenceCount": 15
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:609369",
+      "occurrenceCount": 14
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:70260",
+      "occurrenceCount": 52
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:71128",
+      "occurrenceCount": 4
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:745625",
+      "occurrenceCount": 32
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:77058",
+      "occurrenceCount": 18
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:851140",
+      "occurrenceCount": 14
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:856057",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:858949",
+      "occurrenceCount": 14
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:860864",
+      "occurrenceCount": 14
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:869775",
+      "occurrenceCount": 14
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:872624",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:946816",
+      "occurrenceCount": 261
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:947049",
+      "occurrenceCount": 181
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:953117",
+      "occurrenceCount": 5
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:953545",
+      "occurrenceCount": 16
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:954223",
+      "occurrenceCount": 28
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:954917",
+      "occurrenceCount": 24
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:955725",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:956519",
+      "occurrenceCount": 24
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:957029",
+      "occurrenceCount": 15
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:957489",
+      "occurrenceCount": 5
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:957899",
+      "occurrenceCount": 15
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:958259",
+      "occurrenceCount": 5
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:958937",
+      "occurrenceCount": 28
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:959465",
+      "occurrenceCount": 16
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:960006",
+      "occurrenceCount": 15
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:960814",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:966189",
+      "occurrenceCount": 57
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:994884",
+      "occurrenceCount": 35
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:non-geometric:ifcbuildingstorey",
+      "occurrenceCount": 19
+    },
+    {
+      "prototypeId": "prototype:ifc:architecture-e91ddbbd672b:non-geometric:ifcwallstandardcase",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:1057056",
+      "occurrenceCount": 139
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:1059550",
+      "occurrenceCount": 14
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:1064320",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:1068956",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:1071581",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:1077804",
+      "occurrenceCount": 241
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:10797",
+      "occurrenceCount": 9
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:1087707",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:1088605",
+      "occurrenceCount": 5
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:1126639",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:1130624",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:1166658",
+      "occurrenceCount": 154
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:1168262",
+      "occurrenceCount": 122
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:1173836",
+      "occurrenceCount": 30
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:1174732",
+      "occurrenceCount": 30
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:1197020",
+      "occurrenceCount": 98
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:1197852",
+      "occurrenceCount": 42
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:1221687",
+      "occurrenceCount": 94
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:1271244",
+      "occurrenceCount": 4
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:1301",
+      "occurrenceCount": 15
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:1302774",
+      "occurrenceCount": 58
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:1391116",
+      "occurrenceCount": 30
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:1401606",
+      "occurrenceCount": 28
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:1454866",
+      "occurrenceCount": 10
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:1455826",
+      "occurrenceCount": 10
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:1462148",
+      "occurrenceCount": 26
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:1539820",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:1540972",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:1556070",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:1563792",
+      "occurrenceCount": 8
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:1565298",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:1633484",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:1638294",
+      "occurrenceCount": 4
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:1640364",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:1643078",
+      "occurrenceCount": 56
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:1647289",
+      "occurrenceCount": 28
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:1652712",
+      "occurrenceCount": 5
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:1654583",
+      "occurrenceCount": 5
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:1671765",
+      "occurrenceCount": 4
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:1672256",
+      "occurrenceCount": 15
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:1679365",
+      "occurrenceCount": 59
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:1680500",
+      "occurrenceCount": 30
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:1690950",
+      "occurrenceCount": 8
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:1694728",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:1713388",
+      "occurrenceCount": 4
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:1731489",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:1732821",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:1734454",
+      "occurrenceCount": 14
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:1743352",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:176273",
+      "occurrenceCount": 17
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:178761",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:18354",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:227863",
+      "occurrenceCount": 42
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:231053",
+      "occurrenceCount": 724
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:231820",
+      "occurrenceCount": 219
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:239463",
+      "occurrenceCount": 1881
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:242101",
+      "occurrenceCount": 871
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:242658",
+      "occurrenceCount": 11
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:243274",
+      "occurrenceCount": 8
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:245391",
+      "occurrenceCount": 114
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:249161",
+      "occurrenceCount": 150
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:252492",
+      "occurrenceCount": 394
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:255385",
+      "occurrenceCount": 471
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:25942",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:262927",
+      "occurrenceCount": 1033
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:265122",
+      "occurrenceCount": 60
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:27292",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:275221",
+      "occurrenceCount": 56
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:291521",
+      "occurrenceCount": 44
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:292945",
+      "occurrenceCount": 26
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:293779",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:295021",
+      "occurrenceCount": 26
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:295855",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:297309",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:299007",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:299735",
+      "occurrenceCount": 26
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:301813",
+      "occurrenceCount": 4
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:304881",
+      "occurrenceCount": 15
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:305440",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:309639",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:318769",
+      "occurrenceCount": 17
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:320116",
+      "occurrenceCount": 15
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:320927",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:3221",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:326989",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:327654",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:330242",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:330907",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:331571",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:332235",
+      "occurrenceCount": 4
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:332899",
+      "occurrenceCount": 4
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:345895",
+      "occurrenceCount": 140
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:346654",
+      "occurrenceCount": 37
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:347502",
+      "occurrenceCount": 24
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:352182",
+      "occurrenceCount": 70
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:352397",
+      "occurrenceCount": 68
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:353912",
+      "occurrenceCount": 68
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:356268",
+      "occurrenceCount": 52
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:35881",
+      "occurrenceCount": 4
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:360371",
+      "occurrenceCount": 140
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:360858",
+      "occurrenceCount": 70
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:366480",
+      "occurrenceCount": 30
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:367388",
+      "occurrenceCount": 17
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:373083",
+      "occurrenceCount": 32
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:379727",
+      "occurrenceCount": 50
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:385388",
+      "occurrenceCount": 48
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:386576",
+      "occurrenceCount": 53
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:390784",
+      "occurrenceCount": 113
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:394471",
+      "occurrenceCount": 68
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:410224",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:416801",
+      "occurrenceCount": 18
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:422190",
+      "occurrenceCount": 24
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:424554",
+      "occurrenceCount": 35
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:427536",
+      "occurrenceCount": 5
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:435865",
+      "occurrenceCount": 415
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:437921",
+      "occurrenceCount": 68
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:439881",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:440560",
+      "occurrenceCount": 133
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:440922",
+      "occurrenceCount": 228
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:443809",
+      "occurrenceCount": 25
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:446554",
+      "occurrenceCount": 105
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:450652",
+      "occurrenceCount": 58
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:451708",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:491548",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:499873",
+      "occurrenceCount": 28
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:503589",
+      "occurrenceCount": 14
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:506414",
+      "occurrenceCount": 14
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:5087",
+      "occurrenceCount": 11
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:518391",
+      "occurrenceCount": 20
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:532759",
+      "occurrenceCount": 74
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:537703",
+      "occurrenceCount": 37
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:537911",
+      "occurrenceCount": 37
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:539404",
+      "occurrenceCount": 37
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:543958",
+      "occurrenceCount": 78
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:544445",
+      "occurrenceCount": 37
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:550064",
+      "occurrenceCount": 28
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:554103",
+      "occurrenceCount": 53
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:554459",
+      "occurrenceCount": 131
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:556198",
+      "occurrenceCount": 223
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:558158",
+      "occurrenceCount": 37
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:560111",
+      "occurrenceCount": 30
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:562952",
+      "occurrenceCount": 55
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:563439",
+      "occurrenceCount": 71
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:569833",
+      "occurrenceCount": 20
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:590936",
+      "occurrenceCount": 17
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:596984",
+      "occurrenceCount": 21
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:597094",
+      "occurrenceCount": 37
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:600852",
+      "occurrenceCount": 23
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:660840",
+      "occurrenceCount": 16
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:666592",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:668194",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:7378",
+      "occurrenceCount": 8
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:740526",
+      "occurrenceCount": 4
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:744836",
+      "occurrenceCount": 13
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:8525",
+      "occurrenceCount": 5
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:86017",
+      "occurrenceCount": 778
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:96272",
+      "occurrenceCount": 438
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:non-geometric:ifcbuildingstorey",
+      "occurrenceCount": 19
+    },
+    {
+      "prototypeId": "prototype:ifc:electrical-adb8d5eda2c7:non-geometric:ifcdistributionport",
+      "occurrenceCount": 37082
+    },
+    {
+      "prototypeId": "prototype:ifc:facade-a9a1b20214da:100864",
+      "occurrenceCount": 4
+    },
+    {
+      "prototypeId": "prototype:ifc:facade-a9a1b20214da:10551",
+      "occurrenceCount": 5
+    },
+    {
+      "prototypeId": "prototype:ifc:facade-a9a1b20214da:10979",
+      "occurrenceCount": 16
+    },
+    {
+      "prototypeId": "prototype:ifc:facade-a9a1b20214da:11657",
+      "occurrenceCount": 28
+    },
+    {
+      "prototypeId": "prototype:ifc:facade-a9a1b20214da:12351",
+      "occurrenceCount": 24
+    },
+    {
+      "prototypeId": "prototype:ifc:facade-a9a1b20214da:124553",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:facade-a9a1b20214da:124980",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:facade-a9a1b20214da:13159",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:facade-a9a1b20214da:13953",
+      "occurrenceCount": 24
+    },
+    {
+      "prototypeId": "prototype:ifc:facade-a9a1b20214da:14463",
+      "occurrenceCount": 15
+    },
+    {
+      "prototypeId": "prototype:ifc:facade-a9a1b20214da:14923",
+      "occurrenceCount": 5
+    },
+    {
+      "prototypeId": "prototype:ifc:facade-a9a1b20214da:15333",
+      "occurrenceCount": 15
+    },
+    {
+      "prototypeId": "prototype:ifc:facade-a9a1b20214da:15693",
+      "occurrenceCount": 5
+    },
+    {
+      "prototypeId": "prototype:ifc:facade-a9a1b20214da:16371",
+      "occurrenceCount": 28
+    },
+    {
+      "prototypeId": "prototype:ifc:facade-a9a1b20214da:16899",
+      "occurrenceCount": 16
+    },
+    {
+      "prototypeId": "prototype:ifc:facade-a9a1b20214da:17440",
+      "occurrenceCount": 15
+    },
+    {
+      "prototypeId": "prototype:ifc:facade-a9a1b20214da:18248",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:facade-a9a1b20214da:21583",
+      "occurrenceCount": 57
+    },
+    {
+      "prototypeId": "prototype:ifc:facade-a9a1b20214da:298",
+      "occurrenceCount": 85
+    },
+    {
+      "prototypeId": "prototype:ifc:facade-a9a1b20214da:3107",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:facade-a9a1b20214da:3582",
+      "occurrenceCount": 12
+    },
+    {
+      "prototypeId": "prototype:ifc:facade-a9a1b20214da:4208",
+      "occurrenceCount": 5
+    },
+    {
+      "prototypeId": "prototype:ifc:facade-a9a1b20214da:52727",
+      "occurrenceCount": 9
+    },
+    {
+      "prototypeId": "prototype:ifc:facade-a9a1b20214da:53616",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:facade-a9a1b20214da:53932",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:facade-a9a1b20214da:54448",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:facade-a9a1b20214da:54948",
+      "occurrenceCount": 9
+    },
+    {
+      "prototypeId": "prototype:ifc:facade-a9a1b20214da:55973",
+      "occurrenceCount": 46
+    },
+    {
+      "prototypeId": "prototype:ifc:facade-a9a1b20214da:56380",
+      "occurrenceCount": 4
+    },
+    {
+      "prototypeId": "prototype:ifc:facade-a9a1b20214da:56616",
+      "occurrenceCount": 40
+    },
+    {
+      "prototypeId": "prototype:ifc:facade-a9a1b20214da:57143",
+      "occurrenceCount": 8
+    },
+    {
+      "prototypeId": "prototype:ifc:facade-a9a1b20214da:57491",
+      "occurrenceCount": 8
+    },
+    {
+      "prototypeId": "prototype:ifc:facade-a9a1b20214da:61440",
+      "occurrenceCount": 5
+    },
+    {
+      "prototypeId": "prototype:ifc:facade-a9a1b20214da:62110",
+      "occurrenceCount": 5
+    },
+    {
+      "prototypeId": "prototype:ifc:facade-a9a1b20214da:62824",
+      "occurrenceCount": 4
+    },
+    {
+      "prototypeId": "prototype:ifc:facade-a9a1b20214da:64658",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:facade-a9a1b20214da:65576",
+      "occurrenceCount": 16
+    },
+    {
+      "prototypeId": "prototype:ifc:facade-a9a1b20214da:65896",
+      "occurrenceCount": 16
+    },
+    {
+      "prototypeId": "prototype:ifc:facade-a9a1b20214da:71314",
+      "occurrenceCount": 7
+    },
+    {
+      "prototypeId": "prototype:ifc:facade-a9a1b20214da:72517",
+      "occurrenceCount": 4
+    },
+    {
+      "prototypeId": "prototype:ifc:facade-a9a1b20214da:73020",
+      "occurrenceCount": 7
+    },
+    {
+      "prototypeId": "prototype:ifc:facade-a9a1b20214da:73723",
+      "occurrenceCount": 4
+    },
+    {
+      "prototypeId": "prototype:ifc:facade-a9a1b20214da:9284",
+      "occurrenceCount": 261
+    },
+    {
+      "prototypeId": "prototype:ifc:facade-a9a1b20214da:9519",
+      "occurrenceCount": 181
+    },
+    {
+      "prototypeId": "prototype:ifc:facade-a9a1b20214da:non-geometric:ifcbuildingstorey",
+      "occurrenceCount": 18
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:1003071",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:1004277",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:1023485",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:1023820",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:1023977",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:1024943",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:1025510",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:1026498",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:1027300",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:1028359",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:1028670",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:1029106",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:1029720",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:1030159",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:1048384",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:1067592",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:1067717",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:1068052",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:1069165",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:1079195",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:1084002",
+      "occurrenceCount": 4
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:1086363",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:1087171",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:1098490",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:1098926",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:1099827",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:1099984",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:1101344",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:110140",
+      "occurrenceCount": 18
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:1101780",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:1104207",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:1105195",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:1105811",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:1107056",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:1107672",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:111111",
+      "occurrenceCount": 18
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:111425",
+      "occurrenceCount": 21
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:1117609",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:1118045",
+      "occurrenceCount": 4
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:1118202",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:1118359",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:1118516",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:111948",
+      "occurrenceCount": 18
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:112262",
+      "occurrenceCount": 36
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:1124446",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:1124603",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:112785",
+      "occurrenceCount": 18
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:1130533",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:113128",
+      "occurrenceCount": 36
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:113837",
+      "occurrenceCount": 18
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:114087",
+      "occurrenceCount": 18
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:114433",
+      "occurrenceCount": 18
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:114683",
+      "occurrenceCount": 18
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:115193",
+      "occurrenceCount": 18
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:1179291",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:123606",
+      "occurrenceCount": 18
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:1238170",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:133543",
+      "occurrenceCount": 18
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:135649",
+      "occurrenceCount": 18
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:135844",
+      "occurrenceCount": 21
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:136737",
+      "occurrenceCount": 18
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:137176",
+      "occurrenceCount": 18
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:137426",
+      "occurrenceCount": 18
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:137583",
+      "occurrenceCount": 18
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:138362",
+      "occurrenceCount": 36
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:1388863",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:139164",
+      "occurrenceCount": 18
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:139592",
+      "occurrenceCount": 18
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:141330",
+      "occurrenceCount": 18
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:1485527",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:1503343",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:1504379",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:160631",
+      "occurrenceCount": 21
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:180306",
+      "occurrenceCount": 18
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:198878",
+      "occurrenceCount": 21
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:199209",
+      "occurrenceCount": 21
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:200836",
+      "occurrenceCount": 21
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:210959",
+      "occurrenceCount": 21
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:212040",
+      "occurrenceCount": 21
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:212383",
+      "occurrenceCount": 54
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:213092",
+      "occurrenceCount": 21
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:213903",
+      "occurrenceCount": 21
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:214889",
+      "occurrenceCount": 18
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:215898",
+      "occurrenceCount": 21
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:217636",
+      "occurrenceCount": 18
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:217886",
+      "occurrenceCount": 18
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:218546",
+      "occurrenceCount": 21
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:218889",
+      "occurrenceCount": 27
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:219511",
+      "occurrenceCount": 27
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:227907",
+      "occurrenceCount": 21
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:228792",
+      "occurrenceCount": 21
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:240018",
+      "occurrenceCount": 21
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:243603",
+      "occurrenceCount": 21
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:243917",
+      "occurrenceCount": 21
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:244577",
+      "occurrenceCount": 21
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:246400",
+      "occurrenceCount": 21
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:249080",
+      "occurrenceCount": 20
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:249702",
+      "occurrenceCount": 52
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:250711",
+      "occurrenceCount": 20
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:251782",
+      "occurrenceCount": 20
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:26096",
+      "occurrenceCount": 18
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:26253",
+      "occurrenceCount": 21
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:26410",
+      "occurrenceCount": 36
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:26567",
+      "occurrenceCount": 18
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:271005",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:271801",
+      "occurrenceCount": 20
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:27181",
+      "occurrenceCount": 18
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:272601",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:27338",
+      "occurrenceCount": 36
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:281008",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:281482",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:281639",
+      "occurrenceCount": 26
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:282348",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:282871",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:283217",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:283374",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:283709",
+      "occurrenceCount": 20
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:302746",
+      "occurrenceCount": 20
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:305545",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:306161",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:306684",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:318003",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:318442",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:329761",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:330075",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:330389",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:331003",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:331888",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:340202",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:342273",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:352210",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:3523",
+      "occurrenceCount": 54
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:353033",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:353856",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:355390",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:355864",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:356021",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:356178",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:356513",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:375810",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:394289",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:394539",
+      "occurrenceCount": 26
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:394696",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:396248",
+      "occurrenceCount": 52
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:396676",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:416349",
+      "occurrenceCount": 20
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:416599",
+      "occurrenceCount": 20
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:427187",
+      "occurrenceCount": 20
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:428126",
+      "occurrenceCount": 20
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:428998",
+      "occurrenceCount": 20
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:4359",
+      "occurrenceCount": 36
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:440224",
+      "occurrenceCount": 20
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:442119",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:442779",
+      "occurrenceCount": 20
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:443837",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:444451",
+      "occurrenceCount": 20
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:445445",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:445640",
+      "occurrenceCount": 20
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:447174",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:447517",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:447991",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:448514",
+      "occurrenceCount": 20
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:449337",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:45779",
+      "occurrenceCount": 18
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:459367",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:461438",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:462323",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:4740",
+      "occurrenceCount": 18
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:481713",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:482536",
+      "occurrenceCount": 20
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:483254",
+      "occurrenceCount": 20
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:484033",
+      "occurrenceCount": 20
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:484649",
+      "occurrenceCount": 20
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:487206",
+      "occurrenceCount": 20
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:497741",
+      "occurrenceCount": 20
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:498843",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:5563",
+      "occurrenceCount": 21
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:5720",
+      "occurrenceCount": 36
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:6101",
+      "occurrenceCount": 21
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:614159",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:614447",
+      "occurrenceCount": 14
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:6296",
+      "occurrenceCount": 21
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:639836",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:643685",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:648891",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:64989",
+      "occurrenceCount": 18
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:650859",
+      "occurrenceCount": 14
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:65370",
+      "occurrenceCount": 18
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:657304",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:660684",
+      "occurrenceCount": 8
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:660952",
+      "occurrenceCount": 4
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:662205",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:66368",
+      "occurrenceCount": 36
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:673116",
+      "occurrenceCount": 5
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:674689",
+      "occurrenceCount": 5
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:675070",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:68474",
+      "occurrenceCount": 18
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:687712",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:707868",
+      "occurrenceCount": 4
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:712437",
+      "occurrenceCount": 5
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:712961",
+      "occurrenceCount": 14
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:716582",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:716882",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:717170",
+      "occurrenceCount": 14
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:7174",
+      "occurrenceCount": 18
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:719245",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:720002",
+      "occurrenceCount": 8
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:720127",
+      "occurrenceCount": 4
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:720252",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:7331",
+      "occurrenceCount": 18
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:739282",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:739477",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:751756",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:762823",
+      "occurrenceCount": 5
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:7655",
+      "occurrenceCount": 18
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:772903",
+      "occurrenceCount": 4
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:774959",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:78411",
+      "occurrenceCount": 18
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:795442",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:814375",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:815352",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:815547",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:816163",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:816686",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:817067",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:817413",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:817538",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:817663",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:827600",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:827725",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:827850",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:828007",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:828164",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:828321",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:828478",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:839704",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:839861",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:840299",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:848590",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:849431",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:868641",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:869746",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:870857",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:871014",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:873383",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:873997",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:876734",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:877635",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:89730",
+      "occurrenceCount": 18
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:899914",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:900071",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:90073",
+      "occurrenceCount": 18
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:901382",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:902409",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:902932",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:903816",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:904066",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:90408",
+      "occurrenceCount": 21
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:915119",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:916014",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:918520",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:928113",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:929776",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:930122",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:930560",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:930717",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:933458",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:934141",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:935010",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:936042",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:936199",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:939401",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:939712",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:958831",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:958988",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:959950",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:971920",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:983264",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:983793",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:984407",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:984846",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:98914",
+      "occurrenceCount": 18
+    },
+    {
+      "prototypeId": "prototype:ifc:kitchen-1905b9920717:non-geometric:ifcbuildingstorey",
+      "occurrenceCount": 16
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:1027140",
+      "occurrenceCount": 23
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:1029329",
+      "occurrenceCount": 34
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:1032248",
+      "occurrenceCount": 10
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:1048262",
+      "occurrenceCount": 18
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:1050932",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:1055110",
+      "occurrenceCount": 7
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:1063694",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:1066033",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:106738",
+      "occurrenceCount": 4
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:1071701",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:1076039",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:1082533",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:1084881",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:1090485",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:109187",
+      "occurrenceCount": 5
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:1108286",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:1110895",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:1127618",
+      "occurrenceCount": 4
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:1131249",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:1160486",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:1175030",
+      "occurrenceCount": 4
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:1183122",
+      "occurrenceCount": 4
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:11846",
+      "occurrenceCount": 32
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:1188714",
+      "occurrenceCount": 64
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:1192353",
+      "occurrenceCount": 13
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:1197813",
+      "occurrenceCount": 39
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:1200411",
+      "occurrenceCount": 42
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:1236104",
+      "occurrenceCount": 31
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:1238982",
+      "occurrenceCount": 12
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:1242187",
+      "occurrenceCount": 5
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:1246528",
+      "occurrenceCount": 19
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:1249966",
+      "occurrenceCount": 29
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:1261085",
+      "occurrenceCount": 26
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:1265157",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:1266697",
+      "occurrenceCount": 52
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:1267633",
+      "occurrenceCount": 16
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:1268465",
+      "occurrenceCount": 135
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:1269459",
+      "occurrenceCount": 16
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:1270926",
+      "occurrenceCount": 52
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:1271860",
+      "occurrenceCount": 15
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:1272691",
+      "occurrenceCount": 75
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:1273685",
+      "occurrenceCount": 15
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:1322180",
+      "occurrenceCount": 8
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:1324526",
+      "occurrenceCount": 8
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:134062",
+      "occurrenceCount": 22
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:1447776",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:1454222",
+      "occurrenceCount": 5
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:1455283",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:1459440",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:1465886",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:1466947",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:147576",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:1490186",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:149613",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:1497906",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:1499273",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:1506888",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:1512828",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:1514118",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:153224",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:1567650",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:1569407",
+      "occurrenceCount": 8
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:1575346",
+      "occurrenceCount": 8
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:1578395",
+      "occurrenceCount": 7
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:1584895",
+      "occurrenceCount": 5
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:15884",
+      "occurrenceCount": 12
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:1603678",
+      "occurrenceCount": 7
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:1614338",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:161447",
+      "occurrenceCount": 12
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:1660335",
+      "occurrenceCount": 8
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:1667810",
+      "occurrenceCount": 8
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:167471",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:169309",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:1736474",
+      "occurrenceCount": 11
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:1743809",
+      "occurrenceCount": 8
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:1750779",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:1757107",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:1783",
+      "occurrenceCount": 23
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:1808511",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:1809234",
+      "occurrenceCount": 9
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:1810818",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:1812493",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:1814514",
+      "occurrenceCount": 12
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:1931229",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:1989065",
+      "occurrenceCount": 35
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:1990725",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:1992232",
+      "occurrenceCount": 36
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:1993923",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:1995069",
+      "occurrenceCount": 40
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:2233328",
+      "occurrenceCount": 8
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:2243556",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:2248311",
+      "occurrenceCount": 5
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:2253647",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:2262321",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:2264459",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:2277018",
+      "occurrenceCount": 5
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:24503",
+      "occurrenceCount": 105
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:2492391",
+      "occurrenceCount": 8
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:2498389",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:2503030",
+      "occurrenceCount": 5
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:2512143",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:2523285",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:2525425",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:2541303",
+      "occurrenceCount": 5
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:2663060",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:2720894",
+      "occurrenceCount": 35
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:2722488",
+      "occurrenceCount": 36
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:2724177",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:2725321",
+      "occurrenceCount": 40
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:2731891",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:2735941",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:2747392",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:2749160",
+      "occurrenceCount": 8
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:2766724",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:2769680",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:2774636",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:2784514",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:2786808",
+      "occurrenceCount": 104
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:2788267",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:2789792",
+      "occurrenceCount": 39
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:2790348",
+      "occurrenceCount": 197
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:2794891",
+      "occurrenceCount": 28
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:2796202",
+      "occurrenceCount": 40
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:2797599",
+      "occurrenceCount": 733
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:2801735",
+      "occurrenceCount": 4
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:2802022",
+      "occurrenceCount": 17
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:2805923",
+      "occurrenceCount": 121
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:2807268",
+      "occurrenceCount": 122
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:2811926",
+      "occurrenceCount": 17
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:2816563",
+      "occurrenceCount": 17
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:2817821",
+      "occurrenceCount": 333
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:2819887",
+      "occurrenceCount": 234
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:2821369",
+      "occurrenceCount": 11
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:2823409",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:2829785",
+      "occurrenceCount": 53
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:2837514",
+      "occurrenceCount": 53
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:2838017",
+      "occurrenceCount": 53
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:2839545",
+      "occurrenceCount": 43
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:2843425",
+      "occurrenceCount": 41
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:2846144",
+      "occurrenceCount": 198
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:2850346",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:2851490",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:2852595",
+      "occurrenceCount": 464
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:2857637",
+      "occurrenceCount": 15
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:2859734",
+      "occurrenceCount": 54
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:2861078",
+      "occurrenceCount": 104
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:2861810",
+      "occurrenceCount": 190
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:2865596",
+      "occurrenceCount": 10
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:2870097",
+      "occurrenceCount": 15
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:2878001",
+      "occurrenceCount": 30
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:2887968",
+      "occurrenceCount": 65
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:2892453",
+      "occurrenceCount": 29
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:2893679",
+      "occurrenceCount": 22
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:2894304",
+      "occurrenceCount": 330
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:2898439",
+      "occurrenceCount": 15
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:2898727",
+      "occurrenceCount": 18
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:2902745",
+      "occurrenceCount": 97
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:2904090",
+      "occurrenceCount": 107
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:2908590",
+      "occurrenceCount": 18
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:2913060",
+      "occurrenceCount": 18
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:2916117",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:2917517",
+      "occurrenceCount": 9
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:2922534",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:2924753",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:2926311",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:2929334",
+      "occurrenceCount": 118
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:2933535",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:2934679",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:2936205",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:2967471",
+      "occurrenceCount": 77
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:2967978",
+      "occurrenceCount": 78
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:2968481",
+      "occurrenceCount": 15
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:2969764",
+      "occurrenceCount": 15
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:2970074",
+      "occurrenceCount": 15
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:2971324",
+      "occurrenceCount": 15
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:2977373",
+      "occurrenceCount": 14
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:2979893",
+      "occurrenceCount": 43
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:2982326",
+      "occurrenceCount": 14
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:2983576",
+      "occurrenceCount": 14
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:2984267",
+      "occurrenceCount": 14
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:3013751",
+      "occurrenceCount": 21
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:3015624",
+      "occurrenceCount": 55
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:3016214",
+      "occurrenceCount": 18
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:3023160",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:3029834",
+      "occurrenceCount": 52
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:3035824",
+      "occurrenceCount": 76
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:3036986",
+      "occurrenceCount": 27
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:3042435",
+      "occurrenceCount": 14
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:3046992",
+      "occurrenceCount": 14
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:3051859",
+      "occurrenceCount": 14
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:3057021",
+      "occurrenceCount": 28
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:3060192",
+      "occurrenceCount": 14
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:3060500",
+      "occurrenceCount": 14
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:3062896",
+      "occurrenceCount": 19
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:3065134",
+      "occurrenceCount": 28
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:3065965",
+      "occurrenceCount": 14
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:3067385",
+      "occurrenceCount": 14
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:3067883",
+      "occurrenceCount": 14
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:3068267",
+      "occurrenceCount": 14
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:3069720",
+      "occurrenceCount": 14
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:3079981",
+      "occurrenceCount": 18
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:3113",
+      "occurrenceCount": 10
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:3191395",
+      "occurrenceCount": 14
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:3193432",
+      "occurrenceCount": 14
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:3194170",
+      "occurrenceCount": 14
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:3196117",
+      "occurrenceCount": 14
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:3197343",
+      "occurrenceCount": 14
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:3198983",
+      "occurrenceCount": 14
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:3199410",
+      "occurrenceCount": 14
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:3199812",
+      "occurrenceCount": 31
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:3202337",
+      "occurrenceCount": 14
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:3314915",
+      "occurrenceCount": 54
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:33185",
+      "occurrenceCount": 105
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:3319972",
+      "occurrenceCount": 18
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:3324251",
+      "occurrenceCount": 24
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:3329052",
+      "occurrenceCount": 12
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:3338045",
+      "occurrenceCount": 13
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:3339218",
+      "occurrenceCount": 12
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:3339902",
+      "occurrenceCount": 70
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:3342444",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:3547974",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:3548575",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:3555125",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:3560702",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:3566385",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:3571166",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:3577634",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:3582442",
+      "occurrenceCount": 30
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:3591622",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:3642876",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:3653124",
+      "occurrenceCount": 75
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:3658778",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:3665775",
+      "occurrenceCount": 12
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:3671290",
+      "occurrenceCount": 19
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:3675222",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:3676843",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:3678177",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:37188",
+      "occurrenceCount": 105
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:37633",
+      "occurrenceCount": 105
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:3843486",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:3855274",
+      "occurrenceCount": 15
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:3855846",
+      "occurrenceCount": 15
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:3874700",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:3875646",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:3884706",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:3891414",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:38953",
+      "occurrenceCount": 9
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:3896236",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:3900190",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:3901647",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:3913911",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:3915247",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:3916058",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:4007875",
+      "occurrenceCount": 15
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:4010205",
+      "occurrenceCount": 17
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:4028931",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:4033213",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:4038650",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:4043921",
+      "occurrenceCount": 14
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:4044346",
+      "occurrenceCount": 14
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:4075832",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:4078926",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:4083141",
+      "occurrenceCount": 5
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:4088933",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:4093479",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:4093787",
+      "occurrenceCount": 5
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:4124185",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:4126770",
+      "occurrenceCount": 10
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:4132310",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:4134511",
+      "occurrenceCount": 30
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:4144091",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:4145919",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:4163658",
+      "occurrenceCount": 4
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:4164216",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:4182772",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:4193797",
+      "occurrenceCount": 17
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:4200052",
+      "occurrenceCount": 48
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:4207796",
+      "occurrenceCount": 48
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:4209074",
+      "occurrenceCount": 54
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:4209388",
+      "occurrenceCount": 48
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:4214197",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:4217762",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:4219768",
+      "occurrenceCount": 8
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:4226034",
+      "occurrenceCount": 4
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:4231873",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:4252971",
+      "occurrenceCount": 8
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:426034",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:4263843",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:427847",
+      "occurrenceCount": 8
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:4283576",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:429080",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:43136",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:4323857",
+      "occurrenceCount": 4
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:432856",
+      "occurrenceCount": 144
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:433292",
+      "occurrenceCount": 64
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:4375813",
+      "occurrenceCount": 15
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:4435809",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:4442307",
+      "occurrenceCount": 12
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:4456591",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:4460479",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:4484977",
+      "occurrenceCount": 5
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:4502672",
+      "occurrenceCount": 13
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:4505289",
+      "occurrenceCount": 13
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:464621",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:465458",
+      "occurrenceCount": 5
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:496516",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:499266",
+      "occurrenceCount": 4
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:502463",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:505016",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:528877",
+      "occurrenceCount": 7
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:532706",
+      "occurrenceCount": 5
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:543276",
+      "occurrenceCount": 34
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:546609",
+      "occurrenceCount": 22
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:549078",
+      "occurrenceCount": 5
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:552651",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:55357",
+      "occurrenceCount": 44
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:557505",
+      "occurrenceCount": 4
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:5637",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:568467",
+      "occurrenceCount": 29
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:571718",
+      "occurrenceCount": 44
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:57333",
+      "occurrenceCount": 10
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:58585",
+      "occurrenceCount": 32
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:611245",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:618264",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:618738",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:622498",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:638646",
+      "occurrenceCount": 16
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:639591",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:642066",
+      "occurrenceCount": 144
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:707396",
+      "occurrenceCount": 5
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:711074",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:712933",
+      "occurrenceCount": 5
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:713744",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:714447",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:715351",
+      "occurrenceCount": 7
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:716491",
+      "occurrenceCount": 15
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:718279",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:720653",
+      "occurrenceCount": 61
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:724341",
+      "occurrenceCount": 4
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:727066",
+      "occurrenceCount": 8
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:731012",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:737742",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:744760",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:747314",
+      "occurrenceCount": 292
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:74903",
+      "occurrenceCount": 7
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:749944",
+      "occurrenceCount": 124
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:752117",
+      "occurrenceCount": 14
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:76269",
+      "occurrenceCount": 7
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:765690",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:767832",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:770261",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:774829",
+      "occurrenceCount": 9
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:781686",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:785726",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:788433",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:791384",
+      "occurrenceCount": 10
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:794173",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:798698",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:817178",
+      "occurrenceCount": 290
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:818687",
+      "occurrenceCount": 4
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:821367",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:824454",
+      "occurrenceCount": 82
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:830012",
+      "occurrenceCount": 12
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:834943",
+      "occurrenceCount": 7
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:837630",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:840006",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:840883",
+      "occurrenceCount": 8
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:841290",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:85918",
+      "occurrenceCount": 12
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:861270",
+      "occurrenceCount": 98
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:863952",
+      "occurrenceCount": 96
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:873912",
+      "occurrenceCount": 113
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:876592",
+      "occurrenceCount": 110
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:879285",
+      "occurrenceCount": 11
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:881720",
+      "occurrenceCount": 135
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:885098",
+      "occurrenceCount": 55
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:890507",
+      "occurrenceCount": 73
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:900202",
+      "occurrenceCount": 42
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:900334",
+      "occurrenceCount": 57
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:901034",
+      "occurrenceCount": 57
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:904173",
+      "occurrenceCount": 17
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:907502",
+      "occurrenceCount": 40
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:910233",
+      "occurrenceCount": 17
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:911543",
+      "occurrenceCount": 48
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:914056",
+      "occurrenceCount": 17
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:914416",
+      "occurrenceCount": 65
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:915820",
+      "occurrenceCount": 42
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:915939",
+      "occurrenceCount": 50
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:916632",
+      "occurrenceCount": 50
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:919680",
+      "occurrenceCount": 16
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:922133",
+      "occurrenceCount": 77
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:925041",
+      "occurrenceCount": 37
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:927771",
+      "occurrenceCount": 15
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:929080",
+      "occurrenceCount": 32
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:931591",
+      "occurrenceCount": 15
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:934371",
+      "occurrenceCount": 167
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:936977",
+      "occurrenceCount": 104
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:954821",
+      "occurrenceCount": 110
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:955547",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:963097",
+      "occurrenceCount": 111
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:967645",
+      "occurrenceCount": 44
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:non-geometric:ifcbuildingstorey",
+      "occurrenceCount": 19
+    },
+    {
+      "prototypeId": "prototype:ifc:plumbing-15382b06d0a6:non-geometric:ifcdistributionport",
+      "occurrenceCount": 47458
+    },
+    {
+      "prototypeId": "prototype:ifc:structure-79f294c64343:10058",
+      "occurrenceCount": 8
+    },
+    {
+      "prototypeId": "prototype:ifc:structure-79f294c64343:101053",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:structure-79f294c64343:10423",
+      "occurrenceCount": 4
+    },
+    {
+      "prototypeId": "prototype:ifc:structure-79f294c64343:154264",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:structure-79f294c64343:154347",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:structure-79f294c64343:154429",
+      "occurrenceCount": 4
+    },
+    {
+      "prototypeId": "prototype:ifc:structure-79f294c64343:154569",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:structure-79f294c64343:154651",
+      "occurrenceCount": 4
+    },
+    {
+      "prototypeId": "prototype:ifc:structure-79f294c64343:154791",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:structure-79f294c64343:154873",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:structure-79f294c64343:154955",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:structure-79f294c64343:16112",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:structure-79f294c64343:16289",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:structure-79f294c64343:16372",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:structure-79f294c64343:16454",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:structure-79f294c64343:16537",
+      "occurrenceCount": 8
+    },
+    {
+      "prototypeId": "prototype:ifc:structure-79f294c64343:16794",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:structure-79f294c64343:194749",
+      "occurrenceCount": 10
+    },
+    {
+      "prototypeId": "prototype:ifc:structure-79f294c64343:195202",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:structure-79f294c64343:195480",
+      "occurrenceCount": 10
+    },
+    {
+      "prototypeId": "prototype:ifc:structure-79f294c64343:195903",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:structure-79f294c64343:196210",
+      "occurrenceCount": 10
+    },
+    {
+      "prototypeId": "prototype:ifc:structure-79f294c64343:196633",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:structure-79f294c64343:196940",
+      "occurrenceCount": 10
+    },
+    {
+      "prototypeId": "prototype:ifc:structure-79f294c64343:197363",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:structure-79f294c64343:197670",
+      "occurrenceCount": 10
+    },
+    {
+      "prototypeId": "prototype:ifc:structure-79f294c64343:198093",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:structure-79f294c64343:198400",
+      "occurrenceCount": 10
+    },
+    {
+      "prototypeId": "prototype:ifc:structure-79f294c64343:198823",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:structure-79f294c64343:199130",
+      "occurrenceCount": 10
+    },
+    {
+      "prototypeId": "prototype:ifc:structure-79f294c64343:199553",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:structure-79f294c64343:199860",
+      "occurrenceCount": 10
+    },
+    {
+      "prototypeId": "prototype:ifc:structure-79f294c64343:200254",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:structure-79f294c64343:200532",
+      "occurrenceCount": 10
+    },
+    {
+      "prototypeId": "prototype:ifc:structure-79f294c64343:200926",
+      "occurrenceCount": 30
+    },
+    {
+      "prototypeId": "prototype:ifc:structure-79f294c64343:21341",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:structure-79f294c64343:21423",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:structure-79f294c64343:21505",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:structure-79f294c64343:21587",
+      "occurrenceCount": 8
+    },
+    {
+      "prototypeId": "prototype:ifc:structure-79f294c64343:21843",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:structure-79f294c64343:26411",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:structure-79f294c64343:26493",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:structure-79f294c64343:26575",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:structure-79f294c64343:26657",
+      "occurrenceCount": 8
+    },
+    {
+      "prototypeId": "prototype:ifc:structure-79f294c64343:26913",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:structure-79f294c64343:31563",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:structure-79f294c64343:31645",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:structure-79f294c64343:31727",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:structure-79f294c64343:31809",
+      "occurrenceCount": 8
+    },
+    {
+      "prototypeId": "prototype:ifc:structure-79f294c64343:32065",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:structure-79f294c64343:36719",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:structure-79f294c64343:36801",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:structure-79f294c64343:36883",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:structure-79f294c64343:36965",
+      "occurrenceCount": 8
+    },
+    {
+      "prototypeId": "prototype:ifc:structure-79f294c64343:37163",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:structure-79f294c64343:41879",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:structure-79f294c64343:42221",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:structure-79f294c64343:42303",
+      "occurrenceCount": 8
+    },
+    {
+      "prototypeId": "prototype:ifc:structure-79f294c64343:42559",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:structure-79f294c64343:46921",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:structure-79f294c64343:47004",
+      "occurrenceCount": 4
+    },
+    {
+      "prototypeId": "prototype:ifc:structure-79f294c64343:47144",
+      "occurrenceCount": 4
+    },
+    {
+      "prototypeId": "prototype:ifc:structure-79f294c64343:47609",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:structure-79f294c64343:51479",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:structure-79f294c64343:51561",
+      "occurrenceCount": 4
+    },
+    {
+      "prototypeId": "prototype:ifc:structure-79f294c64343:51701",
+      "occurrenceCount": 4
+    },
+    {
+      "prototypeId": "prototype:ifc:structure-79f294c64343:51913",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:structure-79f294c64343:55698",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:structure-79f294c64343:55780",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:structure-79f294c64343:55862",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:structure-79f294c64343:59568",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:structure-79f294c64343:59650",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:structure-79f294c64343:59732",
+      "occurrenceCount": 4
+    },
+    {
+      "prototypeId": "prototype:ifc:structure-79f294c64343:63324",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:structure-79f294c64343:63406",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:structure-79f294c64343:66684",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:structure-79f294c64343:66766",
+      "occurrenceCount": 4
+    },
+    {
+      "prototypeId": "prototype:ifc:structure-79f294c64343:70239",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:structure-79f294c64343:70321",
+      "occurrenceCount": 4
+    },
+    {
+      "prototypeId": "prototype:ifc:structure-79f294c64343:73287",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:structure-79f294c64343:73369",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:structure-79f294c64343:98282",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:structure-79f294c64343:98364",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:structure-79f294c64343:98446",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:structure-79f294c64343:non-geometric:ifcbuildingstorey",
+      "occurrenceCount": 19
+    },
+    {
+      "prototypeId": "prototype:ifc:structure-79f294c64343:non-geometric:ifcgrid",
+      "occurrenceCount": 19
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:1055282",
+      "occurrenceCount": 67
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:1061267",
+      "occurrenceCount": 68
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:106645",
+      "occurrenceCount": 105
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:107100",
+      "occurrenceCount": 210
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:1071325",
+      "occurrenceCount": 15
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:1073595",
+      "occurrenceCount": 15
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:1074867",
+      "occurrenceCount": 30
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:1081220",
+      "occurrenceCount": 70
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:1083391",
+      "occurrenceCount": 14
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:1085659",
+      "occurrenceCount": 14
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:1087471",
+      "occurrenceCount": 82
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:1097540",
+      "occurrenceCount": 61
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:1136623",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:114632",
+      "occurrenceCount": 105
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:1174046",
+      "occurrenceCount": 77
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:1175306",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:1175748",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:1176465",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:1177182",
+      "occurrenceCount": 5
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:1190550",
+      "occurrenceCount": 103
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:1193803",
+      "occurrenceCount": 8
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:1196197",
+      "occurrenceCount": 16
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:1197914",
+      "occurrenceCount": 8
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:1198438",
+      "occurrenceCount": 4
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:1210954",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:1212882",
+      "occurrenceCount": 14
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:1226849",
+      "occurrenceCount": 4
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:1229126",
+      "occurrenceCount": 16
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:1239139",
+      "occurrenceCount": 7
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:1242388",
+      "occurrenceCount": 18
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:127229",
+      "occurrenceCount": 105
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:1282990",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:128877",
+      "occurrenceCount": 24
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:1289540",
+      "occurrenceCount": 5
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:1290960",
+      "occurrenceCount": 4
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:130384",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:1306417",
+      "occurrenceCount": 8
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:1309186",
+      "occurrenceCount": 20
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:1311355",
+      "occurrenceCount": 34
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:1313524",
+      "occurrenceCount": 33
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:132214",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:134134",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:136808",
+      "occurrenceCount": 4
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:1368291",
+      "occurrenceCount": 104
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:137078",
+      "occurrenceCount": 8
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:1370967",
+      "occurrenceCount": 106
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:1372974",
+      "occurrenceCount": 60
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:1378501",
+      "occurrenceCount": 23
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:1383739",
+      "occurrenceCount": 4
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:138818",
+      "occurrenceCount": 8
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:1459770",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:1461878",
+      "occurrenceCount": 10
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:1464154",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:1466323",
+      "occurrenceCount": 12
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:1469104",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:1496215",
+      "occurrenceCount": 13
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:150549",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:150844",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:1512439",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:15617",
+      "occurrenceCount": 107
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:1580674",
+      "occurrenceCount": 12
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:1645838",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:1647947",
+      "occurrenceCount": 4
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:16753",
+      "occurrenceCount": 25
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:1705044",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:1740",
+      "occurrenceCount": 37
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:17816",
+      "occurrenceCount": 16
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:18043",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:18185",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:1836936",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:1837502",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:1843044",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:18510",
+      "occurrenceCount": 26
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:1857834",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:1860384",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:1860457",
+      "occurrenceCount": 10
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:1873984",
+      "occurrenceCount": 9
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:1874153",
+      "occurrenceCount": 13
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:1882537",
+      "occurrenceCount": 52
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:1885695",
+      "occurrenceCount": 52
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:1887074",
+      "occurrenceCount": 19
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:1887872",
+      "occurrenceCount": 14
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:1915240",
+      "occurrenceCount": 7
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:1921782",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:1921855",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:194035",
+      "occurrenceCount": 15
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:199556",
+      "occurrenceCount": 28
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:20137",
+      "occurrenceCount": 18
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:2017910",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:2019370",
+      "occurrenceCount": 4
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:21103",
+      "occurrenceCount": 46
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:2129549",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:21468",
+      "occurrenceCount": 14
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:21664",
+      "occurrenceCount": 14
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:2173677",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:21766",
+      "occurrenceCount": 14
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:2213198",
+      "occurrenceCount": 5
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:2216875",
+      "occurrenceCount": 47
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:2218522",
+      "occurrenceCount": 53
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:2221674",
+      "occurrenceCount": 53
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:2224580",
+      "occurrenceCount": 47
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:2242786",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:2243728",
+      "occurrenceCount": 10
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:22471",
+      "occurrenceCount": 14
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:22701",
+      "occurrenceCount": 8
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:2271986",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:2275082",
+      "occurrenceCount": 9
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:2298043",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:2298729",
+      "occurrenceCount": 8
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:2300091",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:2302659",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:2308550",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:2313016",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:2318990",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:2357544",
+      "occurrenceCount": 4
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:23668",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:2378387",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:2380216",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:2382455",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:2383801",
+      "occurrenceCount": 5
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:2391860",
+      "occurrenceCount": 4
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:2397498",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:2399327",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:2400802",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:2401566",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:2405350",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:2407475",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:2447239",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:24507",
+      "occurrenceCount": 4
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:2485166",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:2526804",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:2529315",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:2567439",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:2571118",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:2580385",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:25868",
+      "occurrenceCount": 4
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:2587098",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:262373",
+      "occurrenceCount": 195
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:266813",
+      "occurrenceCount": 19
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:28002",
+      "occurrenceCount": 24
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:30058",
+      "occurrenceCount": 4
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:32671",
+      "occurrenceCount": 74
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:33534",
+      "occurrenceCount": 8
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:34124",
+      "occurrenceCount": 4
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:34877",
+      "occurrenceCount": 4
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:36203",
+      "occurrenceCount": 18
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:39487",
+      "occurrenceCount": 20
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:41223",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:44351",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:443776",
+      "occurrenceCount": 61
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:45782",
+      "occurrenceCount": 17
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:4808",
+      "occurrenceCount": 4
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:50375",
+      "occurrenceCount": 8
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:51222",
+      "occurrenceCount": 4
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:55370",
+      "occurrenceCount": 4
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:57144",
+      "occurrenceCount": 2
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:59301",
+      "occurrenceCount": 979
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:595910",
+      "occurrenceCount": 69
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:59601",
+      "occurrenceCount": 309
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:598304",
+      "occurrenceCount": 3
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:606814",
+      "occurrenceCount": 60
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:608791",
+      "occurrenceCount": 18
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:610364",
+      "occurrenceCount": 126
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:618282",
+      "occurrenceCount": 55
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:626202",
+      "occurrenceCount": 56
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:635478",
+      "occurrenceCount": 6
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:637070",
+      "occurrenceCount": 91
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:645790",
+      "occurrenceCount": 55
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:653757",
+      "occurrenceCount": 9
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:661677",
+      "occurrenceCount": 54
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:662952",
+      "occurrenceCount": 29
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:6747",
+      "occurrenceCount": 48
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:725697",
+      "occurrenceCount": 164
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:727895",
+      "occurrenceCount": 97
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:84368",
+      "occurrenceCount": 100
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:85872",
+      "occurrenceCount": 218
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:903626",
+      "occurrenceCount": 41
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:93205",
+      "occurrenceCount": 210
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:93731",
+      "occurrenceCount": 107
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:94680",
+      "occurrenceCount": 525
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:non-geometric:ifcbuildingstorey",
+      "occurrenceCount": 19
+    },
+    {
+      "prototypeId": "prototype:ifc:ventilation-c78f6ad08596:non-geometric:ifcdistributionport",
+      "occurrenceCount": 25434
+    }
+  ],
+  "diagnostics": {
+    "counts": {
+      "info": 1,
+      "warning": 56,
+      "error": 0
+    },
+    "codes": [
+      "IFC_DEGENERATE_PLACEMENT",
+      "IFC_EDGE_EXTRACTION_DEFERRED"
+    ]
+  },
+  "limitations": [
+    "This is an experimental glTF profile, not a MADI interchange format.",
+    "The coarse representation is a prototype AABB, not a shape-preserving LOD.",
+    "Geometry and node transforms are converted to f32 for glTF delivery.",
+    "MADI source mapping uses glTF extras until an interoperable extension is justified."
+  ]
+}
