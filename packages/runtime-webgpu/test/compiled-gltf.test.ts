@@ -183,6 +183,53 @@ describe("compiled glTF runtime boundary", () => {
     ).toEqual(target.objectEvidence.map(({ objectId }) => objectId));
   });
 
+  it("surfaces semantic references on hierarchy entries and pick evidence", async () => {
+    const { json, binary } = await loadPackage();
+    const { hierarchy } = inspectCompiledHierarchy(json);
+    const decoded = decodeCompiledGltf(json, binary);
+
+    expect(hierarchy.entries.find(({ name }) => name === "fastener-03")?.semanticId).toBe(
+      "semantic:prototype:part:fastener-01",
+    );
+    expect(
+      decoded.objectEvidence.find(({ label }) => label === "center-rail")?.semanticId,
+    ).toBe("semantic:prototype:part:center-rail");
+    // The committed Phase 1 STEP package carries no property sidecar.
+    expect(hierarchy.properties).toBeUndefined();
+  });
+
+  it("surfaces a property sidecar pointer from extras.madi.properties", async () => {
+    const { json } = await loadPackage();
+    const copy = structuredClone(json) as {
+      extras: { madi: Record<string, unknown> };
+    };
+    const pointer = {
+      schemaVersion: "madi.package-properties.1",
+      uri: "properties.json",
+      byteLength: 2_260_991,
+      sha256: "a".repeat(64),
+    };
+    copy.extras.madi.properties = pointer;
+
+    expect(inspectCompiledHierarchy(copy).hierarchy.properties).toEqual(pointer);
+  });
+
+  it("rejects a malformed property sidecar pointer", async () => {
+    const { json } = await loadPackage();
+    const copy = structuredClone(json) as {
+      extras: { madi: Record<string, unknown> };
+    };
+    copy.extras.madi.properties = {
+      schemaVersion: "madi.package-properties.1",
+      uri: "properties.json",
+      byteLength: 2_260_991,
+    };
+
+    expect(() => inspectCompiledHierarchy(copy)).toThrowError(
+      expect.objectContaining<Partial<CompiledGltfError>>({ code: "INVALID_GLTF" }),
+    );
+  });
+
   it("rejects unrecognized MADI extras profiles", async () => {
     const { json } = await loadPackage();
     const copy = structuredClone(json) as {

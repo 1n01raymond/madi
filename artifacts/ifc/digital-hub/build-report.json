@@ -10,6 +10,8 @@
   "options": {
     "binaryUri": "scene.bin",
     "coarseBinaryUri": "coarse.bin",
+    "propertiesUri": "properties.json",
+    "propertiesBinaryUri": "properties.bin",
     "coordinateSystem": "right-handed-y-up-meters",
     "geometryEncoding": "gltf-f32",
     "progressiveRepresentation": "prototype-aabb-v1",
@@ -24,13 +26,13 @@
     "optionsDigest": "sha256:d91b3089ec431fff25f5c627fe300ca6da098a007263e1e6678ae5c48cc36df8"
   },
   "output": {
-    "packageDigest": "edf9050ff93165e715275f99a2d7e583f5256442a3a627672bd558f86dd99d36",
+    "packageDigest": "9b98866671eb080fd1a34646b6225d27d1ee55bddecbaad58790d35a344c5f1c",
     "resources": [
       {
         "path": "scene.gltf",
         "mediaType": "model/gltf+json",
-        "bytes": 34183800,
-        "sha256": "80ee5f2f008053126805797d7ba145f0745aa00ac350776f15cbd7eea60a216b"
+        "bytes": 34184035,
+        "sha256": "ab2bf2cb83214395c791deeaee6f79330a28609ccb5d36704f81fdd2c2a109a6"
       },
       {
         "path": "scene.bin",
@@ -43,6 +45,18 @@
         "mediaType": "application/octet-stream",
         "bytes": 3085296,
         "sha256": "5e4fb16db1660f3278a3761f9699c4eb7f003220006d9c082106935e72770284"
+      },
+      {
+        "path": "properties.json",
+        "mediaType": "application/json",
+        "bytes": 1246277,
+        "sha256": "10b1f579eda1c085fdd115031ea416edf14e82b5a2b7b4e1ac0ec80f7af70675"
+      },
+      {
+        "path": "properties.bin",
+        "mediaType": "application/octet-stream",
+        "bytes": 2260991,
+        "sha256": "712fea65ca4b9de75683a01ee79f4fff5ae6f89b0c29cbd0b38a83bb586d07c1"
       }
     ]
   },

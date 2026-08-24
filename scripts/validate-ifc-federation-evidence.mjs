@@ -158,13 +158,30 @@ assertCounts(
 );
 assert(
   compiler.output.packageDigest ===
-    "edf9050ff93165e715275f99a2d7e583f5256442a3a627672bd558f86dd99d36",
+    "9b98866671eb080fd1a34646b6225d27d1ee55bddecbaad58790d35a344c5f1c",
   "Compiled package digest changed.",
 );
 assert(
   compiler.options.targetChunking === "coalesced-prototype-range-v1" &&
     compiler.options.targetChunkByteBudget === 524288,
   "IFC target range coalescing contract changed.",
+);
+// The compiled package carries the property sidecar: properties.json is the
+// madi.package-properties.1 semantic index and properties.bin is the adapter
+// column file byte for byte.
+assert(
+  compiler.options.propertiesUri === "properties.json" &&
+    compiler.options.propertiesBinaryUri === "properties.bin",
+  "Property sidecar resource URIs changed.",
+);
+const propertySidecarBinary = compiler.output.resources.find(
+  ({ path }) => path === "properties.bin",
+);
+assert(
+  compiler.output.resources.some(({ path }) => path === "properties.json") &&
+    propertySidecarBinary?.bytes === adapter.scene.properties.byteLength &&
+    propertySidecarBinary?.sha256 === adapter.scene.properties.sha256,
+  "Package property columns no longer match the adapter column file.",
 );
 assert(
   adapter.scene.encodingVersion === "madi.ifc-scene-ir-split.3",
@@ -393,13 +410,27 @@ assertCounts(
 );
 assert(
   sixty5Compiler.output.packageDigest ===
-    "773652cf45658ec0179b0eec9f0f3628177abd194d413b5f0dc7a883f7ad6049",
+    "a2d6c72a6e936ac3ea2a183a1028cc4a06b20985c6d90b16058954323b7c3347",
   "sixty5 compiled package digest changed.",
 );
 assert(
   sixty5Compiler.options.targetChunking === "coalesced-prototype-range-v1" &&
     sixty5Compiler.options.targetChunkByteBudget === 524288,
   "sixty5 target range coalescing contract changed.",
+);
+assert(
+  sixty5Compiler.options.propertiesUri === "properties.json" &&
+    sixty5Compiler.options.propertiesBinaryUri === "properties.bin",
+  "sixty5 property sidecar resource URIs changed.",
+);
+const sixty5SidecarBinary = sixty5Compiler.output.resources.find(
+  ({ path }) => path === "properties.bin",
+);
+assert(
+  sixty5Compiler.output.resources.some(({ path }) => path === "properties.json") &&
+    sixty5SidecarBinary?.bytes === sixty5.scene.properties.byteLength &&
+    sixty5SidecarBinary?.sha256 === sixty5.scene.properties.sha256,
+  "sixty5 package property columns no longer match the adapter column file.",
 );
 
 assert(

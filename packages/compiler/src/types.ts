@@ -97,6 +97,8 @@ export interface CompilerBuildReport {
   readonly options: {
     readonly binaryUri: string;
     readonly coarseBinaryUri?: string;
+    readonly propertiesUri?: string;
+    readonly propertiesBinaryUri?: string;
     readonly coordinateSystem: "right-handed-y-up-meters";
     readonly geometryEncoding: "gltf-f32";
     readonly progressiveRepresentation?: "prototype-aabb-v1";
@@ -143,6 +145,10 @@ export interface CompiledGltfPackage {
   readonly json: string;
   readonly binary: Uint8Array;
   readonly coarseBinary?: Uint8Array;
+  /** Compact-JSON property sidecar (`madi.package-properties.1`), when emitted. */
+  readonly propertiesJson?: string;
+  /** Byte-verbatim `madi.property-columns.1` column file, when emitted. */
+  readonly propertiesBinary?: Uint8Array;
   readonly report: CompilerBuildReport;
   /**
    * The Scene IR validation the compiler already ran on its input. Exposed so
@@ -161,6 +167,16 @@ export interface CompileGltfOptions {
    * Omit this to retain one target chunk per prototype for compatibility.
    */
   readonly targetChunkByteBudget?: number;
+  /**
+   * The adapter's `madi.property-columns.1` value column file for a scene
+   * whose semantics reference `scene.propertyValues`. Required for such a
+   * scene; the package then carries the file byte-verbatim next to a
+   * `madi.package-properties.1` JSON sidecar so viewers can resolve semantic
+   * property entries lazily.
+   */
+  readonly propertyColumns?: Uint8Array;
+  readonly propertiesUri?: string;
+  readonly propertiesBinaryUri?: string;
 }
 
 export interface PackageValidationIssue {

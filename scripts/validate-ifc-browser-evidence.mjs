@@ -21,7 +21,7 @@ function assert(condition, message) {
 }
 
 assert(
-  evidence.schemaVersion === "madi.ifc-browser-residency.1",
+  evidence.schemaVersion === "madi.ifc-browser-residency.2",
   "Unsupported IFC browser evidence schema.",
 );
 assert(
@@ -121,6 +121,38 @@ assert(
 assert(
   Number(evidence.picking.selectedObjectId) > 0,
   "Picking must record a non-zero selected object ID.",
+);
+
+const properties = evidence.semanticProperties;
+assert(
+  properties?.state === "resolved" &&
+    Number.isInteger(properties.entryCount) &&
+    properties.entryCount > 0,
+  "The picked occurrence must resolve property entries from the package sidecar.",
+);
+assert(
+  Array.isArray(properties.sampleEntries) &&
+    properties.sampleEntries.length > 0 &&
+    properties.sampleEntries.every(
+      (entry) =>
+        typeof entry.key === "string" && entry.key.length > 0 && typeof entry.value === "string",
+    ),
+  "The recorded property entries must carry key/value text.",
+);
+// The center-canvas pick is deterministic, so the resolved entry set is an
+// exact expectation, like the resident chunk set above.
+assert(
+  properties.entryCount === 6 &&
+    properties.sampleEntries.some(
+      (entry) => entry.key === "ifc.globalId" && entry.value === "21a09V0k97ORkNuf1$cKaV",
+    ),
+  "The picked foundation beam must resolve its 6 recorded property entries.",
+);
+assert(
+  evidence.binaryRequests.some(
+    (request) => request.resource.startsWith("properties.bin") && request.status === 200,
+  ),
+  "The lazy sidecar fetch of properties.bin must appear in the request record.",
 );
 
 const rangeResponses = evidence.binaryRequests.filter(

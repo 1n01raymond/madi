@@ -23,6 +23,7 @@ import {
   selectLocalSceneFiles,
 } from "./scene-source.js";
 import type { GeometryBinarySource, SceneSource } from "./scene-source.js";
+import { formatPropertyValue, PropertySidecarStore } from "./property-sidecar.js";
 import { OrthographicOrbitCamera } from "./view.js";
 import { OccurrenceVisibility } from "./visibility.js";
 import {
@@ -181,6 +182,9 @@ const propertyObjectId = requireElement<HTMLElement>("#property-object-id");
 const propertySourceRef = requireElement<HTMLElement>("#property-source-ref");
 const propertyEdgeCount = requireElement<HTMLElement>("#property-edge-count");
 const propertyEdgeRefs = requireElement<HTMLUListElement>("#property-edge-refs");
+const semanticPropertyCount = requireElement<HTMLElement>("#semantic-property-count");
+const semanticPropertyStatus = requireElement<HTMLElement>("#semantic-property-status");
+const semanticPropertyEntries = requireElement<HTMLDListElement>("#semantic-property-entries");
 const visibilityStatus = requireElement<HTMLElement>("#visibility-status");
 const hideSelectionButton = requireElement<HTMLButtonElement>("#hide-selection");
 const isolateSelectionButton = requireElement<HTMLButtonElement>("#isolate-selection");
@@ -536,11 +540,77 @@ async function loadScene(source: SceneSource): Promise<boolean> {
     const section = new AxisSectionPlane(scene.bounds);
     let selectedObjectId = 0;
 
+    const propertyStore = loaded.properties
+      ? new PropertySidecarStore(loaded.properties)
+      : undefined;
+    let semanticPropertyRequest = 0;
+
+    const setSemanticPropertyStatus = (
+      state: "absent" | "loading" | "error",
+      message: string,
+    ): void => {
+      semanticPropertyStatus.hidden = false;
+      semanticPropertyStatus.dataset.state = state;
+      semanticPropertyStatus.textContent = message;
+    };
+
+    const renderSemanticProperties = (picked: CompiledObjectEvidence | undefined): void => {
+      const request = ++semanticPropertyRequest;
+      semanticPropertyCount.textContent = "";
+      semanticPropertyEntries.hidden = true;
+      semanticPropertyEntries.replaceChildren();
+      if (!picked) return;
+      if (!propertyStore) {
+        setSemanticPropertyStatus("absent", "This package carries no property sidecar.");
+        return;
+      }
+      const semanticId = picked.semanticId;
+      if (!semanticId) {
+        setSemanticPropertyStatus("absent", "This occurrence has no semantic reference.");
+        return;
+      }
+      setSemanticPropertyStatus("loading", "Loading property sidecar…");
+      propertyStore
+        .entriesFor(semanticId)
+        .then((resolved) => {
+          if (request !== semanticPropertyRequest) return;
+          if (!resolved) {
+            setSemanticPropertyStatus("absent", "No property rows for this occurrence.");
+            return;
+          }
+          semanticPropertyStatus.hidden = true;
+          semanticPropertyCount.textContent =
+            `· ${resolved.entries.length.toLocaleString("en-US")}` +
+            (resolved.schema === undefined ? "" : ` · ${resolved.schema}`);
+          const fragment = document.createDocumentFragment();
+          for (const [key, value] of resolved.entries) {
+            const row = document.createElement("div");
+            const term = document.createElement("dt");
+            term.textContent = key;
+            term.title = key;
+            const definition = document.createElement("dd");
+            definition.textContent = formatPropertyValue(value);
+            row.append(term, definition);
+            fragment.append(row);
+          }
+          semanticPropertyEntries.replaceChildren(fragment);
+          semanticPropertyEntries.hidden = false;
+        })
+        .catch((error: unknown) => {
+          if (request !== semanticPropertyRequest) return;
+          setSemanticPropertyStatus(
+            "error",
+            error instanceof Error ? error.message : "Failed to load the property sidecar.",
+          );
+        });
+    };
+
     const updateProperties = (picked: CompiledObjectEvidence | undefined): void => {
       propertiesEmpty.hidden = Boolean(picked);
       propertiesContent.hidden = !picked;
       propertiesPanel.dataset.state = picked ? "selected" : "empty";
       document.documentElement.dataset.selectedObjectId = String(picked?.objectId ?? 0);
+      renderSemanticProperties(picked);
       if (!picked) return;
 
       const isVisible = visibility.isVisible(picked.objectId);

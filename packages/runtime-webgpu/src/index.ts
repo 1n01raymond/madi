@@ -26,6 +26,7 @@ export type {
   CompiledHierarchy,
   CompiledHierarchyEntry,
   CompiledObjectEvidence,
+  CompiledPropertiesRef,
   CompiledTargetChunk,
   DecodedCompiledScene,
   GeometryRepresentation,

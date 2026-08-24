@@ -2,7 +2,8 @@
 // federation package. It verifies the local package against the committed
 // build report, serves it through the Studio dev server, loads it in headed
 // Chrome, and records the loading milestone timeline, bounded-residency
-// datasets, Range promotion, and picking.
+// datasets, Range promotion, picking, and the lazily resolved property
+// sidecar entries for the picked occurrence.
 //
 //   pnpm ifc:browser:evidence
 //   node scripts/record-ifc-browser-evidence.mjs \
@@ -154,7 +155,7 @@ try {
     console.log(`[ifc-browser] ${name}: ${(milestones[name] / 1000).toFixed(1)}s`);
   };
   const screenshot = async (name) => {
-    const bytes = await page.screenshot({ type: "png" });
+    const bytes = await page.screenshot({ type: "png", timeout: 120_000 });
     await writeFile(resolve(outputDirectory, name), bytes);
     return { path: name, bytes: bytes.byteLength, sha256: createHash("sha256").update(bytes).digest("hex") };
   };
@@ -231,6 +232,50 @@ try {
     ),
   };
   console.log(`[ifc-browser] picking: ${picking.selection}`);
+
+  // The first selection is what triggers the lazy property sidecar fetch;
+  // wait for the panel to reach a terminal state before judging it.
+  await page.waitForFunction(
+    () => {
+      const entries = document.querySelector("#semantic-property-entries");
+      if (entries instanceof HTMLElement && !entries.hidden) return true;
+      const state = document
+        .querySelector("#semantic-property-status")
+        ?.getAttribute("data-state");
+      return state === "absent" || state === "error";
+    },
+    undefined,
+    { timeout: 120_000 },
+  );
+  const semanticProperties = await page.evaluate(() => {
+    const entries = document.querySelector("#semantic-property-entries");
+    const status = document.querySelector("#semantic-property-status");
+    const resolved = entries instanceof HTMLElement && !entries.hidden;
+    const rows = resolved
+      ? [...entries.children].map((row) => ({
+          key: row.querySelector("dt")?.textContent ?? null,
+          value: (row.querySelector("dd")?.textContent ?? "").slice(0, 120),
+        }))
+      : [];
+    return {
+      state: resolved ? "resolved" : (status?.getAttribute("data-state") ?? null),
+      statusText: resolved ? null : (status?.textContent?.trim() ?? null),
+      countLabel: document.querySelector("#semantic-property-count")?.textContent ?? null,
+      entryCount: rows.length,
+      sampleEntries: rows.slice(0, 8),
+    };
+  });
+  if (semanticProperties.state !== "resolved" || semanticProperties.entryCount === 0) {
+    throw new Error(
+      `The property sidecar did not resolve for the picked occurrence: ${
+        JSON.stringify(semanticProperties)
+      }.`,
+    );
+  }
+  console.log(
+    `[ifc-browser] properties: ${semanticProperties.entryCount} entries` +
+      `${semanticProperties.countLabel ?? ""}`,
+  );
   const pickedScreenshot = await screenshot("picked.png");
 
   if (crashed) throw new Error("The page crashed during the record.");
@@ -239,7 +284,7 @@ try {
   }
 
   const evidence = {
-    schemaVersion: "madi.ifc-browser-residency.1",
+    schemaVersion: "madi.ifc-browser-residency.2",
     capturedAt: new Date(startedAt).toISOString(),
     browser: {
       id: "chrome",
@@ -258,6 +303,7 @@ try {
     milestones,
     snapshot,
     picking,
+    semanticProperties,
     binaryRequests,
     consoleIssues,
     screenshots: {

@@ -26,6 +26,16 @@ export async function writeCompiledPackage(
     }
     writes.push(writeFile(resolve(outputDirectory, coarseBinaryUri), compiled.coarseBinary));
   }
+  if (compiled.propertiesJson !== undefined && compiled.propertiesBinary !== undefined) {
+    const { propertiesUri, propertiesBinaryUri } = compiled.report.options;
+    if (!propertiesUri || !propertiesBinaryUri) {
+      throw new TypeError("Property sidecar package is missing its resource URIs.");
+    }
+    writes.push(
+      writeFile(resolve(outputDirectory, propertiesUri), compiled.propertiesJson, "utf8"),
+      writeFile(resolve(outputDirectory, propertiesBinaryUri), compiled.propertiesBinary),
+    );
+  }
   if (adapterReport !== undefined) {
     writes.push(
       writeFile(

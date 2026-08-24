@@ -1,6 +1,9 @@
 import { inspectCompiledHierarchy } from "@madi/runtime-webgpu";
 import type { CompiledGltfDocument, CompiledHierarchy } from "@madi/runtime-webgpu";
 
+import { resourceFileName } from "./property-sidecar.js";
+import type { PropertySidecarSource } from "./property-sidecar.js";
+
 export interface UrlSceneSource {
   readonly kind: "url";
   readonly gltfUrl: URL;
@@ -10,6 +13,8 @@ export interface LocalSceneSource {
   readonly kind: "local";
   readonly gltfFile: File;
   readonly binaryFiles: readonly File[];
+  /** `.json` files selected next to the glTF, e.g. the property sidecar. */
+  readonly sidecarFiles: readonly File[];
 }
 
 export type SceneSource = UrlSceneSource | LocalSceneSource;
@@ -33,6 +38,7 @@ export interface LoadedSceneHierarchy {
   readonly hierarchy: CompiledHierarchy;
   readonly targetBinary: GeometryBinarySource;
   readonly coarseBinary?: GeometryBinarySource;
+  readonly properties?: PropertySidecarSource;
   readonly label: string;
 }
 
@@ -49,7 +55,8 @@ export function parseSceneUrl(value: string, baseHref: string): URL {
 export function selectLocalSceneFiles(files: readonly File[]): LocalSceneSource {
   const unsupported = files.filter(
     (file) => !file.name.toLocaleLowerCase("en-US").endsWith(".gltf") &&
-      !file.name.toLocaleLowerCase("en-US").endsWith(".bin"),
+      !file.name.toLocaleLowerCase("en-US").endsWith(".bin") &&
+      !file.name.toLocaleLowerCase("en-US").endsWith(".json"),
   );
   const gltfFiles = files.filter((file) =>
     file.name.toLocaleLowerCase("en-US").endsWith(".gltf"),
@@ -57,12 +64,17 @@ export function selectLocalSceneFiles(files: readonly File[]): LocalSceneSource 
   const binaryFiles = files.filter((file) =>
     file.name.toLocaleLowerCase("en-US").endsWith(".bin"),
   );
+  const sidecarFiles = files.filter((file) =>
+    file.name.toLocaleLowerCase("en-US").endsWith(".json"),
+  );
   if (unsupported.length > 0 || gltfFiles.length !== 1 || binaryFiles.length < 1) {
-    throw new TypeError("Select exactly one .gltf file and all of its .bin resources.");
+    throw new TypeError(
+      "Select exactly one .gltf file and all of its .bin and .json resources.",
+    );
   }
   const gltfFile = gltfFiles[0];
   if (!gltfFile) throw new TypeError("The local scene package is incomplete.");
-  return { kind: "local", gltfFile, binaryFiles };
+  return { kind: "local", gltfFile, binaryFiles, sidecarFiles };
 }
 
 export function validateLocalBinary(
@@ -122,6 +134,15 @@ export async function loadSceneHierarchy(
             },
           }
         : {}),
+      ...(hierarchy.properties
+        ? {
+            properties: {
+              kind: "url" as const,
+              ref: hierarchy.properties,
+              jsonUrl: new URL(hierarchy.properties.uri, source.gltfUrl),
+            },
+          }
+        : {}),
       label: source.gltfUrl.href,
     };
   }
@@ -145,8 +166,15 @@ export async function loadSceneHierarchy(
     throw new TypeError(`Select ${hierarchy.coarseBinaryUri} with the glTF file.`);
   }
   if (coarseFile) validateLocalBinary(hierarchy, coarseFile, "coarse");
-  const expectedResourceCount = hierarchy.coarseBinaryUri ? 2 : 1;
-  if (source.binaryFiles.length !== expectedResourceCount) {
+  const propertiesRef = hierarchy.properties;
+  const sidecarJsonFile = propertiesRef
+    ? source.sidecarFiles.find(({ name }) => name === resourceFileName(propertiesRef.uri))
+    : undefined;
+  const geometryFiles = new Set([targetFile, ...(coarseFile ? [coarseFile] : [])]);
+  const extraBinaries = source.binaryFiles.filter((file) => !geometryFiles.has(file));
+  const allowedExtraBinaries = sidecarJsonFile ? 1 : 0;
+  if (extraBinaries.length > allowedExtraBinaries) {
+    const expectedResourceCount = geometryFiles.size + allowedExtraBinaries;
     throw new TypeError(
       `The glTF declares ${expectedResourceCount} external binary ` +
         `${expectedResourceCount === 1 ? "resource" : "resources"}.`,
@@ -157,6 +185,16 @@ export async function loadSceneHierarchy(
     hierarchy,
     targetBinary: { kind: "file", file: targetFile },
     ...(coarseFile ? { coarseBinary: { kind: "file" as const, file: coarseFile } } : {}),
+    ...(propertiesRef && sidecarJsonFile
+      ? {
+          properties: {
+            kind: "file" as const,
+            ref: propertiesRef,
+            jsonFile: sidecarJsonFile,
+            resourceFiles: extraBinaries,
+          },
+        }
+      : {}),
     label: [source.gltfFile, ...source.binaryFiles].map(({ name }) => name).join(" + "),
   };
 }

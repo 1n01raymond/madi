@@ -5,6 +5,14 @@ export {
   resolvePropertyEntries,
 } from "./properties.js";
 export {
+  packagePropertiesSchema,
+  parsePackageProperties,
+} from "./package-properties.js";
+export type {
+  PackagePropertiesDocument,
+  PackagePropertyColumnsRef,
+} from "./package-properties.js";
+export {
   openPropertyValueColumns,
   propertyColumnsEncoding,
 } from "./property-columns.js";

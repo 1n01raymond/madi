@@ -24,7 +24,7 @@ describe("compiled scene sources", () => {
     expect(() => parseSceneUrl(" ", "https://example.com/")).toThrow(/Enter a compiled/u);
   });
 
-  it("selects one local glTF and binary independent of order", () => {
+  it("selects one local glTF plus its binary and sidecar resources", () => {
     const gltf = new File(["{}"], "scene.gltf");
     const binary = new File([new Uint8Array(4)], "scene.bin");
 
@@ -32,16 +32,20 @@ describe("compiled scene sources", () => {
       kind: "local",
       gltfFile: gltf,
       binaryFiles: [binary],
+      sidecarFiles: [],
     });
     expect(() => selectLocalSceneFiles([gltf])).toThrow(/exactly one/u);
-    expect(() => selectLocalSceneFiles([gltf, binary, new File([""], "report.json")])).toThrow(
+    expect(() => selectLocalSceneFiles([gltf, binary, new File([""], "scene.step")])).toThrow(
       /exactly one/u,
     );
     const coarse = new File([new Uint8Array(8)], "coarse.bin");
-    expect(selectLocalSceneFiles([coarse, gltf, binary])).toEqual({
+    const sidecarJson = new File(["{}"], "properties.json");
+    const sidecarColumns = new File([new Uint8Array(8)], "properties.bin");
+    expect(selectLocalSceneFiles([coarse, sidecarJson, gltf, sidecarColumns, binary])).toEqual({
       kind: "local",
       gltfFile: gltf,
-      binaryFiles: [coarse, binary],
+      binaryFiles: [coarse, sidecarColumns, binary],
+      sidecarFiles: [sidecarJson],
     });
   });
 

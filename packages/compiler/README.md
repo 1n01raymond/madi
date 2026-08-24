@@ -109,6 +109,20 @@ exists only between the adapter and its consumers. `--retain-scene-ir`
 therefore writes `scene-ir.json`, `scene-ir-geometry.bin`, and
 `scene-ir-properties.bin`; the JSON alone is not a loadable scene.
 
+### Package property sidecar
+
+A compiled package built from a column-bag scene republishes the properties as
+two additional package resources (`docs/COMPILER.md` section 21.2):
+`properties.bin` — the adapter column file byte for byte — and
+`properties.json`, a `madi.package-properties.1` document holding the interned
+property index plus a sorted columnar semantic table, parsed and validated by
+`parsePackageProperties` in `@madi/scene-ir`. `scene.gltf` points at the
+sidecar through `extras.madi.properties`, both resources join
+`output.resources` and the package digest, and `compileSceneToGltf` refuses a
+column-bag scene without `options.propertyColumns` (and the reverse). Inline
+`PropertyBag` scenes — the STEP path — emit no sidecar and are byte-identical
+to before; the glTF profile and report schema are unchanged.
+
 ## Current limits
 
 - The direct STEP command currently depends on the pinned CadQuery/OCP Python

@@ -307,6 +307,19 @@ while the IFC federation adapter emits column bags plus the column file
 (validated per `scripts/validate-ifc-federation-evidence.mjs`, which pins the
 measured structure-size reduction).
 
+Compiled packages built from a column-bag scene republish the properties as a
+package sidecar (`docs/COMPILER.md`, "Property sidecar"): `properties.json` is
+a `madi.package-properties.1` document holding the property index plus a
+columnar semantic table (sorted `semanticIds` with aligned schema/set/row
+columns), and `properties.bin` is the adapter column file byte for byte.
+`parsePackageProperties` in `packages/scene-ir` validates the sidecar document
+(schema version, experimental status, index integrity, sorted-unique semantic
+ids, aligned column lengths, in-range set/row/schema references, column file
+reference, column header) and the same `openPropertyValueColumns` /
+`resolvePropertyEntries` pair then serves `key -> value` lookups per semantic
+id, so a viewer needs neither the Scene IR document nor the glTF to resolve
+properties (`packages/scene-ir/test/package-properties.test.ts`).
+
 ## 9. Representations
 
 ```ts
