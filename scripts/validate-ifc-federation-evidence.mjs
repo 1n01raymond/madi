@@ -37,7 +37,7 @@ assert(
   dataset.source.revision === "4b37e5d77f12f30dfd7cb7375e15278e1037c808",
   "Digital Hub source revision changed.",
 );
-assert(adapter.schemaVersion === "madi.ifc-adapter-report.3", "Unknown adapter report.");
+assert(adapter.schemaVersion === "madi.ifc-adapter-report.4", "Unknown adapter report.");
 assert(
   adapter.adapter.name === "IfcOpenShell" && adapter.adapter.version === "0.8.5",
   "IfcOpenShell evidence version changed.",
@@ -58,7 +58,7 @@ assert(
     adapter.federation.options.includeEdges === false &&
     adapter.federation.options.useWorldCoordinates === false &&
     adapter.federation.options.normalizeSceneToMeters === true &&
-    adapter.federation.options.propertyMode === "indexed-flattened-psets",
+    adapter.federation.options.propertyMode === "indexed-column-values",
   "Federation extraction contract changed.",
 );
 
@@ -112,6 +112,7 @@ assertCounts(
     propertyValueCount: 273188,
     propertyKeyCount: 1656,
     propertySetCount: 279,
+    propertyDistinctValueCount: 48649,
     duplicateGlobalIdCount: 0,
     maxHierarchyDepth: 5,
   },
@@ -157,7 +158,7 @@ assertCounts(
 );
 assert(
   compiler.output.packageDigest ===
-    "98399341020db499115aa5b7962dbca82cfdd839b7a6b1aea70a1af7517a6e63",
+    "edf9050ff93165e715275f99a2d7e583f5256442a3a627672bd558f86dd99d36",
   "Compiled package digest changed.",
 );
 assert(
@@ -166,15 +167,17 @@ assert(
   "IFC target range coalescing contract changed.",
 );
 assert(
-  adapter.scene.encodingVersion === "madi.ifc-scene-ir-split.2",
+  adapter.scene.encodingVersion === "madi.ifc-scene-ir-split.3",
   "Scene IR transport encoding changed.",
 );
 // Property indexing (split.2) interned key strings into the scene-level
-// propertyIndex, shrinking the structure from 39,135,637 bytes (split.1).
+// propertyIndex, shrinking the structure from 39,135,637 bytes (split.1) to
+// 30,592,935 bytes; property value columns (split.3) moved the values into
+// the binary column file and shrank the structure again.
 assert(
   adapter.scene.structure.sha256 ===
-    "42b3316b94809ab978ec8fcffc260a83943e93a6ba4e7213de5346a26793b6a7" &&
-    adapter.scene.structure.byteLength === 30592935,
+    "1d838a03785899a94d5eddd04eaa57c79a956c99c0c9cb601d524778ded5655f" &&
+    adapter.scene.structure.byteLength === 26235818,
   "Scene IR structure evidence changed.",
 );
 assert(
@@ -182,6 +185,12 @@ assert(
     "247ae94d95883b1b65c5cc00e35048379fb8adbb22999cee9a13858945e84c2b" &&
     adapter.scene.geometry.byteLength === 28134848,
   "Scene IR geometry evidence changed.",
+);
+assert(
+  adapter.scene.properties.sha256 ===
+    "712fea65ca4b9de75683a01ee79f4fff5ae6f89b0c29cbd0b38a83bb586d07c1" &&
+    adapter.scene.properties.byteLength === 2260991,
+  "Scene IR property column evidence changed.",
 );
 
 assert(
@@ -238,9 +247,9 @@ assert(
   sixty5Dataset.source.revision === "4b37e5d77f12f30dfd7cb7375e15278e1037c808",
   "sixty5 source revision changed.",
 );
-assert(sixty5.schemaVersion === "madi.ifc-adapter-report.3", "Unknown sixty5 adapter report.");
+assert(sixty5.schemaVersion === "madi.ifc-adapter-report.4", "Unknown sixty5 adapter report.");
 assert(
-  sixty5.federation.options.propertyMode === "indexed-flattened-psets",
+  sixty5.federation.options.propertyMode === "indexed-column-values",
   "sixty5 property transport mode changed.",
 );
 assert(
@@ -298,24 +307,26 @@ assertCounts(
     propertyValueCount: 4503078,
     propertyKeyCount: 35510,
     propertySetCount: 299,
+    propertyDistinctValueCount: 488526,
     duplicateGlobalIdCount: 0,
   },
   "sixty5 adapter",
 );
 assert(
-  sixty5.scene.encodingVersion === "madi.ifc-scene-ir-split.2",
+  sixty5.scene.encodingVersion === "madi.ifc-scene-ir-split.3",
   "sixty5 Scene IR transport encoding changed.",
 );
 // Property indexing (split.2) shrank the structure from the split.1 record's
-// 631,943,761 bytes (sha256 c82f2dd2…) to 419,502,749 bytes. The split.1
-// structure exceeded V8's 536,870,888-byte string limit; that boundary
-// crossing is preserved as history in the E1.9 record at commit 41e6973 and
-// the streaming reader still protects the compiler if a future federation
-// crosses it again.
+// 631,943,761 bytes (sha256 c82f2dd2…) to 419,502,749 bytes; property value
+// columns (split.3) then moved the values into the binary column file and
+// shrank it to 345,472,410 bytes. The split.1 structure exceeded V8's
+// 536,870,888-byte string limit; that boundary crossing is preserved as
+// history in the E1.9 record at commit 41e6973 and the streaming reader still
+// protects the compiler if a future federation crosses it again.
 assert(
   sixty5.scene.structure.sha256 ===
-    "d9bc76f1e13c66b3f7757e5614a593e934cae6b13125ae5d493ad65f6b7b8331" &&
-    sixty5.scene.structure.byteLength === 419502749,
+    "4aece038a4c983036a0b83af3027956a28eb902ac9f348d37974aceaa8fd3709" &&
+    sixty5.scene.structure.byteLength === 345472410,
   "sixty5 Scene IR structure evidence changed.",
 );
 assert(
@@ -323,6 +334,12 @@ assert(
     "d4960401750f7e67b9c0387c846636e7d63e4bdba099e78886f0bf439d9a8d0d" &&
     sixty5.scene.geometry.byteLength === 151864848,
   "sixty5 Scene IR geometry evidence changed.",
+);
+assert(
+  sixty5.scene.properties.sha256 ===
+    "dad8d98909c738df930569c4b907c29e64cda2b65d84917936c1c4d86d3dd8c4" &&
+    sixty5.scene.properties.byteLength === 31179862,
+  "sixty5 Scene IR property column evidence changed.",
 );
 assert(
   sixty5.scene.structure.byteLength < bufferConstants.MAX_STRING_LENGTH,
@@ -376,7 +393,7 @@ assertCounts(
 );
 assert(
   sixty5Compiler.output.packageDigest ===
-    "638aaf1784efebe5b4ce041fe3dc56674c7f99a1f7248eaa86739d7c7143333f",
+    "773652cf45658ec0179b0eec9f0f3628177abd194d413b5f0dc7a883f7ad6049",
   "sixty5 compiled package digest changed.",
 );
 assert(

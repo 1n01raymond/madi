@@ -164,9 +164,10 @@ function assertAdapterIdentity(
   sources: readonly InspectedIfcFederationDocument[],
   structure: IfcStructureRead,
   geometry: Buffer,
+  properties: Buffer,
 ): { readonly report: Record<string, unknown>; readonly federationDigest: string } {
   const report = asRecord(adapterReport, "IFC adapter report");
-  if (report.schemaVersion !== "madi.ifc-adapter-report.3") {
+  if (report.schemaVersion !== "madi.ifc-adapter-report.4") {
     throw new TypeError("IFC adapter report has an unsupported schema version.");
   }
   if (!Array.isArray(report.sources) || report.sources.length !== sources.length) {
@@ -199,6 +200,7 @@ function assertAdapterIdentity(
   }
   const structureIdentity = asRecord(scene.structure, "IFC scene structure identity");
   const geometryIdentity = asRecord(scene.geometry, "IFC scene geometry identity");
+  const propertiesIdentity = asRecord(scene.properties, "IFC scene properties identity");
   for (const [identity, byteLength, sha256, label] of [
     [structureIdentity, structure.byteLength, structure.sha256, "structure"] as const,
     [
@@ -206,6 +208,12 @@ function assertAdapterIdentity(
       geometry.byteLength,
       createHash("sha256").update(geometry).digest("hex"),
       "geometry",
+    ] as const,
+    [
+      propertiesIdentity,
+      properties.byteLength,
+      createHash("sha256").update(properties).digest("hex"),
+      "properties",
     ] as const,
   ]) {
     if (identity.byteLength !== byteLength || identity.sha256 !== sha256) {
@@ -224,6 +232,7 @@ export async function compileIfcFederation(
   const temporaryDirectory = await mkdtemp(join(tmpdir(), "madi-ifc-"));
   const scenePath = join(temporaryDirectory, "scene-ir.json");
   const geometryPath = join(temporaryDirectory, "scene-ir-geometry.bin");
+  const propertiesPath = join(temporaryDirectory, "scene-ir-properties.bin");
   const adapterReportPath = join(temporaryDirectory, "adapter-report.json");
   try {
     const sourceArguments = sources.flatMap((source) => [
@@ -244,6 +253,8 @@ export async function compileIfcFederation(
         scenePath,
         "--geometry",
         geometryPath,
+        "--properties",
+        propertiesPath,
         "--report",
         adapterReportPath,
         "--threads",
@@ -257,14 +268,21 @@ export async function compileIfcFederation(
     // real-large federation reached 632 MB against V8's 536,870,888-code-unit
     // string limit, and the reader keeps the compiler safe if a future
     // federation crosses it again.
-    const [structure, geometry, serializedAdapterReport] = await Promise.all([
+    const [structure, geometry, properties, serializedAdapterReport] = await Promise.all([
       readIfcStructure(scenePath),
       readFile(geometryPath),
+      readFile(propertiesPath),
       readFile(adapterReportPath, "utf8"),
     ]);
     const parsedAdapterReport = parseJson(serializedAdapterReport, "IFC adapter report");
-    const identity = assertAdapterIdentity(parsedAdapterReport, sources, structure, geometry);
-    const scene = hydrateIfcSceneSplit(structure.value, geometry);
+    const identity = assertAdapterIdentity(
+      parsedAdapterReport,
+      sources,
+      structure,
+      geometry,
+      properties,
+    );
+    const scene = hydrateIfcSceneSplit(structure.value, geometry, properties);
     if (scene.revision.sourceDigest !== `sha256:${identity.federationDigest}`) {
       throw new TypeError("IFC Scene IR federation digest does not match the adapter report.");
     }
@@ -316,6 +334,7 @@ export async function compileIfcFederation(
       await Promise.all([
         copyFile(scenePath, resolve(outputDirectory, "scene-ir.json")),
         copyFile(geometryPath, resolve(outputDirectory, "scene-ir-geometry.bin")),
+        copyFile(propertiesPath, resolve(outputDirectory, "scene-ir-properties.bin")),
       ]);
     }
     return {

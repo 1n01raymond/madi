@@ -255,7 +255,30 @@ interface IndexedPropertyBag {
   values: PropertyValue[]; // values[i] belongs to keys[sets[set][i]]
 }
 
-type SemanticProperties = PropertyBag | IndexedPropertyBag;
+interface ColumnPropertyBag {
+  schema?: string;
+  set: number; // index into propertyIndex.sets
+  row: number; // row into the external propertyValues columns
+}
+
+type SemanticProperties = PropertyBag | IndexedPropertyBag | ColumnPropertyBag;
+
+interface PropertyColumnStreamRef {
+  encoding: "u32le" | "utf8-json";
+  byteOffset: number; // absolute, 8-byte aligned inside the column file
+  byteLength: number;
+}
+
+interface PropertyValueColumns {
+  encoding: "madi.property-columns.1";
+  valueCount: number; // total value references across all rows
+  rowCount: number;
+  distinctValueCount: number;
+  rows: PropertyColumnStreamRef; // u32 distinct-value index per (row, position)
+  rowOffsets: PropertyColumnStreamRef; // rowCount + 1 offsets, in value counts
+  valueOffsets: PropertyColumnStreamRef; // distinctValueCount + 1 byte offsets
+  valueHeap: PropertyColumnStreamRef; // distinct canonical-JSON values, byte-sorted
+}
 ```
 
 Properties are typed and unit-aware. Compiler profiles may columnarize common
@@ -264,14 +287,25 @@ properties and externalize cold property sets.
 Semantic property keys repeat heavily across entities of the same type, so a
 scene may intern them: the optional scene-level `propertyIndex` holds every
 distinct key and key combination once, and an `IndexedPropertyBag` references
-one combination plus its aligned values. `resolvePropertyEntries` in
-`packages/scene-ir` joins either form back to concrete `key -> value` entries
-losslessly, and `validateScene` checks index integrity (unique non-empty keys,
-in-range ascending tuples, set references, value arity). Inline `PropertyBag`
-entries stay valid — the STEP/OCCT adapter still emits them — while the IFC
-federation adapter emits indexed bags (validated per
-`scripts/validate-ifc-federation-evidence.mjs`, which pins the measured
-structure-size reduction).
+one combination plus its aligned values. A scene may go one step further and
+move the values themselves out of the document: the optional scene-level
+`propertyValues` header describes a binary column file in which every distinct
+value is stored once as canonical compact JSON (UTF-8, object keys sorted,
+non-finite numbers rejected, heap sorted by encoded byte sequence), and a
+`ColumnPropertyBag` keeps only its key-set index plus a row into the u32
+reference columns. `openPropertyValueColumns` in `packages/scene-ir` validates
+the header and the offset tables (monotone, bracketing, references in range)
+and returns a lazy browser-safe reader that decodes each distinct value at
+most once on first use; `resolvePropertyEntries` joins any of the three forms
+back to concrete `key -> value` entries losslessly (column bags require the
+reader). `validateScene` checks what the document alone can prove: index
+integrity for indexed bags (unique non-empty keys, in-range ascending tuples,
+set references, value arity) and set/row ranges for column bags — row arity
+lives in the column file and is checked when the columns are opened. Inline
+`PropertyBag` entries stay valid — the STEP/OCCT adapter still emits them —
+while the IFC federation adapter emits column bags plus the column file
+(validated per `scripts/validate-ifc-federation-evidence.mjs`, which pins the
+measured structure-size reduction).
 
 ## 9. Representations
 
@@ -494,7 +528,10 @@ the observable `EngineeringScene` is unchanged. This is an adapter-to-compiler
 transport, not a delivery or cache format, and it is deliberately versioned so
 it can be replaced deliberately: `madi.ifc-scene-ir-split.2` added the interned
 `propertyIndex` (section 8), shrinking the structure document that previously
-needed streaming past the engine string limit.
+needed streaming past the engine string limit, and `madi.ifc-scene-ir-split.3`
+moved the property values themselves into a third file — the binary
+`madi.property-columns.1` value columns (section 8) — whose SHA-256 is
+recorded and verified alongside the structure and geometry halves.
 
 ## 19. Phase 0 extraction evidence
 

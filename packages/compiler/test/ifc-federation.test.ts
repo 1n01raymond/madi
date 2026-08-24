@@ -3,6 +3,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { openPropertyValueColumns, resolvePropertyEntries } from "@madi/scene-ir";
 import { describe, expect, it } from "vitest";
 
 import { compileIfcFederation } from "../src/ifc-federation.js";
@@ -49,15 +50,17 @@ scene.documents = scene.documents.map((document) => ({
   sourceDigest: "sha256:" + sourceDigest,
 }));
 
-// Mirrors split.2 property indexing: distinct keys and key-sets interned into
-// the scene-level propertyIndex, semantics keeping only set ids plus values.
+// Mirrors split.3 property columns: distinct keys and key-sets interned into
+// the scene-level propertyIndex, semantics keeping only set ids plus a row
+// into the external binary value columns.
 const keys = [...new Set(
   scene.semantics.flatMap((semantic) => Object.keys(semantic.properties.entries)),
 )].sort();
 const keyIndexes = new Map(keys.map((key, index) => [key, index]));
 const sets = [];
 const setIndexes = new Map();
-scene.semantics = scene.semantics.map((semantic) => {
+const valueRows = [];
+scene.semantics = scene.semantics.map((semantic, row) => {
   const sorted = Object.keys(semantic.properties.entries).sort();
   const tuple = sorted.map((key) => keyIndexes.get(key));
   const token = tuple.join(",");
@@ -65,16 +68,64 @@ scene.semantics = scene.semantics.map((semantic) => {
     setIndexes.set(token, sets.length);
     sets.push(tuple);
   }
+  valueRows.push(sorted.map((key) => semantic.properties.entries[key]));
   return {
     ...semantic,
     properties: {
       schema: semantic.properties.schema,
       set: setIndexes.get(token),
-      values: sorted.map((key) => semantic.properties.entries[key]),
+      row,
     },
   };
 });
 scene.propertyIndex = { keys, sets };
+
+// Canonical compact JSON with sorted keys, matching the Python encoder.
+const canonical = (value) => {
+  if (Array.isArray(value)) return "[" + value.map(canonical).join(",") + "]";
+  if (value !== null && typeof value === "object") {
+    return "{" + Object.keys(value).sort().map(
+      (key) => JSON.stringify(key) + ":" + canonical(value[key]),
+    ).join(",") + "}";
+  }
+  return JSON.stringify(value);
+};
+const encodedRows = valueRows.map((row) => row.map((value) => Buffer.from(canonical(value), "utf8")));
+const distinct = [...new Map(
+  encodedRows.flat().map((encoded) => [encoded.toString("binary"), encoded]),
+).values()].sort(Buffer.compare);
+const positions = new Map(distinct.map((encoded, index) => [encoded.toString("binary"), index]));
+const rowRefs = [];
+const rowOffsets = [0];
+for (const row of encodedRows) {
+  for (const encoded of row) rowRefs.push(positions.get(encoded.toString("binary")));
+  rowOffsets.push(rowRefs.length);
+}
+const valueOffsets = [0];
+for (const encoded of distinct) valueOffsets.push(valueOffsets.at(-1) + encoded.byteLength);
+const propertyStreams = [];
+let propertyLength = 0;
+const appendProperty = (payload, encoding) => {
+  while (propertyLength % 8) {
+    propertyStreams.push(Buffer.alloc(1));
+    propertyLength += 1;
+  }
+  const entry = { encoding, byteOffset: propertyLength, byteLength: payload.byteLength };
+  propertyStreams.push(payload);
+  propertyLength += payload.byteLength;
+  return entry;
+};
+scene.propertyValues = {
+  encoding: "madi.property-columns.1",
+  valueCount: rowRefs.length,
+  rowCount: encodedRows.length,
+  distinctValueCount: distinct.length,
+  rows: appendProperty(Buffer.from(Uint32Array.from(rowRefs).buffer), "u32le"),
+  rowOffsets: appendProperty(Buffer.from(Uint32Array.from(rowOffsets).buffer), "u32le"),
+  valueOffsets: appendProperty(Buffer.from(Uint32Array.from(valueOffsets).buffer), "u32le"),
+  valueHeap: appendProperty(Buffer.concat(distinct), "utf8-json"),
+};
+const properties = Buffer.concat(propertyStreams);
 
 // Mirrors the adapter transport: surface-only representations whose streams
 // are little-endian references into one concatenated geometry file.
@@ -108,12 +159,13 @@ const structure = Buffer.from(JSON.stringify(scene) + "\\n", "utf8");
 const geometry = Buffer.concat(streams);
 await writeFile(option("--scene"), structure);
 await writeFile(option("--geometry"), geometry);
+await writeFile(option("--properties"), properties);
 const identify = (bytes) => ({
   byteLength: bytes.byteLength,
   sha256: createHash("sha256").update(bytes).digest("hex"),
 });
 await writeFile(option("--report"), JSON.stringify({
-  schemaVersion: "madi.ifc-adapter-report.3",
+  schemaVersion: "madi.ifc-adapter-report.4",
   federation: { sourceDigest: federationDigest },
   sources: [{
     discipline,
@@ -123,9 +175,10 @@ await writeFile(option("--report"), JSON.stringify({
     schema: "IFC4",
   }],
   scene: {
-    encodingVersion: "madi.ifc-scene-ir-split.2",
+    encodingVersion: "madi.ifc-scene-ir-split.3",
     structure: identify(structure),
     geometry: identify(geometry),
+    properties: identify(properties),
   },
 }));
 `,
@@ -159,19 +212,37 @@ await writeFile(option("--report"), JSON.stringify({
         renderableOccurrenceCount: 10,
         triangleCount: 2076,
       });
-      const [gltf, retainedScene, retainedGeometry, adapterReport] = await Promise.all([
-        readFile(join(outputDirectory, "scene.gltf"), "utf8").then(JSON.parse),
-        readFile(join(outputDirectory, "scene-ir.json"), "utf8").then(JSON.parse),
-        readFile(join(outputDirectory, "scene-ir-geometry.bin")),
-        readFile(join(outputDirectory, "adapter-report.json"), "utf8").then(JSON.parse),
-      ]);
+      const [gltf, retainedScene, retainedGeometry, retainedProperties, adapterReport] =
+        await Promise.all([
+          readFile(join(outputDirectory, "scene.gltf"), "utf8").then(JSON.parse),
+          readFile(join(outputDirectory, "scene-ir.json"), "utf8").then(JSON.parse),
+          readFile(join(outputDirectory, "scene-ir-geometry.bin")),
+          readFile(join(outputDirectory, "scene-ir-properties.bin")),
+          readFile(join(outputDirectory, "adapter-report.json"), "utf8").then(JSON.parse),
+        ]);
       expect(gltf.asset.generator).toContain("IfcOpenShell federation slice");
       expect(retainedScene.documents[0].format).toBe("IFC");
       expect(adapterReport.sceneIrValidation.ok).toBe(true);
-      // The retained structure keeps indexed properties plus the scene table.
+      // The retained structure keeps column properties plus the scene tables;
+      // the values themselves live only in the retained column file.
       expect(retainedScene.propertyIndex.keys.length).toBeGreaterThan(0);
       expect(retainedScene.semantics[0].properties.set).toBeTypeOf("number");
+      expect(retainedScene.semantics[0].properties.row).toBeTypeOf("number");
       expect(retainedScene.semantics[0].properties.entries).toBeUndefined();
+      expect(retainedScene.semantics[0].properties.values).toBeUndefined();
+      const columns = openPropertyValueColumns(
+        retainedScene.propertyValues,
+        retainedProperties,
+      );
+      expect(columns.rowCount).toBe(retainedScene.semantics.length);
+      const template = JSON.parse(await readFile(sceneTemplatePath, "utf8"));
+      expect(
+        resolvePropertyEntries(
+          retainedScene.semantics[0].properties,
+          retainedScene.propertyIndex,
+          columns,
+        ),
+      ).toEqual(template.semantics[0].properties.entries);
       // The retained structure keeps references, not expanded coordinate arrays.
       expect(retainedScene.representations[0].surface.positions).toMatchObject({
         encoding: "f64le",

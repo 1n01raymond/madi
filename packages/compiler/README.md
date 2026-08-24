@@ -84,9 +84,9 @@ qualified four-discipline result is under `artifacts/ifc/digital-hub/`.
 The IFC adapter does not hand back one expanded JSON document. It writes a
 structure-only JSON file whose representation surfaces hold
 `{encoding, byteOffset, byteLength}` references into a separate little-endian
-geometry file, and reports a SHA-256 for each half. The compiler verifies both
-digests and then resolves the references into typed-array views without copying
-the coordinate data.
+geometry file, plus a binary property value column file, and reports a SHA-256
+for each of the three. The compiler verifies the digests and then resolves the
+references into typed-array views without copying the coordinate data.
 
 This removes the decimal round-trip for every coordinate, and the compiler
 never holds the structure document as one string either: a record-streaming
@@ -97,11 +97,17 @@ split.1 structure measured 631.9 MB against the 536,870,888 code-unit ceiling;
 property indexing has since brought it to 419.5 MB, and the reader still
 protects against any future crossing). Since `madi.ifc-scene-ir-split.2` the
 structure also interns property keys and key combinations once into a
-scene-level `propertyIndex` instead of repeating key text per entity. The
-observable `EngineeringScene` contract is unchanged apart from that index, so
-the split exists only between the adapter and the compiler.
-`--retain-scene-ir` therefore writes both `scene-ir.json` and
-`scene-ir-geometry.bin`; the JSON alone is not a loadable scene.
+scene-level `propertyIndex` instead of repeating key text per entity, and
+since `madi.ifc-scene-ir-split.3` the property values themselves live in a
+third binary column file (`madi.property-columns.1`): each semantic entity
+carries only `{set, row}`, and the compiler checks every row's arity against
+its interned key set through typed-array views without materializing a single
+value (values decode lazily through `resolvePropertyEntries` /
+`openPropertyValueColumns` in `@madi/scene-ir`). The observable
+`EngineeringScene` contract is unchanged apart from those tables, so the split
+exists only between the adapter and its consumers. `--retain-scene-ir`
+therefore writes `scene-ir.json`, `scene-ir-geometry.bin`, and
+`scene-ir-properties.bin`; the JSON alone is not a loadable scene.
 
 ## Current limits
 
@@ -109,21 +115,22 @@ the split exists only between the adapter and the compiler.
   adapter. Moving the proven extraction behavior into the native C++ adapter
   remains production hardening work.
 - The IFC command currently depends on pinned IfcOpenShell 0.8.5. IFC topology
-  edge classification, binary property-value encoding, and cross-document
-  reconciliation remain explicit follow-up work. A degenerate source
+  edge classification and cross-document reconciliation remain explicit
+  follow-up work. A degenerate source
   `IfcAxis2Placement` (zero-length or parallel axes) is replaced with an
   identity transform and reported as `IFC_DEGENERATE_PLACEMENT`; the adapter
   never hands the compiler a non-finite matrix
   (`native/adapter-ifc/README.md`).
 - The split transport requires a little-endian host. The structure document
-  streams record by record and interns property keys, but the hydrated scene,
-  including every property value, stays resident during compilation; a binary
-  column encoding for the values themselves remains follow-up work. The
-  largest recorded compile — the sixty5 federation with 4,503,078 property
-  values (`artifacts/ifc/sixty5/`) — peaked at 4,043,804,672 bytes (≈3.8 GB)
-  compiler working set inside the default 64-bit Node 22 heap with no
-  `--max-old-space-size` override, measured on the split.1 631.9 MB structure
-  (commit `41e6973`); expect peak memory to scale with occurrence and property
+  streams record by record, property keys are interned, and property values
+  stay in the binary column file — the hydrated scene never materializes them
+  — but the occurrence and semantic records themselves stay resident during
+  compilation. The largest recorded compile — the sixty5 federation with
+  4,503,078 property values (`artifacts/ifc/sixty5/`) — peaked at
+  3,845,181,440 bytes (≈3.6 GB, sampled at 2 s intervals) compiler working
+  set inside the default 64-bit Node 22 heap with no `--max-old-space-size`
+  override (4,043,804,672 bytes on the split.1 631.9 MB structure, commit
+  `41e6973`); expect peak memory to scale with occurrence and semantic record
   counts, not with geometry bytes.
 - The first coarse representation is a per-prototype AABB, not a
   shape-preserving LOD. IFC target ranges are coalesced with a static initial

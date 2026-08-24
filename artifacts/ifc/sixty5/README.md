@@ -24,9 +24,11 @@ It is an adapter and compiler result, not a renderer benchmark.
 | Unique vertices | 2,596,268 |
 | Property values | 4,503,078 |
 | Property index keys / key-sets | 35,510 / 299 |
+| Distinct encoded property values | 488,526 (of 5,225,296 encoded entries) |
 | Duplicate GlobalIds | 0 |
-| Intermediate structure bytes | 419,502,749 |
+| Intermediate structure bytes | 345,472,410 |
 | Intermediate geometry bytes | 151,864,848 |
+| Intermediate property column bytes | 31,179,862 |
 
 Every document declares `IFC2X3`, so this federation also qualifies the older
 schema path. Prototype reuse removes 87.9% of submitted triangles, which is the
@@ -43,12 +45,17 @@ which walks the file in bounded chunks and parses one record at a time, is
 what made that compile possible (recorded at commit `41e6973`). Property
 indexing (`madi.ifc-scene-ir-split.2`) — 35,510 distinct keys and 299 key
 combinations interned once at scene level — then shrank the structure to
-419,502,749 bytes (−33.6 %), back under the string limit; the reader remains
-the compile path and the guard against any future crossing.
+419,502,749 bytes (−33.6 %), back under the string limit, and property value
+columns (`madi.ifc-scene-ir-split.3`) — 5,225,296 encoded value entries
+deduplicated into 488,526 distinct canonical-JSON values in a binary column
+file — shrank it again to 345,472,410 bytes (−17.6 %); the reader remains the
+compile path and the guard against any future crossing, and the compiler
+verifies the column file's row arities through typed-array views without
+materializing a single value.
 
 | Measure | Result |
 |---|---:|
-| Package digest | `638aaf1784efebe5b4ce041fe3dc56674c7f99a1f7248eaa86739d7c7143333f` |
+| Package digest | `773652cf45658ec0179b0eec9f0f3628177abd194d413b5f0dc7a883f7ad6049` |
 | `scene.gltf` bytes | 448,823,616 |
 | `scene.bin` bytes | 120,707,064 |
 | `coarse.bin` bytes | 38,700,720 |
@@ -69,12 +76,14 @@ extraction, produced byte-identical `scene.gltf`, `scene.bin`, `coarse.bin`,
 recording machine (16 CPUs, `--threads 6`, warm OS file cache) took 302 s wall
 clock end to end; the Node compiler process peaked at 4,043,804,672 bytes
 working set (≈3.8 GB) inside the default V8 heap, with no
-`--max-old-space-size` override. The split.2 record here comes from one full
+`--max-old-space-size` override. The split.3 record here comes from one full
 run of the same command; `scene.bin`, `coarse.bin`, the geometry half, every
-compiler count, and all 4,503,078 property values match the split.1 record
+compiler count, and all 4,503,078 property values match the earlier records
 byte for byte or count for count, and `scene.gltf` keeps its exact byte length
 with a digest change explained by the recorded `optionsDigest`
-(`propertyMode: "indexed-flattened-psets"`).
+(`propertyMode: "indexed-column-values"`). The recording run's Node process
+peaked at 3,845,181,440 bytes working set (≈3.6 GB, sampled at 2 s intervals)
+— a recording note, not a benchmark result.
 
 ## Reproduce
 
@@ -108,8 +117,8 @@ pnpm ifc:federation:check
 ```
 
 The federation source digest is
-`e334c6a9295a0adbf8ffbb15c61ea05c47b0135a319ee370f853bb9a36d21dec`. The 571.4 MB
-intermediate pair and the 608.2 MB compiled package stay under ignored
+`e334c6a9295a0adbf8ffbb15c61ea05c47b0135a319ee370f853bb9a36d21dec`. The 528.5 MB
+intermediate triple and the 608.2 MB compiled package stay under ignored
 `output/` storage; only the adapter report, the compiler build report, and the
 Khronos validation envelope are reviewed here.
 
@@ -118,10 +127,10 @@ Khronos validation envelope are reviewed here.
 - IFC curve and boundary-edge classification is deferred, as in Digital Hub.
   This federation reports zero explicit CAD edge segments.
 - Extraction is single-pass and resident: the adapter holds the whole federation
-  in memory before writing. The compiler streams the structure document and
-  property keys are interned at scene level, but the hydrated scene — including
-  all 4,503,078 property values — stays resident during compilation; a binary
-  column encoding for the values themselves is separate follow-up work.
+  in memory before writing. The compiler streams the structure document,
+  property keys are interned at scene level, and property values stay in the
+  binary column file — never materialized during compilation — but the
+  occurrence and semantic records themselves stay resident.
 - A browser and residency record for this package now exists under
   `artifacts/ifc/sixty5-browser/`, but no timing benchmark does. The 302 s
   compile time above is a recording note, not a benchmark result; neither

@@ -1,4 +1,4 @@
-import { isIndexedPropertyBag } from "./properties.js";
+import { isColumnPropertyBag, isIndexedPropertyBag } from "./properties.js";
 import { edgeClassCode } from "./types.js";
 import type {
   Bounds3d,
@@ -500,7 +500,38 @@ export function validateScene(scene: EngineeringScene): ValidationResult {
         `${path}.relationIds[${relationIndex}].targetId`,
       ),
     );
-    if (isIndexedPropertyBag(semantic.properties)) {
+    if (isColumnPropertyBag(semantic.properties)) {
+      const { set, row } = semantic.properties;
+      if (!scene.propertyIndex || !scene.propertyValues) {
+        add({
+          severity: "error",
+          code: "MISSING_PROPERTY_COLUMNS",
+          path: `${path}.properties.row`,
+          message:
+            "Column properties require both a scene propertyIndex and propertyValues.",
+        });
+      } else {
+        if (!Number.isInteger(set) || scene.propertyIndex.sets[set] === undefined) {
+          add({
+            severity: "error",
+            code: "PROPERTY_SET_OUT_OF_RANGE",
+            path: `${path}.properties.set`,
+            message: `Set ${String(set)} is not a valid propertyIndex.sets index.`,
+          });
+        }
+        if (!Number.isInteger(row) || row < 0 || row >= scene.propertyValues.rowCount) {
+          add({
+            severity: "error",
+            code: "PROPERTY_ROW_OUT_OF_RANGE",
+            path: `${path}.properties.row`,
+            message: `Row ${String(row)} is not a valid propertyValues row.`,
+          });
+        }
+      }
+      // Row arity and value finiteness live in the external column file and
+      // are verified when the columns are opened (`openPropertyValueColumns`)
+      // and resolved, not here.
+    } else if (isIndexedPropertyBag(semantic.properties)) {
       const { set, values } = semantic.properties;
       const keySet = scene.propertyIndex?.sets[set];
       if (!scene.propertyIndex) {

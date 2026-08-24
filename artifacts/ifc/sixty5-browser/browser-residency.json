@@ -1,6 +1,6 @@
 {
   "schemaVersion": "madi.ifc-browser-residency.1",
-  "capturedAt": "2026-08-24T06:37:22.165Z",
+  "capturedAt": "2026-08-24T07:26:26.469Z",
   "browser": {
     "id": "chrome",
     "engine": "Blink",
@@ -17,13 +17,13 @@
   },
   "source": {
     "buildReport": "artifacts/ifc/sixty5/build-report.json",
-    "packageDigest": "638aaf1784efebe5b4ce041fe3dc56674c7f99a1f7248eaa86739d7c7143333f",
+    "packageDigest": "773652cf45658ec0179b0eec9f0f3628177abd194d413b5f0dc7a883f7ad6049",
     "resources": [
       {
         "path": "scene.gltf",
         "mediaType": "model/gltf+json",
         "bytes": 448823616,
-        "sha256": "92938609bb0696ab9e1d17bebf831447cf55c20644f71877727117be096eb841"
+        "sha256": "d543c10122f4fa4535df6488a1530185f044c3b5f5dbfb6efc6fef503e3e48d7"
       },
       {
         "path": "scene.bin",
@@ -41,9 +41,9 @@
     "servedFrom": "Vite dev static hosting with HTTP Range support"
   },
   "milestones": {
-    "hierarchyReadyMs": 3462,
-    "coarseFrameMs": 264603,
-    "readyMs": 323844
+    "hierarchyReadyMs": 3420,
+    "coarseFrameMs": 270157,
+    "readyMs": 327079
   },
   "snapshot": {
     "status": "Residency budget reached · 42588 surface batches retained · 78173 renderable occurrences",
@@ -54,7 +54,7 @@
     "triangleCount": "975,013",
     "edgeCount": "466,452",
     "binarySize": "117,878.0 KiB",
-    "decodeTime": "7300.6 ms",
+    "decodeTime": "6984.2 ms",
     "geometryResult": "65,382.5 KiB CPU / 59,222.8 KiB GPU resident (budget 65,536.0 KiB)",
     "gpuAdapter": "nvidia",
     "dataset": {
@@ -77,557 +77,557 @@
       "sectionEnabled": "false",
       "sectionAxis": "z"
     },
-    "usedJsHeapBytes": 1027346535,
-    "totalJsHeapBytes": 1110598527,
+    "usedJsHeapBytes": 1023957423,
+    "totalJsHeapBytes": 1105094239,
     "timeline": [
       {
-        "milliseconds": 126,
+        "milliseconds": 187,
         "target": "html",
         "attribute": "data-scene-loading",
         "value": "true"
       },
       {
-        "milliseconds": 126,
+        "milliseconds": 187,
         "target": "status",
         "attribute": "data-state",
         "value": "loading"
       },
       {
-        "milliseconds": 3458,
+        "milliseconds": 3415,
         "target": "html",
         "attribute": "data-hierarchy-ready",
         "value": "true"
       },
       {
-        "milliseconds": 3458,
+        "milliseconds": 3415,
         "target": "status",
         "attribute": "data-stage",
         "value": "hierarchy"
       },
       {
-        "milliseconds": 264155,
+        "milliseconds": 269656,
         "target": "html",
         "attribute": "data-coarse-ready",
         "value": "true"
       },
       {
-        "milliseconds": 264155,
+        "milliseconds": 269656,
         "target": "html",
         "attribute": "data-geometry-representation",
         "value": "coarse"
       },
       {
-        "milliseconds": 264155,
+        "milliseconds": 269656,
         "target": "status",
         "attribute": "data-stage",
         "value": "coarse"
       },
       {
-        "milliseconds": 264155,
+        "milliseconds": 269656,
         "target": "html",
         "attribute": "data-target-chunks-total",
         "value": "234"
       },
       {
-        "milliseconds": 266177,
+        "milliseconds": 271760,
         "target": "html",
         "attribute": "data-target-chunks-ready",
         "value": "1"
       },
       {
-        "milliseconds": 266177,
+        "milliseconds": 271760,
         "target": "html",
         "attribute": "data-geometry-representation",
         "value": "mixed"
       },
       {
-        "milliseconds": 266177,
+        "milliseconds": 271760,
         "target": "status",
         "attribute": "data-stage",
         "value": "target-chunks"
       },
       {
-        "milliseconds": 268365,
+        "milliseconds": 273892,
         "target": "html",
         "attribute": "data-target-chunks-ready",
         "value": "2"
       },
       {
-        "milliseconds": 268365,
+        "milliseconds": 273892,
         "target": "html",
         "attribute": "data-geometry-representation",
         "value": "mixed"
       },
       {
-        "milliseconds": 268365,
+        "milliseconds": 273892,
         "target": "status",
         "attribute": "data-stage",
         "value": "target-chunks"
       },
       {
-        "milliseconds": 270591,
+        "milliseconds": 275988,
         "target": "html",
         "attribute": "data-target-chunks-ready",
         "value": "3"
       },
       {
-        "milliseconds": 270591,
+        "milliseconds": 275988,
         "target": "html",
         "attribute": "data-geometry-representation",
         "value": "mixed"
       },
       {
-        "milliseconds": 270591,
+        "milliseconds": 275988,
         "target": "status",
         "attribute": "data-stage",
         "value": "target-chunks"
       },
       {
-        "milliseconds": 272816,
+        "milliseconds": 278086,
         "target": "html",
         "attribute": "data-target-chunks-ready",
         "value": "4"
       },
       {
-        "milliseconds": 272816,
+        "milliseconds": 278086,
         "target": "html",
         "attribute": "data-geometry-representation",
         "value": "mixed"
       },
       {
-        "milliseconds": 272816,
+        "milliseconds": 278086,
         "target": "status",
         "attribute": "data-stage",
         "value": "target-chunks"
       },
       {
-        "milliseconds": 275078,
+        "milliseconds": 280094,
         "target": "html",
         "attribute": "data-target-chunks-ready",
         "value": "5"
       },
       {
-        "milliseconds": 275078,
+        "milliseconds": 280094,
         "target": "html",
         "attribute": "data-geometry-representation",
         "value": "mixed"
       },
       {
-        "milliseconds": 275078,
+        "milliseconds": 280094,
         "target": "status",
         "attribute": "data-stage",
         "value": "target-chunks"
       },
       {
-        "milliseconds": 277207,
+        "milliseconds": 282204,
         "target": "html",
         "attribute": "data-target-chunks-ready",
         "value": "6"
       },
       {
-        "milliseconds": 277207,
+        "milliseconds": 282204,
         "target": "html",
         "attribute": "data-geometry-representation",
         "value": "mixed"
       },
       {
-        "milliseconds": 277207,
+        "milliseconds": 282204,
         "target": "status",
         "attribute": "data-stage",
         "value": "target-chunks"
       },
       {
-        "milliseconds": 279498,
+        "milliseconds": 284317,
         "target": "html",
         "attribute": "data-target-chunks-ready",
         "value": "7"
       },
       {
-        "milliseconds": 279498,
+        "milliseconds": 284317,
         "target": "html",
         "attribute": "data-geometry-representation",
         "value": "mixed"
       },
       {
-        "milliseconds": 279498,
+        "milliseconds": 284317,
         "target": "status",
         "attribute": "data-stage",
         "value": "target-chunks"
       },
       {
-        "milliseconds": 281716,
+        "milliseconds": 286449,
         "target": "html",
         "attribute": "data-target-chunks-ready",
         "value": "8"
       },
       {
-        "milliseconds": 281716,
+        "milliseconds": 286449,
         "target": "html",
         "attribute": "data-geometry-representation",
         "value": "mixed"
       },
       {
-        "milliseconds": 281716,
+        "milliseconds": 286449,
         "target": "status",
         "attribute": "data-stage",
         "value": "target-chunks"
       },
       {
-        "milliseconds": 283850,
+        "milliseconds": 288524,
         "target": "html",
         "attribute": "data-target-chunks-ready",
         "value": "9"
       },
       {
-        "milliseconds": 283850,
+        "milliseconds": 288524,
         "target": "html",
         "attribute": "data-geometry-representation",
         "value": "mixed"
       },
       {
-        "milliseconds": 283850,
+        "milliseconds": 288524,
         "target": "status",
         "attribute": "data-stage",
         "value": "target-chunks"
       },
       {
-        "milliseconds": 286142,
+        "milliseconds": 290678,
         "target": "html",
         "attribute": "data-target-chunks-ready",
         "value": "10"
       },
       {
-        "milliseconds": 286142,
+        "milliseconds": 290678,
         "target": "html",
         "attribute": "data-geometry-representation",
         "value": "mixed"
       },
       {
-        "milliseconds": 286142,
+        "milliseconds": 290678,
         "target": "status",
         "attribute": "data-stage",
         "value": "target-chunks"
       },
       {
-        "milliseconds": 288261,
+        "milliseconds": 292750,
         "target": "html",
         "attribute": "data-target-chunks-ready",
         "value": "11"
       },
       {
-        "milliseconds": 288261,
+        "milliseconds": 292750,
         "target": "html",
         "attribute": "data-geometry-representation",
         "value": "mixed"
       },
       {
-        "milliseconds": 288261,
+        "milliseconds": 292750,
         "target": "status",
         "attribute": "data-stage",
         "value": "target-chunks"
       },
       {
-        "milliseconds": 290530,
+        "milliseconds": 294883,
         "target": "html",
         "attribute": "data-target-chunks-ready",
         "value": "12"
       },
       {
-        "milliseconds": 290530,
+        "milliseconds": 294883,
         "target": "html",
         "attribute": "data-geometry-representation",
         "value": "mixed"
       },
       {
-        "milliseconds": 290530,
+        "milliseconds": 294883,
         "target": "status",
         "attribute": "data-stage",
         "value": "target-chunks"
       },
       {
-        "milliseconds": 292688,
+        "milliseconds": 296968,
         "target": "html",
         "attribute": "data-target-chunks-ready",
         "value": "13"
       },
       {
-        "milliseconds": 292688,
+        "milliseconds": 296968,
         "target": "html",
         "attribute": "data-geometry-representation",
         "value": "mixed"
       },
       {
-        "milliseconds": 292688,
+        "milliseconds": 296968,
         "target": "status",
         "attribute": "data-stage",
         "value": "target-chunks"
       },
       {
-        "milliseconds": 294940,
+        "milliseconds": 299103,
         "target": "html",
         "attribute": "data-target-chunks-ready",
         "value": "14"
       },
       {
-        "milliseconds": 294940,
+        "milliseconds": 299103,
         "target": "html",
         "attribute": "data-geometry-representation",
         "value": "mixed"
       },
       {
-        "milliseconds": 294940,
+        "milliseconds": 299103,
         "target": "status",
         "attribute": "data-stage",
         "value": "target-chunks"
       },
       {
-        "milliseconds": 297076,
+        "milliseconds": 301186,
         "target": "html",
         "attribute": "data-target-chunks-ready",
         "value": "15"
       },
       {
-        "milliseconds": 297076,
+        "milliseconds": 301186,
         "target": "html",
         "attribute": "data-geometry-representation",
         "value": "mixed"
       },
       {
-        "milliseconds": 297076,
+        "milliseconds": 301186,
         "target": "status",
         "attribute": "data-stage",
         "value": "target-chunks"
       },
       {
-        "milliseconds": 299353,
+        "milliseconds": 303330,
         "target": "html",
         "attribute": "data-target-chunks-ready",
         "value": "16"
       },
       {
-        "milliseconds": 299353,
+        "milliseconds": 303330,
         "target": "html",
         "attribute": "data-geometry-representation",
         "value": "mixed"
       },
       {
-        "milliseconds": 299353,
+        "milliseconds": 303330,
         "target": "status",
         "attribute": "data-stage",
         "value": "target-chunks"
       },
       {
-        "milliseconds": 301501,
+        "milliseconds": 305494,
         "target": "html",
         "attribute": "data-target-chunks-ready",
         "value": "17"
       },
       {
-        "milliseconds": 301501,
+        "milliseconds": 305494,
         "target": "html",
         "attribute": "data-geometry-representation",
         "value": "mixed"
       },
       {
-        "milliseconds": 301501,
+        "milliseconds": 305494,
         "target": "status",
         "attribute": "data-stage",
         "value": "target-chunks"
       },
       {
-        "milliseconds": 303763,
+        "milliseconds": 307595,
         "target": "html",
         "attribute": "data-target-chunks-ready",
         "value": "18"
       },
       {
-        "milliseconds": 303763,
+        "milliseconds": 307595,
         "target": "html",
         "attribute": "data-geometry-representation",
         "value": "mixed"
       },
       {
-        "milliseconds": 303763,
+        "milliseconds": 307595,
         "target": "status",
         "attribute": "data-stage",
         "value": "target-chunks"
       },
       {
-        "milliseconds": 305971,
+        "milliseconds": 309878,
         "target": "html",
         "attribute": "data-target-chunks-ready",
         "value": "19"
       },
       {
-        "milliseconds": 305971,
+        "milliseconds": 309878,
         "target": "html",
         "attribute": "data-geometry-representation",
         "value": "mixed"
       },
       {
-        "milliseconds": 305971,
+        "milliseconds": 309878,
         "target": "status",
         "attribute": "data-stage",
         "value": "target-chunks"
       },
       {
-        "milliseconds": 308233,
+        "milliseconds": 312147,
         "target": "html",
         "attribute": "data-target-chunks-ready",
         "value": "20"
       },
       {
-        "milliseconds": 308234,
+        "milliseconds": 312147,
         "target": "html",
         "attribute": "data-geometry-representation",
         "value": "mixed"
       },
       {
-        "milliseconds": 308234,
+        "milliseconds": 312147,
         "target": "status",
         "attribute": "data-stage",
         "value": "target-chunks"
       },
       {
-        "milliseconds": 310517,
+        "milliseconds": 314314,
         "target": "html",
         "attribute": "data-target-chunks-ready",
         "value": "21"
       },
       {
-        "milliseconds": 310517,
+        "milliseconds": 314314,
         "target": "html",
         "attribute": "data-geometry-representation",
         "value": "mixed"
       },
       {
-        "milliseconds": 310517,
+        "milliseconds": 314314,
         "target": "status",
         "attribute": "data-stage",
         "value": "target-chunks"
       },
       {
-        "milliseconds": 312962,
+        "milliseconds": 316722,
         "target": "html",
         "attribute": "data-target-chunks-ready",
         "value": "22"
       },
       {
-        "milliseconds": 312962,
+        "milliseconds": 316722,
         "target": "html",
         "attribute": "data-geometry-representation",
         "value": "mixed"
       },
       {
-        "milliseconds": 312962,
+        "milliseconds": 316722,
         "target": "status",
         "attribute": "data-stage",
         "value": "target-chunks"
       },
       {
-        "milliseconds": 315299,
+        "milliseconds": 318944,
         "target": "html",
         "attribute": "data-target-chunks-ready",
         "value": "23"
       },
       {
-        "milliseconds": 315299,
+        "milliseconds": 318944,
         "target": "html",
         "attribute": "data-geometry-representation",
         "value": "mixed"
       },
       {
-        "milliseconds": 315299,
+        "milliseconds": 318944,
         "target": "status",
         "attribute": "data-stage",
         "value": "target-chunks"
       },
       {
-        "milliseconds": 317454,
+        "milliseconds": 321050,
         "target": "html",
         "attribute": "data-target-chunks-ready",
         "value": "24"
       },
       {
-        "milliseconds": 317454,
+        "milliseconds": 321051,
         "target": "html",
         "attribute": "data-geometry-representation",
         "value": "mixed"
       },
       {
-        "milliseconds": 317454,
+        "milliseconds": 321051,
         "target": "status",
         "attribute": "data-stage",
         "value": "target-chunks"
       },
       {
-        "milliseconds": 319598,
+        "milliseconds": 323047,
         "target": "html",
         "attribute": "data-target-chunks-ready",
         "value": "25"
       },
       {
-        "milliseconds": 319598,
+        "milliseconds": 323047,
         "target": "html",
         "attribute": "data-geometry-representation",
         "value": "mixed"
       },
       {
-        "milliseconds": 319598,
+        "milliseconds": 323047,
         "target": "status",
         "attribute": "data-stage",
         "value": "target-chunks"
       },
       {
-        "milliseconds": 321733,
+        "milliseconds": 325071,
         "target": "html",
         "attribute": "data-target-chunks-ready",
         "value": "26"
       },
       {
-        "milliseconds": 321733,
+        "milliseconds": 325071,
         "target": "html",
         "attribute": "data-geometry-representation",
         "value": "mixed"
       },
       {
-        "milliseconds": 321733,
+        "milliseconds": 325071,
         "target": "status",
         "attribute": "data-stage",
         "value": "target-chunks"
       },
       {
-        "milliseconds": 323845,
+        "milliseconds": 327076,
         "target": "html",
         "attribute": "data-residency-budget-reached",
         "value": "true"
       },
       {
-        "milliseconds": 323845,
+        "milliseconds": 327076,
         "target": "html",
         "attribute": "data-geometry-representation",
         "value": "mixed"
       },
       {
-        "milliseconds": 323845,
+        "milliseconds": 327076,
         "target": "html",
         "attribute": "data-target-ready",
         "value": "limited"
       },
       {
-        "milliseconds": 323845,
+        "milliseconds": 327076,
         "target": "status",
         "attribute": "data-state",
         "value": "ready"
       },
       {
-        "milliseconds": 323845,
+        "milliseconds": 327076,
         "target": "status",
         "attribute": "data-stage",
         "value": "rendered"
       },
       {
-        "milliseconds": 323845,
+        "milliseconds": 327076,
         "target": "html",
         "attribute": "data-scene-loading",
         "value": "false"

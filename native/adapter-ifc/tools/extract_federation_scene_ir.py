@@ -30,6 +30,7 @@ from placement_math import (
     rounded,
     sanitized_matrix,
 )
+from property_columns import encode_property_value_columns
 from property_index import index_property_bags
 
 
@@ -865,7 +866,7 @@ def extract_federation(documents: Sequence[DocumentInput], threads: int) -> tupl
         "includeSurfaces": True,
         "includeEdges": False,
         "normalizeSceneToMeters": True,
-        "propertyMode": "indexed-flattened-psets",
+        "propertyMode": "indexed-column-values",
     }
     created_at_candidates = sorted(
         item["timestamp"] for item in extracted if item["timestamp"]
@@ -928,20 +929,30 @@ def extract_federation(documents: Sequence[DocumentInput], threads: int) -> tupl
         ],
     }
     # Property keys repeat across entities, so the federation-level pass interns
-    # them once: distinct keys and key combinations move into `propertyIndex`
-    # and every semantic keeps only its set id plus values. The pass runs after
-    # the cross-document merge because the tables must span the federation.
+    # them once: distinct keys and key combinations move into `propertyIndex`.
+    # The values themselves then leave the JSON entirely: every distinct value
+    # is encoded once into the binary column heap and each semantic keeps only
+    # `{schema, set, row}`, where `row` is its run in the shared reference
+    # column. Both passes run after the cross-document merge because the
+    # tables must span the federation.
     property_index, property_references = index_property_bags(
         [semantic["properties"]["entries"] for semantic in scene["semantics"]]
     )
-    for semantic, reference in zip(
-        scene["semantics"], property_references, strict=True
+    for row, (semantic, reference) in enumerate(
+        zip(scene["semantics"], property_references, strict=True)
     ):
         semantic["properties"] = {
             "schema": semantic["properties"]["schema"],
-            **reference,
+            "set": reference["set"],
+            "row": row,
         }
     scene["propertyIndex"] = property_index
+    property_columns = encode_property_value_columns(
+        [reference["values"] for reference in property_references]
+    )
+    # Raw columns; `write_scene` streams them into the properties file and
+    # replaces this member with the `madi.property-columns.1` header.
+    scene["propertyValues"] = property_columns
     totals: dict[str, int] = defaultdict(int)
     for item in extracted:
         for key, value in item["counts"].items():
@@ -959,8 +970,23 @@ def extract_federation(documents: Sequence[DocumentInput], threads: int) -> tupl
     )
     totals["propertyKeyCount"] = len(property_index["keys"])
     totals["propertySetCount"] = len(property_index["sets"])
+    totals["propertyDistinctValueCount"] = property_columns["distinct_value_count"]
+    # `propertyValueCount` deliberately keeps its published meaning (flattened
+    # pset values only, excluding `ifc.*` metadata entries), so it cannot equal
+    # the encoded total. The loss check is the arity invariant instead: every
+    # encoded row must hold exactly as many values as its interned key set —
+    # the same cross-check the compiler repeats when it opens the columns.
+    expected_value_count = sum(
+        len(property_index["sets"][reference["set"]])
+        for reference in property_references
+    )
+    if expected_value_count != property_columns["value_count"]:
+        raise ValueError(
+            "Property value columns lost values: key sets expect "
+            f"{expected_value_count}, encoded {property_columns['value_count']}."
+        )
     report = {
-        "schemaVersion": "madi.ifc-adapter-report.3",
+        "schemaVersion": "madi.ifc-adapter-report.4",
         "adapter": {
             "name": "IfcOpenShell",
             "version": ifcopenshell.version,
@@ -1001,7 +1027,8 @@ def extract_federation(documents: Sequence[DocumentInput], threads: int) -> tupl
         "limitations": [
             "IFC curve and boundary-edge classification is deferred.",
             "Properties are flattened for the first queryable semantic slice; "
-            "keys and key-sets are interned into the scene propertyIndex.",
+            "keys and key-sets are interned into the scene propertyIndex and "
+            "the values live in the binary property column file.",
             "Cross-document object reconciliation is document-scoped and not inferred from names.",
         ],
     }
@@ -1028,6 +1055,7 @@ GEOMETRY_ENCODINGS = {
 def write_scene(
     structure_path: Path,
     geometry_path: Path,
+    properties_path: Path,
     scene: dict[str, Any],
 ) -> dict[str, Any]:
     """Writes the split Scene IR transport: small structure JSON plus binary streams.
@@ -1037,8 +1065,11 @@ def write_scene(
     concatenated little-endian binary file while the observable Engineering
     Scene semantics stay unchanged. Streams go straight to disk and every
     start is padded to eight bytes so the reader can take typed-array views
-    without copying. `madi.ifc-scene-ir-split.2` additionally interns semantic
-    property keys and key-sets into the scene-level `propertyIndex`.
+    without copying. `madi.ifc-scene-ir-split.2` additionally interned semantic
+    property keys and key-sets into the scene-level `propertyIndex`;
+    `madi.ifc-scene-ir-split.3` moves the property values themselves into the
+    binary column file next to the geometry, leaving `{schema, set, row}` per
+    semantic and the `madi.property-columns.1` header in the structure JSON.
     """
     geometry_path.parent.mkdir(parents=True, exist_ok=True)
     offset = 0
@@ -1069,6 +1100,42 @@ def write_scene(
             if surface.get("normals") is not None:
                 surface["normals"] = append(surface["normals"], "<f4")
 
+    columns = scene["propertyValues"]
+    properties_path.parent.mkdir(parents=True, exist_ok=True)
+    offset = 0
+    with properties_path.open("wb") as sink:
+
+        def append_bytes(payload: bytes, encoding: str) -> dict[str, Any]:
+            nonlocal offset
+            padding = -offset % 8
+            if padding:
+                sink.write(bytes(padding))
+                offset += padding
+            entry = {
+                "encoding": encoding,
+                "byteOffset": offset,
+                "byteLength": len(payload),
+            }
+            sink.write(payload)
+            offset += len(payload)
+            return entry
+
+        def append_u32(values: Any) -> dict[str, Any]:
+            return append_bytes(
+                np.asarray(values, dtype="<u4").tobytes(order="C"), "u32le"
+            )
+
+        scene["propertyValues"] = {
+            "encoding": "madi.property-columns.1",
+            "valueCount": columns["value_count"],
+            "rowCount": columns["row_count"],
+            "distinctValueCount": columns["distinct_value_count"],
+            "rows": append_u32(columns["row_refs"]),
+            "rowOffsets": append_u32(columns["row_offsets"]),
+            "valueOffsets": append_u32(columns["value_offsets"]),
+            "valueHeap": append_bytes(columns["value_heap"], "utf8-json"),
+        }
+
     structure_path.parent.mkdir(parents=True, exist_ok=True)
     with structure_path.open("w", encoding="utf-8", newline="\n") as output:
         json.dump(
@@ -1081,9 +1148,10 @@ def write_scene(
         )
         output.write("\n")
     return {
-        "encodingVersion": "madi.ifc-scene-ir-split.2",
+        "encodingVersion": "madi.ifc-scene-ir-split.3",
         "structure": digest_file(structure_path),
         "geometry": digest_file(geometry_path),
+        "properties": digest_file(properties_path),
     }
 
 
@@ -1111,6 +1179,7 @@ def main() -> None:
     )
     parser.add_argument("--scene", required=True, type=Path)
     parser.add_argument("--geometry", required=True, type=Path)
+    parser.add_argument("--properties", required=True, type=Path)
     parser.add_argument("--report", required=True, type=Path)
     parser.add_argument(
         "--threads",
@@ -1123,7 +1192,9 @@ def main() -> None:
 
     documents = parse_inputs(arguments.document, arguments.uri_hint)
     scene, report = extract_federation(documents, arguments.threads)
-    report["scene"] = write_scene(arguments.scene, arguments.geometry, scene)
+    report["scene"] = write_scene(
+        arguments.scene, arguments.geometry, arguments.properties, scene
+    )
     write_report(arguments.report, report)
     counts = report["counts"]
     print(
