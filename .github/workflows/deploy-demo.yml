@@ -1,0 +1,113 @@
+name: Deploy public demo
+
+# Publishes the Studio (apps/webgpu-spike) to GitHub Pages as a public,
+# read-only demo. Digital Hub (MIT-licensed IFC-Bench federation) is the
+# default scene; PyGamer (MIT-licensed STEP fixture, already committed under
+# artifacts/phase1/adafruit-pygamer/) is reachable as a secondary example.
+#
+# Digital Hub's compiled package (~63 MB) is not committed, per AGENTS.md's
+# rule against large derived geometry in git history. It is instead published
+# as a GitHub Release asset (tag demo-digital-hub-v1) and downloaded here at
+# deploy time. This job verifies every downloaded file's SHA-256 against the
+# committed artifacts/ifc/digital-hub/build-report.json before using it, so a
+# stale or mismatched release asset fails the deploy instead of publishing
+# silently wrong bytes.
+#
+# sixty5 (657 MB, CC-BY-4.0) is deliberately excluded from this demo.
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "apps/webgpu-spike/**"
+      - "packages/runtime-webgpu/**"
+      - "packages/scene-ir/**"
+      - "artifacts/phase1/adafruit-pygamer/**"
+      - "artifacts/ifc/digital-hub/build-report.json"
+      - ".github/workflows/deploy-demo.yml"
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build Studio demo
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11.19.0
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.14.0
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Download Digital Hub demo package
+        run: |
+          set -euo pipefail
+          mkdir -p demo-scene/digital-hub
+          curl -fsSL -o digital-hub-demo-package.tar.gz \
+            "https://github.com/${{ github.repository }}/releases/download/demo-digital-hub-v1/digital-hub-demo-package.tar.gz"
+          tar -xzf digital-hub-demo-package.tar.gz -C demo-scene/digital-hub
+
+      - name: Verify Digital Hub package against committed evidence
+        run: |
+          set -euo pipefail
+          for f in scene.gltf scene.bin coarse.bin properties.json properties.bin; do
+            expected=$(jq -r --arg p "$f" '.output.resources[] | select(.path == $p) | .sha256' \
+              artifacts/ifc/digital-hub/build-report.json)
+            actual=$(sha256sum "demo-scene/digital-hub/$f" | cut -d' ' -f1)
+            if [ "$expected" != "$actual" ]; then
+              echo "::error::$f digest mismatch: expected $expected, got $actual"
+              exit 1
+            fi
+          done
+
+      - name: Build workspace dependencies
+        run: pnpm --filter @naru3d/webgpu-spike^... run build
+
+      - name: Build Studio (Digital Hub default scene)
+        working-directory: apps/webgpu-spike
+        env:
+          NARU_SCENE_DIR: ${{ github.workspace }}/demo-scene/digital-hub
+        run: pnpm exec vite build --base=/naru/
+
+      - name: Add PyGamer as a secondary demo package
+        run: |
+          set -euo pipefail
+          mkdir -p apps/webgpu-spike/dist/pygamer
+          cp artifacts/phase1/adafruit-pygamer/scene.gltf apps/webgpu-spike/dist/pygamer/
+          cp artifacts/phase1/adafruit-pygamer/scene.bin apps/webgpu-spike/dist/pygamer/
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: apps/webgpu-spike/dist
+
+  deploy:
+    name: Deploy to GitHub Pages
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        name: Deploy
+        uses: actions/deploy-pages@v4
