@@ -30,9 +30,13 @@ import {
 } from "./types.js";
 import {
   encodeSpatialDemandIndex,
+  partitionSpatialDemandLeaves,
   spatialDemandIndexSchema,
 } from "./spatial-demand.js";
-import type { SpatialVector3 } from "./spatial-demand.js";
+import type {
+  SpatialDemandBoundsOccurrence,
+  SpatialVector3,
+} from "./spatial-demand.js";
 import type {
   CompileGltfOptions,
   CompiledGltfPackage,
@@ -268,6 +272,96 @@ function occurrenceWorldMatrices(
   };
   for (const occurrence of occurrences) worldFor(occurrence);
   return result;
+}
+
+interface SpatialPayloadOccurrence extends SpatialDemandBoundsOccurrence {
+  readonly prototypeId: string;
+}
+
+function localDeliveredBounds(
+  representation: Representation,
+  scaleToMeters: number,
+): { readonly minimum: SpatialVector3; readonly maximum: SpatialVector3 } {
+  const surfacePositions = representation.surface?.positions;
+  const positions = surfacePositions && surfacePositions.length > 0
+    ? surfacePositions
+    : representation.edges?.positions;
+  if (!positions || positions.length === 0) {
+    throw new TypeError(`Representation ${representation.id} has no positions for coarse bounds.`);
+  }
+  const { min, max } = scaledPositionBounds(positions, 1);
+  return {
+    minimum: [
+      Math.fround((min[0] ?? 0) * scaleToMeters),
+      Math.fround((min[1] ?? 0) * scaleToMeters),
+      Math.fround((min[2] ?? 0) * scaleToMeters),
+    ],
+    maximum: [
+      Math.fround((max[0] ?? 0) * scaleToMeters),
+      Math.fround((max[1] ?? 0) * scaleToMeters),
+      Math.fround((max[2] ?? 0) * scaleToMeters),
+    ],
+  };
+}
+
+function spatialPayloadPrototypeOrder(
+  prototypes: readonly Prototype[],
+  occurrences: readonly Occurrence[],
+  representations: ReadonlyMap<string, Representation>,
+  sourceMatrix: ArrayLike<number>,
+  scaleToMeters: number,
+  leafCapacity: number | undefined,
+): readonly Prototype[] {
+  const prototypeById = new Map(prototypes.map((prototype) => [prototype.id, prototype]));
+  const localBounds = new Map<string, ReturnType<typeof localDeliveredBounds>>();
+  for (const prototype of prototypes) {
+    const representation = representationFor(prototype, representations);
+    if (representation) {
+      localBounds.set(prototype.id, localDeliveredBounds(representation, scaleToMeters));
+    }
+  }
+  const worldMatrices = occurrenceWorldMatrices(occurrences, sourceMatrix, scaleToMeters);
+  const entries: SpatialPayloadOccurrence[] = occurrences.flatMap((occurrence, index) => {
+    const local = localBounds.get(occurrence.prototypeId);
+    const world = worldMatrices.get(occurrence.id);
+    if (!local || !world || !prototypeById.has(occurrence.prototypeId)) return [];
+    return [{
+      id: occurrence.id,
+      nodeIndex: index + 1,
+      prototypeId: occurrence.prototypeId,
+      ...transformedBounds(world, local.minimum, local.maximum),
+    }];
+  });
+  if (entries.length === 0) return prototypes;
+  const leaves = partitionSpatialDemandLeaves(entries, {
+    ...(leafCapacity === undefined ? {} : { leafCapacity }),
+  });
+  const countsByPrototype = new Map<string, Map<number, number>>();
+  leaves.forEach((leaf, leafIndex) => {
+    for (const occurrence of leaf) {
+      const counts = countsByPrototype.get(occurrence.prototypeId) ?? new Map<number, number>();
+      counts.set(leafIndex, (counts.get(leafIndex) ?? 0) + 1);
+      countsByPrototype.set(occurrence.prototypeId, counts);
+    }
+  });
+  const anchorFor = (prototypeId: string): { readonly leaf: number; readonly count: number } => {
+    const counts = countsByPrototype.get(prototypeId);
+    if (!counts) return { leaf: Number.MAX_SAFE_INTEGER, count: 0 };
+    return [...counts]
+      .map(([leaf, count]) => ({ leaf, count }))
+      .sort((left, right) => right.count - left.count || left.leaf - right.leaf)[0] ?? {
+        leaf: Number.MAX_SAFE_INTEGER,
+        count: 0,
+      };
+  };
+  const anchors = new Map(prototypes.map(({ id }) => [id, anchorFor(id)]));
+  return [...prototypes].sort((left, right) => {
+    const leftAnchor = anchors.get(left.id) ?? { leaf: Number.MAX_SAFE_INTEGER, count: 0 };
+    const rightAnchor = anchors.get(right.id) ?? { leaf: Number.MAX_SAFE_INTEGER, count: 0 };
+    return leftAnchor.leaf - rightAnchor.leaf ||
+      rightAnchor.count - leftAnchor.count ||
+      left.id.localeCompare(right.id, "en");
+  });
 }
 
 function gltfMaterial(material: Material, edge: boolean): GltfMaterial {
@@ -699,6 +793,12 @@ export function compileSceneToGltf(
   if (options.spatialLeafCapacity !== undefined && options.spatialIndex !== true) {
     throw new TypeError("spatialLeafCapacity requires spatialIndex.");
   }
+  if (
+    options.spatialPayloadOrder === true &&
+    (options.spatialIndex !== true || options.targetChunkByteBudget === undefined)
+  ) {
+    throw new TypeError("spatialPayloadOrder requires spatialIndex and targetChunkByteBudget.");
+  }
   const spatialBinaryUri = options.spatialBinaryUri ?? "spatial.bin";
   if (
     options.spatialIndex === true &&
@@ -740,7 +840,18 @@ export function compileSceneToGltf(
     ? new GltfBinaryBuilder({ bufferIndex: 1, bufferViews, accessors })
     : undefined;
   const representations = new Map(scene.representations.map((value) => [value.id, value]));
+  const occurrences = [...scene.occurrences].sort(compareId);
   const prototypes = [...scene.prototypes].sort(compareId);
+  const payloadPrototypes = options.spatialPayloadOrder === true
+    ? spatialPayloadPrototypeOrder(
+        prototypes,
+        occurrences,
+        representations,
+        sourceToGltfMatrix(scene.rootFrame.upAxis),
+        scaleToMeters,
+        options.spatialLeafCapacity,
+      )
+    : prototypes;
   const prototypeById = new Map(prototypes.map((value) => [value.id, value]));
   const geometryByPrototype = new Map<string, GeometryResource>();
   const coarseGeometryByPrototype = new Map<string, CoarseGeometryResource>();
@@ -748,7 +859,7 @@ export function compileSceneToGltf(
   let triangleCount = 0;
   let edgeSegmentCount = 0;
 
-  for (const prototype of prototypes) {
+  for (const prototype of payloadPrototypes) {
     const representation = representationFor(prototype, representations);
     if (!representation) continue;
     const byteOffset = builder.byteLength;
@@ -759,7 +870,7 @@ export function compileSceneToGltf(
       byteOffset,
       byteLength: builder.byteLength - byteOffset,
     });
-    if (coarseBuilder) {
+    if (coarseBuilder && options.spatialPayloadOrder !== true) {
       coarseGeometryByPrototype.set(
         prototype.id,
         appendCoarseBounds(coarseBuilder, prototype, representation, scaleToMeters),
@@ -767,6 +878,16 @@ export function compileSceneToGltf(
     }
     triangleCount += compiled.triangles;
     edgeSegmentCount += compiled.edges;
+  }
+  if (coarseBuilder && options.spatialPayloadOrder === true) {
+    for (const prototype of prototypes) {
+      const representation = representationFor(prototype, representations);
+      if (!representation) continue;
+      coarseGeometryByPrototype.set(
+        prototype.id,
+        appendCoarseBounds(coarseBuilder, prototype, representation, scaleToMeters),
+      );
+    }
   }
 
   const materials: GltfMaterial[] = [fallbackMaterial(false), fallbackMaterial(true)];
@@ -924,7 +1045,6 @@ export function compileSceneToGltf(
     return meshIndex;
   }
 
-  const occurrences = [...scene.occurrences].sort(compareId);
   const occurrenceCounts = new Map<string, number>();
   for (const occurrence of occurrences) {
     occurrenceCounts.set(
@@ -1099,6 +1219,9 @@ export function compileSceneToGltf(
                 targetBuffer: 0,
                 coarseBuffer: 1,
                 targetChunks,
+                ...(options.spatialPayloadOrder === true
+                  ? { targetPayloadOrder: "spatial-leaf-anchor-v1" }
+                  : {}),
                 ...(spatialIndex && spatialBinaryDigest
                   ? {
                       spatialIndex: {
@@ -1183,6 +1306,9 @@ export function compileSceneToGltf(
             ...(options.targetChunkByteBudget === undefined
               ? {}
               : { targetChunkByteBudget: options.targetChunkByteBudget }),
+            ...(options.spatialPayloadOrder === true
+              ? { targetPayloadOrder: "spatial-leaf-anchor-v1" as const }
+              : {}),
           }
         : {}),
     },

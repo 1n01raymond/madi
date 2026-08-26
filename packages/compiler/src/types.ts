@@ -105,6 +105,8 @@ export interface CompilerBuildReport {
     readonly targetChunking?: "prototype-range-v1" | "coalesced-prototype-range-v1";
     /** Maximum bytes per progressive target request when coalescing is enabled. */
     readonly targetChunkByteBudget?: number;
+    /** Optional physical target payload order derived from spatial BVH leaves. */
+    readonly targetPayloadOrder?: "spatial-leaf-anchor-v1";
   };
   readonly source: {
     readonly sceneId: string;
@@ -171,6 +173,11 @@ export interface CompileGltfOptions {
    * Omit this to retain one target chunk per prototype for compatibility.
    */
   readonly targetChunkByteBudget?: number;
+  /**
+   * Order prototype payloads by their dominant deterministic spatial leaf
+   * before byte-budget coalescing. Requires spatialIndex and a chunk budget.
+   */
+  readonly spatialPayloadOrder?: boolean;
   /** Emit an optional occurrence BVH that maps spatial leaves to target chunks. */
   readonly spatialIndex?: boolean;
   readonly spatialBinaryUri?: string;

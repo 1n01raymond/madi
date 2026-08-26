@@ -55,11 +55,16 @@ The first spatial contract must also remain optional so historical
    A target Range decode must use that table instead of traversing all active
    nodes. Transferable decode results own transform copies so one completed
    transfer cannot detach the prepared state needed by later chunks.
-10. In the first indexed slice, `scene.bin`, `coarse.bin`, target chunk ownership,
-   and glTF rendering semantics stay unchanged. Reordering prototype payloads by
-   measured spatial co-demand is a later schema/profile decision. Spatial draw
-   clustering is later still and requires geometry resources to be separable
-   from instance clusters.
+10. Keep prototype-ID payload order as the compatibility default. An explicit
+   `spatial-leaf-anchor-v1` experiment may instead assign each prototype to the
+   deterministic BVH leaf containing the most occurrences (earliest DFS leaf
+   breaks ties), order prototype payloads by that anchor, and then apply the
+   existing byte-budget coalescer. The glTF profile, accessor semantics, and
+   one-payload-per-prototype ownership remain unchanged; the selected order is
+   declared in progressive metadata and the build report. It cannot become the
+   default until real-model requested/off-view-byte evidence passes.
+11. Spatial draw clustering is later still and requires geometry resources to
+   be separable from instance clusters.
 
 ## Consequences
 
@@ -82,9 +87,10 @@ The first spatial contract must also remain optional so historical
   scheduling can begin.
 - A fit-to-scene view can legitimately visit most of the hierarchy; the index
   does not make an all-visible scene spatially selective.
-- A leaf can still demand unrelated bytes when the existing target chunk mixes
-  prototypes with different spatial demand. Physical payload packing requires
-  separate evidence and a later change.
+- A leaf can still demand unrelated bytes when the compatibility payload order
+  mixes prototypes with different spatial demand. The leaf-anchor experiment
+  reduces this on a focused oracle, but multi-site prototypes and real-model
+  requested/off-view bytes still require evidence.
 - Large or scene-spanning occurrences can overlap many queries and need explicit
   isolation/tuning in the builder.
 - Compiler and runtime must maintain a versioned binary decoder and strict
@@ -116,6 +122,9 @@ sidecar generation without target/coarse byte changes, strict no-false-negative
 unit/oracle coverage, localized work reduction, single-chunk delivery, and
 obsolete-Range cancellation in headed Chrome and Firefox. The transform-only
 scenario does not close the nested/ADR-0005 or Digital Hub/sixty5 gates below.
+The compiler unit oracle additionally proves deterministic leaf-anchor packing,
+coarse-byte stability, one payload per prototype, and a localized 2→1 chunk
+reduction; it is not real-model requested-byte evidence.
 
 - every renderable occurrence is indexed exactly once, every leaf bound contains
   its references, and BVH queries have no false negatives against a brute-force
@@ -135,7 +144,8 @@ scenario does not close the nested/ADR-0005 or Digital Hub/sixty5 gates below.
 - headed Chrome and Firefox reproduce the request sequence with no console
   warnings or errors, while legacy packages retain their current behavior;
 - Digital Hub and then sixty5 publish index size/build cost, query p50/p95,
-  candidate reduction, requested/off-view bytes, and first-frame impact. The
+  candidate reduction, compatibility-order versus leaf-anchor requested/off-view
+  bytes, and first-frame impact. The
   sixty5 three-run first-coarse-frame p95 must remain at or below 15 seconds on
   the same recorded host class.
 

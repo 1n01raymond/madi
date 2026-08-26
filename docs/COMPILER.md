@@ -422,7 +422,15 @@ and `targetChunks` maps target prototype meshes to deterministic, non-overlappin
 ranges into 512 KiB requests (without splitting an oversized prototype), which
 turns the qualified Digital Hub package from 3,383 prototype ranges into 45
 network/decode units. This proves partial range delivery and static request
-scheduling, but not shape-preserving LOD or spatial partitioning.
+scheduling. The optional `spatialPayloadOrder` compiler flag (CLI:
+`--spatial-payload-order`) adds `targetPayloadOrder:
+"spatial-leaf-anchor-v1"`, orders each prototype by the deterministic BVH leaf
+where most of its occurrences land, and then applies the same byte budget.
+The project-owned four-prototype oracle changes one localized co-demand set
+from two target chunks to one while preserving one payload per prototype,
+coarse bytes, and deterministic output. The default prototype-ID order remains
+byte-identical. Real-model requested/off-view-byte evidence and
+shape-preserving LOD remain pending.
 
 The public `naru compile` entry now accepts a local AP242 or AP214 Part 21 file,
 invokes the isolated OCCT adapter, verifies schema and source digest parity,

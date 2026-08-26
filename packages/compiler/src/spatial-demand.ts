@@ -9,12 +9,15 @@ const magic = [0x4e, 0x53, 0x44, 0x49] as const; // NSDI
 
 export type SpatialVector3 = readonly [number, number, number];
 
-export interface SpatialDemandOccurrence {
+export interface SpatialDemandBoundsOccurrence {
   readonly id: string;
   readonly nodeIndex: number;
-  readonly targetChunkIndex: number;
   readonly minimum: SpatialVector3;
   readonly maximum: SpatialVector3;
+}
+
+export interface SpatialDemandOccurrence extends SpatialDemandBoundsOccurrence {
+  readonly targetChunkIndex: number;
 }
 
 export interface SpatialDemandIndexStats {
@@ -54,10 +57,9 @@ function assertUint32(value: number, label: string): void {
   }
 }
 
-function assertBounds(entry: SpatialDemandOccurrence): void {
+function assertBounds(entry: SpatialDemandBoundsOccurrence): void {
   if (entry.id.trim() === "") throw new TypeError("Spatial occurrence id must not be empty.");
   assertUint32(entry.nodeIndex, `Spatial occurrence ${entry.id} nodeIndex`);
-  assertUint32(entry.targetChunkIndex, `Spatial occurrence ${entry.id} targetChunkIndex`);
   for (const axis of [0, 1, 2] as const) {
     const minimum = entry.minimum[axis];
     const maximum = entry.maximum[axis];
@@ -67,7 +69,7 @@ function assertBounds(entry: SpatialDemandOccurrence): void {
   }
 }
 
-function boundsFor(entries: readonly SpatialDemandOccurrence[]): {
+function boundsFor(entries: readonly SpatialDemandBoundsOccurrence[]): {
   readonly minimum: SpatialVector3;
   readonly maximum: SpatialVector3;
 } {
@@ -94,8 +96,65 @@ function splitAxis(minimum: SpatialVector3, maximum: SpatialVector3): 0 | 1 | 2 
   return axis;
 }
 
-function center(entry: SpatialDemandOccurrence, axis: 0 | 1 | 2): number {
+function center(entry: SpatialDemandBoundsOccurrence, axis: 0 | 1 | 2): number {
   return entry.minimum[axis] + (entry.maximum[axis] - entry.minimum[axis]) / 2;
+}
+
+function validatedLeafCapacity(value: number | undefined): number {
+  const leafCapacity = value ?? defaultSpatialLeafCapacity;
+  if (!Number.isSafeInteger(leafCapacity) || leafCapacity < 1 || leafCapacity > 65_535) {
+    throw new RangeError("Spatial leaf capacity must be an integer between 1 and 65535.");
+  }
+  return leafCapacity;
+}
+
+/**
+ * Returns deterministic depth-first BVH leaf membership without assigning
+ * payload chunks. The compiler uses the same split/tie rules to derive an
+ * opt-in spatial payload order before final chunk indexes exist.
+ */
+export function partitionSpatialDemandLeaves<T extends SpatialDemandBoundsOccurrence>(
+  input: readonly T[],
+  options: { readonly leafCapacity?: number } = {},
+): readonly (readonly T[])[] {
+  const leafCapacity = validatedLeafCapacity(options.leafCapacity);
+  if (input.length === 0) throw new TypeError("A spatial demand partition needs one occurrence.");
+  const ids = new Set<string>();
+  const nodeIndexes = new Set<number>();
+  for (const entry of input) {
+    assertBounds(entry);
+    if (ids.has(entry.id)) throw new RangeError(`Duplicate spatial occurrence id ${entry.id}.`);
+    if (nodeIndexes.has(entry.nodeIndex)) {
+      throw new RangeError(`Duplicate spatial occurrence nodeIndex ${entry.nodeIndex}.`);
+    }
+    ids.add(entry.id);
+    nodeIndexes.add(entry.nodeIndex);
+  }
+
+  const leaves: T[][] = [];
+  const append = (entries: readonly T[]): void => {
+    if (entries.length <= leafCapacity) {
+      leaves.push(
+        [...entries].sort(
+          (left, right) => left.id.localeCompare(right.id, "en") || left.nodeIndex - right.nodeIndex,
+        ),
+      );
+      return;
+    }
+    const bounds = boundsFor(entries);
+    const axis = splitAxis(bounds.minimum, bounds.maximum);
+    const ordered = [...entries].sort(
+      (left, right) =>
+        center(left, axis) - center(right, axis) ||
+        left.id.localeCompare(right.id, "en") ||
+        left.nodeIndex - right.nodeIndex,
+    );
+    const midpoint = Math.floor(ordered.length / 2);
+    append(ordered.slice(0, midpoint));
+    append(ordered.slice(midpoint));
+  };
+  append([...input].sort((left, right) => left.id.localeCompare(right.id, "en")));
+  return leaves;
 }
 
 function checkedTotalByteLength(
@@ -118,10 +177,7 @@ export function encodeSpatialDemandIndex(
   input: readonly SpatialDemandOccurrence[],
   options: { readonly leafCapacity?: number } = {},
 ): EncodedSpatialDemandIndex {
-  const leafCapacity = options.leafCapacity ?? defaultSpatialLeafCapacity;
-  if (!Number.isSafeInteger(leafCapacity) || leafCapacity < 1 || leafCapacity > 65_535) {
-    throw new RangeError("Spatial leaf capacity must be an integer between 1 and 65535.");
-  }
+  const leafCapacity = validatedLeafCapacity(options.leafCapacity);
   if (input.length === 0) throw new TypeError("A spatial demand index needs one occurrence.");
   assertUint32(input.length, "Spatial occurrence count");
 
@@ -129,6 +185,7 @@ export function encodeSpatialDemandIndex(
   const nodeIndexes = new Set<number>();
   for (const entry of input) {
     assertBounds(entry);
+    assertUint32(entry.targetChunkIndex, `Spatial occurrence ${entry.id} targetChunkIndex`);
     if (ids.has(entry.id)) throw new RangeError(`Duplicate spatial occurrence id ${entry.id}.`);
     if (nodeIndexes.has(entry.nodeIndex)) {
       throw new RangeError(`Duplicate spatial occurrence nodeIndex ${entry.nodeIndex}.`);

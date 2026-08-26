@@ -51,9 +51,13 @@ CLI compile commands can pass `--spatial-index`, to emit `spatial.bin` using
 `naru.spatial-demand-index.1`. Its deterministic flat BVH stores float64 world
 bounds for every renderable occurrence and maps each leaf to sorted,
 deduplicated indexes in `targetChunks`; it does not duplicate or reorder target
-geometry. `--spatial-leaf-capacity` overrides the default of 64. Committed
-real-model records and headed Studio evidence are still pending, so ADR-0008
-remains Proposed.
+geometry by default. `--spatial-leaf-capacity` overrides the default of 64.
+For IFC experiments, `--spatial-payload-order` opts into
+`spatial-leaf-anchor-v1`: prototypes are ordered by the deterministic BVH leaf
+where they occur most often before the existing byte-budget coalescer runs.
+This changes target byte ranges without duplicating geometry; historical output
+remains byte-identical when the flag is absent. Real-model packing records are
+still pending, so ADR-0008 remains Proposed.
 Its expanded Scene IR is temporary and is deleted after the package passes
 validation. `phase1:compile:evidence` retains the historical small Scene IR
 regression path without coarse output. The evidence check validates both plus the
@@ -81,6 +85,7 @@ pnpm naru compile-ifc \
   --threads 4 \
   --target-chunk-kib 512 \
   --spatial-index \
+  --spatial-payload-order \
   --output output/ifc/federation
 ```
 

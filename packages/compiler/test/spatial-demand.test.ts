@@ -5,6 +5,7 @@ import {
   spatialDemandIndexSchema,
 } from "../src/index.js";
 import type { SpatialDemandOccurrence } from "../src/index.js";
+import { partitionSpatialDemandLeaves } from "../src/spatial-demand.js";
 
 const occurrences: readonly SpatialDemandOccurrence[] = [
   {
@@ -59,6 +60,18 @@ describe("spatial demand index encoder", () => {
     expect(encoded.stats.chunkReferenceCount).toBe(2);
     expect(view.getUint32(chunkOffset, true)).toBe(0);
     expect(view.getUint32(chunkOffset + 4, true)).toBe(1);
+  });
+
+  it("exposes the same deterministic DFS leaf partition before chunks exist", () => {
+    const first = partitionSpatialDemandLeaves(occurrences, { leafCapacity: 1 });
+    const second = partitionSpatialDemandLeaves([...occurrences].reverse(), { leafCapacity: 1 });
+
+    expect(first.map((leaf) => leaf.map(({ id }) => id))).toEqual([
+      ["occurrence:a"],
+      ["occurrence:b"],
+      ["occurrence:c"],
+    ]);
+    expect(second).toEqual(first);
   });
 
   it("rejects ambiguous identity, invalid bounds, and invalid leaf capacity", () => {

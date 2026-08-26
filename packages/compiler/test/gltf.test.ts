@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 
 import {
   createRepeatedTriangleScene,
+  ids,
   openPropertyValueColumns,
   packagePropertiesSchema,
   parsePackageProperties,
@@ -39,6 +40,44 @@ async function compileEvidence(options: Parameters<typeof compileSceneToGltf>[1]
 
 function madiExtras(value: { readonly extras?: Readonly<Record<string, unknown>> }) {
   return value.extras?.madi as Record<string, unknown> | undefined;
+}
+
+function createSpatialPackingScene(): EngineeringScene {
+  const base = createRepeatedTriangleScene();
+  const prototype = base.prototypes[0];
+  const representation = base.representations[0];
+  if (!prototype || !representation) throw new TypeError("Triangle fixture is incomplete.");
+  const entries = [
+    { suffix: "a", x: -10 },
+    { suffix: "b", x: 10 },
+    { suffix: "c", x: -9 },
+    { suffix: "d", x: 9 },
+  ] as const;
+  return {
+    ...base,
+    sceneId: "scene:spatial-payload-packing",
+    prototypes: entries.map(({ suffix }) => {
+      const prototypeId = ids.prototype(`prototype:spatial:${suffix}`);
+      return {
+        ...prototype,
+        id: prototypeId,
+        name: `Spatial ${suffix}`,
+        representationIds: [ids.representation(`representation:spatial:${suffix}`)],
+      };
+    }),
+    occurrences: entries.map(({ suffix, x }) => ({
+      ...base.occurrences[0]!,
+      id: ids.occurrence(`occurrence:spatial:${suffix}`),
+      prototypeId: ids.prototype(`prototype:spatial:${suffix}`),
+      name: `Spatial ${suffix}`,
+      localTransform: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, x, 0, 0, 1],
+    })),
+    representations: entries.map(({ suffix }) => ({
+      ...representation,
+      id: ids.representation(`representation:spatial:${suffix}`),
+      prototypeId: ids.prototype(`prototype:spatial:${suffix}`),
+    })),
+  };
 }
 
 describe("Phase 1 glTF compiler slice", () => {
@@ -241,6 +280,88 @@ describe("Phase 1 glTF compiler slice", () => {
       progressive.targetChunks.reduce((total, chunk) => total + chunk.byteLength, 0),
     ).toBe(compiled.binary.byteLength);
     expect(compiled.report.counts.targetChunkCount).toBe(2);
+  });
+
+  it("orders opt-in payload ranges by dominant spatial leaf before coalescing", () => {
+    const scene = createSpatialPackingScene();
+    const prototypeRanges = compileSceneToGltf(scene, { coarseBounds: true });
+    const singlePrototypeBytes = ((prototypeRanges.document.extras.madi as {
+      progressive: { targetChunks: readonly { byteLength: number }[] };
+    }).progressive.targetChunks[0]?.byteLength) ?? 0;
+    const options = {
+      coarseBounds: true,
+      targetChunkByteBudget: singlePrototypeBytes * 2,
+      spatialIndex: true,
+      spatialLeafCapacity: 2,
+    } as const;
+    const baseline = compileSceneToGltf(scene, options);
+    const packed = compileSceneToGltf(scene, { ...options, spatialPayloadOrder: true });
+    const repeated = compileSceneToGltf(scene, { ...options, spatialPayloadOrder: true });
+    const permuted = compileSceneToGltf({
+      ...scene,
+      prototypes: [...scene.prototypes].reverse(),
+      occurrences: [...scene.occurrences].reverse(),
+      representations: [...scene.representations].reverse(),
+    }, { ...options, spatialPayloadOrder: true });
+    const chunksFor = (compiled: typeof packed) => ((compiled.document.extras.madi as {
+      progressive: {
+        targetPayloadOrder?: string;
+        targetChunks: readonly { prototypeIds: readonly string[] }[];
+      };
+    }).progressive);
+    const baselineChunks = chunksFor(baseline).targetChunks;
+    const packedProgressive = chunksFor(packed);
+    const chunksDemandedBy = (
+      chunks: readonly { prototypeIds: readonly string[] }[],
+      prototypes: readonly string[],
+    ): number => new Set(
+      prototypes.flatMap((prototypeId) =>
+        chunks.flatMap((chunk, index) => chunk.prototypeIds.includes(prototypeId) ? [index] : []),
+      ),
+    ).size;
+
+    expect(baselineChunks.map(({ prototypeIds }) => prototypeIds)).toEqual([
+      ["prototype:spatial:a", "prototype:spatial:b"],
+      ["prototype:spatial:c", "prototype:spatial:d"],
+    ]);
+    expect(packedProgressive.targetChunks.map(({ prototypeIds }) => prototypeIds)).toEqual([
+      ["prototype:spatial:a", "prototype:spatial:c"],
+      ["prototype:spatial:b", "prototype:spatial:d"],
+    ]);
+    expect(chunksDemandedBy(baselineChunks, ["prototype:spatial:a", "prototype:spatial:c"]))
+      .toBe(2);
+    expect(chunksDemandedBy(packedProgressive.targetChunks, [
+      "prototype:spatial:a",
+      "prototype:spatial:c",
+    ])).toBe(1);
+    expect(packedProgressive.targetPayloadOrder).toBe("spatial-leaf-anchor-v1");
+    expect(packed.report.options.targetPayloadOrder).toBe("spatial-leaf-anchor-v1");
+    // The synthetic prototypes intentionally share byte-identical geometry;
+    // chunk ownership changes even though permuting equal byte blocks does not.
+    expect(packed.binary.byteLength).toBe(baseline.binary.byteLength);
+    expect(packed.json).not.toBe(baseline.json);
+    expect(packed.coarseBinary).toEqual(baseline.coarseBinary);
+    expect(repeated.json).toBe(packed.json);
+    expect(repeated.binary).toEqual(packed.binary);
+    expect(repeated.spatialBinary).toEqual(packed.spatialBinary);
+    expect(permuted.json).toBe(packed.json);
+    expect(permuted.binary).toEqual(packed.binary);
+    expect(permuted.spatialBinary).toEqual(packed.spatialBinary);
+    expect(validateCompiledGltf(packed.document, [
+      packed.binary,
+      packed.coarseBinary as Uint8Array,
+    ])).toEqual({ ok: true, issues: [] });
+  });
+
+  it("requires spatial indexing and byte-budget coalescing for spatial payload order", async () => {
+    await expect(compileEvidence({ spatialPayloadOrder: true })).rejects.toThrow(
+      /requires spatialIndex and targetChunkByteBudget/u,
+    );
+    await expect(compileEvidence({
+      coarseBounds: true,
+      spatialIndex: true,
+      spatialPayloadOrder: true,
+    })).rejects.toThrow(/requires spatialIndex and targetChunkByteBudget/u);
   });
 
   it("reproduces the committed compiler artifact byte for byte", async () => {

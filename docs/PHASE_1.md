@@ -129,6 +129,7 @@ direct WebGPU renderer. The Phase 0 Scene IR JSON is no longer a browser input.
 | Chunk-local decode | The session Worker prepares active float64 transforms and direct chunk-to-occurrence tables once; a transfer-detachment regression proves repeated single-occurrence Range decodes do not read the node graph again | Passed in `packages/runtime-webgpu/test/compiled-gltf.test.ts` |
 | View-priority scheduling | Recorder holds the initial fastener Range, pans the camera, observes its Worker cancellation, and receives the newly hottest mounting-plate Range before releasing the obsolete response | Passed in headed Chrome and Firefox |
 | Spatial demand scheduling | Optional `spatial.bin` is authenticated once; a transform-only localized oracle reduces 19→9/7 visited nodes, 10→1 tested occurrences, and 3→1 candidate chunks while cancelling the obsolete Range before its body is delivered | Passed in headed Chrome and Firefox; real-model gates remain |
+| Spatial payload packing | Opt-in `spatial-leaf-anchor-v1` orders prototype blocks by dominant deterministic BVH leaf before byte-budget coalescing; a four-prototype oracle reduces one localized co-demand set from 2 chunks to 1 without changing coarse bytes or duplicating geometry | Passed in `packages/compiler/test/gltf.test.ts`; real-model byte evidence remains |
 | In-flight cancellation | A second browser run cancels while range 2/3 is pending, observes `Scene load cancelled.`, and proves that range 3/3 is never requested | Passed in headed Chrome and Firefox |
 | Browser conformance | Headed Chrome/Blink and Firefox/Gecko emit no console warnings or errors | Passed by `pnpm browser:matrix` |
 | Safari capability | Real Safari 18.6 loads 87 hierarchy records under default settings, then reports that WebGPU is unavailable because `navigator.gpu` is absent | Graceful unsupported-browser result; rendering conformance not yet available |
@@ -216,9 +217,11 @@ re-ranks retained-coarse chunk bounds, cancels obsolete Range/Worker
 work, and updates eviction priority. The persistent Worker now prepares active
 transforms and direct chunk occurrence membership once, eliminating node-graph
 walks from later target Range decodes. The optional ADR-0008 path now queries a
-compiler-built occurrence BVH and requests only visible-leaf target demand;
-the next increment is its headed/real-model evidence, followed by persistent
-cache tiers and screen-space priority.
+compiler-built occurrence BVH and requests only visible-leaf target demand.
+Opt-in leaf-anchor payload ordering now feeds that BVH partition back into the
+existing byte-budget coalescer; the next increment is Digital Hub then sixty5
+requested/off-view-byte and first-frame evidence, followed by persistent cache
+tiers and screen-space priority.
 
 On the compiler side the structure document now streams record by record,
 property keys and key combinations are interned once at scene level, and the

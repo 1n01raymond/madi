@@ -203,6 +203,7 @@ await writeFile(option("--report"), JSON.stringify({
         retainSceneIr: true,
         spatialIndex: true,
         spatialLeafCapacity: 2,
+        spatialPayloadOrder: true,
       });
 
       expect(result.sources[0]).toMatchObject({
@@ -242,6 +243,10 @@ await writeFile(option("--report"), JSON.stringify({
         schemaVersion: "naru.spatial-demand-index.1",
         byteLength: spatialIndex.byteLength,
       });
+      expect(gltf.extras.madi.progressive.targetPayloadOrder).toBe(
+        "spatial-leaf-anchor-v1",
+      );
+      expect(result.report.options.targetPayloadOrder).toBe("spatial-leaf-anchor-v1");
       // The package carries the property sidecar: a pointer in the glTF
       // extras, the parsed document, and the adapter column file verbatim.
       expect(gltf.extras.madi.properties).toMatchObject({

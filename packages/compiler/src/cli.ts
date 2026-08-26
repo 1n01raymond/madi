@@ -18,6 +18,7 @@ IFC options:
   --python <executable>          Python environment containing IfcOpenShell
   --threads <count>              Geometry iterator threads (default: up to 8)
   --target-chunk-kib <count>     Coalesced target request budget (default: 512)
+  --spatial-payload-order        Co-locate target payloads by dominant BVH leaf
   --retain-scene-ir              Keep the split intermediate pair under output
 
 General options:
@@ -47,6 +48,7 @@ interface IfcCompileArguments {
   readonly targetChunkByteBudget?: number;
   readonly spatialIndex: boolean;
   readonly spatialLeafCapacity?: number;
+  readonly spatialPayloadOrder: boolean;
   readonly retainSceneIr: boolean;
 }
 
@@ -136,6 +138,7 @@ function parseIfcCompileArguments(arguments_: string[]): IfcCompileArguments {
   let targetChunkByteBudget: number | undefined;
   let spatialIndex = false;
   let spatialLeafCapacity: number | undefined;
+  let spatialPayloadOrder = false;
   let retainSceneIr = false;
   for (let index = 0; index < arguments_.length; index += 1) {
     const option = arguments_[index];
@@ -178,6 +181,8 @@ function parseIfcCompileArguments(arguments_: string[]): IfcCompileArguments {
     } else if (option === "--spatial-leaf-capacity") {
       spatialLeafCapacity = integerOption(optionValue(arguments_, index, option), option);
       index += 1;
+    } else if (option === "--spatial-payload-order") {
+      spatialPayloadOrder = true;
     } else {
       throw new TypeError(`Unknown option ${String(option)}.\n\n${usage}`);
     }
@@ -186,6 +191,9 @@ function parseIfcCompileArguments(arguments_: string[]): IfcCompileArguments {
   if (!outputDirectory) throw new TypeError(`--output is required.\n\n${usage}`);
   if (spatialLeafCapacity !== undefined && !spatialIndex) {
     throw new TypeError(`--spatial-leaf-capacity requires --spatial-index.\n\n${usage}`);
+  }
+  if (spatialPayloadOrder && !spatialIndex) {
+    throw new TypeError(`--spatial-payload-order requires --spatial-index.\n\n${usage}`);
   }
   for (const discipline of uriHints.keys()) {
     if (!documents.has(discipline)) {
@@ -204,6 +212,7 @@ function parseIfcCompileArguments(arguments_: string[]): IfcCompileArguments {
     ...(targetChunkByteBudget === undefined ? {} : { targetChunkByteBudget }),
     spatialIndex,
     ...(spatialLeafCapacity === undefined ? {} : { spatialLeafCapacity }),
+    spatialPayloadOrder,
     retainSceneIr,
   };
 }
