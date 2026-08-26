@@ -136,4 +136,98 @@ await writeFile(option("--report"), JSON.stringify({
       await rm(temporaryDirectory, { recursive: true, force: true });
     }
   });
+
+  it("restores an unchanged STEP package without running extraction again", async () => {
+    const temporaryDirectory = await mkdtemp(join(tmpdir(), "naru-step-cache-test-"));
+    try {
+      const sourcePath = join(temporaryDirectory, "assembly.step");
+      const adapterPath = join(temporaryDirectory, "cache-adapter.mjs");
+      const counterPath = join(temporaryDirectory, "adapter-count.txt");
+      const cacheDirectory = join(temporaryDirectory, "cache");
+      const firstOutput = join(temporaryDirectory, "compiled-first");
+      const secondOutput = join(temporaryDirectory, "compiled-second");
+      await writeFile(
+        sourcePath,
+        "ISO-10303-21;\nHEADER;\nFILE_SCHEMA(('AP242_MANAGED_MODEL_BASED_3D_ENGINEERING_MIM_LF'));\nENDSEC;\nDATA;\nENDSEC;\nEND-ISO-10303-21;\n",
+        "utf8",
+      );
+      await writeFile(counterPath, "0", "utf8");
+      await writeFile(
+        adapterPath,
+        `import { createHash } from "node:crypto";
+import { basename } from "node:path";
+import { readFile, writeFile } from "node:fs/promises";
+const args = process.argv.slice(2);
+if (args.includes("--identity")) {
+  console.log(JSON.stringify({
+    schemaVersion: "naru.occt-adapter-identity.1",
+    name: "test-occt-adapter",
+    version: "1.0.0",
+    fingerprint: "1".repeat(64),
+  }));
+  process.exit(0);
+}
+const sourcePath = args[0];
+const option = (name) => args[args.indexOf(name) + 1];
+const count = Number(await readFile(${JSON.stringify(counterPath)}, "utf8"));
+await writeFile(${JSON.stringify(counterPath)}, String(count + 1));
+const source = await readFile(sourcePath);
+const digest = createHash("sha256").update(source).digest("hex");
+const scene = JSON.parse(await readFile(${JSON.stringify(sceneTemplatePath)}, "utf8"));
+scene.revision.sourceDigest = "sha256:" + digest;
+scene.documents = scene.documents.map((document) => ({
+  ...document,
+  uriHint: option("--uri-hint"),
+  displayName: basename(sourcePath),
+  formatVersion: "AP242",
+  sourceDigest: "sha256:" + digest,
+}));
+await writeFile(option("--scene"), JSON.stringify(scene));
+await writeFile(option("--report"), JSON.stringify({
+  schemaVersion: "test-adapter.1",
+  source: {
+    path: option("--uri-hint"),
+    sha256: digest,
+    format: "STEP AP242",
+    schemaIdentifiers: ["AP242_MANAGED_MODEL_BASED_3D_ENGINEERING_MIM_LF"],
+  },
+}));
+`,
+        "utf8",
+      );
+
+      const first = await compileStepFile({
+        sourcePath,
+        outputDirectory: firstOutput,
+        cacheDirectory,
+        pythonExecutable: process.execPath,
+        adapterScriptPath: adapterPath,
+      });
+      const second = await compileStepFile({
+        sourcePath,
+        outputDirectory: secondOutput,
+        cacheDirectory,
+        pythonExecutable: process.execPath,
+        adapterScriptPath: adapterPath,
+      });
+      const existing = await compileStepFile({
+        sourcePath,
+        outputDirectory: firstOutput,
+        cacheDirectory,
+        pythonExecutable: process.execPath,
+        adapterScriptPath: adapterPath,
+      });
+
+      expect(first.cache).toMatchObject({ status: "miss" });
+      expect(second.cache).toEqual({ status: "hit", key: first.cache.key });
+      expect(existing.cache).toEqual({ status: "hit", key: first.cache.key });
+      expect(await readFile(counterPath, "utf8")).toBe("1");
+      expect(second.report.output.packageDigest).toBe(first.report.output.packageDigest);
+      await expect(readFile(join(secondOutput, "scene.bin"))).resolves.toEqual(
+        await readFile(join(firstOutput, "scene.bin")),
+      );
+    } finally {
+      await rm(temporaryDirectory, { recursive: true, force: true });
+    }
+  });
 });

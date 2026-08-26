@@ -6,25 +6,27 @@ Read in this order:
    success metrics, and risks.
 2. [System architecture](ARCHITECTURE.md) — boundaries, data flow, runtime,
    precision, security, and compatibility.
-3. [Engineering Scene IR](SCENE_IR.md) — neutral semantic/assembly/
+3. [Import and cache contract](IMPORT_AND_CACHE.md) — cold import, progressive
+   preview, warm reopen, invalidation, and shared-cache product SLOs.
+4. [Engineering Scene IR](SCENE_IR.md) — neutral semantic/assembly/
    representation model.
-4. [Compiler](COMPILER.md) — source adapters, tessellation, edges, chunking,
+5. [Compiler](COMPILER.md) — source adapters, tessellation, edges, chunking,
    encoding, and validation.
-5. [WebGPU runtime](RUNTIME.md) — loading, Workers, GPU resources, rendering,
+6. [WebGPU runtime](RUNTIME.md) — loading, Workers, GPU resources, rendering,
    picking, clipping, and lifecycle.
-6. [Plugin architecture](PLUGINS.md) — capabilities, transactions, UI, analysis,
+7. [Plugin architecture](PLUGINS.md) — capabilities, transactions, UI, analysis,
    and distribution.
-7. [Benchmark plan](BENCHMARKS.md) — datasets, baselines, metrics, scenarios,
+8. [Benchmark plan](BENCHMARKS.md) — datasets, baselines, metrics, scenarios,
    and anti-benchmark rules.
-8. [Roadmap](ROADMAP.md) — evidence-gated phases and exit criteria.
-9. [Phase 0 evidence](PHASE_0.md) — completed exit record, reproduction, and
+9. [Roadmap](ROADMAP.md) — evidence-gated phases and exit criteria.
+10. [Phase 0 evidence](PHASE_0.md) — completed exit record, reproduction, and
    known limits.
-10. [Phase 1 evidence](PHASE_1.md) — current vertical-slice evidence and open
+11. [Phase 1 evidence](PHASE_1.md) — current vertical-slice evidence and open
     gates.
-11. [Architecture decisions](adr/README.md) — decisions and alternatives.
-12. [Branching and releases](BRANCHING.md) — work branches, pull requests,
+12. [Architecture decisions](adr/README.md) — decisions and alternatives.
+13. [Branching and releases](BRANCHING.md) — work branches, pull requests,
     merge rules, backports, tags, and enforcement gates.
-13. [Translations](TRANSLATIONS.md) — README languages, terminology, and
+14. [Translations](TRANSLATIONS.md) — README languages, terminology, and
     maintenance workflow.
 
 ## Documentation rules

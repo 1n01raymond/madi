@@ -52,6 +52,25 @@ canonical PyGamer package: source and resource hashes, buffer/accessor ranges,
 hierarchy, prototype reuse, triangle/edge counts, and official Khronos glTF
 validation.
 
+### Persistent compiled-cache foundation
+
+`src/compiled-cache.ts` starts the first priority in the
+[import/cache product contract](../../docs/IMPORT_AND_CACHE.md). It derives a
+deterministic key from source digests, adapter/compiler identities, and sorted
+compile options; publishes immutable flat package resources atomically; and
+verifies every byte count and SHA-256 before an atomic restore. Cache corruption
+fails before the requested output directory is created.
+
+The STEP path opts in with `--cache <directory>`. Before lookup, the OCCT
+adapter's `--identity` reports a fingerprint over its implementation, pinned
+CadQuery/OCP versions, Python, OS, and architecture; compiler identity similarly
+includes Node and host class until cross-platform determinism is proven. A
+verified hit reuses matching output or restores the package without running
+source extraction; a miss compiles normally and publishes only after package
+validation. The IFC command still invokes its adapter on every run;
+IFC identity/integration, cold/warm evidence, incremental federation
+dependencies, and shared-cache authorization remain follow-up gates.
+
 ## Compile an IFC federation
 
 Install the separate pinned adapter environment, then repeat `--document` for

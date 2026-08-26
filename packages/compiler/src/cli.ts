@@ -9,6 +9,7 @@ const usage = `Usage:
 
 STEP options:
   --python <executable>          Python environment containing CadQuery/OCP
+  --cache <directory>           Reuse verified packages by source/toolchain/options
   --linear-tolerance <mm>        Tessellation tolerance (default: 0.15)
   --angular-tolerance <radians>  Angular tolerance (default: 0.15)
 
@@ -29,6 +30,7 @@ interface CompileArguments {
   readonly pythonExecutable?: string;
   readonly linearTolerance?: number;
   readonly angularTolerance?: number;
+  readonly cacheDirectory?: string;
 }
 
 interface IfcCompileArguments {
@@ -81,6 +83,7 @@ function parseCompileArguments(arguments_: string[]): CompileArguments {
   let pythonExecutable: string | undefined;
   let linearTolerance: number | undefined;
   let angularTolerance: number | undefined;
+  let cacheDirectory: string | undefined;
   for (let index = 1; index < arguments_.length; index += 1) {
     const option = arguments_[index];
     if (option === "--output") {
@@ -95,6 +98,9 @@ function parseCompileArguments(arguments_: string[]): CompileArguments {
     } else if (option === "--angular-tolerance") {
       angularTolerance = numericOption(optionValue(arguments_, index, option), option);
       index += 1;
+    } else if (option === "--cache") {
+      cacheDirectory = optionValue(arguments_, index, option);
+      index += 1;
     } else {
       throw new TypeError(`Unknown option ${String(option)}.\n\n${usage}`);
     }
@@ -106,6 +112,7 @@ function parseCompileArguments(arguments_: string[]): CompileArguments {
     ...(pythonExecutable ? { pythonExecutable } : {}),
     ...(linearTolerance === undefined ? {} : { linearTolerance }),
     ...(angularTolerance === undefined ? {} : { angularTolerance }),
+    ...(cacheDirectory ? { cacheDirectory } : {}),
   };
 }
 
@@ -197,6 +204,9 @@ async function main(): Promise<void> {
         `${result.report.counts.triangleCount.toLocaleString("en-US")} triangles`,
     );
     console.log(`[naru] package ${result.report.output.packageDigest}`);
+    if (result.cache.status !== "disabled") {
+      console.log(`[naru] cache ${result.cache.status}: ${String(result.cache.key)}`);
+    }
     console.log(`[naru] output: ${result.outputDirectory}`);
     return;
   }

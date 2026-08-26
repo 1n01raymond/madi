@@ -11,7 +11,9 @@ import argparse
 import hashlib
 import json
 import math
+import platform
 import re
+import sys
 from importlib.metadata import version
 from pathlib import Path
 from typing import Any, Iterable, Sequence
@@ -56,6 +58,35 @@ UNSUPPORTED_STEP_ENTITIES = {
         ),
     }
 }
+
+
+def adapter_identity() -> dict[str, Any]:
+    """Return the cheap, compile-affecting identity used by persistent caches."""
+
+    implementation = Path(__file__).read_bytes()
+    toolchain = {
+        "cadquery": cq.__version__,
+        "ocp": OCP.__version__,
+        "cadqueryOcpPackage": version("cadquery-ocp"),
+        "python": platform.python_version(),
+        "platform": sys.platform,
+        "architecture": platform.machine(),
+    }
+    fingerprint_payload = json.dumps(
+        {
+            "implementationSha256": hashlib.sha256(implementation).hexdigest(),
+            "toolchain": toolchain,
+        },
+        sort_keys=True,
+        separators=(",", ":"),
+    ).encode("utf-8")
+    return {
+        "schemaVersion": "naru.occt-adapter-identity.1",
+        "name": "madi-occt-xde-evidence",
+        "version": "0.1.0",
+        "fingerprint": hashlib.sha256(fingerprint_payload).hexdigest(),
+        "toolchain": toolchain,
+    }
 
 
 def detect_step_schema(source_text: str) -> dict[str, Any]:
@@ -768,9 +799,14 @@ def write_json(path: Path, value: dict[str, Any]) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("source", type=Path)
-    parser.add_argument("--scene", required=True, type=Path)
-    parser.add_argument("--report", required=True, type=Path)
+    parser.add_argument("source", nargs="?", type=Path)
+    parser.add_argument("--scene", type=Path)
+    parser.add_argument("--report", type=Path)
+    parser.add_argument(
+        "--identity",
+        action="store_true",
+        help="Print the cache-safe adapter/toolchain identity without reading a source.",
+    )
     parser.add_argument("--linear-tolerance", type=float, default=0.15)
     parser.add_argument("--angular-tolerance", type=float, default=0.15)
     parser.add_argument(
@@ -778,6 +814,12 @@ def main() -> None:
         help="Non-sensitive source label stored in Scene IR and the adapter report.",
     )
     arguments = parser.parse_args()
+
+    if arguments.identity:
+        print(json.dumps(adapter_identity(), sort_keys=True, separators=(",", ":")))
+        return
+    if arguments.source is None or arguments.scene is None or arguments.report is None:
+        parser.error("source, --scene, and --report are required unless --identity is used")
 
     scene, report = extract(
         arguments.source,

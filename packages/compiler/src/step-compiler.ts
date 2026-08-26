@@ -11,6 +11,12 @@ import { inspectStepFile } from "./step-source.js";
 import type { StepSourceInspection } from "./step-source.js";
 import type { CompilerBuildReport } from "./types.js";
 import { validateCompiledGltf } from "./validate.js";
+import {
+  createCompiledCacheKey,
+  publishCompiledCacheEntry,
+  restoreCompiledCacheEntry,
+} from "./compiled-cache.js";
+import type { CompiledCacheKeyInput } from "./compiled-cache.js";
 
 const defaultAdapterScript = fileURLToPath(
   new URL("../../../native/adapter-occt/tools/extract_scene_ir.py", import.meta.url),
@@ -23,7 +29,14 @@ export interface StepCompileOptions {
   readonly adapterScriptPath?: string;
   readonly linearTolerance?: number;
   readonly angularTolerance?: number;
+  /** Optional persistent package cache. Existing output is reused only after full verification. */
+  readonly cacheDirectory?: string;
   readonly environment?: NodeJS.ProcessEnv;
+}
+
+export interface CompilationCacheResult {
+  readonly status: "disabled" | "hit" | "miss";
+  readonly key?: string;
 }
 
 export interface StepCompilationResult {
@@ -31,6 +44,7 @@ export interface StepCompilationResult {
   readonly outputDirectory: string;
   readonly report: CompilerBuildReport;
   readonly adapterReport: unknown;
+  readonly cache: CompilationCacheResult;
 }
 
 function positiveTolerance(value: number | undefined, fallback: number, label: string): number {
@@ -45,8 +59,8 @@ async function runAdapter(
   executable: string,
   arguments_: readonly string[],
   environment: NodeJS.ProcessEnv,
-): Promise<void> {
-  await new Promise<void>((resolvePromise, reject) => {
+): Promise<string> {
+  return await new Promise<string>((resolvePromise, reject) => {
     const child = spawn(executable, arguments_, {
       env: environment,
       shell: false,
@@ -73,7 +87,7 @@ async function runAdapter(
     });
     child.once("close", (code) => {
       if (code === 0) {
-        resolvePromise();
+        resolvePromise(stdout);
         return;
       }
       const details = stderr.trim() || stdout.trim() || `exit code ${String(code)}`;
@@ -89,6 +103,74 @@ async function runAdapter(
       reject(new TypeError(`OCCT STEP adapter failed: ${details}.`));
     });
   });
+}
+
+interface OcctAdapterIdentity {
+  readonly schemaVersion: "naru.occt-adapter-identity.1";
+  readonly name: string;
+  readonly version: string;
+  readonly fingerprint: string;
+}
+
+async function inspectAdapterIdentity(
+  executable: string,
+  adapterScriptPath: string,
+  environment: NodeJS.ProcessEnv,
+): Promise<OcctAdapterIdentity> {
+  const serialized = await runAdapter(executable, [adapterScriptPath, "--identity"], environment);
+  const value = parseJson(serialized.trim(), "OCCT adapter identity");
+  if (typeof value !== "object" || value === null) {
+    throw new TypeError("OCCT adapter identity must be an object.");
+  }
+  const identity = value as Partial<OcctAdapterIdentity>;
+  if (
+    identity.schemaVersion !== "naru.occt-adapter-identity.1" ||
+    typeof identity.name !== "string" ||
+    identity.name === "" ||
+    typeof identity.version !== "string" ||
+    identity.version === "" ||
+    typeof identity.fingerprint !== "string" ||
+    !/^[a-f0-9]{64}$/u.test(identity.fingerprint)
+  ) {
+    throw new TypeError("OCCT adapter returned an invalid cache identity.");
+  }
+  return identity as OcctAdapterIdentity;
+}
+
+function cacheInput(
+  inspection: StepSourceInspection,
+  identity: OcctAdapterIdentity,
+  linearTolerance: number,
+  angularTolerance: number,
+): CompiledCacheKeyInput {
+  return {
+    sources: [{ scope: "step", sha256: inspection.sha256 }],
+    adapter: {
+      name: identity.name,
+      version: `${identity.version}+${identity.fingerprint}`,
+    },
+    compiler: {
+      name: "@naru3d/compiler",
+      version:
+        `0.0.0+cache.1;node=${process.versions.node};` +
+        `platform=${process.platform}-${process.arch}`,
+    },
+    options: { linearTolerance, angularTolerance, coarseBounds: true },
+  };
+}
+
+function requireBuildReport(value: unknown, sourceDigest: string): CompilerBuildReport {
+  if (typeof value !== "object" || value === null) {
+    throw new TypeError("Cached build report must be an object.");
+  }
+  const report = value as Partial<CompilerBuildReport>;
+  if (
+    report.source?.sourceDigest !== `sha256:${sourceDigest}` ||
+    typeof report.output?.packageDigest !== "string"
+  ) {
+    throw new TypeError("Cached build report source/package identity changed.");
+  }
+  return report as CompilerBuildReport;
 }
 
 function parseJson(text: string, label: string): unknown {
@@ -135,16 +217,56 @@ export async function compileStepFile(
     0.15,
     "Angular tolerance",
   );
+  const pythonExecutable =
+    options.pythonExecutable ??
+    process.env.NARU_PYTHON ??
+    (process.platform === "win32" ? "python" : "python3");
+  const adapterScriptPath = resolve(options.adapterScriptPath ?? defaultAdapterScript);
+  const environment = options.environment ?? process.env;
+  let cacheKeyInput: CompiledCacheKeyInput | undefined;
+  let cacheKey: string | undefined;
+  if (options.cacheDirectory) {
+    const identity = await inspectAdapterIdentity(
+      pythonExecutable,
+      adapterScriptPath,
+      environment,
+    );
+    cacheKeyInput = cacheInput(inspection, identity, linearTolerance, angularTolerance);
+    cacheKey = createCompiledCacheKey(cacheKeyInput);
+    const restored = await restoreCompiledCacheEntry({
+      cacheDirectory: options.cacheDirectory,
+      key: cacheKey,
+      outputDirectory,
+    });
+    if (restored) {
+      const [serializedBuildReport, serializedAdapterReport] = await Promise.all([
+        readFile(resolve(outputDirectory, "build-report.json"), "utf8"),
+        readFile(resolve(outputDirectory, "adapter-report.json"), "utf8"),
+      ]);
+      const report = requireBuildReport(
+        parseJson(serializedBuildReport, "Cached build report"),
+        inspection.sha256,
+      );
+      if (report.output.packageDigest !== restored.packageDigest) {
+        throw new TypeError("Cached package digest does not match its manifest.");
+      }
+      return {
+        source: inspection,
+        outputDirectory,
+        report,
+        adapterReport: parseJson(serializedAdapterReport, "Cached adapter report"),
+        cache: { status: "hit", key: cacheKey },
+      };
+    }
+  }
   const temporaryDirectory = await mkdtemp(join(tmpdir(), "naru-step-"));
   const scenePath = join(temporaryDirectory, "scene-ir.json");
   const adapterReportPath = join(temporaryDirectory, "adapter-report.json");
   try {
     await runAdapter(
-      options.pythonExecutable ??
-        process.env.NARU_PYTHON ??
-        (process.platform === "win32" ? "python" : "python3"),
+      pythonExecutable,
       [
-        resolve(options.adapterScriptPath ?? defaultAdapterScript),
+        adapterScriptPath,
         sourcePath,
         "--scene",
         scenePath,
@@ -157,7 +279,7 @@ export async function compileStepFile(
         "--uri-hint",
         basename(sourcePath),
       ],
-      options.environment ?? process.env,
+      environment,
     );
     const [serializedScene, serializedAdapterReport] = await Promise.all([
       readFile(scenePath, "utf8"),
@@ -185,7 +307,26 @@ export async function compileStepFile(
       );
     }
     await writeCompiledPackage(compiled, outputDirectory, adapterReport);
-    return { source: inspection, outputDirectory, report: compiled.report, adapterReport };
+    if (cacheKeyInput && cacheKey) {
+      await publishCompiledCacheEntry({
+        cacheDirectory: options.cacheDirectory as string,
+        packageDirectory: outputDirectory,
+        input: cacheKeyInput,
+        packageDigest: compiled.report.output.packageDigest,
+        resourcePaths: [
+          ...compiled.report.output.resources.map(({ path }) => path),
+          "adapter-report.json",
+          "build-report.json",
+        ],
+      });
+    }
+    return {
+      source: inspection,
+      outputDirectory,
+      report: compiled.report,
+      adapterReport,
+      cache: cacheKey ? { status: "miss", key: cacheKey } : { status: "disabled" },
+    };
   } finally {
     await rm(temporaryDirectory, { recursive: true, force: true });
   }

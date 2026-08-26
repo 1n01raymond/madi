@@ -152,7 +152,10 @@ smoke-checks the live app, package resources, and HTTP Range delivery.
 
 ## Phase 2 — Large-scene alpha (`0.2.x`)
 
-- content-addressed persistent cache;
+- content-addressed persistent cache under the
+  [import/cache product contract](IMPORT_AND_CACHE.md): cancellable background
+  cold import, hierarchy/coarse preview in 5–15 s, unchanged reopen in 1–5 s,
+  followed by dependency-safe per-discipline rebuild and authorized shared reuse;
 - view-prioritized scheduling and cancellation of obsolete camera work
   (coarse-bounds policy implemented; spatial/screen-space policy pending);
 - dynamic memory budgets and persistent cache tiers (fixed admission budgets and
