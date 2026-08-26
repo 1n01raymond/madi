@@ -43,6 +43,16 @@ reports `IFC_EDGE_EXTRACTION_DEFERRED` and zero explicit edge segments. The
 compact result is checked by `pnpm ifc:federation:check`; large source and
 compiled binaries remain outside Git.
 
+E2.1 is now proven independently on the project-owned IFC4 wall fixture. The
+current split.4 adapter preserves 12 OpenCascade face-boundary segments and
+maps every segment to `IfcExtrudedAreaSolid#21`; the validator derives an
+18-edge triangle-wireframe control from the 12 surface triangles and proves
+that all six face diagonals are excluded. The edge and surface primitives reuse
+one POSITION accessor, and Khronos validation reports zero errors and warnings.
+See `artifacts/ifc/explicit-edges/` and run `pnpm ifc:edges:check`. Digital Hub
+and sixty5 remain historical split.3 surface-only records rather than being
+silently rewritten.
+
 ### Split Scene IR transport and the real-large boundary
 
 The adapter no longer hands the compiler one expanded JSON document. It writes
@@ -150,6 +160,7 @@ pnpm phase1:compile:evidence
 pnpm naru compile fixtures/step/repeated-fasteners-ap242.step \
   --output output/repeated-fasteners-ap242
 pnpm phase1:evidence:check
+pnpm ifc:edges:check
 pnpm browser:matrix
 pnpm safari:compatibility
 pnpm precision:evidence
@@ -205,9 +216,10 @@ downstream output invariant verified in `artifacts/ifc/sixty5/`. The compiled
 package now republishes those properties as the `madi.package-properties.1`
 sidecar and the Studio resolves the selected occurrence's property sets
 lazily through the same column reader; full-text search over property values
-remains a deliberate Phase 1 exclusion. The next compiler increment is
-explicit IFC edge extraction (E2.1). The
-browser gate for that package is now
+remains a deliberate Phase 1 exclusion. Focused E2.1 explicit IFC boundaries
+are now recorded; analytic curve kinds, richer edge classification, and a
+real-model edge re-record remain future increments. The browser gate for the
+sixty5 package is now
 recorded (`artifacts/ifc/sixty5-browser/`): loading, bounded residency,
 picking, and lazy property resolution hold at real-large scale. The named
 268.0 s main-thread first-frame path is now reduced to a 12.796 s median by

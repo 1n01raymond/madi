@@ -1,0 +1,626 @@
+{
+  "asset": {
+    "version": "2.0",
+    "generator": "MADI compiler 0.0.0 / IfcOpenShell federation slice"
+  },
+  "scene": 0,
+  "scenes": [
+    {
+      "name": "scene:ifc-federation:b3fe988ba7607b58",
+      "nodes": [
+        0
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "name": "MADI source frame",
+      "children": [
+        1,
+        2
+      ],
+      "matrix": [
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        -1,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1
+      ],
+      "extras": {
+        "madi": {
+          "kind": "source-frame",
+          "sourceUpAxis": "Z",
+          "targetUpAxis": "Y",
+          "sourceLengthUnit": "m",
+          "scaleToMeters": 1
+        }
+      }
+    },
+    {
+      "name": "NARU Explicit Edge Fixture",
+      "matrix": [
+        1,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        1
+      ],
+      "extras": {
+        "madi": {
+          "occurrenceId": "occurrence:ifc:architecture-cf15bb336ca6:1",
+          "prototypeId": "prototype:ifc:architecture-cf15bb336ca6:non-geometric:ifcproject",
+          "semanticId": "semantic:ifc:architecture-cf15bb336ca6:guid:0xi9LUIe90eumVhKl_uE_W",
+          "sourceRef": "source:ifc:architecture-cf15bb336ca6:guid:0xi9LUIe90eumVhKl_uE_W",
+          "initialVisibility": true,
+          "tags": [
+            "ifc",
+            "non-geometric",
+            "architecture",
+            "ifcproject"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Edge Proof Wall",
+      "matrix": [
+        1,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        1
+      ],
+      "mesh": 0,
+      "extras": {
+        "madi": {
+          "occurrenceId": "occurrence:ifc:architecture-cf15bb336ca6:12",
+          "prototypeId": "prototype:ifc:architecture-cf15bb336ca6:22",
+          "semanticId": "semantic:ifc:architecture-cf15bb336ca6:guid:1$MFVSawD0IumtMukH2qSS",
+          "sourceRef": "source:ifc:architecture-cf15bb336ca6:guid:1$MFVSawD0IumtMukH2qSS",
+          "initialVisibility": true,
+          "tags": [
+            "ifc",
+            "geometry",
+            "architecture",
+            "ifcwall"
+          ],
+          "coarseMesh": 1
+        }
+      }
+    }
+  ],
+  "meshes": [
+    {
+      "name": "IfcWall geometry 22",
+      "primitives": [
+        {
+          "attributes": {
+            "POSITION": 0,
+            "NORMAL": 1
+          },
+          "indices": 2,
+          "material": 2,
+          "mode": 4,
+          "extras": {
+            "madi": {
+              "kind": "surface",
+              "representationId": "representation:ifc:architecture-cf15bb336ca6:22:display",
+              "firstIndex": 0,
+              "indexCount": 36,
+              "sourceRefs": [
+                "source:ifc:architecture-cf15bb336ca6:22:geometry",
+                "source:ifc:architecture-cf15bb336ca6:step:21:representation-item"
+              ]
+            }
+          }
+        },
+        {
+          "attributes": {
+            "POSITION": 0
+          },
+          "indices": 3,
+          "material": 3,
+          "mode": 1,
+          "extras": {
+            "madi": {
+              "kind": "explicit-cad-edges",
+              "representationId": "representation:ifc:architecture-cf15bb336ca6:22:display",
+              "edgeClassAccessor": 4,
+              "edgeSourceAccessor": 5,
+              "sourceRefs": [
+                "source:ifc:architecture-cf15bb336ca6:22:geometry",
+                "source:ifc:architecture-cf15bb336ca6:step:21:representation-item"
+              ],
+              "curveHints": []
+            }
+          }
+        }
+      ],
+      "extras": {
+        "madi": {
+          "prototypeId": "prototype:ifc:architecture-cf15bb336ca6:22",
+          "representationId": "representation:ifc:architecture-cf15bb336ca6:22:display",
+          "sourceRef": "source:ifc:architecture-cf15bb336ca6:22:geometry"
+        }
+      }
+    },
+    {
+      "name": "IfcWall geometry 22 coarse bounds",
+      "primitives": [
+        {
+          "attributes": {
+            "POSITION": 6,
+            "NORMAL": 7
+          },
+          "indices": 8,
+          "material": 2,
+          "mode": 4,
+          "extras": {
+            "madi": {
+              "kind": "coarse-bounds-surface",
+              "representationId": "representation:ifc:architecture-cf15bb336ca6:22:display"
+            }
+          }
+        },
+        {
+          "attributes": {
+            "POSITION": 9
+          },
+          "indices": 10,
+          "material": 3,
+          "mode": 1,
+          "extras": {
+            "madi": {
+              "kind": "coarse-bounds-edges",
+              "representationId": "representation:ifc:architecture-cf15bb336ca6:22:display"
+            }
+          }
+        }
+      ],
+      "extras": {
+        "madi": {
+          "prototypeId": "prototype:ifc:architecture-cf15bb336ca6:22",
+          "representationId": "representation:ifc:architecture-cf15bb336ca6:22:display",
+          "role": "coarse-bounds"
+        }
+      }
+    }
+  ],
+  "materials": [
+    {
+      "name": "MADI fallback surface",
+      "pbrMetallicRoughness": {
+        "baseColorFactor": [
+          0.55,
+          0.62,
+          0.68,
+          1
+        ],
+        "metallicFactor": 0.05,
+        "roughnessFactor": 0.72
+      },
+      "extras": {
+        "madi": {
+          "role": "surface",
+          "fallback": true
+        }
+      }
+    },
+    {
+      "name": "MADI fallback edges",
+      "pbrMetallicRoughness": {
+        "baseColorFactor": [
+          0.025,
+          0.045,
+          0.06,
+          1
+        ],
+        "metallicFactor": 0,
+        "roughnessFactor": 1
+      },
+      "extras": {
+        "madi": {
+          "role": "edge",
+          "fallback": true
+        }
+      }
+    },
+    {
+      "name": "IfcWall",
+      "pbrMetallicRoughness": {
+        "baseColorFactor": [
+          0.9,
+          0.9,
+          0.9,
+          1
+        ],
+        "metallicFactor": 0,
+        "roughnessFactor": 0.8
+      },
+      "doubleSided": true,
+      "alphaMode": "OPAQUE",
+      "extras": {
+        "madi": {
+          "materialId": "material:ifc:0adec8fb25116e63",
+          "role": "surface"
+        }
+      }
+    },
+    {
+      "name": "IfcWall edges",
+      "pbrMetallicRoughness": {
+        "baseColorFactor": [
+          0.03,
+          0.05,
+          0.07,
+          1
+        ],
+        "metallicFactor": 0,
+        "roughnessFactor": 1
+      },
+      "doubleSided": true,
+      "alphaMode": "OPAQUE",
+      "extras": {
+        "madi": {
+          "materialId": "material:ifc:0adec8fb25116e63",
+          "role": "edge"
+        }
+      }
+    },
+    {
+      "name": "IFC default material",
+      "pbrMetallicRoughness": {
+        "baseColorFactor": [
+          0.62,
+          0.68,
+          0.72,
+          1
+        ],
+        "metallicFactor": 0,
+        "roughnessFactor": 0.8
+      },
+      "doubleSided": true,
+      "alphaMode": "OPAQUE",
+      "extras": {
+        "madi": {
+          "materialId": "material:ifc:e8ce4c2f86450792",
+          "role": "surface"
+        }
+      }
+    },
+    {
+      "name": "IFC default material edges",
+      "pbrMetallicRoughness": {
+        "baseColorFactor": [
+          0.03,
+          0.05,
+          0.07,
+          1
+        ],
+        "metallicFactor": 0,
+        "roughnessFactor": 1
+      },
+      "doubleSided": true,
+      "alphaMode": "OPAQUE",
+      "extras": {
+        "madi": {
+          "materialId": "material:ifc:e8ce4c2f86450792",
+          "role": "edge"
+        }
+      }
+    }
+  ],
+  "buffers": [
+    {
+      "uri": "scene.bin",
+      "byteLength": 492
+    },
+    {
+      "uri": "coarse.bin",
+      "byteLength": 912
+    }
+  ],
+  "bufferViews": [
+    {
+      "buffer": 0,
+      "byteOffset": 0,
+      "byteLength": 96,
+      "target": 34962,
+      "name": "representation:ifc:architecture-cf15bb336ca6:22:display surface positions"
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 96,
+      "byteLength": 96,
+      "target": 34962,
+      "name": "representation:ifc:architecture-cf15bb336ca6:22:display surface normals"
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 192,
+      "byteLength": 144,
+      "target": 34963,
+      "name": "representation:ifc:architecture-cf15bb336ca6:22:display surface indices 0"
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 336,
+      "byteLength": 96,
+      "target": 34963,
+      "name": "representation:ifc:architecture-cf15bb336ca6:22:display edge indices"
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 432,
+      "byteLength": 12,
+      "name": "representation:ifc:architecture-cf15bb336ca6:22:display edge classes"
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 444,
+      "byteLength": 48,
+      "name": "representation:ifc:architecture-cf15bb336ca6:22:display edge source IDs"
+    },
+    {
+      "buffer": 1,
+      "byteOffset": 0,
+      "byteLength": 288,
+      "target": 34962,
+      "name": "representation:ifc:architecture-cf15bb336ca6:22:display coarse bounds positions"
+    },
+    {
+      "buffer": 1,
+      "byteOffset": 288,
+      "byteLength": 288,
+      "target": 34962,
+      "name": "representation:ifc:architecture-cf15bb336ca6:22:display coarse bounds normals"
+    },
+    {
+      "buffer": 1,
+      "byteOffset": 576,
+      "byteLength": 144,
+      "target": 34963,
+      "name": "representation:ifc:architecture-cf15bb336ca6:22:display coarse bounds surface indices"
+    },
+    {
+      "buffer": 1,
+      "byteOffset": 720,
+      "byteLength": 96,
+      "target": 34962,
+      "name": "representation:ifc:architecture-cf15bb336ca6:22:display coarse bounds edge positions"
+    },
+    {
+      "buffer": 1,
+      "byteOffset": 816,
+      "byteLength": 96,
+      "target": 34963,
+      "name": "representation:ifc:architecture-cf15bb336ca6:22:display coarse bounds edge indices"
+    }
+  ],
+  "accessors": [
+    {
+      "bufferView": 0,
+      "componentType": 5126,
+      "count": 8,
+      "type": "VEC3",
+      "min": [
+        0,
+        0,
+        0
+      ],
+      "max": [
+        2,
+        0.20000000298023224,
+        3
+      ],
+      "name": "representation:ifc:architecture-cf15bb336ca6:22:display surface positions"
+    },
+    {
+      "bufferView": 1,
+      "componentType": 5126,
+      "count": 8,
+      "type": "VEC3",
+      "name": "representation:ifc:architecture-cf15bb336ca6:22:display surface normals"
+    },
+    {
+      "bufferView": 2,
+      "componentType": 5125,
+      "count": 36,
+      "type": "SCALAR",
+      "min": [
+        0
+      ],
+      "max": [
+        7
+      ],
+      "name": "representation:ifc:architecture-cf15bb336ca6:22:display surface indices 0"
+    },
+    {
+      "bufferView": 3,
+      "componentType": 5125,
+      "count": 24,
+      "type": "SCALAR",
+      "min": [
+        0
+      ],
+      "max": [
+        7
+      ],
+      "name": "representation:ifc:architecture-cf15bb336ca6:22:display edge indices"
+    },
+    {
+      "bufferView": 4,
+      "componentType": 5121,
+      "count": 12,
+      "type": "SCALAR",
+      "name": "representation:ifc:architecture-cf15bb336ca6:22:display edge classes"
+    },
+    {
+      "bufferView": 5,
+      "componentType": 5125,
+      "count": 12,
+      "type": "SCALAR",
+      "name": "representation:ifc:architecture-cf15bb336ca6:22:display edge source IDs"
+    },
+    {
+      "bufferView": 6,
+      "componentType": 5126,
+      "count": 24,
+      "type": "VEC3",
+      "min": [
+        0,
+        0,
+        0
+      ],
+      "max": [
+        2,
+        0.20000000298023224,
+        3
+      ],
+      "name": "representation:ifc:architecture-cf15bb336ca6:22:display coarse bounds positions"
+    },
+    {
+      "bufferView": 7,
+      "componentType": 5126,
+      "count": 24,
+      "type": "VEC3",
+      "name": "representation:ifc:architecture-cf15bb336ca6:22:display coarse bounds normals"
+    },
+    {
+      "bufferView": 8,
+      "componentType": 5125,
+      "count": 36,
+      "type": "SCALAR",
+      "min": [
+        0
+      ],
+      "max": [
+        23
+      ],
+      "name": "representation:ifc:architecture-cf15bb336ca6:22:display coarse bounds surface indices"
+    },
+    {
+      "bufferView": 9,
+      "componentType": 5126,
+      "count": 8,
+      "type": "VEC3",
+      "min": [
+        0,
+        0,
+        0
+      ],
+      "max": [
+        2,
+        0.20000000298023224,
+        3
+      ],
+      "name": "representation:ifc:architecture-cf15bb336ca6:22:display coarse bounds edge positions"
+    },
+    {
+      "bufferView": 10,
+      "componentType": 5125,
+      "count": 24,
+      "type": "SCALAR",
+      "min": [
+        0
+      ],
+      "max": [
+        7
+      ],
+      "name": "representation:ifc:architecture-cf15bb336ca6:22:display coarse bounds edge indices"
+    }
+  ],
+  "extras": {
+    "madi": {
+      "profile": "madi.experimental.gltf.1",
+      "status": "experimental-not-interchange",
+      "sceneId": "scene:ifc-federation:b3fe988ba7607b58",
+      "revisionId": "revision:ifc-federation:b3fe988ba7607b58",
+      "sourceDigest": "sha256:b3fe988ba7607b580345342bb26138becae437401e5081eba869ffb8d79108e9",
+      "optionsDigest": "sha256:809e8ea555dea32be53fe4268e0831ca6d1bc43079333c78b2e521150758f79f",
+      "progressive": {
+        "strategy": "prototype-aabb-v1",
+        "targetBuffer": 0,
+        "coarseBuffer": 1,
+        "targetChunks": [
+          {
+            "id": "target:0000:prototype:ifc:architecture-cf15bb336ca6:22",
+            "buffer": 0,
+            "byteOffset": 0,
+            "byteLength": 492,
+            "meshIndexes": [
+              0
+            ],
+            "prototypeId": "prototype:ifc:architecture-cf15bb336ca6:22",
+            "prototypeIds": [
+              "prototype:ifc:architecture-cf15bb336ca6:22"
+            ],
+            "occurrenceCount": 1,
+            "priority": 0
+          }
+        ]
+      },
+      "properties": {
+        "schemaVersion": "madi.package-properties.1",
+        "uri": "properties.json",
+        "byteLength": 1108,
+        "sha256": "b93430de0dfd89379725913f265b54955a7bc34b1d48ddf7a80575c931695841"
+      },
+      "documents": [
+        {
+          "id": "document:ifc:architecture-cf15bb336ca6",
+          "displayName": "explicit-edge-wall.ifc",
+          "format": "IFC",
+          "formatVersion": "IFC4",
+          "sourceDigest": "sha256:cf15bb336ca6f563ab899bd0d3d5e499529d9523cf5c2275ed161dd42a8f8f28"
+        }
+      ],
+      "diagnostics": [
+        {
+          "severity": "info",
+          "code": "IFC_EDGE_CLASSIFICATION_BOUNDARY_ONLY",
+          "message": "IfcOpenShell OpenCascade face-boundary segments are explicit edges; analytic curve kinds and sharp/smooth/seam classes are not yet retained.",
+          "data": {
+            "entries": {
+              "handling": "tessellated-boundary-segments"
+            },
+            "schema": "naru.ifc-adapter.2"
+          }
+        }
+      ]
+    }
+  }
+}

@@ -60,7 +60,7 @@ Node 22.12+ and pnpm 11 (`packageManager` pin). If `pnpm` is not on PATH, use
 | `pnpm demo:smoke` | Check the deployed Studio, package resources, and HTTP Range delivery |
 | `pnpm naru compile <file.step> --output <dir>` | Compile a local STEP source |
 | `pnpm naru compile-ifc ...` | Compile an IFC federation from discipline/document pairs |
-| `pnpm <record>:check` | Validate one evidence record (`phase1:evidence`, `ifc:federation`, `browser:evidence`, `benchmark:industrial`, `benchmark:heterogeneous`, `fixtures`, `fixtures:external`, `occt:diagnostics`, `adr`) |
+| `pnpm <record>:check` | Validate one evidence record (`phase1:evidence`, `ifc:edges`, `ifc:federation`, `browser:evidence`, `benchmark:industrial`, `benchmark:heterogeneous`, `fixtures`, `fixtures:external`, `occt:diagnostics`, `adr`) |
 | `pnpm ifc:federation:evidence`, `pnpm phase1:compile:evidence`, `pnpm benchmark:*`, `pnpm browser:matrix` | Re-record evidence (slow; headed browsers for the last two) |
 | `pnpm native:check` | Verify native toolchains before configuring adapters |
 

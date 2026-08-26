@@ -1,0 +1,92 @@
+{
+  "schemaVersion": "madi.phase1.compiler-report.1",
+  "profile": "madi.experimental.gltf.1",
+  "status": "experimental-not-interchange",
+  "compiler": {
+    "name": "@madi/compiler",
+    "version": "0.0.0",
+    "generator": "MADI compiler 0.0.0 / IfcOpenShell federation slice"
+  },
+  "options": {
+    "binaryUri": "scene.bin",
+    "coarseBinaryUri": "coarse.bin",
+    "propertiesUri": "properties.json",
+    "propertiesBinaryUri": "properties.bin",
+    "coordinateSystem": "right-handed-y-up-meters",
+    "geometryEncoding": "gltf-f32",
+    "progressiveRepresentation": "prototype-aabb-v1",
+    "targetChunking": "coalesced-prototype-range-v1",
+    "targetChunkByteBudget": 524288
+  },
+  "source": {
+    "sceneId": "scene:ifc-federation:b3fe988ba7607b58",
+    "revisionId": "revision:ifc-federation:b3fe988ba7607b58",
+    "sourceDigest": "sha256:b3fe988ba7607b580345342bb26138becae437401e5081eba869ffb8d79108e9",
+    "adapter": "IfcOpenShell 0.8.5",
+    "optionsDigest": "sha256:809e8ea555dea32be53fe4268e0831ca6d1bc43079333c78b2e521150758f79f"
+  },
+  "output": {
+    "packageDigest": "83ab598070eee6bb77536f8f80d90a3712afde2638c50a5ea5d0d743eab598fc",
+    "resources": [
+      {
+        "path": "scene.gltf",
+        "mediaType": "model/gltf+json",
+        "bytes": 15033,
+        "sha256": "bbabcfdf2108516dfcedecacea9dadb3e8d2c5beea8c14d2444a4fcf249aaa22"
+      },
+      {
+        "path": "scene.bin",
+        "mediaType": "application/octet-stream",
+        "bytes": 492,
+        "sha256": "c2e7f0e7bcd4d28eb51018f75bd20b38b9382f1760cec8c42303819796b2ff3f"
+      },
+      {
+        "path": "coarse.bin",
+        "mediaType": "application/octet-stream",
+        "bytes": 912,
+        "sha256": "2c00d40a25112356a88a48f357e2bb24409e1882b1da2f82b908ae15e98f6b1d"
+      },
+      {
+        "path": "properties.json",
+        "mediaType": "application/json",
+        "bytes": 1108,
+        "sha256": "b93430de0dfd89379725913f265b54955a7bc34b1d48ddf7a80575c931695841"
+      },
+      {
+        "path": "properties.bin",
+        "mediaType": "application/octet-stream",
+        "bytes": 129,
+        "sha256": "5543ecd2f4d6a852ed4e93f30c3c65c83521d7ed2a173c56c55073bb66036711"
+      }
+    ]
+  },
+  "counts": {
+    "prototypeCount": 2,
+    "compiledPrototypeCount": 1,
+    "occurrenceCount": 2,
+    "renderableOccurrenceCount": 1,
+    "gltfNodeCount": 3,
+    "gltfMeshCount": 2,
+    "materialCount": 6,
+    "triangleCount": 12,
+    "edgeSegmentCount": 12,
+    "targetChunkCount": 1
+  },
+  "prototypeReuse": [],
+  "diagnostics": {
+    "counts": {
+      "info": 1,
+      "warning": 0,
+      "error": 0
+    },
+    "codes": [
+      "IFC_EDGE_CLASSIFICATION_BOUNDARY_ONLY"
+    ]
+  },
+  "limitations": [
+    "This is an experimental glTF profile, not a MADI interchange format.",
+    "The coarse representation is a prototype AABB, not a shape-preserving LOD.",
+    "Geometry and node transforms are converted to f32 for glTF delivery.",
+    "MADI source mapping uses glTF extras until an interoperable extension is justified."
+  ]
+}

@@ -2,6 +2,7 @@ import { endianness } from "node:os";
 
 import { isColumnPropertyBag, openPropertyValueColumns } from "@naru3d/scene-ir";
 import type {
+  CurveHint,
   EngineeringScene,
   MaterialGroup,
   Representation,
@@ -18,10 +19,10 @@ import type {
  * string limits.
  */
 
-export const ifcSceneSplitEncodingVersion = "madi.ifc-scene-ir-split.3";
+export const ifcSceneSplitEncodingVersion = "naru.ifc-scene-ir-split.4";
 
 interface GeometryStreamRef {
-  readonly encoding: "f64le" | "f32le" | "u32le";
+  readonly encoding: "f64le" | "f32le" | "u32le" | "u8";
   readonly byteOffset: number;
   readonly byteLength: number;
 }
@@ -34,8 +35,17 @@ interface SerializedSplitSurface {
   readonly materialGroups?: readonly MaterialGroup[];
 }
 
+interface SerializedSplitEdges {
+  readonly positions: GeometryStreamRef;
+  readonly segments: GeometryStreamRef;
+  readonly classes: GeometryStreamRef;
+  readonly sourceIds?: GeometryStreamRef;
+  readonly curveHints?: readonly CurveHint[];
+}
+
 type SerializedSplitRepresentation = Omit<Representation, "surface" | "edges"> & {
   readonly surface?: SerializedSplitSurface;
+  readonly edges?: SerializedSplitEdges;
 };
 
 type SerializedSplitScene = Omit<EngineeringScene, "representations"> & {
@@ -56,7 +66,9 @@ function isGeometryStreamRef(value: unknown): value is GeometryStreamRef {
 }
 
 function elementBytes(encoding: GeometryStreamRef["encoding"]): number {
-  return encoding === "f64le" ? 8 : 4;
+  if (encoding === "f64le") return 8;
+  if (encoding === "u8") return 1;
+  return 4;
 }
 
 /**
@@ -78,7 +90,8 @@ function alignedGeometry(geometry: Buffer): Buffer {
 type GeometryView =
   | Float64ArrayConstructor
   | Float32ArrayConstructor
-  | Uint32ArrayConstructor;
+  | Uint32ArrayConstructor
+  | Uint8ArrayConstructor;
 
 function typedArrayView<View extends GeometryView>(
   geometry: Buffer,
@@ -141,6 +154,40 @@ function hydrateSurface(
   };
 }
 
+function hydrateEdges(
+  geometry: Buffer,
+  edges: SerializedSplitEdges,
+): Representation["edges"] {
+  if (
+    !isGeometryStreamRef(edges.positions) ||
+    !isGeometryStreamRef(edges.segments) ||
+    !isGeometryStreamRef(edges.classes)
+  ) {
+    throw new TypeError("Split IFC edge streams must be geometry references.");
+  }
+  if (
+    edges.positions.encoding !== "f64le" ||
+    edges.segments.encoding !== "u32le" ||
+    edges.classes.encoding !== "u8"
+  ) {
+    throw new TypeError("Split IFC edge streams use unexpected encodings.");
+  }
+  let sourceIds: Uint32Array | undefined;
+  if (edges.sourceIds !== undefined) {
+    if (!isGeometryStreamRef(edges.sourceIds) || edges.sourceIds.encoding !== "u32le") {
+      throw new TypeError("Split IFC edge source stream uses an unexpected encoding.");
+    }
+    sourceIds = typedArrayView(geometry, edges.sourceIds, Uint32Array);
+  }
+  return {
+    positions: typedArrayView(geometry, edges.positions, Float64Array),
+    segments: typedArrayView(geometry, edges.segments, Uint32Array),
+    classes: typedArrayView(geometry, edges.classes, Uint8Array),
+    sourceIds,
+    curveHints: edges.curveHints,
+  };
+}
+
 /**
  * Structurally verifies the property value column file against the scene it
  * belongs to: `openPropertyValueColumns` checks the offset tables and
@@ -194,12 +241,13 @@ export function hydrateIfcSceneSplit(
   return {
     ...scene,
     representations: scene.representations.map((representation) => {
-      if (member(representation, "edges") !== undefined) {
-        throw new TypeError("Split IFC representations cannot carry edge streams.");
-      }
-      return representation.surface
-        ? { ...representation, surface: hydrateSurface(aligned, representation.surface) }
-        : (representation as Representation);
+      const surface = representation.surface
+        ? hydrateSurface(aligned, representation.surface)
+        : undefined;
+      const edges = representation.edges
+        ? hydrateEdges(aligned, representation.edges)
+        : undefined;
+      return { ...representation, surface, edges } as Representation;
     }),
   };
 }

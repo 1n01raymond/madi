@@ -14,12 +14,19 @@ The first executable slice preserves:
   (`madi.ifc-scene-ir-split.3`, `tools/property_columns.py`);
 - project/site/building/storey/product containment and local transforms;
 - IfcOpenShell local triangulation separated from occurrence placement;
+- OpenCascade face-boundary segments as explicit boundary edges, mapped back
+  to their originating IFC representation-item STEP ids;
 - prototype reuse keyed by IfcOpenShell's geometry identity; and
 - source units normalized to a metre/Z-up federation frame.
 
-IFC curve and boundary-edge classification is intentionally deferred. The
-adapter emits surfaces and a stable diagnostic rather than labeling triangle or
-topological edges as explicit CAD edges.
+IfcOpenShell's OpenCascade backend derives these lines from per-face boundary
+edges after removing manifold triangle edges; they are not a triangle
+wireframe. `naru.ifc-scene-ir-split.4` streams their indices, boundary classes,
+and source ids while allowing edge positions to alias the surface position
+stream. Analytic curve kinds and sharp/smooth/seam classification remain
+deferred and are disclosed as `IFC_EDGE_CLASSIFICATION_BOUNDARY_ONLY`. The
+focused proof is `artifacts/ifc/explicit-edges/`; the older real-model records
+remain historical split.3 surface-only evidence.
 
 ## Degenerate placement handling
 
@@ -36,8 +43,8 @@ time (`ValueError`) instead of emitting invalid JSON with a bare `NaN` token.
 
 ## Adapter unit tests
 
-`placement_math.py`, `property_index.py`, and `property_columns.py` have no
-IfcOpenShell import, so their tests run without the pinned adapter
+`placement_math.py`, `property_index.py`, `property_columns.py`, and
+`explicit_edges.py` have no IfcOpenShell import, so their tests run without the pinned adapter
 environment:
 
 ```sh
@@ -81,7 +88,7 @@ pnpm naru compile-ifc \
 
 The Scene IR is a large disposable intermediate and stays under `output/`. The
 adapter writes it as a split triple rather than one document: `--scene`
-receives structure-only JSON whose representation surfaces hold
+receives structure-only JSON whose representation geometry streams hold
 `{encoding, byteOffset, byteLength}` references, `--geometry` receives the
 concatenated little-endian streams those references point into, and
 `--properties` receives the binary property value columns
@@ -93,6 +100,11 @@ typed-array views without copying, and the report carries a SHA-256 for each
 of the three files. Reviewed counts and hashes live under `artifacts/ifc/`;
 normal CI validates those compact records without installing IfcOpenShell or
 downloading the IFC sources.
+
+For the small project-owned E2.1 record, use the command in
+`artifacts/ifc/explicit-edges/README.md`; `pnpm ifc:edges:check` independently
+proves that six triangle face diagonals are absent from the 12 explicit wall
+boundaries.
 
 IfcOpenShell is LGPL-3.0-or-later. It is an adapter dependency and is not
 bundled into NARU's browser runtime.

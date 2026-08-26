@@ -550,6 +550,9 @@ needed streaming past the engine string limit, and `madi.ifc-scene-ir-split.3`
 moved the property values themselves into a third file — the binary
 `madi.property-columns.1` value columns (section 8) — whose SHA-256 is
 recorded and verified alongside the structure and geometry halves.
+`naru.ifc-scene-ir-split.4` adds external edge indices, boundary classes, and
+representation-item source ids; when edges share the surface vertices, both
+members reference the same f64 position range instead of duplicating it.
 
 ## 19. Phase 0 extraction evidence
 
@@ -590,6 +593,9 @@ adapter output, and compiled package by SHA-256.
 This satisfies the “two independent adapters produce the IR” serialization
 precondition, but does not freeze JSON or any other disk schema. Profiling,
 schema-evolution tests, and larger-scene partitioning evidence are still
-required. The first IFC slice also makes edge-classification absence explicit
-with `IFC_EDGE_EXTRACTION_DEFERRED` instead of manufacturing CAD topology from
-mesh edges.
+required. The original Digital Hub/sixty5 records retain their historical
+`IFC_EDGE_EXTRACTION_DEFERRED` split.3 output. The focused split.4 record under
+`artifacts/ifc/explicit-edges/` now proves 12 OpenCascade face-boundary segments
+against an 18-edge triangle-wireframe control, excludes all six face diagonals,
+and maps every emitted segment to its source `IfcExtrudedAreaSolid`; analytic
+curve kinds and richer edge classes remain explicitly unproven.

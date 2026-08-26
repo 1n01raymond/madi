@@ -55,8 +55,11 @@ groups, and flattened properties. Its 3,383 prototype ranges now coalesce into
 separate 64 MiB decoded/GPU admission budgets. A selected target can replace
 colder detail with retained coarse fallbacks, preserving visibility and picking
 identity. It is not the Phase 3 BIM workflow or a Phase 2 performance result:
-explicit IFC edges, spatial chunks, view-driven scheduling, and cache tiers
-remain pending.
+spatial chunks, view-driven scheduling, and cache tiers remain pending. A
+focused project-owned IFC4 wall now proves the E2.1 boundary path separately:
+12 OpenCascade face-boundary segments survive into glTF with source-item
+mapping while six triangle face diagonals are excluded. Analytic curve kinds,
+richer edge classification, and a real-model edge re-record remain pending.
 
 The adapter boundary now uses a split Scene IR transport — structure-only JSON
 plus a digest-linked binary geometry file — which reproduces the same compiled
