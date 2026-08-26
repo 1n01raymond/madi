@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 
 import {
+  createRepeatedTriangleScene,
   openPropertyValueColumns,
   packagePropertiesSchema,
   parsePackageProperties,
@@ -91,6 +92,31 @@ describe("Phase 1 glTF compiler slice", () => {
     expect(second.json).toBe(first.json);
     expect(second.binary).toEqual(first.binary);
     expect(second.report).toEqual(first.report);
+  });
+
+  it("retains sub-millimetre node translations at a large world offset", () => {
+    const base = createRepeatedTriangleScene();
+    const translation = 10_000_000.000_25;
+    const scene: EngineeringScene = {
+      ...base,
+      occurrences: base.occurrences.map((occurrence, index) => ({
+        ...occurrence,
+        localTransform: index === 0
+          ? [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, translation, -7_000_000, 3_000_000, 1]
+          : occurrence.localTransform,
+      })),
+    };
+    const compiled = compileSceneToGltf(scene);
+    const node = compiled.document.nodes.find(
+      (candidate) => madiExtras(candidate)?.occurrenceId === "occurrence:triangle:left",
+    );
+
+    expect(node?.matrix?.[12]).toBe(translation);
+    expect(Math.fround(node?.matrix?.[12] ?? 0)).not.toBe(translation);
+    expect(validateCompiledGltf(compiled.document, compiled.binary)).toEqual({
+      ok: true,
+      issues: [],
+    });
   });
 
   it("emits deterministic prototype bounds in a separate standard glTF buffer", async () => {

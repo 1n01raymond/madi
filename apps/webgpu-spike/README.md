@@ -32,6 +32,12 @@ not endorse NARU. Press `C` to enable one world-space section plane; choose its
 X/Y/Z axis, drag the normalized position, or flip the retained side. Surfaces,
 explicit edges, and GPU picking share the same clipping equation.
 
+The camera chooses a JavaScript-number origin for every frame and sends a
+camera-relative f32 projection plus that origin to the renderer. This keeps the
+same review controls and section equation stable for site-scale transforms; the
+committed ADR-0005 record compares a 0.25 mm gap at the origin and 10,000 km
+away through headed Chrome and Firefox (`pnpm precision:check`).
+
 The Scene Inspector searches hierarchy names, occurrence/prototype IDs, and
 source references as soon as `scene.gltf` is available; geometry residency is
 not required. Press `/` to focus search and Enter to select its first renderable

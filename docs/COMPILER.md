@@ -245,6 +245,14 @@ encodings include:
 Every quantized representation records bounds and worst-case positional error.
 The compiler rejects a profile when requested accuracy cannot be represented.
 
+The current standards-first glTF profile keeps prototype geometry and transform
+linear components as f32. Occurrence translations are serialized as ordinary
+JSON numbers; values remain f32-compatible when rounding error is at most
+10 nm, and otherwise retain JavaScript number precision for the NARU loader's
+camera-relative path. This is not a custom glTF extension. The threshold and
+the resulting package digests are fixed by the ADR-0005 0.25 mm / 10,000 km
+record and `pnpm precision:check`.
+
 ## 13. Compression
 
 Compression is chosen per payload class:

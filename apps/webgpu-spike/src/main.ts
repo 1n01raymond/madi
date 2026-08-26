@@ -358,7 +358,9 @@ async function loadScene(source: SceneSource): Promise<boolean> {
     const render = (): void => {
       animationFrame = 0;
       const aspect = canvas.clientWidth / Math.max(canvas.clientHeight, 1);
-      renderer.render(camera.viewProjection(aspect));
+      const frame = camera.frame(aspect);
+      document.documentElement.dataset.cameraOrigin = frame.origin.join(",");
+      renderer.render(frame.viewProjection, { cameraOrigin: frame.origin });
     };
     const scheduleRender = (): void => {
       if (animationFrame === 0) animationFrame = requestAnimationFrame(render);

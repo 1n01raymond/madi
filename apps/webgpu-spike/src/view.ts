@@ -2,6 +2,11 @@ import type { SceneBounds } from "@naru3d/runtime-webgpu";
 
 type Vector3 = readonly [number, number, number];
 
+export interface CameraRelativeFrame {
+  readonly viewProjection: Float32Array;
+  readonly origin: Vector3;
+}
+
 const defaultYaw = -Math.PI / 4;
 const defaultPitch = Math.asin(1 / Math.sqrt(3));
 const minimumScale = 0.000_001;
@@ -138,38 +143,62 @@ export class OrthographicOrbitCamera {
   }
 
   viewProjection(aspect: number): Float32Array {
-    const { right, up, depth } = cameraBasis(this.yaw, this.pitch);
-    const { halfWidth, halfHeight } = this.halfExtents(aspect);
+    return this.projection(aspect, [0, 0, 0]).viewProjection;
+  }
+
+  /** Builds a stable f32 projection around a double-precision camera origin. */
+  frame(aspect: number): CameraRelativeFrame {
+    const { right, up } = cameraBasis(this.yaw, this.pitch);
     const target: Vector3 = [
       this.center[0] + right[0] * this.panRight + up[0] * this.panUp,
       this.center[1] + right[1] * this.panRight + up[1] * this.panUp,
       this.center[2] + right[2] * this.panRight + up[2] * this.panUp,
     ];
-    const projectedDepth = this.corners.map((corner) => dot(depth, corner));
+    return this.projection(aspect, target);
+  }
+
+  private projection(aspect: number, origin: Vector3): CameraRelativeFrame {
+    const { right, up, depth } = cameraBasis(this.yaw, this.pitch);
+    const { halfWidth, halfHeight } = this.halfExtents(aspect);
+    const target: Vector3 = [
+      this.center[0] + right[0] * this.panRight + up[0] * this.panUp - origin[0],
+      this.center[1] + right[1] * this.panRight + up[1] * this.panUp - origin[1],
+      this.center[2] + right[2] * this.panRight + up[2] * this.panUp - origin[2],
+    ];
+    const projectedDepth = this.corners.map((corner) =>
+      dot(depth, [
+        corner[0] - origin[0],
+        corner[1] - origin[1],
+        corner[2] - origin[2],
+      ]),
+    );
     const minDepth = Math.min(...projectedDepth);
     const maxDepth = Math.max(...projectedDepth);
     const depthPadding = Math.max((maxDepth - minDepth) * 0.08, minimumScale);
     const nearDepth = minDepth - depthPadding;
     const depthRange = Math.max(maxDepth - minDepth + depthPadding * 2, minimumScale);
 
-    return new Float32Array([
-      right[0] / halfWidth,
-      up[0] / halfHeight,
-      depth[0] / depthRange,
-      0,
-      right[1] / halfWidth,
-      up[1] / halfHeight,
-      depth[1] / depthRange,
-      0,
-      right[2] / halfWidth,
-      up[2] / halfHeight,
-      depth[2] / depthRange,
-      0,
-      -dot(right, target) / halfWidth,
-      -dot(up, target) / halfHeight,
-      -nearDepth / depthRange,
-      1,
-    ]);
+    return {
+      origin,
+      viewProjection: new Float32Array([
+        right[0] / halfWidth,
+        up[0] / halfHeight,
+        depth[0] / depthRange,
+        0,
+        right[1] / halfWidth,
+        up[1] / halfHeight,
+        depth[1] / depthRange,
+        0,
+        right[2] / halfWidth,
+        up[2] / halfHeight,
+        depth[2] / depthRange,
+        0,
+        -dot(right, target) / halfWidth,
+        -dot(up, target) / halfHeight,
+        -nearDepth / depthRange,
+        1,
+      ]),
+    };
   }
 
   private halfExtents(aspect: number): { readonly halfWidth: number; readonly halfHeight: number } {

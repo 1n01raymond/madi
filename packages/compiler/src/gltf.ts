@@ -177,9 +177,18 @@ function sourceToGltfMatrix(upAxis: "X" | "Y" | "Z"): readonly number[] {
   return [0, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1];
 }
 
+const maximumF32TranslationErrorMeters = 1e-8;
+
+function deliveredTranslation(value: number): number {
+  const rounded = Math.fround(value);
+  return Math.abs(value - rounded) <= maximumF32TranslationErrorMeters ? rounded : value;
+}
+
 function scaledOccurrenceMatrix(matrix: Matrix4d, scaleToMeters: number): number[] {
   return Array.from(matrix, (value, index) =>
-    Math.fround(index >= 12 && index <= 14 ? value * scaleToMeters : value),
+    index >= 12 && index <= 14
+      ? deliveredTranslation(value * scaleToMeters)
+      : Math.fround(value),
   );
 }
 
@@ -1079,7 +1088,13 @@ export function compileSceneToGltf(
       ...(coarseBinary
         ? ["The coarse representation is a prototype AABB, not a shape-preserving LOD."]
         : ["Only one target display representation per prototype is emitted; coarse LOD is pending."]),
-      "Geometry and node transforms are converted to f32 for glTF delivery.",
+      ...(occurrences.some(({ localTransform }) =>
+        localTransform.slice(12, 15).some((value) =>
+          deliveredTranslation(value * scaleToMeters) !== Math.fround(value * scaleToMeters),
+        ),
+      )
+        ? ["Local geometry and transform linear components are f32; translations that exceed the 1e-8 metre f32 error budget retain JavaScript number precision for camera-relative rendering."]
+        : ["Geometry and node transforms are converted to f32 for glTF delivery."]),
       "MADI source mapping uses glTF extras until an interoperable extension is justified.",
     ],
   };

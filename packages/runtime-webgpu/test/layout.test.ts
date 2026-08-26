@@ -5,6 +5,7 @@ import {
   instanceStride,
   packInstanceData,
   packInstanceDataInto,
+  splitFloat64,
   validateGpuScene,
   validatePrototypeBatch,
 } from "../src/index.js";
@@ -46,6 +47,21 @@ describe("WebGPU packed layouts", () => {
     expect(view.getFloat32(92, true)).toBe(1);
     expect(view.getUint32(instanceStride + 64, true)).toBe(9);
     expect(view.getFloat32(instanceStride + 80, true)).toBeCloseTo(0.16);
+  });
+
+  it("stores a large translation as high/low f32 without growing the instance record", () => {
+    const translation = 10_000_000.000_25;
+    const transform = Float64Array.from(identity);
+    transform[12] = translation;
+    const packed = packInstanceData([{ transform, objectId: 1 }]);
+    const view = new DataView(packed);
+    const high = view.getFloat32(48, true);
+    const low = view.getFloat32(68, true);
+
+    expect(packed.byteLength).toBe(96);
+    expect(high).toBe(10_000_000);
+    expect(Math.abs(high + low - translation)).toBeLessThan(1e-10);
+    expect(splitFloat64(translation)).toEqual([high, low]);
   });
 
   it("packs a dense visibility index table into reusable storage", () => {

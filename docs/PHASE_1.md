@@ -120,6 +120,28 @@ direct WebGPU renderer. The Phase 0 Scene IR JSON is no longer a browser input.
 | Browser conformance | Headed Chrome/Blink and Firefox/Gecko emit no console warnings or errors | Passed by `pnpm browser:matrix` |
 | Safari capability | Real Safari 18.6 loads 87 hierarchy records under default settings, then reports that WebGPU is unavailable because `navigator.gpu` is absent | Graceful unsupported-browser result; rendering conformance not yet available |
 
+## Large-coordinate precision
+
+ADR-0005 is now accepted for the tessellated display path. Its project-owned
+control places a 0.25 mm gap between two 40 mm plates near the origin and at a
+10,000 km world offset. The compiler retains translations beyond its 10 nm f32
+delivery-error budget; runtime transform composition stays in JavaScript number
+precision; and the renderer subtracts high/low camera origins from high/low
+instance translations before f32 projection. Section and picking use the same
+relative frame.
+
+| Signal | Evidence | Status |
+|---|---|---|
+| Measurement | Near and far packages both report 0.249999613 mm; absolute error is 0.000000387 mm against the 0.001 mm budget | Passed |
+| Untreated risk | At 10,000,000 m the f32 ULP is 1 m and naive f32 plate centres collapse, yielding a −40 mm calculated gap | Recorded |
+| Visual stability | Initial, fixed orbit/pan/zoom, and X-section canvases are byte-identical between near/far scenes in each engine | Passed with 0 px drift in headed Chrome 151 and Firefox 150 |
+| Interaction | Both locations retain the same picked occurrence and produce no console issues | Passed |
+| Standards/package integrity | Both packages pass Khronos glTF validation with 0 errors / 0 warnings; resources and screenshots are digest-pinned | Passed by `pnpm precision:check` |
+
+See `artifacts/precision/large-coordinates/`. This does not upgrade the real
+Safari capability result: Safari 18.6 still lacks `navigator.gpu` under the
+recorded default settings.
+
 ## Reproduce
 
 ```sh
@@ -129,12 +151,15 @@ pnpm naru compile fixtures/step/repeated-fasteners-ap242.step \
 pnpm phase1:evidence:check
 pnpm browser:matrix
 pnpm safari:compatibility
+pnpm precision:evidence
+pnpm precision:check
 pnpm check
 ```
 
 See `artifacts/phase1/README.md` for the compiled package,
 `artifacts/browser-matrix/README.md` for reviewed Chrome/Firefox screenshots,
 `artifacts/browser-safari/README.md` for the real-Safari capability record, and
+`artifacts/precision/large-coordinates/README.md` for ADR-0005 evidence, and
 `packages/compiler/README.md` for the profile boundary.
 
 ## Not yet proven
@@ -152,7 +177,6 @@ See `artifacts/phase1/README.md` for the compiled package,
 - Additional repeated reference-hardware profiles for ADR-0003; the first
   Apple-Silicon integrated-GPU record now shows divergent Chrome and Firefox
   CPU-p95 outcomes.
-- Large-coordinate precision behavior required by ADR-0005.
 - A public end-to-end review workflow and reproducible performance report.
 
 The canonical fixture is Adafruit's real PyGamer electronics assembly,

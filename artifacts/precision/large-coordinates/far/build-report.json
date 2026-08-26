@@ -1,0 +1,70 @@
+{
+  "schemaVersion": "madi.phase1.compiler-report.1",
+  "profile": "madi.experimental.gltf.1",
+  "status": "experimental-not-interchange",
+  "compiler": {
+    "name": "@madi/compiler",
+    "version": "0.0.0",
+    "generator": "NARU ADR-0005 coordinate precision evidence"
+  },
+  "options": {
+    "binaryUri": "scene.bin",
+    "coordinateSystem": "right-handed-y-up-meters",
+    "geometryEncoding": "gltf-f32"
+  },
+  "source": {
+    "sceneId": "scene:coordinate-precision-far",
+    "revisionId": "revision:coordinate-precision-far:v1",
+    "sourceDigest": "sha256:coordinate-precision-far",
+    "adapter": "@naru3d/scene-ir precision fixture 0.0.0",
+    "optionsDigest": "sha256:default-options"
+  },
+  "output": {
+    "packageDigest": "74da685cf59644f646dcb373b82f6342b8ae296e1a85dd439957a64cb5ba8fb4",
+    "resources": [
+      {
+        "path": "scene.gltf",
+        "mediaType": "model/gltf+json",
+        "bytes": 9153,
+        "sha256": "8bd3d57b12deb32c253de7b1a3badf60dd7e19d57940e2b24af2ba11dbc82cba"
+      },
+      {
+        "path": "scene.bin",
+        "mediaType": "application/octet-stream",
+        "bytes": 228,
+        "sha256": "3f9acb27da17fdb8a950e1458024528ce3b44b4b0b3ab54a450b9bf6668c1638"
+      }
+    ]
+  },
+  "counts": {
+    "prototypeCount": 1,
+    "compiledPrototypeCount": 1,
+    "occurrenceCount": 2,
+    "renderableOccurrenceCount": 2,
+    "gltfNodeCount": 3,
+    "gltfMeshCount": 1,
+    "materialCount": 4,
+    "triangleCount": 2,
+    "edgeSegmentCount": 4
+  },
+  "prototypeReuse": [
+    {
+      "prototypeId": "prototype:triangle",
+      "occurrenceCount": 2
+    }
+  ],
+  "diagnostics": {
+    "counts": {
+      "info": 0,
+      "warning": 0,
+      "error": 0
+    },
+    "codes": []
+  },
+  "limitations": [
+    "This is an experimental glTF profile, not a MADI interchange format.",
+    "Only one target display representation per prototype is emitted; coarse LOD is pending.",
+    "Local geometry and transform linear components are f32; translations that exceed the 1e-8 metre f32 error budget retain JavaScript number precision for camera-relative rendering.",
+    "MADI source mapping uses glTF extras until an interoperable extension is justified."
+  ]
+}

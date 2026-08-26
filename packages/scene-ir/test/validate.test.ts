@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  createLargeCoordinatePrecisionScene,
   createRepeatedTriangleScene,
   ids,
   resolvePropertyEntries,
@@ -32,6 +33,22 @@ describe("validateScene", () => {
     expect(scene.prototypes).toHaveLength(1);
     expect(scene.representations).toHaveLength(1);
     expect(scene.occurrences[0]?.prototypeId).toBe(scene.occurrences[1]?.prototypeId);
+  });
+
+  it("accepts matching near/far large-coordinate precision controls", () => {
+    const near = createLargeCoordinatePrecisionScene();
+    const far = createLargeCoordinatePrecisionScene([
+      10_000_000,
+      -7_000_000,
+      3_000_000,
+    ]);
+
+    expect(validateScene(near)).toEqual({ ok: true, issues: [] });
+    expect(validateScene(far)).toEqual({ ok: true, issues: [] });
+    expect(Array.from(near.representations[0]?.surface?.positions ?? []))
+      .toEqual(Array.from(far.representations[0]?.surface?.positions ?? []));
+    expect(far.occurrences.map(({ localTransform }) => localTransform[12]))
+      .toEqual([9_999_999.979_875, 10_000_000.020_125]);
   });
 
   it("rejects an occurrence cycle", () => {

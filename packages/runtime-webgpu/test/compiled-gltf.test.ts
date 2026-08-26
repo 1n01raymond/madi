@@ -86,6 +86,27 @@ describe("compiled glTF runtime boundary", () => {
     ).toHaveLength(12);
   });
 
+  it("composes large node translations without reducing them to f32", async () => {
+    const { json, binary } = await loadPackage();
+    const copy = structuredClone(json) as {
+      nodes: { matrix?: number[] }[];
+    };
+    const translation = 10_000_000.000_25;
+    copy.nodes[0]!.matrix = [
+      1, 0, 0, 0,
+      0, 1, 0, 0,
+      0, 0, 1, 0,
+      translation, -7_000_000, 3_000_000, 1,
+    ];
+    const decoded = decodeCompiledGltf(copy, binary);
+    const first = decoded.gpuScene.batches[0]?.instances[0];
+
+    expect(first?.transform).toBeInstanceOf(Float64Array);
+    expect(first?.transform[12]).toBe(translation);
+    expect(decoded.bounds.min[0]).toBeCloseTo(translation - 0.048, 6);
+    expect(decoded.bounds.max[0]).toBeCloseTo(translation + 0.048, 6);
+  });
+
   it("decodes material-separated surface primitives as one pickable object", async () => {
     const { json, binary } = await loadPackage();
     const copy = structuredClone(json) as {

@@ -1,7 +1,7 @@
 # ADR-0005: Use hierarchical local coordinates and camera-relative rendering
 
-Status: Proposed
-Reviewed: 2026-08-23
+Status: Accepted
+Accepted: 2026-08-26
 
 ## Context
 
@@ -42,11 +42,32 @@ causes visible jitter and measurement instability.
 
 ## Validation
 
-Phase 0 establishes only the structural path: Scene IR can retain positions and
-transforms in double precision, while the evidence renderer creates local f32
-GPU buffers. It does not yet implement camera-relative origin subtraction or
-exercise site-scale offsets.
+The committed ADR record places two 40 mm × 60 mm project-owned plates with a
+0.25 mm gap both near the origin and at
+`[10,000,000, -7,000,000, 3,000,000]` metres. A naive f32 translation collapses
+the far plate centres to the same value: the calculated gap becomes −40 mm and
+the f32 ULP at the far X coordinate is 1 metre.
 
-This ADR therefore remains Proposed. Acceptance requires visual and measurement
-tests that place millimeter details at large coordinate offsets and compare
-jitter/error while the camera moves.
+The implemented path instead:
+
+- retains Scene IR and composed runtime transforms as JavaScript numbers;
+- keeps local prototype vertices and transform linear components as f32;
+- retains compiler-delivered translations when f32 error exceeds 10 nm;
+- splits instance translations and the camera origin into f32 high/low pairs;
+- rebases section planes into the same camera-relative frame; and
+- shares that vertex path across surfaces, explicit edges, and object-ID picking.
+
+The far compiled package measures the gap as 0.249999613 mm, an absolute error
+of 0.000000387 mm against the 0.001 mm acceptance budget. Khronos validation
+reports zero errors and warnings. On the reviewed Apple-Silicon host, headed
+Chrome 151/Blink and Firefox 150/Gecko each produce byte-identical near/far
+canvas captures before navigation, after a fixed orbit/pan/zoom trace, and after
+an X section. Both retain the same picked occurrence and emit no console issues.
+
+The record, screenshots, package digests, recorder, and strict validator are in
+[`artifacts/precision/large-coordinates/`](../../artifacts/precision/large-coordinates/README.md)
+and run through `pnpm precision:check`. This accepts the coordinate strategy for
+the implemented tessellated display path. It does not claim source-exact B-Rep
+measurement, all coordinate reference systems, or Safari rendering support;
+the real Safari 18.6 capability record still has no `navigator.gpu` under
+default settings.

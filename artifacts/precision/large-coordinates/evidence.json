@@ -1,0 +1,266 @@
+{
+  "schemaVersion": "naru.coordinate-precision.1",
+  "status": "adr-decision-evidence",
+  "host": {
+    "platform": "darwin",
+    "architecture": "arm64"
+  },
+  "fixture": {
+    "ownership": "project-owned-apache-2.0",
+    "plateWidthMillimeters": 40,
+    "plateHeightMillimeters": 60,
+    "gapMillimeters": 0.25,
+    "farOffsetMeters": [
+      10000000,
+      -7000000,
+      3000000
+    ],
+    "naiveF32UlpMetersAtFarX": 1
+  },
+  "thresholds": {
+    "maximumMeasurementErrorMillimeters": 0.001,
+    "maximumPixelDrift": 0.25,
+    "pickingIdentityRequired": true,
+    "gltfErrors": 0,
+    "gltfWarnings": 0,
+    "consoleIssues": 0
+  },
+  "packages": {
+    "near": {
+      "packageDigest": "1019d7cd7bfdc3deb0962f952da7e9b2dd48f1988a00b315706772d51324a185",
+      "sceneGltf": {
+        "bytes": 9147,
+        "sha256": "dca51bd9da17f2974db1cd2130e2c30829dbe9f50a5fcbc93dcf4c18bf5db68e"
+      },
+      "sceneBinary": {
+        "bytes": 228,
+        "sha256": "3f9acb27da17fdb8a950e1458024528ce3b44b4b0b3ab54a450b9bf6668c1638"
+      },
+      "counts": {
+        "prototypeCount": 1,
+        "compiledPrototypeCount": 1,
+        "occurrenceCount": 2,
+        "renderableOccurrenceCount": 2,
+        "gltfNodeCount": 3,
+        "gltfMeshCount": 1,
+        "materialCount": 4,
+        "triangleCount": 2,
+        "edgeSegmentCount": 4
+      },
+      "measurement": {
+        "centerXMeters": [
+          -0.020124999806284904,
+          0.020124999806284904
+        ],
+        "gapMillimeters": 0.24999961256980813,
+        "absoluteErrorMillimeters": 3.8743019187270633e-7,
+        "naiveF32GapMillimeters": 0.24999961256980813
+      },
+      "gltfValidation": {
+        "validator": "2.0.0-dev.3.10",
+        "errors": 0,
+        "warnings": 0
+      }
+    },
+    "far": {
+      "packageDigest": "74da685cf59644f646dcb373b82f6342b8ae296e1a85dd439957a64cb5ba8fb4",
+      "sceneGltf": {
+        "bytes": 9153,
+        "sha256": "8bd3d57b12deb32c253de7b1a3badf60dd7e19d57940e2b24af2ba11dbc82cba"
+      },
+      "sceneBinary": {
+        "bytes": 228,
+        "sha256": "3f9acb27da17fdb8a950e1458024528ce3b44b4b0b3ab54a450b9bf6668c1638"
+      },
+      "counts": {
+        "prototypeCount": 1,
+        "compiledPrototypeCount": 1,
+        "occurrenceCount": 2,
+        "renderableOccurrenceCount": 2,
+        "gltfNodeCount": 3,
+        "gltfMeshCount": 1,
+        "materialCount": 4,
+        "triangleCount": 2,
+        "edgeSegmentCount": 4
+      },
+      "measurement": {
+        "centerXMeters": [
+          9999999.979875,
+          10000000.020125
+        ],
+        "gapMillimeters": 0.24999961256980813,
+        "absoluteErrorMillimeters": 3.8743019187270633e-7,
+        "naiveF32GapMillimeters": -40
+      },
+      "gltfValidation": {
+        "validator": "2.0.0-dev.3.10",
+        "errors": 0,
+        "warnings": 0
+      }
+    }
+  },
+  "browsers": [
+    {
+      "browser": "chrome",
+      "browserEngine": "Blink",
+      "version": "151.0.7922.174",
+      "headless": false,
+      "near": {
+        "gpuAdapter": "apple",
+        "picked": {
+          "xRatio": 0.42,
+          "yRatio": 0.55,
+          "label": "Left precision plate",
+          "nodeIndex": 1,
+          "objectId": 2
+        },
+        "screenshots": {
+          "initial": {
+            "path": "chrome-initial-near.png",
+            "bytes": 20965,
+            "sha256": "8b72b65a683e788c2145c6309ec46d649fea6de81291cef8e0a27934de8c4170"
+          },
+          "navigated": {
+            "path": "chrome-navigated-near.png",
+            "bytes": 23741,
+            "sha256": "363f0342da4a469b8c870feeb61695aa094b9347176a638ddb8721a8d0cf33a9"
+          },
+          "sectioned": {
+            "path": "chrome-sectioned-near.png",
+            "bytes": 31423,
+            "sha256": "13743c59dcf1a1a3c33c07553c79fefa2c83e4e60ccdb79a818a5fddb1d95cbb"
+          }
+        }
+      },
+      "far": {
+        "gpuAdapter": "apple",
+        "picked": {
+          "xRatio": 0.42,
+          "yRatio": 0.55,
+          "label": "Left precision plate",
+          "nodeIndex": 1,
+          "objectId": 2
+        },
+        "screenshots": {
+          "initial": {
+            "path": "chrome-initial-far.png",
+            "bytes": 20965,
+            "sha256": "8b72b65a683e788c2145c6309ec46d649fea6de81291cef8e0a27934de8c4170"
+          },
+          "navigated": {
+            "path": "chrome-navigated-far.png",
+            "bytes": 23741,
+            "sha256": "363f0342da4a469b8c870feeb61695aa094b9347176a638ddb8721a8d0cf33a9"
+          },
+          "sectioned": {
+            "path": "chrome-sectioned-far.png",
+            "bytes": 31423,
+            "sha256": "13743c59dcf1a1a3c33c07553c79fefa2c83e4e60ccdb79a818a5fddb1d95cbb"
+          }
+        }
+      },
+      "comparisons": {
+        "initial": {
+          "byteIdentical": true,
+          "nearSha256": "8b72b65a683e788c2145c6309ec46d649fea6de81291cef8e0a27934de8c4170",
+          "farSha256": "8b72b65a683e788c2145c6309ec46d649fea6de81291cef8e0a27934de8c4170",
+          "maximumPixelDrift": 0
+        },
+        "navigated": {
+          "byteIdentical": true,
+          "nearSha256": "363f0342da4a469b8c870feeb61695aa094b9347176a638ddb8721a8d0cf33a9",
+          "farSha256": "363f0342da4a469b8c870feeb61695aa094b9347176a638ddb8721a8d0cf33a9",
+          "maximumPixelDrift": 0
+        },
+        "sectioned": {
+          "byteIdentical": true,
+          "nearSha256": "13743c59dcf1a1a3c33c07553c79fefa2c83e4e60ccdb79a818a5fddb1d95cbb",
+          "farSha256": "13743c59dcf1a1a3c33c07553c79fefa2c83e4e60ccdb79a818a5fddb1d95cbb",
+          "maximumPixelDrift": 0
+        }
+      },
+      "consoleIssues": []
+    },
+    {
+      "browser": "firefox",
+      "browserEngine": "Gecko",
+      "version": "150.0.2",
+      "headless": false,
+      "near": {
+        "gpuAdapter": "WebGPU adapter",
+        "picked": {
+          "xRatio": 0.38,
+          "yRatio": 0.5,
+          "label": "Left precision plate",
+          "nodeIndex": 1,
+          "objectId": 2
+        },
+        "screenshots": {
+          "initial": {
+            "path": "firefox-initial-near.png",
+            "bytes": 94610,
+            "sha256": "5649ca5a78a32e6a7b0d91726afd4c39adb39e1032eb633089f3ccecb62f36aa"
+          },
+          "navigated": {
+            "path": "firefox-navigated-near.png",
+            "bytes": 100197,
+            "sha256": "5bbea69491a3b1ea1864d3461c6e5515f8ed96ee0e3ed275ef5ae209b26a02aa"
+          },
+          "sectioned": {
+            "path": "firefox-sectioned-near.png",
+            "bytes": 126136,
+            "sha256": "48f6278d20dc4b8988d31db5bdaa7452bdd49529e604d2a8ecef66bb05aff373"
+          }
+        }
+      },
+      "far": {
+        "gpuAdapter": "WebGPU adapter",
+        "picked": {
+          "xRatio": 0.38,
+          "yRatio": 0.5,
+          "label": "Left precision plate",
+          "nodeIndex": 1,
+          "objectId": 2
+        },
+        "screenshots": {
+          "initial": {
+            "path": "firefox-initial-far.png",
+            "bytes": 94610,
+            "sha256": "5649ca5a78a32e6a7b0d91726afd4c39adb39e1032eb633089f3ccecb62f36aa"
+          },
+          "navigated": {
+            "path": "firefox-navigated-far.png",
+            "bytes": 100197,
+            "sha256": "5bbea69491a3b1ea1864d3461c6e5515f8ed96ee0e3ed275ef5ae209b26a02aa"
+          },
+          "sectioned": {
+            "path": "firefox-sectioned-far.png",
+            "bytes": 126136,
+            "sha256": "48f6278d20dc4b8988d31db5bdaa7452bdd49529e604d2a8ecef66bb05aff373"
+          }
+        }
+      },
+      "comparisons": {
+        "initial": {
+          "byteIdentical": true,
+          "nearSha256": "5649ca5a78a32e6a7b0d91726afd4c39adb39e1032eb633089f3ccecb62f36aa",
+          "farSha256": "5649ca5a78a32e6a7b0d91726afd4c39adb39e1032eb633089f3ccecb62f36aa",
+          "maximumPixelDrift": 0
+        },
+        "navigated": {
+          "byteIdentical": true,
+          "nearSha256": "5bbea69491a3b1ea1864d3461c6e5515f8ed96ee0e3ed275ef5ae209b26a02aa",
+          "farSha256": "5bbea69491a3b1ea1864d3461c6e5515f8ed96ee0e3ed275ef5ae209b26a02aa",
+          "maximumPixelDrift": 0
+        },
+        "sectioned": {
+          "byteIdentical": true,
+          "nearSha256": "48f6278d20dc4b8988d31db5bdaa7452bdd49529e604d2a8ecef66bb05aff373",
+          "farSha256": "48f6278d20dc4b8988d31db5bdaa7452bdd49529e604d2a8ecef66bb05aff373",
+          "maximumPixelDrift": 0
+        }
+      },
+      "consoleIssues": []
+    }
+  ]
+}

@@ -1,0 +1,70 @@
+{
+  "schemaVersion": "madi.phase1.compiler-report.1",
+  "profile": "madi.experimental.gltf.1",
+  "status": "experimental-not-interchange",
+  "compiler": {
+    "name": "@madi/compiler",
+    "version": "0.0.0",
+    "generator": "NARU ADR-0005 coordinate precision evidence"
+  },
+  "options": {
+    "binaryUri": "scene.bin",
+    "coordinateSystem": "right-handed-y-up-meters",
+    "geometryEncoding": "gltf-f32"
+  },
+  "source": {
+    "sceneId": "scene:coordinate-precision-near",
+    "revisionId": "revision:coordinate-precision-near:v1",
+    "sourceDigest": "sha256:coordinate-precision-near",
+    "adapter": "@naru3d/scene-ir precision fixture 0.0.0",
+    "optionsDigest": "sha256:default-options"
+  },
+  "output": {
+    "packageDigest": "1019d7cd7bfdc3deb0962f952da7e9b2dd48f1988a00b315706772d51324a185",
+    "resources": [
+      {
+        "path": "scene.gltf",
+        "mediaType": "model/gltf+json",
+        "bytes": 9147,
+        "sha256": "dca51bd9da17f2974db1cd2130e2c30829dbe9f50a5fcbc93dcf4c18bf5db68e"
+      },
+      {
+        "path": "scene.bin",
+        "mediaType": "application/octet-stream",
+        "bytes": 228,
+        "sha256": "3f9acb27da17fdb8a950e1458024528ce3b44b4b0b3ab54a450b9bf6668c1638"
+      }
+    ]
+  },
+  "counts": {
+    "prototypeCount": 1,
+    "compiledPrototypeCount": 1,
+    "occurrenceCount": 2,
+    "renderableOccurrenceCount": 2,
+    "gltfNodeCount": 3,
+    "gltfMeshCount": 1,
+    "materialCount": 4,
+    "triangleCount": 2,
+    "edgeSegmentCount": 4
+  },
+  "prototypeReuse": [
+    {
+      "prototypeId": "prototype:triangle",
+      "occurrenceCount": 2
+    }
+  ],
+  "diagnostics": {
+    "counts": {
+      "info": 0,
+      "warning": 0,
+      "error": 0
+    },
+    "codes": []
+  },
+  "limitations": [
+    "This is an experimental glTF profile, not a MADI interchange format.",
+    "Only one target display representation per prototype is emitted; coarse LOD is pending.",
+    "Geometry and node transforms are converted to f32 for glTF delivery.",
+    "MADI source mapping uses glTF extras until an interoperable extension is justified."
+  ]
+}
