@@ -107,6 +107,24 @@ the same host class present the first coarse frame at 12.553, 12.796, and
 from the 268.013 s baseline. All 78,173 occurrences remain visible and pickable,
 the 64 MiB budgets hold, and the same selected IFC properties resolve.
 
+### Persistent import cache
+
+Both compile paths accept `--cache <dir>` (ADR-0009, Accepted). The recorded
+product evidence in `artifacts/cache/` runs the pinned PyGamer STEP fixture and
+the four-document Digital Hub federation three times each against one cache
+directory, and `pnpm cache:check` pins the record.
+
+| Signal | Evidence | Status |
+|---|---|---|
+| Verified warm reuse | Cold miss then warm hit with the same key and a byte-identical restored package: STEP 19.9 s → 1.7 s (11.4×), IFC 46.3 s → 0.5 s (96.2×) | Passed; single-run timings on one recorded host, not a distribution |
+| Fail-closed corruption | Flipping one byte of the cached `scene.gltf` produces a reported failed restore, a byte-identical full recompile, and an entry that stays unpublishable (manifest intact, digest mismatched) | Passed |
+| Identity-keyed invalidation | Keys include normalized source digests, the adapters' `--identity` fingerprints, a content hash of the compiler's own modules, and output-affecting options | Passed in `packages/compiler/test/compiled-cache.test.ts` and both orchestration test suites |
+
+The recorded IFC package digest is the current split.4 explicit-edge toolchain
+digest and deliberately differs from the historical split.3
+`artifacts/ifc/digital-hub/` federation record; refreshing that record and the
+deployed demo package it verifies is a separate tracked slice.
+
 ## First browser runtime slice
 
 The browser now consumes that compiled package directly. It reads the glTF node
@@ -169,6 +187,8 @@ pnpm browser:matrix
 pnpm safari:compatibility
 pnpm precision:evidence
 pnpm precision:check
+pnpm cache:evidence
+pnpm cache:check
 pnpm demo:smoke
 pnpm check
 ```
@@ -200,6 +220,11 @@ See `artifacts/phase1/README.md` for the compiled package,
   CPU-p95 outcomes.
 - A reproducible public performance report. The deployed Studio and its package
   delivery are smoke-checked, but no public benchmark report is published yet.
+- A current-toolchain (split.4 explicit-edge) re-record of the Digital Hub and
+  sixty5 federation packages, including the released demo package that
+  `deploy-demo.yml` digest-verifies, and a real-large cache-reopen
+  distribution; the import-cache record pins the current Digital Hub digest
+  while the federation record remains deliberately historical.
 
 The canonical fixture is Adafruit's real PyGamer electronics assembly,
 redistributed unchanged under MIT with a pinned source commit and notice. Its
@@ -244,8 +269,11 @@ recorded (`artifacts/ifc/sixty5-browser/`): loading, bounded residency,
 picking, and lazy property resolution hold at real-large scale. The named
 268.0 s main-thread first-frame path is now reduced to a 12.796 s median by
 the shared-coarse/persistent-Worker follow-up in
-`artifacts/ifc/sixty5-first-frame/`. Spatial partitioning, screen-space policy,
-and cache tiers remain the next runtime increments.
+`artifacts/ifc/sixty5-first-frame/`. The ADR-0009 persistent import cache is
+now recorded product evidence (`artifacts/cache/`): unchanged pinned sources
+restore byte-identically in seconds instead of recompiling, and corrupt
+entries fail closed. Spatial partitioning, screen-space policy, and runtime
+cache tiers remain the next runtime increments.
 
 In parallel, the repeated 100k record now carries GPU pass timestamps and a
 backend-owned retained-resource census on both the discrete host and an Apple

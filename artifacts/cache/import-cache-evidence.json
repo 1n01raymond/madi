@@ -1,0 +1,190 @@
+{
+  "schemaVersion": "naru.import-cache-evidence.1",
+  "recordedAt": "2026-08-26T16:55:56.773Z",
+  "host": {
+    "platform": "win32",
+    "architecture": "x64",
+    "node": "22.14.0",
+    "cpuCount": 16,
+    "cpuModel": "AMD Ryzen 7 9800X3D 8-Core Processor           ",
+    "totalMemoryBytes": 33463021568
+  },
+  "step": {
+    "source": {
+      "path": "fixtures/step/adafruit-pygamer.step",
+      "sha256": "f0caf940c27af5a409f7c964d50941f60a1cc6329de14407bedd5fabeb9f10c0"
+    },
+    "adapter": {
+      "fingerprint": "cd6672af611323509f273e1042f11904a1b78f50aec0a3be99b0928747de9878",
+      "name": "madi-occt-xde-evidence",
+      "schemaVersion": "naru.occt-adapter-identity.1",
+      "toolchain": {
+        "architecture": "AMD64",
+        "cadquery": "2.8.0",
+        "cadqueryOcpPackage": "7.9.3.1.1",
+        "ocp": "7.9.3.1",
+        "platform": "win32",
+        "python": "3.12.13"
+      },
+      "version": "0.1.0"
+    },
+    "cacheKey": "71bcf9784b0542cd82167bac2d8117e54d72e1afe225d6d9662353dd7fbd7909",
+    "packageDigest": "f99ccb9c69f4a5771eda9825005f197d0a74d40742944c8d8a7ad78af40ab86d",
+    "resources": [
+      {
+        "path": "adapter-report.json",
+        "bytes": 7254,
+        "sha256": "77cde6084f596c1970ea648afcb305aff6e850595e41aa8aead859e5f5cae9f0"
+      },
+      {
+        "path": "build-report.json",
+        "bytes": 3523,
+        "sha256": "717cb06c6c307bc913450be5f08c84bab758f09dbddac400aa80a5f0b7908fc1"
+      },
+      {
+        "path": "coarse.bin",
+        "bytes": 31008,
+        "sha256": "cd48db7666982d30ff1e418d2f2f4651b3ee668e620885526eedab19fd754cae"
+      },
+      {
+        "path": "scene.bin",
+        "bytes": 14826752,
+        "sha256": "6503dbb3fcaf37e071a376fb1855f06b38abd751305d0fe689fbfb9606ec11c2"
+      },
+      {
+        "path": "scene.gltf",
+        "bytes": 4511215,
+        "sha256": "2303219a02cf709d2f3c6f3a90788e665f29bb3d772cc55496e41bd568aedc71"
+      }
+    ],
+    "runs": [
+      {
+        "phase": "cold",
+        "cache": "miss",
+        "elapsedMs": 19885.2
+      },
+      {
+        "phase": "warm",
+        "cache": "hit",
+        "elapsedMs": 1741.2
+      },
+      {
+        "phase": "corrupted-entry",
+        "cache": "miss",
+        "elapsedMs": 19615.5,
+        "corruptedResource": "scene.gltf",
+        "warnings": [
+          "[naru] cache restore failed (Compiled cache resource scene.gltf failed integrity verification.); recompiling.",
+          "[naru] cache publish failed (Compiled cache resource scene.gltf failed integrity verification.); compiled output kept without a cache entry."
+        ]
+      }
+    ],
+    "warmRestoreByteIdentical": true,
+    "fallbackRecompileByteIdentical": true,
+    "entryAfterFallback": "manifest-intact-resource-still-corrupt",
+    "warmSpeedup": 11.4
+  },
+  "ifc": {
+    "documents": [
+      {
+        "discipline": "architecture",
+        "uriHint": "projects/digital_hub/arc.ifc",
+        "sha256": "19d7d02d53c2b88e86890ee236297b12bbb0f7748030cd32ff6a22762e9966bb"
+      },
+      {
+        "discipline": "heating",
+        "uriHint": "projects/digital_hub/heating.ifc",
+        "sha256": "a5603e8f6aa4cbf63aece92f92f503e9a578702d8fe96a6d4661490f1843710d"
+      },
+      {
+        "discipline": "plumbing",
+        "uriHint": "projects/digital_hub/plumbing.ifc",
+        "sha256": "0b1d6b0abd8d4cc3f5f798c7581bed2b39b40110ba6348d5470bbef646cfed79"
+      },
+      {
+        "discipline": "ventilation",
+        "uriHint": "projects/digital_hub/ventilation.ifc",
+        "sha256": "c0a1807875957c4154d45d14a3b5ed480dd3178a5bdc3262302a7eccf76d5cb1"
+      }
+    ],
+    "adapter": {
+      "fingerprint": "bc05f6730fe8af30478ef0503f7f9d375470b1a4834da6370d70afba985554af",
+      "name": "IfcOpenShell",
+      "schemaVersion": "naru.ifc-adapter-identity.1",
+      "toolchain": {
+        "architecture": "AMD64",
+        "ifcOpenShell": "0.8.5",
+        "numpy": "2.5.2",
+        "platform": "win32",
+        "python": "3.13.2"
+      },
+      "version": "0.8.5"
+    },
+    "threads": 6,
+    "cacheKey": "9865febcb7655ac9db37133badea6ffb5b0d88c24bda563faa23538f77781c92",
+    "packageDigest": "0e2ed4547e298908744ce7d9075900b1c55a4e88f26af7a6bef2ea7ee6c6595d",
+    "resources": [
+      {
+        "path": "adapter-report.json",
+        "bytes": 23226,
+        "sha256": "3ad3406b74ae661a5df325138951dc97c9ddd972e3c09be7c1423200ccb0b528"
+      },
+      {
+        "path": "build-report.json",
+        "bytes": 34506,
+        "sha256": "713eb048329600a33204f9fb0091d0073651a97b648c3e354d0edd73911178e7"
+      },
+      {
+        "path": "coarse.bin",
+        "bytes": 3085296,
+        "sha256": "5e4fb16db1660f3278a3761f9699c4eb7f003220006d9c082106935e72770284"
+      },
+      {
+        "path": "properties.bin",
+        "bytes": 2260991,
+        "sha256": "712fea65ca4b9de75683a01ee79f4fff5ae6f89b0c29cbd0b38a83bb586d07c1"
+      },
+      {
+        "path": "properties.json",
+        "bytes": 1246277,
+        "sha256": "10b1f579eda1c085fdd115031ea416edf14e82b5a2b7b4e1ac0ec80f7af70675"
+      },
+      {
+        "path": "scene.bin",
+        "bytes": 35962344,
+        "sha256": "e6cb5f6943f03a14ccccc7be950646dac84ad22536891ad5423e48e5113747f7"
+      },
+      {
+        "path": "scene.gltf",
+        "bytes": 41903482,
+        "sha256": "580262628478689792bfee41c1281c37ae9c4aab17c0a75a135922ba33154fa3"
+      }
+    ],
+    "runs": [
+      {
+        "phase": "cold",
+        "cache": "miss",
+        "elapsedMs": 46296.3
+      },
+      {
+        "phase": "warm",
+        "cache": "hit",
+        "elapsedMs": 481.3
+      },
+      {
+        "phase": "corrupted-entry",
+        "cache": "miss",
+        "elapsedMs": 44713.3,
+        "corruptedResource": "scene.gltf",
+        "warnings": [
+          "[naru] cache restore failed (Compiled cache resource scene.gltf failed integrity verification.); recompiling.",
+          "[naru] cache publish failed (Compiled cache resource scene.gltf failed integrity verification.); compiled output kept without a cache entry."
+        ]
+      }
+    ],
+    "warmRestoreByteIdentical": true,
+    "fallbackRecompileByteIdentical": true,
+    "entryAfterFallback": "manifest-intact-resource-still-corrupt",
+    "warmSpeedup": 96.2
+  }
+}

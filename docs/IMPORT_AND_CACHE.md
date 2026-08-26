@@ -1,7 +1,9 @@
 # Import and compiled-cache product contract
 
-Status: proposed Phase 2 contract; cache-store plus STEP/IFC whole-package
-integration implemented, real-toolchain product evidence pending.
+Status: Phase 2 contract; cache-store plus STEP/IFC whole-package integration
+implemented, and the persistent-cache acceptance gate is closed by recorded
+real-toolchain evidence ([record](../artifacts/cache/README.md),
+[ADR-0009](adr/0009-persistent-compiled-cache.md), Accepted).
 
 ## 1. User promise
 
@@ -23,8 +25,11 @@ must be reported separately under [the benchmark rules](BENCHMARKS.md). The
 current real-large boundary is a recorded 302-second end-to-end sixty5 import
 ([evidence](../artifacts/ifc/sixty5/README.md)); shared coarse residency later
 records a 12.553-second first frame
-([evidence](../artifacts/ifc/sixty5-first-frame/README.md)). Neither record yet
-proves a 1–5-second persistent-cache reopen.
+([evidence](../artifacts/ifc/sixty5-first-frame/README.md)). The recorded cache
+evidence proves compile-level warm reopens on the pinned mid-size fixtures
+(0.5 s for the Digital Hub federation, 1.7 s for the PyGamer STEP fixture —
+[record](../artifacts/cache/README.md)); a real-large sixty5 reopen
+distribution remains unproven.
 
 ## 2. User-visible lifecycle
 
@@ -80,8 +85,8 @@ compiler's own module files and also includes Node/OS/architecture
 until cross-platform determinism is proven. An unchanged second compile reuses
 verified existing output or atomically restores it without running extraction.
 Focused tests prove this orchestration for STEP and a single-document IFC
-federation; recorded cold/warm runs with the pinned native toolchains remain the
-next gate.
+federation, and the recorded cold/warm/corruption runs with the pinned native
+toolchains close that gate ([record](../artifacts/cache/README.md)).
 
 ## 4. Storage and security
 
@@ -130,7 +135,8 @@ profile under [ADR-0004](adr/0004-format-strategy.md).
 
 1. **Persistent source-digest cache:** storage foundation, OCCT/IFC identities,
    and STEP/IFC whole-package integration implemented; pinned real-fixture
-   cold/warm evidence next.
+   cold/warm and corruption evidence recorded
+   ([record](../artifacts/cache/README.md)).
 2. **Columnar hierarchy sidecar:** compare size, parse, hierarchy-ready time,
    peak memory, and compatibility against compact glTF JSON.
 3. **Incremental IFC compilation:** discipline dependency index plus changed,
@@ -143,7 +149,9 @@ profile under [ADR-0004](adr/0004-format-strategy.md).
 Focused tests already prove an unchanged STEP and single-document IFC input
 skip extraction, preserve the package digest, invalidate changed compile
 identity, and reject corrupted entries at the storage layer while the
-orchestration falls back to recompilation. The persistent-cache gate closes only
-when pinned real STEP and multi-document IFC inputs reproduce those properties
-and publish cold/warm timings. The real-large product gate additionally
-requires three-run distributions for the SLO table on a recorded host class.
+orchestration falls back to recompilation. The persistent-cache gate is closed:
+the pinned PyGamer STEP fixture and the four-document Digital Hub federation
+reproduce those properties with published cold/warm timings and a fail-closed
+corrupted-entry recompile ([record](../artifacts/cache/README.md), validated by
+`pnpm cache:check`). The real-large product gate additionally requires
+three-run distributions for the SLO table on a recorded host class.

@@ -22,7 +22,7 @@ reverse. They explain context and trade-offs rather than only the final choice.
 | [0006](0006-license.md) | Apache-2.0 for NARU-owned code | Accepted |
 | [0007](0007-rebrand-naru.md) | Rebrand to NARU; freeze serialized `madi.*` identifiers | Accepted |
 | [0008](0008-spatial-demand-partitioning.md) | Separate spatial demand from shared prototype payload ownership | Proposed |
-| [0009](0009-persistent-compiled-cache.md) | Key persistent compiled caches by complete import identity | Proposed |
+| [0009](0009-persistent-compiled-cache.md) | Key persistent compiled caches by complete import identity | Accepted |
 
 ## Phase 0 review
 

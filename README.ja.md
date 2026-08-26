@@ -219,8 +219,11 @@ geometric prototype、913,520個の固有triangle、273,188個のプロパティ
 両コンパイラとも`--cache <dir>`で、変更のないソースを抽出の再実行なしに
 検証済みの永続キャッシュから復元します。エントリはソース・アダプター・
 コンパイラ・オプションのidentityでキー化され、破損したエントリは完全な
-再コンパイルへフォールバックします
-([ADR-0009](docs/adr/0009-persistent-compiled-cache.md)、
+再コンパイルへフォールバックします。固定されたPyGamer STEPフィクスチャと
+Digital Hub federationで記録された証拠は、19.9秒・46.3秒のコールドコンパイル
+に対し1.7秒・0.5秒のバイト同一ウォーム復元を示します
+([キャッシュ証拠](artifacts/cache/README.md)、
+[ADR-0009](docs/adr/0009-persistent-compiled-cache.md)、
 [インポートとキャッシュ設計](docs/IMPORT_AND_CACHE.md))。
 
 ## 設計から読み始める
