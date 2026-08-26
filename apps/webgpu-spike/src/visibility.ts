@@ -20,6 +20,31 @@ export type InstanceVisibilityFilter = (
   instanceIndex: number,
 ) => boolean;
 
+export interface HierarchyVisibilityEntry {
+  readonly nodeIndex: number;
+  readonly objectId: number;
+}
+
+export interface HierarchyVisibilityItem {
+  readonly dataset: {
+    hidden?: string;
+  };
+}
+
+/** Synchronizes hierarchy markers through the node-index lookup built at load time. */
+export function syncHierarchyVisibility(
+  entries: readonly HierarchyVisibilityEntry[],
+  items: ReadonlyMap<number, HierarchyVisibilityItem>,
+  isVisible: (objectId: number) => boolean,
+): void {
+  for (const entry of entries) {
+    const item = items.get(entry.nodeIndex);
+    if (!item) continue;
+    if (isVisible(entry.objectId)) delete item.dataset.hidden;
+    else item.dataset.hidden = "true";
+  }
+}
+
 /**
  * Builds dense per-prototype instance tables without allocating during review
  * actions. The renderer consumes these tables through updateVisibleInstances().

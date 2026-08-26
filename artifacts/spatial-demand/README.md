@@ -123,12 +123,15 @@ with zero errors and warnings. The two 6.98/7.66-second compile observations
 are single-run diagnostics, not benchmark claims.
 
 The recorder compiles packages sequentially and was run with an 8 GiB V8 heap;
-that execution contract is embedded in the record. Headed Chrome attempts
-reproduced a 6.2–6.5-second coarse frame under a 40 MiB residency setting, but
-the second target admission did not complete in a reviewable interval. Those
-aborted runs are not committed evidence. They identify real-large browser GPU
-reconciliation/visibility as the next gate rather than proving a timing or
-parity result.
+that execution contract is embedded in the record.
+`sixty5-browser-comparison.json` adds separate headed Chrome 151 runs under a
+40 MiB residency setting after target promotion stopped rescanning the full
+188,319-record hierarchy. Compatibility reaches a 6,417 ms coarse frame and a
+20,899 ms budget-limited ready state; leaf-anchor reaches 6,503 ms and 21,369
+ms. Both pick object 148736, resolve six IFC2X3 properties, and emit no console
+issue. The fitted view intersects all 2,048 leaves, so its 45/46 target Range
+responses do not demonstrate localized packing gains. These are single-run
+integration diagnostics, not the required three-run p95 distribution.
 
 Reproduce after retaining the current sixty5 split Scene IR:
 
@@ -138,5 +141,20 @@ node --max-old-space-size=8192 --expose-gc \
   --input output/ifc/sixty5-spatial-packed \
   --output output/ifc/sixty5-spatial-analysis \
   --compact-json
+node scripts/record-ifc-browser-evidence.mjs \
+  --scene-dir output/ifc/sixty5-spatial-analysis/compatibility \
+  --report output/ifc/sixty5-spatial-analysis/compatibility/build-report.json \
+  --output output/browser-sixty5-spatial-compatibility \
+  --skip-coarse-screenshot --residency-mib 40
+node scripts/record-ifc-browser-evidence.mjs \
+  --scene-dir output/ifc/sixty5-spatial-analysis/spatial-leaf-anchor \
+  --report output/ifc/sixty5-spatial-analysis/spatial-leaf-anchor/build-report.json \
+  --output output/browser-sixty5-spatial-leaf-anchor \
+  --skip-coarse-screenshot --residency-mib 40
+node scripts/record-spatial-ifc-browser-comparison.mjs \
+  --compatibility output/browser-sixty5-spatial-compatibility/browser-residency.json \
+  --leaf-anchor output/browser-sixty5-spatial-leaf-anchor/browser-residency.json \
+  --packing artifacts/spatial-demand/sixty5-packing.json \
+  --output output/ifc/sixty5-spatial-analysis/browser-comparison.json
 pnpm spatial:check
 ```

@@ -26,7 +26,7 @@ import type { GeometryBinarySource, SceneSource } from "./scene-source.js";
 import { formatPropertyValue, PropertySidecarStore } from "./property-sidecar.js";
 import { loadSpatialDemandIndex } from "./spatial-demand-source.js";
 import { OrthographicOrbitCamera } from "./view.js";
-import { OccurrenceVisibility } from "./visibility.js";
+import { OccurrenceVisibility, syncHierarchyVisibility } from "./visibility.js";
 import {
   defaultProgressiveResidencyBudget,
   ProgressiveResidency,
@@ -611,15 +611,14 @@ async function loadScene(source: SceneSource): Promise<boolean> {
       document.documentElement.dataset.visibleOccurrences = String(state.visibleOccurrences);
     };
 
-    const applyVisibility = (): void => {
+    const applyVisibility = ({ syncHierarchy = true } = {}): void => {
       renderer.updateVisibleInstances(visibility.indicesByBatch, visibility.counts);
-      for (const entry of scene.objectEvidence) {
-        const item = hierarchyList.querySelector<HTMLElement>(
-          `[data-node-index="${entry.nodeIndex}"]`,
+      if (syncHierarchy) {
+        syncHierarchyVisibility(
+          scene.objectEvidence,
+          hierarchyItems,
+          (objectId) => visibility.isVisible(objectId),
         );
-        if (!item) continue;
-        if (visibility.isVisible(entry.objectId)) delete item.dataset.hidden;
-        else item.dataset.hidden = "true";
       }
       updateSelectionText();
       updateVisibilityControls();
@@ -672,7 +671,6 @@ async function loadScene(source: SceneSource): Promise<boolean> {
         promotion.targetMeshIndexes,
       );
       visibility.restore(visibilitySnapshot);
-      renderer.updateVisibleInstances(visibility.indicesByBatch, visibility.counts);
       decodeMilliseconds += target.decodeMilliseconds;
       decodedTargetBytes += target.scene.summary.binaryBytes;
       residentDecodedBytes = promotion.decodedBytes;
@@ -699,7 +697,9 @@ async function loadScene(source: SceneSource): Promise<boolean> {
         `${formatBytes(decodedTargetBytes)} range-decoded · ` +
           `${formatBytes(promotion.decodedBytes)} CPU / ${formatBytes(promotion.gpuBytes)} GPU`,
       );
-      applyVisibility();
+      // Residency changes batch membership, not the user's visibility intent. The
+      // hierarchy markers therefore remain valid and must not be rescanned here.
+      applyVisibility({ syncHierarchy: false });
     };
     const finalizeProgressiveStatus = (): void => {
       if (!progressiveResidency) return;

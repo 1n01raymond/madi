@@ -83,7 +83,9 @@ into deterministic requests (512 KiB by default), while the existing
 with contiguous occurrence transforms. The browser enforces separate 64 MiB
 decoded and GPU admission budgets. Promoted targets mask matching coarse
 instances; evicting colder target groups reveals those shared fallbacks again,
-so visibility intent and stable object IDs survive every batch update. Add
+so visibility intent and stable object IDs survive every batch update. Target
+promotion reuses the hierarchy's node lookup and does not rescan DOM visibility
+markers because residency changes no user visibility intent. Add
 `?residencyMiB=5` to force a small budget during local exploration. Orbit,
 pan, zoom, fit, and resize rank visible retained-coarse chunk bounds by distance
 from the view center. If the hottest nonresident chunk

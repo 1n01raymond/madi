@@ -12,6 +12,9 @@ const packing = JSON.parse(
 const sixty5Packing = JSON.parse(
   await readFile(resolve(directory, "sixty5-packing.json"), "utf8"),
 );
+const sixty5Browser = JSON.parse(
+  await readFile(resolve(directory, "sixty5-browser-comparison.json"), "utf8"),
+);
 const digitalHubBrowser = JSON.parse(
   await readFile(resolve(directory, "digital-hub-browser-comparison.json"), "utf8"),
 );
@@ -316,10 +319,67 @@ assert(
     sixty5LeafAnchor.leafMetrics.summedOffViewBytes === 9668115064,
   "sixty5 requested/useful/off-view byte census changed.",
 );
+assert(
+  sixty5Browser.schemaVersion === "naru.spatial-ifc-browser-comparison.1" &&
+    sixty5Browser.mode === "headed-single-run-diagnostic" &&
+    sixty5Browser.browser.id === "chrome" &&
+    sixty5Browser.browser.version === "151.0.7922.174" &&
+    sixty5Browser.browser.headless === false &&
+    sixty5Browser.host.platform === "darwin" &&
+    sixty5Browser.host.architecture === "arm64",
+  "Unexpected sixty5 browser-comparison environment.",
+);
+const sixty5CompatibilityBrowser = sixty5Browser.compatibility;
+const sixty5LeafAnchorBrowser = sixty5Browser.spatialLeafAnchor;
+assert(
+  sixty5CompatibilityBrowser.packageDigest === sixty5Compatibility.packageDigest &&
+    sixty5LeafAnchorBrowser.packageDigest === sixty5LeafAnchor.packageDigest,
+  "sixty5 browser/package identity changed.",
+);
+assert(
+  sixty5CompatibilityBrowser.milestones.hierarchyReadyMs === 2051 &&
+    sixty5CompatibilityBrowser.milestones.coarseFrameMs === 6417 &&
+    sixty5CompatibilityBrowser.milestones.readyMs === 20899 &&
+    sixty5LeafAnchorBrowser.milestones.hierarchyReadyMs === 2120 &&
+    sixty5LeafAnchorBrowser.milestones.coarseFrameMs === 6503 &&
+    sixty5LeafAnchorBrowser.milestones.readyMs === 21369 &&
+    sixty5CompatibilityBrowser.milestones.coarseFrameMs <= 15000 &&
+    sixty5LeafAnchorBrowser.milestones.coarseFrameMs <= 15000,
+  "sixty5 browser milestones changed or exceeded the coarse-frame ceiling.",
+);
+assert(
+  sixty5CompatibilityBrowser.targetChunkCount === 324 &&
+    sixty5CompatibilityBrowser.targetChunksReady === 41 &&
+    sixty5CompatibilityBrowser.targetSchedulerRequests === 43 &&
+    sixty5CompatibilityBrowser.targetRangeResponses === 45 &&
+    sixty5LeafAnchorBrowser.targetChunkCount === 325 &&
+    sixty5LeafAnchorBrowser.targetChunksReady === 42 &&
+    sixty5LeafAnchorBrowser.targetSchedulerRequests === 44 &&
+    sixty5LeafAnchorBrowser.targetRangeResponses === 46,
+  "sixty5 browser target residency census changed.",
+);
+assert(
+  sixty5CompatibilityBrowser.spatialNodesVisited === 4095 &&
+    sixty5CompatibilityBrowser.spatialLeavesVisible === 2048 &&
+    sixty5CompatibilityBrowser.spatialOccurrencesTested === 78173 &&
+    sixty5CompatibilityBrowser.spatialCandidateChunks === 324 &&
+    sixty5LeafAnchorBrowser.spatialNodesVisited === 4095 &&
+    sixty5LeafAnchorBrowser.spatialLeavesVisible === 2048 &&
+    sixty5LeafAnchorBrowser.spatialOccurrencesTested === 78173 &&
+    sixty5LeafAnchorBrowser.spatialCandidateChunks === 325,
+  "sixty5 initial-fit spatial census changed.",
+);
+assert(
+  sixty5CompatibilityBrowser.selectedObjectId === sixty5LeafAnchorBrowser.selectedObjectId &&
+    sixty5CompatibilityBrowser.propertyEntryCount === 6 &&
+    sixty5LeafAnchorBrowser.propertyEntryCount === 6 &&
+    sixty5Browser.consoleIssues.length === 0,
+  "sixty5 browser picking, properties, or console parity changed.",
+);
 
 console.log(
   "[spatial-demand] verified headed Chrome/Firefox: " +
     "localized 1/3 chunks and 1/10 occurrences with obsolete Range cancellation; " +
     "Digital Hub leaf-anchor off-view bytes 637689824 -> 383315164 and headed Ranges 71 -> 66; " +
-    "sixty5 off-view bytes 15972343228 -> 9668115064",
+    "sixty5 off-view bytes 15972343228 -> 9668115064 and headed coarse frames 6417/6503 ms",
 );

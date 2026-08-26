@@ -138,10 +138,13 @@ sixty5 census covers 2,048 leaves and reduces leaf chunk references
 coarse bytes and a byte-identical repeat. Its compatibility/leaf-anchor global
 chunk counts are 324/325, so the decision depends on local demand rather than a
 claim that total request count always falls. Both compact-JSON packages pass
-Khronos validation with zero errors and warnings. Headed sixty5 attempts reach
-a 6.2–6.5-second coarse frame but stall during the second target admission;
-because those runs were interrupted, they are a named browser blocker rather
-than committed evidence.
+Khronos validation with zero errors and warnings. After removing the full
+188,319-record hierarchy rescan from each target promotion, separate headed
+Chrome sixty5 runs now complete selection and property resolution: compatibility
+records a 6,417 ms coarse frame / 20,899 ms budget-limited ready state and
+leaf-anchor records 6,503 / 21,369 ms, with no console issue. The initial fit
+still intersects all 2,048 leaves, and each result is a single run, so neither
+localized camera reduction nor the required three-run p95 is yet proven.
 
 - every renderable occurrence is indexed exactly once, every leaf bound contains
   its references, and BVH queries have no false negatives against a brute-force

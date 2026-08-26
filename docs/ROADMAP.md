@@ -126,9 +126,13 @@ oracle and Digital Hub offline census pass: 71→66 chunks, 1,458→882 leaf chu
 references, and 39.89% less summed leaf off-view payload. The current explicit-edge
 sixty5 census independently records 34,167→21,246 leaf chunk references and
 39.47% less summed off-view payload while global chunks change 324→325.
-Localized headed Digital Hub and sixty5 evidence remain pending. A headed Digital Hub full-fit integration pair
-does pass with 71→66 target Ranges and equal residency, picking, and property
-results; localized real-model navigation and repeated timing remain pending.
+Localized headed Digital Hub and sixty5 evidence remain pending. Headed full-fit
+integration pairs pass for both models: Digital Hub records 71→66 target Ranges,
+while sixty5 records 6,417/6,503 ms coarse frames and completes budget-limited
+selection/property checks after target promotion stopped rescanning all 188,319
+hierarchy records. The fitted sixty5 view sees every leaf and does not improve
+Range count (45→46), so localized real-model navigation and repeated timing
+remain pending.
 
 The camera-relative precision path is now decision evidence for ADR-0005. A
 project-owned 0.25 mm gap is retained at a 10,000 km offset with
