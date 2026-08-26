@@ -127,6 +127,11 @@ WebGPU under the recorded default settings.
 
 ### Studio
 
+Current evidence: the [public GitHub Pages demo](https://1n01raymond.github.io/naru/)
+opens the qualified Digital Hub package by default and PyGamer as a secondary
+scene. The deployment verifies the package digests before publishing and
+smoke-checks the live app, package resources, and HTTP Range delivery.
+
 - open local/URL compiled scene;
 - orbit/pan/zoom and fit;
 - hierarchy search and properties;

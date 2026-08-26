@@ -82,7 +82,7 @@ NARU 更名之前，显示的是项目的旧名称。</sub>
 
 | 你想做什么 | 入口 |
 |---|---|
-| 看模型实际运行 | `pnpm install && pnpm dev` 会打开已加载 PyGamer 装配体的 Studio（[Studio 指南](apps/webgpu-spike/README.md)）；托管的公开演示是 Phase 1 的目标（[路线图](docs/ROADMAP.md)） |
+| 看模型实际运行 | 打开已加载 Digital Hub 的[公开 Studio 演示](https://1n01raymond.github.io/naru/)，或运行 `pnpm install && pnpm dev` 在本地加载 PyGamer 装配体（[Studio 指南](apps/webgpu-spike/README.md)） |
 | 把查看器嵌入你的应用 | [Runtime 包](packages/runtime-webgpu/README.md) —— 编译 glTF 加载器与直接 WebGPU 渲染器 |
 | 编译你自己的 STEP、IFC | [Compiler 包](packages/compiler/README.md)与下方的[编译器验证](#当前编译器验证) |
 | 理解整体架构 | 按阅读顺序整理的[设计文档](docs/README.md) |

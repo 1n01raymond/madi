@@ -85,7 +85,7 @@ commit과 고지를 보존해 수정 없이 MIT로 재배포합니다. Adafruit�
 
 | 하고 싶은 것 | 시작점 |
 |---|---|
-| 모델이 동작하는 것을 보기 | `pnpm install && pnpm dev`가 PyGamer 어셈블리가 로드된 Studio를 엽니다 ([Studio 안내](apps/webgpu-spike/README.md)); 호스팅된 공개 데모는 Phase 1 목표입니다 ([로드맵](docs/ROADMAP.md)) |
+| 모델이 동작하는 것을 보기 | Digital Hub가 로드된 [공개 Studio 데모](https://1n01raymond.github.io/naru/)를 열거나, `pnpm install && pnpm dev`로 PyGamer 어셈블리를 로컬에서 실행합니다 ([Studio 안내](apps/webgpu-spike/README.md)) |
 | 뷰어를 내 앱에 임베드하기 | [Runtime 패키지](packages/runtime-webgpu/README.md) — 컴파일된 glTF 로더와 직접 WebGPU 렌더러 |
 | 내 STEP·IFC 컴파일하기 | [Compiler 패키지](packages/compiler/README.md)와 아래 [컴파일러 증거](#현재-컴파일러-증거) |
 | 아키텍처 이해하기 | 읽기 순서대로 정리된 [설계 문서](docs/README.md) |

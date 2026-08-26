@@ -16,6 +16,7 @@
     "build": "pnpm --recursive --if-present run build",
     "browser:evidence:check": "node scripts/validate-browser-evidence.mjs",
     "browser:matrix": "node scripts/record-browser-matrix.mjs",
+    "demo:smoke": "node scripts/check-public-demo.mjs",
     "check": "pnpm run adr:check && pnpm run fixtures:check && pnpm run fixtures:external:check && pnpm run occt:diagnostics:check && pnpm run phase1:evidence:check && pnpm run ifc:federation:check && pnpm run ifc:browser:check && pnpm run ifc:first-frame:check && pnpm run browser:evidence:check && pnpm run safari:compatibility:check && pnpm run precision:check && pnpm run benchmark:industrial:check && pnpm run benchmark:heterogeneous:check && pnpm run benchmark:repeatability:check && pnpm run benchmark:gpu-timing:check && pnpm run benchmark:gpu-timing:integrated:check && pnpm run lint && pnpm run typecheck && pnpm run test && pnpm run build",
     "dev": "pnpm --filter @naru3d/webgpu-spike run dev",
     "fixtures:check": "node scripts/validate-fixture-manifest.mjs",
