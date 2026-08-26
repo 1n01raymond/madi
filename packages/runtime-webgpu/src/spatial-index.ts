@@ -398,7 +398,14 @@ function projectedNodeBounds(
   };
 }
 
-/** Conservatively returns the target chunks referenced by frustum-visible BVH leaves. */
+/**
+ * Conservatively returns the target chunks referenced by frustum-visible BVH
+ * leaves. A box is rejected only when all eight corners lie outside a single
+ * clip half-space, tested on undivided clip coordinates (linear in world
+ * space), so a box intersecting the frustum is never culled; boxes outside
+ * the frustum but not fully outside any one plane may still be kept, which
+ * only over-fetches.
+ */
 export function querySpatialDemandIndex(
   index: DecodedSpatialDemandIndex,
   frame: SpatialDemandQueryFrame,
