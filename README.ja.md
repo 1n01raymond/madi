@@ -40,7 +40,7 @@
   <tr>
     <td width="50%" valign="top">
       <a href="artifacts/browser-matrix/README.md">
-        <img src="artifacts/browser-matrix/chrome-151-windows-selected.png" alt="ChromeでNARU WebGPUランタイムにより描画・pickingされたAdafruit PyGamer STEPアセンブリ" />
+        <img src="artifacts/browser-matrix/chrome-151-macos-selected.png" alt="ChromeでNARU WebGPUランタイムにより描画・pickingされたAdafruit PyGamer STEPアセンブリ" />
       </a>
       <br />
       <sub><strong>実在するSTEPアセンブリを、最後まで。</strong> Adafruit
@@ -50,23 +50,24 @@
       <a href="artifacts/browser-matrix/README.md">ブラウザ証拠</a></sub>
     </td>
     <td width="50%" valign="top">
-      <a href="artifacts/ifc/sixty5-browser/README.md">
-        <img src="artifacts/ifc/sixty5-browser/picked.png" alt="固定residency予算の下で描画された7分野sixty5 IFC federationと、IFCプロパティをresolveした選択要素" />
+      <a href="artifacts/ifc/sixty5-first-frame/README.md">
+        <img src="artifacts/ifc/sixty5-first-frame/picked.png" alt="固定residency予算の下で描画された7分野sixty5 IFC federationと、IFCプロパティをresolveした選択要素" />
       </a>
       <br />
       <sub><strong>実物大のIFC federation。</strong> 839.9 MB・7分野の
       <code>sixty5</code>モデル:3.3秒で階層と検索が準備完了、描画可能な
-      78,173個のoccurrenceをすべて表示、geometryは固定64 MiB予算内に維持、
-      選択した基礎梁が自身のIFCプロパティをresolveします。
-      <a href="artifacts/ifc/sixty5-browser/README.md">residency証拠</a></sub>
+      78,173個のoccurrence全体の初回coarse frameが12.8秒、geometryは固定
+      64 MiB予算内に維持、選択した基礎梁が自身のIFCプロパティをresolve
+      します。
+      <a href="artifacts/ifc/sixty5-browser/README.md">residency証拠</a> ·
+      <a href="artifacts/ifc/sixty5-first-frame/README.md">初回フレーム証拠</a></sub>
     </td>
   </tr>
 </table>
 
 <sub>PyGamerのCADの著作権はAdafruit Industriesにあり、固定upstream commitと
 通知を保持して未変更のままMITで再配布しています。AdafruitによるNARUの推奨を
-意味しません。両キャプチャはNARU改名前の記録であり、プロジェクトの旧名称が
-表示されています。</sub>
+意味しません。</sub>
 
 ## この証拠があなたのモデルに意味すること
 
@@ -78,8 +79,12 @@
 | 詳細形状はプレーンなHTTP上で漸進的にストリーミングされます | 28件の`scene.bin`リクエストがすべてHTTP 206 `bytes=` Range応答 ([sixty5ブラウザ記録](artifacts/ifc/sixty5-browser/README.md)) |
 | シーン規模によらずメモリは宣言された予算内に収まります | promotionは234個中26番目のchunkで停止、デコード・GPUバイトとも64 MiB未満を維持 ([sixty5ブラウザ記録](artifacts/ifc/sixty5-browser/README.md)) |
 | 選択はソースCAD/BIM識別子へ解決されます | 選択した基礎梁が6件のIFCプロパティ項目を遅延resolve ([sixty5ブラウザ記録](artifacts/ifc/sixty5-browser/README.md)) |
+| 実物大の初回フレームは分ではなく秒単位で到着します | 共有coarse Worker経路がsixty5の初回coarse frameを268.0秒から中央値12.8秒へ短縮 — 20.9倍の高速化 ([初回フレーム記録](artifacts/ifc/sixty5-first-frame/README.md)) |
+| カメラ移動は古いダウンロードを待たずにキャンセルします | 不要になったfastener Rangeリクエストが中断され、新たに見えるmounting-plate Rangeが先に発行 — ChromeとFirefoxで同一 ([ブラウザmatrix](artifacts/browser-matrix/README.md)) |
+| 原点から10,000 km離れた座標でも精度を維持します | 0.25 mmの板間隔が誤差0.001 mm以下でコンパイルされ、両エンジンともピクセルドリフト0で描画 ([精度記録](artifacts/precision/large-coordinates/README.md)) |
+| 近接するgeometryがまとまって転送されるようパッケージをパッキングできます (opt-in) | leaf-anchor payload順序がDigital Hub censusでoff-viewバイト合計を39.9%削減 ([spatial demand記録](artifacts/spatial-demand/README.md)) |
 | コンパイルはバイト単位で再現可能です | 2回の完全なsixty5コンパイルがバイト同一のパッケージを生成 ([コンパイル証拠](artifacts/ifc/sixty5/README.md)) |
-| **まだ達成していないこと:** 実物大スケールでの高速な初回フレーム | sixty5の初回coarse frameは268.0秒 — 次フェーズが超えるべき境界として意図的に記録 ([記録された境界](artifacts/ifc/sixty5-browser/README.md)) |
+| **まだ達成していないこと:** 実物大スケールでのインタラクティブ級のready状態とブラウザ間性能主張 | 12.8秒の初回フレームはdiscrete GPUホスト1台での単一Chrome記録であり、予算制限ready状態は依然64.4秒 ([初回フレーム記録](artifacts/ifc/sixty5-first-frame/README.md)) |
 
 ## どこから始めるか
 
@@ -173,10 +178,17 @@ Engineering Scene IRは新しい交換形式ではなく、論理的なシステ
 | **2 — 大規模シーンalpha** | 10万以上のoccurrence、ストリーミング、LOD、キャッシュ、メモリ予算 | 予定 |
 | **3 — オープンプラットフォームbeta** | プラグイン、IFC、組み込み例、セルフホスト配布 | 予定 |
 
-詳しくは[ロードマップ](docs/ROADMAP.md)、[Phase 1進捗](docs/PHASE_1.md)、
-[ベンチマーク仕様](docs/BENCHMARKS.md)をご覧ください。性能値は再配布可能な
-モデル、正確なハードウェア・ブラウザ情報、cold/warm状態、再現コマンドと
-ともに公開します。
+詳しくは[ロードマップ](docs/ROADMAP.md)、[Phase 1証拠](docs/PHASE_1.md)、
+[Phase 0記録](docs/PHASE_0.md)、
+[Chrome/Firefox WebGPU matrix](artifacts/browser-matrix/README.md)をご覧
+ください。性能値は再配布可能なモデル、正確なハードウェア・ブラウザ情報、
+cold/warm状態、再現コマンドとともに公開します。
+
+実在の参照ソースは、大きなバイナリをコミットせずにチェックサムで固定される
+ようになりました: NIST AP242適合性ケース2件、IFC-Benchの4分野Digital Hub
+federation、839.9 MB・7分野の`sixty5` federationが、ファイルごとの固定
+ダイジェストで検証されています。`sixty5`のダウンロードは明示的なopt-inの
+ままです。[外部fixtureレジストリ](fixtures/external/README.md)をご覧ください。
 
 ## 現在のコンパイラ検証
 
@@ -194,6 +206,22 @@ pnpm naru compile fixtures/step/repeated-fasteners-ap242.step \
 コミット済みAP242結果は、Khronos glTFのerror・warningともに0件です。展開された
 Scene IRは一時データであり、NARUファイル形式ではありません。
 [コンパイラ証拠](artifacts/phase1/README.md)を参照してください。
+
+同じコンパイラ境界に、初期のマルチドキュメントIFC経路が追加されました。
+検証済みDigital Hubスライスは、固定されたIfcOpenShell 0.8.5で建築・暖房・
+配管・換気をfederationします: 描画可能な5,152個のoccurrence、3,383個の共有
+geometric prototype、913,520個の固有triangle、273,188個のプロパティ値。
+ソースとパッケージのハッシュは、Khronos glTFのerror・warning 0件で独立に
+検証されています。これは正確性の証拠であり、まだ大規模シーンの性能主張では
+ありません。
+[IFC federation証拠](artifacts/ifc/digital-hub/README.md)を参照してください。
+
+両コンパイラとも`--cache <dir>`で、変更のないソースを抽出の再実行なしに
+検証済みの永続キャッシュから復元します。エントリはソース・アダプター・
+コンパイラ・オプションのidentityでキー化され、破損したエントリは完全な
+再コンパイルへフォールバックします
+([ADR-0009](docs/adr/0009-persistent-compiled-cache.md)、
+[インポートとキャッシュ設計](docs/IMPORT_AND_CACHE.md))。
 
 ## 設計から読み始める
 

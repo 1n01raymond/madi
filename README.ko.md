@@ -40,7 +40,7 @@
   <tr>
     <td width="50%" valign="top">
       <a href="artifacts/browser-matrix/README.md">
-        <img src="artifacts/browser-matrix/chrome-151-windows-selected.png" alt="Chrome에서 NARU WebGPU 런타임으로 렌더링·picking한 Adafruit PyGamer STEP 어셈블리" />
+        <img src="artifacts/browser-matrix/chrome-151-macos-selected.png" alt="Chrome에서 NARU WebGPU 런타임으로 렌더링·picking한 Adafruit PyGamer STEP 어셈블리" />
       </a>
       <br />
       <sub><strong>실제 STEP 어셈블리, 끝까지.</strong> Adafruit PyGamer
@@ -50,23 +50,24 @@
       <a href="artifacts/browser-matrix/README.md">브라우저 증거</a></sub>
     </td>
     <td width="50%" valign="top">
-      <a href="artifacts/ifc/sixty5-browser/README.md">
-        <img src="artifacts/ifc/sixty5-browser/picked.png" alt="고정 residency 예산 아래 렌더링된 7개 분야 sixty5 IFC federation과 IFC 속성을 resolve한 선택 요소" />
+      <a href="artifacts/ifc/sixty5-first-frame/README.md">
+        <img src="artifacts/ifc/sixty5-first-frame/picked.png" alt="고정 residency 예산 아래 렌더링된 7개 분야 sixty5 IFC federation과 IFC 속성을 resolve한 선택 요소" />
       </a>
       <br />
       <sub><strong>실물 대형 IFC federation.</strong> 839.9 MB 7개 분야
       <code>sixty5</code> 모델: 3.3초 만에 계층과 검색 준비, 렌더링 가능한
-      78,173개 occurrence 전체 표시, 고정 64 MiB 예산 안에 유지되는
-      geometry, 그리고 선택된 기초 보가 자신의 IFC 속성을 resolve합니다.
-      <a href="artifacts/ifc/sixty5-browser/README.md">residency 증거</a></sub>
+      78,173개 occurrence 전체의 첫 coarse frame이 12.8초, 고정 64 MiB 예산
+      안에 유지되는 geometry, 그리고 선택된 기초 보가 자신의 IFC 속성을
+      resolve합니다.
+      <a href="artifacts/ifc/sixty5-browser/README.md">residency 증거</a> ·
+      <a href="artifacts/ifc/sixty5-first-frame/README.md">첫 프레임 증거</a></sub>
     </td>
   </tr>
 </table>
 
 <sub>PyGamer CAD의 저작권은 Adafruit Industries에 있으며, 고정된 upstream
 commit과 고지를 보존해 수정 없이 MIT로 재배포합니다. Adafruit가 NARU를
-보증한다는 의미는 아닙니다. 두 캡처는 NARU 개명 이전에 기록되어 프로젝트의
-이전 이름이 보입니다.</sub>
+보증한다는 의미는 아닙니다.</sub>
 
 ## 이 증거가 당신의 모델에 의미하는 것
 
@@ -78,8 +79,12 @@ commit과 고지를 보존해 수정 없이 MIT로 재배포합니다. Adafruit�
 | 상세 형상은 일반 HTTP 위에서 점진적으로 스트리밍됩니다 | 28건의 `scene.bin` 요청이 전부 HTTP 206 `bytes=` Range 응답 ([sixty5 브라우저 기록](artifacts/ifc/sixty5-browser/README.md)) |
 | 장면 크기와 무관하게 메모리는 선언된 예산 안에 머뭅니다 | promotion이 234개 중 26번째 chunk에서 정지, 디코드·GPU 바이트 모두 64 MiB 미만 유지 ([sixty5 브라우저 기록](artifacts/ifc/sixty5-browser/README.md)) |
 | 선택은 원본 CAD/BIM 식별자로 이어집니다 | 선택된 기초 보가 6개 IFC 속성 항목을 지연 resolve ([sixty5 브라우저 기록](artifacts/ifc/sixty5-browser/README.md)) |
+| 실물 대형 첫 프레임이 분이 아니라 초 단위로 도착합니다 | 공유 coarse Worker 경로가 sixty5 첫 coarse frame을 268.0초에서 중앙값 12.8초로 단축 — 20.9배 개선 ([첫 프레임 기록](artifacts/ifc/sixty5-first-frame/README.md)) |
+| 카메라 이동은 오래된 다운로드를 기다리지 않고 취소합니다 | 불필요해진 fastener Range 요청이 중단되고 새로 보이는 mounting-plate Range가 먼저 발행 — Chrome과 Firefox 모두 동일 ([브라우저 matrix](artifacts/browser-matrix/README.md)) |
+| 원점에서 10,000 km 떨어진 좌표도 정밀도를 유지합니다 | 0.25 mm 판 간격이 ≤ 0.001 mm 오차로 컴파일되고 두 엔진 모두 픽셀 드리프트 0으로 렌더링 ([정밀도 기록](artifacts/precision/large-coordinates/README.md)) |
+| 가까운 geometry가 함께 전송되도록 패키지를 패킹할 수 있습니다 (opt-in) | leaf-anchor payload 정렬이 Digital Hub census에서 off-view 바이트 합계를 39.9% 절감 ([spatial demand 기록](artifacts/spatial-demand/README.md)) |
 | 컴파일은 바이트 단위로 재현 가능합니다 | 두 번의 전체 sixty5 컴파일이 바이트 동일 패키지 생성 ([컴파일 증거](artifacts/ifc/sixty5/README.md)) |
-| **아직 아닌 것:** 실물 대형 규모의 빠른 첫 프레임 | sixty5 첫 coarse frame이 268.0초 — 다음 단계가 넘어야 할 경계로 의도적으로 기록 ([기록된 경계](artifacts/ifc/sixty5-browser/README.md)) |
+| **아직 아닌 것:** 실물 대형 규모의 인터랙티브급 준비 완료와 브라우저 간 성능 주장 | 12.8초 첫 프레임은 discrete GPU 호스트 1대의 단일 Chrome 기록이며, 예산 제한 ready 상태는 여전히 64.4초 ([첫 프레임 기록](artifacts/ifc/sixty5-first-frame/README.md)) |
 
 ## 어디서 시작할까요
 
@@ -173,10 +178,17 @@ Engineering Scene IR은 새로운 교환 포맷이 아니라 논리적인 시스
 | **2 — 대형 장면 알파** | 10만+ occurrence, 스트리밍, LOD, 캐시, 메모리 예산 | 예정 |
 | **3 — 오픈 플랫폼 베타** | 플러그인, IFC, 임베딩 예제, 셀프 호스팅 배포 | 예정 |
 
-전체 [로드맵](docs/ROADMAP.md), [Phase 1 진행 기록](docs/PHASE_1.md),
-[벤치마크 계약](docs/BENCHMARKS.md)을 확인하세요. 성능 수치는 재배포 가능한
-모델, 정확한 하드웨어·브라우저 정보, cold/warm 상태, 재현 명령과 함께
-공개합니다.
+전체 [로드맵](docs/ROADMAP.md), [Phase 1 증거](docs/PHASE_1.md),
+[Phase 0 기록](docs/PHASE_0.md),
+[Chrome/Firefox WebGPU matrix](artifacts/browser-matrix/README.md)를
+확인하세요. 성능 수치는 재배포 가능한 모델, 정확한 하드웨어·브라우저 정보,
+cold/warm 상태, 재현 명령과 함께 공개합니다.
+
+실제 레퍼런스 소스는 이제 대용량 바이너리를 커밋하지 않고 체크섬으로
+고정됩니다: NIST AP242 적합성 케이스 2건, IFC-Bench의 4개 분야 Digital Hub
+federation, 839.9 MB 7개 분야 `sixty5` federation이 파일별 고정 다이제스트로
+검증됩니다. `sixty5` 다운로드는 명시적 opt-in으로 유지됩니다.
+[외부 fixture 레지스트리](fixtures/external/README.md)를 확인하세요.
 
 ## 현재 컴파일러 증거
 
@@ -194,6 +206,20 @@ pnpm naru compile fixtures/step/repeated-fasteners-ap242.step \
 커밋된 AP242 결과는 Khronos glTF 오류·경고 0건으로 독립 검증됩니다. 확장된
 Scene IR은 임시 데이터이며 NARU 파일 포맷이 아닙니다. [컴파일러 증거](artifacts/phase1/README.md)를
 확인하세요.
+
+같은 컴파일러 경계에는 이제 초기 다중 문서 IFC 경로가 있습니다. 검증된
+Digital Hub 슬라이스는 고정된 IfcOpenShell 0.8.5로 건축·난방·배관·환기를
+federation합니다: 렌더링 가능한 5,152개 occurrence, 3,383개 공유 geometric
+prototype, 913,520개 고유 triangle, 273,188개 속성 값. 소스와 패키지 해시는
+Khronos glTF 오류·경고 0건으로 독립 검증됩니다. 이는 정확성 증거이며 아직
+대형 장면 성능 주장이 아닙니다.
+[IFC federation 증거](artifacts/ifc/digital-hub/README.md)를 확인하세요.
+
+두 컴파일러 모두 `--cache <dir>`로 변경되지 않은 소스를 추출 재실행 없이
+검증된 영속 캐시에서 복원합니다. 엔트리는 소스·어댑터·컴파일러·옵션
+identity로 키가 만들어지고, 손상된 엔트리는 전체 재컴파일로 폴백합니다
+([ADR-0009](docs/adr/0009-persistent-compiled-cache.md),
+[import·캐시 설계](docs/IMPORT_AND_CACHE.md)).
 
 ## 설계 문서부터 시작하기
 
@@ -297,21 +323,29 @@ NARU는 아직 근거에 따라 아키텍처를 바꿀 수 있는 초기 단계�
 ```text
 apps/
   webgpu-spike/       Phase 1 glTF + Worker + WebGPU 브라우저 검증
+  benchmark-lab/      NARU 대 Three.js 산업용 벤치마크 하네스
 packages/
   compiler/           결정적 Scene IR → 표준 우선 glTF 컴파일러
   scene-ir/           인메모리 엔지니어링 장면 타입과 검증기
   runtime-webgpu/     glTF 로더와 직접 WebGPU 렌더링 경로
 native/
   adapter-occt/       격리된 STEP/XDE 추출 스파이크
+  adapter-ifc/        격리된 다중 문서 IFC federation 어댑터
 fixtures/
   step/               재배포 가능한 STEP manifest와 검토 정책
+  ifc/                재배포 가능한 IFC 엣지 케이스 fixture
+  external/           다운로드 방식 STEP/IFC 레지스트리와 라이선스 기록
 tools/
   benchmark/          재현 가능한 벤치마크 결과 하네스
+  external-fixtures/  체크섬 고정 외부 소스를 manifest 기준으로 검증
+scripts/              `pnpm check`가 실행하는 증거 recorder·validator
+artifacts/            CI가 재검증하는 커밋된 증거 기록
 docs/
   PRODUCT.md          제품 요구사항과 주요 워크플로
   ARCHITECTURE.md     시스템 경계와 품질 속성
   SCENE_IR.md         의미·어셈블리·표현 모델
   COMPILER.md         입력 및 컴파일 파이프라인
+  IMPORT_AND_CACHE.md 임포트 파이프라인과 영속 컴파일 캐시
   RUNTIME.md          브라우저·WebGPU 런타임 설계
   PLUGINS.md          확장 및 자동화 모델
   BENCHMARKS.md       재현 가능한 성능 계약

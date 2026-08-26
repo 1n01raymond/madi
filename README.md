@@ -37,7 +37,7 @@ captures those records pin by digest.
   <tr>
     <td width="50%" valign="top">
       <a href="artifacts/browser-matrix/README.md">
-        <img src="artifacts/browser-matrix/chrome-151-windows-selected.png" alt="Adafruit PyGamer STEP assembly rendered and picked through the NARU WebGPU runtime in Chrome" />
+        <img src="artifacts/browser-matrix/chrome-151-macos-selected.png" alt="Adafruit PyGamer STEP assembly rendered and picked through the NARU WebGPU runtime in Chrome" />
       </a>
       <br />
       <sub><strong>A real STEP assembly, end to end.</strong> Adafruit's
@@ -47,24 +47,24 @@ captures those records pin by digest.
       <a href="artifacts/browser-matrix/README.md">Browser evidence</a></sub>
     </td>
     <td width="50%" valign="top">
-      <a href="artifacts/ifc/sixty5-browser/README.md">
-        <img src="artifacts/ifc/sixty5-browser/picked.png" alt="The seven-discipline sixty5 IFC federation rendered under a fixed residency budget, with a picked element resolving its IFC properties" />
+      <a href="artifacts/ifc/sixty5-first-frame/README.md">
+        <img src="artifacts/ifc/sixty5-first-frame/picked.png" alt="The seven-discipline sixty5 IFC federation rendered under a fixed residency budget, with a picked element resolving its IFC properties" />
       </a>
       <br />
       <sub><strong>A real-large IFC federation.</strong> The 839.9 MB
       seven-discipline <code>sixty5</code> model: hierarchy and search ready in
-      3.3 s, all 78,173 renderable occurrences on screen, geometry held inside
-      a fixed 64 MiB budget, and a picked foundation beam resolving its IFC
-      properties.
-      <a href="artifacts/ifc/sixty5-browser/README.md">Residency evidence</a></sub>
+      3.3 s, a first coarse frame of all 78,173 renderable occurrences in
+      12.8 s, geometry held inside a fixed 64 MiB budget, and a picked
+      foundation beam resolving its IFC properties.
+      <a href="artifacts/ifc/sixty5-browser/README.md">Residency evidence</a> ·
+      <a href="artifacts/ifc/sixty5-first-frame/README.md">First-frame evidence</a></sub>
     </td>
   </tr>
 </table>
 
 <sub>The PyGamer CAD is copyright Adafruit Industries, redistributed unchanged
 under MIT with a pinned upstream commit and notice; Adafruit does not endorse
-NARU. Both captures predate the NARU rename and show the project's former
-name.</sub>
+NARU.</sub>
 
 ## What the evidence means for your models
 
@@ -76,8 +76,12 @@ name.</sub>
 | Detail streams progressively over plain HTTP | 28 `scene.bin` requests, every one an HTTP 206 `bytes=` Range response ([sixty5 browser record](artifacts/ifc/sixty5-browser/README.md)) |
 | Memory stays inside a declared budget at any scene size | promotion stopped at chunk 26 of 234; decoded and GPU bytes both held under 64 MiB ([sixty5 browser record](artifacts/ifc/sixty5-browser/README.md)) |
 | Selection resolves to source CAD/BIM identity | a picked foundation beam lazily resolves its 6 IFC property entries ([sixty5 browser record](artifacts/ifc/sixty5-browser/README.md)) |
+| A real-large first frame arrives in seconds, not minutes | the shared-coarse Worker path cut the sixty5 first coarse frame from 268.0 s to a 12.8 s median, a 20.9× speedup ([first-frame record](artifacts/ifc/sixty5-first-frame/README.md)) |
+| Camera moves cancel stale downloads instead of waiting on them | an obsolete fastener Range request was aborted and the newly visible mounting-plate Range issued first, in both Chrome and Firefox ([browser matrix](artifacts/browser-matrix/README.md)) |
+| Coordinates 10,000 km from the origin stay precise | a 0.25 mm plate gap compiles with ≤ 0.001 mm error and renders with zero pixel drift in both engines ([precision record](artifacts/precision/large-coordinates/README.md)) |
+| Packages can be packed so nearby geometry travels together (opt-in) | leaf-anchor payload ordering cut summed off-view bytes 39.9% on the Digital Hub census ([spatial demand record](artifacts/spatial-demand/README.md)) |
 | Compiles are reproducible, byte for byte | two full sixty5 compilations produced byte-identical packages ([compile evidence](artifacts/ifc/sixty5/README.md)) |
-| **Not yet:** a fast first frame at real-large scale | the sixty5 first coarse frame took 268.0 s, recorded deliberately as the boundary the next phase must beat ([the recorded boundary](artifacts/ifc/sixty5-browser/README.md)) |
+| **Not yet:** interactive-grade readiness or cross-browser performance claims at real-large scale | the 12.8 s first frame is a single Chrome record on one discrete-GPU host, and the budget-limited ready state still takes 64.4 s ([first-frame record](artifacts/ifc/sixty5-first-frame/README.md)) |
 
 ## Where to start
 
@@ -213,6 +217,13 @@ zero Khronos glTF errors or warnings. This is correctness evidence, not yet a
 large-scene performance claim. See the
 [IFC federation evidence](artifacts/ifc/digital-hub/README.md).
 
+Both compilers accept `--cache <dir>` to restore an unchanged source from a
+verified persistent cache instead of re-running extraction; entries are keyed
+by source, adapter, compiler, and option identity, and a corrupt entry falls
+back to a full recompile
+([ADR-0009](docs/adr/0009-persistent-compiled-cache.md),
+[import and cache design](docs/IMPORT_AND_CACHE.md)).
+
 ## Start with the design
 
 | If you want to… | Read… |
@@ -315,6 +326,7 @@ issue so assumptions are visible before implementation.
 ```text
 apps/
   webgpu-spike/       Phase 1 compiled glTF + Worker + WebGPU browser proof
+  benchmark-lab/      NARU vs Three.js industrial benchmark harness
 packages/
   compiler/           Deterministic Scene IR to standards-first glTF compiler
   scene-ir/           In-memory engineering scene types and validator
@@ -324,14 +336,19 @@ native/
   adapter-ifc/        Isolated multi-document IFC federation adapter
 fixtures/
   step/               Redistributable STEP manifest and review policy
+  ifc/                Redistributable IFC edge-case fixtures
   external/           Download-on-demand STEP/IFC registry and license records
 tools/
   benchmark/          Reproducible benchmark result harness
+  external-fixtures/  Qualify checksum-locked external sources against the manifest
+scripts/              Evidence recorders and the validators `pnpm check` runs
+artifacts/            Committed evidence records, re-validated by CI
 docs/
   PRODUCT.md          Product requirements and target workflows
   ARCHITECTURE.md     System boundaries and quality attributes
   SCENE_IR.md         Semantic, assembly, and representation model
   COMPILER.md         Ingestion and compilation pipeline
+  IMPORT_AND_CACHE.md Import pipeline and the persistent compile cache
   RUNTIME.md          Browser and WebGPU runtime design
   PLUGINS.md          Extension and automation model
   BENCHMARKS.md       Reproducible performance contract

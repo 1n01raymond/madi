@@ -38,7 +38,7 @@
   <tr>
     <td width="50%" valign="top">
       <a href="artifacts/browser-matrix/README.md">
-        <img src="artifacts/browser-matrix/chrome-151-windows-selected.png" alt="Chrome 中由 NARU WebGPU 运行时渲染并 picking 的 Adafruit PyGamer STEP 装配体" />
+        <img src="artifacts/browser-matrix/chrome-151-macos-selected.png" alt="Chrome 中由 NARU WebGPU 运行时渲染并 picking 的 Adafruit PyGamer STEP 装配体" />
       </a>
       <br />
       <sub><strong>一个真实的 STEP 装配体，端到端。</strong> Adafruit
@@ -48,22 +48,22 @@
       <a href="artifacts/browser-matrix/README.md">浏览器证据</a></sub>
     </td>
     <td width="50%" valign="top">
-      <a href="artifacts/ifc/sixty5-browser/README.md">
-        <img src="artifacts/ifc/sixty5-browser/picked.png" alt="在固定 residency 预算下渲染的七专业 sixty5 IFC federation，以及解析出 IFC 属性的被选构件" />
+      <a href="artifacts/ifc/sixty5-first-frame/README.md">
+        <img src="artifacts/ifc/sixty5-first-frame/picked.png" alt="在固定 residency 预算下渲染的七专业 sixty5 IFC federation，以及解析出 IFC 属性的被选构件" />
       </a>
       <br />
       <sub><strong>真实的超大 IFC federation。</strong> 839.9 MB 的七专业
-      <code>sixty5</code> 模型：3.3 秒内层级与搜索就绪，78,173 个可渲染
-      occurrence 全部呈现，geometry 始终保持在固定的 64 MiB 预算之内，
-      被选中的基础梁解析出自身的 IFC 属性。
-      <a href="artifacts/ifc/sixty5-browser/README.md">residency 证据</a></sub>
+      <code>sixty5</code> 模型：3.3 秒内层级与搜索就绪，全部 78,173 个可渲染
+      occurrence 的首个 coarse frame 在 12.8 秒内呈现，geometry 始终保持在
+      固定的 64 MiB 预算之内，被选中的基础梁解析出自身的 IFC 属性。
+      <a href="artifacts/ifc/sixty5-browser/README.md">residency 证据</a> ·
+      <a href="artifacts/ifc/sixty5-first-frame/README.md">首帧证据</a></sub>
     </td>
   </tr>
 </table>
 
 <sub>PyGamer CAD 版权归 Adafruit Industries 所有，按 MIT 许可证原样再分发，
-并固定上游 commit 与声明；这不表示 Adafruit 对 NARU 的认可。两张截图记录于
-NARU 更名之前，显示的是项目的旧名称。</sub>
+并固定上游 commit 与声明；这不表示 Adafruit 对 NARU 的认可。</sub>
 
 ## 这些证据对你的模型意味着什么
 
@@ -75,8 +75,12 @@ NARU 更名之前，显示的是项目的旧名称。</sub>
 | 细节几何通过普通 HTTP 渐进流式传输 | 28 次 `scene.bin` 请求全部为 HTTP 206 `bytes=` Range 响应（[sixty5 浏览器记录](artifacts/ifc/sixty5-browser/README.md)） |
 | 无论场景多大，内存都保持在声明的预算内 | promotion 在 234 个 chunk 的第 26 个处停止；解码与 GPU 字节均保持在 64 MiB 以下（[sixty5 浏览器记录](artifacts/ifc/sixty5-browser/README.md)） |
 | 选择可解析回源 CAD/BIM 标识 | 被选中的基础梁按需解析出 6 条 IFC 属性条目（[sixty5 浏览器记录](artifacts/ifc/sixty5-browser/README.md)） |
+| 超大规模的首帧以秒计，而不是分钟 | 共享 coarse Worker 路径将 sixty5 首个 coarse frame 从 268.0 秒缩短到中位数 12.8 秒 —— 提速 20.9 倍（[首帧记录](artifacts/ifc/sixty5-first-frame/README.md)） |
+| 相机移动会取消过时的下载，而不是等待它们 | 已不需要的 fastener Range 请求被中止，新可见的 mounting-plate Range 优先发出 —— Chrome 与 Firefox 行为一致（[浏览器 matrix](artifacts/browser-matrix/README.md)） |
+| 距原点 10,000 km 的坐标仍保持精度 | 0.25 mm 的板间隙以 ≤ 0.001 mm 的误差编译，两个引擎渲染均零像素漂移（[精度记录](artifacts/precision/large-coordinates/README.md)） |
+| 可将包打包为让邻近 geometry 一起传输（opt-in） | leaf-anchor payload 排序在 Digital Hub census 中将 off-view 字节总量削减 39.9%（[spatial demand 记录](artifacts/spatial-demand/README.md)） |
 | 编译结果逐字节可复现 | 两次完整的 sixty5 编译产生逐字节相同的包（[编译证据](artifacts/ifc/sixty5/README.md)） |
-| **尚未做到：** 超大规模下的快速首帧 | sixty5 首个 coarse frame 耗时 268.0 秒 —— 作为下一阶段必须超越的边界被有意记录（[记录的边界](artifacts/ifc/sixty5-browser/README.md)） |
+| **尚未做到：** 超大规模下交互级的就绪状态与跨浏览器性能结论 | 12.8 秒首帧是单台独立 GPU 主机上的单次 Chrome 记录，预算受限的就绪状态仍需 64.4 秒（[首帧记录](artifacts/ifc/sixty5-first-frame/README.md)） |
 
 ## 从哪里开始
 
@@ -165,9 +169,16 @@ Engineering Scene IR 是逻辑系统边界，而不是新的交换格式。交�
 | **2 — 大场景 alpha** | 10 万以上 occurrence、流送、LOD、缓存和内存预算 | 计划中 |
 | **3 — 开放平台 beta** | 插件、IFC、嵌入示例与自托管部署 | 计划中 |
 
-请查看完整[路线图](docs/ROADMAP.md)、[Phase 1 进展](docs/PHASE_1.md)与
-[基准测试约定](docs/BENCHMARKS.md)。性能数据将与可再分发模型、准确的硬件和
-浏览器信息、cold/warm 状态及可复现命令一同发布。
+请查看完整[路线图](docs/ROADMAP.md)、[Phase 1 证据](docs/PHASE_1.md)、
+[Phase 0 记录](docs/PHASE_0.md)与
+[Chrome/Firefox WebGPU matrix](artifacts/browser-matrix/README.md)。性能数据
+将与可再分发模型、准确的硬件和浏览器信息、cold/warm 状态及可复现命令一同
+发布。
+
+真实参照源现已通过校验和锁定，而无需提交其大体积二进制文件：两个 NIST AP242
+一致性用例、IFC-Bench 的四专业 Digital Hub federation，以及 839.9 MB 的七专业
+`sixty5` federation 都按逐文件固定摘要完成验证。`sixty5` 的下载保持显式
+opt-in。请查看[外部 fixture 注册表](fixtures/external/README.md)。
 
 ## 当前编译器验证
 
@@ -183,6 +194,19 @@ pnpm naru compile fixtures/step/repeated-fasteners-ap242.step \
 
 提交的 AP242 结果经独立验证，Khronos glTF 错误和警告均为 0。展开的 Scene IR
 只是临时数据，并非 NARU 文件格式。请查看[编译器证据](artifacts/phase1/README.md)。
+
+同一编译器边界现在还有一条早期的多文档 IFC 路径。经资格验证的 Digital Hub
+切片通过固定版本的 IfcOpenShell 0.8.5 联合建筑、供暖、给排水与通风四个专业：
+5,152 个可渲染 occurrence、3,383 个共享几何 prototype、913,520 个唯一
+triangle 与 273,188 个属性值。其源与包哈希经独立验证，Khronos glTF 错误和
+警告均为 0。这是正确性证据，还不是大场景性能结论。请查看
+[IFC federation 证据](artifacts/ifc/digital-hub/README.md)。
+
+两个编译器都支持 `--cache <dir>`，可将未变更的源从经过验证的持久缓存中恢复，
+而无需重新运行提取；缓存条目按源、适配器、编译器与选项身份作为键，损坏的
+条目会回退到完整重新编译
+（[ADR-0009](docs/adr/0009-persistent-compiled-cache.md)、
+[导入与缓存设计](docs/IMPORT_AND_CACHE.md)）。
 
 ## 从设计文档开始
 
