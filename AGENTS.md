@@ -57,6 +57,7 @@ Node 22.12+ and pnpm 11 (`packageManager` pin). If `pnpm` is not on PATH, use
 | `pnpm test` / `pnpm test:watch` | Vitest over `{apps,packages,tools}/**/*.test.ts` |
 | `pnpm lint` / `pnpm typecheck` / `pnpm build` | Individual gates |
 | `pnpm dev` | Studio prototype (Vite) |
+| `pnpm demo:smoke` | Check the deployed Studio, package resources, and HTTP Range delivery |
 | `pnpm naru compile <file.step> --output <dir>` | Compile a local STEP source |
 | `pnpm naru compile-ifc ...` | Compile an IFC federation from discipline/document pairs |
 | `pnpm <record>:check` | Validate one evidence record (`phase1:evidence`, `ifc:federation`, `browser:evidence`, `benchmark:industrial`, `benchmark:heterogeneous`, `fixtures`, `fixtures:external`, `occt:diagnostics`, `adr`) |

@@ -38,6 +38,12 @@ same review controls and section equation stable for site-scale transforms; the
 committed ADR-0005 record compares a 0.25 mm gap at the origin and 10,000 km
 away through headed Chrome and Firefox (`pnpm precision:check`).
 
+The [public Studio demo](https://1n01raymond.github.io/naru/) serves the
+qualified Digital Hub IFC federation by default, with PyGamer available as a
+secondary scene. Its deployment verifies the Digital Hub package digests
+before publishing, then checks the live Studio assets, every declared package
+resource, and binary HTTP Range delivery with `pnpm demo:smoke`.
+
 The Scene Inspector searches hierarchy names, occurrence/prototype IDs, and
 source references as soon as `scene.gltf` is available; geometry residency is
 not required. Press `/` to focus search and Enter to select its first renderable

@@ -85,7 +85,7 @@
 
 | やりたいこと | 開始地点 |
 |---|---|
-| モデルが動くところを見る | `pnpm install && pnpm dev`でPyGamerアセンブリが読み込まれたStudioが開きます ([Studioガイド](apps/webgpu-spike/README.md));ホスティングされた公開デモはPhase 1の目標です ([ロードマップ](docs/ROADMAP.md)) |
+| モデルが動くところを見る | Digital Hubを読み込んだ[公開Studioデモ](https://1n01raymond.github.io/naru/)を開くか、`pnpm install && pnpm dev`でPyGamerアセンブリをローカル実行します ([Studioガイド](apps/webgpu-spike/README.md)) |
 | ビューアを自分のアプリに組み込む | [Runtimeパッケージ](packages/runtime-webgpu/README.md) — コンパイル済みglTFローダーと直接WebGPUレンダラー |
 | 自分のSTEP・IFCをコンパイルする | [Compilerパッケージ](packages/compiler/README.md)と下記の[コンパイラ検証](#現在のコンパイラ検証) |
 | アーキテクチャを理解する | 読む順序で整理された[設計文書](docs/README.md) |

@@ -83,7 +83,7 @@ name.</sub>
 
 | You want to… | Start here |
 |---|---|
-| See a model running | `pnpm install && pnpm dev` opens the Studio with the PyGamer assembly loaded ([Studio guide](apps/webgpu-spike/README.md)); a hosted public demo is a Phase 1 goal ([roadmap](docs/ROADMAP.md)) |
+| See a model running | [Open the public Studio demo](https://1n01raymond.github.io/naru/) with Digital Hub loaded, or run `pnpm install && pnpm dev` locally with the PyGamer assembly ([Studio guide](apps/webgpu-spike/README.md)) |
 | Embed the viewer in your app | [Runtime package](packages/runtime-webgpu/README.md) — the compiled-glTF loader and direct WebGPU renderer |
 | Compile your own STEP or IFC | [Compiler package](packages/compiler/README.md) and the [compiler proof](#current-compiler-proof) below |
 | Understand the architecture | [Design documents](docs/README.md) in reading order |

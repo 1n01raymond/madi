@@ -119,6 +119,7 @@ direct WebGPU renderer. The Phase 0 Scene IR JSON is no longer a browser input.
 | In-flight cancellation | A second browser run cancels while range 2/3 is pending, observes `Scene load cancelled.`, and proves that range 3/3 is never requested | Passed in headed Chrome and Firefox |
 | Browser conformance | Headed Chrome/Blink and Firefox/Gecko emit no console warnings or errors | Passed by `pnpm browser:matrix` |
 | Safari capability | Real Safari 18.6 loads 87 hierarchy records under default settings, then reports that WebGPU is unavailable because `navigator.gpu` is absent | Graceful unsupported-browser result; rendering conformance not yet available |
+| Public review | [GitHub Pages](https://1n01raymond.github.io/naru/) serves the qualified Digital Hub package by default and PyGamer as a secondary scene; deployment verifies the package digests and smoke-checks the live app, declared resources, and HTTP Range delivery | Passed by `.github/workflows/deploy-demo.yml` and `pnpm demo:smoke` |
 
 ## Large-coordinate precision
 
@@ -153,6 +154,7 @@ pnpm browser:matrix
 pnpm safari:compatibility
 pnpm precision:evidence
 pnpm precision:check
+pnpm demo:smoke
 pnpm check
 ```
 
@@ -177,7 +179,8 @@ See `artifacts/phase1/README.md` for the compiled package,
 - Additional repeated reference-hardware profiles for ADR-0003; the first
   Apple-Silicon integrated-GPU record now shows divergent Chrome and Firefox
   CPU-p95 outcomes.
-- A public end-to-end review workflow and reproducible performance report.
+- A reproducible public performance report. The deployed Studio and its package
+  delivery are smoke-checked, but no public benchmark report is published yet.
 
 The canonical fixture is Adafruit's real PyGamer electronics assembly,
 redistributed unchanged under MIT with a pinned source commit and notice. Its

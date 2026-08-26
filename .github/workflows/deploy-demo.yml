@@ -25,6 +25,7 @@ on:
       - "packages/scene-ir/**"
       - "artifacts/phase1/adafruit-pygamer/**"
       - "artifacts/ifc/digital-hub/build-report.json"
+      - "scripts/check-public-demo.mjs"
       - ".github/workflows/deploy-demo.yml"
 
 permissions:
@@ -111,3 +112,18 @@ jobs:
       - id: deployment
         name: Deploy
         uses: actions/deploy-pages@v4
+
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.14.0
+
+      - name: Smoke-test deployed Studio and packages
+        run: >-
+          node scripts/check-public-demo.mjs
+          --url "${{ steps.deployment.outputs.page_url }}"
+          --attempts 12
+          --retry-delay-ms 10000
