@@ -130,6 +130,88 @@ describe("progressive residency", () => {
     expect(estimateBatchGpuBytes(value)).toBe(184);
   });
 
+  it("keeps incremental totals equal to a full recount across admissions and evictions", () => {
+    const coarseBatches = [batch(1), batch(2), batch(3)];
+    const coarse = decoded(coarseBatches, [0, 1, 2]);
+    const residency = new ProgressiveResidency(coarse, { decodedBytes: 1000, gpuBytes: 800 });
+    const recount = (
+      entries: readonly { readonly batch: GpuPrototypeBatch }[],
+      promotedTargetMeshes: readonly number[],
+    ): { decodedBytes: number; gpuBytes: number; triangles: number; edgeSegments: number } => ({
+      decodedBytes:
+        entries.reduce((total, { batch: value }) => total + estimateBatchDecodedBytes(value), 0) +
+        promotedTargetMeshes.reduce(
+          (total, mesh) => total + estimateBatchDecodedBytes(coarseBatches[mesh] as GpuPrototypeBatch),
+          0,
+        ),
+      gpuBytes: entries.reduce(
+        (total, { batch: value }) => total + estimateBatchGpuBytes(value),
+        0,
+      ),
+      triangles: entries.reduce(
+        (total, { batch: value }) => total + value.surfaceIndices.length / 3,
+        0,
+      ),
+      edgeSegments: entries.reduce(
+        (total, { batch: value }) => total + value.edgeVertices.length / 6,
+        0,
+      ),
+    });
+    const expectConsistent = (snapshot: ReturnType<ProgressiveResidency["current"]>): void => {
+      expect({
+        decodedBytes: snapshot.decodedBytes,
+        gpuBytes: snapshot.gpuBytes,
+        triangles: snapshot.triangles,
+        edgeSegments: snapshot.edgeSegments,
+      }).toEqual(recount(snapshot.entries, snapshot.targetMeshIndexes));
+    };
+
+    expectConsistent(residency.current());
+
+    const admitted = residency.promote(decoded([batch(1, 20)], [0]), { priority: 1 });
+    expect(admitted.admitted).toBe(true);
+    expectConsistent(admitted);
+
+    const evicting = residency.promote(decoded([batch(2, 20)], [1]), { priority: 2, pin: true });
+    expect(evicting.admitted).toBe(true);
+    expect(evicting.evictedTargetMeshIndexes).toEqual([0]);
+    expectConsistent(evicting);
+
+    const rejected = residency.promote(decoded([batch(3, 30)], [2]), { priority: 3 });
+    expect(rejected.admitted).toBe(false);
+    expectConsistent(rejected);
+    expectConsistent(residency.current());
+  });
+
+  it("keeps incremental totals exact in aggregate-coarse mode", () => {
+    const coarse = decoded([batch(9, 2)], [-1]);
+    const residency = new ProgressiveResidency(
+      coarse,
+      { decodedBytes: 800, gpuBytes: 800 },
+      { aggregateCoarse: true },
+    );
+    const expectConsistent = (snapshot: ReturnType<ProgressiveResidency["current"]>): void => {
+      expect(snapshot.decodedBytes).toBe(
+        snapshot.entries.reduce(
+          (total, { batch: value }) => total + estimateBatchDecodedBytes(value),
+          0,
+        ),
+      );
+      expect(snapshot.triangles).toBe(
+        snapshot.entries.reduce(
+          (total, { batch: value }) => total + value.surfaceIndices.length / 3,
+          0,
+        ),
+      );
+    };
+
+    expectConsistent(residency.promote(decoded([batch(1, 20)], [0]), { priority: 1 }));
+    const selected = residency.promote(decoded([batch(2, 20)], [1]), { priority: 2, pin: true });
+    expect(selected.evictedTargetMeshIndexes).toEqual([0]);
+    expectConsistent(selected);
+    expectConsistent(residency.current());
+  });
+
   it("keeps an aggregated coarse batch while target groups are promoted and evicted", () => {
     const coarse = decoded([batch(1)], [-1]);
     const firstTarget = decoded([batch(1, 20)], [0]);

@@ -1,8 +1,10 @@
 import type {
+  CompiledHierarchy,
   DecodedCompiledScene,
   GeometryRepresentation,
 } from "@naru3d/runtime-webgpu";
 
+import { adoptTransitScene } from "./geometry-transfer.js";
 import type {
   GeometryWorkerRequest,
   GeometryWorkerResponse,
@@ -32,6 +34,8 @@ export class GeometryDecoder {
   private readonly initialized: Promise<void>;
   private nextRequestId = 0;
   private disposed = false;
+  /** Document hierarchy cached from the first hierarchy-bearing response. */
+  private hierarchy: CompiledHierarchy | undefined;
 
   constructor(source: GeometryDocumentSource, signal: AbortSignal) {
     this.signal = signal;
@@ -77,8 +81,10 @@ export class GeometryDecoder {
     if (response.type !== "ready") {
       throw new Error("The geometry Worker returned an invalid decode response.");
     }
+    const adopted = adoptTransitScene(response.scene, this.hierarchy);
+    this.hierarchy = adopted.hierarchy;
     return {
-      scene: response.scene,
+      scene: adopted.scene,
       ...(response.coarseInstanceTargetMeshIndexes
         ? { coarseInstanceTargetMeshIndexes: response.coarseInstanceTargetMeshIndexes }
         : {}),

@@ -136,3 +136,98 @@ describe("occurrence visibility", () => {
     expect(visibility.state().visibleOccurrences).toBe(1);
   });
 });
+
+describe("residency visibility updates", () => {
+  const coarseBatch = batch([1, 2, 3]);
+  const maskPromoted = (promoted: readonly number[]) => {
+    const masked = new Set(promoted);
+    return (batchIndex: number, instanceIndex: number): boolean =>
+      batchIndex !== 0 || !masked.has(instanceIndex);
+  };
+
+  it("reuses unchanged tables and recomputes only new and filter-changed batches", () => {
+    const initial = new OccurrenceVisibility(
+      { batches: [coarseBatch], sharedObjectIdsAcrossBatches: true },
+      maskPromoted([]),
+    );
+    const coarseTable = initial.indicesByBatch[0];
+    const targetOne = batch([1]);
+
+    const first = OccurrenceVisibility.forResidencyUpdate(
+      initial,
+      { batches: [coarseBatch, targetOne], sharedObjectIdsAcrossBatches: true },
+      maskPromoted([0]),
+      [0],
+    );
+    expect(first.changedBatchIndexes).toEqual([0, 1]);
+    expect(first.visibility.indicesByBatch[0]).toBe(coarseTable);
+    expect(Array.from(first.visibility.counts)).toEqual([2, 1]);
+    expect(first.visibility.state()).toMatchObject({
+      totalOccurrences: 3,
+      visibleOccurrences: 3,
+    });
+
+    const targetTable = first.visibility.indicesByBatch[1];
+    const targetTwo = batch([2]);
+    const second = OccurrenceVisibility.forResidencyUpdate(
+      first.visibility,
+      { batches: [coarseBatch, targetOne, targetTwo], sharedObjectIdsAcrossBatches: true },
+      maskPromoted([0, 1]),
+      [0],
+    );
+    expect(second.changedBatchIndexes).toEqual([0, 2]);
+    expect(second.visibility.indicesByBatch[1]).toBe(targetTable);
+    expect(Array.from(second.visibility.counts)).toEqual([1, 1, 1]);
+    expect(second.visibility.state().visibleOccurrences).toBe(3);
+  });
+
+  it("preserves hidden and isolated intent across residency updates", () => {
+    const initial = new OccurrenceVisibility(
+      { batches: [coarseBatch], sharedObjectIdsAcrossBatches: true },
+      maskPromoted([]),
+    );
+    initial.hide(2);
+
+    const hidden = OccurrenceVisibility.forResidencyUpdate(
+      initial,
+      { batches: [coarseBatch, batch([2])], sharedObjectIdsAcrossBatches: true },
+      maskPromoted([1]),
+      [0],
+    );
+    expect(hidden.visibility.isVisible(2)).toBe(false);
+    expect(Array.from(hidden.visibility.counts)).toEqual([2, 0]);
+    expect(hidden.visibility.state()).toMatchObject({
+      mode: "hidden",
+      visibleOccurrences: 2,
+    });
+
+    hidden.visibility.isolate(3);
+    const isolated = OccurrenceVisibility.forResidencyUpdate(
+      hidden.visibility,
+      { batches: [coarseBatch], sharedObjectIdsAcrossBatches: true },
+      maskPromoted([]),
+      [0],
+    );
+    expect(isolated.visibility.state()).toMatchObject({
+      mode: "isolated",
+      isolatedObjectId: 3,
+    });
+    expect(Array.from(isolated.visibility.counts)).toEqual([1]);
+  });
+
+  it("rejects object IDs outside the established scene universe", () => {
+    const initial = new OccurrenceVisibility(
+      { batches: [coarseBatch], sharedObjectIdsAcrossBatches: true },
+      maskPromoted([]),
+    );
+
+    expect(() =>
+      OccurrenceVisibility.forResidencyUpdate(
+        initial,
+        { batches: [coarseBatch, batch([99])], sharedObjectIdsAcrossBatches: true },
+        maskPromoted([0]),
+        [0],
+      ),
+    ).toThrow(/Unknown scene object ID 99/u);
+  });
+});

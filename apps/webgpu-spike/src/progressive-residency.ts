@@ -93,33 +93,32 @@ function ordered(entries: ReadonlyMap<string, ResidentBatch>): readonly Resident
   );
 }
 
-function snapshot(
-  entries: ReadonlyMap<string, ResidentBatch>,
-  targetMeshIndexes: ReadonlySet<number>,
-  pinnedTargetMeshIndexes: ReadonlySet<number>,
-  coarseEntriesByTargetMesh: ReadonlyMap<number, readonly ResidentBatch[]>,
-): ResidencySnapshot {
-  const result = ordered(entries);
-  const fallbackDecodedBytes = [...targetMeshIndexes].reduce(
-    (total, targetMeshIndex) =>
-      total + (coarseEntriesByTargetMesh.get(targetMeshIndex) ?? []).reduce(
-        (batchTotal, { batch }) => batchTotal + estimateBatchDecodedBytes(batch),
-        0,
-      ),
-    0,
-  );
-  return {
-    entries: result,
-    targetMeshIndexes: [...targetMeshIndexes].sort((left, right) => left - right),
-    pinnedTargetMeshIndexes: [...pinnedTargetMeshIndexes].sort((left, right) => left - right),
-    decodedBytes: result.reduce(
-      (total, { batch }) => total + estimateBatchDecodedBytes(batch),
-      0,
-    ) + fallbackDecodedBytes,
-    gpuBytes: result.reduce((total, { batch }) => total + estimateBatchGpuBytes(batch), 0),
-    triangles: result.reduce((total, { batch }) => total + batch.surfaceIndices.length / 3, 0),
-    edgeSegments: result.reduce((total, { batch }) => total + batch.edgeVertices.length / 6, 0),
-  };
+/**
+ * Running byte/triangle sums over one entry map. Every term is an integer
+ * (index counts are triangle triples, edge vertices are segment sextets), so
+ * incremental adds and removes stay exact in any order.
+ */
+interface ResidencyTotals {
+  decodedBytes: number;
+  gpuBytes: number;
+  triangles: number;
+  edgeSegments: number;
+  /** Retained coarse fallbacks of promoted target groups (legacy mode only). */
+  fallbackDecodedBytes: number;
+}
+
+function addBatchToTotals(totals: ResidencyTotals, batch: GpuPrototypeBatch): void {
+  totals.decodedBytes += estimateBatchDecodedBytes(batch);
+  totals.gpuBytes += estimateBatchGpuBytes(batch);
+  totals.triangles += batch.surfaceIndices.length / 3;
+  totals.edgeSegments += batch.edgeVertices.length / 6;
+}
+
+function removeBatchFromTotals(totals: ResidencyTotals, batch: GpuPrototypeBatch): void {
+  totals.decodedBytes -= estimateBatchDecodedBytes(batch);
+  totals.gpuBytes -= estimateBatchGpuBytes(batch);
+  totals.triangles -= batch.surfaceIndices.length / 3;
+  totals.edgeSegments -= batch.edgeVertices.length / 6;
 }
 
 function entriesFromScene(scene: DecodedCompiledScene): readonly ResidentBatch[] {
@@ -136,15 +135,27 @@ function entriesFromScene(scene: DecodedCompiledScene): readonly ResidentBatch[]
  * coarse batches; aggregate mode keeps one shared coarse batch and lets the
  * visibility layer mask promoted instances. Both paths can displace colder
  * target groups without losing pickable identity or exceeding either budget.
+ *
+ * Budget totals are maintained incrementally so an admission costs work
+ * proportional to the entries it adds, removes, or evicts — never a full
+ * recount of the resident set per eviction probe.
  */
 export class ProgressiveResidency {
   readonly budget: ResidencyBudget;
   private readonly entries = new Map<string, ResidentBatch>();
   private readonly coarseEntriesByTargetMesh = new Map<number, readonly ResidentBatch[]>();
+  private readonly coarseDecodedBytesByTargetMesh = new Map<number, number>();
   private readonly targetMeshIndexes = new Set<number>();
   private readonly pinnedTargetMeshIndexes = new Set<number>();
   private readonly priorityByTargetMesh = new Map<number, number>();
   private readonly lastTouchedByTargetMesh = new Map<number, number>();
+  private readonly totals: ResidencyTotals = {
+    decodedBytes: 0,
+    gpuBytes: 0,
+    triangles: 0,
+    edgeSegments: 0,
+    fallbackDecodedBytes: 0,
+  };
   private readonly aggregateCoarse: boolean;
   private touchSequence = 0;
 
@@ -171,19 +182,37 @@ export class ProgressiveResidency {
         throw new RangeError(`Duplicate coarse residency key ${residencyEntry.key}.`);
       }
       this.entries.set(residencyEntry.key, residencyEntry);
+      addBatchToTotals(this.totals, residencyEntry.batch);
       if (this.aggregateCoarse) continue;
       const targetMeshIndex = entry.evidence.targetMeshIndex;
       const group = this.coarseEntriesByTargetMesh.get(targetMeshIndex) ?? [];
       this.coarseEntriesByTargetMesh.set(targetMeshIndex, [...group, entry]);
+      this.coarseDecodedBytesByTargetMesh.set(
+        targetMeshIndex,
+        (this.coarseDecodedBytesByTargetMesh.get(targetMeshIndex) ?? 0) +
+          estimateBatchDecodedBytes(entry.batch),
+      );
     }
-    const initial = this.snapshot();
-    if (initial.decodedBytes > budget.decodedBytes || initial.gpuBytes > budget.gpuBytes) {
+    if (
+      this.totals.decodedBytes > budget.decodedBytes ||
+      this.totals.gpuBytes > budget.gpuBytes
+    ) {
       throw new RangeError("The coarse representation exceeds the configured residency budget.");
     }
   }
 
   current(): ResidencySnapshot {
-    return this.snapshot();
+    return {
+      entries: ordered(this.entries),
+      targetMeshIndexes: [...this.targetMeshIndexes].sort((left, right) => left - right),
+      pinnedTargetMeshIndexes: [...this.pinnedTargetMeshIndexes].sort(
+        (left, right) => left - right,
+      ),
+      decodedBytes: this.totals.decodedBytes + this.totals.fallbackDecodedBytes,
+      gpuBytes: this.totals.gpuBytes,
+      triangles: this.totals.triangles,
+      edgeSegments: this.totals.edgeSegments,
+    };
   }
 
   hasTargetMeshes(targetMeshIndexes: readonly number[]): boolean {
@@ -191,18 +220,17 @@ export class ProgressiveResidency {
   }
 
   /** Pins already-resident target groups after selecting an object. */
-  pinTargetMeshes(targetMeshIndexes: readonly number[]): ResidencySnapshot {
+  pinTargetMeshes(targetMeshIndexes: readonly number[]): void {
     this.pinnedTargetMeshIndexes.clear();
     for (const targetMeshIndex of targetMeshIndexes) {
       if (!this.targetMeshIndexes.has(targetMeshIndex)) continue;
       this.pinnedTargetMeshIndexes.add(targetMeshIndex);
       this.touch(targetMeshIndex);
     }
-    return this.snapshot();
   }
 
   /** Re-ranks resident detail after the camera/view priority order changes. */
-  reprioritize(groups: readonly ResidencyPriority[]): ResidencySnapshot {
+  reprioritize(groups: readonly ResidencyPriority[]): void {
     for (const group of groups) {
       if (!Number.isSafeInteger(group.priority) || group.priority < 0) {
         throw new TypeError("Target residency priority must be a non-negative safe integer.");
@@ -213,7 +241,6 @@ export class ProgressiveResidency {
         }
       }
     }
-    return this.snapshot();
   }
 
   promote(target: DecodedCompiledScene, options: PromotionOptions = {}): PromotionResult {
@@ -226,10 +253,41 @@ export class ProgressiveResidency {
       replacements.map(({ evidence }) => evidence.targetMeshIndex),
     );
     const candidate = new Map(this.entries);
-    this.removeTargetMeshes(candidate, targetMeshes);
-    for (const replacement of replacements) candidate.set(replacement.key, replacement);
+    const totals: ResidencyTotals = { ...this.totals };
+    const keysByTargetMesh = new Map<number, string[]>();
+    for (const entry of candidate.values()) {
+      const keys = keysByTargetMesh.get(entry.evidence.targetMeshIndex);
+      if (keys) keys.push(entry.key);
+      else keysByTargetMesh.set(entry.evidence.targetMeshIndex, [entry.key]);
+    }
+    const removeEntry = (key: string): void => {
+      const entry = candidate.get(key);
+      if (!entry) return;
+      candidate.delete(key);
+      removeBatchFromTotals(totals, entry.batch);
+    };
+    const addEntry = (entry: ResidentBatch): void => {
+      removeEntry(entry.key);
+      candidate.set(entry.key, entry);
+      addBatchToTotals(totals, entry.batch);
+      const keys = keysByTargetMesh.get(entry.evidence.targetMeshIndex);
+      if (keys) keys.push(entry.key);
+      else keysByTargetMesh.set(entry.evidence.targetMeshIndex, [entry.key]);
+    };
+    const removeTargetMesh = (targetMeshIndex: number): void => {
+      for (const key of keysByTargetMesh.get(targetMeshIndex) ?? []) removeEntry(key);
+      keysByTargetMesh.delete(targetMeshIndex);
+    };
+
+    for (const targetMeshIndex of targetMeshes) removeTargetMesh(targetMeshIndex);
+    for (const replacement of replacements) addEntry(replacement);
     const candidateTargetMeshes = new Set(this.targetMeshIndexes);
-    for (const targetMeshIndex of targetMeshes) candidateTargetMeshes.add(targetMeshIndex);
+    for (const targetMeshIndex of targetMeshes) {
+      if (candidateTargetMeshes.has(targetMeshIndex)) continue;
+      candidateTargetMeshes.add(targetMeshIndex);
+      totals.fallbackDecodedBytes +=
+        this.coarseDecodedBytesByTargetMesh.get(targetMeshIndex) ?? 0;
+    }
     const candidatePins = options.pin
       ? new Set(targetMeshes)
       : new Set(
@@ -244,26 +302,32 @@ export class ProgressiveResidency {
       candidateTouches.set(targetMeshIndex, this.nextTouch());
     }
 
+    const fitsBudget = (): boolean =>
+      totals.decodedBytes + totals.fallbackDecodedBytes <= this.budget.decodedBytes &&
+      totals.gpuBytes <= this.budget.gpuBytes;
     const evictedTargetMeshIndexes: number[] = [];
-    while (!this.fitsBudget(candidate, candidateTargetMeshes, candidatePins)) {
-      const eviction = [...candidateTargetMeshes]
-        .filter(
-          (targetMeshIndex) =>
-            !targetMeshes.has(targetMeshIndex) &&
-            !candidatePins.has(targetMeshIndex) &&
-            (options.pin || (candidatePriorities.get(targetMeshIndex) ?? priority) > priority),
-        )
-        .sort(
-          (left, right) =>
-            (candidatePriorities.get(right) ?? Number.MAX_SAFE_INTEGER) -
-              (candidatePriorities.get(left) ?? Number.MAX_SAFE_INTEGER) ||
-            (candidateTouches.get(left) ?? 0) - (candidateTouches.get(right) ?? 0) ||
-            left - right,
-        )[0];
+    while (!fitsBudget()) {
+      const eviction = this.selectEviction(
+        candidateTargetMeshes,
+        targetMeshes,
+        candidatePins,
+        candidatePriorities,
+        candidateTouches,
+        priority,
+        options.pin === true,
+      );
       if (eviction === undefined) {
         return { admitted: false, evictedTargetMeshIndexes: [], ...this.current() };
       }
-      this.replaceWithCoarse(candidate, eviction);
+      removeTargetMesh(eviction);
+      if (!this.aggregateCoarse) {
+        const coarse = this.coarseEntriesByTargetMesh.get(eviction);
+        if (!coarse) {
+          throw new RangeError(`Missing coarse fallback for target mesh ${eviction}.`);
+        }
+        for (const entry of coarse) addEntry(entry);
+      }
+      totals.fallbackDecodedBytes -= this.coarseDecodedBytesByTargetMesh.get(eviction) ?? 0;
       candidateTargetMeshes.delete(eviction);
       candidatePins.delete(eviction);
       candidatePriorities.delete(eviction);
@@ -273,6 +337,11 @@ export class ProgressiveResidency {
 
     this.entries.clear();
     for (const [key, entry] of candidate) this.entries.set(key, entry);
+    this.totals.decodedBytes = totals.decodedBytes;
+    this.totals.gpuBytes = totals.gpuBytes;
+    this.totals.triangles = totals.triangles;
+    this.totals.edgeSegments = totals.edgeSegments;
+    this.totals.fallbackDecodedBytes = totals.fallbackDecodedBytes;
     this.replaceSet(this.targetMeshIndexes, candidateTargetMeshes);
     this.replaceSet(this.pinnedTargetMeshIndexes, candidatePins);
     this.replaceMap(this.priorityByTargetMesh, candidatePriorities);
@@ -280,49 +349,32 @@ export class ProgressiveResidency {
     return { admitted: true, evictedTargetMeshIndexes, ...this.current() };
   }
 
-  private snapshot(): ResidencySnapshot {
-    return snapshot(
-      this.entries,
-      this.targetMeshIndexes,
-      this.pinnedTargetMeshIndexes,
-      this.coarseEntriesByTargetMesh,
-    );
-  }
-
-  private fitsBudget(
-    entries: ReadonlyMap<string, ResidentBatch>,
-    targetMeshIndexes: ReadonlySet<number>,
-    pinnedTargetMeshIndexes: ReadonlySet<number>,
-  ): boolean {
-    const candidate = snapshot(
-      entries,
-      targetMeshIndexes,
-      pinnedTargetMeshIndexes,
-      this.coarseEntriesByTargetMesh,
-    );
-    return (
-      candidate.decodedBytes <= this.budget.decodedBytes &&
-      candidate.gpuBytes <= this.budget.gpuBytes
-    );
-  }
-
-  private removeTargetMeshes(
-    entries: Map<string, ResidentBatch>,
-    targetMeshIndexes: ReadonlySet<number>,
-  ): void {
-    for (const [key, entry] of entries) {
-      if (targetMeshIndexes.has(entry.evidence.targetMeshIndex)) entries.delete(key);
+  /** Coldest evictable group: highest priority value, then oldest touch, then index. */
+  private selectEviction(
+    candidateTargetMeshes: ReadonlySet<number>,
+    incomingTargetMeshes: ReadonlySet<number>,
+    candidatePins: ReadonlySet<number>,
+    candidatePriorities: ReadonlyMap<number, number>,
+    candidateTouches: ReadonlyMap<number, number>,
+    incomingPriority: number,
+    pinning: boolean,
+  ): number | undefined {
+    const compare = (left: number, right: number): number =>
+      (candidatePriorities.get(right) ?? Number.MAX_SAFE_INTEGER) -
+        (candidatePriorities.get(left) ?? Number.MAX_SAFE_INTEGER) ||
+      (candidateTouches.get(left) ?? 0) - (candidateTouches.get(right) ?? 0) ||
+      left - right;
+    let selected: number | undefined;
+    for (const targetMeshIndex of candidateTargetMeshes) {
+      if (incomingTargetMeshes.has(targetMeshIndex)) continue;
+      if (candidatePins.has(targetMeshIndex)) continue;
+      const meshPriority = candidatePriorities.get(targetMeshIndex) ?? incomingPriority;
+      if (!pinning && meshPriority <= incomingPriority) continue;
+      if (selected === undefined || compare(targetMeshIndex, selected) < 0) {
+        selected = targetMeshIndex;
+      }
     }
-  }
-
-  private replaceWithCoarse(entries: Map<string, ResidentBatch>, targetMeshIndex: number): void {
-    this.removeTargetMeshes(entries, new Set([targetMeshIndex]));
-    if (this.aggregateCoarse) return;
-    const coarse = this.coarseEntriesByTargetMesh.get(targetMeshIndex);
-    if (!coarse) {
-      throw new RangeError(`Missing coarse fallback for target mesh ${targetMeshIndex}.`);
-    }
-    for (const entry of coarse) entries.set(entry.key, entry);
+    return selected;
   }
 
   private touch(targetMeshIndex: number): void {
