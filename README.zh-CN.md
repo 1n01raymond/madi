@@ -204,8 +204,11 @@ triangle 与 273,188 个属性值。其源与包哈希经独立验证，Khronos 
 
 两个编译器都支持 `--cache <dir>`，可将未变更的源从经过验证的持久缓存中恢复，
 而无需重新运行提取；缓存条目按源、适配器、编译器与选项身份作为键，损坏的
-条目会回退到完整重新编译
-（[ADR-0009](docs/adr/0009-persistent-compiled-cache.md)、
+条目会回退到完整重新编译。在固定的 PyGamer STEP 夹具和 Digital Hub
+federation 上记录的证据显示：相对 19.9 秒与 46.3 秒的冷编译，字节相同的
+热恢复仅需 1.7 秒与 0.5 秒
+（[缓存证据](artifacts/cache/README.md)、
+[ADR-0009](docs/adr/0009-persistent-compiled-cache.md)、
 [导入与缓存设计](docs/IMPORT_AND_CACHE.md)）。
 
 ## 从设计文档开始

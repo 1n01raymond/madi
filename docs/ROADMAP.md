@@ -179,7 +179,9 @@ smoke-checks the live app, package resources, and HTTP Range delivery.
   cold import, hierarchy/coarse preview in 5–15 s, unchanged reopen in 1–5 s,
   followed by dependency-safe per-discipline rebuild and authorized shared reuse
   (verified STEP/IFC whole-package storage and adapter-skipping orchestration
-  implemented; pinned real-fixture timing evidence pending);
+  implemented; pinned real-fixture cold/warm and corruption evidence recorded
+  in `artifacts/cache/`, ADR-0009 Accepted; per-discipline rebuild and shared
+  reuse pending);
 - view-prioritized scheduling and cancellation of obsolete camera work
   (coarse-bounds fallback and optional spatial-demand policy implemented;
   focused browser evidence passed, real-model and screen-space policy pending);

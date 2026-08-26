@@ -92,8 +92,11 @@ package validation. Output-affecting compile options — tessellation tolerances
 and the spatial-index family — are part of both keys. IFC cache identity also
 includes every discipline digest,
 stable URI hint, adapter thread count, chunk budget, JSON formatting, and
-retained-intermediate policy. Cold/warm real-fixture evidence, incremental federation dependencies,
-and shared-cache authorization remain follow-up gates.
+retained-intermediate policy. Recorded real-fixture cold/warm and
+corrupted-entry evidence on the pinned PyGamer STEP fixture and the
+four-document Digital Hub federation closes the ADR-0009 acceptance gate
+([record](../../artifacts/cache/README.md), `pnpm cache:check`); incremental
+federation dependencies and shared-cache authorization remain follow-up gates.
 
 ## Compile an IFC federation
 

@@ -217,8 +217,11 @@ Khronos glTF 오류·경고 0건으로 독립 검증됩니다. 이는 정확성 
 
 두 컴파일러 모두 `--cache <dir>`로 변경되지 않은 소스를 추출 재실행 없이
 검증된 영속 캐시에서 복원합니다. 엔트리는 소스·어댑터·컴파일러·옵션
-identity로 키가 만들어지고, 손상된 엔트리는 전체 재컴파일로 폴백합니다
-([ADR-0009](docs/adr/0009-persistent-compiled-cache.md),
+identity로 키가 만들어지고, 손상된 엔트리는 전체 재컴파일로 폴백합니다.
+고정된 PyGamer STEP 픽스처와 Digital Hub federation에서 기록된 증거는
+19.9초·46.3초 콜드 컴파일 대비 1.7초·0.5초의 바이트 동일 웜 복원을 보여줍니다
+([캐시 증거](artifacts/cache/README.md),
+[ADR-0009](docs/adr/0009-persistent-compiled-cache.md),
 [import·캐시 설계](docs/IMPORT_AND_CACHE.md)).
 
 ## 설계 문서부터 시작하기

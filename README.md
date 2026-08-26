@@ -220,8 +220,11 @@ large-scene performance claim. See the
 Both compilers accept `--cache <dir>` to restore an unchanged source from a
 verified persistent cache instead of re-running extraction; entries are keyed
 by source, adapter, compiler, and option identity, and a corrupt entry falls
-back to a full recompile
-([ADR-0009](docs/adr/0009-persistent-compiled-cache.md),
+back to a full recompile. Recorded evidence on the pinned PyGamer STEP fixture
+and the Digital Hub federation shows byte-identical warm restores of 1.7 s and
+0.5 s against 19.9 s and 46.3 s cold compiles
+([cache evidence](artifacts/cache/README.md),
+[ADR-0009](docs/adr/0009-persistent-compiled-cache.md),
 [import and cache design](docs/IMPORT_AND_CACHE.md)).
 
 ## Start with the design

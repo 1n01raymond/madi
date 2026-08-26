@@ -1,6 +1,7 @@
 # ADR-0009: Key persistent compiled caches by complete import identity
 
-Status: Proposed
+Status: Accepted
+Accepted: 2026-08-27
 
 ## Context
 
@@ -68,6 +69,12 @@ normalization, idempotent atomic publication, verified restore, storage-layer
 rejection of corrupted entries, and an unchanged STEP cache hit that skips
 extraction after the OCCT identity probe. IFC orchestration tests likewise prove a cheap
 identity probe, unchanged adapter-skipping hit, stable package digest, retained
-intermediate restore, and URI-hint invalidation. Acceptance additionally
-requires pinned real-fixture STEP and multi-document IFC cold/warm timing and
-corruption records defined in `docs/IMPORT_AND_CACHE.md`.
+intermediate restore, and URI-hint invalidation. The acceptance gate defined in
+`docs/IMPORT_AND_CACHE.md` is closed by the recorded product evidence in
+`artifacts/cache/import-cache-evidence.json`
+(`naru.import-cache-evidence.1`, validated by
+`scripts/validate-import-cache-evidence.mjs` in the `pnpm check` chain): the
+pinned PyGamer STEP fixture and the four-document Digital Hub IFC federation
+each record a cold miss, a byte-identical warm restore (19.9 s → 1.7 s STEP,
+46.3 s → 0.5 s IFC), and a corrupted-entry run that fails closed and recompiles
+byte-identically.
