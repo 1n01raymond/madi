@@ -37,9 +37,11 @@ const progressiveGltf = JSON.parse(
     "utf8",
   ),
 );
-const expectedTargetRanges = progressiveGltf.extras.madi.progressive.targetChunks.map(
-  ({ byteOffset, byteLength }) => `bytes=${byteOffset}-${byteOffset + byteLength - 1}`,
-);
+const expectedTargetRanges = [0, 2, 1].map((chunkIndex) => {
+  const chunk = progressiveGltf.extras.madi.progressive.targetChunks[chunkIndex];
+  assert(chunk, `Missing progressive target chunk ${chunkIndex}.`);
+  return `bytes=${chunk.byteOffset}-${chunk.byteOffset + chunk.byteLength - 1}`;
+});
 const fixtureManifest = JSON.parse(
   await readFile(
     fileURLToPath(new URL("../fixtures/step/manifest.json", import.meta.url)),
@@ -60,7 +62,7 @@ function assertNonEmptyString(value, label) {
 }
 
 assert(
-  evidence.schemaVersion === "phase-1-browser-matrix.1",
+  evidence.schemaVersion === "phase-1-browser-matrix.2",
   "Unsupported browser evidence schema.",
 );
 assert(Array.isArray(evidence.results) && evidence.results.length === 2, "Expected two results.");
@@ -108,6 +110,15 @@ for (const [resultIndex, result] of evidence.results.entries()) {
       `${label}.observed.${key} does not match the expected value.`,
     );
   }
+  assert(
+    typeof result.observed?.pickPoint?.x === "number" &&
+      result.observed.pickPoint.x >= 0 &&
+      result.observed.pickPoint.x <= 1 &&
+      typeof result.observed?.pickPoint?.y === "number" &&
+      result.observed.pickPoint.y >= 0 &&
+      result.observed.pickPoint.y <= 1,
+    `${label}.observed.pickPoint must be normalized to the viewport.`,
+  );
 
   const screenshotPath = result.screenshot?.path;
   assertNonEmptyString(screenshotPath, `${label}.screenshot.path`);
@@ -157,7 +168,7 @@ for (const [resultIndex, result] of evidence.results.entries()) {
     `${label} did not expose a partial target frame.`,
   );
   assert(
-    progressive?.partialTriangles === "380" && progressive?.partialEdges === "61",
+    progressive?.partialTriangles === "368" && progressive?.partialEdges === "49",
     `${label} partial target geometry counts changed.`,
   );
   assert(
@@ -166,11 +177,11 @@ for (const [resultIndex, result] of evidence.results.entries()) {
     `${label} target Range request sequence changed.`,
   );
   assert(
-    progressive?.coarseTriangles === "36" && progressive?.coarseEdges === "36",
+    progressive?.coarseTriangles === "12" && progressive?.coarseEdges === "12",
     `${label} coarse geometry counts changed.`,
   );
   assert(
-    progressive?.targetTriangles === "2,076" && progressive?.targetEdges === "181",
+    progressive?.targetTriangles === "2,088" && progressive?.targetEdges === "193",
     `${label} target geometry counts changed.`,
   );
   assert(
@@ -179,6 +190,23 @@ for (const [resultIndex, result] of evidence.results.entries()) {
       progressive?.cancellation?.noFurtherRequests === true &&
       progressive?.cancellation?.status === "Scene load cancelled.",
     `${label} did not cancel the active target range cleanly.`,
+  );
+  const viewPriority = progressive?.viewPriority;
+  const progressiveChunks = progressiveGltf.extras.madi.progressive.targetChunks;
+  const initialChunk = progressiveChunks.find(({ id }) => id === viewPriority?.initialSchedulerChunk);
+  const replacementChunk = progressiveChunks.find(
+    ({ id }) => id === viewPriority?.replacementSchedulerChunk,
+  );
+  const rangeFor = (chunk) =>
+    chunk ? `bytes=${chunk.byteOffset}-${chunk.byteOffset + chunk.byteLength - 1}` : undefined;
+  assert(
+    initialChunk?.id === progressiveChunks[0]?.id &&
+      replacementChunk?.id === progressiveChunks[1]?.id &&
+      viewPriority?.initialRange === rangeFor(initialChunk) &&
+      viewPriority?.replacementRange === rangeFor(replacementChunk) &&
+      viewPriority?.obsoleteRangeCancelled === true &&
+      viewPriority?.replacementRequestedBeforeRelease === true,
+    `${label} did not replace obsolete camera-priority work.`,
   );
   const coarseScreenshotPath = progressive?.coarseScreenshot?.path;
   assertNonEmptyString(coarseScreenshotPath, `${label}.progressive.coarseScreenshot.path`);
@@ -254,6 +282,45 @@ for (const [resultIndex, result] of evidence.results.entries()) {
     createHash("sha256").update(partialScreenshotBytes).digest("hex") ===
       progressive.partialScreenshot.sha256,
     `${label} partial screenshot digest changed.`,
+  );
+  const viewScreenshotPath = viewPriority?.screenshot?.path;
+  assertNonEmptyString(viewScreenshotPath, `${label}.progressive.viewPriority.screenshot.path`);
+  assert(!isAbsolute(viewScreenshotPath), `${label} view-priority screenshot path must be relative.`);
+  assert(
+    extname(viewScreenshotPath).toLowerCase() === ".png",
+    `${label} view-priority screenshot must be PNG.`,
+  );
+  const viewScreenshot = resolve(evidenceDirectory, viewScreenshotPath);
+  const viewFromRoot = relative(evidenceDirectory, viewScreenshot);
+  assert(
+    viewFromRoot !== "" &&
+      viewFromRoot !== ".." &&
+      !viewFromRoot.startsWith(`..${sep}`) &&
+      !isAbsolute(viewFromRoot),
+    `${label} view-priority screenshot path escapes the evidence directory.`,
+  );
+  const realViewScreenshot = await realpath(viewScreenshot);
+  const realViewFromRoot = relative(realEvidenceDirectory, realViewScreenshot);
+  assert(
+    realViewFromRoot !== "" &&
+      realViewFromRoot !== ".." &&
+      !realViewFromRoot.startsWith(`..${sep}`) &&
+      !isAbsolute(realViewFromRoot),
+    `${label} view-priority screenshot resolves outside the evidence directory.`,
+  );
+  const viewScreenshotBytes = await readFile(realViewScreenshot);
+  assert(
+    viewScreenshotBytes.byteLength === viewPriority.screenshot.bytes,
+    `${label} view-priority screenshot size changed.`,
+  );
+  assert(
+    viewScreenshotBytes.subarray(0, 8).equals(Buffer.from("89504e470d0a1a0a", "hex")),
+    `${label} view-priority screenshot has an invalid PNG signature.`,
+  );
+  assert(
+    createHash("sha256").update(viewScreenshotBytes).digest("hex") ===
+      viewPriority.screenshot.sha256,
+    `${label} view-priority screenshot digest changed.`,
   );
 }
 

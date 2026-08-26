@@ -18,6 +18,7 @@ export interface GeometryDecodeResult {
 interface PendingRequest {
   readonly resolve: (response: GeometryWorkerResponse) => void;
   readonly reject: (error: Error) => void;
+  readonly cleanup: () => void;
 }
 
 /** Owns one parsed glTF document in one Worker for the full scene session. */
@@ -62,15 +63,17 @@ export class GeometryDecoder {
     binary: GeometryBinarySource,
     representation: GeometryRepresentation,
     targetChunkId?: string,
+    signal?: AbortSignal,
   ): Promise<GeometryDecodeResult> {
     await this.initialized;
+    if (signal?.aborted) throw new DOMException("Obsolete target request.", "AbortError");
     const response = await this.request({
       type: "decode",
       requestId: this.requestId(),
       binary,
       representation,
       ...(targetChunkId ? { targetChunkId } : {}),
-    });
+    }, [], signal);
     if (response.type !== "ready") {
       throw new Error("The geometry Worker returned an invalid decode response.");
     }
@@ -90,7 +93,10 @@ export class GeometryDecoder {
     this.worker.removeEventListener("message", this.receive);
     this.worker.removeEventListener("error", this.failWorker);
     this.worker.terminate();
-    for (const pending of this.pending.values()) pending.reject(reason);
+    for (const pending of this.pending.values()) {
+      pending.cleanup();
+      pending.reject(reason);
+    }
     this.pending.clear();
   }
 
@@ -102,7 +108,14 @@ export class GeometryDecoder {
     const pending = this.pending.get(event.data.requestId);
     if (!pending) return;
     this.pending.delete(event.data.requestId);
-    if (event.data.type === "error") pending.reject(new Error(event.data.message));
+    pending.cleanup();
+    if (event.data.type === "error") {
+      pending.reject(
+        event.data.name === "AbortError"
+          ? new DOMException(event.data.message, "AbortError")
+          : new Error(event.data.message),
+      );
+    }
     else pending.resolve(event.data);
   };
 
@@ -111,18 +124,34 @@ export class GeometryDecoder {
   };
 
   private request(
-    message: GeometryWorkerRequest,
+    message: Exclude<GeometryWorkerRequest, { readonly type: "cancel" }>,
     transfer: Transferable[] = [],
+    signal?: AbortSignal,
   ): Promise<GeometryWorkerResponse> {
     if (this.disposed) {
       return Promise.reject(new DOMException("Scene load cancelled.", "AbortError"));
     }
     return new Promise((resolve, reject) => {
-      this.pending.set(message.requestId, { resolve, reject });
+      if (signal?.aborted) {
+        reject(new DOMException("Obsolete target request.", "AbortError"));
+        return;
+      }
+      const abort = (): void => {
+        const pending = this.pending.get(message.requestId);
+        if (!pending) return;
+        this.pending.delete(message.requestId);
+        pending.cleanup();
+        this.worker.postMessage({ type: "cancel", requestId: message.requestId });
+        reject(new DOMException("Obsolete target request.", "AbortError"));
+      };
+      const cleanup = (): void => signal?.removeEventListener("abort", abort);
+      signal?.addEventListener("abort", abort, { once: true });
+      this.pending.set(message.requestId, { resolve, reject, cleanup });
       try {
         this.worker.postMessage(message, transfer);
       } catch (error) {
         this.pending.delete(message.requestId);
+        cleanup();
         reject(error instanceof Error ? error : new Error(String(error)));
       }
     });

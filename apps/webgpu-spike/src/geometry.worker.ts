@@ -24,6 +24,11 @@ export type GeometryWorkerRequest =
       readonly binary: GeometryBinarySource;
       readonly representation: GeometryRepresentation;
       readonly targetChunkId?: string;
+    }
+  | {
+      readonly type: "cancel";
+      /** Request id of the in-flight decode whose fetch should be aborted. */
+      readonly requestId: number;
     };
 
 export type GeometryWorkerResponse =
@@ -39,6 +44,7 @@ export type GeometryWorkerResponse =
       readonly type: "error";
       readonly requestId: number;
       readonly message: string;
+      readonly name?: string;
     };
 
 interface WorkerHost {
@@ -51,12 +57,19 @@ interface WorkerHost {
 
 const worker = globalThis as unknown as WorkerHost;
 let compiledDocument: CompiledGltfDocument | undefined;
+const activeDecodes = new Map<number, AbortController>();
 
 worker.addEventListener("message", (event) => {
+  if (event.data.type === "cancel") {
+    activeDecodes.get(event.data.requestId)?.abort();
+    return;
+  }
   void handleRequest(event.data);
 });
 
-async function handleRequest(request: GeometryWorkerRequest): Promise<void> {
+async function handleRequest(
+  request: Exclude<GeometryWorkerRequest, { readonly type: "cancel" }>,
+): Promise<void> {
   try {
     if (request.type === "initialize") {
       const text = request.source.kind === "bytes"
@@ -72,17 +85,28 @@ async function handleRequest(request: GeometryWorkerRequest): Promise<void> {
       type: "error",
       requestId: request.requestId,
       message: error instanceof Error ? error.message : String(error),
+      ...(error instanceof Error ? { name: error.name } : {}),
     });
   }
 }
 
-async function loadBinary(source: GeometryBinarySource): Promise<ArrayBuffer> {
+function throwIfAborted(signal: AbortSignal): void {
+  if (signal.aborted) throw new DOMException("Obsolete target request.", "AbortError");
+}
+
+async function loadBinary(
+  source: GeometryBinarySource,
+  signal: AbortSignal,
+): Promise<ArrayBuffer> {
+  throwIfAborted(signal);
   if (source.kind === "file") {
-    return source.byteOffset === undefined || source.byteLength === undefined
+    const binary = await (source.byteOffset === undefined || source.byteLength === undefined
       ? source.file.arrayBuffer()
       : source.file
           .slice(source.byteOffset, source.byteOffset + source.byteLength)
-          .arrayBuffer();
+          .arrayBuffer());
+    throwIfAborted(signal);
+    return binary;
   }
 
   const range = source.byteOffset === undefined || source.byteLength === undefined
@@ -90,6 +114,7 @@ async function loadBinary(source: GeometryBinarySource): Promise<ArrayBuffer> {
     : `bytes=${source.byteOffset}-${source.byteOffset + source.byteLength - 1}`;
   const response = await fetch(source.href, {
     cache: "no-store",
+    signal,
     ...(range ? { headers: { Range: range } } : {}),
   });
   if (!response.ok) {
@@ -129,29 +154,36 @@ async function decode(
   request: Extract<GeometryWorkerRequest, { readonly type: "decode" }>,
 ): Promise<void> {
   if (!compiledDocument) throw new Error("The geometry Worker is not initialized.");
-  const startedAt = performance.now();
-  const binary = await loadBinary(request.binary);
-  const decoded = decodeCompiledGltf(compiledDocument, binary, {
-    representation: request.representation,
-    ...(request.targetChunkId ? { targetChunkId: request.targetChunkId } : {}),
-  });
-  const aggregated = request.representation === "coarse"
-    ? aggregateCoarseScene(decoded)
-    : undefined;
-  const scene = aggregated ?? decoded;
-  const transferables = compiledSceneTransferables(scene);
-  const coarseInstanceTargetMeshIndexes = aggregated?.coarseInstanceTargetMeshIndexes;
-  if (coarseInstanceTargetMeshIndexes?.buffer instanceof ArrayBuffer) {
-    transferables.push(coarseInstanceTargetMeshIndexes.buffer);
+  const cancellation = new AbortController();
+  activeDecodes.set(request.requestId, cancellation);
+  try {
+    const startedAt = performance.now();
+    const binary = await loadBinary(request.binary, cancellation.signal);
+    throwIfAborted(cancellation.signal);
+    const decoded = decodeCompiledGltf(compiledDocument, binary, {
+      representation: request.representation,
+      ...(request.targetChunkId ? { targetChunkId: request.targetChunkId } : {}),
+    });
+    const aggregated = request.representation === "coarse"
+      ? aggregateCoarseScene(decoded)
+      : undefined;
+    const scene = aggregated ?? decoded;
+    const transferables = compiledSceneTransferables(scene);
+    const coarseInstanceTargetMeshIndexes = aggregated?.coarseInstanceTargetMeshIndexes;
+    if (coarseInstanceTargetMeshIndexes?.buffer instanceof ArrayBuffer) {
+      transferables.push(coarseInstanceTargetMeshIndexes.buffer);
+    }
+    worker.postMessage(
+      {
+        type: "ready",
+        requestId: request.requestId,
+        scene,
+        ...(coarseInstanceTargetMeshIndexes ? { coarseInstanceTargetMeshIndexes } : {}),
+        decodeMilliseconds: performance.now() - startedAt,
+      },
+      transferables,
+    );
+  } finally {
+    activeDecodes.delete(request.requestId);
   }
-  worker.postMessage(
-    {
-      type: "ready",
-      requestId: request.requestId,
-      scene,
-      ...(coarseInstanceTargetMeshIndexes ? { coarseInstanceTargetMeshIndexes } : {}),
-      decodeMilliseconds: performance.now() - startedAt,
-    },
-    transferables,
-  );
 }

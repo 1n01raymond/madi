@@ -24,6 +24,11 @@ if (
 }
 
 const headless = process.argv.includes("--headless");
+const browserFlag = process.argv.indexOf("--browser");
+const browserFilter = browserFlag === -1 ? undefined : process.argv[browserFlag + 1];
+if (browserFlag !== -1 && browserFilter !== "chrome" && browserFilter !== "firefox") {
+  throw new TypeError("--browser must be chrome or firefox.");
+}
 const operatingSystem =
   { win32: "windows", darwin: "macos", linux: "linux" }[process.platform] ??
   process.platform;
@@ -61,8 +66,16 @@ const progressiveGltf = JSON.parse(
   await readFile(resolve(progressiveDirectory, "scene.gltf"), "utf8"),
 );
 const progressiveTargetBytes = await readFile(resolve(progressiveDirectory, "scene.bin"));
-const expectedTargetRanges = progressiveGltf.extras.madi.progressive.targetChunks.map(
-  ({ byteOffset, byteLength }) => `bytes=${byteOffset}-${byteOffset + byteLength - 1}`,
+const expectedTargetRanges = [0, 2, 1].map((chunkIndex) => {
+  const chunk = progressiveGltf.extras.madi.progressive.targetChunks[chunkIndex];
+  if (!chunk) throw new Error(`Missing progressive target chunk ${chunkIndex}.`);
+  return `bytes=${chunk.byteOffset}-${chunk.byteOffset + chunk.byteLength - 1}`;
+});
+const targetChunkIdByRange = new Map(
+  progressiveGltf.extras.madi.progressive.targetChunks.map((chunk) => [
+    `bytes=${chunk.byteOffset}-${chunk.byteOffset + chunk.byteLength - 1}`,
+    chunk.id,
+  ]),
 );
 
 function assertEqual(actual, expectedValue, label) {
@@ -73,6 +86,30 @@ function assertEqual(actual, expectedValue, label) {
 
 function sha256(bytes) {
   return createHash("sha256").update(bytes).digest("hex");
+}
+
+async function selectObjectAtNearbyPoint(page, canvas, canvasBounds, objectId) {
+  const offsets = [0, 0.02, -0.02, 0.04, -0.04, 0.06, -0.06, 0.08, -0.08, 0.1, -0.1];
+  for (const offsetY of offsets) {
+    for (const offsetX of offsets) {
+      const normalized = { x: 0.6 + offsetX, y: 0.35 + offsetY };
+      const position = {
+        x: Math.round(canvasBounds.width * normalized.x),
+        y: Math.round(canvasBounds.height * normalized.y),
+      };
+      await canvas.click({ position });
+      const selected = await page
+        .waitForFunction(
+          (expectedId) => document.documentElement.dataset.selectedObjectId === String(expectedId),
+          objectId,
+          { timeout: offsetX === 0 && offsetY === 0 ? 2_000 : 300 },
+        )
+        .then(() => true)
+        .catch(() => false);
+      if (selected) return { normalized, position };
+    }
+  }
+  throw new Error(`Could not pick object ${objectId} near the canonical review point.`);
 }
 
 async function recordBrowser(definition) {
@@ -157,16 +194,12 @@ async function recordBrowser(definition) {
     const canvas = page.locator("#viewport");
     const canvasBounds = await canvas.boundingBox();
     if (!canvasBounds) throw new Error(`${definition.id} canvas has no visible bounds.`);
-    await canvas.click({
-      position: {
-        x: Math.round(canvasBounds.width * 0.6),
-        y: Math.round(canvasBounds.height * 0.35),
-      },
-    });
+    const pickPoint = await selectObjectAtNearbyPoint(page, canvas, canvasBounds, 57);
     await page.locator("#selection").filter({ hasText: expected.selection }).waitFor({
       timeout: 5_000,
     });
     observed.selection = await page.locator("#selection").innerText();
+    observed.pickPoint = pickPoint.normalized;
     assertEqual(observed.selection, expected.selection, `${definition.id} selection`);
 
     await page.locator("#toggle-section").click();
@@ -177,22 +210,12 @@ async function recordBrowser(definition) {
     );
     const sectionPosition = page.locator("#section-position");
     await sectionPosition.fill("0");
-    await canvas.click({
-      position: {
-        x: Math.round(canvasBounds.width * 0.6),
-        y: Math.round(canvasBounds.height * 0.35),
-      },
-    });
+    await canvas.click({ position: pickPoint.position });
     await page.locator("#selection").filter({ hasText: "No occurrence at that pixel." }).waitFor({
       timeout: 5_000,
     });
     await sectionPosition.fill("100");
-    await canvas.click({
-      position: {
-        x: Math.round(canvasBounds.width * 0.6),
-        y: Math.round(canvasBounds.height * 0.35),
-      },
-    });
+    await canvas.click({ position: pickPoint.position });
     await page.locator("#selection").filter({ hasText: expected.selection }).waitFor({
       timeout: 5_000,
     });
@@ -458,6 +481,168 @@ async function recordBrowser(definition) {
     );
     await progressivePage.close();
 
+    const viewPriorityPage = await context.newPage();
+    viewPriorityPage.on("console", (message) => {
+      if (message.type() === "warning" || message.type() === "error") {
+        consoleIssues.push({ level: message.type(), message: message.text() });
+      }
+    });
+    viewPriorityPage.on("pageerror", (error) => {
+      consoleIssues.push({ level: "pageerror", message: error.message });
+    });
+    await viewPriorityPage.route("**/progressive/scene.gltf", (route) =>
+      route.fulfill({
+        path: resolve(progressiveDirectory, "scene.gltf"),
+        contentType: "model/gltf+json",
+      }),
+    );
+    await viewPriorityPage.route("**/progressive/coarse.bin", (route) =>
+      route.fulfill({
+        path: resolve(progressiveDirectory, "coarse.bin"),
+        contentType: "application/octet-stream",
+      }),
+    );
+    let releaseObsoleteRange;
+    const obsoleteRangeGate = new Promise((resolveGate) => {
+      releaseObsoleteRange = resolveGate;
+    });
+    let releaseTailRanges;
+    const tailRangeGate = new Promise((resolveGate) => {
+      releaseTailRanges = resolveGate;
+    });
+    let firstViewRangeResolve;
+    const firstViewRange = new Promise((resolveRequest) => {
+      firstViewRangeResolve = resolveRequest;
+    });
+    let replacementViewRangeResolve;
+    const replacementViewRange = new Promise((resolveRequest) => {
+      replacementViewRangeResolve = resolveRequest;
+    });
+    let obsoleteRangeReleased = false;
+    let replacementRequestedBeforeRelease = false;
+    const viewPriorityRangeRequests = [];
+    await viewPriorityPage.route("**/progressive/scene.bin", async (route) => {
+      const range = route.request().headers().range;
+      const match = range ? /^bytes=(\d+)-(\d+)$/u.exec(range) : undefined;
+      if (!match) throw new Error(`${definition.id} view-priority request omitted its range.`);
+      const start = Number(match[1]);
+      const end = Number(match[2]);
+      const requestIndex = viewPriorityRangeRequests.length;
+      viewPriorityRangeRequests.push(range);
+      if (requestIndex === 0) {
+        firstViewRangeResolve();
+        await obsoleteRangeGate;
+        await route.abort("aborted").catch(() => undefined);
+        return;
+      }
+      if (requestIndex === 1) {
+        replacementRequestedBeforeRelease = !obsoleteRangeReleased;
+        replacementViewRangeResolve();
+      } else {
+        await tailRangeGate;
+      }
+      await route.fulfill({
+        status: 206,
+        contentType: "application/octet-stream",
+        headers: {
+          "Accept-Ranges": "bytes",
+          "Content-Range": `bytes ${start}-${end}/${progressiveTargetBytes.byteLength}`,
+        },
+        body: progressiveTargetBytes.subarray(start, end + 1),
+      });
+    });
+    await viewPriorityPage.goto(progressiveViewerUrl.href, { waitUntil: "domcontentloaded" });
+    await Promise.all([
+      viewPriorityPage.waitForFunction(
+        () => document.documentElement.dataset.coarseReady === "true",
+      ),
+      firstViewRange,
+    ]);
+    const priorityCanvas = viewPriorityPage.locator("#viewport");
+    const priorityCanvasBounds = await priorityCanvas.boundingBox();
+    if (!priorityCanvasBounds) throw new Error(`${definition.id} priority canvas has no bounds.`);
+    await viewPriorityPage.mouse.move(
+      priorityCanvasBounds.x + priorityCanvasBounds.width / 2,
+      priorityCanvasBounds.y + priorityCanvasBounds.height / 2,
+    );
+    await viewPriorityPage.mouse.down({ button: "middle" });
+    await viewPriorityPage.mouse.move(
+      priorityCanvasBounds.x + priorityCanvasBounds.width / 2 + 100,
+      priorityCanvasBounds.y + priorityCanvasBounds.height / 2 - 50,
+      { steps: 1 },
+    );
+    await viewPriorityPage.mouse.up({ button: "middle" });
+    try {
+      await viewPriorityPage.waitForFunction(
+        () => document.documentElement.dataset.targetSchedulerCancellations === "1",
+        undefined,
+        { timeout: 5_000 },
+      );
+      await Promise.race([
+        replacementViewRange,
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error("replacement Range timed out")), 5_000),
+        ),
+      ]);
+    } catch (error) {
+      const diagnostics = await viewPriorityPage.evaluate(() => ({
+        order: document.documentElement.dataset.targetSchedulerOrder,
+        cancellations: document.documentElement.dataset.targetSchedulerCancellations,
+        cameraOrigin: document.documentElement.dataset.cameraOrigin,
+        status: document.querySelector("#status")?.textContent,
+        canvas: (() => {
+          const bounds = document.querySelector("#viewport")?.getBoundingClientRect();
+          return bounds ? { width: bounds.width, height: bounds.height } : undefined;
+        })(),
+      }));
+      releaseObsoleteRange();
+      releaseTailRanges();
+      throw new Error(
+        `${definition.id} view-priority navigation failed: ${JSON.stringify({
+          diagnostics,
+          viewPriorityRangeRequests,
+          cause: error instanceof Error ? error.message : String(error),
+        })}`,
+        { cause: error },
+      );
+    }
+    obsoleteRangeReleased = true;
+    releaseObsoleteRange();
+    await viewPriorityPage.waitForFunction(
+      () => document.documentElement.dataset.targetChunksReady === "1",
+    );
+    const viewPriorityScreenshotName =
+      `${definition.id}-${browserVersion.split(".")[0]}-${operatingSystem}-view-priority.png`;
+    const viewPriorityScreenshot = await viewPriorityPage.screenshot({
+      fullPage: true,
+      type: "png",
+    });
+    await writeFile(resolve(outputDirectory, viewPriorityScreenshotName), viewPriorityScreenshot);
+    observed.progressive.viewPriority = {
+      initialSchedulerChunk: targetChunkIdByRange.get(viewPriorityRangeRequests[0]),
+      replacementSchedulerChunk: targetChunkIdByRange.get(viewPriorityRangeRequests[1]),
+      initialRange: viewPriorityRangeRequests[0],
+      replacementRange: viewPriorityRangeRequests[1],
+      obsoleteRangeCancelled: await viewPriorityPage.evaluate(
+        () => document.documentElement.dataset.targetSchedulerCancellations === "1",
+      ),
+      replacementRequestedBeforeRelease,
+      screenshot: {
+        path: viewPriorityScreenshotName,
+        bytes: viewPriorityScreenshot.byteLength,
+        sha256: sha256(viewPriorityScreenshot),
+      },
+    };
+    if (
+      !observed.progressive.viewPriority.obsoleteRangeCancelled ||
+      !replacementRequestedBeforeRelease ||
+      viewPriorityRangeRequests[0] === viewPriorityRangeRequests[1]
+    ) {
+      throw new Error(`${definition.id} did not replace obsolete camera work.`);
+    }
+    releaseTailRanges();
+    await viewPriorityPage.close();
+
     const cancellationPage = await context.newPage();
     cancellationPage.on("console", (message) => {
       if (message.type() === "warning" || message.type() === "error") {
@@ -601,7 +786,7 @@ const vite = await createServer({
 try {
   await vite.listen();
   const results = [];
-  for (const definition of [
+  const definitions = [
     {
       id: "chrome",
       engine: "Blink",
@@ -612,12 +797,13 @@ try {
       engine: "Gecko",
       launch: () => firefox.launch({ headless }),
     },
-  ]) {
+  ].filter(({ id }) => browserFilter === undefined || id === browserFilter);
+  for (const definition of definitions) {
     results.push(await recordBrowser(definition));
   }
 
   const evidence = {
-    schemaVersion: "phase-1-browser-matrix.1",
+    schemaVersion: "phase-1-browser-matrix.2",
     capturedAt: new Date().toISOString(),
     source: {
       fixture: "fixtures/step/adafruit-pygamer.step",

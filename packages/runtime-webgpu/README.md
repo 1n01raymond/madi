@@ -59,8 +59,11 @@ renderer replaces prototype AABBs with target meshes. When target chunk metadata
 is present, `targetChunkId` decodes only one declared byte range and its mesh
 occurrences. The browser requests those ranges sequentially, displays each
 promotion before requesting the next, and falls back safely when a host returns
-the complete buffer with HTTP 200. Changing scenes terminates the active Worker
-and its fetch; explicit cancellation uses the same boundary. Intentional
+the complete buffer with HTTP 200. The Studio builds retained-coarse chunk
+bounds once, ranks them in the current camera, keeps one Range/decode active at
+a time, and aborts that request through the Worker when navigation makes another chunk
+hotter. Changing scenes terminates the active Worker and its fetch; explicit
+cancellation uses the same boundary. Intentional
 renderer destruction does not surface as a device-loss error. Per mesh, the decoder
 accepts one indexed `TRIANGLES` primitive plus at most one indexed `LINES`
 primitive. It is not a general-purpose glTF loader. Unsupported profiles and
