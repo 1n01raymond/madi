@@ -145,6 +145,10 @@ export interface CompiledGltfPackage {
   readonly json: string;
   readonly binary: Uint8Array;
   readonly coarseBinary?: Uint8Array;
+  /** Optional `naru.spatial-demand-index.1` derived-cache sidecar. */
+  readonly spatialBinary?: Uint8Array;
+  /** Resource URI paired with `spatialBinary`. */
+  readonly spatialBinaryUri?: string;
   /** Compact-JSON property sidecar (`madi.package-properties.1`), when emitted. */
   readonly propertiesJson?: string;
   /** Byte-verbatim `madi.property-columns.1` column file, when emitted. */
@@ -167,6 +171,11 @@ export interface CompileGltfOptions {
    * Omit this to retain one target chunk per prototype for compatibility.
    */
   readonly targetChunkByteBudget?: number;
+  /** Emit an optional occurrence BVH that maps spatial leaves to target chunks. */
+  readonly spatialIndex?: boolean;
+  readonly spatialBinaryUri?: string;
+  /** Maximum renderable occurrences per spatial BVH leaf. Defaults to 64. */
+  readonly spatialLeafCapacity?: number;
   /**
    * The adapter's `madi.property-columns.1` value column file for a scene
    * whose semantics reference `scene.propertyValues`. Required for such a

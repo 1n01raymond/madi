@@ -219,6 +219,38 @@ describe("compiled glTF runtime boundary", () => {
     expect(hierarchy.properties).toBeUndefined();
   });
 
+  it("validates and exposes an optional spatial demand sidecar pointer", async () => {
+    const json = JSON.parse(await readFile(new URL("scene.gltf", progressiveUrl), "utf8")) as unknown;
+    const copy = structuredClone(json) as {
+      extras: { madi: { progressive?: Record<string, unknown> } };
+    };
+    copy.extras.madi.progressive = {
+      ...copy.extras.madi.progressive,
+      spatialIndex: {
+        schemaVersion: "naru.spatial-demand-index.1",
+        uri: "spatial.bin",
+        byteLength: 512,
+        sha256: "a".repeat(64),
+      },
+    };
+
+    expect(inspectCompiledHierarchy(copy).hierarchy.spatialIndex).toEqual({
+      schemaVersion: "naru.spatial-demand-index.1",
+      uri: "spatial.bin",
+      byteLength: 512,
+      sha256: "a".repeat(64),
+    });
+
+    const invalid = structuredClone(copy);
+    const progressive = invalid.extras.madi.progressive as {
+      spatialIndex: { schemaVersion: string };
+    };
+    progressive.spatialIndex.schemaVersion = "naru.spatial-demand-index.2";
+    expect(() => inspectCompiledHierarchy(invalid)).toThrowError(
+      expect.objectContaining<Partial<CompiledGltfError>>({ code: "INVALID_GLTF" }),
+    );
+  });
+
   it("surfaces a property sidecar pointer from extras.madi.properties", async () => {
     const { json } = await loadPackage();
     const copy = structuredClone(json) as {

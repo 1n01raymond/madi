@@ -3,6 +3,7 @@ import type {
   GpuPrototypeBatch,
   GpuScene,
 } from "./layout.js";
+import { supportedSpatialDemandIndexSchema } from "./spatial-index.js";
 
 const supportedProfile = "madi.experimental.gltf.1";
 const identityMatrix = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1] as const;
@@ -90,6 +91,14 @@ export interface CompiledPropertiesRef {
   readonly sha256: string;
 }
 
+/** Pointer to the optional occurrence-to-target-chunk spatial demand index. */
+export interface CompiledSpatialIndexRef {
+  readonly schemaVersion: typeof supportedSpatialDemandIndexSchema;
+  readonly uri: string;
+  readonly byteLength: number;
+  readonly sha256: string;
+}
+
 export interface CompiledTargetChunk {
   readonly id: string;
   readonly buffer: number;
@@ -113,6 +122,7 @@ export interface CompiledHierarchy {
   readonly coarseBinaryUri?: string;
   readonly coarseBinaryByteLength?: number;
   readonly properties?: CompiledPropertiesRef;
+  readonly spatialIndex?: CompiledSpatialIndexRef;
   readonly targetChunks: readonly CompiledTargetChunk[];
   readonly entries: readonly CompiledHierarchyEntry[];
   readonly renderableOccurrences: number;
@@ -458,6 +468,32 @@ function propertiesRefFor(rootMadi: JsonRecord): CompiledPropertiesRef | undefin
   };
 }
 
+function spatialIndexRefFor(progressive: JsonRecord | undefined): CompiledSpatialIndexRef | undefined {
+  if (progressive?.spatialIndex === undefined) return undefined;
+  const spatialIndex = recordAt(progressive, "spatialIndex");
+  if (
+    !spatialIndex ||
+    spatialIndex.schemaVersion !== supportedSpatialDemandIndexSchema ||
+    typeof spatialIndex.uri !== "string" ||
+    spatialIndex.uri.trim() === "" ||
+    !Number.isInteger(spatialIndex.byteLength) ||
+    (spatialIndex.byteLength as number) <= 0 ||
+    typeof spatialIndex.sha256 !== "string" ||
+    !/^[0-9a-f]{64}$/u.test(spatialIndex.sha256)
+  ) {
+    throw new CompiledGltfError(
+      "INVALID_GLTF",
+      `extras.madi.progressive.spatialIndex must use ${supportedSpatialDemandIndexSchema} and carry uri, byteLength, and sha256.`,
+    );
+  }
+  return {
+    schemaVersion: supportedSpatialDemandIndexSchema,
+    uri: spatialIndex.uri,
+    byteLength: spatialIndex.byteLength as number,
+    sha256: spatialIndex.sha256,
+  };
+}
+
 export function inspectCompiledHierarchy(value: unknown): {
   readonly document: CompiledGltfDocument;
   readonly hierarchy: CompiledHierarchy;
@@ -502,6 +538,7 @@ export function inspectCompiledHierarchy(value: unknown): {
     ? undefined
     : document.buffers[coarseBufferIndex];
   const properties = propertiesRefFor(rootMadi);
+  const spatialIndex = spatialIndexRefFor(progressive);
   if (
     targetChunks.length > 0 &&
     [...renderedMeshes].some(
@@ -532,6 +569,7 @@ export function inspectCompiledHierarchy(value: unknown): {
           }
         : {}),
       ...(properties ? { properties } : {}),
+      ...(spatialIndex ? { spatialIndex } : {}),
       targetChunks,
       entries,
       renderableOccurrences: entries.filter(({ renderable }) => renderable).length,

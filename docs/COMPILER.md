@@ -215,6 +215,16 @@ Candidate policies:
 
 Partition metrics are emitted for tuning.
 
+The first implemented spatial-demand contract follows ADR-0008. When the
+compiler API is given `coarseBounds: true` and `spatialIndex: true`, it writes a
+deterministic `naru.spatial-demand-index.1` `spatial.bin`: a flat float64 BVH
+over renderable occurrence world bounds whose leaves reference existing target
+chunks. Target and coarse geometry bytes are unchanged, so repeated prototype
+payloads remain shared. The browser decoder validates the binary layout,
+allocation limits, tree ownership, and glTF/chunk references, but Studio query
+scheduling and committed browser evidence remain the next slice; ADR-0008 is
+therefore still Proposed.
+
 ## 11. LOD and simplification
 
 CAD simplification is conservative:
@@ -493,8 +503,10 @@ reproduction command live under `artifacts/ifc/digital-hub/`.
 This now also exercises the first Phase 2 scheduler boundary: its 3,383
 prototype-granular ranges compile into 45 request chunks, the browser updates
 only changed GPU batches, and fixed decoded/GPU admission caps retain coarse
-fallbacks when pressure is reached. It is not yet a spatial scheduler: LOD,
-camera reprioritization, eviction, and cache tiers remain deferred. The focused
+fallbacks when pressure is reached. The optional spatial-demand sidecar and its
+strict decoder now exist, but this committed Digital Hub package predates it and
+the Studio does not query it yet. Spatial query scheduling, LOD, and cache tiers
+remain deferred. The focused
 E2.1 record proves IFC boundary extraction; Digital Hub itself remains a
 historical surface-only split.3 package until its next licensed re-recording.
 

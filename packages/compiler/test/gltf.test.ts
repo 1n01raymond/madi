@@ -154,6 +154,64 @@ describe("Phase 1 glTF compiler slice", () => {
     expect(compiled.report.counts.targetChunkCount).toBe(3);
   });
 
+  it("adds a deterministic spatial sidecar without changing target or coarse geometry", async () => {
+    const baseline = await compileEvidence({ coarseBounds: true });
+    const first = await compileEvidence({
+      coarseBounds: true,
+      spatialIndex: true,
+      spatialLeafCapacity: 2,
+    });
+    const second = await compileEvidence({
+      coarseBounds: true,
+      spatialIndex: true,
+      spatialLeafCapacity: 2,
+    });
+    const progressive = (first.document.extras.madi as {
+      progressive: { spatialIndex: Record<string, unknown> };
+    }).progressive;
+    const spatial = first.spatialBinary as Uint8Array;
+
+    expect(first.binary).toEqual(baseline.binary);
+    expect(first.coarseBinary).toEqual(baseline.coarseBinary);
+    expect(first.spatialBinaryUri).toBe("spatial.bin");
+    expect(second.spatialBinary).toEqual(spatial);
+    expect(second.report).toEqual(first.report);
+    expect(progressive.spatialIndex).toEqual({
+      schemaVersion: "naru.spatial-demand-index.1",
+      uri: "spatial.bin",
+      byteLength: spatial.byteLength,
+      sha256: createHash("sha256").update(spatial).digest("hex"),
+    });
+    expect(first.report.output.resources).toContainEqual({
+      path: "spatial.bin",
+      mediaType: "application/octet-stream",
+      bytes: spatial.byteLength,
+      sha256: createHash("sha256").update(spatial).digest("hex"),
+    });
+    expect(first.report.output.packageDigest).toBe(
+      createHash("sha256")
+        .update(first.json)
+        .update(first.binary)
+        .update(first.coarseBinary as Uint8Array)
+        .update(spatial)
+        .digest("hex"),
+    );
+    expect(first.report.output.packageDigest).not.toBe(baseline.report.output.packageDigest);
+  });
+
+  it("requires coarse bounds and distinct package URIs for a spatial sidecar", async () => {
+    await expect(compileEvidence({ spatialIndex: true })).rejects.toThrow(
+      /requires coarse bounds/u,
+    );
+    await expect(
+      compileEvidence({
+        coarseBounds: true,
+        spatialIndex: true,
+        spatialBinaryUri: "scene.bin",
+      }),
+    ).rejects.toThrow(/must be distinct/u);
+  });
+
   it("coalesces adjacent target prototype ranges when a request budget is declared", async () => {
     const compiled = await compileEvidence({
       coarseBounds: true,

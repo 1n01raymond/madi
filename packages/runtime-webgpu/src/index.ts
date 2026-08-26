@@ -19,6 +19,15 @@ export {
   inspectCompiledHierarchy,
   parseCompiledGltf,
 } from "./compiled-gltf.js";
+export {
+  decodeSpatialDemandIndex,
+  SpatialDemandIndexError,
+  supportedSpatialDemandIndexSchema,
+} from "./spatial-index.js";
+export type {
+  DecodedSpatialDemandIndex,
+  DecodeSpatialDemandIndexOptions,
+} from "./spatial-index.js";
 export type {
   CompiledGltfDocument,
   CompiledGltfErrorCode,
@@ -28,6 +37,7 @@ export type {
   CompiledHierarchyEntry,
   CompiledObjectEvidence,
   CompiledPropertiesRef,
+  CompiledSpatialIndexRef,
   CompiledTargetChunk,
   DecodedCompiledScene,
   GeometryRepresentation,

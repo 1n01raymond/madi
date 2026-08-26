@@ -28,6 +28,11 @@ import {
   compilerEvidenceSchema,
   experimentalGltfProfile,
 } from "./types.js";
+import {
+  encodeSpatialDemandIndex,
+  spatialDemandIndexSchema,
+} from "./spatial-demand.js";
+import type { SpatialVector3 } from "./spatial-demand.js";
 import type {
   CompileGltfOptions,
   CompiledGltfPackage,
@@ -72,6 +77,8 @@ interface CoarseGeometryResource {
   readonly indexAccessor: number;
   readonly edgePositionAccessor: number;
   readonly edgeIndexAccessor: number;
+  readonly minimum: SpatialVector3;
+  readonly maximum: SpatialVector3;
 }
 
 interface TargetGeometryRange {
@@ -190,6 +197,77 @@ function scaledOccurrenceMatrix(matrix: Matrix4d, scaleToMeters: number): number
       ? deliveredTranslation(value * scaleToMeters)
       : Math.fround(value),
   );
+}
+
+function multiplyMatrices(a: ArrayLike<number>, b: ArrayLike<number>): Float64Array {
+  const result = new Float64Array(16);
+  for (let column = 0; column < 4; column += 1) {
+    for (let row = 0; row < 4; row += 1) {
+      let value = 0;
+      for (let index = 0; index < 4; index += 1) {
+        value += (a[index * 4 + row] ?? 0) * (b[column * 4 + index] ?? 0);
+      }
+      result[column * 4 + row] = value;
+    }
+  }
+  return result;
+}
+
+function transformedBounds(
+  matrix: ArrayLike<number>,
+  minimum: SpatialVector3,
+  maximum: SpatialVector3,
+): { readonly minimum: SpatialVector3; readonly maximum: SpatialVector3 } {
+  const worldMinimum: [number, number, number] = [Infinity, Infinity, Infinity];
+  const worldMaximum: [number, number, number] = [-Infinity, -Infinity, -Infinity];
+  for (const x of [minimum[0], maximum[0]]) {
+    for (const y of [minimum[1], maximum[1]]) {
+      for (const z of [minimum[2], maximum[2]]) {
+        const point = [
+          (matrix[0] ?? 0) * x + (matrix[4] ?? 0) * y + (matrix[8] ?? 0) * z + (matrix[12] ?? 0),
+          (matrix[1] ?? 0) * x + (matrix[5] ?? 0) * y + (matrix[9] ?? 0) * z + (matrix[13] ?? 0),
+          (matrix[2] ?? 0) * x + (matrix[6] ?? 0) * y + (matrix[10] ?? 0) * z + (matrix[14] ?? 0),
+        ] as const;
+        for (const axis of [0, 1, 2] as const) {
+          worldMinimum[axis] = Math.min(worldMinimum[axis], point[axis]);
+          worldMaximum[axis] = Math.max(worldMaximum[axis], point[axis]);
+        }
+      }
+    }
+  }
+  return { minimum: worldMinimum, maximum: worldMaximum };
+}
+
+function occurrenceWorldMatrices(
+  occurrences: readonly Occurrence[],
+  sourceMatrix: ArrayLike<number>,
+  scaleToMeters: number,
+): ReadonlyMap<string, Float64Array> {
+  const byId = new Map(occurrences.map((occurrence) => [occurrence.id, occurrence]));
+  const result = new Map<string, Float64Array>();
+  const visiting = new Set<string>();
+  const worldFor = (occurrence: Occurrence): Float64Array => {
+    const existing = result.get(occurrence.id);
+    if (existing) return existing;
+    if (visiting.has(occurrence.id)) {
+      throw new TypeError(`Occurrence hierarchy cycle at ${occurrence.id}.`);
+    }
+    visiting.add(occurrence.id);
+    const parent = occurrence.parentId ? byId.get(occurrence.parentId) : undefined;
+    if (occurrence.parentId && !parent) {
+      throw new TypeError(`Missing parent occurrence ${occurrence.parentId}.`);
+    }
+    const parentMatrix = parent ? worldFor(parent) : sourceMatrix;
+    const world = multiplyMatrices(
+      parentMatrix,
+      scaledOccurrenceMatrix(occurrence.localTransform, scaleToMeters),
+    );
+    visiting.delete(occurrence.id);
+    result.set(occurrence.id, world);
+    return world;
+  };
+  for (const occurrence of occurrences) worldFor(occurrence);
+  return result;
 }
 
 function gltfMaterial(material: Material, edge: boolean): GltfMaterial {
@@ -402,6 +480,16 @@ function appendCoarseBounds(
   const { min, max } = scaledPositionBounds(sourcePositions, 1);
   const [minX = 0, minY = 0, minZ = 0] = min;
   const [maxX = 0, maxY = 0, maxZ = 0] = max;
+  const deliveredMinimum: SpatialVector3 = [
+    Math.fround(minX * scaleToMeters),
+    Math.fround(minY * scaleToMeters),
+    Math.fround(minZ * scaleToMeters),
+  ];
+  const deliveredMaximum: SpatialVector3 = [
+    Math.fround(maxX * scaleToMeters),
+    Math.fround(maxY * scaleToMeters),
+    Math.fround(maxZ * scaleToMeters),
+  ];
   const corners: readonly (readonly [number, number, number])[] = [
     [minX, minY, minZ],
     [maxX, minY, minZ],
@@ -484,6 +572,8 @@ function appendCoarseBounds(
     indexAccessor,
     edgePositionAccessor,
     edgeIndexAccessor,
+    minimum: deliveredMinimum,
+    maximum: deliveredMaximum,
   };
 }
 
@@ -603,6 +693,16 @@ export function compileSceneToGltf(
   if (coarseBounds && coarseBinaryUri === binaryUri) {
     throw new TypeError("Target and coarse glTF buffers must use different URIs.");
   }
+  if (options.spatialIndex === true && !coarseBounds) {
+    throw new TypeError("A spatial demand index requires coarse bounds and target chunks.");
+  }
+  const spatialBinaryUri = options.spatialBinaryUri ?? "spatial.bin";
+  if (
+    options.spatialIndex === true &&
+    new Set(["scene.gltf", binaryUri, coarseBinaryUri]).has(spatialBinaryUri)
+  ) {
+    throw new TypeError("The spatial index resource URI must be distinct.");
+  }
   if (scene.propertyValues !== undefined && options.propertyColumns === undefined) {
     throw new TypeError(
       "A scene with property value columns requires options.propertyColumns.",
@@ -614,7 +714,12 @@ export function compileSceneToGltf(
     ? buildPropertySidecar(scene, options.propertyColumns, propertiesBinaryUri)
     : undefined;
   if (propertySidecar) {
-    const uris = new Set([binaryUri, ...(coarseBounds ? [coarseBinaryUri] : []), "scene.gltf"]);
+    const uris = new Set([
+      binaryUri,
+      ...(coarseBounds ? [coarseBinaryUri] : []),
+      ...(options.spatialIndex === true ? [spatialBinaryUri] : []),
+      "scene.gltf",
+    ]);
     if (
       propertiesUri === propertiesBinaryUri ||
       uris.has(propertiesUri) ||
@@ -920,6 +1025,43 @@ export function compileSceneToGltf(
           priority,
         }))
     : [];
+  const spatialIndex = options.spatialIndex === true
+    ? (() => {
+        const chunkByPrototype = new Map<string, number>();
+        targetChunks.forEach((chunk, chunkIndex) => {
+          for (const prototypeId of chunk.prototypeIds) {
+            if (chunkByPrototype.has(prototypeId)) {
+              throw new RangeError(`Prototype ${prototypeId} belongs to more than one target chunk.`);
+            }
+            chunkByPrototype.set(prototypeId, chunkIndex);
+          }
+        });
+        const worldMatrices = occurrenceWorldMatrices(
+          occurrences,
+          sourceToGltfMatrix(scene.rootFrame.upAxis),
+          scaleToMeters,
+        );
+        const entries = occurrences.flatMap((occurrence) => {
+          const coarse = coarseGeometryByPrototype.get(occurrence.prototypeId);
+          const targetChunkIndex = chunkByPrototype.get(occurrence.prototypeId);
+          const nodeIndex = occurrenceIndexes.get(occurrence.id);
+          const world = worldMatrices.get(occurrence.id);
+          if (!coarse || targetChunkIndex === undefined || nodeIndex === undefined || !world) return [];
+          return [{
+            id: occurrence.id,
+            nodeIndex,
+            targetChunkIndex,
+            ...transformedBounds(world, coarse.minimum, coarse.maximum),
+          }];
+        });
+        return encodeSpatialDemandIndex(entries, {
+          ...(options.spatialLeafCapacity === undefined
+            ? {}
+            : { leafCapacity: options.spatialLeafCapacity }),
+        });
+      })()
+    : undefined;
+  const spatialBinaryDigest = spatialIndex ? sha256(spatialIndex.bytes) : undefined;
   const diagnostics = [...scene.diagnostics].sort((left, right) =>
     `${left.code}\u0000${left.sourceRef ?? ""}`.localeCompare(
       `${right.code}\u0000${right.sourceRef ?? ""}`,
@@ -954,6 +1096,16 @@ export function compileSceneToGltf(
                 targetBuffer: 0,
                 coarseBuffer: 1,
                 targetChunks,
+                ...(spatialIndex && spatialBinaryDigest
+                  ? {
+                      spatialIndex: {
+                        schemaVersion: spatialDemandIndexSchema,
+                        uri: spatialBinaryUri,
+                        byteLength: spatialIndex.bytes.byteLength,
+                        sha256: spatialBinaryDigest,
+                      },
+                    }
+                  : {}),
               },
             }
           : {}),
@@ -995,6 +1147,7 @@ export function compileSceneToGltf(
   const coarseBinaryDigest = coarseBinary ? sha256(coarseBinary) : undefined;
   const packageHash = createHash("sha256").update(json).update(binary);
   if (coarseBinary) packageHash.update(coarseBinary);
+  if (spatialIndex) packageHash.update(spatialIndex.bytes);
   if (propertySidecar) {
     packageHash.update(propertySidecar.jsonBytes).update(propertySidecar.binary);
   }
@@ -1062,6 +1215,16 @@ export function compileSceneToGltf(
               },
             ]
           : []),
+        ...(spatialIndex && spatialBinaryDigest
+          ? [
+              {
+                path: spatialBinaryUri,
+                mediaType: "application/octet-stream",
+                bytes: spatialIndex.bytes.byteLength,
+                sha256: spatialBinaryDigest,
+              },
+            ]
+          : []),
         ...(propertySidecar
           ? [
               {
@@ -1122,6 +1285,12 @@ export function compileSceneToGltf(
     json,
     binary,
     ...(coarseBinary ? { coarseBinary } : {}),
+    ...(spatialIndex
+      ? {
+          spatialBinary: spatialIndex.bytes,
+          spatialBinaryUri,
+        }
+      : {}),
     ...(propertySidecar
       ? {
           propertiesJson: propertySidecar.json,

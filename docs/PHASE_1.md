@@ -178,10 +178,12 @@ See `artifacts/phase1/README.md` for the compiled package,
 
 ## Not yet proven
 
-- Shape-preserving and screen-space LODs, spatial partitioning, compression,
+- Shape-preserving and screen-space LODs, spatial query scheduling and evidence,
+  compression,
   persistent cache tiers, and a general cache-aware eviction policy under a
-  bounded residency budget. The current camera policy ranks retained-coarse
-  chunk bounds and can only restore their shared fallback batch.
+  bounded residency budget. The optional ADR-0008 compiler sidecar and strict
+  runtime decoder exist, but the current camera policy still ranks
+  retained-coarse chunk bounds and can only restore their shared fallback batch.
 - Full material, mass, PMI, and domain-specific property schemas remain
   pending, and Studio search does not index property values (a deliberate
   Phase 1 limit — the sidecar is resolved per selected occurrence only).

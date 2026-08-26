@@ -70,6 +70,14 @@ primitive. It is not a general-purpose glTF loader. Unsupported profiles and
 layouts fail with a typed `CompiledGltfError` instead of silently dropping
 engineering data.
 
+The package boundary also recognizes the optional
+`extras.madi.progressive.spatialIndex` pointer and strictly decodes
+`naru.spatial-demand-index.1`. The decoder preserves float64 bounds and rejects
+invalid sizes, allocation limits, unreachable/cyclic nodes, duplicate
+occurrence ownership, and out-of-range glTF or target-chunk references before
+exposing query arrays. Studio does not yet fetch or query the index, so current
+camera scheduling still uses aggregate retained-coarse chunk bounds.
+
 Run `pnpm test` for package and committed-fixture regression coverage. The
 headed cross-engine path is recorded by `pnpm browser:matrix`; the focused
 large-coordinate path is recorded by `pnpm precision:evidence`.
