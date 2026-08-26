@@ -1,0 +1,63 @@
+{
+  "schemaVersion": "naru.spatial-ifc-browser-comparison.1",
+  "browser": {
+    "id": "chrome",
+    "engine": "Blink",
+    "version": "151.0.7922.174",
+    "headless": false,
+    "viewport": {
+      "width": 1320,
+      "height": 1000
+    }
+  },
+  "host": {
+    "platform": "darwin",
+    "architecture": "arm64"
+  },
+  "mode": "headed-single-run-diagnostic",
+  "compatibility": {
+    "capturedAt": "2026-08-26T12:44:00.366Z",
+    "packageDigest": "4f25e08d68db184fde0ab8ec0081db30f3bb83f580be0813ff11bb1a7df542ba",
+    "milestones": {
+      "hierarchyReadyMs": 438,
+      "coarseFrameMs": 578,
+      "readyMs": 20766
+    },
+    "targetChunkCount": 71,
+    "targetChunksReady": 71,
+    "targetSchedulerRequests": 71,
+    "targetRangeResponses": 71,
+    "spatialNodesVisited": 255,
+    "spatialLeavesVisible": 128,
+    "spatialOccurrencesTested": 5152,
+    "spatialCandidateChunks": 71,
+    "decodeTime": "289.6 ms",
+    "residentDecodedBytes": 54326976,
+    "residentGpuBytes": 54327980,
+    "selectedObjectId": "689",
+    "propertyEntryCount": 18
+  },
+  "spatialLeafAnchor": {
+    "capturedAt": "2026-08-26T12:44:48.386Z",
+    "packageDigest": "12ec70e83edc5ce917552abdf12fc81b9c70d9999cf35da61b9833f675bf379e",
+    "milestones": {
+      "hierarchyReadyMs": 432,
+      "coarseFrameMs": 569,
+      "readyMs": 19346
+    },
+    "targetChunkCount": 66,
+    "targetChunksReady": 66,
+    "targetSchedulerRequests": 66,
+    "targetRangeResponses": 66,
+    "spatialNodesVisited": 255,
+    "spatialLeavesVisible": 128,
+    "spatialOccurrencesTested": 5152,
+    "spatialCandidateChunks": 66,
+    "decodeTime": "279.6 ms",
+    "residentDecodedBytes": 54326976,
+    "residentGpuBytes": 54327980,
+    "selectedObjectId": "689",
+    "propertyEntryCount": 18
+  },
+  "consoleIssues": []
+}

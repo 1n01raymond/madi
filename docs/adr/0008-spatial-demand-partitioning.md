@@ -124,7 +124,14 @@ obsolete-Range cancellation in headed Chrome and Firefox. The transform-only
 scenario does not close the nested/ADR-0005 or Digital Hub/sixty5 gates below.
 The compiler unit oracle additionally proves deterministic leaf-anchor packing,
 coarse-byte stability, one payload per prototype, and a localized 2→1 chunk
-reduction; it is not real-model requested-byte evidence.
+reduction. The Digital Hub offline leaf census proves 71→66 chunks,
+1,458→882 leaf chunk references, and 637,689,824→383,315,164 summed off-view
+bytes with unchanged coarse output. It is not a headed camera trace, and the
+single compile timings are diagnostic rather than performance evidence.
+Separate headed Chrome full-fit runs also reproduce 71→66 target Ranges with
+equal resident bytes, picking, and property resolution and no console issues.
+Because each is one run and the fitted view visits every leaf, they do not close
+the localized-query or repeated first-frame timing gates.
 
 - every renderable occurrence is indexed exactly once, every leaf bound contains
   its references, and BVH queries have no false negatives against a brute-force

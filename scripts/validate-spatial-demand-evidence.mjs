@@ -6,6 +6,12 @@ import { fileURLToPath } from "node:url";
 const repositoryRoot = fileURLToPath(new URL("..", import.meta.url));
 const directory = resolve(repositoryRoot, "artifacts/spatial-demand");
 const evidence = JSON.parse(await readFile(resolve(directory, "evidence.json"), "utf8"));
+const packing = JSON.parse(
+  await readFile(resolve(directory, "digital-hub-packing.json"), "utf8"),
+);
+const digitalHubBrowser = JSON.parse(
+  await readFile(resolve(directory, "digital-hub-browser-comparison.json"), "utf8"),
+);
 const assert = (condition, message) => {
   if (!condition) throw new Error(`[spatial-demand] ${message}`);
 };
@@ -82,7 +88,147 @@ for (const result of evidence.results) {
   assert(sha256(screenshot) === result.screenshot.sha256, `${result.browser} screenshot digest changed.`);
 }
 
+assert(
+  packing.schemaVersion === "naru.spatial-ifc-packing-evidence.1",
+  "Unexpected Digital Hub packing schema.",
+);
+assert(
+  packing.source.sourceDigest ===
+    "sha256:89fae107a28fc5f86494cb9ce788f62789b9f4ace46c42b1bb7a9e54265d4785",
+  "Digital Hub source identity changed.",
+);
+assert(
+  packing.options.targetChunkByteBudget === 524288 && packing.options.leafCapacity === 64,
+  "Digital Hub packing options changed.",
+);
+assert(
+  packing.counts.compiledPrototypeCount === 3383 &&
+    packing.counts.renderableOccurrenceCount === 5152,
+  "Digital Hub packing counts changed.",
+);
+assert(
+  packing.deterministicRepeat === true && packing.coarseByteIdentical === true,
+  "Digital Hub packing invariants were not proven.",
+);
+assert(
+  packing.khronosValidation.version === "2.0.0-dev.3.10" &&
+    packing.khronosValidation.compatibility.errors === 0 &&
+    packing.khronosValidation.compatibility.warnings === 0 &&
+    packing.khronosValidation.spatialLeafAnchor.errors === 0 &&
+    packing.khronosValidation.spatialLeafAnchor.warnings === 0,
+  "Digital Hub packing failed Khronos validation.",
+);
+const compatibility = packing.compatibility;
+const leafAnchor = packing.spatialLeafAnchor;
+for (const [label, result] of [["compatibility", compatibility], ["leaf-anchor", leafAnchor]]) {
+  assert(
+    Number.isFinite(result.compileMilliseconds) && result.compileMilliseconds > 0,
+    `${label} compile timing is invalid.`,
+  );
+  assert(
+    result.targetBytes === 35962344 && result.coarseBytes === 3085296,
+    `${label} geometry byte counts changed.`,
+  );
+  assert(result.leafMetrics.leafCount === 128, `${label} leaf count changed.`);
+}
+assert(
+  compatibility.packageDigest ===
+    "4f25e08d68db184fde0ab8ec0081db30f3bb83f580be0813ff11bb1a7df542ba" &&
+    compatibility.targetChunkCount === 71 &&
+    compatibility.spatialBytes === 65472 &&
+    compatibility.spatialSha256 ===
+      "7e3be0ef5af702997f32fab7b62c1ed62d42078739ce38bab52b95742981041a",
+  "Compatibility package identity changed.",
+);
+assert(
+  leafAnchor.packageDigest ===
+    "12ec70e83edc5ce917552abdf12fc81b9c70d9999cf35da61b9833f675bf379e" &&
+    leafAnchor.targetChunkCount === 66 &&
+    leafAnchor.spatialBytes === 63168 &&
+    leafAnchor.spatialSha256 ===
+      "86a09efba36818abc22a39be7167a2bf0ac9ade766196870b8f71a160e8fed24",
+  "Leaf-anchor package identity changed.",
+);
+assert(
+  compatibility.leafMetrics.summedUsefulBytes === 72874844 &&
+    leafAnchor.leafMetrics.summedUsefulBytes === compatibility.leafMetrics.summedUsefulBytes,
+  "Leaf useful-byte census changed.",
+);
+assert(
+  compatibility.leafMetrics.summedOffViewBytes === 637689824 &&
+    leafAnchor.leafMetrics.summedOffViewBytes === 383315164 &&
+    leafAnchor.leafMetrics.summedOffViewBytes <
+      compatibility.leafMetrics.summedOffViewBytes,
+  "Leaf-anchor packing did not reduce off-view bytes.",
+);
+assert(
+  compatibility.leafMetrics.chunksPerLeaf.p50 === 12 &&
+    compatibility.leafMetrics.chunksPerLeaf.p95 === 16 &&
+    leafAnchor.leafMetrics.chunksPerLeaf.p50 === 7 &&
+    leafAnchor.leafMetrics.chunksPerLeaf.p95 === 12,
+  "Digital Hub chunks-per-leaf distribution changed.",
+);
+assert(
+  digitalHubBrowser.schemaVersion === "naru.spatial-ifc-browser-comparison.1" &&
+    digitalHubBrowser.mode === "headed-single-run-diagnostic",
+  "Unexpected Digital Hub browser-comparison schema.",
+);
+assert(
+  digitalHubBrowser.browser.id === "chrome" &&
+    digitalHubBrowser.browser.version === "151.0.7922.174" &&
+    digitalHubBrowser.browser.headless === false &&
+    digitalHubBrowser.host.platform === "darwin" &&
+    digitalHubBrowser.host.architecture === "arm64",
+  "Digital Hub browser host changed.",
+);
+const compatibilityBrowser = digitalHubBrowser.compatibility;
+const leafAnchorBrowser = digitalHubBrowser.spatialLeafAnchor;
+assert(
+  compatibilityBrowser.packageDigest === compatibility.packageDigest &&
+    leafAnchorBrowser.packageDigest === leafAnchor.packageDigest,
+  "Digital Hub browser/package identity changed.",
+);
+assert(
+  compatibilityBrowser.milestones.hierarchyReadyMs === 438 &&
+    compatibilityBrowser.milestones.coarseFrameMs === 578 &&
+    compatibilityBrowser.milestones.readyMs === 20766 &&
+    leafAnchorBrowser.milestones.hierarchyReadyMs === 432 &&
+    leafAnchorBrowser.milestones.coarseFrameMs === 569 &&
+    leafAnchorBrowser.milestones.readyMs === 19346,
+  "Digital Hub browser milestones changed.",
+);
+assert(
+  compatibilityBrowser.targetChunkCount === 71 &&
+    compatibilityBrowser.targetChunksReady === 71 &&
+    compatibilityBrowser.targetRangeResponses === 71 &&
+    leafAnchorBrowser.targetChunkCount === 66 &&
+    leafAnchorBrowser.targetChunksReady === 66 &&
+    leafAnchorBrowser.targetRangeResponses === 66,
+  "Digital Hub browser Range census changed.",
+);
+assert(
+  compatibilityBrowser.spatialNodesVisited === 255 &&
+    compatibilityBrowser.spatialLeavesVisible === 128 &&
+    compatibilityBrowser.spatialOccurrencesTested === 5152 &&
+    compatibilityBrowser.spatialCandidateChunks === 71 &&
+    leafAnchorBrowser.spatialNodesVisited === 255 &&
+    leafAnchorBrowser.spatialLeavesVisible === 128 &&
+    leafAnchorBrowser.spatialOccurrencesTested === 5152 &&
+    leafAnchorBrowser.spatialCandidateChunks === 66,
+  "Digital Hub initial-fit spatial census changed.",
+);
+assert(
+  compatibilityBrowser.residentDecodedBytes === leafAnchorBrowser.residentDecodedBytes &&
+    compatibilityBrowser.residentGpuBytes === leafAnchorBrowser.residentGpuBytes &&
+    compatibilityBrowser.selectedObjectId === leafAnchorBrowser.selectedObjectId &&
+    compatibilityBrowser.propertyEntryCount === 18 &&
+    leafAnchorBrowser.propertyEntryCount === 18 &&
+    digitalHubBrowser.consoleIssues.length === 0,
+  "Digital Hub browser identity, residency, or property parity changed.",
+);
+
 console.log(
   "[spatial-demand] verified headed Chrome/Firefox: " +
-    "localized 1/3 chunks and 1/10 occurrences with obsolete Range cancellation",
+    "localized 1/3 chunks and 1/10 occurrences with obsolete Range cancellation; " +
+    "Digital Hub leaf-anchor off-view bytes 637689824 -> 383315164 and headed Ranges 71 -> 66",
 );

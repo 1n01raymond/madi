@@ -1,0 +1,130 @@
+{
+  "schemaVersion": "naru.spatial-ifc-packing-evidence.1",
+  "source": {
+    "sceneId": "scene:ifc-federation:89fae107a28fc5f8",
+    "revisionId": "revision:ifc-federation:89fae107a28fc5f8",
+    "sourceDigest": "sha256:89fae107a28fc5f86494cb9ce788f62789b9f4ace46c42b1bb7a9e54265d4785",
+    "structureBytes": 29843019,
+    "structureSha256": "e05447c772c4a3fce6a9e0fa9c5e020e20686e8d9d8c620fbbe14fbdffee6380",
+    "geometryBytes": 41692760,
+    "geometrySha256": "f478be1e3653a15fb262fc430e8cc06e7cafbfd1e36dcfdb9bc5a3c2ee7d92f7"
+  },
+  "options": {
+    "targetChunkByteBudget": 524288,
+    "leafCapacity": 64
+  },
+  "counts": {
+    "prototypeCount": 3405,
+    "compiledPrototypeCount": 3383,
+    "occurrenceCount": 13681,
+    "renderableOccurrenceCount": 5152,
+    "gltfNodeCount": 13682,
+    "gltfMeshCount": 6766,
+    "materialCount": 88,
+    "triangleCount": 913520,
+    "edgeSegmentCount": 1042392,
+    "targetChunkCount": 66
+  },
+  "compatibility": {
+    "compileMilliseconds": 590.4867920000002,
+    "packageDigest": "4f25e08d68db184fde0ab8ec0081db30f3bb83f580be0813ff11bb1a7df542ba",
+    "targetChunkCount": 71,
+    "targetBytes": 35962344,
+    "coarseBytes": 3085296,
+    "spatialBytes": 65472,
+    "spatialSha256": "7e3be0ef5af702997f32fab7b62c1ed62d42078739ce38bab52b95742981041a",
+    "leafMetrics": {
+      "leafCount": 128,
+      "chunkReferences": 1458,
+      "chunksPerLeaf": {
+        "minimum": 3,
+        "p50": 12,
+        "p95": 16,
+        "maximum": 18,
+        "mean": 11.390625
+      },
+      "requestedBytesPerLeaf": {
+        "minimum": 1484392,
+        "p50": 5651564,
+        "p95": 8145684,
+        "maximum": 10282064,
+        "mean": 5551286.46875
+      },
+      "usefulBytesPerLeaf": {
+        "minimum": 78448,
+        "p50": 267756,
+        "p95": 2622272,
+        "maximum": 3640992,
+        "mean": 569334.71875
+      },
+      "offViewBytesPerLeaf": {
+        "minimum": 681096,
+        "p50": 5116532,
+        "p95": 7122752,
+        "maximum": 7818572,
+        "mean": 4981951.75
+      },
+      "summedRequestedBytes": 710564668,
+      "summedUsefulBytes": 72874844,
+      "summedOffViewBytes": 637689824
+    }
+  },
+  "spatialLeafAnchor": {
+    "compileMilliseconds": 629.5553329999998,
+    "packageDigest": "12ec70e83edc5ce917552abdf12fc81b9c70d9999cf35da61b9833f675bf379e",
+    "targetChunkCount": 66,
+    "targetBytes": 35962344,
+    "coarseBytes": 3085296,
+    "spatialBytes": 63168,
+    "spatialSha256": "86a09efba36818abc22a39be7167a2bf0ac9ade766196870b8f71a160e8fed24",
+    "leafMetrics": {
+      "leafCount": 128,
+      "chunkReferences": 882,
+      "chunksPerLeaf": {
+        "minimum": 2,
+        "p50": 7,
+        "p95": 12,
+        "maximum": 13,
+        "mean": 6.890625
+      },
+      "requestedBytesPerLeaf": {
+        "minimum": 678016,
+        "p50": 3503260,
+        "p95": 6095496,
+        "maximum": 7912504,
+        "mean": 3563984.4375
+      },
+      "usefulBytesPerLeaf": {
+        "minimum": 78448,
+        "p50": 267756,
+        "p95": 2622272,
+        "maximum": 3640992,
+        "mean": 569334.71875
+      },
+      "offViewBytesPerLeaf": {
+        "minimum": 378540,
+        "p50": 2900044,
+        "p95": 5412024,
+        "maximum": 5899468,
+        "mean": 2994649.71875
+      },
+      "summedRequestedBytes": 456190008,
+      "summedUsefulBytes": 72874844,
+      "summedOffViewBytes": 383315164
+    }
+  },
+  "khronosValidation": {
+    "validator": "Khronos glTF Validator",
+    "version": "2.0.0-dev.3.10",
+    "compatibility": {
+      "errors": 0,
+      "warnings": 0
+    },
+    "spatialLeafAnchor": {
+      "errors": 0,
+      "warnings": 0
+    }
+  },
+  "deterministicRepeat": true,
+  "coarseByteIdentical": true
+}

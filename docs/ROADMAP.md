@@ -121,8 +121,12 @@ active float64 transforms and direct chunk occurrence tables once, so target
 Range decodes no longer traverse the document node graph; transferred result
 buffers remain isolated from that prepared state. The compiler also has an
 opt-in `spatial-leaf-anchor-v1` payload order that feeds deterministic BVH leaf
-co-demand back into the existing byte-budget coalescer; its focused 2→1 chunk
-oracle passes, while Digital Hub/sixty5 requested-byte evidence remains pending.
+co-demand back into the existing byte-budget coalescer. Its focused 2→1 chunk
+oracle and Digital Hub offline census pass: 71→66 chunks, 1,458→882 leaf chunk
+references, and 39.89% less summed leaf off-view payload. Localized headed
+Digital Hub and sixty5 evidence remain pending. A headed Digital Hub full-fit integration pair
+does pass with 71→66 target Ranges and equal residency, picking, and property
+results; localized real-model navigation and repeated timing remain pending.
 
 The camera-relative precision path is now decision evidence for ADR-0005. A
 project-owned 0.25 mm gap is retained at a 10,000 km offset with
