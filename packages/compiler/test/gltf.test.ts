@@ -193,6 +193,17 @@ describe("Phase 1 glTF compiler slice", () => {
     expect(compiled.report.counts.targetChunkCount).toBe(3);
   });
 
+  it("can compact scene.gltf without changing its document", async () => {
+    const pretty = await compileEvidence({ coarseBounds: true });
+    const compact = await compileEvidence({ coarseBounds: true, compactJson: true });
+
+    expect(JSON.parse(compact.json)).toEqual(JSON.parse(pretty.json));
+    expect(compact.json.length).toBeLessThan(pretty.json.length);
+    expect(compact.json).not.toContain("\n  \"");
+    expect(compact.report.options.jsonFormatting).toBe("compact");
+    expect(pretty.report.options.jsonFormatting).toBeUndefined();
+  });
+
   it("adds a deterministic spatial sidecar without changing target or coarse geometry", async () => {
     const baseline = await compileEvidence({ coarseBounds: true });
     const first = await compileEvidence({

@@ -9,6 +9,9 @@ const evidence = JSON.parse(await readFile(resolve(directory, "evidence.json"), 
 const packing = JSON.parse(
   await readFile(resolve(directory, "digital-hub-packing.json"), "utf8"),
 );
+const sixty5Packing = JSON.parse(
+  await readFile(resolve(directory, "sixty5-packing.json"), "utf8"),
+);
 const digitalHubBrowser = JSON.parse(
   await readFile(resolve(directory, "digital-hub-browser-comparison.json"), "utf8"),
 );
@@ -227,8 +230,96 @@ assert(
   "Digital Hub browser identity, residency, or property parity changed.",
 );
 
+assert(
+  sixty5Packing.schemaVersion === "naru.spatial-ifc-packing-evidence.1",
+  "Unexpected sixty5 packing schema.",
+);
+assert(
+  sixty5Packing.source.sourceDigest ===
+    "sha256:e334c6a9295a0adbf8ffbb15c61ea05c47b0135a319ee370f853bb9a36d21dec" &&
+    sixty5Packing.source.structureBytes === 378291460 &&
+    sixty5Packing.source.structureSha256 ===
+      "5c01010cfeaaf5aa581ae4a2d8433f9a9dd63e5a4e05743e067a8a6e81c5d6a0" &&
+    sixty5Packing.source.geometryBytes === 201062984 &&
+    sixty5Packing.source.geometrySha256 ===
+      "79086ade4a471433dba1b4605b3fe3e404dcd74c180a9124c84204f2616b9879",
+  "sixty5 split.4 source identity changed.",
+);
+assert(
+  sixty5Packing.options.targetChunkByteBudget === 524288 &&
+    sixty5Packing.options.leafCapacity === 64 &&
+    sixty5Packing.options.jsonFormatting === "compact" &&
+    sixty5Packing.runtime.sequentialCompilation === true &&
+    sixty5Packing.runtime.heapSizeLimitBytes === 8791261184,
+  "sixty5 recording options changed.",
+);
+assert(
+  sixty5Packing.counts.compiledPrototypeCount === 42435 &&
+    sixty5Packing.counts.renderableOccurrenceCount === 78173 &&
+    sixty5Packing.counts.triangleCount === 4866380 &&
+    sixty5Packing.counts.edgeSegmentCount === 3771758,
+  "sixty5 packing counts changed.",
+);
+assert(
+  sixty5Packing.deterministicRepeat === true &&
+    sixty5Packing.coarseByteIdentical === true &&
+    sixty5Packing.khronosValidation.version === "2.0.0-dev.3.10" &&
+    sixty5Packing.khronosValidation.compatibility.errors === 0 &&
+    sixty5Packing.khronosValidation.compatibility.warnings === 0 &&
+    sixty5Packing.khronosValidation.spatialLeafAnchor.errors === 0 &&
+    sixty5Packing.khronosValidation.spatialLeafAnchor.warnings === 0,
+  "sixty5 package invariants or Khronos validation changed.",
+);
+const sixty5Compatibility = sixty5Packing.compatibility;
+const sixty5LeafAnchor = sixty5Packing.spatialLeafAnchor;
+assert(
+  sixty5Compatibility.packageDigest ===
+    "72ee778e92fdce1f786f541366bd3912885711f099714ef9ccdae05301a945fa" &&
+    sixty5Compatibility.targetChunkCount === 324 &&
+    sixty5Compatibility.targetBytes === 169752048 &&
+    sixty5Compatibility.coarseBytes === 38700720 &&
+    sixty5Compatibility.spatialBytes === 1056956 &&
+    sixty5Compatibility.spatialSha256 ===
+      "3b1c5853853ecda980242a19e0041671b874f405ed44445a4a4501cda3875b30",
+  "sixty5 compatibility package identity changed.",
+);
+assert(
+  sixty5LeafAnchor.packageDigest ===
+    "01a7f3fa61f953a57764fcb0a0b0f5ceddf8b56f4ddee8332a5a456492a8afb7" &&
+    sixty5LeafAnchor.targetChunkCount === 325 &&
+    sixty5LeafAnchor.targetBytes === 169752048 &&
+    sixty5LeafAnchor.coarseBytes === 38700720 &&
+    sixty5LeafAnchor.spatialBytes === 1005272 &&
+    sixty5LeafAnchor.spatialSha256 ===
+      "f1d40a5d1a1b9cf9afa05932a479639a4016289c30bef34ac37aa90d864d0fa1",
+  "sixty5 leaf-anchor package identity changed.",
+);
+assert(
+  sixty5Compatibility.leafMetrics.leafCount === 2048 &&
+    sixty5LeafAnchor.leafMetrics.leafCount === 2048 &&
+    sixty5Compatibility.leafMetrics.chunkReferences === 34167 &&
+    sixty5LeafAnchor.leafMetrics.chunkReferences === 21246 &&
+    sixty5Compatibility.leafMetrics.chunksPerLeaf.p50 === 17 &&
+    sixty5Compatibility.leafMetrics.chunksPerLeaf.p95 === 23 &&
+    sixty5LeafAnchor.leafMetrics.chunksPerLeaf.p50 === 10 &&
+    sixty5LeafAnchor.leafMetrics.chunksPerLeaf.p95 === 17,
+  "sixty5 leaf chunk distribution changed.",
+);
+assert(
+  sixty5Compatibility.leafMetrics.requestedBytesPerLeaf.p50 === 8376048 &&
+    sixty5Compatibility.leafMetrics.requestedBytesPerLeaf.p95 === 11771888 &&
+    sixty5LeafAnchor.leafMetrics.requestedBytesPerLeaf.p50 === 5341128 &&
+    sixty5LeafAnchor.leafMetrics.requestedBytesPerLeaf.p95 === 8578584 &&
+    sixty5Compatibility.leafMetrics.summedUsefulBytes === 1245817332 &&
+    sixty5LeafAnchor.leafMetrics.summedUsefulBytes === 1245817332 &&
+    sixty5Compatibility.leafMetrics.summedOffViewBytes === 15972343228 &&
+    sixty5LeafAnchor.leafMetrics.summedOffViewBytes === 9668115064,
+  "sixty5 requested/useful/off-view byte census changed.",
+);
+
 console.log(
   "[spatial-demand] verified headed Chrome/Firefox: " +
     "localized 1/3 chunks and 1/10 occurrences with obsolete Range cancellation; " +
-    "Digital Hub leaf-anchor off-view bytes 637689824 -> 383315164 and headed Ranges 71 -> 66",
+    "Digital Hub leaf-anchor off-view bytes 637689824 -> 383315164 and headed Ranges 71 -> 66; " +
+    "sixty5 off-view bytes 15972343228 -> 9668115064",
 );

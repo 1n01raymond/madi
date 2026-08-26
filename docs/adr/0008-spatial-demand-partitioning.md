@@ -89,8 +89,8 @@ The first spatial contract must also remain optional so historical
   does not make an all-visible scene spatially selective.
 - A leaf can still demand unrelated bytes when the compatibility payload order
   mixes prototypes with different spatial demand. The leaf-anchor experiment
-  reduces this on a focused oracle, but multi-site prototypes and real-model
-  requested/off-view bytes still require evidence.
+  reduces this on the focused oracle, Digital Hub, and sixty5, but localized
+  camera traces still need to show the same benefit through the browser.
 - Large or scene-spanning occurrences can overlap many queries and need explicit
   isolation/tuning in the builder.
 - Compiler and runtime must maintain a versioned binary decoder and strict
@@ -131,7 +131,17 @@ single compile timings are diagnostic rather than performance evidence.
 Separate headed Chrome full-fit runs also reproduce 71→66 target Ranges with
 equal resident bytes, picking, and property resolution and no console issues.
 Because each is one run and the fitted view visits every leaf, they do not close
-the localized-query or repeated first-frame timing gates.
+the localized-query or repeated first-frame timing gates. The current split.4
+sixty5 census covers 2,048 leaves and reduces leaf chunk references
+34,167→21,246 and summed off-view bytes
+15,972,343,228→9,668,115,064 (−39.47%), with unchanged useful, target, and
+coarse bytes and a byte-identical repeat. Its compatibility/leaf-anchor global
+chunk counts are 324/325, so the decision depends on local demand rather than a
+claim that total request count always falls. Both compact-JSON packages pass
+Khronos validation with zero errors and warnings. Headed sixty5 attempts reach
+a 6.2–6.5-second coarse frame but stall during the second target admission;
+because those runs were interrupted, they are a named browser blocker rather
+than committed evidence.
 
 - every renderable occurrence is indexed exactly once, every leaf bound contains
   its references, and BVH queries have no false negatives against a brute-force
@@ -150,9 +160,10 @@ the localized-query or repeated first-frame timing gates.
   decoded/GPU budgets remain intact;
 - headed Chrome and Firefox reproduce the request sequence with no console
   warnings or errors, while legacy packages retain their current behavior;
-- Digital Hub and then sixty5 publish index size/build cost, query p50/p95,
-  candidate reduction, compatibility-order versus leaf-anchor requested/off-view
-  bytes, and first-frame impact. The
+- Digital Hub and sixty5 publish index size/build cost and
+  compatibility-order versus leaf-anchor requested/off-view bytes; localized
+  headed traces must still publish query p50/p95, candidate reduction, and
+  first-frame impact. The
   sixty5 three-run first-coarse-frame p95 must remain at or below 15 seconds on
   the same recorded host class.
 

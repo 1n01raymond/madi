@@ -434,7 +434,9 @@ occurrence tables once for the scene session. Coarse and whole-target decodes
 reuse the prepared renderable list; each target Range decode visits only its
 indexed occurrences rather than traversing the active node graph again. Result
 transforms are cloned at the Worker transfer boundary so transferring one
-decoded chunk cannot detach the prepared session state. For the
+decoded chunk cannot detach the prepared session state. Prototype-local surface
+bounds are also cached once; each occurrence transforms eight AABB corners
+instead of every vertex, conservatively matching the coarse-bounds contract. For the
 compiler's `prototype-aabb-v1` tier, it collapses prototype AABBs into one
 canonical box batch with contiguous occurrence transforms and target-mesh
 indexes. Target prototype ranges are fetched and decoded one at a time;
@@ -452,10 +454,13 @@ chunks referenced by visible leaves. Cold chunks remain in the residency order
 but are not fetched. Orbit, pan, zoom, fit, and resize re-query demand and
 re-rank resident eviction priority; if the hottest nonresident chunk changes,
 the old HTTP Range and Worker decode are aborted before its replacement is
-admitted. Spatial draw clusters, screen-space LOD, persistent cache tiers, and
+admitted. A budget-blocked demand signature prevents an unchanged camera update
+from refetching the same rejected chunk; selection resume or a changed demand
+order reopens scheduling. Spatial draw clusters, screen-space LOD, persistent cache tiers, and
 a broader eviction policy remain unimplemented. The focused transform-only
 record under `artifacts/spatial-demand/` passes in headed Chrome and Firefox;
-real-model evidence is still pending, so ADR-0008 remains Proposed.
+Digital Hub and sixty5 also pass offline co-demand censuses, while localized
+real-model browser evidence is still pending, so ADR-0008 remains Proposed.
 
 The reproducible browser smoke command is `pnpm browser:matrix`. Its committed
 Phase 1 run covers Chrome/Blink and Firefox/Gecko with the same compiled package,

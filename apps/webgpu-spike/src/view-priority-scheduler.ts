@@ -331,6 +331,7 @@ export class CameraTargetScheduler<Result> {
   private rerun = false;
   private paused = false;
   private stopped = false;
+  private blockedDemandSignature: string | undefined;
 
   constructor(index: TargetChunkRanker, hooks: TargetSchedulerHooks<Result>) {
     this.index = index;
@@ -339,9 +340,13 @@ export class CameraTargetScheduler<Result> {
 
   update(frame: CameraRelativeFrame): void {
     if (this.stopped) return;
-    this.ranked = this.index.rank(frame);
+    const ranked = this.index.rank(frame);
+    const demandSignature = this.signature(ranked);
+    this.ranked = ranked;
     this.rankCursor = 0;
     this.hooks.reprioritize?.(this.ranked);
+    if (this.blockedDemandSignature === demandSignature) return;
+    this.blockedDemandSignature = undefined;
     const next = this.ranked.find(
       ({ chunk, demanded }) => demanded && !this.hooks.isResident(chunk),
     );
@@ -369,6 +374,7 @@ export class CameraTargetScheduler<Result> {
   resume(): void {
     if (this.stopped || !this.paused) return;
     this.paused = false;
+    this.blockedDemandSignature = undefined;
     this.rankCursor = 0;
     this.ensureRun();
   }
@@ -382,6 +388,7 @@ export class CameraTargetScheduler<Result> {
     this.stopped = true;
     this.active?.controller.abort();
     this.active = undefined;
+    this.blockedDemandSignature = undefined;
   }
 
   private ensureRun(): void {
@@ -437,7 +444,10 @@ export class CameraTargetScheduler<Result> {
           chunkId: ranked.chunk.id,
           viewPriority: current.viewPriority,
         });
-        if (!admitted) return;
+        if (!admitted) {
+          this.blockedDemandSignature = this.signature(this.ranked);
+          return;
+        }
       } catch (error) {
         if (!isAbortError(error)) {
           this.hooks.onError(error);
@@ -447,5 +457,12 @@ export class CameraTargetScheduler<Result> {
         if (this.active?.controller === controller) this.active = undefined;
       }
     }
+  }
+
+  private signature(ranked: readonly RankedTargetChunk[]): string {
+    return ranked
+      .filter(({ demanded }) => demanded)
+      .map(({ chunk }) => chunk.id)
+      .join("\u0000");
   }
 }

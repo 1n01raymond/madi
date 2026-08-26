@@ -40,8 +40,8 @@ ranges, query counts, screenshot hashes, and package digests are in
 `evidence.json`.
 
 Remaining ADR-0008 gates include the ADR-0005 large-coordinate/nested-transform
-package cross-check, headed Digital Hub navigation, sixty5, and real-model query
-and first-frame distributions. This record does not accept ADR-0008 by itself.
+package cross-check, localized headed real-model navigation, and real-model query
+and repeated first-frame distributions. This record does not accept ADR-0008 by itself.
 
 ## Digital Hub payload-packing census
 
@@ -94,5 +94,49 @@ node scripts/record-ifc-browser-evidence.mjs \
   --report output/ifc/digital-hub-spatial-analysis/spatial-leaf-anchor/build-report.json \
   --output output/browser-digital-hub-spatial-leaf-anchor
 node scripts/record-spatial-ifc-browser-comparison.mjs
+pnpm spatial:check
+```
+
+## sixty5 real-large payload-packing census
+
+`sixty5-packing.json` repeats the same offline contract on the qualified
+seven-discipline IFC2X3 federation after current split.4 explicit-edge
+extraction: 188,319 occurrences, 42,435 compiled prototypes, 4,866,380 unique
+triangles, and 3,771,758 explicit edge segments. Its compact `scene.gltf`
+serialization is declared because the pretty-printed document exceeds V8's
+single-string limit; compact JSON changes no glTF data model value.
+
+| Metric | Compatibility order | Leaf-anchor order |
+|---|---:|---:|
+| Target chunks | 324 | 325 |
+| Chunk references across leaves | 34,167 | 21,246 |
+| Chunks per leaf p50 / p95 | 17 / 23 | 10 / 17 |
+| Requested bytes per leaf p50 / p95 | 8,376,048 / 11,771,888 | 5,341,128 / 8,578,584 |
+| Summed off-view bytes across leaves | 15,972,343,228 | 9,668,115,064 |
+
+The global chunk count increases by one, but the 2,048-leaf co-demand census
+reduces chunk references by 37.82%, requested bytes p50 by 36.23%, p95 by
+27.13%, and summed off-view bytes by 39.47%. Useful bytes, target bytes, and
+`coarse.bin` remain identical. A repeated leaf-anchor compile is
+byte-identical, and both packages pass Khronos glTF Validator 2.0.0-dev.3.10
+with zero errors and warnings. The two 6.98/7.66-second compile observations
+are single-run diagnostics, not benchmark claims.
+
+The recorder compiles packages sequentially and was run with an 8 GiB V8 heap;
+that execution contract is embedded in the record. Headed Chrome attempts
+reproduced a 6.2–6.5-second coarse frame under a 40 MiB residency setting, but
+the second target admission did not complete in a reviewable interval. Those
+aborted runs are not committed evidence. They identify real-large browser GPU
+reconciliation/visibility as the next gate rather than proving a timing or
+parity result.
+
+Reproduce after retaining the current sixty5 split Scene IR:
+
+```sh
+node --max-old-space-size=8192 --expose-gc \
+  scripts/record-spatial-ifc-packing-evidence.mjs \
+  --input output/ifc/sixty5-spatial-packed \
+  --output output/ifc/sixty5-spatial-analysis \
+  --compact-json
 pnpm spatial:check
 ```

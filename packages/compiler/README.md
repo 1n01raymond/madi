@@ -56,8 +56,13 @@ For IFC experiments, `--spatial-payload-order` opts into
 `spatial-leaf-anchor-v1`: prototypes are ordered by the deterministic BVH leaf
 where they occur most often before the existing byte-budget coalescer runs.
 This changes target byte ranges without duplicating geometry; historical output
-remains byte-identical when the flag is absent. Real-model packing records are
-still pending, so ADR-0008 remains Proposed.
+remains byte-identical when the flag is absent. Digital Hub and sixty5 offline
+packing records now pass, while localized headed traces remain pending, so
+ADR-0008 remains Proposed. Current explicit-edge sixty5 packages also pass
+`--compact-json`: it removes insignificant `scene.gltf` whitespace and records
+`jsonFormatting: "compact"` in the build report, avoiding V8's single-string
+limit without changing the parsed glTF document. Pretty output remains the
+default and historical digests remain unchanged.
 Its expanded Scene IR is temporary and is deleted after the package passes
 validation. `phase1:compile:evidence` retains the historical small Scene IR
 regression path without coarse output. The evidence check validates both plus the

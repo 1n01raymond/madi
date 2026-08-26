@@ -129,7 +129,7 @@ direct WebGPU renderer. The Phase 0 Scene IR JSON is no longer a browser input.
 | Chunk-local decode | The session Worker prepares active float64 transforms and direct chunk-to-occurrence tables once; a transfer-detachment regression proves repeated single-occurrence Range decodes do not read the node graph again | Passed in `packages/runtime-webgpu/test/compiled-gltf.test.ts` |
 | View-priority scheduling | Recorder holds the initial fastener Range, pans the camera, observes its Worker cancellation, and receives the newly hottest mounting-plate Range before releasing the obsolete response | Passed in headed Chrome and Firefox |
 | Spatial demand scheduling | Optional `spatial.bin` is authenticated once; a transform-only localized oracle reduces 19→9/7 visited nodes, 10→1 tested occurrences, and 3→1 candidate chunks while cancelling the obsolete Range before its body is delivered | Passed in headed Chrome and Firefox; real-model gates remain |
-| Spatial payload packing | Opt-in `spatial-leaf-anchor-v1` orders prototype blocks by dominant deterministic BVH leaf before byte-budget coalescing; Digital Hub reduces target chunks 71→66, leaf chunk references 1,458→882, and summed leaf off-view bytes 637,689,824→383,315,164 with unchanged coarse bytes; separate headed Chrome runs deliver 71→66 Ranges with identical residency/picking/property results | Focused oracle, Digital Hub offline census, and headed full-fit integration passed; localized real-model trace and sixty5 remain |
+| Spatial payload packing | Opt-in `spatial-leaf-anchor-v1` orders prototype blocks by dominant deterministic BVH leaf before byte-budget coalescing; Digital Hub reduces chunks 71→66, leaf references 1,458→882, and off-view bytes 637,689,824→383,315,164; explicit-edge sixty5 changes global chunks 324→325 but reduces leaf references 34,167→21,246 and off-view bytes 15,972,343,228→9,668,115,064, with unchanged useful/target/coarse bytes and Khronos-clean deterministic repeats | Focused oracle plus Digital Hub and sixty5 offline censuses passed; Digital Hub headed full-fit integration passed; localized real-model browser traces remain |
 | In-flight cancellation | A second browser run cancels while range 2/3 is pending, observes `Scene load cancelled.`, and proves that range 3/3 is never requested | Passed in headed Chrome and Firefox |
 | Browser conformance | Headed Chrome/Blink and Firefox/Gecko emit no console warnings or errors | Passed by `pnpm browser:matrix` |
 | Safari capability | Real Safari 18.6 loads 87 hierarchy records under default settings, then reports that WebGPU is unavailable because `navigator.gpu` is absent | Graceful unsupported-browser result; rendering conformance not yet available |
@@ -181,13 +181,14 @@ See `artifacts/phase1/README.md` for the compiled package,
 
 ## Not yet proven
 
-- Shape-preserving and screen-space LODs, spatial scheduler real-model evidence,
+- Shape-preserving and screen-space LODs, spatial scheduler localized real-model browser evidence,
   compression,
   persistent cache tiers, and a general cache-aware eviction policy under a
   bounded residency budget. The optional ADR-0008 compiler sidecar, strict
-  decoder, and frustum-demand scheduler have focused headed evidence, while
-  real-model evidence is still pending; historical packages continue through
-  the retained-coarse chunk-bounds fallback.
+  decoder, and frustum-demand scheduler have focused headed evidence plus
+  Digital Hub/sixty5 offline co-demand censuses, while localized headed traces
+  are still pending; historical packages continue through the retained-coarse
+  chunk-bounds fallback.
 - Full material, mass, PMI, and domain-specific property schemas remain
   pending, and Studio search does not index property values (a deliberate
   Phase 1 limit — the sidecar is resolved per selected occurrence only).
@@ -219,10 +220,13 @@ transforms and direct chunk occurrence membership once, eliminating node-graph
 walks from later target Range decodes. The optional ADR-0008 path now queries a
 compiler-built occurrence BVH and requests only visible-leaf target demand.
 Opt-in leaf-anchor payload ordering now feeds that BVH partition back into the
-existing byte-budget coalescer. The Digital Hub leaf census passes with 39.89%
-less off-view payload; the next increment is headed Digital Hub navigation and
-then sixty5 requested/off-view-byte and first-frame evidence, followed by
-persistent cache tiers and screen-space priority.
+existing byte-budget coalescer. The Digital Hub and sixty5 leaf censuses pass
+with 39.89% and 39.47% less off-view payload respectively. The real-large run
+also exposed a headed browser blocker after the coarse frame: target admission
+does not complete promptly even though the same chunk decodes offline in
+milliseconds. The next increment is therefore bounded delta GPU
+reconciliation/visibility followed by localized Digital Hub and sixty5 traces,
+then persistent cache tiers and screen-space priority.
 
 On the compiler side the structure document now streams record by record,
 property keys and key combinations are interned once at scene level, and the

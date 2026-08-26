@@ -234,4 +234,49 @@ describe("view-prioritized target scheduling", () => {
 
     expect(requested).toEqual(["near"]);
   });
+
+  it("does not retry an unchanged demand set after residency blocks admission", async () => {
+    const chunks = [chunk("near", 0, 0), chunk("far", 1, 1)];
+    const index: { rank: () => readonly {
+      chunk: CompiledTargetChunk;
+      viewPriority: number;
+      visibleBounds: boolean;
+      screenDistanceSquared: number;
+      demanded: boolean;
+    }[] } = {
+      rank: () => chunks.map((entry, viewPriority) => ({
+        chunk: entry,
+        viewPriority,
+        visibleBounds: true,
+        screenDistanceSquared: viewPriority,
+        demanded: true,
+      })),
+    };
+    const requested: string[] = [];
+    const resident = new Set<string>();
+    const scheduler = new CameraTargetScheduler(index, {
+      isResident: (entry) => resident.has(entry.id),
+      load: async (entry) => {
+        requested.push(entry.id);
+        return entry.id;
+      },
+      admit: (entry) => {
+        if (entry.id === "far") return false;
+        resident.add(entry.id);
+        return true;
+      },
+      onError: (error) => {
+        throw error;
+      },
+    });
+
+    scheduler.update({ viewProjection, origin: [0, 0, 0] });
+    await scheduler.whenIdle();
+    scheduler.update({ viewProjection, origin: [0, 0, 0] });
+    scheduler.update({ viewProjection, origin: [0, 0, 0] });
+    await scheduler.whenIdle();
+
+    expect(requested).toEqual(["near", "far"]);
+    scheduler.stop();
+  });
 });

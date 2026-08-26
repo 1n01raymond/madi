@@ -429,8 +429,17 @@ where most of its occurrences land, and then applies the same byte budget.
 The project-owned four-prototype oracle changes one localized co-demand set
 from two target chunks to one while preserving one payload per prototype,
 coarse bytes, and deterministic output. The default prototype-ID order remains
-byte-identical. Real-model requested/off-view-byte evidence and
-shape-preserving LOD remain pending.
+byte-identical. Digital Hub and sixty5 now reproduce lower leaf requested and
+off-view bytes; localized headed traces and shape-preserving LOD remain
+pending.
+
+Pretty-printed `scene.gltf` remains the deterministic default. IFC compilation
+may explicitly pass `--compact-json` (API: `compactJson: true`) when a
+real-large document would exceed V8's single-string limit with insignificant
+whitespace. The build report records `jsonFormatting: "compact"`; parsed glTF
+values, buffer bytes, and accessor semantics are unchanged. The current
+explicit-edge sixty5 record uses this path, while historical package digests
+remain unchanged when the option is absent.
 
 The public `naru compile` entry now accepts a local AP242 or AP214 Part 21 file,
 invokes the isolated OCCT adapter, verifies schema and source digest parity,

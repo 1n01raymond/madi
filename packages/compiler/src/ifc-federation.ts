@@ -42,6 +42,8 @@ export interface IfcFederationCompileOptions {
   readonly spatialIndex?: boolean;
   readonly spatialLeafCapacity?: number;
   readonly spatialPayloadOrder?: boolean;
+  /** Omit insignificant scene.gltf whitespace for real-large packages. */
+  readonly compactJson?: boolean;
   readonly environment?: NodeJS.ProcessEnv;
 }
 
@@ -312,6 +314,7 @@ export async function compileIfcFederation(
         ? {}
         : { spatialLeafCapacity: options.spatialLeafCapacity }),
       ...(options.spatialPayloadOrder === true ? { spatialPayloadOrder: true } : {}),
+      ...(options.compactJson === true ? { compactJson: true } : {}),
       // The package carries the adapter's value column file byte-verbatim as
       // a lazy property sidecar; the compiler still never materializes a
       // property value.

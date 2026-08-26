@@ -1267,7 +1267,7 @@ export function compileSceneToGltf(
       },
     },
   };
-  const json = `${JSON.stringify(document, null, 2)}\n`;
+  const json = `${JSON.stringify(document, null, options.compactJson === true ? undefined : 2)}\n`;
   const jsonDigest = sha256(json);
   const binaryDigest = sha256(binary);
   const coarseBinaryDigest = coarseBinary ? sha256(coarseBinary) : undefined;
@@ -1297,6 +1297,7 @@ export function compileSceneToGltf(
       ...(propertySidecar ? { propertiesUri, propertiesBinaryUri } : {}),
       coordinateSystem: "right-handed-y-up-meters",
       geometryEncoding: "gltf-f32",
+      ...(options.compactJson === true ? { jsonFormatting: "compact" as const } : {}),
       ...(coarseBinary ? { progressiveRepresentation: "prototype-aabb-v1" as const } : {}),
       ...(coarseBinary
         ? {

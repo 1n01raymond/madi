@@ -101,6 +101,8 @@ export interface CompilerBuildReport {
     readonly propertiesBinaryUri?: string;
     readonly coordinateSystem: "right-handed-y-up-meters";
     readonly geometryEncoding: "gltf-f32";
+    /** JSON whitespace policy. Omitted for the historical pretty-printed default. */
+    readonly jsonFormatting?: "compact";
     readonly progressiveRepresentation?: "prototype-aabb-v1";
     readonly targetChunking?: "prototype-range-v1" | "coalesced-prototype-range-v1";
     /** Maximum bytes per progressive target request when coalescing is enabled. */
@@ -168,6 +170,8 @@ export interface CompileGltfOptions {
   readonly coarseBounds?: boolean;
   readonly coarseBinaryUri?: string;
   readonly generator?: string;
+  /** Omit insignificant JSON whitespace for packages near V8's string limit. */
+  readonly compactJson?: boolean;
   /**
    * Coalesce adjacent prototype ranges into deterministic HTTP Range requests.
    * Omit this to retain one target chunk per prototype for compatibility.

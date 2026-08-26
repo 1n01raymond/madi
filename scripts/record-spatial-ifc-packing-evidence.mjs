@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { isAbsolute, relative, resolve, sep } from "node:path";
+import { getHeapStatistics } from "node:v8";
 
 import { validateBytes, version as gltfValidatorVersion } from "gltf-validator";
 
@@ -50,6 +51,7 @@ const leafCapacity = Number(argument("--leaf-capacity", "64"));
 if (!Number.isSafeInteger(leafCapacity) || leafCapacity < 1 || leafCapacity > 65_535) {
   throw new TypeError("--leaf-capacity must be an integer from 1 through 65535.");
 }
+const compactJson = process.argv.includes("--compact-json");
 
 const sha256 = (bytes) => createHash("sha256").update(bytes).digest("hex");
 const percentile = (values, fraction) => {
@@ -73,6 +75,7 @@ const [structure, geometry, properties] = await Promise.all([
 const scene = hydrateIfcSceneSplit(structure.value, geometry, properties);
 const commonOptions = {
   coarseBounds: true,
+  ...(compactJson ? { compactJson: true } : {}),
   generator: "MADI compiler 0.0.0 / IfcOpenShell federation slice",
   propertyColumns: properties,
 };
@@ -82,43 +85,17 @@ const compile = (options) => {
   return { result, milliseconds: performance.now() - startedAt };
 };
 
-const prototypeRanges = compile({});
-const compatibility = compile({
-  targetChunkByteBudget,
-  spatialIndex: true,
-  spatialLeafCapacity: leafCapacity,
-});
-const packed = compile({
-  targetChunkByteBudget,
-  spatialIndex: true,
-  spatialLeafCapacity: leafCapacity,
-  spatialPayloadOrder: true,
-});
-const packedRepeat = compile({
-  targetChunkByteBudget,
-  spatialIndex: true,
-  spatialLeafCapacity: leafCapacity,
-  spatialPayloadOrder: true,
-});
-if (
-  packedRepeat.result.json !== packed.result.json ||
-  !Buffer.from(packedRepeat.result.binary).equals(packed.result.binary) ||
-  !Buffer.from(packedRepeat.result.coarseBinary).equals(packed.result.coarseBinary) ||
-  !Buffer.from(packedRepeat.result.spatialBinary).equals(packed.result.spatialBinary)
-) {
-  throw new Error("Repeated spatial payload compilation was not byte-identical.");
-}
-if (!Buffer.from(compatibility.result.coarseBinary).equals(packed.result.coarseBinary)) {
-  throw new Error("Spatial payload ordering changed coarse.bin.");
-}
-
 const progressiveFor = (compiled) => compiled.document.extras.madi.progressive;
-const prototypeBytes = new Map(
-  progressiveFor(prototypeRanges.result).targetChunks.map((chunk) => [
-    chunk.prototypeId,
-    chunk.byteLength,
-  ]),
-);
+const prototypeBytes = (() => {
+  const prototypeRanges = compile({});
+  return new Map(
+    progressiveFor(prototypeRanges.result).targetChunks.map((chunk) => [
+      chunk.prototypeId,
+      chunk.byteLength,
+    ]),
+  );
+})();
+global.gc?.();
 const leafMetrics = (compiled) => {
   const progressive = progressiveFor(compiled);
   const chunks = progressive.targetChunks;
@@ -209,10 +186,63 @@ const validatePackage = async (compiled) => {
     warnings: report.issues.numWarnings,
   };
 };
-const [compatibilityValidation, packedValidation] = await Promise.all([
-  validatePackage(compatibility.result),
-  validatePackage(packed.result),
-]);
+await mkdir(outputDirectory, { recursive: true });
+
+const {
+  validation: compatibilityValidation,
+  summary: compatibilitySummary,
+  coarseSha256: compatibilityCoarseSha256,
+} = await (async () => {
+  const compatibility = compile({
+    targetChunkByteBudget,
+    spatialIndex: true,
+    spatialLeafCapacity: leafCapacity,
+  });
+  const validation = await validatePackage(compatibility.result);
+  const summary = summarize(compatibility);
+  const coarseSha256 = sha256(compatibility.result.coarseBinary);
+  await writeCompiledPackage(compatibility.result, resolve(outputDirectory, "compatibility"));
+  return { validation, summary, coarseSha256 };
+})();
+global.gc?.();
+
+const {
+  validation: packedValidation,
+  summary: packedSummary,
+  counts: packedCounts,
+  identity: packedIdentity,
+} = await (async () => {
+  const packed = compile({
+    targetChunkByteBudget,
+    spatialIndex: true,
+    spatialLeafCapacity: leafCapacity,
+    spatialPayloadOrder: true,
+  });
+  const validation = await validatePackage(packed.result);
+  const summary = summarize(packed);
+  const counts = packed.result.report.counts;
+  const identity = JSON.stringify(packed.result.report.output);
+  if (compatibilityCoarseSha256 !== sha256(packed.result.coarseBinary)) {
+    throw new Error("Spatial payload ordering changed coarse.bin.");
+  }
+  await writeCompiledPackage(packed.result, resolve(outputDirectory, "spatial-leaf-anchor"));
+  return { validation, summary, counts, identity };
+})();
+global.gc?.();
+
+{
+  const packedRepeat = compile({
+    targetChunkByteBudget,
+    spatialIndex: true,
+    spatialLeafCapacity: leafCapacity,
+    spatialPayloadOrder: true,
+  });
+  if (JSON.stringify(packedRepeat.result.report.output) !== packedIdentity) {
+    throw new Error("Repeated spatial payload compilation was not byte-identical.");
+  }
+}
+global.gc?.();
+
 const evidence = {
   schemaVersion: "naru.spatial-ifc-packing-evidence.1",
   source: {
@@ -224,10 +254,23 @@ const evidence = {
     geometryBytes: geometry.byteLength,
     geometrySha256: sha256(geometry),
   },
-  options: { targetChunkByteBudget, leafCapacity },
-  counts: packed.result.report.counts,
-  compatibility: summarize(compatibility),
-  spatialLeafAnchor: summarize(packed),
+  options: {
+    targetChunkByteBudget,
+    leafCapacity,
+    ...(compactJson ? { jsonFormatting: "compact" } : {}),
+  },
+  ...(compactJson
+    ? {
+        runtime: {
+          node: process.version,
+          heapSizeLimitBytes: getHeapStatistics().heap_size_limit,
+          sequentialCompilation: true,
+        },
+      }
+    : {}),
+  counts: packedCounts,
+  compatibility: compatibilitySummary,
+  spatialLeafAnchor: packedSummary,
   khronosValidation: {
     validator: "Khronos glTF Validator",
     version: gltfValidatorVersion(),
@@ -238,11 +281,6 @@ const evidence = {
   coarseByteIdentical: true,
 };
 
-await mkdir(outputDirectory, { recursive: true });
-await Promise.all([
-  writeCompiledPackage(compatibility.result, resolve(outputDirectory, "compatibility")),
-  writeCompiledPackage(packed.result, resolve(outputDirectory, "spatial-leaf-anchor")),
-]);
 await writeFile(
   resolve(outputDirectory, "evidence.json"),
   `${JSON.stringify(evidence, null, 2)}\n`,

@@ -75,7 +75,9 @@ surface batches. One session Worker validates the glTF document, composes its
 float64 world transforms, and indexes target-chunk occurrence membership once.
 Every later Range decode reuses that state and visits only the selected chunk's
 renderable occurrences; transferred results clone only their occurrence
-transforms so the prepared state remains attached. IFC compilation coalesces adjacent prototype ranges
+transforms so the prepared state remains attached. Prototype-local surface
+bounds are cached once and only eight corners are transformed per occurrence,
+rather than rescanning every vertex. IFC compilation coalesces adjacent prototype ranges
 into deterministic requests (512 KiB by default), while the existing
 `prototype-aabb-v1` tier is collapsed at runtime into one canonical box batch
 with contiguous occurrence transforms. The browser enforces separate 64 MiB
@@ -86,11 +88,14 @@ so visibility intent and stable object IDs survive every batch update. Add
 pan, zoom, fit, and resize rank visible retained-coarse chunk bounds by distance
 from the view center. If the hottest nonresident chunk
 changes, the scheduler aborts the obsolete HTTP Range and Worker decode before
-starting its replacement; the same order re-ranks eviction priority. Packages
+starting its replacement; the same order re-ranks eviction priority. An
+unchanged camera does not retry a demand signature already blocked by the
+residency budget. Packages
 with `naru.spatial-demand-index.1` instead authenticate `spatial.bin`, query
 only frustum-visible BVH leaves, and keep cold chunks out of the fetch queue.
-The focused headed record is `artifacts/spatial-demand/`. Persistent cache
-tiers, spatial draw clusters, screen-space LOD, and real-model indexed evidence
+The focused headed record plus Digital Hub and sixty5 offline co-demand
+censuses are under `artifacts/spatial-demand/`. Persistent cache tiers, spatial
+draw clusters, screen-space LOD, and localized real-model headed evidence
 remain Phase 2 work.
 
 ## Open another compiled scene

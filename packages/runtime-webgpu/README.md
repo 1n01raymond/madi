@@ -19,8 +19,9 @@ Direct WebGPU rendering and the Phase 1 compiled glTF runtime boundary.
 - `prepareCompiledGltfDecoder(value)` validates and traverses the active document
   once, retaining float64 world transforms plus direct target-chunk occurrence
   tables. Its `decode(binary, { targetChunkId })` path touches only the selected
-  chunk's occurrences; `decodeCompiledGltf` remains the one-shot compatibility
-  wrapper.
+  chunk's occurrences and transforms cached prototype AABB corners rather than
+  every vertex for every occurrence; `decodeCompiledGltf` remains the one-shot
+  compatibility wrapper.
 - `compiledSceneTransferables(scene)` lists owned typed-array buffers for a
   zero-copy Worker-to-main-thread transfer.
 - `NaruWebGpuRenderer` uploads those batches and renders surfaces, edges, and an
@@ -88,8 +89,9 @@ camera-relative frustum traversal, requests only the deduplicated chunks of
 visible leaves, and keeps non-demanded chunks cold for eviction. Packages
 without the optional index retain aggregate retained-coarse chunk scheduling.
 The indexed browser path has unit/oracle coverage plus the focused headed
-Chrome/Firefox record under `artifacts/spatial-demand/`; real-model evidence is
-still pending.
+Chrome/Firefox record under `artifacts/spatial-demand/`. Digital Hub and
+sixty5 pass offline co-demand censuses; localized real-model headed evidence
+is still pending.
 
 Run `pnpm test` for package and committed-fixture regression coverage. The
 headed cross-engine path is recorded by `pnpm browser:matrix`; the focused

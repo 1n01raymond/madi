@@ -204,6 +204,7 @@ await writeFile(option("--report"), JSON.stringify({
         spatialIndex: true,
         spatialLeafCapacity: 2,
         spatialPayloadOrder: true,
+        compactJson: true,
       });
 
       expect(result.sources[0]).toMatchObject({
@@ -247,6 +248,7 @@ await writeFile(option("--report"), JSON.stringify({
         "spatial-leaf-anchor-v1",
       );
       expect(result.report.options.targetPayloadOrder).toBe("spatial-leaf-anchor-v1");
+      expect(result.report.options.jsonFormatting).toBe("compact");
       // The package carries the property sidecar: a pointer in the glTF
       // extras, the parsed document, and the adapter column file verbatim.
       expect(gltf.extras.madi.properties).toMatchObject({

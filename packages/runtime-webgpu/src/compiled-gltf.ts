@@ -792,10 +792,26 @@ function surfaceColor(
 
 interface DecodedSurfaceGeometry {
   readonly surfaceVertices: Float32Array;
-  readonly surfacePositions: Float32Array;
   readonly surfaceIndices: Uint32Array;
+  readonly bounds: SceneBounds;
   readonly color: readonly [number, number, number, number];
   readonly primitiveIndex: number;
+}
+
+function positionBounds(positions: Float32Array): SceneBounds {
+  const minimum: [number, number, number] = [Infinity, Infinity, Infinity];
+  const maximum: [number, number, number] = [-Infinity, -Infinity, -Infinity];
+  for (let offset = 0; offset < positions.length; offset += 3) {
+    for (let axis = 0; axis < 3; axis += 1) {
+      const value = positions[offset + axis];
+      if (value === undefined || !Number.isFinite(value)) {
+        throw new CompiledGltfError("INVALID_BINARY", "Surface position is not finite.");
+      }
+      minimum[axis] = Math.min(minimum[axis] ?? Infinity, value);
+      maximum[axis] = Math.max(maximum[axis] ?? -Infinity, value);
+    }
+  }
+  return { min: minimum, max: maximum };
 }
 
 interface DecodedMeshGeometry {
@@ -890,8 +906,8 @@ function decodeMesh(
     }
     return {
       surfaceVertices: interleaveSurface(positions, normals),
-      surfacePositions: positions,
       surfaceIndices,
+      bounds: positionBounds(positions),
       color: surfaceColor(document, surface),
       primitiveIndex,
     };
@@ -1175,16 +1191,19 @@ function decodePreparedCompiledGltf(
     });
 
     for (const surface of geometry.surfaces) {
-      for (let offset = 0; offset < surface.surfacePositions.length; offset += 3) {
-        const point = transformPoint(
-          worldTransform,
-          surface.surfacePositions[offset] ?? 0,
-          surface.surfacePositions[offset + 1] ?? 0,
-          surface.surfacePositions[offset + 2] ?? 0,
-        );
-        for (let axis = 0; axis < 3; axis += 1) {
-          boundsMin[axis] = Math.min(boundsMin[axis] ?? Infinity, point[axis] ?? 0);
-          boundsMax[axis] = Math.max(boundsMax[axis] ?? -Infinity, point[axis] ?? 0);
+      // A target chunk can contain thousands of instances of one prototype.
+      // Transform its cached local AABB corners instead of every vertex for
+      // every occurrence. The result is conservative under rotation and
+      // exactly matches the compiler's coarse-bounds representation.
+      for (const x of [surface.bounds.min[0], surface.bounds.max[0]]) {
+        for (const y of [surface.bounds.min[1], surface.bounds.max[1]]) {
+          for (const z of [surface.bounds.min[2], surface.bounds.max[2]]) {
+            const point = transformPoint(worldTransform, x, y, z);
+            for (let axis = 0; axis < 3; axis += 1) {
+              boundsMin[axis] = Math.min(boundsMin[axis] ?? Infinity, point[axis] ?? 0);
+              boundsMax[axis] = Math.max(boundsMax[axis] ?? -Infinity, point[axis] ?? 0);
+            }
+          }
         }
       }
     }

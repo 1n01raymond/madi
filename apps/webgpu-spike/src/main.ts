@@ -748,6 +748,7 @@ async function loadScene(source: SceneSource): Promise<boolean> {
       document.documentElement.dataset.targetSchedulerChunk = event.chunkId;
       document.documentElement.dataset.targetSchedulerPriority = String(event.viewPriority);
       if (event.type === "request") {
+        schedulerBlocked = false;
         schedulerRequests += 1;
         document.documentElement.dataset.targetSchedulerRequests = String(schedulerRequests);
       } else if (event.type === "cancel") {
@@ -805,7 +806,6 @@ async function loadScene(source: SceneSource): Promise<boolean> {
           return true;
         },
         reprioritize: (ranked: readonly RankedTargetChunk[]) => {
-          schedulerBlocked = false;
           document.documentElement.dataset.targetSchedulerOrder = ranked
             .map(({ chunk }) => chunk.id)
             .join(",");

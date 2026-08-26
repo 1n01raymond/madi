@@ -115,16 +115,18 @@ authenticate it after the coarse frame, query only frustum-intersecting BVH
 leaves, demand their deduplicated target chunks, and retain all other chunks as
 a cold eviction tail. A focused transform-only scenario now reproduces 3→1
 candidate chunks with obsolete-Range cancellation in headed Chrome and Firefox
-(`artifacts/spatial-demand/`). Digital Hub/sixty5 evidence, screen-space policy,
-and persistent cache tiers remain pending. The session Worker now also prepares
+(`artifacts/spatial-demand/`). Localized real-model browser evidence,
+screen-space policy, and persistent cache tiers remain pending. The session Worker now also prepares
 active float64 transforms and direct chunk occurrence tables once, so target
 Range decodes no longer traverse the document node graph; transferred result
 buffers remain isolated from that prepared state. The compiler also has an
 opt-in `spatial-leaf-anchor-v1` payload order that feeds deterministic BVH leaf
 co-demand back into the existing byte-budget coalescer. Its focused 2→1 chunk
 oracle and Digital Hub offline census pass: 71→66 chunks, 1,458→882 leaf chunk
-references, and 39.89% less summed leaf off-view payload. Localized headed
-Digital Hub and sixty5 evidence remain pending. A headed Digital Hub full-fit integration pair
+references, and 39.89% less summed leaf off-view payload. The current explicit-edge
+sixty5 census independently records 34,167→21,246 leaf chunk references and
+39.47% less summed off-view payload while global chunks change 324→325.
+Localized headed Digital Hub and sixty5 evidence remain pending. A headed Digital Hub full-fit integration pair
 does pass with 71→66 target Ranges and equal residency, picking, and property
 results; localized real-model navigation and repeated timing remain pending.
 
