@@ -3,8 +3,10 @@ import { readFile } from "node:fs/promises";
 import { describe, expect, it } from "vitest";
 
 import {
+  compiledSceneTransferables,
   decodeCompiledGltf,
   inspectCompiledHierarchy,
+  prepareCompiledGltfDecoder,
   validateGpuScene,
 } from "../src/index.js";
 import type { CompiledGltfError } from "../src/index.js";
@@ -202,6 +204,51 @@ describe("compiled glTF runtime boundary", () => {
       chunkScenes.flatMap(({ objectEvidence }) => objectEvidence.map(({ objectId }) => objectId))
         .sort((left, right) => left - right),
     ).toEqual(target.objectEvidence.map(({ objectId }) => objectId));
+  });
+
+  it("prepares active transforms once and decodes repeated target ranges chunk-locally", async () => {
+    const [json, targetBytes, coarseBytes] = await Promise.all([
+      readFile(new URL("scene.gltf", progressiveUrl), "utf8").then(JSON.parse) as Promise<{
+        nodes: unknown[];
+      }>,
+      readFile(new URL("scene.bin", progressiveUrl)),
+      readFile(new URL("coarse.bin", progressiveUrl)),
+    ]);
+    let nodeReads = 0;
+    json.nodes = new Proxy(json.nodes, {
+      get(target, property, receiver) {
+        if (typeof property === "string" && /^\d+$/u.test(property)) nodeReads += 1;
+        return Reflect.get(target, property, receiver) as unknown;
+      },
+    });
+
+    const prepared = prepareCompiledGltfDecoder(json);
+    const readsAfterPrepare = nodeReads;
+    const chunk = prepared.hierarchy.targetChunks.find(({ occurrenceCount }) =>
+      occurrenceCount === 1
+    );
+    if (!chunk) throw new TypeError("Progressive fixture has no single-occurrence chunk.");
+    const range = (): ArrayBuffer => Uint8Array.from(
+      targetBytes.subarray(chunk.byteOffset, chunk.byteOffset + chunk.byteLength),
+    ).buffer;
+
+    const coarse = prepared.decode(Uint8Array.from(coarseBytes).buffer, {
+      representation: "coarse",
+    });
+    expect(coarse.summary.partOccurrences).toBe(10);
+    structuredClone(coarse, { transfer: compiledSceneTransferables(coarse) });
+
+    const first = prepared.decode(range(), { targetChunkId: chunk.id });
+    expect(prepared.activeNodeCount).toBe(prepared.hierarchy.nodeCount);
+    expect(prepared.renderableNodeCount).toBe(10);
+    expect(first.summary.partOccurrences).toBe(1);
+    expect(nodeReads).toBe(readsAfterPrepare);
+
+    structuredClone(first, { transfer: compiledSceneTransferables(first) });
+    const second = prepared.decode(range(), { targetChunkId: chunk.id });
+    expect(second.objectEvidence).toEqual(first.objectEvidence);
+    expect(second.gpuScene.batches[0]?.instances[0]?.transform.byteLength).toBe(128);
+    expect(nodeReads).toBe(readsAfterPrepare);
   });
 
   it("surfaces semantic references on hierarchy entries and pick evidence", async () => {

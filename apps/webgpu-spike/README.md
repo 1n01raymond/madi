@@ -71,8 +71,11 @@ pnpm dev
 ```
 
 The runtime preserves one pickable occurrence ID across material-separated
-surface batches. One session Worker parses the glTF document once and reuses it
-for every geometry request. IFC compilation coalesces adjacent prototype ranges
+surface batches. One session Worker validates the glTF document, composes its
+float64 world transforms, and indexes target-chunk occurrence membership once.
+Every later Range decode reuses that state and visits only the selected chunk's
+renderable occurrences; transferred results clone only their occurrence
+transforms so the prepared state remains attached. IFC compilation coalesces adjacent prototype ranges
 into deterministic requests (512 KiB by default), while the existing
 `prototype-aabb-v1` tier is collapsed at runtime into one canonical box batch
 with contiguous occurrence transforms. The browser enforces separate 64 MiB

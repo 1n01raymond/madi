@@ -50,7 +50,12 @@ The first spatial contract must also remain optional so historical
 8. Keep packages without the sidecar on the current coarse-chunk-bound scheduler.
    A missing optional index is not an error; a declared index with an invalid
    digest, schema, bound, count, or reference is rejected before allocation.
-9. In the first indexed slice, `scene.bin`, `coarse.bin`, target chunk ownership,
+9. Prepare the active glTF graph once per Worker session: retain composed
+   float64 occurrence transforms and direct target-chunk occurrence tables.
+   A target Range decode must use that table instead of traversing all active
+   nodes. Transferable decode results own transform copies so one completed
+   transfer cannot detach the prepared state needed by later chunks.
+10. In the first indexed slice, `scene.bin`, `coarse.bin`, target chunk ownership,
    and glTF rendering semantics stay unchanged. Reordering prototype payloads by
    measured spatial co-demand is a later schema/profile decision. Spatial draw
    clustering is later still and requires geometry resources to be separable

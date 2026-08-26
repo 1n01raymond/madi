@@ -126,6 +126,7 @@ direct WebGPU renderer. The Phase 0 Scene IR JSON is no longer a browser input.
 | Scene opening | HTTP(S) glTF URLs are shareable through `?scene=`; a validated local `.gltf` plus all declared `.bin` resources load entirely client-side and decode their `File` objects in the Worker without a binary network request | Passed by source unit tests and the Chrome/Firefox browser matrix |
 | Useful frame before target | Recorder holds the first target Range response, captures a 12-triangle/12-edge shared coarse frame, then releases all ranges and observes 2,088 resident triangles/193 resident edges including the retained shared fallback | Passed in headed Chrome and Firefox |
 | Mixed-residency frame | Recorder releases only the first 31.7 KiB range and captures 8 detailed fasteners at 368 resident triangles/49 resident edges before completing the remaining ranges | Passed in headed Chrome and Firefox |
+| Chunk-local decode | The session Worker prepares active float64 transforms and direct chunk-to-occurrence tables once; a transfer-detachment regression proves repeated single-occurrence Range decodes do not read the node graph again | Passed in `packages/runtime-webgpu/test/compiled-gltf.test.ts` |
 | View-priority scheduling | Recorder holds the initial fastener Range, pans the camera, observes its Worker cancellation, and receives the newly hottest mounting-plate Range before releasing the obsolete response | Passed in headed Chrome and Firefox |
 | Spatial demand scheduling | Optional `spatial.bin` is authenticated once; a transform-only localized oracle reduces 19→9/7 visited nodes, 10→1 tested occurrences, and 3→1 candidate chunks while cancelling the obsolete Range before its body is delivered | Passed in headed Chrome and Firefox; real-model gates remain |
 | In-flight cancellation | A second browser run cancels while range 2/3 is pending, observes `Scene load cancelled.`, and proves that range 3/3 is never requested | Passed in headed Chrome and Firefox |
@@ -183,7 +184,7 @@ See `artifacts/phase1/README.md` for the compiled package,
   compression,
   persistent cache tiers, and a general cache-aware eviction policy under a
   bounded residency budget. The optional ADR-0008 compiler sidecar, strict
-  decoder, and frustum-demand scheduler exist, while committed headed and
+  decoder, and frustum-demand scheduler have focused headed evidence, while
   real-model evidence is still pending; historical packages continue through
   the retained-coarse chunk-bounds fallback.
 - Full material, mass, PMI, and domain-specific property schemas remain
@@ -212,7 +213,9 @@ and the browser reconciles only changed GPU batches under fixed 64 MiB decoded
 and GPU admission caps. A selected target now pins its detail and evicts colder
 target groups to their retained coarse fallbacks. Camera navigation now
 re-ranks retained-coarse chunk bounds, cancels obsolete Range/Worker
-work, and updates eviction priority. The optional ADR-0008 path now queries a
+work, and updates eviction priority. The persistent Worker now prepares active
+transforms and direct chunk occurrence membership once, eliminating node-graph
+walks from later target Range decodes. The optional ADR-0008 path now queries a
 compiler-built occurrence BVH and requests only visible-leaf target demand;
 the next increment is its headed/real-model evidence, followed by persistent
 cache tiers and screen-space priority.

@@ -428,8 +428,13 @@ batches, and renders per-occurrence transforms, source colors, explicit CAD
 edges, an isometric bounds fit, and integer object picking. Selecting an
 occurrence resolves its glTF node and revision-local OCCT edge references.
 Visibility, navigation, clipping, hierarchy inspection, and local/URL package
-opening are implemented. One persistent geometry Worker owns the parsed glTF
-for the scene session and reuses it across coarse and target decodes. For the
+opening are implemented. One persistent geometry Worker validates the glTF,
+composes active-node float64 transforms, and builds direct target-chunk
+occurrence tables once for the scene session. Coarse and whole-target decodes
+reuse the prepared renderable list; each target Range decode visits only its
+indexed occurrences rather than traversing the active node graph again. Result
+transforms are cloned at the Worker transfer boundary so transferring one
+decoded chunk cannot detach the prepared session state. For the
 compiler's `prototype-aabb-v1` tier, it collapses prototype AABBs into one
 canonical box batch with contiguous occurrence transforms and target-mesh
 indexes. Target prototype ranges are fetched and decoded one at a time;

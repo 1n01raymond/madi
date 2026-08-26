@@ -250,7 +250,11 @@ async function recordBrowser(definition) {
       (localized.snapshot.targetSchedulerDemand ?? "").split(",").filter(Boolean),
     );
     releaseNavigation();
-    await page.locator("#status[data-state='ready']").waitFor({ timeout: 15_000 });
+    await page.waitForFunction(
+      () => document.documentElement.dataset.targetReady === "spatial-idle",
+      undefined,
+      { timeout: 15_000 },
+    );
     const finalSnapshot = await dataset(page);
     const requestedChunks = targetRanges.map((range) => rangeToChunk.get(range));
     const screenshotName =

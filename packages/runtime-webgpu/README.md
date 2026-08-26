@@ -16,6 +16,11 @@ Direct WebGPU rendering and the Phase 1 compiled glTF runtime boundary.
   external-buffer accessor ranges,
   decodes surface and explicit-edge streams, composes node transforms, preserves
   picking identity, and groups nodes by shared mesh.
+- `prepareCompiledGltfDecoder(value)` validates and traverses the active document
+  once, retaining float64 world transforms plus direct target-chunk occurrence
+  tables. Its `decode(binary, { targetChunkId })` path touches only the selected
+  chunk's occurrences; `decodeCompiledGltf` remains the one-shot compatibility
+  wrapper.
 - `compiledSceneTransferables(scene)` lists owned typed-array buffers for a
   zero-copy Worker-to-main-thread transfer.
 - `NaruWebGpuRenderer` uploads those batches and renders surfaces, edges, and an
@@ -57,7 +62,10 @@ package with separate target and coarse external buffers. The progressive slice
 uses `extras.madi.coarseMesh` and preserves node-derived object IDs while the
 renderer replaces prototype AABBs with target meshes. When target chunk metadata
 is present, `targetChunkId` decodes only one declared byte range and its mesh
-occurrences. The browser requests those ranges sequentially, displays each
+occurrences. The session Worker prepares document transforms and chunk
+membership once, then reuses that state across coarse and target decodes. Each
+result receives its own transform arrays so zero-copy transfer cannot detach
+the prepared state. The browser requests those ranges sequentially, displays each
 promotion before requesting the next, and falls back safely when a host returns
 the complete buffer with HTTP 200. The Studio builds retained-coarse chunk
 bounds once, ranks them in the current camera, keeps one Range/decode active at

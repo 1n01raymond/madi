@@ -18,6 +18,7 @@ export {
   decodeCompiledGltf,
   inspectCompiledHierarchy,
   parseCompiledGltf,
+  prepareCompiledGltfDecoder,
 } from "./compiled-gltf.js";
 export {
   decodeSpatialDemandIndex,
@@ -45,6 +46,7 @@ export type {
   CompiledTargetChunk,
   DecodedCompiledScene,
   GeometryRepresentation,
+  PreparedCompiledGltfDecoder,
   SceneBounds,
 } from "./compiled-gltf.js";
 export {

@@ -177,6 +177,20 @@ export interface DecodeCompiledGltfOptions {
   readonly targetChunkId?: string;
 }
 
+/**
+ * Document-scoped decode state. Active-node transforms and target-chunk
+ * occurrence membership are prepared once, then reused for every binary range.
+ */
+export interface PreparedCompiledGltfDecoder {
+  readonly hierarchy: CompiledHierarchy;
+  readonly activeNodeCount: number;
+  readonly renderableNodeCount: number;
+  decode(
+    binary: ArrayBuffer,
+    options?: DecodeCompiledGltfOptions,
+  ): DecodedCompiledScene;
+}
+
 export type CompiledGltfErrorCode =
   | "INVALID_GLTF"
   | "UNSUPPORTED_PROFILE"
@@ -790,6 +804,31 @@ interface DecodedMeshGeometry {
   readonly edgeSourceRefs: readonly string[];
 }
 
+interface PreparedRenderableNode {
+  readonly ordinal: number;
+  readonly nodeIndex: number;
+  readonly targetMeshIndex: number;
+  readonly coarseMeshIndex?: number;
+  readonly worldTransform: Float64Array;
+  readonly label: string;
+  readonly occurrenceId: string;
+  readonly prototypeId?: string;
+  readonly semanticId?: string;
+  readonly sourceRef?: string;
+}
+
+interface PreparedCompiledGltfState {
+  readonly document: CompiledGltfDocument;
+  readonly hierarchy: CompiledHierarchy;
+  readonly activeNodeCount: number;
+  readonly renderableNodes: readonly PreparedRenderableNode[];
+  readonly renderableNodesByTargetChunk: ReadonlyMap<
+    string,
+    readonly PreparedRenderableNode[]
+  >;
+  readonly targetChunksById: ReadonlyMap<string, CompiledTargetChunk>;
+}
+
 function decodeMesh(
   document: CompiledGltfDocument,
   accessors: BinaryAccessors,
@@ -908,12 +947,124 @@ function decodeMesh(
   };
 }
 
+function prepareCompiledGltfState(value: unknown): PreparedCompiledGltfState {
+  const { document, hierarchy } = inspectCompiledHierarchy(value);
+  const renderableNodes: PreparedRenderableNode[] = [];
+  const renderableNodesByTargetMesh = new Map<number, PreparedRenderableNode[]>();
+  let activeNodeCount = 0;
+
+  const traverse = (
+    nodeIndex: number,
+    parentTransform: ArrayLike<number>,
+    activePath: Set<number>,
+  ): void => {
+    if (activePath.has(nodeIndex)) {
+      throw new CompiledGltfError("INVALID_GLTF", `Cycle detected at nodes[${nodeIndex}].`);
+    }
+    const node = document.nodes[nodeIndex];
+    if (!node) throw new CompiledGltfError("INVALID_GLTF", `Missing nodes[${nodeIndex}].`);
+    activeNodeCount += 1;
+    const path = new Set(activePath).add(nodeIndex);
+    const worldTransform = multiplyMatrices(parentTransform, matrixFor(node, nodeIndex));
+
+    if (node.mesh !== undefined) {
+      const targetMeshIndex = node.mesh;
+      const nodeMadi = madiExtras(node);
+      const occurrenceId =
+        typeof nodeMadi.occurrenceId === "string"
+          ? nodeMadi.occurrenceId
+          : `gltf-node:${nodeIndex}`;
+      const prepared: PreparedRenderableNode = {
+        ordinal: renderableNodes.length,
+        nodeIndex,
+        targetMeshIndex,
+        ...(nodeMadi.coarseMesh === undefined
+          ? {}
+          : {
+              coarseMeshIndex: finiteInteger(
+                nodeMadi.coarseMesh,
+                `nodes[${nodeIndex}].extras.madi.coarseMesh`,
+                document.meshes.length,
+              ),
+            }),
+        worldTransform,
+        label: node.name ?? occurrenceId,
+        occurrenceId,
+        ...(typeof nodeMadi.prototypeId === "string"
+          ? { prototypeId: nodeMadi.prototypeId }
+          : {}),
+        ...(typeof nodeMadi.semanticId === "string"
+          ? { semanticId: nodeMadi.semanticId }
+          : {}),
+        ...(typeof nodeMadi.sourceRef === "string"
+          ? { sourceRef: nodeMadi.sourceRef }
+          : {}),
+      };
+      renderableNodes.push(prepared);
+      const meshNodes = renderableNodesByTargetMesh.get(targetMeshIndex) ?? [];
+      meshNodes.push(prepared);
+      renderableNodesByTargetMesh.set(targetMeshIndex, meshNodes);
+    }
+
+    for (const child of node.children ?? []) traverse(child, worldTransform, path);
+  };
+
+  for (const root of activeRoots(document)) traverse(root, identityMatrix, new Set());
+
+  const renderableNodesByTargetChunk = new Map<
+    string,
+    readonly PreparedRenderableNode[]
+  >();
+  const targetChunksById = new Map<string, CompiledTargetChunk>();
+  for (const chunk of hierarchy.targetChunks) {
+    targetChunksById.set(chunk.id, chunk);
+    renderableNodesByTargetChunk.set(
+      chunk.id,
+      chunk.meshIndexes
+        .flatMap((meshIndex) => renderableNodesByTargetMesh.get(meshIndex) ?? [])
+        .sort((left, right) => left.ordinal - right.ordinal),
+    );
+  }
+
+  return {
+    document,
+    hierarchy,
+    activeNodeCount,
+    renderableNodes,
+    renderableNodesByTargetChunk,
+    targetChunksById,
+  };
+}
+
+/**
+ * Validates and indexes one compiled document for repeated coarse/target range
+ * decoding. Target-chunk decodes touch only the occurrences assigned to that
+ * chunk; they do not walk the active scene graph again.
+ */
+export function prepareCompiledGltfDecoder(value: unknown): PreparedCompiledGltfDecoder {
+  const state = prepareCompiledGltfState(value);
+  return {
+    hierarchy: state.hierarchy,
+    activeNodeCount: state.activeNodeCount,
+    renderableNodeCount: state.renderableNodes.length,
+    decode: (binary, options = {}) => decodePreparedCompiledGltf(state, binary, options),
+  };
+}
+
 export function decodeCompiledGltf(
   value: unknown,
   binary: ArrayBuffer,
   options: DecodeCompiledGltfOptions = {},
 ): DecodedCompiledScene {
-  const { document, hierarchy } = inspectCompiledHierarchy(value);
+  return prepareCompiledGltfDecoder(value).decode(binary, options);
+}
+
+function decodePreparedCompiledGltf(
+  state: PreparedCompiledGltfState,
+  binary: ArrayBuffer,
+  options: DecodeCompiledGltfOptions,
+): DecodedCompiledScene {
+  const { document, hierarchy } = state;
   const representation = options.representation ?? "target";
   if (representation === "coarse" && options.targetChunkId !== undefined) {
     throw new CompiledGltfError(
@@ -923,7 +1074,7 @@ export function decodeCompiledGltf(
   }
   const targetChunk = options.targetChunkId === undefined
     ? undefined
-    : hierarchy.targetChunks.find(({ id }) => id === options.targetChunkId);
+    : state.targetChunksById.get(options.targetChunkId);
   if (options.targetChunkId !== undefined && !targetChunk) {
     throw new CompiledGltfError(
       "INVALID_GLTF",
@@ -945,7 +1096,9 @@ export function decodeCompiledGltf(
         )
       : 0);
   const accessors = new BinaryAccessors(document, binary, bufferIndex, targetChunk);
-  const selectedTargetMeshes = targetChunk ? new Set(targetChunk.meshIndexes) : undefined;
+  const selectedRenderableNodes = targetChunk
+    ? state.renderableNodesByTargetChunk.get(targetChunk.id) ?? []
+    : state.renderableNodes;
   const meshGeometry = new Map<number, DecodedMeshGeometry>();
   const instances = new Map<
     string,
@@ -960,45 +1113,33 @@ export function decodeCompiledGltf(
   const boundsMin = [Infinity, Infinity, Infinity];
   const boundsMax = [-Infinity, -Infinity, -Infinity];
 
-  const traverse = (
-    nodeIndex: number,
-    parentTransform: ArrayLike<number>,
-    activePath: Set<number>,
-  ): void => {
-    if (activePath.has(nodeIndex)) {
-      throw new CompiledGltfError("INVALID_GLTF", `Cycle detected at nodes[${nodeIndex}].`);
-    }
-    const node = document.nodes[nodeIndex];
-    if (!node) throw new CompiledGltfError("INVALID_GLTF", `Missing nodes[${nodeIndex}].`);
-    const path = new Set(activePath).add(nodeIndex);
-    const worldTransform = multiplyMatrices(parentTransform, matrixFor(node, nodeIndex));
-
-    if (node.mesh !== undefined && (!selectedTargetMeshes || selectedTargetMeshes.has(node.mesh))) {
-      const nodeMadi = madiExtras(node);
-      const meshIndex = representation === "coarse"
-        ? finiteInteger(
-            nodeMadi.coarseMesh,
-            `nodes[${nodeIndex}].extras.madi.coarseMesh`,
-            document.meshes.length,
-          )
-        : node.mesh;
-      const mesh = document.meshes[meshIndex];
-      if (!mesh) throw new CompiledGltfError("INVALID_GLTF", `Missing meshes[${meshIndex}].`);
-      const geometry = meshGeometry.get(meshIndex) ?? decodeMesh(document, accessors, mesh, meshIndex);
-      meshGeometry.set(meshIndex, geometry);
-      const objectId = nodeIndex + 1;
-      const meshMadi = madiExtras(mesh);
-      const occurrenceId =
-        typeof nodeMadi.occurrenceId === "string"
-          ? nodeMadi.occurrenceId
-          : `gltf-node:${nodeIndex}`;
-      const prototypeId =
-        typeof nodeMadi.prototypeId === "string"
-          ? nodeMadi.prototypeId
-          : typeof meshMadi.prototypeId === "string"
-            ? meshMadi.prototypeId
-            : `gltf-mesh:${meshIndex}`;
-      for (const surface of geometry.surfaces) {
+  for (const prepared of selectedRenderableNodes) {
+    const {
+      nodeIndex,
+      targetMeshIndex,
+      worldTransform,
+      occurrenceId,
+    } = prepared;
+    const meshIndex = representation === "coarse"
+      ? finiteInteger(
+          prepared.coarseMeshIndex,
+          `nodes[${nodeIndex}].extras.madi.coarseMesh`,
+          document.meshes.length,
+        )
+      : targetMeshIndex;
+    const mesh = document.meshes[meshIndex];
+    if (!mesh) throw new CompiledGltfError("INVALID_GLTF", `Missing meshes[${meshIndex}].`);
+    const geometry = meshGeometry.get(meshIndex) ?? decodeMesh(document, accessors, mesh, meshIndex);
+    meshGeometry.set(meshIndex, geometry);
+    const objectId = nodeIndex + 1;
+    const meshMadi = madiExtras(mesh);
+    const prototypeId =
+      prepared.prototypeId !== undefined
+        ? prepared.prototypeId
+        : typeof meshMadi.prototypeId === "string"
+          ? meshMadi.prototypeId
+          : `gltf-mesh:${meshIndex}`;
+    for (const surface of geometry.surfaces) {
         const batchKey = `${meshIndex}:${surface.primitiveIndex}`;
         const batchInstances = instances.get(batchKey) ?? {
           meshIndex,
@@ -1006,50 +1147,48 @@ export function decodeCompiledGltf(
           values: [],
         };
         batchInstances.values.push({
-          transform: worldTransform,
+          // The decoded scene is transferred out of the Worker. Keep the
+          // prepared transform attached for subsequent range decodes.
+          transform: worldTransform.slice(),
           objectId,
           baseColor: surface.color,
         });
         instances.set(batchKey, batchInstances);
-      }
-      const existingTargetMesh = targetMeshByDecodedMesh.get(meshIndex);
-      if (existingTargetMesh !== undefined && existingTargetMesh !== node.mesh) {
-        throw new CompiledGltfError(
-          "INVALID_GLTF",
-          `Decoded mesh ${meshIndex} maps to multiple target meshes.`,
-        );
-      }
-      targetMeshByDecodedMesh.set(meshIndex, node.mesh);
-      objectEvidence.push({
-        objectId,
-        nodeIndex,
-        label: node.name ?? occurrenceId,
-        occurrenceId,
-        prototypeId,
-        ...(typeof nodeMadi.semanticId === "string" ? { semanticId: nodeMadi.semanticId } : {}),
-        ...(typeof nodeMadi.sourceRef === "string" ? { sourceRef: nodeMadi.sourceRef } : {}),
-        edgeSourceRefs: geometry.edgeSourceRefs,
-      });
+    }
+    const existingTargetMesh = targetMeshByDecodedMesh.get(meshIndex);
+    if (existingTargetMesh !== undefined && existingTargetMesh !== targetMeshIndex) {
+      throw new CompiledGltfError(
+        "INVALID_GLTF",
+        `Decoded mesh ${meshIndex} maps to multiple target meshes.`,
+      );
+    }
+    targetMeshByDecodedMesh.set(meshIndex, targetMeshIndex);
+    objectEvidence.push({
+      objectId,
+      nodeIndex,
+      label: prepared.label,
+      occurrenceId,
+      prototypeId,
+      ...(prepared.semanticId !== undefined ? { semanticId: prepared.semanticId } : {}),
+      ...(prepared.sourceRef !== undefined ? { sourceRef: prepared.sourceRef } : {}),
+      edgeSourceRefs: geometry.edgeSourceRefs,
+    });
 
-      for (const surface of geometry.surfaces) {
-        for (let offset = 0; offset < surface.surfacePositions.length; offset += 3) {
-          const point = transformPoint(
-            worldTransform,
-            surface.surfacePositions[offset] ?? 0,
-            surface.surfacePositions[offset + 1] ?? 0,
-            surface.surfacePositions[offset + 2] ?? 0,
-          );
-          for (let axis = 0; axis < 3; axis += 1) {
-            boundsMin[axis] = Math.min(boundsMin[axis] ?? Infinity, point[axis] ?? 0);
-            boundsMax[axis] = Math.max(boundsMax[axis] ?? -Infinity, point[axis] ?? 0);
-          }
+    for (const surface of geometry.surfaces) {
+      for (let offset = 0; offset < surface.surfacePositions.length; offset += 3) {
+        const point = transformPoint(
+          worldTransform,
+          surface.surfacePositions[offset] ?? 0,
+          surface.surfacePositions[offset + 1] ?? 0,
+          surface.surfacePositions[offset + 2] ?? 0,
+        );
+        for (let axis = 0; axis < 3; axis += 1) {
+          boundsMin[axis] = Math.min(boundsMin[axis] ?? Infinity, point[axis] ?? 0);
+          boundsMax[axis] = Math.max(boundsMax[axis] ?? -Infinity, point[axis] ?? 0);
         }
       }
     }
-    for (const child of node.children ?? []) traverse(child, worldTransform, path);
-  };
-
-  for (const root of activeRoots(document)) traverse(root, identityMatrix, new Set());
+  }
   if (objectEvidence.length === 0 || boundsMin.some((value) => !Number.isFinite(value))) {
     throw new CompiledGltfError("UNSUPPORTED_GEOMETRY", "Compiled scene has no renderable geometry.");
   }

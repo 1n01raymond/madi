@@ -116,7 +116,10 @@ leaves, demand their deduplicated target chunks, and retain all other chunks as
 a cold eviction tail. A focused transform-only scenario now reproduces 3→1
 candidate chunks with obsolete-Range cancellation in headed Chrome and Firefox
 (`artifacts/spatial-demand/`). Digital Hub/sixty5 evidence, screen-space policy,
-and persistent cache tiers remain pending.
+and persistent cache tiers remain pending. The session Worker now also prepares
+active float64 transforms and direct chunk occurrence tables once, so target
+Range decodes no longer traverse the document node graph; transferred result
+buffers remain isolated from that prepared state.
 
 The camera-relative precision path is now decision evidence for ADR-0005. A
 project-owned 0.25 mm gap is retained at a 10,000 km offset with
