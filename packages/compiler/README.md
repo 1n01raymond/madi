@@ -152,8 +152,11 @@ to before; the glTF profile and report schema are unchanged.
   still pending. The browser applies a fixed decoded/GPU admission budget and
   retains coarse fallbacks when it reaches that cap; eviction and cache policy
   are Phase 2 follow-up work.
-- Geometry and node transforms are f32 in glTF; the large-coordinate precision
-  profile remains an open ADR gate.
+- Local geometry and transform linear components are f32. Node translations
+  stay as ordinary glTF JSON numbers when f32 delivery error would exceed the
+  10 nm budget, allowing the NARU loader to compose and camera-rebase them in
+  JavaScript number precision. The 0.25 mm / 10,000 km ADR-0005 record is
+  checked by `pnpm precision:check`.
 - `extras.madi` is an experimental profile, not a public interchange standard.
 - The browser runtime proves coarse-first promotion on the direct AP242 package;
   the canonical PyGamer benchmark remains a monolithic target-only baseline.

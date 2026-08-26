@@ -197,6 +197,11 @@ Rules:
   prototype representation.
 - Empty/group occurrences are allowed.
 
+The project-owned `createLargeCoordinatePrecisionScene()` fixture exercises
+this contract with identical local f32 plate geometry and double-precision
+near/far occurrence transforms. Its 0.25 mm gap at a 10,000 km offset is the
+committed ADR-0005 compiler/runtime evidence gate.
+
 ## 7. Semantic entities
 
 Semantic entities are queryable business/source concepts. They are not required

@@ -100,8 +100,8 @@ function localBounds(batch: GpuPrototypeBatch): {
 
 /** Writes world * translate(center) * scale(size) in column-major order. */
 function composeBoundsTransform(
-  target: Float32Array,
-  world: Float32Array,
+  target: Float64Array,
+  world: ArrayLike<number>,
   center: readonly [number, number, number],
   size: readonly [number, number, number],
 ): void {
@@ -133,7 +133,7 @@ export function aggregateCoarseScene(scene: DecodedCompiledScene): AggregatedCoa
     (total, batch) => total + batch.instances.length,
     0,
   );
-  const transforms = new Float32Array(instanceCount * 16);
+  const transforms = new Float64Array(instanceCount * 16);
   const targetMeshIndexes = new Uint32Array(instanceCount);
   const instances: GpuOccurrenceInstance[] = new Array(instanceCount);
   let outputIndex = 0;

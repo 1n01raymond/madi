@@ -83,6 +83,7 @@ describe("coarse AABB aggregation", () => {
     expect(batch?.instances).toHaveLength(2);
     expect(aggregated.coarseInstanceTargetMeshIndexes).toEqual(new Uint32Array([10, 20]));
     expect(batch?.instances[0]?.transform.buffer).toBe(batch?.instances[1]?.transform.buffer);
+    expect(batch?.instances[0]?.transform).toBeInstanceOf(Float64Array);
     expect(Array.from(batch?.instances[0]?.transform ?? [])).toEqual([
       2, 0, 0, 0,
       0, 4, 0, 0,
@@ -100,6 +101,24 @@ describe("coarse AABB aggregation", () => {
       triangles: 12,
       edgeSegments: 12,
     });
+  });
+
+  it("retains large-coordinate residuals while composing coarse bounds", () => {
+    const scene = coarseScene();
+    const translated = Float64Array.from(identity);
+    translated[12] = 10_000_000.000_25;
+    const firstBatch = scene.gpuScene.batches[0];
+    if (!firstBatch) throw new TypeError("Expected a coarse test batch.");
+    const aggregated = aggregateCoarseScene({
+      ...scene,
+      gpuScene: {
+        batches: [{ ...firstBatch, instances: [{ transform: translated, objectId: 1 }] }],
+      },
+      batchEvidence: [scene.batchEvidence[0]!],
+    });
+
+    expect(aggregated.gpuScene.batches[0]?.instances[0]?.transform[12])
+      .toBe(10_000_003.000_25);
   });
 
   it("rejects target geometry", () => {

@@ -1,6 +1,6 @@
 export interface GpuOccurrenceInstance {
-  /** Column-major local-to-world transform. */
-  readonly transform: Float32Array;
+  /** Column-major local-to-world transform; decoded glTF scenes retain f64 translations. */
+  readonly transform: Float32Array | Float64Array;
   /** Zero is reserved for the picking background. */
   readonly objectId: number;
   /** Linear RGBA display color for this occurrence. */
@@ -25,6 +25,13 @@ export interface GpuScene {
 }
 
 export const instanceStride = 96;
+
+/** Splits one finite f64 value into two f32 values whose sum retains its residual. */
+export function splitFloat64(value: number): readonly [high: number, low: number] {
+  if (!Number.isFinite(value)) throw new TypeError("Split values must be finite.");
+  const high = Math.fround(value);
+  return [high, Math.fround(value - high)];
+}
 
 export function validatePrototypeBatch(batch: GpuPrototypeBatch): void {
   if (batch.surfaceVertices.length % 6 !== 0) {
@@ -120,9 +127,17 @@ export function packInstanceDataInto(
     if (!instance) throw new RangeError(`Instance index ${sourceIndex} is out of range.`);
     const base = outputIndex * instanceStride;
     instance.transform.forEach((value, matrixIndex) => {
-      target.setFloat32(base + matrixIndex * 4, value, true);
+      const [high] = matrixIndex >= 12 && matrixIndex <= 14
+        ? splitFloat64(value)
+        : [Math.fround(value)];
+      target.setFloat32(base + matrixIndex * 4, high, true);
     });
     target.setUint32(base + 64, instance.objectId, true);
+    for (let axis = 0; axis < 3; axis += 1) {
+      const [, low] = splitFloat64(instance.transform[12 + axis] ?? 0);
+      // Reuse the instance record's existing 12-byte alignment gap.
+      target.setFloat32(base + 68 + axis * 4, low, true);
+    }
     const color = instance.baseColor ?? [0.16, 0.55, 0.92, 1.0];
     color.forEach((value, channel) => {
       target.setFloat32(base + 80 + channel * 4, value, true);

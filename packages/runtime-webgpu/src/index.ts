@@ -3,6 +3,7 @@ export {
   instanceStride,
   packInstanceData,
   packInstanceDataInto,
+  splitFloat64,
   validateGpuScene,
   validatePrototypeBatch,
 } from "./layout.js";
@@ -35,6 +36,7 @@ export type {
 export {
   NaruWebGpuError,
   normalizeSectionPlane,
+  rebaseSectionPlane,
   Phase0Renderer,
   Phase0Renderer as NaruWebGpuRenderer,
 } from "./renderer.js";

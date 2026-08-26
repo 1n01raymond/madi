@@ -1,0 +1,430 @@
+{
+  "asset": {
+    "version": "2.0",
+    "generator": "NARU ADR-0005 coordinate precision evidence"
+  },
+  "scene": 0,
+  "scenes": [
+    {
+      "name": "scene:coordinate-precision-near",
+      "nodes": [
+        0
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "name": "MADI source frame",
+      "children": [
+        1,
+        2
+      ],
+      "matrix": [
+        1,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        1
+      ],
+      "extras": {
+        "madi": {
+          "kind": "source-frame",
+          "sourceUpAxis": "Y",
+          "targetUpAxis": "Y",
+          "sourceLengthUnit": "m",
+          "scaleToMeters": 1
+        }
+      }
+    },
+    {
+      "name": "Left precision plate",
+      "matrix": [
+        1,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        -0.020124999806284904,
+        0,
+        0,
+        1
+      ],
+      "mesh": 0,
+      "extras": {
+        "madi": {
+          "occurrenceId": "occurrence:triangle:left",
+          "prototypeId": "prototype:triangle",
+          "semanticId": "semantic:triangle-part",
+          "sourceRef": "source:part:triangle",
+          "initialVisibility": true,
+          "tags": [
+            "coordinate-precision",
+            "near"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Right precision plate",
+      "matrix": [
+        1,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0.020124999806284904,
+        0,
+        0,
+        1
+      ],
+      "mesh": 0,
+      "extras": {
+        "madi": {
+          "occurrenceId": "occurrence:triangle:right",
+          "prototypeId": "prototype:triangle",
+          "semanticId": "semantic:triangle-part",
+          "sourceRef": "source:part:triangle",
+          "initialVisibility": true,
+          "tags": [
+            "coordinate-precision",
+            "near"
+          ]
+        }
+      }
+    }
+  ],
+  "meshes": [
+    {
+      "name": "40 mm precision plate",
+      "primitives": [
+        {
+          "attributes": {
+            "POSITION": 0,
+            "NORMAL": 1
+          },
+          "indices": 3,
+          "material": 2,
+          "mode": 4,
+          "extras": {
+            "madi": {
+              "kind": "surface",
+              "representationId": "representation:triangle:display",
+              "firstIndex": 0,
+              "indexCount": 6,
+              "faceSourceAccessor": 2,
+              "sourceRefs": [
+                "source:face:triangle",
+                "source:edge:triangle:0",
+                "source:edge:triangle:1",
+                "source:edge:triangle:2"
+              ]
+            }
+          }
+        },
+        {
+          "attributes": {
+            "POSITION": 4
+          },
+          "indices": 5,
+          "material": 3,
+          "mode": 1,
+          "extras": {
+            "madi": {
+              "kind": "explicit-cad-edges",
+              "representationId": "representation:triangle:display",
+              "edgeClassAccessor": 6,
+              "edgeSourceAccessor": 7,
+              "sourceRefs": [
+                "source:face:triangle",
+                "source:edge:triangle:0",
+                "source:edge:triangle:1",
+                "source:edge:triangle:2"
+              ],
+              "curveHints": []
+            }
+          }
+        }
+      ],
+      "extras": {
+        "madi": {
+          "prototypeId": "prototype:triangle",
+          "representationId": "representation:triangle:display",
+          "sourceRef": "source:part:triangle"
+        }
+      }
+    }
+  ],
+  "materials": [
+    {
+      "name": "MADI fallback surface",
+      "pbrMetallicRoughness": {
+        "baseColorFactor": [
+          0.55,
+          0.62,
+          0.68,
+          1
+        ],
+        "metallicFactor": 0.05,
+        "roughnessFactor": 0.72
+      },
+      "extras": {
+        "madi": {
+          "role": "surface",
+          "fallback": true
+        }
+      }
+    },
+    {
+      "name": "MADI fallback edges",
+      "pbrMetallicRoughness": {
+        "baseColorFactor": [
+          0.025,
+          0.045,
+          0.06,
+          1
+        ],
+        "metallicFactor": 0,
+        "roughnessFactor": 1
+      },
+      "extras": {
+        "madi": {
+          "role": "edge",
+          "fallback": true
+        }
+      }
+    },
+    {
+      "name": "Phase 0 blue",
+      "pbrMetallicRoughness": {
+        "baseColorFactor": [
+          0.16,
+          0.55,
+          0.92,
+          1
+        ],
+        "metallicFactor": 0.05,
+        "roughnessFactor": 0.7
+      },
+      "extras": {
+        "madi": {
+          "materialId": "material:phase-0-blue",
+          "role": "surface"
+        }
+      }
+    },
+    {
+      "name": "Phase 0 blue edges",
+      "pbrMetallicRoughness": {
+        "baseColorFactor": [
+          0.02,
+          0.08,
+          0.14,
+          1
+        ],
+        "metallicFactor": 0,
+        "roughnessFactor": 1
+      },
+      "extras": {
+        "madi": {
+          "materialId": "material:phase-0-blue",
+          "role": "edge"
+        }
+      }
+    }
+  ],
+  "buffers": [
+    {
+      "uri": "scene.bin",
+      "byteLength": 228
+    }
+  ],
+  "bufferViews": [
+    {
+      "buffer": 0,
+      "byteOffset": 0,
+      "byteLength": 48,
+      "target": 34962,
+      "name": "representation:triangle:display surface positions"
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 48,
+      "byteLength": 48,
+      "target": 34962,
+      "name": "representation:triangle:display surface normals"
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 96,
+      "byteLength": 8,
+      "name": "representation:triangle:display face source IDs"
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 104,
+      "byteLength": 24,
+      "target": 34963,
+      "name": "representation:triangle:display surface indices 0"
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 128,
+      "byteLength": 48,
+      "target": 34962,
+      "name": "representation:triangle:display edge positions"
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 176,
+      "byteLength": 32,
+      "target": 34963,
+      "name": "representation:triangle:display edge indices"
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 208,
+      "byteLength": 4,
+      "name": "representation:triangle:display edge classes"
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 212,
+      "byteLength": 16,
+      "name": "representation:triangle:display edge source IDs"
+    }
+  ],
+  "accessors": [
+    {
+      "bufferView": 0,
+      "componentType": 5126,
+      "count": 4,
+      "type": "VEC3",
+      "min": [
+        -0.019999999552965164,
+        -0.029999999329447746,
+        0
+      ],
+      "max": [
+        0.019999999552965164,
+        0.029999999329447746,
+        0
+      ],
+      "name": "representation:triangle:display surface positions"
+    },
+    {
+      "bufferView": 1,
+      "componentType": 5126,
+      "count": 4,
+      "type": "VEC3",
+      "name": "representation:triangle:display surface normals"
+    },
+    {
+      "bufferView": 2,
+      "componentType": 5125,
+      "count": 2,
+      "type": "SCALAR",
+      "name": "representation:triangle:display face source IDs"
+    },
+    {
+      "bufferView": 3,
+      "componentType": 5125,
+      "count": 6,
+      "type": "SCALAR",
+      "min": [
+        0
+      ],
+      "max": [
+        3
+      ],
+      "name": "representation:triangle:display surface indices 0"
+    },
+    {
+      "bufferView": 4,
+      "componentType": 5126,
+      "count": 4,
+      "type": "VEC3",
+      "min": [
+        -0.019999999552965164,
+        -0.029999999329447746,
+        0
+      ],
+      "max": [
+        0.019999999552965164,
+        0.029999999329447746,
+        0
+      ],
+      "name": "representation:triangle:display edge positions"
+    },
+    {
+      "bufferView": 5,
+      "componentType": 5125,
+      "count": 8,
+      "type": "SCALAR",
+      "min": [
+        0
+      ],
+      "max": [
+        3
+      ],
+      "name": "representation:triangle:display edge indices"
+    },
+    {
+      "bufferView": 6,
+      "componentType": 5121,
+      "count": 4,
+      "type": "SCALAR",
+      "name": "representation:triangle:display edge classes"
+    },
+    {
+      "bufferView": 7,
+      "componentType": 5125,
+      "count": 4,
+      "type": "SCALAR",
+      "name": "representation:triangle:display edge source IDs"
+    }
+  ],
+  "extras": {
+    "madi": {
+      "profile": "madi.experimental.gltf.1",
+      "status": "experimental-not-interchange",
+      "sceneId": "scene:coordinate-precision-near",
+      "revisionId": "revision:coordinate-precision-near:v1",
+      "sourceDigest": "sha256:coordinate-precision-near",
+      "optionsDigest": "sha256:default-options",
+      "documents": [
+        {
+          "id": "document:phase-0-triangle",
+          "displayName": "Generated coordinate precision near control",
+          "format": "generated-fixture",
+          "sourceDigest": "sha256:coordinate-precision-near"
+        }
+      ],
+      "diagnostics": []
+    }
+  }
+}

@@ -44,6 +44,14 @@ normalizes the equation and applies the same fragment discard to shaded
 surfaces, explicit CAD edges, and the on-demand object-ID pass. Passing
 `undefined` disables clipping without rebuilding pipelines or scene buffers.
 
+`render(viewProjection, { cameraOrigin })` accepts a double-precision world
+origin. Decoded node transforms compose in JavaScript number precision, while
+the 96-byte instance record stores translation high/low f32 components (the low
+component reuses the existing alignment gap). Surface, edge, section, and pick
+passes subtract a matching high/low camera origin before projection. The
+project-owned 0.25 mm / 10,000 km headed Chrome/Firefox record is checked by
+`pnpm precision:check`.
+
 The current experimental decoder accepts a target-only package or a progressive
 package with separate target and coarse external buffers. The progressive slice
 uses `extras.madi.coarseMesh` and preserves node-derived object IDs while the
@@ -60,4 +68,5 @@ layouts fail with a typed `CompiledGltfError` instead of silently dropping
 engineering data.
 
 Run `pnpm test` for package and committed-fixture regression coverage. The
-headed cross-engine path is recorded by `pnpm browser:matrix`.
+headed cross-engine path is recorded by `pnpm browser:matrix`; the focused
+large-coordinate path is recorded by `pnpm precision:evidence`.

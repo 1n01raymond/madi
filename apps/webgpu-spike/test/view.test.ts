@@ -39,4 +39,26 @@ describe("compiled scene camera", () => {
       () => new OrthographicOrbitCamera({ min: [1, 0, 0], max: [0, 1, 1] }),
     ).toThrow(/ordered finite values/u);
   });
+
+  it("produces the same relative frame for millimetre geometry at a large offset", () => {
+    const offset = [10_000_000, -7_000_000, 3_000_000] as const;
+    const translated = {
+      min: bounds.min.map((value, axis) => value + offset[axis]) as [number, number, number],
+      max: bounds.max.map((value, axis) => value + offset[axis]) as [number, number, number],
+    };
+    const near = new OrthographicOrbitCamera(bounds);
+    const far = new OrthographicOrbitCamera(translated);
+
+    for (const camera of [near, far]) {
+      camera.orbit(40, -20);
+      camera.pan(25, -10, 1_000, 500, 2);
+      camera.zoomBy(-120);
+    }
+    const nearFrame = near.frame(2);
+    const farFrame = far.frame(2);
+
+    expect(Array.from(farFrame.viewProjection)).toEqual(Array.from(nearFrame.viewProjection));
+    expect(farFrame.origin.map((value, axis) => value - nearFrame.origin[axis]))
+      .toEqual(offset);
+  });
 });

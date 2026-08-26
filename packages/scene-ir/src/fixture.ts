@@ -15,8 +15,8 @@ const rootFrame: CoordinateFrame = {
   upAxis: "Y",
 };
 
-function translation(x: number): Matrix4d {
-  return [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, x, 0, 0, 1];
+function translation(x: number, y = 0, z = 0): Matrix4d {
+  return [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, x, y, z, 1];
 }
 
 /**
@@ -201,6 +201,121 @@ export function createRepeatedTriangleScene(): EngineeringScene {
         edgeStyle: { color: [0.02, 0.08, 0.14, 1], width: 1 },
       },
     ],
+    diagnostics: [],
+  };
+}
+
+/**
+ * Creates two 40 mm plates separated by a 0.25 mm gap at a caller-owned
+ * world offset. Near/far variants have identical local geometry so precision
+ * evidence can isolate transform and camera behavior.
+ */
+export function createLargeCoordinatePrecisionScene(
+  offset: readonly [number, number, number] = [0, 0, 0],
+): EngineeringScene {
+  if (offset.some((value) => !Number.isFinite(value))) {
+    throw new TypeError("Precision fixture offset must contain finite values.");
+  }
+  const base = createRepeatedTriangleScene();
+  const prototype = base.prototypes[0];
+  const representation = base.representations[0];
+  const material = base.materials[0];
+  if (!prototype || !representation || !material) {
+    throw new TypeError("Repeated triangle fixture is incomplete.");
+  }
+  const halfWidth = 0.02;
+  const halfHeight = 0.03;
+  const gap = 0.000_25;
+  const center = halfWidth + gap / 2;
+  const positions = new Float32Array([
+    -halfWidth, -halfHeight, 0,
+    halfWidth, -halfHeight, 0,
+    halfWidth, halfHeight, 0,
+    -halfWidth, halfHeight, 0,
+  ]);
+  const variant = offset.every((value) => value === 0) ? "near" : "far";
+
+  return {
+    ...base,
+    sceneId: `scene:coordinate-precision-${variant}`,
+    revision: {
+      ...base.revision,
+      id: ids.revision(`revision:coordinate-precision-${variant}:v1`),
+      sourceDigest: `sha256:coordinate-precision-${variant}`,
+      adapter: { name: "@naru3d/scene-ir precision fixture", version: "0.0.0" },
+    },
+    documents: base.documents.map((document) => ({
+      ...document,
+      displayName: `Generated coordinate precision ${variant} control`,
+      sourceDigest: `sha256:coordinate-precision-${variant}`,
+    })),
+    prototypes: [{
+      ...prototype,
+      name: "40 mm precision plate",
+      localBounds: { min: [-halfWidth, -halfHeight, 0], max: [halfWidth, halfHeight, 0] },
+    }],
+    occurrences: base.occurrences.map((occurrence, index) => ({
+      ...occurrence,
+      name: index === 0 ? "Left precision plate" : "Right precision plate",
+      localTransform: translation(
+        offset[0] + (index === 0 ? -center : center),
+        offset[1],
+        offset[2],
+      ),
+      tags: ["coordinate-precision", variant],
+    })),
+    semantics: base.semantics.map((semantic) => ({
+      ...semantic,
+      name: "Generated 0.25 mm precision gap",
+      properties: {
+        entries: {
+          fixture: true,
+          gapMillimeters: 0.25,
+          offsetXMeters: offset[0],
+          offsetYMeters: offset[1],
+          offsetZMeters: offset[2],
+        },
+      },
+    })),
+    representations: [{
+      ...representation,
+      accuracy: {
+        kind: "tessellated",
+        linearTolerance: 0.000_001,
+        unit: "m",
+        notes: ["Project-owned 0.25 mm large-coordinate precision control."],
+      },
+      surface: {
+        primitive: "triangles",
+        positions,
+        indices: new Uint32Array([0, 1, 2, 0, 2, 3]),
+        normals: new Float32Array([
+          0, 0, 1,
+          0, 0, 1,
+          0, 0, 1,
+          0, 0, 1,
+        ]),
+        faceSourceIds: new Uint32Array([0, 0]),
+        materialGroups: [{ firstIndex: 0, indexCount: 6, materialId: material.id }],
+      },
+      edges: {
+        positions,
+        segments: new Uint32Array([0, 1, 1, 2, 2, 3, 3, 0]),
+        classes: new Uint8Array([
+          edgeClassCode.boundary,
+          edgeClassCode.boundary,
+          edgeClassCode.boundary,
+          edgeClassCode.boundary,
+        ]),
+        sourceIds: new Uint32Array([1, 2, 3, 1]),
+      },
+      bounds: { min: [-halfWidth, -halfHeight, 0], max: [halfWidth, halfHeight, 0] },
+      sourceMap: {
+        sourceRefs: representation.sourceMap?.sourceRefs ?? [],
+        faceSourceIndices: new Uint32Array([0, 0]),
+        edgeSourceIndices: new Uint32Array([1, 2, 3, 1]),
+      },
+    }],
     diagnostics: [],
   };
 }

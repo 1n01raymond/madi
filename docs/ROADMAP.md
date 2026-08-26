@@ -108,6 +108,14 @@ chunk and replace colder target detail with retained coarse fallbacks;
 camera-driven reprioritization, obsolete-work cancellation, and cache tiers
 remain pending.
 
+The camera-relative precision path is now decision evidence for ADR-0005. A
+project-owned 0.25 mm gap is retained at a 10,000 km offset with
+0.000000387 mm measured error, while headed Chrome and Firefox reproduce
+byte-identical near/far frames through navigation, sectioning, and picking.
+The record is `artifacts/precision/large-coordinates/`; real Safari remains a
+graceful unsupported-browser capability result because it does not expose
+WebGPU under the recorded default settings.
+
 - manifest/hierarchy-first loading;
 - Worker decode;
 - direct WebGPU surfaces and edges;
@@ -216,8 +224,9 @@ The implementation can be organized into parallel but integrated tracks:
 
 Decision: continue to Phase 1. The 2026-08-23 evidence review connected source
 identity, explicit edges, and direct WebGPU rendering without making OCCT a
-browser dependency. ADR-0003 and ADR-0005 remain proposed until their narrower
-performance and precision gates are measured.
+browser dependency. ADR-0003 remains proposed until its narrower performance
+gate is measured. ADR-0005 was accepted on 2026-08-26 after its 0.25 mm detail
+at 10,000 km precision gate passed in headed Chrome and Firefox.
 
 ### After Phase 1
 

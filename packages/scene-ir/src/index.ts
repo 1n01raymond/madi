@@ -1,4 +1,7 @@
-export { createRepeatedTriangleScene } from "./fixture.js";
+export {
+  createLargeCoordinatePrecisionScene,
+  createRepeatedTriangleScene,
+} from "./fixture.js";
 export {
   isColumnPropertyBag,
   isIndexedPropertyBag,

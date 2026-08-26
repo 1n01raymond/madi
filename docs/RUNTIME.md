@@ -287,8 +287,13 @@ accuracy disclosed.
 
 ## 14. Precision
 
-The runtime keeps camera and scene anchors in JavaScript number (double) and
-uploads local f32 transforms/positions.
+The runtime keeps camera and scene anchors in JavaScript number (double),
+composes decoded glTF node transforms into `Float64Array` values, and uploads
+local f32 geometry. Instance translations and the per-frame camera origin are
+split into f32 high/low pairs before the vertex shader subtracts them. The low
+instance component reuses the existing 12-byte alignment gap, so the 96-byte
+instance stride is unchanged. Section planes are rebased to the same origin and
+surface, explicit-edge, and object-ID passes share the relative vertex path.
 
 For each view:
 
@@ -300,6 +305,12 @@ For each view:
 
 Bounds and scheduling use double-precision CPU representations where large
 coordinate ranges require them.
+
+The committed ADR-0005 record validates this path with a 0.25 mm gap at a
+10,000 km offset: 0.000000387 mm measurement error and byte-identical near/far
+canvases through navigation, picking, and sectioning in headed Chrome and
+Firefox. See `artifacts/precision/large-coordinates/` and
+`pnpm precision:check`.
 
 ## 15. Multiple views
 

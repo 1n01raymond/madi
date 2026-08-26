@@ -540,8 +540,8 @@ export function inspectCompiledHierarchy(value: unknown): {
   };
 }
 
-function multiplyMatrices(a: ArrayLike<number>, b: ArrayLike<number>): Float32Array {
-  const result = new Float32Array(16);
+function multiplyMatrices(a: ArrayLike<number>, b: ArrayLike<number>): Float64Array {
+  const result = new Float64Array(16);
   for (let column = 0; column < 4; column += 1) {
     for (let row = 0; row < 4; row += 1) {
       let value = 0;

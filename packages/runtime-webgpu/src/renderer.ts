@@ -3,6 +3,7 @@ import {
   instanceStride,
   packInstanceData,
   packInstanceDataInto,
+  splitFloat64,
   validateGpuScene,
 } from "./layout.js";
 import type { GpuOccurrenceInstance, GpuPrototypeBatch, GpuScene } from "./layout.js";
@@ -10,11 +11,13 @@ import type { GpuOccurrenceInstance, GpuPrototypeBatch, GpuScene } from "./layou
 const surfaceShader = /* wgsl */ `
 struct SceneUniforms {
   viewProjection: mat4x4<f32>,
+  cameraOriginHigh: vec4<f32>,
+  cameraOriginLow: vec4<f32>,
+  sectionPlane: vec4<f32>,
   selectedObjectId: u32,
   sectionEnabled: u32,
   padding0: u32,
   padding1: u32,
-  sectionPlane: vec4<f32>,
 };
 
 @group(0) @binding(0) var<uniform> scene: SceneUniforms;
@@ -28,6 +31,7 @@ struct VertexInput {
   @location(5) model3: vec4<f32>,
   @location(6) objectId: u32,
   @location(7) baseColor: vec4<f32>,
+  @location(8) translationLow: vec3<f32>,
 };
 
 struct VertexOutput {
@@ -40,14 +44,22 @@ struct VertexOutput {
 
 @vertex
 fn vsMain(input: VertexInput) -> VertexOutput {
-  let model = mat4x4<f32>(input.model0, input.model1, input.model2, input.model3);
-  let worldPosition = model * vec4<f32>(input.position, 1.0);
+  let linear = mat3x3<f32>(input.model0.xyz, input.model1.xyz, input.model2.xyz);
+  // Matching high words cancel exactly; preserve the low-word residual directly.
+  let highTranslation = select(
+    vec3<f32>(0.0),
+    input.model3.xyz - scene.cameraOriginHigh.xyz,
+    input.model3.xyz != scene.cameraOriginHigh.xyz,
+  );
+  let relativeTranslation =
+    highTranslation + (input.translationLow - scene.cameraOriginLow.xyz);
+  let worldPosition = linear * input.position + relativeTranslation;
   var output: VertexOutput;
-  output.position = scene.viewProjection * worldPosition;
-  output.normal = normalize(mat3x3<f32>(input.model0.xyz, input.model1.xyz, input.model2.xyz) * input.normal);
+  output.position = scene.viewProjection * vec4<f32>(worldPosition, 1.0);
+  output.normal = normalize(linear * input.normal);
   output.objectId = input.objectId;
   output.baseColor = input.baseColor;
-  output.worldPosition = worldPosition.xyz;
+  output.worldPosition = worldPosition;
   return output;
 }
 
@@ -78,11 +90,13 @@ fn fsPick(input: VertexOutput) -> @location(0) vec4<u32> {
 const edgeShader = /* wgsl */ `
 struct SceneUniforms {
   viewProjection: mat4x4<f32>,
+  cameraOriginHigh: vec4<f32>,
+  cameraOriginLow: vec4<f32>,
+  sectionPlane: vec4<f32>,
   selectedObjectId: u32,
   sectionEnabled: u32,
   padding0: u32,
   padding1: u32,
-  sectionPlane: vec4<f32>,
 };
 
 @group(0) @binding(0) var<uniform> scene: SceneUniforms;
@@ -95,6 +109,7 @@ struct VertexInput {
   @location(5) model3: vec4<f32>,
   @location(6) objectId: u32,
   @location(7) baseColor: vec4<f32>,
+  @location(8) translationLow: vec3<f32>,
 };
 
 struct VertexOutput {
@@ -105,12 +120,20 @@ struct VertexOutput {
 
 @vertex
 fn vsMain(input: VertexInput) -> VertexOutput {
-  let model = mat4x4<f32>(input.model0, input.model1, input.model2, input.model3);
-  let worldPosition = model * vec4<f32>(input.position, 1.0);
+  let linear = mat3x3<f32>(input.model0.xyz, input.model1.xyz, input.model2.xyz);
+  // Matching high words cancel exactly; preserve the low-word residual directly.
+  let highTranslation = select(
+    vec3<f32>(0.0),
+    input.model3.xyz - scene.cameraOriginHigh.xyz,
+    input.model3.xyz != scene.cameraOriginHigh.xyz,
+  );
+  let relativeTranslation =
+    highTranslation + (input.translationLow - scene.cameraOriginLow.xyz);
+  let worldPosition = linear * input.position + relativeTranslation;
   var output: VertexOutput;
-  output.position = scene.viewProjection * worldPosition;
+  output.position = scene.viewProjection * vec4<f32>(worldPosition, 1.0);
   output.objectId = input.objectId;
-  output.worldPosition = worldPosition.xyz;
+  output.worldPosition = worldPosition;
   return output;
 }
 
@@ -134,6 +157,7 @@ const instanceBufferLayout: GPUVertexBufferLayout = {
     { shaderLocation: 4, offset: 32, format: "float32x4" },
     { shaderLocation: 5, offset: 48, format: "float32x4" },
     { shaderLocation: 6, offset: 64, format: "uint32" },
+    { shaderLocation: 8, offset: 68, format: "float32x3" },
     { shaderLocation: 7, offset: 80, format: "float32x4" },
   ],
 };
@@ -192,6 +216,8 @@ export interface RenderOptions {
    * Requires a device created with requestTimestampQueries and adapter support.
    */
   readonly timestampWrites?: GPURenderPassTimestampWrites;
+  /** Double-precision world origin subtracted before GPU projection. Defaults to zero. */
+  readonly cameraOrigin?: readonly [number, number, number];
 }
 
 /** Exact allocation census of renderer-owned scene resources. */
@@ -227,6 +253,28 @@ export function normalizeSectionPlane(plane: SectionPlane): NormalizedSectionPla
   return {
     normal: [x / length, y / length, z / length],
     offset: plane.offset / length,
+  };
+}
+
+/** Converts a normalized world-space plane to coordinates relative to one camera origin. */
+export function rebaseSectionPlane(
+  plane: NormalizedSectionPlane,
+  cameraOrigin: ArrayLike<number>,
+): NormalizedSectionPlane {
+  if (
+    cameraOrigin.length !== 3 ||
+    Array.from(cameraOrigin).some((value) => !Number.isFinite(value))
+  ) {
+    throw new TypeError("cameraOrigin must contain three finite values.");
+  }
+  return {
+    normal: plane.normal,
+    offset:
+      plane.offset -
+      plane.normal.reduce(
+        (total, value, axis) => total + value * (cameraOrigin[axis] ?? 0),
+        0,
+      ),
   };
 }
 
@@ -288,10 +336,13 @@ export class Phase0Renderer {
   private readonly pickPipeline: GPURenderPipeline;
   private readonly pixelRatio?: number;
   private readonly lastViewProjection = new Float32Array(16);
-  private readonly uniformData = new ArrayBuffer(96);
+  private readonly lastCameraOrigin = new Float64Array(3);
+  private readonly uniformData = new ArrayBuffer(128);
   private readonly uniformMatrix = new Float32Array(this.uniformData, 0, 16);
-  private readonly uniformFlags = new Uint32Array(this.uniformData, 64, 4);
-  private readonly uniformSectionPlane = new Float32Array(this.uniformData, 80, 4);
+  private readonly uniformCameraOriginHigh = new Float32Array(this.uniformData, 64, 4);
+  private readonly uniformCameraOriginLow = new Float32Array(this.uniformData, 80, 4);
+  private readonly uniformSectionPlane = new Float32Array(this.uniformData, 96, 4);
+  private readonly uniformFlags = new Uint32Array(this.uniformData, 112, 4);
   private batches: GpuBatchResources[] = [];
   private hasRendered = false;
   private selectedObjectId = 0;
@@ -569,7 +620,12 @@ export class Phase0Renderer {
     if (viewProjection.length !== 16) {
       throw new TypeError("viewProjection must contain 16 float32 values.");
     }
+    const cameraOrigin = options.cameraOrigin ?? [0, 0, 0];
+    if (cameraOrigin.length !== 3 || cameraOrigin.some((value) => !Number.isFinite(value))) {
+      throw new TypeError("cameraOrigin must contain three finite values.");
+    }
     this.lastViewProjection.set(viewProjection);
+    this.lastCameraOrigin.set(cameraOrigin);
     this.hasRendered = true;
     this.ensureTargets();
     if (!this.depthTexture) return;
@@ -581,7 +637,7 @@ export class Phase0Renderer {
       );
     }
 
-    this.writeUniforms(viewProjection);
+    this.writeUniforms(viewProjection, cameraOrigin);
     const encoder = this.device.createCommandEncoder({ label: "NARU frame" });
     const colorView = this.context.getCurrentTexture().createView();
     const depthView = this.depthTexture.createView();
@@ -668,7 +724,7 @@ export class Phase0Renderer {
       0,
       Math.min(this.targetHeight - 1, Math.floor(((clientY - rect.top) / rect.height) * this.targetHeight)),
     );
-    this.writeUniforms(this.lastViewProjection);
+    this.writeUniforms(this.lastViewProjection, this.lastCameraOrigin);
     const readback = this.device.createBuffer({
       label: "NARU pick readback",
       size: 256,
@@ -734,13 +790,24 @@ export class Phase0Renderer {
     pass.setIndexBuffer(batch.surfaceIndex, "uint32");
   }
 
-  private writeUniforms(viewProjection: Float32Array): void {
+  private writeUniforms(
+    viewProjection: Float32Array,
+    cameraOrigin: ArrayLike<number>,
+  ): void {
     this.uniformMatrix.set(viewProjection);
     this.uniformFlags[0] = this.selectedObjectId;
     this.uniformFlags[1] = this.sectionPlane ? 1 : 0;
     if (this.sectionPlane) {
-      this.uniformSectionPlane.set(this.sectionPlane.normal, 0);
-      this.uniformSectionPlane[3] = this.sectionPlane.offset;
+      const relativePlane = rebaseSectionPlane(this.sectionPlane, cameraOrigin);
+      this.uniformSectionPlane.set(relativePlane.normal, 0);
+      this.uniformSectionPlane[3] = relativePlane.offset;
+    } else {
+      this.uniformSectionPlane.fill(0);
+    }
+    for (let axis = 0; axis < 3; axis += 1) {
+      const [high, low] = splitFloat64(cameraOrigin[axis] ?? 0);
+      this.uniformCameraOriginHigh[axis] = high;
+      this.uniformCameraOriginLow[axis] = low;
     }
     this.device.queue.writeBuffer(this.cameraBuffer, 0, this.uniformData);
   }
