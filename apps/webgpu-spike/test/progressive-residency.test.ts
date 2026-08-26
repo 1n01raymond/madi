@@ -106,6 +106,24 @@ describe("progressive residency", () => {
     expect(selected.gpuBytes).toBeLessThanOrEqual(800);
   });
 
+  it("evicts detail made colder by a changed view priority", () => {
+    const coarse = decoded([batch(1), batch(2)], [0, 1]);
+    const firstTarget = decoded([batch(1, 20)], [0]);
+    const secondTarget = decoded([batch(2, 20)], [1]);
+    const residency = new ProgressiveResidency(coarse, { decodedBytes: 800, gpuBytes: 800 });
+
+    expect(residency.promote(firstTarget, { priority: 0 }).admitted).toBe(true);
+    residency.reprioritize([
+      { targetMeshIndexes: [0], priority: 1 },
+      { targetMeshIndexes: [1], priority: 0 },
+    ]);
+    const promoted = residency.promote(secondTarget, { priority: 0 });
+
+    expect(promoted.admitted).toBe(true);
+    expect(promoted.evictedTargetMeshIndexes).toEqual([0]);
+    expect(promoted.targetMeshIndexes).toEqual([1]);
+  });
+
   it("accounts for decoder payload and aligned GPU buffers separately", () => {
     const value = batch(1);
     expect(estimateBatchDecodedBytes(value)).toBe(180);

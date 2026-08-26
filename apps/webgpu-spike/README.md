@@ -14,8 +14,9 @@ scene.bin
 
 progressive package
   └─ coarse.bin → one shared canonical-box batch → first WebGPU frame
-       └─ scene.bin Range chunks → coalesced-request promotion
-            └─ stable GPU batch reconciliation → bounded residency admission
+       └─ retained coarse chunk bounds → current-view ranking
+            └─ scene.bin Range chunks → cancellable Worker decode
+                 └─ stable GPU batch reconciliation → bounded residency admission
 ```
 
 Run it with `pnpm dev`. Use `pnpm browser:matrix` for the reproducible headed
@@ -78,8 +79,12 @@ with contiguous occurrence transforms. The browser enforces separate 64 MiB
 decoded and GPU admission budgets. Promoted targets mask matching coarse
 instances; evicting colder target groups reveals those shared fallbacks again,
 so visibility intent and stable object IDs survive every batch update. Add
-`?residencyMiB=5` to force a small budget during local exploration. Persistent
-cache tiers and camera-driven reprioritization remain Phase 2 work.
+`?residencyMiB=5` to force a small budget during local exploration. Orbit,
+pan, zoom, fit, and resize rank visible retained-coarse chunk bounds by distance
+from the view center. If the hottest nonresident chunk
+changes, the scheduler aborts the obsolete HTTP Range and Worker decode before
+starting its replacement; the same order re-ranks eviction priority. Persistent
+cache tiers, spatial clusters, and screen-space LOD remain Phase 2 work.
 
 ## Open another compiled scene
 

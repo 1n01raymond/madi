@@ -438,8 +438,12 @@ those instances again while preserving node-derived object IDs. Selecting an
 unresolved occurrence can pin its requested target and demote colder target
 groups within the same decoded/GPU budgets. Scene replacement or explicit
 user cancellation aborts the active range, terminates the session Worker, and
-prevents later ranges from starting. Camera-driven scheduling across spatial
-chunks, cancellation of obsolete view work, persistent cache tiers, and
+prevents later ranges from starting. The camera scheduler ranks each target
+chunk from retained-coarse bounds built once per scene, visible-first and then
+by distance from the view center. Orbit, pan, zoom, fit, and resize re-rank both
+request and resident-eviction priority; if the hottest nonresident chunk
+changes, the old HTTP Range and Worker decode are aborted before its replacement
+is admitted. Spatial clusters, screen-space LOD, persistent cache tiers, and a
 broader eviction policy remain unimplemented.
 
 The reproducible browser smoke command is `pnpm browser:matrix`. Its committed

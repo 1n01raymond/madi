@@ -1,6 +1,6 @@
 {
-  "schemaVersion": "phase-1-browser-matrix.1",
-  "capturedAt": "2026-08-23T06:41:35.783Z",
+  "schemaVersion": "phase-1-browser-matrix.2",
+  "capturedAt": "2026-08-26T06:42:04.820Z",
   "source": {
     "fixture": "fixtures/step/adafruit-pygamer.step",
     "sceneIr": "generated locally; not committed (80.6 MB JSON evidence)",
@@ -16,8 +16,8 @@
     "sourceDigest": "sha256:f0caf940c27af5a409f7c964d50941f60a1cc6329de14407bedd5fabeb9f10c0"
   },
   "host": {
-    "platform": "win32",
-    "architecture": "x64"
+    "platform": "darwin",
+    "architecture": "arm64"
   },
   "expected": {
     "status": "Compiled glTF ready · 34 shared meshes · 85 renderable occurrences",
@@ -37,17 +37,17 @@
     {
       "browser": "chrome",
       "browserEngine": "Blink",
-      "browserVersion": "151.0.7922.139",
+      "browserVersion": "151.0.7922.174",
       "headless": false,
       "viewport": {
         "width": 1320,
         "height": 1000
       },
-      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36",
-      "platform": "Win32",
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36",
+      "platform": "MacIntel",
       "adapter": {
-        "vendor": "nvidia",
-        "architecture": "lovelace",
+        "vendor": "apple",
+        "architecture": "metal-3",
         "device": "",
         "description": "",
         "isFallbackAdapter": false
@@ -66,6 +66,10 @@
         "faviconLoaded": true,
         "fixtureCreditLinked": true,
         "selection": "Selected JOYSTICK_ANALOG_MINITHM:JOY1 · node 56 · ID 57 · 524 CAD edge refs",
+        "pickPoint": {
+          "x": 0.6,
+          "y": 0.35
+        },
         "sectionInteraction": true,
         "hierarchySearchAndProperties": true,
         "sceneSources": {
@@ -77,32 +81,45 @@
           "coarseVisibleBeforeTarget": true,
           "targetRequestSawCoarseReady": true,
           "coarseStatus": "Coarse bounds ready · 10 renderable occurrences · loading 183.6 KiB target geometry…",
-          "coarseTriangles": "36",
-          "coarseEdges": "36",
+          "coarseTriangles": "12",
+          "coarseEdges": "12",
           "coarseScreenshot": {
-            "path": "chrome-151-windows-coarse.png",
-            "bytes": 321958,
-            "sha256": "fac99089f5838dfe01d4ef740958ee2fd4593f6389acf9aa5fd173607a87f467"
+            "path": "chrome-151-macos-coarse.png",
+            "bytes": 360610,
+            "sha256": "4b4ba525b4c2dfe0993d6c2acaf8298072473ea9cb259af0e6018faeb074a33f"
           },
           "firstTargetChunkPromoted": true,
-          "partialStatus": "Target detail 1/3 · 8 occurrences promoted · 31.7 KiB range-decoded",
-          "partialTriangles": "380",
-          "partialEdges": "61",
+          "partialStatus": "View-priority target detail 1/3 · 10 occurrences retained · 32.7 KiB GPU resident",
+          "partialTriangles": "368",
+          "partialEdges": "49",
           "partialScreenshot": {
-            "path": "chrome-151-windows-partial.png",
-            "bytes": 318519,
-            "sha256": "64bdda6ab5ff642f114d42e52d20fa3554134d0459af3afe52777b832115c329"
+            "path": "chrome-151-macos-partial.png",
+            "bytes": 361113,
+            "sha256": "6169d8f206446153cfbcd95a65955c33b33109efd901923a785c986d5d92739f"
           },
           "targetPromoted": true,
-          "targetStatus": "Compiled glTF ready · 3 shared meshes · 10 renderable occurrences",
-          "targetTriangles": "2,076",
-          "targetEdges": "181",
+          "targetStatus": "Compiled glTF ready · 4 surface batches · 10 renderable occurrences",
+          "targetTriangles": "2,088",
+          "targetEdges": "193",
           "targetRangeRequests": [
             "bytes=1500-34007",
-            "bytes=34008-188043",
-            "bytes=0-1499"
+            "bytes=0-1499",
+            "bytes=34008-188043"
           ],
           "targetResponsesPartial": true,
+          "viewPriority": {
+            "initialSchedulerChunk": "target:0000:prototype:part:fastener-01",
+            "replacementSchedulerChunk": "target:0001:prototype:part:mounting-plate",
+            "initialRange": "bytes=1500-34007",
+            "replacementRange": "bytes=34008-188043",
+            "obsoleteRangeCancelled": true,
+            "replacementRequestedBeforeRelease": true,
+            "screenshot": {
+              "path": "chrome-151-macos-view-priority.png",
+              "bytes": 363457,
+              "sha256": "8f9ca07322a4bb66bf24433b16472db99ecfbc9ac89dc44f0f9d5da1ec5c08c8"
+            }
+          },
           "cancellation": {
             "activeRangeAborted": true,
             "requestsBeforeCancel": 2,
@@ -113,9 +130,9 @@
       },
       "consoleIssues": [],
       "screenshot": {
-        "path": "chrome-151-windows-selected.png",
-        "bytes": 380524,
-        "sha256": "9f0a4a251b87eda1536bebf4fd4829f1e01a2833d66288e7a02a9f6257369288"
+        "path": "chrome-151-macos-selected.png",
+        "bytes": 435644,
+        "sha256": "6709e1872d95f5432c94ea944b70a70a8d10337ee21ec596f1f2eac60b8894c3"
       }
     },
     {
@@ -127,8 +144,8 @@
         "width": 1320,
         "height": 1000
       },
-      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:150.0) Gecko/20100101 Firefox/150.0",
-      "platform": "Win32",
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:150.0) Gecko/20100101 Firefox/150.0",
+      "platform": "MacIntel",
       "adapter": {
         "vendor": "",
         "architecture": "",
@@ -150,6 +167,10 @@
         "faviconLoaded": true,
         "fixtureCreditLinked": true,
         "selection": "Selected JOYSTICK_ANALOG_MINITHM:JOY1 · node 56 · ID 57 · 524 CAD edge refs",
+        "pickPoint": {
+          "x": 0.6,
+          "y": 0.35
+        },
         "sectionInteraction": true,
         "hierarchySearchAndProperties": true,
         "sceneSources": {
@@ -161,32 +182,45 @@
           "coarseVisibleBeforeTarget": true,
           "targetRequestSawCoarseReady": true,
           "coarseStatus": "Coarse bounds ready · 10 renderable occurrences · loading 183.6 KiB target geometry…",
-          "coarseTriangles": "36",
-          "coarseEdges": "36",
+          "coarseTriangles": "12",
+          "coarseEdges": "12",
           "coarseScreenshot": {
-            "path": "firefox-150-windows-coarse.png",
-            "bytes": 303373,
-            "sha256": "6b35ee40ea1cc9756c22d5d38e8695f25476272bb995b89b05fa66862951d595"
+            "path": "firefox-150-macos-coarse.png",
+            "bytes": 1045055,
+            "sha256": "68dedb5d59618c55f7edc19e1bd726fb5b202780815b81ac3abfc8cde7cdcf71"
           },
           "firstTargetChunkPromoted": true,
-          "partialStatus": "Target detail 1/3 · 8 occurrences promoted · 31.7 KiB range-decoded",
-          "partialTriangles": "380",
-          "partialEdges": "61",
+          "partialStatus": "View-priority target detail 1/3 · 10 occurrences retained · 32.7 KiB GPU resident",
+          "partialTriangles": "368",
+          "partialEdges": "49",
           "partialScreenshot": {
-            "path": "firefox-150-windows-partial.png",
-            "bytes": 298529,
-            "sha256": "2c8a314a9f671f94c3e3928abce0ea6897b5af95128baf60b2d74df18b07af97"
+            "path": "firefox-150-macos-partial.png",
+            "bytes": 1036930,
+            "sha256": "6700f472f0b67c98dbb431c789f1d41b7319e0bca93693730a3f10e7928e59bc"
           },
           "targetPromoted": true,
-          "targetStatus": "Compiled glTF ready · 3 shared meshes · 10 renderable occurrences",
-          "targetTriangles": "2,076",
-          "targetEdges": "181",
+          "targetStatus": "Compiled glTF ready · 4 surface batches · 10 renderable occurrences",
+          "targetTriangles": "2,088",
+          "targetEdges": "193",
           "targetRangeRequests": [
             "bytes=1500-34007",
-            "bytes=34008-188043",
-            "bytes=0-1499"
+            "bytes=0-1499",
+            "bytes=34008-188043"
           ],
           "targetResponsesPartial": true,
+          "viewPriority": {
+            "initialSchedulerChunk": "target:0000:prototype:part:fastener-01",
+            "replacementSchedulerChunk": "target:0001:prototype:part:mounting-plate",
+            "initialRange": "bytes=1500-34007",
+            "replacementRange": "bytes=34008-188043",
+            "obsoleteRangeCancelled": true,
+            "replacementRequestedBeforeRelease": true,
+            "screenshot": {
+              "path": "firefox-150-macos-view-priority.png",
+              "bytes": 1053825,
+              "sha256": "864b03a0c7fc0448fb6f4384e731dbb5f390e3ddc071da9bf07775ba03c6add7"
+            }
+          },
           "cancellation": {
             "activeRangeAborted": true,
             "requestsBeforeCancel": 2,
@@ -197,9 +231,9 @@
       },
       "consoleIssues": [],
       "screenshot": {
-        "path": "firefox-150-windows-selected.png",
-        "bytes": 354629,
-        "sha256": "1d0cb6bf6fafdcf72c58f1856363317a24d1e173523cc35688209a680d848553"
+        "path": "firefox-150-macos-selected.png",
+        "bytes": 1227402,
+        "sha256": "213a1f33c872930e43f42eb5791a04a037069b127e7829ff651b49552baca75e"
       }
     }
   ]

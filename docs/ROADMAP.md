@@ -108,8 +108,9 @@ range. User/scene replacement cancellation now stops an active range and its
 Worker. Coalesced range promotion does not rebuild unchanged GPU buffers and
 has a fixed admission cap. A selected occurrence can pin a requested target
 chunk and replace colder target detail with retained coarse fallbacks;
-camera-driven reprioritization, obsolete-work cancellation, and cache tiers
-remain pending.
+camera navigation now re-ranks retained-coarse chunk bounds, cancels an
+obsolete active Range/Worker decode, and applies the same order to residency
+eviction. Spatial/screen-space policy and persistent cache tiers remain pending.
 
 The camera-relative precision path is now decision evidence for ADR-0005. A
 project-owned 0.25 mm gap is retained at a 10,000 km offset with
@@ -152,7 +153,8 @@ smoke-checks the live app, package resources, and HTTP Range delivery.
 ## Phase 2 — Large-scene alpha (`0.2.x`)
 
 - content-addressed persistent cache;
-- view-prioritized scheduling and cancellation of obsolete camera work;
+- view-prioritized scheduling and cancellation of obsolete camera work
+  (coarse-bounds policy implemented; spatial/screen-space policy pending);
 - dynamic memory budgets and persistent cache tiers (fixed admission budgets and
   selected-target eviction implemented);
 - spatial/draw clustering;

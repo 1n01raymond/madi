@@ -124,8 +124,9 @@ direct WebGPU renderer. The Phase 0 Scene IR JSON is no longer a browser input.
 | Review interaction | Orthographic orbit/pan/zoom/fit, synchronized canvas/tree selection, hide/isolate/show-all, and one axis-controlled section plane; surfaces, explicit edges, and picking share the clipping equation without rebuilding GPU resources | Passed by camera/visibility/section unit tests and browser interaction review |
 | Scene inspection | Tokenized hierarchy search covers names and source identity before geometry residency; viewport/tree/search selection share an occurrence property panel with bounded edge-reference previews, and packages carrying the property sidecar resolve the selected occurrence's IFC property sets lazily through `resolvePropertyEntries` (search deliberately does not index property values in Phase 1) | Passed by search/sidecar unit tests and cross-browser interaction review |
 | Scene opening | HTTP(S) glTF URLs are shareable through `?scene=`; a validated local `.gltf` plus all declared `.bin` resources load entirely client-side and decode their `File` objects in the Worker without a binary network request | Passed by source unit tests and the Chrome/Firefox browser matrix |
-| Useful frame before target | Recorder holds the first target Range response, captures a 36-triangle/36-edge coarse frame, then releases all ranges and observes promotion to 2,076 triangles/181 edges | Passed in headed Chrome and Firefox |
-| Mixed-residency frame | Recorder releases only the first 31.7 KiB range, captures 8 detailed fasteners alongside two retained coarse batches at 380 triangles/61 edges, then completes the remaining ranges | Passed in headed Chrome and Firefox |
+| Useful frame before target | Recorder holds the first target Range response, captures a 12-triangle/12-edge shared coarse frame, then releases all ranges and observes 2,088 resident triangles/193 resident edges including the retained shared fallback | Passed in headed Chrome and Firefox |
+| Mixed-residency frame | Recorder releases only the first 31.7 KiB range and captures 8 detailed fasteners at 368 resident triangles/49 resident edges before completing the remaining ranges | Passed in headed Chrome and Firefox |
+| View-priority scheduling | Recorder holds the initial fastener Range, pans the camera, observes its Worker cancellation, and receives the newly hottest mounting-plate Range before releasing the obsolete response | Passed in headed Chrome and Firefox |
 | In-flight cancellation | A second browser run cancels while range 2/3 is pending, observes `Scene load cancelled.`, and proves that range 3/3 is never requested | Passed in headed Chrome and Firefox |
 | Browser conformance | Headed Chrome/Blink and Firefox/Gecko emit no console warnings or errors | Passed by `pnpm browser:matrix` |
 | Safari capability | Real Safari 18.6 loads 87 hierarchy records under default settings, then reports that WebGPU is unavailable because `navigator.gpu` is absent | Graceful unsupported-browser result; rendering conformance not yet available |
@@ -177,10 +178,10 @@ See `artifacts/phase1/README.md` for the compiled package,
 
 ## Not yet proven
 
-- Shape-preserving LODs, spatial partitioning, compression, camera-driven
-  reprioritization, and a general cache-aware eviction policy under a bounded
-  residency budget. The current selection path can only restore retained coarse
-  fallback batches.
+- Shape-preserving and screen-space LODs, spatial partitioning, compression,
+  persistent cache tiers, and a general cache-aware eviction policy under a
+  bounded residency budget. The current camera policy ranks retained-coarse
+  chunk bounds and can only restore their shared fallback batch.
 - Full material, mass, PMI, and domain-specific property schemas remain
   pending, and Studio search does not index property values (a deliberate
   Phase 1 limit — the sidecar is resolved per selected occurrence only).
@@ -205,8 +206,10 @@ The IFC-discovered 3,383 prototype ranges now coalesce into 45 deterministic
 512 KiB target requests (one indivisible 1.12 MiB prototype remains whole),
 and the browser reconciles only changed GPU batches under fixed 64 MiB decoded
 and GPU admission caps. A selected target now pins its detail and evicts colder
-target groups to their retained coarse fallbacks. The next scheduler increment
-is persistent cache tiers and camera/view reprioritization.
+target groups to their retained coarse fallbacks. Camera navigation now
+re-ranks retained-coarse chunk bounds, cancels obsolete Range/Worker
+work, and updates eviction priority. The next scheduler increment is persistent
+cache tiers plus spatial and screen-space priority.
 
 On the compiler side the structure document now streams record by record,
 property keys and key combinations are interned once at scene level, and the
@@ -224,8 +227,8 @@ recorded (`artifacts/ifc/sixty5-browser/`): loading, bounded residency,
 picking, and lazy property resolution hold at real-large scale. The named
 268.0 s main-thread first-frame path is now reduced to a 12.796 s median by
 the shared-coarse/persistent-Worker follow-up in
-`artifacts/ifc/sixty5-first-frame/`. Spatial scheduling and cache tiers remain
-the next runtime increments.
+`artifacts/ifc/sixty5-first-frame/`. Spatial partitioning, screen-space policy,
+and cache tiers remain the next runtime increments.
 
 In parallel, the repeated 100k record now carries GPU pass timestamps and a
 backend-owned retained-resource census on both the discrete host and an Apple

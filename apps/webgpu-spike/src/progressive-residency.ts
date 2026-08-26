@@ -39,10 +39,15 @@ export interface PromotionResult extends ResidencySnapshot {
 }
 
 export interface PromotionOptions {
-  /** Lower values are hotter; compiled target chunk priority is suitable here. */
+  /** Lower values are hotter; compiled or view-derived chunk priority is suitable here. */
   readonly priority?: number;
   /** Make this request's target groups eviction-proof until the next selection boost. */
   readonly pin?: boolean;
+}
+
+export interface ResidencyPriority {
+  readonly targetMeshIndexes: readonly number[];
+  readonly priority: number;
 }
 
 export interface ProgressiveResidencyOptions {
@@ -192,6 +197,21 @@ export class ProgressiveResidency {
       if (!this.targetMeshIndexes.has(targetMeshIndex)) continue;
       this.pinnedTargetMeshIndexes.add(targetMeshIndex);
       this.touch(targetMeshIndex);
+    }
+    return this.snapshot();
+  }
+
+  /** Re-ranks resident detail after the camera/view priority order changes. */
+  reprioritize(groups: readonly ResidencyPriority[]): ResidencySnapshot {
+    for (const group of groups) {
+      if (!Number.isSafeInteger(group.priority) || group.priority < 0) {
+        throw new TypeError("Target residency priority must be a non-negative safe integer.");
+      }
+      for (const targetMeshIndex of group.targetMeshIndexes) {
+        if (this.targetMeshIndexes.has(targetMeshIndex)) {
+          this.priorityByTargetMesh.set(targetMeshIndex, group.priority);
+        }
+      }
     }
     return this.snapshot();
   }

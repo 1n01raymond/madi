@@ -12,6 +12,7 @@ import type {
 } from "@naru3d/runtime-webgpu";
 
 import { GeometryDecoder } from "./geometry-decoder.js";
+import type { GeometryDecodeResult } from "./geometry-decoder.js";
 import { HierarchySearchIndex } from "./hierarchy-search.js";
 import type { HierarchySearchResult } from "./hierarchy-search.js";
 import { AxisSectionPlane } from "./section-plane.js";
@@ -29,6 +30,14 @@ import {
   defaultProgressiveResidencyBudget,
   ProgressiveResidency,
 } from "./progressive-residency.js";
+import {
+  CameraTargetScheduler,
+  TargetChunkViewIndex,
+} from "./view-priority-scheduler.js";
+import type {
+  RankedTargetChunk,
+  TargetSchedulerEvent,
+} from "./view-priority-scheduler.js";
 import faviconUrl from "../../../docs/media/naru-favicon.svg?url";
 import inverseMarkUrl from "../../../docs/media/naru-mark-inverse.svg?url";
 
@@ -204,6 +213,12 @@ function resetSceneUi(): void {
   delete document.documentElement.dataset.residencyBudgetBytes;
   delete document.documentElement.dataset.selectionResidency;
   delete document.documentElement.dataset.evictedTargetMeshCount;
+  delete document.documentElement.dataset.targetSchedulerRequests;
+  delete document.documentElement.dataset.targetSchedulerCancellations;
+  delete document.documentElement.dataset.targetSchedulerChunk;
+  delete document.documentElement.dataset.targetSchedulerPriority;
+  delete document.documentElement.dataset.targetSchedulerCancelledChunk;
+  delete document.documentElement.dataset.targetSchedulerOrder;
   hierarchySearchInput.value = "";
   hierarchySearchResult.textContent = "Waiting for hierarchy";
   hierarchyEmpty.hidden = true;
@@ -308,13 +323,17 @@ async function loadScene(source: SceneSource): Promise<boolean> {
       adapterInfo.description || adapterInfo.vendor || "WebGPU adapter",
     );
     let animationFrame = 0;
-    const sessionResources: { resizeObserver?: ResizeObserver } = {};
+    const sessionResources: {
+      resizeObserver?: ResizeObserver;
+      targetScheduler?: CameraTargetScheduler<GeometryDecodeResult>;
+    } = {};
     let disposed = false;
     const dispose = (): void => {
       if (disposed) return;
       disposed = true;
       interactions.abort();
       sessionResources.resizeObserver?.disconnect();
+      sessionResources.targetScheduler?.stop();
       if (animationFrame !== 0) cancelAnimationFrame(animationFrame);
       geometryDecoder.dispose();
       renderer.destroy();
@@ -333,7 +352,6 @@ async function loadScene(source: SceneSource): Promise<boolean> {
     });
     let scene = initial.scene;
     let decodeMilliseconds = initial.decodeMilliseconds;
-    let residencyBudgetReached = false;
     let residentDecodedBytes: number | undefined;
     let residentGpuBytes: number | undefined;
     const progressiveResidency =
@@ -355,15 +373,25 @@ async function loadScene(source: SceneSource): Promise<boolean> {
     }
 
     const camera = new OrthographicOrbitCamera(scene.bounds);
+    let updateTargetView = (_frame: ReturnType<OrthographicOrbitCamera["frame"]>): void => {};
+    let cameraChanged = false;
     const render = (): void => {
       animationFrame = 0;
       const aspect = canvas.clientWidth / Math.max(canvas.clientHeight, 1);
       const frame = camera.frame(aspect);
       document.documentElement.dataset.cameraOrigin = frame.origin.join(",");
       renderer.render(frame.viewProjection, { cameraOrigin: frame.origin });
+      if (cameraChanged) {
+        cameraChanged = false;
+        updateTargetView(frame);
+      }
     };
     const scheduleRender = (): void => {
       if (animationFrame === 0) animationFrame = requestAnimationFrame(render);
+    };
+    const scheduleCameraRender = (): void => {
+      cameraChanged = true;
+      scheduleRender();
     };
     render();
 
@@ -395,112 +423,27 @@ async function loadScene(source: SceneSource): Promise<boolean> {
         renderer.setScene(scene.gpuScene);
         render();
       } else {
-        const coarseScene = scene;
         if (!progressiveResidency) throw new Error("Missing progressive residency state.");
-        const residency = progressiveResidency;
-        let decodedTargetBytes = 0;
-        let readyChunks = 0;
         document.documentElement.dataset.targetChunksTotal = String(
           hierarchy.targetChunks.length,
         );
         document.documentElement.dataset.residencyBudgetBytes = String(
           residencyBudget,
         );
-
-        for (const chunk of hierarchy.targetChunks) {
-          const target = await geometryDecoder.decode(
-            binarySourceForChunk(loaded.targetBinary, chunk),
-            "target",
-            chunk.id,
-          ).catch((error: unknown) => {
-            dispose();
-            throw error;
-          });
-          decodeMilliseconds += target.decodeMilliseconds;
-          const promotion = residency.promote(target.scene, { priority: chunk.priority });
-          if (!promotion.admitted) {
-            residencyBudgetReached = true;
-            break;
-          }
-          decodedTargetBytes += target.scene.summary.binaryBytes;
-          readyChunks += 1;
-          renderer.reconcileBatches(
-            promotion.entries.map(({ key, batch }) => ({ key, batch })),
-            { sharedObjectIdsAcrossBatches: true },
-          );
-          const residencyVisibility = occurrenceVisibilityForResidency(
-            { batches: promotion.entries.map(({ batch }) => batch), sharedObjectIdsAcrossBatches: true },
-            initial.coarseInstanceTargetMeshIndexes,
-            promotion.targetMeshIndexes,
-          );
-          renderer.updateVisibleInstances(
-            residencyVisibility.indicesByBatch,
-            residencyVisibility.counts,
-          );
-          render();
-          document.documentElement.dataset.targetChunksReady = String(readyChunks);
-          document.documentElement.dataset.geometryRepresentation =
-            readyChunks === hierarchy.targetChunks.length ? "target" : "mixed";
-          status.textContent =
-            `Target detail ${readyChunks}/${hierarchy.targetChunks.length} · ` +
-            `${coarseScene.objectEvidence.length} occurrences retained · ` +
-            `${formatBytes(promotion.gpuBytes)} GPU resident`;
-          status.dataset.stage = "target-chunks";
-          setText("#triangle-count", promotion.triangles.toLocaleString("en-US"));
-          setText("#edge-count", promotion.edgeSegments.toLocaleString("en-US"));
-          setText("#decode-time", `${decodeMilliseconds.toFixed(1)} ms`);
-          setText(
-            "#geometry-result",
-            `${formatBytes(decodedTargetBytes)} range-decoded · ` +
-              `${formatBytes(promotion.decodedBytes)} CPU / ${formatBytes(promotion.gpuBytes)} GPU`,
-          );
-          await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
-        }
-
-        const finalResidency = residency.current();
-        residentDecodedBytes = finalResidency.decodedBytes;
-        residentGpuBytes = finalResidency.gpuBytes;
-        document.documentElement.dataset.residentDecodedBytes = String(finalResidency.decodedBytes);
-        document.documentElement.dataset.residentGpuBytes = String(renderer.residentGpuBytes);
-        if (residencyBudgetReached) {
-          document.documentElement.dataset.residencyBudgetReached = "true";
-        }
-        scene = {
-          gpuScene: {
-            batches: finalResidency.entries.map(({ batch }) => batch),
-            sharedObjectIdsAcrossBatches: true,
-          },
-          bounds: coarseScene.bounds,
-          hierarchy,
-          objectEvidence: coarseScene.objectEvidence,
-          batchEvidence: finalResidency.entries.map(({ evidence }, batchIndex) => ({
-            ...evidence,
-            batchIndex,
-          })),
-          summary: {
-            prototypeBatches: finalResidency.entries.length,
-            partOccurrences: coarseScene.objectEvidence.length,
-            triangles: finalResidency.triangles,
-            edgeSegments: finalResidency.edgeSegments,
-            binaryBytes: hierarchy.binaryByteLength,
-            representation: "target",
-          },
-        };
+        document.documentElement.dataset.targetChunksReady = "0";
+        document.documentElement.dataset.targetReady = "loading";
       }
     }
 
-    document.documentElement.dataset.geometryRepresentation = residencyBudgetReached
-      ? "mixed"
-      : "target";
-    document.documentElement.dataset.targetReady = residencyBudgetReached ? "limited" : "true";
-
-    status.textContent = residencyBudgetReached
-      ? `Residency budget reached · ${scene.summary.prototypeBatches} surface batches retained · ` +
-        `${scene.summary.partOccurrences} renderable occurrences`
-      : `Compiled glTF ready · ${scene.summary.prototypeBatches} surface batches · ` +
+    if (!progressiveResidency) {
+      document.documentElement.dataset.geometryRepresentation = "target";
+      document.documentElement.dataset.targetReady = "true";
+      status.textContent =
+        `Compiled glTF ready · ${scene.summary.prototypeBatches} shared meshes · ` +
         `${scene.summary.partOccurrences} renderable occurrences`;
-    status.dataset.state = "ready";
-    status.dataset.stage = "rendered";
+      status.dataset.state = "ready";
+      status.dataset.stage = "rendered";
+    }
     setText("#triangle-count", scene.summary.triangles.toLocaleString("en-US"));
     setText("#edge-count", scene.summary.edgeSegments.toLocaleString("en-US"));
     setText("#decode-time", `${decodeMilliseconds.toFixed(1)} ms`);
@@ -671,47 +614,21 @@ async function loadScene(source: SceneSource): Promise<boolean> {
       scheduleRender();
     };
 
-    let selectionRequest = 0;
-    const promoteSelectedResidency = async (picked: CompiledObjectEvidence): Promise<void> => {
-      if (!progressiveResidency) return;
-      const chunk = chunksByPrototype.get(picked.prototypeId);
-      if (!chunk) return;
-      const request = ++selectionRequest;
-      if (progressiveResidency.hasTargetMeshes(chunk.meshIndexes)) {
-        progressiveResidency.pinTargetMeshes(chunk.meshIndexes);
-        document.documentElement.dataset.selectionResidency = "retained";
-        return;
-      }
-
-      document.documentElement.dataset.selectionResidency = "loading";
-      status.textContent = `Loading selected target detail · ${formatBytes(chunk.byteLength)}…`;
-      status.dataset.stage = "selection-residency";
-      let target: { readonly scene: DecodedCompiledScene; readonly decodeMilliseconds: number };
-      try {
-        target = await geometryDecoder.decode(
-          binarySourceForChunk(loaded.targetBinary, chunk),
-          "target",
-          chunk.id,
-        );
-      } catch (error) {
-        if (error instanceof DOMException && error.name === "AbortError") return;
-        throw error;
-      }
-      if (disposed || request !== selectionRequest || selectedObjectId !== picked.objectId) return;
-      decodeMilliseconds += target.decodeMilliseconds;
-      const promotion = progressiveResidency.promote(target.scene, {
-        priority: chunk.priority,
-        pin: true,
-      });
-      if (!promotion.admitted) {
-        document.documentElement.dataset.selectionResidency = "coarse";
-        status.textContent =
-          `Selected target request exceeds the ${formatBytes(residencyBudget)} residency budget · ` +
-          "coarse fallback retained";
-        status.dataset.stage = "selection-residency";
-        return;
-      }
-
+    const coarseScene = initial.scene;
+    let decodedTargetBytes = 0;
+    let schedulerFailure: unknown;
+    let schedulerRequests = 0;
+    let schedulerCancellations = 0;
+    const residentChunkCount = (): number => {
+      if (!progressiveResidency) return 0;
+      return hierarchy.targetChunks.filter((chunk) =>
+        progressiveResidency.hasTargetMeshes(chunk.meshIndexes),
+      ).length;
+    };
+    const applyPromotion = (
+      promotion: ReturnType<ProgressiveResidency["promote"]>,
+      target: GeometryDecodeResult,
+    ): void => {
       const visibilitySnapshot = visibility.snapshot();
       scene = {
         ...scene,
@@ -728,6 +645,7 @@ async function loadScene(source: SceneSource): Promise<boolean> {
           prototypeBatches: promotion.entries.length,
           triangles: promotion.triangles,
           edgeSegments: promotion.edgeSegments,
+          representation: "target",
         },
       };
       renderer.reconcileBatches(
@@ -741,31 +659,182 @@ async function loadScene(source: SceneSource): Promise<boolean> {
       );
       visibility.restore(visibilitySnapshot);
       renderer.updateVisibleInstances(visibility.indicesByBatch, visibility.counts);
+      decodeMilliseconds += target.decodeMilliseconds;
+      decodedTargetBytes += target.scene.summary.binaryBytes;
       residentDecodedBytes = promotion.decodedBytes;
       residentGpuBytes = promotion.gpuBytes;
-      residencyBudgetReached = true;
-      document.documentElement.dataset.residencyBudgetReached = "true";
+      const readyChunks = residentChunkCount();
+      document.documentElement.dataset.targetChunksReady = String(readyChunks);
       document.documentElement.dataset.residentDecodedBytes = String(promotion.decodedBytes);
       document.documentElement.dataset.residentGpuBytes = String(renderer.residentGpuBytes);
-      document.documentElement.dataset.geometryRepresentation = "mixed";
-      document.documentElement.dataset.targetReady = "limited";
-      document.documentElement.dataset.selectionResidency = "target";
-      document.documentElement.dataset.evictedTargetMeshCount = String(
-        promotion.evictedTargetMeshIndexes.length,
-      );
+      document.documentElement.dataset.geometryRepresentation =
+        readyChunks === hierarchy.targetChunks.length ? "target" : "mixed";
+      document.documentElement.dataset.targetReady =
+        readyChunks === hierarchy.targetChunks.length ? "true" : "loading";
       status.textContent =
-        `Selected target detail resident · ${promotion.evictedTargetMeshIndexes.length} colder ` +
-        `target groups evicted · ${formatBytes(promotion.gpuBytes)} GPU resident`;
-      status.dataset.stage = "selection-residency";
+        `View-priority target detail ${readyChunks}/${hierarchy.targetChunks.length} · ` +
+        `${coarseScene.objectEvidence.length} occurrences retained · ` +
+        `${formatBytes(promotion.gpuBytes)} GPU resident`;
+      status.dataset.state = "loading";
+      status.dataset.stage = "target-chunks";
       setText("#triangle-count", promotion.triangles.toLocaleString("en-US"));
       setText("#edge-count", promotion.edgeSegments.toLocaleString("en-US"));
       setText("#decode-time", `${decodeMilliseconds.toFixed(1)} ms`);
       setText(
         "#geometry-result",
-        `${formatBytes(promotion.decodedBytes)} CPU / ${formatBytes(promotion.gpuBytes)} GPU resident ` +
-          `(budget ${formatBytes(residencyBudget)})`,
+        `${formatBytes(decodedTargetBytes)} range-decoded · ` +
+          `${formatBytes(promotion.decodedBytes)} CPU / ${formatBytes(promotion.gpuBytes)} GPU`,
       );
       applyVisibility();
+    };
+    const finalizeProgressiveStatus = (): void => {
+      if (!progressiveResidency) return;
+      const current = progressiveResidency.current();
+      const readyChunks = residentChunkCount();
+      const complete = readyChunks === hierarchy.targetChunks.length;
+      residentDecodedBytes = current.decodedBytes;
+      residentGpuBytes = current.gpuBytes;
+      document.documentElement.dataset.targetChunksReady = String(readyChunks);
+      document.documentElement.dataset.residentDecodedBytes = String(current.decodedBytes);
+      document.documentElement.dataset.residentGpuBytes = String(renderer.residentGpuBytes);
+      document.documentElement.dataset.geometryRepresentation = complete ? "target" : "mixed";
+      document.documentElement.dataset.targetReady = complete ? "true" : "limited";
+      if (complete) delete document.documentElement.dataset.residencyBudgetReached;
+      else document.documentElement.dataset.residencyBudgetReached = "true";
+      status.textContent = complete
+        ? `Compiled glTF ready · ${scene.summary.prototypeBatches} surface batches · ` +
+          `${scene.summary.partOccurrences} renderable occurrences`
+        : `Residency budget reached · ${scene.summary.prototypeBatches} surface batches retained · ` +
+          `${scene.summary.partOccurrences} renderable occurrences`;
+      status.dataset.state = "ready";
+      status.dataset.stage = "rendered";
+      setText("#triangle-count", scene.summary.triangles.toLocaleString("en-US"));
+      setText("#edge-count", scene.summary.edgeSegments.toLocaleString("en-US"));
+      setText("#decode-time", `${decodeMilliseconds.toFixed(1)} ms`);
+      setText(
+        "#geometry-result",
+        `${formatBytes(current.decodedBytes)} CPU / ${formatBytes(current.gpuBytes)} GPU resident ` +
+          `(budget ${formatBytes(residencyBudget)})`,
+      );
+    };
+    const recordSchedulerEvent = (event: TargetSchedulerEvent): void => {
+      document.documentElement.dataset.targetSchedulerChunk = event.chunkId;
+      document.documentElement.dataset.targetSchedulerPriority = String(event.viewPriority);
+      if (event.type === "request") {
+        schedulerRequests += 1;
+        document.documentElement.dataset.targetSchedulerRequests = String(schedulerRequests);
+      } else if (event.type === "cancel") {
+        schedulerCancellations += 1;
+        document.documentElement.dataset.targetSchedulerCancellations = String(
+          schedulerCancellations,
+        );
+        document.documentElement.dataset.targetSchedulerCancelledChunk = event.chunkId;
+      } else if (event.type === "blocked") {
+        finalizeProgressiveStatus();
+      } else if (residentChunkCount() === hierarchy.targetChunks.length) {
+        finalizeProgressiveStatus();
+      }
+    };
+    if (progressiveResidency) {
+      const viewIndex = new TargetChunkViewIndex(
+        hierarchy.targetChunks,
+        coarseScene,
+        initial.coarseInstanceTargetMeshIndexes,
+      );
+      const scheduler = new CameraTargetScheduler(viewIndex, {
+        isResident: (chunk) => progressiveResidency.hasTargetMeshes(chunk.meshIndexes),
+        load: (chunk, signal) =>
+          geometryDecoder.decode(
+            binarySourceForChunk(loaded.targetBinary, chunk),
+            "target",
+            chunk.id,
+            signal,
+          ),
+        admit: (_chunk, target, viewPriority) => {
+          const promotion = progressiveResidency.promote(target.scene, {
+            priority: viewPriority,
+          });
+          if (!promotion.admitted) return false;
+          applyPromotion(promotion, target);
+          return true;
+        },
+        reprioritize: (ranked: readonly RankedTargetChunk[]) => {
+          document.documentElement.dataset.targetSchedulerOrder = ranked
+            .map(({ chunk }) => chunk.id)
+            .join(",");
+          progressiveResidency.reprioritize(
+            ranked.map(({ chunk, viewPriority }) => ({
+              targetMeshIndexes: chunk.meshIndexes,
+              priority: viewPriority,
+            })),
+          );
+        },
+        onEvent: recordSchedulerEvent,
+        onError: (error) => {
+          schedulerFailure = error;
+          status.textContent = error instanceof Error ? error.message : String(error);
+          status.dataset.state = "error";
+        },
+      });
+      sessionResources.targetScheduler = scheduler;
+      updateTargetView = (frame): void => scheduler.update(frame);
+    }
+
+    let selectionRequest = 0;
+    const promoteSelectedResidency = async (picked: CompiledObjectEvidence): Promise<void> => {
+      if (!progressiveResidency) return;
+      const chunk = chunksByPrototype.get(picked.prototypeId);
+      if (!chunk) return;
+      const request = ++selectionRequest;
+      if (progressiveResidency.hasTargetMeshes(chunk.meshIndexes)) {
+        progressiveResidency.pinTargetMeshes(chunk.meshIndexes);
+        document.documentElement.dataset.selectionResidency = "retained";
+        return;
+      }
+
+      document.documentElement.dataset.selectionResidency = "loading";
+      status.textContent = `Loading selected target detail · ${formatBytes(chunk.byteLength)}…`;
+      status.dataset.stage = "selection-residency";
+      const targetScheduler = sessionResources.targetScheduler;
+      targetScheduler?.pause();
+      try {
+        const target = await geometryDecoder.decode(
+          binarySourceForChunk(loaded.targetBinary, chunk),
+          "target",
+          chunk.id,
+        );
+        if (disposed || request !== selectionRequest || selectedObjectId !== picked.objectId) return;
+        const promotion = progressiveResidency.promote(target.scene, {
+          priority: chunk.priority,
+          pin: true,
+        });
+        if (!promotion.admitted) {
+          document.documentElement.dataset.selectionResidency = "coarse";
+          status.textContent =
+            `Selected target request exceeds the ${formatBytes(residencyBudget)} residency budget · ` +
+            "coarse fallback retained";
+          status.dataset.stage = "selection-residency";
+          return;
+        }
+
+        applyPromotion(promotion, target);
+        document.documentElement.dataset.residencyBudgetReached = "true";
+        document.documentElement.dataset.targetReady = "limited";
+        document.documentElement.dataset.selectionResidency = "target";
+        document.documentElement.dataset.evictedTargetMeshCount = String(
+          promotion.evictedTargetMeshIndexes.length,
+        );
+        status.textContent =
+          `Selected target detail resident · ${promotion.evictedTargetMeshIndexes.length} colder ` +
+          `target groups evicted · ${formatBytes(promotion.gpuBytes)} GPU resident`;
+        status.dataset.state = "ready";
+        status.dataset.stage = "selection-residency";
+      } catch (error) {
+        if (error instanceof DOMException && error.name === "AbortError") return;
+        throw error;
+      } finally {
+        targetScheduler?.resume();
+      }
     };
 
     const selectObject = (objectId: number): void => {
@@ -889,7 +958,7 @@ async function loadScene(source: SceneSource): Promise<boolean> {
         } else {
           camera.orbit(deltaX, deltaY);
         }
-        scheduleRender();
+        scheduleCameraRender();
       },
       listenerOptions,
     );
@@ -906,7 +975,7 @@ async function loadScene(source: SceneSource): Promise<boolean> {
       "wheel",
       (event) => {
         camera.zoomBy(event.deltaY);
-        scheduleRender();
+        scheduleCameraRender();
         event.preventDefault();
       },
       { ...listenerOptions, passive: false },
@@ -915,7 +984,7 @@ async function loadScene(source: SceneSource): Promise<boolean> {
 
     const fitView = (): void => {
       camera.fit();
-      scheduleRender();
+      scheduleCameraRender();
     };
     requireElement<HTMLButtonElement>("#fit-view").addEventListener("click", fitView, listenerOptions);
     hideSelectionButton.addEventListener("click", hideSelection, listenerOptions);
@@ -1026,7 +1095,7 @@ async function loadScene(source: SceneSource): Promise<boolean> {
       listenerOptions,
     );
 
-    sessionResources.resizeObserver = new ResizeObserver(scheduleRender);
+    sessionResources.resizeObserver = new ResizeObserver(scheduleCameraRender);
     sessionResources.resizeObserver.observe(canvas);
 
     canvas.addEventListener("click", async (event) => {
@@ -1037,6 +1106,17 @@ async function loadScene(source: SceneSource): Promise<boolean> {
       const objectId = await renderer.pick(event.clientX, event.clientY);
       selectObject(objectId);
     }, listenerOptions);
+
+    if (sessionResources.targetScheduler) {
+      const aspect = canvas.clientWidth / Math.max(canvas.clientHeight, 1);
+      updateTargetView(camera.frame(aspect));
+      await sessionResources.targetScheduler.whenIdle();
+      if (interactions.signal.aborted) {
+        throw new DOMException("Scene load cancelled.", "AbortError");
+      }
+      if (schedulerFailure !== undefined) throw schedulerFailure;
+      finalizeProgressiveStatus();
+    }
 
     pendingCleanup = undefined;
     return true;
