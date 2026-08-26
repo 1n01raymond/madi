@@ -155,7 +155,9 @@ smoke-checks the live app, package resources, and HTTP Range delivery.
 - content-addressed persistent cache under the
   [import/cache product contract](IMPORT_AND_CACHE.md): cancellable background
   cold import, hierarchy/coarse preview in 5–15 s, unchanged reopen in 1–5 s,
-  followed by dependency-safe per-discipline rebuild and authorized shared reuse;
+  followed by dependency-safe per-discipline rebuild and authorized shared reuse
+  (verified STEP/IFC whole-package storage and adapter-skipping orchestration
+  implemented; pinned real-fixture timing evidence pending);
 - view-prioritized scheduling and cancellation of obsolete camera work
   (coarse-bounds policy implemented; spatial/screen-space policy pending);
 - dynamic memory budgets and persistent cache tiers (fixed admission budgets and

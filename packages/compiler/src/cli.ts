@@ -17,6 +17,7 @@ IFC options:
   --document <name=path.ifc>     Repeat once per federation discipline
   --uri-hint <name=value>        Optional non-sensitive source label
   --python <executable>          Python environment containing IfcOpenShell
+  --cache <directory>            Reuse verified federation packages
   --threads <count>              Geometry iterator threads (default: up to 8)
   --target-chunk-kib <count>     Coalesced target request budget (default: 512)
   --retain-scene-ir              Keep the split intermediate pair under output
@@ -43,6 +44,7 @@ interface IfcCompileArguments {
   readonly pythonExecutable?: string;
   readonly threads?: number;
   readonly targetChunkByteBudget?: number;
+  readonly cacheDirectory?: string;
   readonly retainSceneIr: boolean;
 }
 
@@ -123,6 +125,7 @@ function parseIfcCompileArguments(arguments_: string[]): IfcCompileArguments {
   let pythonExecutable: string | undefined;
   let threads: number | undefined;
   let targetChunkByteBudget: number | undefined;
+  let cacheDirectory: string | undefined;
   let retainSceneIr = false;
   for (let index = 0; index < arguments_.length; index += 1) {
     const option = arguments_[index];
@@ -158,6 +161,9 @@ function parseIfcCompileArguments(arguments_: string[]): IfcCompileArguments {
     } else if (option === "--target-chunk-kib") {
       targetChunkByteBudget = integerOption(optionValue(arguments_, index, option), option) * 1024;
       index += 1;
+    } else if (option === "--cache") {
+      cacheDirectory = optionValue(arguments_, index, option);
+      index += 1;
     } else if (option === "--retain-scene-ir") {
       retainSceneIr = true;
     } else {
@@ -181,6 +187,7 @@ function parseIfcCompileArguments(arguments_: string[]): IfcCompileArguments {
     ...(pythonExecutable ? { pythonExecutable } : {}),
     ...(threads === undefined ? {} : { threads }),
     ...(targetChunkByteBudget === undefined ? {} : { targetChunkByteBudget }),
+    ...(cacheDirectory ? { cacheDirectory } : {}),
     retainSceneIr,
   };
 }
@@ -223,6 +230,9 @@ async function main(): Promise<void> {
         `${result.report.counts.triangleCount.toLocaleString("en-US")} unique triangles`,
     );
     console.log(`[naru] package ${result.report.output.packageDigest}`);
+    if (result.cache.status !== "disabled") {
+      console.log(`[naru] cache ${result.cache.status}: ${String(result.cache.key)}`);
+    }
     console.log(`[naru] output: ${result.outputDirectory}`);
     return;
   }

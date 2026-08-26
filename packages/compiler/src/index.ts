@@ -2,6 +2,7 @@ export { compileSceneToGltf } from "./gltf.js";
 export {
   compiledCacheEntrySchema,
   createCompiledCacheKey,
+  currentCompilerCacheIdentity,
   publishCompiledCacheEntry,
   readCompiledCacheEntry,
   restoreCompiledCacheEntry,
@@ -12,6 +13,7 @@ export type {
   CompiledCacheResource,
   CompiledCacheSourceInput,
   CompiledCacheToolInput,
+  CompilationCacheResult,
   PublishCompiledCacheEntryOptions,
   RestoreCompiledCacheEntryOptions,
 } from "./compiled-cache.js";
@@ -20,11 +22,7 @@ export { inspectIfcBytes, inspectIfcFile } from "./ifc-source.js";
 export { writeCompiledPackage } from "./package-output.js";
 export { compileStepFile } from "./step-compiler.js";
 export { inspectStepBytes, inspectStepFile } from "./step-source.js";
-export type {
-  CompilationCacheResult,
-  StepCompilationResult,
-  StepCompileOptions,
-} from "./step-compiler.js";
+export type { StepCompilationResult, StepCompileOptions } from "./step-compiler.js";
 export type { StepSourceInspection, SupportedStepSchema } from "./step-source.js";
 export type {
   IfcFederationCompilationResult,

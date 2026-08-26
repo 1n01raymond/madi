@@ -44,6 +44,20 @@ export interface CompiledCacheEntry {
   readonly resources: readonly CompiledCacheResource[];
 }
 
+export interface CompilationCacheResult {
+  readonly status: "disabled" | "hit" | "miss";
+  readonly key?: string;
+}
+
+export function currentCompilerCacheIdentity(): CompiledCacheToolInput {
+  return {
+    name: "@naru3d/compiler",
+    version:
+      `0.0.0+cache.1;node=${process.versions.node};` +
+      `platform=${process.platform}-${process.arch}`,
+  };
+}
+
 export interface PublishCompiledCacheEntryOptions {
   readonly cacheDirectory: string;
   readonly packageDirectory: string;

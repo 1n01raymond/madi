@@ -61,15 +61,16 @@ compile options; publishes immutable flat package resources atomically; and
 verifies every byte count and SHA-256 before an atomic restore. Cache corruption
 fails before the requested output directory is created.
 
-The STEP path opts in with `--cache <directory>`. Before lookup, the OCCT
-adapter's `--identity` reports a fingerprint over its implementation, pinned
-CadQuery/OCP versions, Python, OS, and architecture; compiler identity similarly
-includes Node and host class until cross-platform determinism is proven. A
-verified hit reuses matching output or restores the package without running
-source extraction; a miss compiles normally and publishes only after package
-validation. The IFC command still invokes its adapter on every run;
-IFC identity/integration, cold/warm evidence, incremental federation
-dependencies, and shared-cache authorization remain follow-up gates.
+Both source paths opt in with `--cache <directory>`. Before lookup, each
+adapter's cheap `--identity` reports a fingerprint over its implementation,
+pinned native dependencies, Python, OS, and architecture; compiler identity
+similarly includes Node and host class until cross-platform determinism is
+proven. A verified hit reuses matching output or restores the package without
+running source extraction; a miss compiles normally and publishes only after
+package validation. IFC cache identity also includes every discipline digest,
+stable URI hint, adapter thread count, chunk budget, and retained-intermediate
+policy. Cold/warm real-fixture evidence, incremental federation dependencies,
+and shared-cache authorization remain follow-up gates.
 
 ## Compile an IFC federation
 
@@ -90,13 +91,16 @@ pnpm naru compile-ifc \
   --python output/venv-ifc/Scripts/python \
   --threads 4 \
   --target-chunk-kib 512 \
+  --cache output/naru-compiled-cache \
   --output output/ifc/federation
 ```
 
 The command preflights every Part 21 envelope, verifies adapter/source digests,
 validates the intermediate Scene IR, emits the compiled package and adapter
-report, and deletes Scene IR unless `--retain-scene-ir` is requested. The
-qualified four-discipline result is under `artifacts/ifc/digital-hub/`.
+report, and deletes Scene IR unless `--retain-scene-ir` is requested. When a
+cache is selected, retained intermediates are included only when that option is
+part of the key. The qualified four-discipline result is under
+`artifacts/ifc/digital-hub/`.
 
 ### Split Scene IR transport
 

@@ -32,6 +32,12 @@ describe("compiled package cache", () => {
     };
 
     expect(createCompiledCacheKey(reordered)).toBe(createCompiledCacheKey(input));
+    expect(
+      createCompiledCacheKey({
+        ...input,
+        sources: [{ scope: "architecture", sha256: digest("changed") }],
+      }),
+    ).not.toBe(createCompiledCacheKey(input));
   });
 
   it("publishes and atomically restores a verified package", async () => {

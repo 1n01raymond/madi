@@ -1,7 +1,7 @@
 # Import and compiled-cache product contract
 
-Status: proposed Phase 2 contract; cache-store foundation implemented, importer
-integration and product evidence pending.
+Status: proposed Phase 2 contract; cache-store plus STEP/IFC whole-package
+integration implemented, real-toolchain product evidence pending.
 
 ## 1. User promise
 
@@ -57,21 +57,27 @@ changing output:
   property, and LOD policies; and
 - cache schema major version.
 
-Display names, output directory, UI state, and machine path are not compile
-inputs. Thread count may be excluded only after determinism evidence proves it
-cannot change output. Unknown or incomplete identities are cache misses.
+Stable source labels such as IFC URI hints and the current STEP basename are
+inputs because the current glTF profile serializes them. Absolute machine path,
+output directory, and UI state are not inputs. Thread count may be excluded only
+after determinism evidence proves it cannot change output. Unknown or incomplete
+identities are cache misses.
 
 `packages/compiler/src/compiled-cache.ts` implements the first storage slice:
 `naru.compiled-cache-entry.1` keys normalized inputs, records every package
 resource byte count and SHA-256, verifies the complete entry before restore,
 and publishes/restores through same-parent temporary directories and atomic
 rename. Its tests prove key determinism, idempotent publish, successful restore,
-and fail-closed corruption handling. The STEP CLI can opt in with `--cache`;
-the OCCT adapter's cheap `--identity` includes its implementation hash, pinned
-CadQuery/OCP versions, Python, OS, and architecture; the compiler identity also
-includes Node/OS/architecture until cross-platform determinism is proven. An
-unchanged second compile reuses verified existing output or atomically restores
-it without running extraction. IFC orchestration integration is the next gate.
+and fail-closed corruption handling. The STEP and IFC CLIs can opt in with
+`--cache`. Each adapter exposes a cheap `--identity`: OCCT fingerprints its
+implementation and pinned CadQuery/OCP toolchain, while IFC fingerprints its
+extraction modules and pinned IfcOpenShell/numpy toolchain; both include Python,
+OS, and architecture. The compiler identity also includes Node/OS/architecture
+until cross-platform determinism is proven. An unchanged second compile reuses
+verified existing output or atomically restores it without running extraction.
+Focused tests prove this orchestration for STEP and a single-document IFC
+federation; recorded cold/warm runs with the pinned native toolchains remain the
+next gate.
 
 ## 4. Storage and security
 
@@ -118,8 +124,9 @@ profile under [ADR-0004](adr/0004-format-strategy.md).
 
 ## 7. Implementation order and acceptance gates
 
-1. **Persistent source-digest cache:** storage foundation, OCCT identity, and
-   STEP integration implemented; IFC integration and cold/warm evidence next.
+1. **Persistent source-digest cache:** storage foundation, OCCT/IFC identities,
+   and STEP/IFC whole-package integration implemented; pinned real-fixture
+   cold/warm evidence next.
 2. **Columnar hierarchy sidecar:** compare size, parse, hierarchy-ready time,
    peak memory, and compatibility against compact glTF JSON.
 3. **Incremental IFC compilation:** discipline dependency index plus changed,
@@ -129,8 +136,9 @@ profile under [ADR-0004](adr/0004-format-strategy.md).
 5. **Shared cache:** authenticated lookup/publication, tenant isolation,
    provenance, quotas, eviction, and observability.
 
-The persistent-cache gate closes only when one unchanged STEP and one unchanged
-multi-document IFC input skip their extraction work, reproduce the original package
-digest, survive a corrupted-entry test, and publish cold/warm timings. The
-real-large product gate additionally requires three-run distributions for the
-SLO table on a recorded host class.
+Focused tests already prove an unchanged STEP and single-document IFC input
+skip extraction, preserve the package digest, invalidate changed compile
+identity, and fail closed on corruption. The persistent-cache gate closes only
+when pinned real STEP and multi-document IFC inputs reproduce those properties
+and publish cold/warm timings. The real-large product gate additionally
+requires three-run distributions for the SLO table on a recorded host class.

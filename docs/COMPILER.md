@@ -560,3 +560,20 @@ unchanged — the sidecar is additive, and the occurrence nodes' existing
 `apps/webgpu-spike/src/property-sidecar.ts`). Full-text search deliberately
 does not index property values in Phase 1; the Studio resolves properties
 lazily for the selected occurrence only.
+
+### 21.3 Persistent source-package cache
+
+`naru compile` and `naru compile-ifc` can opt into a content-addressed cache
+with `--cache <directory>`. The `naru.compiled-cache-entry.1` key covers source
+roles and digests, a cheap exact adapter implementation/toolchain identity, the
+compiler host identity, and every option or stable source label serialized into
+the package. Absolute source/output paths and UI state are excluded.
+
+Entries are immutable flat resource sets. The compiler checks the manifest key,
+path policy, byte count, and SHA-256 of every resource before it atomically
+restores an output, and it atomically publishes only after normal package
+validation. STEP and IFC orchestration tests prove that a verified unchanged
+hit preserves the package digest and skips native extraction; IFC tests also
+prove that changing a serialized URI hint causes a miss. Real pinned-toolchain
+cold/warm evidence and per-discipline dependency indexing are intentionally
+separate gates in [the import/cache contract](IMPORT_AND_CACHE.md).

@@ -23,6 +23,11 @@ describe("IFC federation compiler orchestration", () => {
       const sourcePath = join(temporaryDirectory, "architecture.ifc");
       const adapterPath = join(temporaryDirectory, "fake-ifc-adapter.mjs");
       const outputDirectory = join(temporaryDirectory, "compiled");
+      const cachedOutputDirectory = join(temporaryDirectory, "compiled-cached");
+      const relabeledOutputDirectory = join(temporaryDirectory, "compiled-relabeled");
+      const cacheDirectory = join(temporaryDirectory, "cache");
+      const adapterCountPath = join(temporaryDirectory, "adapter-count.txt");
+      await writeFile(adapterCountPath, "0", "utf8");
       await writeFile(
         sourcePath,
         "ISO-10303-21;\nHEADER;\nFILE_SCHEMA(('IFC4'));\nENDSEC;\nDATA;\nENDSEC;\nEND-ISO-10303-21;\n",
@@ -33,7 +38,18 @@ describe("IFC federation compiler orchestration", () => {
         `import { createHash } from "node:crypto";
 import { readFile, writeFile } from "node:fs/promises";
 const args = process.argv.slice(2);
+if (args.includes("--identity")) {
+  console.log(JSON.stringify({
+    schemaVersion: "naru.ifc-adapter-identity.1",
+    name: "IfcOpenShell",
+    version: "test",
+    fingerprint: "2".repeat(64),
+  }));
+  process.exit(0);
+}
 const option = (name) => args[args.indexOf(name) + 1];
+const adapterCount = Number(await readFile(${JSON.stringify(adapterCountPath)}, "utf8"));
+await writeFile(${JSON.stringify(adapterCountPath)}, String(adapterCount + 1));
 const documentArgument = option("--document");
 const uriArgument = option("--uri-hint");
 const discipline = documentArgument.slice(0, documentArgument.indexOf("="));
@@ -201,6 +217,21 @@ await writeFile(option("--report"), JSON.stringify({
         pythonExecutable: process.execPath,
         adapterScriptPath: adapterPath,
         retainSceneIr: true,
+        cacheDirectory,
+      });
+      const cached = await compileIfcFederation({
+        documents: [
+          {
+            discipline: "architecture",
+            sourcePath,
+            uriHint: "projects/digital_hub/arc.ifc",
+          },
+        ],
+        outputDirectory: cachedOutputDirectory,
+        pythonExecutable: process.execPath,
+        adapterScriptPath: adapterPath,
+        retainSceneIr: true,
+        cacheDirectory,
       });
 
       expect(result.sources[0]).toMatchObject({
@@ -211,6 +242,30 @@ await writeFile(option("--report"), JSON.stringify({
       expect(result.adapterReport).toMatchObject({
         sceneIrValidation: { ok: true, errorCount: 0, warningCount: 0 },
       });
+      expect(result.cache).toMatchObject({ status: "miss" });
+      expect(cached.cache).toEqual({ status: "hit", key: result.cache.key });
+      expect(cached.report.output.packageDigest).toBe(result.report.output.packageDigest);
+      expect(await readFile(adapterCountPath, "utf8")).toBe("1");
+      await expect(readFile(join(cachedOutputDirectory, "scene-ir.json"))).resolves.toEqual(
+        await readFile(join(outputDirectory, "scene-ir.json")),
+      );
+      const relabeled = await compileIfcFederation({
+        documents: [
+          {
+            discipline: "architecture",
+            sourcePath,
+            uriHint: "projects/digital_hub/architecture-renamed.ifc",
+          },
+        ],
+        outputDirectory: relabeledOutputDirectory,
+        pythonExecutable: process.execPath,
+        adapterScriptPath: adapterPath,
+        retainSceneIr: true,
+        cacheDirectory,
+      });
+      expect(relabeled.cache.status).toBe("miss");
+      expect(relabeled.cache.key).not.toBe(result.cache.key);
+      expect(await readFile(adapterCountPath, "utf8")).toBe("2");
       expect(result.report.counts).toMatchObject({
         compiledPrototypeCount: 3,
         renderableOccurrenceCount: 10,

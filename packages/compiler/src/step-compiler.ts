@@ -13,10 +13,11 @@ import type { CompilerBuildReport } from "./types.js";
 import { validateCompiledGltf } from "./validate.js";
 import {
   createCompiledCacheKey,
+  currentCompilerCacheIdentity,
   publishCompiledCacheEntry,
   restoreCompiledCacheEntry,
 } from "./compiled-cache.js";
-import type { CompiledCacheKeyInput } from "./compiled-cache.js";
+import type { CompilationCacheResult, CompiledCacheKeyInput } from "./compiled-cache.js";
 
 const defaultAdapterScript = fileURLToPath(
   new URL("../../../native/adapter-occt/tools/extract_scene_ir.py", import.meta.url),
@@ -32,11 +33,6 @@ export interface StepCompileOptions {
   /** Optional persistent package cache. Existing output is reused only after full verification. */
   readonly cacheDirectory?: string;
   readonly environment?: NodeJS.ProcessEnv;
-}
-
-export interface CompilationCacheResult {
-  readonly status: "disabled" | "hit" | "miss";
-  readonly key?: string;
 }
 
 export interface StepCompilationResult {
@@ -149,13 +145,13 @@ function cacheInput(
       name: identity.name,
       version: `${identity.version}+${identity.fingerprint}`,
     },
-    compiler: {
-      name: "@naru3d/compiler",
-      version:
-        `0.0.0+cache.1;node=${process.versions.node};` +
-        `platform=${process.platform}-${process.arch}`,
+    compiler: currentCompilerCacheIdentity(),
+    options: {
+      linearTolerance,
+      angularTolerance,
+      coarseBounds: true,
+      uriHint: basename(inspection.sourcePath),
     },
-    options: { linearTolerance, angularTolerance, coarseBounds: true },
   };
 }
 

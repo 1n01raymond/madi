@@ -59,6 +59,8 @@ The proposed `naru.compiled-cache-entry.1` foundation is implemented by
 `packages/compiler/src/compiled-cache.ts`. Unit tests prove deterministic
 normalization, idempotent atomic publication, verified restore, fail-closed
 resource corruption, and an unchanged STEP cache hit that skips extraction
-after the OCCT identity probe. Acceptance additionally requires the IFC
-skip/digest gate and cold/warm timing distributions defined in
-`docs/IMPORT_AND_CACHE.md`.
+after the OCCT identity probe. IFC orchestration tests likewise prove a cheap
+identity probe, unchanged adapter-skipping hit, stable package digest, retained
+intermediate restore, and URI-hint invalidation. Acceptance additionally
+requires pinned real-fixture STEP and multi-document IFC cold/warm timing and
+corruption records defined in `docs/IMPORT_AND_CACHE.md`.

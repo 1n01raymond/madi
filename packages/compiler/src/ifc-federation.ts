@@ -14,6 +14,16 @@ import type { IfcSourceInspection } from "./ifc-source.js";
 import { writeCompiledPackage } from "./package-output.js";
 import type { CompilerBuildReport } from "./types.js";
 import { validateCompiledGltf } from "./validate.js";
+import {
+  createCompiledCacheKey,
+  currentCompilerCacheIdentity,
+  publishCompiledCacheEntry,
+  restoreCompiledCacheEntry,
+} from "./compiled-cache.js";
+import type {
+  CompilationCacheResult,
+  CompiledCacheKeyInput,
+} from "./compiled-cache.js";
 
 const defaultAdapterScript = fileURLToPath(
   new URL(
@@ -39,6 +49,8 @@ export interface IfcFederationCompileOptions {
   readonly retainSceneIr?: boolean;
   /** Maximum target bytes fetched and decoded in one progressive IFC request. */
   readonly targetChunkByteBudget?: number;
+  /** Optional persistent package cache keyed by the complete federation/toolchain identity. */
+  readonly cacheDirectory?: string;
   readonly environment?: NodeJS.ProcessEnv;
 }
 
@@ -52,6 +64,7 @@ export interface IfcFederationCompilationResult {
   readonly outputDirectory: string;
   readonly report: CompilerBuildReport;
   readonly adapterReport: unknown;
+  readonly cache: CompilationCacheResult;
 }
 
 function parseJson(text: string, label: string): unknown {
@@ -113,8 +126,8 @@ async function runAdapter(
   executable: string,
   arguments_: readonly string[],
   environment: NodeJS.ProcessEnv,
-): Promise<void> {
-  await new Promise<void>((resolvePromise, reject) => {
+): Promise<string> {
+  return await new Promise<string>((resolvePromise, reject) => {
     const child = spawn(executable, arguments_, {
       env: environment,
       shell: false,
@@ -141,7 +154,7 @@ async function runAdapter(
     });
     child.once("close", (code) => {
       if (code === 0) {
-        resolvePromise();
+        resolvePromise(stdout);
         return;
       }
       const details = stderr.trim() || stdout.trim() || `exit code ${String(code)}`;
@@ -157,6 +170,75 @@ async function runAdapter(
       reject(new TypeError(`IFC federation adapter failed: ${details}.`));
     });
   });
+}
+
+interface IfcAdapterIdentity {
+  readonly schemaVersion: "naru.ifc-adapter-identity.1";
+  readonly name: string;
+  readonly version: string;
+  readonly fingerprint: string;
+}
+
+async function inspectAdapterToolchain(
+  executable: string,
+  adapterScriptPath: string,
+  environment: NodeJS.ProcessEnv,
+): Promise<IfcAdapterIdentity> {
+  const serialized = await runAdapter(executable, [adapterScriptPath, "--identity"], environment);
+  const value = parseJson(serialized.trim(), "IFC adapter identity");
+  if (typeof value !== "object" || value === null) {
+    throw new TypeError("IFC adapter identity must be an object.");
+  }
+  const identity = value as Partial<IfcAdapterIdentity>;
+  if (
+    identity.schemaVersion !== "naru.ifc-adapter-identity.1" ||
+    typeof identity.name !== "string" ||
+    identity.name === "" ||
+    typeof identity.version !== "string" ||
+    identity.version === "" ||
+    typeof identity.fingerprint !== "string" ||
+    !/^[a-f0-9]{64}$/u.test(identity.fingerprint)
+  ) {
+    throw new TypeError("IFC adapter returned an invalid cache identity.");
+  }
+  return identity as IfcAdapterIdentity;
+}
+
+function federationCacheInput(
+  sources: readonly InspectedIfcFederationDocument[],
+  identity: IfcAdapterIdentity,
+  threads: number,
+  targetChunkByteBudget: number,
+  retainSceneIr: boolean,
+): CompiledCacheKeyInput {
+  return {
+    sources: sources.map(({ discipline, sha256 }) => ({ scope: discipline, sha256 })),
+    adapter: {
+      name: identity.name,
+      version: `${identity.version}+${identity.fingerprint}`,
+    },
+    compiler: currentCompilerCacheIdentity(),
+    options: {
+      threads,
+      targetChunkByteBudget,
+      retainSceneIr,
+      coarseBounds: true,
+      ...Object.fromEntries(
+        sources.map(({ discipline, uriHint }) => [`uriHint.${discipline}`, uriHint]),
+      ),
+    },
+  };
+}
+
+function requireCachedBuildReport(value: unknown, packageDigest: string): CompilerBuildReport {
+  if (typeof value !== "object" || value === null) {
+    throw new TypeError("Cached IFC build report must be an object.");
+  }
+  const report = value as Partial<CompilerBuildReport>;
+  if (report.output?.packageDigest !== packageDigest) {
+    throw new TypeError("Cached IFC build report does not match its package manifest.");
+  }
+  return report as CompilerBuildReport;
 }
 
 function assertAdapterIdentity(
@@ -233,6 +315,54 @@ export async function compileIfcFederation(
   const sources = await inspectDocuments(options.documents);
   const threads = positiveThreads(options.threads);
   const outputDirectory = resolve(options.outputDirectory);
+  const targetChunkByteBudget =
+    options.targetChunkByteBudget ?? defaultIfcTargetChunkByteBudget;
+  const retainSceneIr = options.retainSceneIr === true;
+  const pythonExecutable =
+    options.pythonExecutable ??
+    process.env.NARU_IFC_PYTHON ??
+    process.env.NARU_PYTHON ??
+    (process.platform === "win32" ? "python" : "python3");
+  const adapterScriptPath = resolve(options.adapterScriptPath ?? defaultAdapterScript);
+  const environment = options.environment ?? process.env;
+  let cacheKeyInput: CompiledCacheKeyInput | undefined;
+  let cacheKey: string | undefined;
+  if (options.cacheDirectory) {
+    const adapterIdentity = await inspectAdapterToolchain(
+      pythonExecutable,
+      adapterScriptPath,
+      environment,
+    );
+    cacheKeyInput = federationCacheInput(
+      sources,
+      adapterIdentity,
+      threads,
+      targetChunkByteBudget,
+      retainSceneIr,
+    );
+    cacheKey = createCompiledCacheKey(cacheKeyInput);
+    const restored = await restoreCompiledCacheEntry({
+      cacheDirectory: options.cacheDirectory,
+      key: cacheKey,
+      outputDirectory,
+    });
+    if (restored) {
+      const [serializedBuildReport, serializedAdapterReport] = await Promise.all([
+        readFile(resolve(outputDirectory, "build-report.json"), "utf8"),
+        readFile(resolve(outputDirectory, "adapter-report.json"), "utf8"),
+      ]);
+      return {
+        sources,
+        outputDirectory,
+        report: requireCachedBuildReport(
+          parseJson(serializedBuildReport, "Cached IFC build report"),
+          restored.packageDigest,
+        ),
+        adapterReport: parseJson(serializedAdapterReport, "Cached IFC adapter report"),
+        cache: { status: "hit", key: cacheKey },
+      };
+    }
+  }
   const temporaryDirectory = await mkdtemp(join(tmpdir(), "naru-ifc-"));
   const scenePath = join(temporaryDirectory, "scene-ir.json");
   const geometryPath = join(temporaryDirectory, "scene-ir-geometry.bin");
@@ -246,12 +376,9 @@ export async function compileIfcFederation(
       `${source.discipline}=${source.uriHint}`,
     ]);
     await runAdapter(
-      options.pythonExecutable ??
-        process.env.NARU_IFC_PYTHON ??
-        process.env.NARU_PYTHON ??
-        (process.platform === "win32" ? "python" : "python3"),
+      pythonExecutable,
       [
-        resolve(options.adapterScriptPath ?? defaultAdapterScript),
+        adapterScriptPath,
         ...sourceArguments,
         "--scene",
         scenePath,
@@ -264,7 +391,7 @@ export async function compileIfcFederation(
         "--threads",
         String(threads),
       ],
-      options.environment ?? process.env,
+      environment,
     );
     // The structure document is never read or parsed as one string: the
     // streaming reader parses it record by record and hashes it on the way
@@ -302,8 +429,7 @@ export async function compileIfcFederation(
     const compiled = compileSceneToGltf(scene, {
       coarseBounds: true,
       generator: "MADI compiler 0.0.0 / IfcOpenShell federation slice",
-      targetChunkByteBudget:
-        options.targetChunkByteBudget ?? defaultIfcTargetChunkByteBudget,
+      targetChunkByteBudget,
       // The package carries the adapter's value column file byte-verbatim as
       // a lazy property sidecar; the compiler still never materializes a
       // property value.
@@ -338,18 +464,35 @@ export async function compileIfcFederation(
       },
     };
     await writeCompiledPackage(compiled, outputDirectory, adapterReport);
-    if (options.retainSceneIr) {
+    if (retainSceneIr) {
       await Promise.all([
         copyFile(scenePath, resolve(outputDirectory, "scene-ir.json")),
         copyFile(geometryPath, resolve(outputDirectory, "scene-ir-geometry.bin")),
         copyFile(propertiesPath, resolve(outputDirectory, "scene-ir-properties.bin")),
       ]);
     }
+    if (cacheKeyInput && cacheKey) {
+      await publishCompiledCacheEntry({
+        cacheDirectory: options.cacheDirectory as string,
+        packageDirectory: outputDirectory,
+        input: cacheKeyInput,
+        packageDigest: compiled.report.output.packageDigest,
+        resourcePaths: [
+          ...compiled.report.output.resources.map(({ path }) => path),
+          "adapter-report.json",
+          "build-report.json",
+          ...(retainSceneIr
+            ? ["scene-ir.json", "scene-ir-geometry.bin", "scene-ir-properties.bin"]
+            : []),
+        ],
+      });
+    }
     return {
       sources,
       outputDirectory,
       report: compiled.report,
       adapterReport,
+      cache: cacheKey ? { status: "miss", key: cacheKey } : { status: "disabled" },
     };
   } finally {
     await rm(temporaryDirectory, { recursive: true, force: true });

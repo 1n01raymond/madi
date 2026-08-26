@@ -61,6 +61,16 @@ pnpm adapter:ifc:test
 from `pnpm check`, the same way `native:check` is: it needs a Python
 interpreter present, and CI runs it in its own `python-adapter` job.
 
+## Persistent-cache identity
+
+`tools/extract_federation_scene_ir.py --identity` performs no IFC extraction.
+It emits `naru.ifc-adapter-identity.1`, whose fingerprint covers the adapter's
+extraction, edge, placement, property-index, and property-column modules plus
+the IfcOpenShell/numpy/Python/OS/architecture toolchain. The compiler combines
+that identity with ordered discipline digests, stable URI hints, and every
+compile-affecting option before it permits an adapter-skipping cache hit. An
+unknown or malformed identity fails closed rather than reusing output.
+
 ## Reproduce the Digital Hub extraction
 
 Fetch the external fixture, create an isolated Python environment, and use the
@@ -83,6 +93,7 @@ pnpm naru compile-ifc \
   --uri-hint ventilation=projects/digital_hub/ventilation.ifc \
   --python output/venv-ifc/Scripts/python \
   --threads 4 \
+  --cache output/naru-compiled-cache \
   --output output/ifc/digital-hub
 ```
 
