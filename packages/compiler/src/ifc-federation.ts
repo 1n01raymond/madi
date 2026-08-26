@@ -39,6 +39,8 @@ export interface IfcFederationCompileOptions {
   readonly retainSceneIr?: boolean;
   /** Maximum target bytes fetched and decoded in one progressive IFC request. */
   readonly targetChunkByteBudget?: number;
+  readonly spatialIndex?: boolean;
+  readonly spatialLeafCapacity?: number;
   readonly environment?: NodeJS.ProcessEnv;
 }
 
@@ -304,6 +306,10 @@ export async function compileIfcFederation(
       generator: "MADI compiler 0.0.0 / IfcOpenShell federation slice",
       targetChunkByteBudget:
         options.targetChunkByteBudget ?? defaultIfcTargetChunkByteBudget,
+      ...(options.spatialIndex === true ? { spatialIndex: true } : {}),
+      ...(options.spatialLeafCapacity === undefined
+        ? {}
+        : { spatialLeafCapacity: options.spatialLeafCapacity }),
       // The package carries the adapter's value column file byte-verbatim as
       // a lazy property sidecar; the compiler still never materializes a
       // property value.

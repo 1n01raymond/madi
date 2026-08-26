@@ -79,8 +79,9 @@ exposing query arrays. The Studio authenticates the SHA-256, performs a
 camera-relative frustum traversal, requests only the deduplicated chunks of
 visible leaves, and keeps non-demanded chunks cold for eviction. Packages
 without the optional index retain aggregate retained-coarse chunk scheduling.
-The indexed browser path has unit/oracle coverage but not yet a committed
-headed or real-model evidence record.
+The indexed browser path has unit/oracle coverage plus the focused headed
+Chrome/Firefox record under `artifacts/spatial-demand/`; real-model evidence is
+still pending.
 
 Run `pnpm test` for package and committed-fixture regression coverage. The
 headed cross-engine path is recorded by `pnpm browser:matrix`; the focused

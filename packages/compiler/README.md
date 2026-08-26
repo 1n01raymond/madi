@@ -46,13 +46,14 @@ splitting its accessors. Use `--target-chunk-kib` to change that budget. This
 allows ordinary HTTP Range delivery without inventing another container or
 duplicating target geometry.
 
-The compiler API can additionally set `coarseBounds: true` and
-`spatialIndex: true` to emit `spatial.bin` using
+The compiler API can set `coarseBounds: true` and `spatialIndex: true`, or both
+CLI compile commands can pass `--spatial-index`, to emit `spatial.bin` using
 `naru.spatial-demand-index.1`. Its deterministic flat BVH stores float64 world
 bounds for every renderable occurrence and maps each leaf to sorted,
 deduplicated indexes in `targetChunks`; it does not duplicate or reorder target
-geometry. This is the package/decoder slice of Proposed ADR-0008. CLI exposure,
-committed real-model records, and headed Studio evidence are still pending.
+geometry. `--spatial-leaf-capacity` overrides the default of 64. Committed
+real-model records and headed Studio evidence are still pending, so ADR-0008
+remains Proposed.
 Its expanded Scene IR is temporary and is deleted after the package passes
 validation. `phase1:compile:evidence` retains the historical small Scene IR
 regression path without coarse output. The evidence check validates both plus the
@@ -79,6 +80,7 @@ pnpm naru compile-ifc \
   --python output/venv-ifc/Scripts/python \
   --threads 4 \
   --target-chunk-kib 512 \
+  --spatial-index \
   --output output/ifc/federation
 ```
 

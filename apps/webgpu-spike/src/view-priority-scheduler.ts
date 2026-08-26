@@ -250,6 +250,7 @@ export interface SpatialTargetQueryStats {
   readonly visibleLeafCount: number;
   readonly testedOccurrenceCount: number;
   readonly candidateChunkCount: number;
+  readonly queryMilliseconds: number;
 }
 
 /** Ranks only frustum-demanded chunks hot while retaining a stable cold eviction tail. */
@@ -262,6 +263,7 @@ export class SpatialTargetChunkViewIndex implements TargetChunkRanker {
     visibleLeafCount: 0,
     testedOccurrenceCount: 0,
     candidateChunkCount: 0,
+    queryMilliseconds: 0,
   };
 
   constructor(chunks: readonly CompiledTargetChunk[], spatial: DecodedSpatialDemandIndex) {
@@ -281,12 +283,14 @@ export class SpatialTargetChunkViewIndex implements TargetChunkRanker {
   }
 
   rank(frame: CameraRelativeFrame): readonly RankedTargetChunk[] {
+    const started = performance.now();
     const query = querySpatialDemandIndex(this.spatial, frame);
     this.latest = {
       visitedNodeCount: query.visitedNodeCount,
       visibleLeafCount: query.visibleLeafCount,
       testedOccurrenceCount: query.testedOccurrenceCount,
       candidateChunkCount: query.candidates.length,
+      queryMilliseconds: performance.now() - started,
     };
     const demanded = new Set(query.candidates.map(({ targetChunkIndex }) => targetChunkIndex));
     const hot = query.candidates.map(({ targetChunkIndex, screenDistanceSquared }) => {

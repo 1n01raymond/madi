@@ -448,8 +448,9 @@ but are not fetched. Orbit, pan, zoom, fit, and resize re-query demand and
 re-rank resident eviction priority; if the hottest nonresident chunk changes,
 the old HTTP Range and Worker decode are aborted before its replacement is
 admitted. Spatial draw clusters, screen-space LOD, persistent cache tiers, and
-a broader eviction policy remain unimplemented. Headed browser and real-model
-evidence for the indexed path is still pending, so ADR-0008 remains Proposed.
+a broader eviction policy remain unimplemented. The focused transform-only
+record under `artifacts/spatial-demand/` passes in headed Chrome and Firefox;
+real-model evidence is still pending, so ADR-0008 remains Proposed.
 
 The reproducible browser smoke command is `pnpm browser:matrix`. Its committed
 Phase 1 run covers Chrome/Blink and Firefox/Gecko with the same compiled package,

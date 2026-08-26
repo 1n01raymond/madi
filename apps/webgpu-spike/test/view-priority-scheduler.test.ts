@@ -209,6 +209,7 @@ describe("view-prioritized target scheduling", () => {
       visibleLeafCount: 1,
       testedOccurrenceCount: 1,
       candidateChunkCount: 1,
+      queryMilliseconds: expect.any(Number),
     });
 
     const requested: string[] = [];

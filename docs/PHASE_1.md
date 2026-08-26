@@ -127,6 +127,7 @@ direct WebGPU renderer. The Phase 0 Scene IR JSON is no longer a browser input.
 | Useful frame before target | Recorder holds the first target Range response, captures a 12-triangle/12-edge shared coarse frame, then releases all ranges and observes 2,088 resident triangles/193 resident edges including the retained shared fallback | Passed in headed Chrome and Firefox |
 | Mixed-residency frame | Recorder releases only the first 31.7 KiB range and captures 8 detailed fasteners at 368 resident triangles/49 resident edges before completing the remaining ranges | Passed in headed Chrome and Firefox |
 | View-priority scheduling | Recorder holds the initial fastener Range, pans the camera, observes its Worker cancellation, and receives the newly hottest mounting-plate Range before releasing the obsolete response | Passed in headed Chrome and Firefox |
+| Spatial demand scheduling | Optional `spatial.bin` is authenticated once; a transform-only localized oracle reduces 19→9/7 visited nodes, 10→1 tested occurrences, and 3→1 candidate chunks while cancelling the obsolete Range before its body is delivered | Passed in headed Chrome and Firefox; real-model gates remain |
 | In-flight cancellation | A second browser run cancels while range 2/3 is pending, observes `Scene load cancelled.`, and proves that range 3/3 is never requested | Passed in headed Chrome and Firefox |
 | Browser conformance | Headed Chrome/Blink and Firefox/Gecko emit no console warnings or errors | Passed by `pnpm browser:matrix` |
 | Safari capability | Real Safari 18.6 loads 87 hierarchy records under default settings, then reports that WebGPU is unavailable because `navigator.gpu` is absent | Graceful unsupported-browser result; rendering conformance not yet available |
@@ -178,7 +179,7 @@ See `artifacts/phase1/README.md` for the compiled package,
 
 ## Not yet proven
 
-- Shape-preserving and screen-space LODs, spatial scheduler headed/real-model evidence,
+- Shape-preserving and screen-space LODs, spatial scheduler real-model evidence,
   compression,
   persistent cache tiers, and a general cache-aware eviction policy under a
   bounded residency budget. The optional ADR-0008 compiler sidecar, strict

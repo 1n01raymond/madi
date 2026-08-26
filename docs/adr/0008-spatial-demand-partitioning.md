@@ -106,6 +106,12 @@ The first spatial contract must also remain optional so historical
 The ADR remains Proposed until a vertical evidence slice proves all of the
 following:
 
+The focused `artifacts/spatial-demand/` record already proves deterministic
+sidecar generation without target/coarse byte changes, strict no-false-negative
+unit/oracle coverage, localized work reduction, single-chunk delivery, and
+obsolete-Range cancellation in headed Chrome and Firefox. The transform-only
+scenario does not close the nested/ADR-0005 or Digital Hub/sixty5 gates below.
+
 - every renderable occurrence is indexed exactly once, every leaf bound contains
   its references, and BVH queries have no false negatives against a brute-force
   frustum oracle;

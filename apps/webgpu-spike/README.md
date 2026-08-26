@@ -83,8 +83,12 @@ so visibility intent and stable object IDs survive every batch update. Add
 pan, zoom, fit, and resize rank visible retained-coarse chunk bounds by distance
 from the view center. If the hottest nonresident chunk
 changes, the scheduler aborts the obsolete HTTP Range and Worker decode before
-starting its replacement; the same order re-ranks eviction priority. Persistent
-cache tiers, spatial clusters, and screen-space LOD remain Phase 2 work.
+starting its replacement; the same order re-ranks eviction priority. Packages
+with `naru.spatial-demand-index.1` instead authenticate `spatial.bin`, query
+only frustum-visible BVH leaves, and keep cold chunks out of the fetch queue.
+The focused headed record is `artifacts/spatial-demand/`. Persistent cache
+tiers, spatial draw clusters, screen-space LOD, and real-model indexed evidence
+remain Phase 2 work.
 
 ## Open another compiled scene
 
@@ -94,7 +98,7 @@ host must allow cross-origin requests for both the glTF and its external binary.
 
 Use **Open local package** to select exactly one NARU-profile `.gltf` and all of
 its external `.bin` and `.json` resources (including the optional
-`properties.json` / `properties.bin` sidecar pair). The browser validates each
+`properties.json` / `properties.bin` sidecar pair and `spatial.bin`). The browser validates each
 declared file name and byte length before sending local `File` objects to the
 geometry Worker.
 Local files stay on the client and do not create a shareable URL. This is a

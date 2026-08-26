@@ -221,6 +221,7 @@ function resetSceneUi(): void {
   delete document.documentElement.dataset.targetSchedulerPriority;
   delete document.documentElement.dataset.targetSchedulerCancelledChunk;
   delete document.documentElement.dataset.targetSchedulerOrder;
+  delete document.documentElement.dataset.targetSchedulerDemand;
   delete document.documentElement.dataset.targetSchedulerMode;
   delete document.documentElement.dataset.spatialNodesVisited;
   delete document.documentElement.dataset.spatialNodesTotal;
@@ -229,6 +230,7 @@ function resetSceneUi(): void {
   delete document.documentElement.dataset.spatialOccurrencesTested;
   delete document.documentElement.dataset.spatialOccurrencesTotal;
   delete document.documentElement.dataset.spatialCandidateChunks;
+  delete document.documentElement.dataset.spatialQueryMilliseconds;
   hierarchySearchInput.value = "";
   hierarchySearchResult.textContent = "Waiting for hierarchy";
   hierarchyEmpty.hidden = true;
@@ -807,6 +809,10 @@ async function loadScene(source: SceneSource): Promise<boolean> {
           document.documentElement.dataset.targetSchedulerOrder = ranked
             .map(({ chunk }) => chunk.id)
             .join(",");
+          document.documentElement.dataset.targetSchedulerDemand = ranked
+            .filter(({ demanded }) => demanded)
+            .map(({ chunk }) => chunk.id)
+            .join(",");
           if (spatialViewIndex) {
             const stats = spatialViewIndex.queryStats();
             document.documentElement.dataset.spatialNodesVisited = String(
@@ -820,6 +826,9 @@ async function loadScene(source: SceneSource): Promise<boolean> {
             );
             document.documentElement.dataset.spatialCandidateChunks = String(
               stats.candidateChunkCount,
+            );
+            document.documentElement.dataset.spatialQueryMilliseconds = String(
+              stats.queryMilliseconds,
             );
           }
           progressiveResidency.reprioritize(

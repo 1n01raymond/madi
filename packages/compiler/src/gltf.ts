@@ -696,6 +696,9 @@ export function compileSceneToGltf(
   if (options.spatialIndex === true && !coarseBounds) {
     throw new TypeError("A spatial demand index requires coarse bounds and target chunks.");
   }
+  if (options.spatialLeafCapacity !== undefined && options.spatialIndex !== true) {
+    throw new TypeError("spatialLeafCapacity requires spatialIndex.");
+  }
   const spatialBinaryUri = options.spatialBinaryUri ?? "spatial.bin";
   if (
     options.spatialIndex === true &&

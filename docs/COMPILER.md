@@ -17,14 +17,17 @@ a declared runtime profile and can be rebuilt from authoritative sources.
 pnpm naru compile assembly.step \
   --output ./dist/assembly \
   --linear-tolerance 0.1 \
-  --angular-tolerance 0.15
+  --angular-tolerance 0.15 \
+  --spatial-index \
+  --spatial-leaf-capacity 64
 ```
 
 This local AP242/AP214 command is executable. It requires the pinned
 CadQuery/OCP environment documented in `packages/compiler/README.md`, records
 both adapter and compiler reports, and removes its temporary expanded Scene IR.
-Profile, coarse-error, chunk-budget, and service-oriented options remain future
-compiler work.
+`--spatial-index` is optional and is also available to `compile-ifc`; the leaf
+capacity flag is valid only with it. Profile, coarse-error, and service-oriented
+options remain future compiler work.
 
 Other commands:
 
@@ -222,8 +225,9 @@ over renderable occurrence world bounds whose leaves reference existing target
 chunks. Target and coarse geometry bytes are unchanged, so repeated prototype
 payloads remain shared. The browser validates the binary layout, allocation
 limits, tree ownership, and glTF/chunk references, then queries visible leaves
-without fetching cold target chunks. Committed headed and real-model evidence
-remain the next slice; ADR-0008 is therefore still Proposed.
+without fetching cold target chunks. Committed evidence is split: the focused
+headed record passes under `artifacts/spatial-demand/`, while real-model
+evidence remains the next slice. ADR-0008 is therefore still Proposed.
 
 ## 11. LOD and simplification
 
@@ -505,8 +509,8 @@ prototype-granular ranges compile into 45 request chunks, the browser updates
 only changed GPU batches, and fixed decoded/GPU admission caps retain coarse
 fallbacks when pressure is reached. The optional spatial-demand sidecar,
 authenticated loader, and frustum query scheduler now exist, but this committed
-Digital Hub package predates them. Indexed browser/real-model evidence, LOD,
-and cache tiers remain deferred. The focused
+Digital Hub package predates them. Focused headed evidence passes, while
+indexed real-model evidence, LOD, and cache tiers remain deferred. The focused
 E2.1 record proves IFC boundary extraction; Digital Hub itself remains a
 historical surface-only split.3 package until its next licensed re-recording.
 
