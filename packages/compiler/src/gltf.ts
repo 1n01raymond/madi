@@ -239,6 +239,17 @@ function representationFor(
   return candidates[0];
 }
 
+function sharesTypedArrayStorage(
+  left: ArrayBufferView,
+  right: ArrayBufferView,
+): boolean {
+  return (
+    left.buffer === right.buffer &&
+    left.byteOffset === right.byteOffset &&
+    left.byteLength === right.byteLength
+  );
+}
+
 function appendGeometry(
   builder: GltfBinaryBuilder,
   prototype: Prototype,
@@ -315,15 +326,23 @@ function appendGeometry(
   let edgeClassAccessor: number | undefined;
   let edgeSourceAccessor: number | undefined;
   if (edges && edges.positions.length > 0 && edges.segments.length > 0) {
-    const bounds = scaledPositionBounds(edges.positions, scaleToMeters);
-    edgePositionAccessor = builder.append(encodeFloat32(edges.positions, scaleToMeters), {
-      componentType: 5126,
-      count: edges.positions.length / 3,
-      type: "VEC3",
-      target: 34962,
-      name: `${representation.id} edge positions`,
-      ...bounds,
-    });
+    if (
+      positionAccessor !== undefined &&
+      surface !== undefined &&
+      sharesTypedArrayStorage(edges.positions, surface.positions)
+    ) {
+      edgePositionAccessor = positionAccessor;
+    } else {
+      const bounds = scaledPositionBounds(edges.positions, scaleToMeters);
+      edgePositionAccessor = builder.append(encodeFloat32(edges.positions, scaleToMeters), {
+        componentType: 5126,
+        count: edges.positions.length / 3,
+        type: "VEC3",
+        target: 34962,
+        name: `${representation.id} edge positions`,
+        ...bounds,
+      });
+    }
     edgeIndexAccessor = builder.append(encodeUint32(edges.segments), {
       componentType: 5125,
       count: edges.segments.length,

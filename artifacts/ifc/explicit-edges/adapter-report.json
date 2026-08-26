@@ -1,0 +1,113 @@
+{
+  "adapter": {
+    "geometryLibrary": "opencascade",
+    "name": "IfcOpenShell",
+    "version": "0.8.5"
+  },
+  "counts": {
+    "documentCount": 1,
+    "duplicateGlobalIdCount": 0,
+    "edgeSegmentCount": 12,
+    "geometricOccurrenceCount": 1,
+    "geometricPrototypeCount": 1,
+    "mappedItemCount": 0,
+    "maxHierarchyDepth": 0,
+    "occurrenceCount": 2,
+    "part21EntityCount": 28,
+    "productCount": 1,
+    "propertyDistinctValueCount": 5,
+    "propertyKeyCount": 3,
+    "propertySetCount": 1,
+    "propertyValueCount": 0,
+    "prototypeCount": 2,
+    "representationCount": 1,
+    "representationMapCount": 0,
+    "reusedGeometryOccurrenceCount": 0,
+    "semanticEntityCount": 2,
+    "submittedEdgeSegmentCount": 12,
+    "submittedTriangleCount": 12,
+    "triangleCount": 12,
+    "vertexCount": 8
+  },
+  "diagnostics": {
+    "codes": [
+      "IFC_EDGE_CLASSIFICATION_BOUNDARY_ONLY"
+    ],
+    "counts": {
+      "info": 1
+    }
+  },
+  "federation": {
+    "documentOrder": [
+      "architecture"
+    ],
+    "options": {
+      "edgeMode": "ifcopenshell-opencascade-face-boundaries",
+      "geometryLibrary": "opencascade",
+      "includeEdges": true,
+      "includeSurfaces": true,
+      "normalizeSceneToMeters": true,
+      "propertyMode": "indexed-column-values",
+      "useWorldCoordinates": false,
+      "weldVertices": true
+    },
+    "sourceDigest": "b3fe988ba7607b580345342bb26138becae437401e5081eba869ffb8d79108e9"
+  },
+  "limitations": [
+    "IFC edges retain tessellated OpenCascade face boundaries and source representation-item ids, but not analytic curve kinds or sharp/smooth/seam classification.",
+    "Properties are flattened for the first queryable semantic slice; keys and key-sets are interned into the scene propertyIndex and the values live in the binary property column file.",
+    "Cross-document object reconciliation is document-scoped and not inferred from names."
+  ],
+  "prototypeReuse": [],
+  "scene": {
+    "encodingVersion": "naru.ifc-scene-ir-split.4",
+    "geometry": {
+      "byteLength": 592,
+      "sha256": "1a7b29785444fbb3374c13e76739c9c7dc9adcf49282a2587d97b0a11e04aa02"
+    },
+    "properties": {
+      "byteLength": 129,
+      "sha256": "5543ecd2f4d6a852ed4e93f30c3c65c83521d7ed2a173c56c55073bb66036711"
+    },
+    "structure": {
+      "byteLength": 7779,
+      "sha256": "6811e8da1c431b43d6d5033495f28d1c3894554e270d34ddaf4e6599e58850c1"
+    }
+  },
+  "schemaVersion": "naru.ifc-adapter-report.5",
+  "sources": [
+    {
+      "byteLength": 1555,
+      "counts": {
+        "duplicateGlobalIdCount": 0,
+        "edgeSegmentCount": 12,
+        "geometricOccurrenceCount": 1,
+        "geometricPrototypeCount": 1,
+        "mappedItemCount": 0,
+        "maxHierarchyDepth": 0,
+        "occurrenceCount": 2,
+        "part21EntityCount": 28,
+        "productCount": 1,
+        "propertyValueCount": 0,
+        "prototypeCount": 2,
+        "representationCount": 1,
+        "representationMapCount": 0,
+        "semanticEntityCount": 2,
+        "submittedEdgeSegmentCount": 12,
+        "submittedTriangleCount": 12,
+        "triangleCount": 12,
+        "vertexCount": 8
+      },
+      "discipline": "architecture",
+      "path": "fixtures/ifc/explicit-edge-wall.ifc",
+      "schema": "IFC4",
+      "sha256": "cf15bb336ca6f563ab899bd0d3d5e499529d9523cf5c2275ed161dd42a8f8f28",
+      "unitScaleToMeters": 0.001
+    }
+  ],
+  "sceneIrValidation": {
+    "ok": true,
+    "errorCount": 0,
+    "warningCount": 0
+  }
+}

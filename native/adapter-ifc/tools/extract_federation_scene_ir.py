@@ -24,6 +24,7 @@ import ifcopenshell.util.placement
 import ifcopenshell.util.unit
 import numpy as np
 
+from explicit_edges import explicit_edge_geometry
 from placement_math import (
     column_major_values,
     matrix_from_column_major,
@@ -453,6 +454,12 @@ def inspect_document(
             if len(raw_normals) == vertices.size
             else computed_normals(vertices, faces)
         )
+        positions = [rounded(value) for value in vertices.reshape(-1)]
+        edges, edge_item_ids = explicit_edge_geometry(
+            positions,
+            list(getattr(geometry, "edges", ()) or ()),
+            list(getattr(geometry, "edges_item_ids", ()) or ()),
+        )
         groups, default_material_id = material_groups(
             geometry,
             len(faces),
@@ -466,6 +473,24 @@ def inspect_document(
             "kind": "body",
             "stability": "revision-local",
         }
+        edge_source_ref_ids: list[str] = []
+        for item_id in edge_item_ids:
+            item = model.by_id(item_id)
+            edge_source_ref_id = (
+                f"source:ifc:{document_token}:step:{item_id}:representation-item"
+            )
+            source_refs.setdefault(
+                edge_source_ref_id,
+                {
+                    "id": edge_source_ref_id,
+                    "documentId": document_id,
+                    "namespace": "ifc-representation-item",
+                    "value": f"{item.is_a()}#{item_id}",
+                    "kind": "body",
+                    "stability": "revision-local",
+                },
+            )
+            edge_source_ref_ids.append(edge_source_ref_id)
         bounds = transformed_bounds(vertices)
         representation = {
             "id": representation_id,
@@ -476,19 +501,20 @@ def inspect_document(
                 "unit": "m",
                 "notes": [
                     "IfcOpenShell triangulation in local product coordinates.",
-                    "IFC curve/edge semantics are deferred in this adapter slice.",
+                    "OpenCascade face-boundary edges are tessellated and classified as boundary.",
                 ],
             },
             "localFrame": ROOT_FRAME,
             "surface": {
                 "primitive": "triangles",
-                "positions": [rounded(value) for value in vertices.reshape(-1)],
+                "positions": positions,
                 "indices": [int(value) for value in faces.reshape(-1)],
                 "normals": normals,
                 "materialGroups": groups,
             },
+            **({"edges": edges} if edges is not None else {}),
             "bounds": bounds,
-            "sourceMap": {"sourceRefs": [body_ref_id]},
+            "sourceMap": {"sourceRefs": [body_ref_id, *edge_source_ref_ids]},
         }
         representations[representation_id] = representation
         prototypes[prototype_id] = {
@@ -509,6 +535,7 @@ def inspect_document(
         geometry_metrics[prototype_id] = {
             "vertices": len(vertices),
             "triangles": len(faces),
+            "edgeSegments": len(edges["segments"]) // 2 if edges is not None else 0,
             "materialGroups": len(groups),
         }
 
@@ -812,8 +839,15 @@ def inspect_document(
         "representationCount": len(representations),
         "vertexCount": sum(value["vertices"] for value in geometry_metrics.values()),
         "triangleCount": sum(value["triangles"] for value in geometry_metrics.values()),
+        "edgeSegmentCount": sum(
+            value["edgeSegments"] for value in geometry_metrics.values()
+        ),
         "submittedTriangleCount": sum(
             geometry_metrics[prototype_id]["triangles"] * occurrence_count
+            for prototype_id, occurrence_count in geometry_occurrences.items()
+        ),
+        "submittedEdgeSegmentCount": sum(
+            geometry_metrics[prototype_id]["edgeSegments"] * occurrence_count
             for prototype_id, occurrence_count in geometry_occurrences.items()
         ),
         "propertyValueCount": property_value_count,
@@ -864,7 +898,8 @@ def extract_federation(documents: Sequence[DocumentInput], threads: int) -> tupl
         "useWorldCoordinates": False,
         "weldVertices": True,
         "includeSurfaces": True,
-        "includeEdges": False,
+        "includeEdges": True,
+        "edgeMode": "ifcopenshell-opencascade-face-boundaries",
         "normalizeSceneToMeters": True,
         "propertyMode": "indexed-column-values",
     }
@@ -916,14 +951,14 @@ def extract_federation(documents: Sequence[DocumentInput], threads: int) -> tupl
             *[record for item in extracted for record in item["diagnostics"]],
             {
                 "severity": "info",
-                "code": "IFC_EDGE_EXTRACTION_DEFERRED",
+                "code": "IFC_EDGE_CLASSIFICATION_BOUNDARY_ONLY",
                 "message": (
-                    "The first IFC adapter slice emits tessellated surfaces but does not "
-                    "classify IFC curve or boundary edges."
+                    "IfcOpenShell OpenCascade face-boundary segments are explicit edges; "
+                    "analytic curve kinds and sharp/smooth/seam classes are not yet retained."
                 ),
                 "data": {
-                    "schema": "madi.ifc-adapter.1",
-                    "entries": {"handling": "surface-only"},
+                    "schema": "naru.ifc-adapter.2",
+                    "entries": {"handling": "tessellated-boundary-segments"},
                 },
             },
         ],
@@ -986,7 +1021,7 @@ def extract_federation(documents: Sequence[DocumentInput], threads: int) -> tupl
             f"{expected_value_count}, encoded {property_columns['value_count']}."
         )
     report = {
-        "schemaVersion": "madi.ifc-adapter-report.4",
+        "schemaVersion": "naru.ifc-adapter-report.5",
         "adapter": {
             "name": "IfcOpenShell",
             "version": ifcopenshell.version,
@@ -1025,7 +1060,9 @@ def extract_federation(documents: Sequence[DocumentInput], threads: int) -> tupl
             "codes": sorted({diagnostic["code"] for diagnostic in scene["diagnostics"]}),
         },
         "limitations": [
-            "IFC curve and boundary-edge classification is deferred.",
+            "IFC edges retain tessellated OpenCascade face boundaries and source "
+            "representation-item ids, but not analytic curve kinds or "
+            "sharp/smooth/seam classification.",
             "Properties are flattened for the first queryable semantic slice; "
             "keys and key-sets are interned into the scene propertyIndex and "
             "the values live in the binary property column file.",
@@ -1049,6 +1086,7 @@ GEOMETRY_ENCODINGS = {
     "<f8": "f64le",
     "<f4": "f32le",
     "<u4": "u32le",
+    "<u1": "u8",
 }
 
 
@@ -1070,6 +1108,8 @@ def write_scene(
     `madi.ifc-scene-ir-split.3` moves the property values themselves into the
     binary column file next to the geometry, leaving `{schema, set, row}` per
     semantic and the `madi.property-columns.1` header in the structure JSON.
+    `naru.ifc-scene-ir-split.4` adds boundary-edge geometry streams while
+    allowing edge positions to alias their surface position stream.
     """
     geometry_path.parent.mkdir(parents=True, exist_ok=True)
     offset = 0
@@ -1095,10 +1135,22 @@ def write_scene(
             surface = representation.get("surface")
             if not surface:
                 continue
-            surface["positions"] = append(surface["positions"], "<f8")
+            positions = surface["positions"]
+            surface["positions"] = append(positions, "<f8")
             surface["indices"] = append(surface["indices"], "<u4")
             if surface.get("normals") is not None:
                 surface["normals"] = append(surface["normals"], "<f4")
+            edges = representation.get("edges")
+            if edges is not None:
+                edges["positions"] = (
+                    surface["positions"]
+                    if edges["positions"] is positions
+                    else append(edges["positions"], "<f8")
+                )
+                edges["segments"] = append(edges["segments"], "<u4")
+                edges["classes"] = append(edges["classes"], "<u1")
+                if edges.get("sourceIds") is not None:
+                    edges["sourceIds"] = append(edges["sourceIds"], "<u4")
 
     columns = scene["propertyValues"]
     properties_path.parent.mkdir(parents=True, exist_ok=True)
@@ -1148,7 +1200,7 @@ def write_scene(
         )
         output.write("\n")
     return {
-        "encodingVersion": "madi.ifc-scene-ir-split.3",
+        "encodingVersion": "naru.ifc-scene-ir-split.4",
         "structure": digest_file(structure_path),
         "geometry": digest_file(geometry_path),
         "properties": digest_file(properties_path),

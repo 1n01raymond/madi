@@ -109,6 +109,13 @@ exists only between the adapter and its consumers. `--retain-scene-ir`
 therefore writes `scene-ir.json`, `scene-ir-geometry.bin`, and
 `scene-ir-properties.bin`; the JSON alone is not a loadable scene.
 
+`naru.ifc-scene-ir-split.4` adds explicit OpenCascade face-boundary streams.
+Edge positions may alias the surface position range; indices, boundary classes,
+and IFC representation-item source ids remain separate typed-array views. The
+compiler still accepts historical split.3 reports so existing Digital Hub,
+sixty5, and public-demo packages remain reproducible. The focused split.4
+record is checked by `pnpm ifc:edges:check`.
+
 ### Package property sidecar
 
 A compiled package built from a column-bag scene republishes the properties as

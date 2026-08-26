@@ -167,7 +167,11 @@ function assertAdapterIdentity(
   properties: Buffer,
 ): { readonly report: Record<string, unknown>; readonly federationDigest: string } {
   const report = asRecord(adapterReport, "IFC adapter report");
-  if (report.schemaVersion !== "madi.ifc-adapter-report.4") {
+  const expectedSceneEncoding = new Map<string, string>([
+    ["madi.ifc-adapter-report.4", "madi.ifc-scene-ir-split.3"],
+    ["naru.ifc-adapter-report.5", ifcSceneSplitEncodingVersion],
+  ]).get(String(report.schemaVersion));
+  if (expectedSceneEncoding === undefined) {
     throw new TypeError("IFC adapter report has an unsupported schema version.");
   }
   if (!Array.isArray(report.sources) || report.sources.length !== sources.length) {
@@ -195,7 +199,7 @@ function assertAdapterIdentity(
     throw new TypeError("IFC adapter report is missing its federation digest.");
   }
   const scene = asRecord(report.scene, "IFC adapter scene identity");
-  if (scene.encodingVersion !== ifcSceneSplitEncodingVersion) {
+  if (scene.encodingVersion !== expectedSceneEncoding) {
     throw new TypeError("IFC adapter scene transport version is unsupported.");
   }
   const structureIdentity = asRecord(scene.structure, "IFC scene structure identity");

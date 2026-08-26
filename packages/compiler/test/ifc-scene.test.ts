@@ -5,6 +5,9 @@ import { hydrateIfcSceneSplit } from "../src/ifc-scene.js";
 const positions = Float64Array.from([0, 0, 0, 1, 0, 0, 0, 1, 0]);
 const indices = Uint32Array.from([0, 1, 2]);
 const normals = Float32Array.from([0, 0, 1, 0, 0, 1, 0, 0, 1]);
+const edgeSegments = Uint32Array.from([0, 1, 1, 2]);
+const edgeClasses = Uint8Array.from([0, 0]);
+const edgeSourceIds = Uint32Array.from([1, 1]);
 
 /** Concatenates the streams the adapter writes, keeping every start 8-aligned. */
 function geometryFile(): Buffer {
@@ -13,12 +16,18 @@ function geometryFile(): Buffer {
     Buffer.from(indices.buffer),
     Buffer.alloc(4),
     Buffer.from(normals.buffer),
+    Buffer.alloc(4),
+    Buffer.from(edgeSegments.buffer),
+    Buffer.from(edgeClasses.buffer),
+    Buffer.alloc(6),
+    Buffer.from(edgeSourceIds.buffer),
   ];
   return Buffer.concat(parts);
 }
 
 function splitScene(
   overrides: Record<string, unknown> = {},
+  edgeOverrides: Record<string, unknown> = {},
 ): Record<string, unknown> {
   return {
     schemaVersion: "madi.scene-ir.0",
@@ -34,6 +43,13 @@ function splitScene(
           indices: { encoding: "u32le", byteOffset: 72, byteLength: 12 },
           normals: { encoding: "f32le", byteOffset: 88, byteLength: 36 },
           ...overrides,
+        },
+        edges: {
+          positions: { encoding: "f64le", byteOffset: 0, byteLength: 72 },
+          segments: { encoding: "u32le", byteOffset: 128, byteLength: 16 },
+          classes: { encoding: "u8", byteOffset: 144, byteLength: 2 },
+          sourceIds: { encoding: "u32le", byteOffset: 152, byteLength: 8 },
+          ...edgeOverrides,
         },
       },
     ],
@@ -54,6 +70,12 @@ describe("split IFC Scene IR hydration", () => {
     expect(surface?.positions.buffer).toBe(geometry.buffer);
     // Non-geometry members such as the property index pass through untouched.
     expect(scene.propertyIndex).toEqual({ keys: ["a"], sets: [[0]] });
+    const edges = scene.representations[0]?.edges;
+    expect(Array.from(edges?.positions ?? [])).toEqual(Array.from(positions));
+    expect(Array.from(edges?.segments ?? [])).toEqual(Array.from(edgeSegments));
+    expect(Array.from(edges?.classes ?? [])).toEqual(Array.from(edgeClasses));
+    expect(Array.from(edges?.sourceIds ?? [])).toEqual(Array.from(edgeSourceIds));
+    expect(edges?.positions.buffer).toBe(surface?.positions.buffer);
   });
 
   it("hydrates a geometry buffer that starts unaligned inside a pool", () => {
@@ -101,15 +123,23 @@ describe("split IFC Scene IR hydration", () => {
     ).toThrow(/cannot carry faceSourceIds/u);
   });
 
-  it("rejects representations that still carry expanded edges", () => {
-    const scene = splitScene();
-    (scene.representations as Record<string, unknown>[])[0]!.edges = {
-      positions: [],
-      segments: [],
-      classes: [],
-    };
-    expect(() => hydrateIfcSceneSplit(scene, geometryFile())).toThrow(
-      /cannot carry edge streams/u,
+  it("rejects expanded edge members instead of geometry references", () => {
+    expect(() =>
+      hydrateIfcSceneSplit(
+        splitScene({}, { segments: [0, 1] }),
+        geometryFile(),
+      ),
+    ).toThrow(/edge streams must be geometry references/u);
+  });
+
+  it("rejects a misdeclared edge-class encoding", () => {
+    expect(() =>
+      hydrateIfcSceneSplit(
+        splitScene({}, { classes: { encoding: "u32le", byteOffset: 144, byteLength: 2 } }),
+        geometryFile(),
+      ),
+    ).toThrow(
+      /edge streams use unexpected encodings/u,
     );
   });
 });

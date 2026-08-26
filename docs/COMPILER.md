@@ -461,6 +461,17 @@ the value table; values decode lazily through
 `scene.gltf` kept its byte length with a digest change explained by the
 recorded `optionsDigest` (`propertyMode: "indexed-column-values"`).
 
+Explicit IFC boundaries are the next deliberate transport revision:
+`naru.ifc-scene-ir-split.4` writes IfcOpenShell/OpenCascade face-boundary
+indices, boundary classes, and originating IFC representation-item ids into
+the geometry stream. Edge and surface positions share one stream reference
+when they use the same tessellation vertices, and the glTF compiler likewise
+reuses one POSITION accessor. The focused project-owned wall record contains
+12 topological boundary segments while its triangle wireframe contains 18
+unique edges, proving that the six face diagonals are not promoted to authored
+geometry (`artifacts/ifc/explicit-edges/`). Historical split.3 real-model
+records remain accepted and byte-reproducible.
+
 The compiler never holds the structure document as one string. A
 record-streaming reader (`packages/compiler/src/ifc-structure-stream.ts`)
 walks the file in bounded chunks with a byte-level state machine, parses each
@@ -483,8 +494,9 @@ This now also exercises the first Phase 2 scheduler boundary: its 3,383
 prototype-granular ranges compile into 45 request chunks, the browser updates
 only changed GPU batches, and fixed decoded/GPU admission caps retain coarse
 fallbacks when pressure is reached. It is not yet a spatial scheduler: LOD,
-camera reprioritization, eviction, cache tiers, and explicit IFC CAD-edge
-classification remain deferred.
+camera reprioritization, eviction, and cache tiers remain deferred. The focused
+E2.1 record proves IFC boundary extraction; Digital Hub itself remains a
+historical surface-only split.3 package until its next licensed re-recording.
 
 ### 21.1 Real-large compile status
 
