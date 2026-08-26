@@ -17,7 +17,11 @@ import {
   publishCompiledCacheEntry,
   restoreCompiledCacheEntry,
 } from "./compiled-cache.js";
-import type { CompilationCacheResult, CompiledCacheKeyInput } from "./compiled-cache.js";
+import type {
+  CompilationCacheResult,
+  CompiledCacheKeyInput,
+  CompiledCacheToolInput,
+} from "./compiled-cache.js";
 
 const defaultAdapterScript = fileURLToPath(
   new URL("../../../native/adapter-occt/tools/extract_scene_ir.py", import.meta.url),
@@ -32,6 +36,8 @@ export interface StepCompileOptions {
   readonly angularTolerance?: number;
   /** Optional persistent package cache. Existing output is reused only after full verification. */
   readonly cacheDirectory?: string;
+  readonly spatialIndex?: boolean;
+  readonly spatialLeafCapacity?: number;
   readonly environment?: NodeJS.ProcessEnv;
 }
 
@@ -136,8 +142,10 @@ async function inspectAdapterIdentity(
 function cacheInput(
   inspection: StepSourceInspection,
   identity: OcctAdapterIdentity,
+  compiler: CompiledCacheToolInput,
   linearTolerance: number,
   angularTolerance: number,
+  options: StepCompileOptions,
 ): CompiledCacheKeyInput {
   return {
     sources: [{ scope: "step", sha256: inspection.sha256 }],
@@ -145,14 +153,22 @@ function cacheInput(
       name: identity.name,
       version: `${identity.version}+${identity.fingerprint}`,
     },
-    compiler: currentCompilerCacheIdentity(),
+    compiler,
     options: {
       linearTolerance,
       angularTolerance,
       coarseBounds: true,
       uriHint: basename(inspection.sourcePath),
+      spatialIndex: options.spatialIndex === true,
+      ...(options.spatialLeafCapacity === undefined
+        ? {}
+        : { spatialLeafCapacity: options.spatialLeafCapacity }),
     },
   };
+}
+
+function cacheFailureDetails(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
 }
 
 function requireBuildReport(value: unknown, sourceDigest: string): CompilerBuildReport {
@@ -227,32 +243,46 @@ export async function compileStepFile(
       adapterScriptPath,
       environment,
     );
-    cacheKeyInput = cacheInput(inspection, identity, linearTolerance, angularTolerance);
+    const compiler = await currentCompilerCacheIdentity();
+    cacheKeyInput = cacheInput(
+      inspection,
+      identity,
+      compiler,
+      linearTolerance,
+      angularTolerance,
+      options,
+    );
     cacheKey = createCompiledCacheKey(cacheKeyInput);
-    const restored = await restoreCompiledCacheEntry({
-      cacheDirectory: options.cacheDirectory,
-      key: cacheKey,
-      outputDirectory,
-    });
-    if (restored) {
-      const [serializedBuildReport, serializedAdapterReport] = await Promise.all([
-        readFile(resolve(outputDirectory, "build-report.json"), "utf8"),
-        readFile(resolve(outputDirectory, "adapter-report.json"), "utf8"),
-      ]);
-      const report = requireBuildReport(
-        parseJson(serializedBuildReport, "Cached build report"),
-        inspection.sha256,
-      );
-      if (report.output.packageDigest !== restored.packageDigest) {
-        throw new TypeError("Cached package digest does not match its manifest.");
-      }
-      return {
-        source: inspection,
+    try {
+      const restored = await restoreCompiledCacheEntry({
+        cacheDirectory: options.cacheDirectory,
+        key: cacheKey,
         outputDirectory,
-        report,
-        adapterReport: parseJson(serializedAdapterReport, "Cached adapter report"),
-        cache: { status: "hit", key: cacheKey },
-      };
+      });
+      if (restored) {
+        const [serializedBuildReport, serializedAdapterReport] = await Promise.all([
+          readFile(resolve(outputDirectory, "build-report.json"), "utf8"),
+          readFile(resolve(outputDirectory, "adapter-report.json"), "utf8"),
+        ]);
+        const report = requireBuildReport(
+          parseJson(serializedBuildReport, "Cached build report"),
+          inspection.sha256,
+        );
+        if (report.output.packageDigest !== restored.packageDigest) {
+          throw new TypeError("Cached package digest does not match its manifest.");
+        }
+        return {
+          source: inspection,
+          outputDirectory,
+          report,
+          adapterReport: parseJson(serializedAdapterReport, "Cached adapter report"),
+          cache: { status: "hit", key: cacheKey },
+        };
+      }
+    } catch (error) {
+      console.warn(
+        `[naru] cache restore failed (${cacheFailureDetails(error)}); recompiling.`,
+      );
     }
   }
   const temporaryDirectory = await mkdtemp(join(tmpdir(), "naru-step-"));
@@ -287,7 +317,13 @@ export async function compileStepFile(
     if (scene.revision.sourceDigest !== `sha256:${inspection.sha256}`) {
       throw new TypeError("OCCT Scene IR source digest does not match the STEP input.");
     }
-    const compiled = compileSceneToGltf(scene, { coarseBounds: true });
+    const compiled = compileSceneToGltf(scene, {
+      coarseBounds: true,
+      ...(options.spatialIndex === true ? { spatialIndex: true } : {}),
+      ...(options.spatialLeafCapacity === undefined
+        ? {}
+        : { spatialLeafCapacity: options.spatialLeafCapacity }),
+    });
     const validation = validateCompiledGltf(
       compiled.document,
       compiled.coarseBinary
@@ -304,17 +340,24 @@ export async function compileStepFile(
     }
     await writeCompiledPackage(compiled, outputDirectory, adapterReport);
     if (cacheKeyInput && cacheKey) {
-      await publishCompiledCacheEntry({
-        cacheDirectory: options.cacheDirectory as string,
-        packageDirectory: outputDirectory,
-        input: cacheKeyInput,
-        packageDigest: compiled.report.output.packageDigest,
-        resourcePaths: [
-          ...compiled.report.output.resources.map(({ path }) => path),
-          "adapter-report.json",
-          "build-report.json",
-        ],
-      });
+      try {
+        await publishCompiledCacheEntry({
+          cacheDirectory: options.cacheDirectory as string,
+          packageDirectory: outputDirectory,
+          input: cacheKeyInput,
+          packageDigest: compiled.report.output.packageDigest,
+          resourcePaths: [
+            ...compiled.report.output.resources.map(({ path }) => path),
+            "adapter-report.json",
+            "build-report.json",
+          ],
+        });
+      } catch (error) {
+        console.warn(
+          `[naru] cache publish failed (${cacheFailureDetails(error)}); ` +
+            "compiled output kept without a cache entry.",
+        );
+      }
     }
     return {
       source: inspection,

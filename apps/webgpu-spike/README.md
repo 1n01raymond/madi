@@ -71,20 +71,34 @@ pnpm dev
 ```
 
 The runtime preserves one pickable occurrence ID across material-separated
-surface batches. One session Worker parses the glTF document once and reuses it
-for every geometry request. IFC compilation coalesces adjacent prototype ranges
+surface batches. One session Worker validates the glTF document, composes its
+float64 world transforms, and indexes target-chunk occurrence membership once.
+Every later Range decode reuses that state and visits only the selected chunk's
+renderable occurrences; transferred results clone only their occurrence
+transforms so the prepared state remains attached. Prototype-local surface
+bounds are cached once and only eight corners are transformed per occurrence,
+rather than rescanning every vertex. IFC compilation coalesces adjacent prototype ranges
 into deterministic requests (512 KiB by default), while the existing
 `prototype-aabb-v1` tier is collapsed at runtime into one canonical box batch
 with contiguous occurrence transforms. The browser enforces separate 64 MiB
 decoded and GPU admission budgets. Promoted targets mask matching coarse
 instances; evicting colder target groups reveals those shared fallbacks again,
-so visibility intent and stable object IDs survive every batch update. Add
+so visibility intent and stable object IDs survive every batch update. Target
+promotion reuses the hierarchy's node lookup and does not rescan DOM visibility
+markers because residency changes no user visibility intent. Add
 `?residencyMiB=5` to force a small budget during local exploration. Orbit,
 pan, zoom, fit, and resize rank visible retained-coarse chunk bounds by distance
 from the view center. If the hottest nonresident chunk
 changes, the scheduler aborts the obsolete HTTP Range and Worker decode before
-starting its replacement; the same order re-ranks eviction priority. Persistent
-cache tiers, spatial clusters, and screen-space LOD remain Phase 2 work.
+starting its replacement; the same order re-ranks eviction priority. An
+unchanged camera does not retry a demand signature already blocked by the
+residency budget. Packages
+with `naru.spatial-demand-index.1` instead authenticate `spatial.bin`, query
+only frustum-visible BVH leaves, and keep cold chunks out of the fetch queue.
+The focused headed record plus Digital Hub and sixty5 offline co-demand
+censuses are under `artifacts/spatial-demand/`. Persistent cache tiers, spatial
+draw clusters, screen-space LOD, and localized real-model headed evidence
+remain Phase 2 work.
 
 ## Open another compiled scene
 
@@ -94,7 +108,7 @@ host must allow cross-origin requests for both the glTF and its external binary.
 
 Use **Open local package** to select exactly one NARU-profile `.gltf` and all of
 its external `.bin` and `.json` resources (including the optional
-`properties.json` / `properties.bin` sidecar pair). The browser validates each
+`properties.json` / `properties.bin` sidecar pair and `spatial.bin`). The browser validates each
 declared file name and byte length before sending local `File` objects to the
 geometry Worker.
 Local files stay on the client and do not create a shareable URL. This is a

@@ -179,7 +179,7 @@ the first broadly useful alpha, and P2 for later expansion.
 | ING-004 | P1 | Import IFC geometry and property relationships through a separate adapter. |
 | ING-005 | P1 | Import glTF as already-renderable scene content without routing it through OCCT. |
 | ING-006 | P1 | Cache derived packages by complete source/adapter/compiler/options identity and skip unchanged source adapters on reopen. |
-| ING-006 | P2 | Support licensed native translators through an out-of-tree adapter contract. |
+| ING-007 | P2 | Support licensed native translators through an out-of-tree adapter contract. |
 
 ### 6.2 Scene and workspace
 

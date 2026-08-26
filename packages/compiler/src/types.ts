@@ -101,10 +101,14 @@ export interface CompilerBuildReport {
     readonly propertiesBinaryUri?: string;
     readonly coordinateSystem: "right-handed-y-up-meters";
     readonly geometryEncoding: "gltf-f32";
+    /** JSON whitespace policy. Omitted for the historical pretty-printed default. */
+    readonly jsonFormatting?: "compact";
     readonly progressiveRepresentation?: "prototype-aabb-v1";
     readonly targetChunking?: "prototype-range-v1" | "coalesced-prototype-range-v1";
     /** Maximum bytes per progressive target request when coalescing is enabled. */
     readonly targetChunkByteBudget?: number;
+    /** Optional physical target payload order derived from spatial BVH leaves. */
+    readonly targetPayloadOrder?: "spatial-leaf-anchor-v1";
   };
   readonly source: {
     readonly sceneId: string;
@@ -145,6 +149,10 @@ export interface CompiledGltfPackage {
   readonly json: string;
   readonly binary: Uint8Array;
   readonly coarseBinary?: Uint8Array;
+  /** Optional `naru.spatial-demand-index.1` derived-cache sidecar. */
+  readonly spatialBinary?: Uint8Array;
+  /** Resource URI paired with `spatialBinary`. */
+  readonly spatialBinaryUri?: string;
   /** Compact-JSON property sidecar (`madi.package-properties.1`), when emitted. */
   readonly propertiesJson?: string;
   /** Byte-verbatim `madi.property-columns.1` column file, when emitted. */
@@ -162,11 +170,23 @@ export interface CompileGltfOptions {
   readonly coarseBounds?: boolean;
   readonly coarseBinaryUri?: string;
   readonly generator?: string;
+  /** Omit insignificant JSON whitespace for packages near V8's string limit. */
+  readonly compactJson?: boolean;
   /**
    * Coalesce adjacent prototype ranges into deterministic HTTP Range requests.
    * Omit this to retain one target chunk per prototype for compatibility.
    */
   readonly targetChunkByteBudget?: number;
+  /**
+   * Order prototype payloads by their dominant deterministic spatial leaf
+   * before byte-budget coalescing. Requires spatialIndex and a chunk budget.
+   */
+  readonly spatialPayloadOrder?: boolean;
+  /** Emit an optional occurrence BVH that maps spatial leaves to target chunks. */
+  readonly spatialIndex?: boolean;
+  readonly spatialBinaryUri?: string;
+  /** Maximum renderable occurrences per spatial BVH leaf. Defaults to 64. */
+  readonly spatialLeafCapacity?: number;
   /**
    * The adapter's `madi.property-columns.1` value column file for a scene
    * whose semantics reference `scene.propertyValues`. Required for such a

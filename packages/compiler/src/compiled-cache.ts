@@ -5,11 +5,13 @@ import {
   mkdir,
   mkdtemp,
   readFile,
+  readdir,
   rename,
   rm,
   writeFile,
 } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 
 export const compiledCacheEntrySchema = "naru.compiled-cache-entry.1" as const;
 
@@ -49,13 +51,45 @@ export interface CompilationCacheResult {
   readonly key?: string;
 }
 
-export function currentCompilerCacheIdentity(): CompiledCacheToolInput {
-  return {
-    name: "@naru3d/compiler",
-    version:
-      `0.0.0+cache.1;node=${process.versions.node};` +
-      `platform=${process.platform}-${process.arch}`,
-  };
+async function fingerprintModuleDirectory(directory: string): Promise<string> {
+  const entries = await readdir(directory, { withFileTypes: true });
+  const fileNames = entries
+    .filter((entry) => entry.isFile())
+    .map((entry) => entry.name)
+    .sort((left, right) => left.localeCompare(right, "en"));
+  const digests = await Promise.all(
+    fileNames.map(async (name) =>
+      createHash("sha256").update(await readFile(join(directory, name))).digest("hex"),
+    ),
+  );
+  const hash = createHash("sha256");
+  for (const [index, name] of fileNames.entries()) {
+    hash.update(`${name}\n${digests[index]}\n`);
+  }
+  return hash.digest("hex");
+}
+
+let compilerIdentityPromise: Promise<CompiledCacheToolInput> | undefined;
+
+/**
+ * The compiler half of every cache key: a content hash over the compiler's own
+ * module directory, so any code change invalidates old entries without a
+ * hand-maintained version bump. Node/OS/architecture stay in the identity
+ * until cross-platform determinism is proven.
+ */
+export function currentCompilerCacheIdentity(): Promise<CompiledCacheToolInput> {
+  compilerIdentityPromise ??= (async () => {
+    const moduleDirectory = dirname(fileURLToPath(import.meta.url));
+    const fingerprint = await fingerprintModuleDirectory(moduleDirectory);
+    return {
+      name: "@naru3d/compiler",
+      version:
+        `0.0.0+cache.1;node=${process.versions.node};` +
+        `platform=${process.platform}-${process.arch};` +
+        `sources=${fingerprint}`,
+    };
+  })();
+  return compilerIdentityPromise;
 }
 
 export interface PublishCompiledCacheEntryOptions {
@@ -259,7 +293,9 @@ export async function publishCompiledCacheEntry(
     try {
       await rename(stagingDirectory, entryDirectory);
     } catch (error) {
-      if (!new Set(["EEXIST", "ENOTEMPTY"]).has(errorCode(error) ?? "")) throw error;
+      // Windows reports a rename onto an existing directory as EPERM; the
+      // read-back below still rethrows the original error when no entry exists.
+      if (!new Set(["EEXIST", "ENOTEMPTY", "EPERM"]).has(errorCode(error) ?? "")) throw error;
       const existing = await readCompiledCacheEntry(cacheDirectory, key);
       if (!existing) throw error;
       await verifyResources(entryDirectory, existing.resources);

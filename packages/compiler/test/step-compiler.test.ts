@@ -3,7 +3,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { compileStepFile } from "../src/step-compiler.js";
 
@@ -61,6 +61,8 @@ await writeFile(option("--report"), JSON.stringify({
         outputDirectory,
         pythonExecutable: process.execPath,
         adapterScriptPath: adapterPath,
+        spatialIndex: true,
+        spatialLeafCapacity: 2,
       });
 
       expect(result.source.schema).toBe("AP242");
@@ -70,10 +72,11 @@ await writeFile(option("--report"), JSON.stringify({
         triangleCount: 2076,
         edgeSegmentCount: 181,
       });
-      const [gltf, binary, coarseBinary, buildReport, adapterReport] = await Promise.all([
+      const [gltf, binary, coarseBinary, spatialBinary, buildReport, adapterReport] = await Promise.all([
         readFile(join(outputDirectory, "scene.gltf"), "utf8").then(JSON.parse),
         readFile(join(outputDirectory, "scene.bin")),
         readFile(join(outputDirectory, "coarse.bin")),
+        readFile(join(outputDirectory, "spatial.bin")),
         readFile(join(outputDirectory, "build-report.json"), "utf8").then(JSON.parse),
         readFile(join(outputDirectory, "adapter-report.json"), "utf8").then(JSON.parse),
       ]);
@@ -81,6 +84,11 @@ await writeFile(option("--report"), JSON.stringify({
         { uri: "scene.bin", byteLength: binary.byteLength },
         { uri: "coarse.bin", byteLength: coarseBinary.byteLength },
       ]);
+      expect(gltf.extras.madi.progressive.spatialIndex).toMatchObject({
+        schemaVersion: "naru.spatial-demand-index.1",
+        uri: "spatial.bin",
+        byteLength: spatialBinary.byteLength,
+      });
       expect(buildReport.options).toMatchObject({
         coarseBinaryUri: "coarse.bin",
         progressiveRepresentation: "prototype-aabb-v1",
@@ -226,6 +234,30 @@ await writeFile(option("--report"), JSON.stringify({
       await expect(readFile(join(secondOutput, "scene.bin"))).resolves.toEqual(
         await readFile(join(firstOutput, "scene.bin")),
       );
+
+      const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+      try {
+        await writeFile(
+          join(cacheDirectory, String(first.cache.key), "scene.gltf"),
+          "corrupted",
+          "utf8",
+        );
+        const recovered = await compileStepFile({
+          sourcePath,
+          outputDirectory: join(temporaryDirectory, "compiled-recovered"),
+          cacheDirectory,
+          pythonExecutable: process.execPath,
+          adapterScriptPath: adapterPath,
+        });
+        expect(recovered.cache).toEqual({ status: "miss", key: first.cache.key });
+        expect(recovered.report.output.packageDigest).toBe(first.report.output.packageDigest);
+        expect(await readFile(counterPath, "utf8")).toBe("2");
+        expect(warnSpy).toHaveBeenCalledWith(
+          expect.stringContaining("cache restore failed"),
+        );
+      } finally {
+        warnSpy.mockRestore();
+      }
     } finally {
       await rm(temporaryDirectory, { recursive: true, force: true });
     }

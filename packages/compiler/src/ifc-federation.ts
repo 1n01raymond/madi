@@ -23,6 +23,7 @@ import {
 import type {
   CompilationCacheResult,
   CompiledCacheKeyInput,
+  CompiledCacheToolInput,
 } from "./compiled-cache.js";
 
 const defaultAdapterScript = fileURLToPath(
@@ -51,6 +52,11 @@ export interface IfcFederationCompileOptions {
   readonly targetChunkByteBudget?: number;
   /** Optional persistent package cache keyed by the complete federation/toolchain identity. */
   readonly cacheDirectory?: string;
+  readonly spatialIndex?: boolean;
+  readonly spatialLeafCapacity?: number;
+  readonly spatialPayloadOrder?: boolean;
+  /** Omit insignificant scene.gltf whitespace for real-large packages. */
+  readonly compactJson?: boolean;
   readonly environment?: NodeJS.ProcessEnv;
 }
 
@@ -207,9 +213,11 @@ async function inspectAdapterToolchain(
 function federationCacheInput(
   sources: readonly InspectedIfcFederationDocument[],
   identity: IfcAdapterIdentity,
+  compiler: CompiledCacheToolInput,
   threads: number,
   targetChunkByteBudget: number,
   retainSceneIr: boolean,
+  options: IfcFederationCompileOptions,
 ): CompiledCacheKeyInput {
   return {
     sources: sources.map(({ discipline, sha256 }) => ({ scope: discipline, sha256 })),
@@ -217,17 +225,27 @@ function federationCacheInput(
       name: identity.name,
       version: `${identity.version}+${identity.fingerprint}`,
     },
-    compiler: currentCompilerCacheIdentity(),
+    compiler,
     options: {
       threads,
       targetChunkByteBudget,
       retainSceneIr,
       coarseBounds: true,
+      spatialIndex: options.spatialIndex === true,
+      ...(options.spatialLeafCapacity === undefined
+        ? {}
+        : { spatialLeafCapacity: options.spatialLeafCapacity }),
+      spatialPayloadOrder: options.spatialPayloadOrder === true,
+      compactJson: options.compactJson === true,
       ...Object.fromEntries(
         sources.map(({ discipline, uriHint }) => [`uriHint.${discipline}`, uriHint]),
       ),
     },
   };
+}
+
+function cacheFailureDetails(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
 }
 
 function requireCachedBuildReport(value: unknown, packageDigest: string): CompilerBuildReport {
@@ -333,34 +351,43 @@ export async function compileIfcFederation(
       adapterScriptPath,
       environment,
     );
+    const compiler = await currentCompilerCacheIdentity();
     cacheKeyInput = federationCacheInput(
       sources,
       adapterIdentity,
+      compiler,
       threads,
       targetChunkByteBudget,
       retainSceneIr,
+      options,
     );
     cacheKey = createCompiledCacheKey(cacheKeyInput);
-    const restored = await restoreCompiledCacheEntry({
-      cacheDirectory: options.cacheDirectory,
-      key: cacheKey,
-      outputDirectory,
-    });
-    if (restored) {
-      const [serializedBuildReport, serializedAdapterReport] = await Promise.all([
-        readFile(resolve(outputDirectory, "build-report.json"), "utf8"),
-        readFile(resolve(outputDirectory, "adapter-report.json"), "utf8"),
-      ]);
-      return {
-        sources,
+    try {
+      const restored = await restoreCompiledCacheEntry({
+        cacheDirectory: options.cacheDirectory,
+        key: cacheKey,
         outputDirectory,
-        report: requireCachedBuildReport(
-          parseJson(serializedBuildReport, "Cached IFC build report"),
-          restored.packageDigest,
-        ),
-        adapterReport: parseJson(serializedAdapterReport, "Cached IFC adapter report"),
-        cache: { status: "hit", key: cacheKey },
-      };
+      });
+      if (restored) {
+        const [serializedBuildReport, serializedAdapterReport] = await Promise.all([
+          readFile(resolve(outputDirectory, "build-report.json"), "utf8"),
+          readFile(resolve(outputDirectory, "adapter-report.json"), "utf8"),
+        ]);
+        return {
+          sources,
+          outputDirectory,
+          report: requireCachedBuildReport(
+            parseJson(serializedBuildReport, "Cached IFC build report"),
+            restored.packageDigest,
+          ),
+          adapterReport: parseJson(serializedAdapterReport, "Cached IFC adapter report"),
+          cache: { status: "hit", key: cacheKey },
+        };
+      }
+    } catch (error) {
+      console.warn(
+        `[naru] cache restore failed (${cacheFailureDetails(error)}); recompiling.`,
+      );
     }
   }
   const temporaryDirectory = await mkdtemp(join(tmpdir(), "naru-ifc-"));
@@ -430,6 +457,12 @@ export async function compileIfcFederation(
       coarseBounds: true,
       generator: "MADI compiler 0.0.0 / IfcOpenShell federation slice",
       targetChunkByteBudget,
+      ...(options.spatialIndex === true ? { spatialIndex: true } : {}),
+      ...(options.spatialLeafCapacity === undefined
+        ? {}
+        : { spatialLeafCapacity: options.spatialLeafCapacity }),
+      ...(options.spatialPayloadOrder === true ? { spatialPayloadOrder: true } : {}),
+      ...(options.compactJson === true ? { compactJson: true } : {}),
       // The package carries the adapter's value column file byte-verbatim as
       // a lazy property sidecar; the compiler still never materializes a
       // property value.
@@ -472,20 +505,27 @@ export async function compileIfcFederation(
       ]);
     }
     if (cacheKeyInput && cacheKey) {
-      await publishCompiledCacheEntry({
-        cacheDirectory: options.cacheDirectory as string,
-        packageDirectory: outputDirectory,
-        input: cacheKeyInput,
-        packageDigest: compiled.report.output.packageDigest,
-        resourcePaths: [
-          ...compiled.report.output.resources.map(({ path }) => path),
-          "adapter-report.json",
-          "build-report.json",
-          ...(retainSceneIr
-            ? ["scene-ir.json", "scene-ir-geometry.bin", "scene-ir-properties.bin"]
-            : []),
-        ],
-      });
+      try {
+        await publishCompiledCacheEntry({
+          cacheDirectory: options.cacheDirectory as string,
+          packageDirectory: outputDirectory,
+          input: cacheKeyInput,
+          packageDigest: compiled.report.output.packageDigest,
+          resourcePaths: [
+            ...compiled.report.output.resources.map(({ path }) => path),
+            "adapter-report.json",
+            "build-report.json",
+            ...(retainSceneIr
+              ? ["scene-ir.json", "scene-ir-geometry.bin", "scene-ir-properties.bin"]
+              : []),
+          ],
+        });
+      } catch (error) {
+        console.warn(
+          `[naru] cache publish failed (${cacheFailureDetails(error)}); ` +
+            "compiled output kept without a cache entry.",
+        );
+      }
     }
     return {
       sources,

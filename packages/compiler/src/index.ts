@@ -17,6 +17,17 @@ export type {
   PublishCompiledCacheEntryOptions,
   RestoreCompiledCacheEntryOptions,
 } from "./compiled-cache.js";
+export {
+  defaultSpatialLeafCapacity,
+  encodeSpatialDemandIndex,
+  spatialDemandIndexSchema,
+} from "./spatial-demand.js";
+export type {
+  EncodedSpatialDemandIndex,
+  SpatialDemandIndexStats,
+  SpatialDemandOccurrence,
+  SpatialVector3,
+} from "./spatial-demand.js";
 export { compileIfcFederation } from "./ifc-federation.js";
 export { inspectIfcBytes, inspectIfcFile } from "./ifc-source.js";
 export { writeCompiledPackage } from "./package-output.js";

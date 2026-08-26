@@ -68,11 +68,15 @@ identities are cache misses.
 resource byte count and SHA-256, verifies the complete entry before restore,
 and publishes/restores through same-parent temporary directories and atomic
 rename. Its tests prove key determinism, idempotent publish, successful restore,
-and fail-closed corruption handling. The STEP and IFC CLIs can opt in with
+and storage-layer rejection of corrupted entries; the STEP and IFC compile
+orchestrations report a damaged or unreadable entry and fall back to a full
+recompile, so a broken cache degrades to a miss instead of blocking compilation.
+The STEP and IFC CLIs can opt in with
 `--cache`. Each adapter exposes a cheap `--identity`: OCCT fingerprints its
 implementation and pinned CadQuery/OCP toolchain, while IFC fingerprints its
 extraction modules and pinned IfcOpenShell/numpy toolchain; both include Python,
-OS, and architecture. The compiler identity also includes Node/OS/architecture
+OS, and architecture. The compiler identity is a content hash over the
+compiler's own module files and also includes Node/OS/architecture
 until cross-platform determinism is proven. An unchanged second compile reuses
 verified existing output or atomically restores it without running extraction.
 Focused tests prove this orchestration for STEP and a single-document IFC
@@ -138,7 +142,8 @@ profile under [ADR-0004](adr/0004-format-strategy.md).
 
 Focused tests already prove an unchanged STEP and single-document IFC input
 skip extraction, preserve the package digest, invalidate changed compile
-identity, and fail closed on corruption. The persistent-cache gate closes only
+identity, and reject corrupted entries at the storage layer while the
+orchestration falls back to recompilation. The persistent-cache gate closes only
 when pinned real STEP and multi-document IFC inputs reproduce those properties
 and publish cold/warm timings. The real-large product gate additionally
 requires three-run distributions for the SLO table on a recorded host class.

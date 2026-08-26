@@ -110,7 +110,29 @@ has a fixed admission cap. A selected occurrence can pin a requested target
 chunk and replace colder target detail with retained coarse fallbacks;
 camera navigation now re-ranks retained-coarse chunk bounds, cancels an
 obsolete active Range/Worker decode, and applies the same order to residency
-eviction. Spatial/screen-space policy and persistent cache tiers remain pending.
+eviction. Packages carrying the Proposed ADR-0008 sidecar now fetch and
+authenticate it after the coarse frame, query only frustum-intersecting BVH
+leaves, demand their deduplicated target chunks, and retain all other chunks as
+a cold eviction tail. A focused transform-only scenario now reproduces 3→1
+candidate chunks with obsolete-Range cancellation in headed Chrome and Firefox
+(`artifacts/spatial-demand/`). Localized real-model browser evidence,
+screen-space policy, and persistent cache tiers remain pending. The session Worker now also prepares
+active float64 transforms and direct chunk occurrence tables once, so target
+Range decodes no longer traverse the document node graph; transferred result
+buffers remain isolated from that prepared state. The compiler also has an
+opt-in `spatial-leaf-anchor-v1` payload order that feeds deterministic BVH leaf
+co-demand back into the existing byte-budget coalescer. Its focused 2→1 chunk
+oracle and Digital Hub offline census pass: 71→66 chunks, 1,458→882 leaf chunk
+references, and 39.89% less summed leaf off-view payload. The current explicit-edge
+sixty5 census independently records 34,167→21,246 leaf chunk references and
+39.47% less summed off-view payload while global chunks change 324→325.
+Localized headed Digital Hub and sixty5 evidence remain pending. Headed full-fit
+integration pairs pass for both models: Digital Hub records 71→66 target Ranges,
+while sixty5 records 6,417/6,503 ms coarse frames and completes budget-limited
+selection/property checks after target promotion stopped rescanning all 188,319
+hierarchy records. The fitted sixty5 view sees every leaf and does not improve
+Range count (45→46), so localized real-model navigation and repeated timing
+remain pending.
 
 The camera-relative precision path is now decision evidence for ADR-0005. A
 project-owned 0.25 mm gap is retained at a 10,000 km offset with
@@ -159,7 +181,8 @@ smoke-checks the live app, package resources, and HTTP Range delivery.
   (verified STEP/IFC whole-package storage and adapter-skipping orchestration
   implemented; pinned real-fixture timing evidence pending);
 - view-prioritized scheduling and cancellation of obsolete camera work
-  (coarse-bounds policy implemented; spatial/screen-space policy pending);
+  (coarse-bounds fallback and optional spatial-demand policy implemented;
+  focused browser evidence passed, real-model and screen-space policy pending);
 - dynamic memory budgets and persistent cache tiers (fixed admission budgets and
   selected-target eviction implemented);
 - spatial/draw clustering;

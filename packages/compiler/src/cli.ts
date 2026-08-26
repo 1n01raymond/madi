@@ -20,9 +20,13 @@ IFC options:
   --cache <directory>            Reuse verified federation packages
   --threads <count>              Geometry iterator threads (default: up to 8)
   --target-chunk-kib <count>     Coalesced target request budget (default: 512)
+  --spatial-payload-order        Co-locate target payloads by dominant BVH leaf
+  --compact-json                 Omit insignificant scene.gltf whitespace
   --retain-scene-ir              Keep the split intermediate pair under output
 
 General options:
+  --spatial-index                Emit the optional occurrence demand BVH
+  --spatial-leaf-capacity <n>    Maximum occurrences per BVH leaf (default: 64)
   --help                         Show this help`;
 
 interface CompileArguments {
@@ -32,6 +36,8 @@ interface CompileArguments {
   readonly linearTolerance?: number;
   readonly angularTolerance?: number;
   readonly cacheDirectory?: string;
+  readonly spatialIndex: boolean;
+  readonly spatialLeafCapacity?: number;
 }
 
 interface IfcCompileArguments {
@@ -45,6 +51,10 @@ interface IfcCompileArguments {
   readonly threads?: number;
   readonly targetChunkByteBudget?: number;
   readonly cacheDirectory?: string;
+  readonly spatialIndex: boolean;
+  readonly spatialLeafCapacity?: number;
+  readonly spatialPayloadOrder: boolean;
+  readonly compactJson: boolean;
   readonly retainSceneIr: boolean;
 }
 
@@ -86,6 +96,8 @@ function parseCompileArguments(arguments_: string[]): CompileArguments {
   let linearTolerance: number | undefined;
   let angularTolerance: number | undefined;
   let cacheDirectory: string | undefined;
+  let spatialIndex = false;
+  let spatialLeafCapacity: number | undefined;
   for (let index = 1; index < arguments_.length; index += 1) {
     const option = arguments_[index];
     if (option === "--output") {
@@ -103,11 +115,19 @@ function parseCompileArguments(arguments_: string[]): CompileArguments {
     } else if (option === "--cache") {
       cacheDirectory = optionValue(arguments_, index, option);
       index += 1;
+    } else if (option === "--spatial-index") {
+      spatialIndex = true;
+    } else if (option === "--spatial-leaf-capacity") {
+      spatialLeafCapacity = integerOption(optionValue(arguments_, index, option), option);
+      index += 1;
     } else {
       throw new TypeError(`Unknown option ${String(option)}.\n\n${usage}`);
     }
   }
   if (!outputDirectory) throw new TypeError(`--output is required.\n\n${usage}`);
+  if (spatialLeafCapacity !== undefined && !spatialIndex) {
+    throw new TypeError(`--spatial-leaf-capacity requires --spatial-index.\n\n${usage}`);
+  }
   return {
     sourcePath,
     outputDirectory,
@@ -115,6 +135,8 @@ function parseCompileArguments(arguments_: string[]): CompileArguments {
     ...(linearTolerance === undefined ? {} : { linearTolerance }),
     ...(angularTolerance === undefined ? {} : { angularTolerance }),
     ...(cacheDirectory ? { cacheDirectory } : {}),
+    spatialIndex,
+    ...(spatialLeafCapacity === undefined ? {} : { spatialLeafCapacity }),
   };
 }
 
@@ -126,6 +148,10 @@ function parseIfcCompileArguments(arguments_: string[]): IfcCompileArguments {
   let threads: number | undefined;
   let targetChunkByteBudget: number | undefined;
   let cacheDirectory: string | undefined;
+  let spatialIndex = false;
+  let spatialLeafCapacity: number | undefined;
+  let spatialPayloadOrder = false;
+  let compactJson = false;
   let retainSceneIr = false;
   for (let index = 0; index < arguments_.length; index += 1) {
     const option = arguments_[index];
@@ -166,12 +192,27 @@ function parseIfcCompileArguments(arguments_: string[]): IfcCompileArguments {
       index += 1;
     } else if (option === "--retain-scene-ir") {
       retainSceneIr = true;
+    } else if (option === "--spatial-index") {
+      spatialIndex = true;
+    } else if (option === "--spatial-leaf-capacity") {
+      spatialLeafCapacity = integerOption(optionValue(arguments_, index, option), option);
+      index += 1;
+    } else if (option === "--spatial-payload-order") {
+      spatialPayloadOrder = true;
+    } else if (option === "--compact-json") {
+      compactJson = true;
     } else {
       throw new TypeError(`Unknown option ${String(option)}.\n\n${usage}`);
     }
   }
   if (documents.size === 0) throw new TypeError(`--document is required.\n\n${usage}`);
   if (!outputDirectory) throw new TypeError(`--output is required.\n\n${usage}`);
+  if (spatialLeafCapacity !== undefined && !spatialIndex) {
+    throw new TypeError(`--spatial-leaf-capacity requires --spatial-index.\n\n${usage}`);
+  }
+  if (spatialPayloadOrder && !spatialIndex) {
+    throw new TypeError(`--spatial-payload-order requires --spatial-index.\n\n${usage}`);
+  }
   for (const discipline of uriHints.keys()) {
     if (!documents.has(discipline)) {
       throw new TypeError(`URI hint ${discipline} has no matching IFC document.`);
@@ -188,6 +229,10 @@ function parseIfcCompileArguments(arguments_: string[]): IfcCompileArguments {
     ...(threads === undefined ? {} : { threads }),
     ...(targetChunkByteBudget === undefined ? {} : { targetChunkByteBudget }),
     ...(cacheDirectory ? { cacheDirectory } : {}),
+    spatialIndex,
+    ...(spatialLeafCapacity === undefined ? {} : { spatialLeafCapacity }),
+    spatialPayloadOrder,
+    compactJson,
     retainSceneIr,
   };
 }

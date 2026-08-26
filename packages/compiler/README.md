@@ -45,6 +45,24 @@ requests by default; an oversized individual prototype stays whole rather than
 splitting its accessors. Use `--target-chunk-kib` to change that budget. This
 allows ordinary HTTP Range delivery without inventing another container or
 duplicating target geometry.
+
+The compiler API can set `coarseBounds: true` and `spatialIndex: true`, or both
+CLI compile commands can pass `--spatial-index`, to emit `spatial.bin` using
+`naru.spatial-demand-index.1`. Its deterministic flat BVH stores float64 world
+bounds for every renderable occurrence and maps each leaf to sorted,
+deduplicated indexes in `targetChunks`; it does not duplicate or reorder target
+geometry by default. `--spatial-leaf-capacity` overrides the default of 64.
+For IFC experiments, `--spatial-payload-order` opts into
+`spatial-leaf-anchor-v1`: prototypes are ordered by the deterministic BVH leaf
+where they occur most often before the existing byte-budget coalescer runs.
+This changes target byte ranges without duplicating geometry; historical output
+remains byte-identical when the flag is absent. Digital Hub and sixty5 offline
+packing records now pass, while localized headed traces remain pending, so
+ADR-0008 remains Proposed. Current explicit-edge sixty5 packages also pass
+`--compact-json`: it removes insignificant `scene.gltf` whitespace and records
+`jsonFormatting: "compact"` in the build report, avoiding V8's single-string
+limit without changing the parsed glTF document. Pretty output remains the
+default and historical digests remain unchanged.
 Its expanded Scene IR is temporary and is deleted after the package passes
 validation. `phase1:compile:evidence` retains the historical small Scene IR
 regression path without coarse output. The evidence check validates both plus the
@@ -59,17 +77,22 @@ validation.
 deterministic key from source digests, adapter/compiler identities, and sorted
 compile options; publishes immutable flat package resources atomically; and
 verifies every byte count and SHA-256 before an atomic restore. Cache corruption
-fails before the requested output directory is created.
+fails before the requested output directory is created; the STEP and IFC
+compilers treat a failed restore or publish as a warning and fall back to a
+full recompile.
 
 Both source paths opt in with `--cache <directory>`. Before lookup, each
 adapter's cheap `--identity` reports a fingerprint over its implementation,
-pinned native dependencies, Python, OS, and architecture; compiler identity
-similarly includes Node and host class until cross-platform determinism is
-proven. A verified hit reuses matching output or restores the package without
+pinned native dependencies, Python, OS, and architecture; compiler identity is
+a content hash over the compiler's own module files and includes Node and host
+class until cross-platform determinism is proven. A verified hit reuses
+matching output or restores the package without
 running source extraction; a miss compiles normally and publishes only after
-package validation. IFC cache identity also includes every discipline digest,
-stable URI hint, adapter thread count, chunk budget, and retained-intermediate
-policy. Cold/warm real-fixture evidence, incremental federation dependencies,
+package validation. Output-affecting compile options — tessellation tolerances
+and the spatial-index family — are part of both keys. IFC cache identity also
+includes every discipline digest,
+stable URI hint, adapter thread count, chunk budget, JSON formatting, and
+retained-intermediate policy. Cold/warm real-fixture evidence, incremental federation dependencies,
 and shared-cache authorization remain follow-up gates.
 
 ## Compile an IFC federation
@@ -91,6 +114,8 @@ pnpm naru compile-ifc \
   --python output/venv-ifc/Scripts/python \
   --threads 4 \
   --target-chunk-kib 512 \
+  --spatial-index \
+  --spatial-payload-order \
   --cache output/naru-compiled-cache \
   --output output/ifc/federation
 ```
@@ -178,8 +203,10 @@ to before; the glTF profile and report schema are unchanged.
   counts, not with geometry bytes.
 - The first coarse representation is a per-prototype AABB, not a
   shape-preserving LOD. IFC target ranges are coalesced with a static initial
-  priority; spatial partitioning, compression, and view reprioritization are
-  still pending. The browser applies a fixed decoded/GPU admission budget and
+  priority. The optional occurrence spatial index is implemented at the API
+  and decoder boundary, but the CLI, recorded packages, and browser scheduler
+  do not consume it yet; compression and screen-space policy also remain
+  pending. The browser applies a fixed decoded/GPU admission budget and
   retains coarse fallbacks when it reaches that cap; eviction and cache policy
   are Phase 2 follow-up work.
 - Local geometry and transform linear components are f32. Node translations

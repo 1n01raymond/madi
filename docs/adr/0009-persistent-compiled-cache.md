@@ -19,7 +19,13 @@ interchange format without comparative evidence.
 - Store an immutable manifest with the package digest and every resource's
   portable path, byte count, and SHA-256.
 - Verify a complete entry before restore and publish/restore through atomic
-  same-parent rename; partial or corrupt entries are misses/errors, never hits.
+  same-parent rename; partial or corrupt entries are never hits. The storage
+  layer rejects them; the compile orchestration reports the failure and falls
+  back to a full recompile, so a damaged cache can never block compilation.
+- Derive the compiler half of the key from a content hash of the compiler's
+  own module files (plus Node/OS/architecture until cross-platform determinism
+  is proven), so compiler changes invalidate entries without hand-maintained
+  version bumps.
 - Keep source paths, workspace/UI state, credentials, and machine-specific
   output locations out of the key.
 - Treat pre-1.0 cache schemas as disposable. Enable adapter-skipping hits only
@@ -38,8 +44,9 @@ interchange format without comparative evidence.
 
 ### Negative
 
-- Exact adapter/compiler identity requires deliberate version/fingerprint
-  maintenance.
+- Exact adapter identity requires deliberate version/fingerprint maintenance;
+  the compiler fingerprint is automatic but makes every compiler edit a cold
+  cache.
 - One changed source initially invalidates the whole federation until a proven
   dependency index exists.
 - Full-resource verification adds I/O before reuse; later evidence may justify
@@ -57,9 +64,9 @@ interchange format without comparative evidence.
 
 The proposed `naru.compiled-cache-entry.1` foundation is implemented by
 `packages/compiler/src/compiled-cache.ts`. Unit tests prove deterministic
-normalization, idempotent atomic publication, verified restore, fail-closed
-resource corruption, and an unchanged STEP cache hit that skips extraction
-after the OCCT identity probe. IFC orchestration tests likewise prove a cheap
+normalization, idempotent atomic publication, verified restore, storage-layer
+rejection of corrupted entries, and an unchanged STEP cache hit that skips
+extraction after the OCCT identity probe. IFC orchestration tests likewise prove a cheap
 identity probe, unchanged adapter-skipping hit, stable package digest, retained
 intermediate restore, and URI-hint invalidation. Acceptance additionally
 requires pinned real-fixture STEP and multi-document IFC cold/warm timing and

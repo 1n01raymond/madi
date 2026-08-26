@@ -8,7 +8,7 @@ import {
   parsePackageProperties,
   resolvePropertyEntries,
 } from "@naru3d/scene-ir";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { compileIfcFederation } from "../src/ifc-federation.js";
 
@@ -218,6 +218,10 @@ await writeFile(option("--report"), JSON.stringify({
         adapterScriptPath: adapterPath,
         retainSceneIr: true,
         cacheDirectory,
+        spatialIndex: true,
+        spatialLeafCapacity: 2,
+        spatialPayloadOrder: true,
+        compactJson: true,
       });
       const cached = await compileIfcFederation({
         documents: [
@@ -232,6 +236,10 @@ await writeFile(option("--report"), JSON.stringify({
         adapterScriptPath: adapterPath,
         retainSceneIr: true,
         cacheDirectory,
+        spatialIndex: true,
+        spatialLeafCapacity: 2,
+        spatialPayloadOrder: true,
+        compactJson: true,
       });
 
       expect(result.sources[0]).toMatchObject({
@@ -262,10 +270,51 @@ await writeFile(option("--report"), JSON.stringify({
         adapterScriptPath: adapterPath,
         retainSceneIr: true,
         cacheDirectory,
+        spatialIndex: true,
+        spatialLeafCapacity: 2,
+        spatialPayloadOrder: true,
+        compactJson: true,
       });
       expect(relabeled.cache.status).toBe("miss");
       expect(relabeled.cache.key).not.toBe(result.cache.key);
       expect(await readFile(adapterCountPath, "utf8")).toBe("2");
+
+      const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+      try {
+        await writeFile(
+          join(cacheDirectory, String(result.cache.key), "scene.gltf"),
+          "corrupted",
+          "utf8",
+        );
+        const recovered = await compileIfcFederation({
+          documents: [
+            {
+              discipline: "architecture",
+              sourcePath,
+              uriHint: "projects/digital_hub/arc.ifc",
+            },
+          ],
+          outputDirectory: join(temporaryDirectory, "compiled-recovered"),
+          pythonExecutable: process.execPath,
+          adapterScriptPath: adapterPath,
+          retainSceneIr: true,
+          cacheDirectory,
+          spatialIndex: true,
+          spatialLeafCapacity: 2,
+          spatialPayloadOrder: true,
+          compactJson: true,
+        });
+        expect(recovered.cache).toEqual({ status: "miss", key: result.cache.key });
+        expect(recovered.report.output.packageDigest).toBe(
+          result.report.output.packageDigest,
+        );
+        expect(await readFile(adapterCountPath, "utf8")).toBe("3");
+        expect(warnSpy).toHaveBeenCalledWith(
+          expect.stringContaining("cache restore failed"),
+        );
+      } finally {
+        warnSpy.mockRestore();
+      }
       expect(result.report.counts).toMatchObject({
         compiledPrototypeCount: 3,
         renderableOccurrenceCount: 10,
@@ -279,6 +328,7 @@ await writeFile(option("--report"), JSON.stringify({
         adapterReport,
         packageProperties,
         packageColumns,
+        spatialIndex,
       ] = await Promise.all([
         readFile(join(outputDirectory, "scene.gltf"), "utf8").then(JSON.parse),
         readFile(join(outputDirectory, "scene-ir.json"), "utf8").then(JSON.parse),
@@ -287,8 +337,18 @@ await writeFile(option("--report"), JSON.stringify({
         readFile(join(outputDirectory, "adapter-report.json"), "utf8").then(JSON.parse),
         readFile(join(outputDirectory, "properties.json"), "utf8"),
         readFile(join(outputDirectory, "properties.bin")),
+        readFile(join(outputDirectory, "spatial.bin")),
       ]);
       expect(gltf.asset.generator).toContain("IfcOpenShell federation slice");
+      expect(gltf.extras.madi.progressive.spatialIndex).toMatchObject({
+        schemaVersion: "naru.spatial-demand-index.1",
+        byteLength: spatialIndex.byteLength,
+      });
+      expect(gltf.extras.madi.progressive.targetPayloadOrder).toBe(
+        "spatial-leaf-anchor-v1",
+      );
+      expect(result.report.options.targetPayloadOrder).toBe("spatial-leaf-anchor-v1");
+      expect(result.report.options.jsonFormatting).toBe("compact");
       // The package carries the property sidecar: a pointer in the glTF
       // extras, the parsed document, and the adapter column file verbatim.
       expect(gltf.extras.madi.properties).toMatchObject({

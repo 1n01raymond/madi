@@ -1,0 +1,151 @@
+{
+  "schemaVersion": "naru.spatial-demand-evidence.1",
+  "capturedAt": "2026-08-26T08:10:25.315Z",
+  "source": {
+    "sceneIr": "artifacts/occt/repeated-fasteners.scene.json",
+    "scenario": "transform-only separation of the three target-owning prototypes",
+    "historicalPackage": "artifacts/phase1/repeated-fasteners-ap242",
+    "sourceDigest": "sha256:de177178a4bb86a6983cabc7ad265117c56d7324df7912b94ece1263a6c8865d"
+  },
+  "host": {
+    "platform": "darwin",
+    "architecture": "arm64"
+  },
+  "compile": {
+    "leafCapacity": 1,
+    "deterministic": true,
+    "historicalTargetUnchanged": true,
+    "historicalCoarseUnchanged": true,
+    "packageDigest": "28386d787f075ad8836b7833a28f3509467c50f2387d74adfd09eb3c1f18f200",
+    "spatialIndex": {
+      "schemaVersion": "naru.spatial-demand-index.1",
+      "uri": "spatial.bin",
+      "byteLength": 1552,
+      "sha256": "44d1b9fc46985e2bf6658ea67263e81b821bd3b2605b41d086561d8e818be4a0"
+    },
+    "targetChunkCount": 3,
+    "renderableOccurrenceCount": 10
+  },
+  "results": [
+    {
+      "browser": "chrome",
+      "browserEngine": "Blink",
+      "browserVersion": "151.0.7922.174",
+      "headless": false,
+      "viewport": { "width": 1320, "height": 1000 },
+      "adapter": {
+        "vendor": "apple",
+        "architecture": "metal-3",
+        "device": "",
+        "description": "",
+        "isFallbackAdapter": false
+      },
+      "spatialRequests": 1,
+      "initial": {
+        "nodesVisited": 19,
+        "nodesTotal": 19,
+        "leavesVisible": 10,
+        "leavesTotal": 10,
+        "occurrencesTested": 10,
+        "occurrencesTotal": 10,
+        "candidateChunks": 3,
+        "targetChunksTotal": 3,
+        "queryMilliseconds": 0.18500000052154064
+      },
+      "localized": {
+        "nodesVisited": 9,
+        "nodesTotal": 19,
+        "leavesVisible": 1,
+        "leavesTotal": 10,
+        "occurrencesTested": 1,
+        "occurrencesTotal": 10,
+        "candidateChunks": 1,
+        "targetChunksTotal": 3,
+        "queryMilliseconds": 0.029999999329447746
+      },
+      "cancellationCount": 1,
+      "requestedRanges": ["bytes=1500-34007", "bytes=0-1499"],
+      "fulfilledRanges": ["bytes=0-1499"],
+      "abortedRanges": ["bytes=1500-34007"],
+      "requestedChunks": [
+        {
+          "index": 0,
+          "id": "target:0000:prototype:part:fastener-01",
+          "byteLength": 32508
+        },
+        {
+          "index": 2,
+          "id": "target:0002:prototype:part:center-rail",
+          "byteLength": 1500
+        }
+      ],
+      "targetReady": "spatial-idle",
+      "consoleIssues": [],
+      "screenshot": {
+        "path": "chrome-151-macos-spatial-demand.png",
+        "bytes": 350395,
+        "sha256": "5752768bb9f1c6ef8aa085e9f58dcc6f717adf37f73e70a7eb87d0a01d17ee8a"
+      }
+    },
+    {
+      "browser": "firefox",
+      "browserEngine": "Gecko",
+      "browserVersion": "150.0.2",
+      "headless": false,
+      "viewport": { "width": 1320, "height": 1000 },
+      "adapter": {
+        "vendor": "",
+        "architecture": "",
+        "device": "",
+        "description": "",
+        "isFallbackAdapter": false
+      },
+      "spatialRequests": 1,
+      "initial": {
+        "nodesVisited": 19,
+        "nodesTotal": 19,
+        "leavesVisible": 10,
+        "leavesTotal": 10,
+        "occurrencesTested": 10,
+        "occurrencesTotal": 10,
+        "candidateChunks": 3,
+        "targetChunksTotal": 3,
+        "queryMilliseconds": 0.4399999999999977
+      },
+      "localized": {
+        "nodesVisited": 7,
+        "nodesTotal": 19,
+        "leavesVisible": 1,
+        "leavesTotal": 10,
+        "occurrencesTested": 1,
+        "occurrencesTotal": 10,
+        "candidateChunks": 1,
+        "targetChunksTotal": 3,
+        "queryMilliseconds": 0.13999999999998636
+      },
+      "cancellationCount": 1,
+      "requestedRanges": ["bytes=1500-34007", "bytes=34008-188043"],
+      "fulfilledRanges": ["bytes=34008-188043"],
+      "abortedRanges": ["bytes=1500-34007"],
+      "requestedChunks": [
+        {
+          "index": 0,
+          "id": "target:0000:prototype:part:fastener-01",
+          "byteLength": 32508
+        },
+        {
+          "index": 1,
+          "id": "target:0001:prototype:part:mounting-plate",
+          "byteLength": 154036
+        }
+      ],
+      "targetReady": "spatial-idle",
+      "consoleIssues": [],
+      "screenshot": {
+        "path": "firefox-150-macos-spatial-demand.png",
+        "bytes": 1002824,
+        "sha256": "ce98f49e29c73dabb12e18d253b588b6134dec4378811b5d34653489d3fcf830"
+      }
+    }
+  ]
+}

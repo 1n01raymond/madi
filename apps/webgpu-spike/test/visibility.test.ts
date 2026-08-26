@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import type { GpuPrototypeBatch, GpuScene } from "@naru3d/runtime-webgpu";
 
-import { OccurrenceVisibility } from "../src/visibility.js";
+import { OccurrenceVisibility, syncHierarchyVisibility } from "../src/visibility.js";
 
 const identity = new Float32Array([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]);
 
@@ -20,6 +20,27 @@ function scene(): GpuScene {
 }
 
 describe("occurrence visibility", () => {
+  it("synchronizes hierarchy markers through the node lookup", () => {
+    const first = { dataset: { hidden: "true" } };
+    const second = { dataset: {} as { hidden?: string } };
+
+    syncHierarchyVisibility(
+      [
+        { nodeIndex: 10, objectId: 1 },
+        { nodeIndex: 20, objectId: 2 },
+        { nodeIndex: 30, objectId: 3 },
+      ],
+      new Map([
+        [10, first],
+        [20, second],
+      ]),
+      (objectId) => objectId === 1,
+    );
+
+    expect(first.dataset.hidden).toBeUndefined();
+    expect(second.dataset.hidden).toBe("true");
+  });
+
   it("builds full dense tables initially", () => {
     const visibility = new OccurrenceVisibility(scene());
 

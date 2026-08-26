@@ -1,0 +1,136 @@
+{
+  "schemaVersion": "naru.spatial-ifc-packing-evidence.1",
+  "source": {
+    "sceneId": "scene:ifc-federation:e334c6a9295a0adb",
+    "revisionId": "revision:ifc-federation:e334c6a9295a0adb",
+    "sourceDigest": "sha256:e334c6a9295a0adbf8ffbb15c61ea05c47b0135a319ee370f853bb9a36d21dec",
+    "structureBytes": 378291460,
+    "structureSha256": "5c01010cfeaaf5aa581ae4a2d8433f9a9dd63e5a4e05743e067a8a6e81c5d6a0",
+    "geometryBytes": 201062984,
+    "geometrySha256": "79086ade4a471433dba1b4605b3fe3e404dcd74c180a9124c84204f2616b9879"
+  },
+  "options": {
+    "targetChunkByteBudget": 524288,
+    "leafCapacity": 64,
+    "jsonFormatting": "compact"
+  },
+  "runtime": {
+    "node": "v25.2.1",
+    "heapSizeLimitBytes": 8791261184,
+    "sequentialCompilation": true
+  },
+  "counts": {
+    "prototypeCount": 42469,
+    "compiledPrototypeCount": 42435,
+    "occurrenceCount": 188319,
+    "renderableOccurrenceCount": 78173,
+    "gltfNodeCount": 188320,
+    "gltfMeshCount": 84870,
+    "materialCount": 318,
+    "triangleCount": 4866380,
+    "edgeSegmentCount": 3771758,
+    "targetChunkCount": 325
+  },
+  "compatibility": {
+    "compileMilliseconds": 6976.369999999999,
+    "packageDigest": "72ee778e92fdce1f786f541366bd3912885711f099714ef9ccdae05301a945fa",
+    "targetChunkCount": 324,
+    "targetBytes": 169752048,
+    "coarseBytes": 38700720,
+    "spatialBytes": 1056956,
+    "spatialSha256": "3b1c5853853ecda980242a19e0041671b874f405ed44445a4a4501cda3875b30",
+    "leafMetrics": {
+      "leafCount": 2048,
+      "chunkReferences": 34167,
+      "chunksPerLeaf": {
+        "minimum": 3,
+        "p50": 17,
+        "p95": 23,
+        "maximum": 29,
+        "mean": 16.68310546875
+      },
+      "requestedBytesPerLeaf": {
+        "minimum": 1464784,
+        "p50": 8376048,
+        "p95": 11771888,
+        "maximum": 15270704,
+        "mean": 8407304.9609375
+      },
+      "usefulBytesPerLeaf": {
+        "minimum": 22620,
+        "p50": 425060,
+        "p95": 1802496,
+        "maximum": 4684528,
+        "mean": 608309.244140625
+      },
+      "offViewBytesPerLeaf": {
+        "minimum": 1333456,
+        "p50": 7834484,
+        "p95": 10798712,
+        "maximum": 13803996,
+        "mean": 7798995.716796875
+      },
+      "summedRequestedBytes": 17218160560,
+      "summedUsefulBytes": 1245817332,
+      "summedOffViewBytes": 15972343228
+    }
+  },
+  "spatialLeafAnchor": {
+    "compileMilliseconds": 7664.407416999995,
+    "packageDigest": "01a7f3fa61f953a57764fcb0a0b0f5ceddf8b56f4ddee8332a5a456492a8afb7",
+    "targetChunkCount": 325,
+    "targetBytes": 169752048,
+    "coarseBytes": 38700720,
+    "spatialBytes": 1005272,
+    "spatialSha256": "f1d40a5d1a1b9cf9afa05932a479639a4016289c30bef34ac37aa90d864d0fa1",
+    "leafMetrics": {
+      "leafCount": 2048,
+      "chunkReferences": 21246,
+      "chunksPerLeaf": {
+        "minimum": 1,
+        "p50": 10,
+        "p95": 17,
+        "maximum": 21,
+        "mean": 10.3740234375
+      },
+      "requestedBytesPerLeaf": {
+        "minimum": 521292,
+        "p50": 5341128,
+        "p95": 8578584,
+        "maximum": 12307060,
+        "mean": 5329068.552734375
+      },
+      "usefulBytesPerLeaf": {
+        "minimum": 22620,
+        "p50": 425060,
+        "p95": 1802496,
+        "maximum": 4684528,
+        "mean": 608309.244140625
+      },
+      "offViewBytesPerLeaf": {
+        "minimum": 269724,
+        "p50": 4755708,
+        "p95": 7632836,
+        "maximum": 10286660,
+        "mean": 4720759.30859375
+      },
+      "summedRequestedBytes": 10913932396,
+      "summedUsefulBytes": 1245817332,
+      "summedOffViewBytes": 9668115064
+    }
+  },
+  "khronosValidation": {
+    "validator": "Khronos glTF Validator",
+    "version": "2.0.0-dev.3.10",
+    "compatibility": {
+      "errors": 0,
+      "warnings": 0
+    },
+    "spatialLeafAnchor": {
+      "errors": 0,
+      "warnings": 0
+    }
+  },
+  "deterministicRepeat": true,
+  "coarseByteIdentical": true
+}
