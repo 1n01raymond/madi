@@ -712,7 +712,6 @@ async function loadScene(source: SceneSource): Promise<boolean> {
       document.documentElement.dataset.residentDecodedBytes = String(current.decodedBytes);
       document.documentElement.dataset.residentGpuBytes = String(renderer.residentGpuBytes);
       document.documentElement.dataset.geometryRepresentation = complete ? "target" : "mixed";
-      document.documentElement.dataset.targetReady = complete ? "true" : "limited";
       const spatialStats = spatialViewIndex?.queryStats();
       const spatialDemandSatisfied = spatialStats !== undefined && !schedulerBlocked;
       if (complete || spatialDemandSatisfied) {
