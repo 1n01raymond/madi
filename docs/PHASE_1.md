@@ -88,6 +88,15 @@ recording. The record is `artifacts/ifc/sixty5-browser/`, checked by
 | Property resolution | The first selection lazily fetches the 48.9 MB `properties.json`/`properties.bin` sidecar pair (one plain HTTP 200 each, no Range) and resolves the picked foundation beam's 6 property entries under its `IFC2X3` schema; the validator pins the entry set | Passed, recorded with the `madi.ifc-browser-residency.2` schema |
 | First-frame boundary | The Worker decode of the 37.8 MB `coarse.bin` takes 6.6 s; the rest of the 264.7 s to the first frame sits on the main-thread document handoff and 42,588-batch construction path | Recorded as the named Phase 2 optimization input |
 
+The Phase 2 follow-up in `artifacts/ifc/sixty5-first-frame/` closes that named
+boundary without changing the compiled package. A persistent Worker owns the
+parsed glTF once, and `prototype-aabb-v1` is rendered as one canonical box batch
+with an occurrence transform/target table. Three fresh headed-Chrome runs on
+the same host class present the first coarse frame at 12.553, 12.796, and
+13.378 s (12.796 s median, 13.378 s observed p95): a 95.23% median reduction
+from the 268.013 s baseline. All 78,173 occurrences remain visible and pickable,
+the 64 MiB budgets hold, and the same selected IFC properties resolve.
+
 ## First browser runtime slice
 
 The browser now consumes that compiled package directly. It reads the glTF node
@@ -137,12 +146,9 @@ See `artifacts/phase1/README.md` for the compiled package,
 - Full material, mass, PMI, and domain-specific property schemas remain
   pending, and Studio search does not index property values (a deliberate
   Phase 1 limit — the sidecar is resolved per selected occurrence only).
-- A useful first frame at real-large scale. The recorded sixty5 browser result
-  (`artifacts/ifc/sixty5-browser/`) proves loading, bounded residency, and
-  picking, but its 268.0 s first coarse frame is dominated by the main-thread
-  per-prototype batch path; no run yet demonstrates an early frame there. A
-  Firefox repeat and any benchmark or ADR-0003 claim for sixty5 also remain
-  unrecorded.
+- A Firefox repeat and any benchmark or ADR-0003 renderer-decision claim for
+  sixty5 remain unrecorded. The Chrome first-useful-frame boundary itself is now
+  closed by `artifacts/ifc/sixty5-first-frame/`.
 - Additional repeated reference-hardware profiles for ADR-0003; the first
   Apple-Silicon integrated-GPU record now shows divergent Chrome and Firefox
   CPU-p95 outcomes.
@@ -176,10 +182,11 @@ remains a deliberate Phase 1 exclusion. The next compiler increment is
 explicit IFC edge extraction (E2.1). The
 browser gate for that package is now
 recorded (`artifacts/ifc/sixty5-browser/`): loading, bounded residency,
-picking, and lazy property resolution hold at real-large scale, and the
-268.0 s first coarse frame names the
-next runtime increment — cutting the main-thread per-prototype batch path
-that dominates it.
+picking, and lazy property resolution hold at real-large scale. The named
+268.0 s main-thread first-frame path is now reduced to a 12.796 s median by
+the shared-coarse/persistent-Worker follow-up in
+`artifacts/ifc/sixty5-first-frame/`. Spatial scheduling and cache tiers remain
+the next runtime increments.
 
 In parallel, the repeated 100k record now carries GPU pass timestamps and a
 backend-owned retained-resource census on both the discrete host and an Apple

@@ -45,6 +45,11 @@ export interface PromotionOptions {
   readonly pin?: boolean;
 }
 
+export interface ProgressiveResidencyOptions {
+  /** Keep one shared coarse batch resident and mask its promoted instances. */
+  readonly aggregateCoarse?: boolean;
+}
+
 function alignedBufferByteLength(byteLength: number): number {
   return Math.max(4, Math.ceil(byteLength / 4) * 4);
 }
@@ -122,9 +127,10 @@ function entriesFromScene(scene: DecodedCompiledScene): readonly ResidentBatch[]
 }
 
 /**
- * Holds the current coarse/target mix. Every target group keeps its decoded
- * coarse fallback, so a selected object can displace colder target groups
- * without losing its pickable occurrence identity or exceeding either budget.
+ * Holds the current coarse/target mix. The legacy path retains per-target
+ * coarse batches; aggregate mode keeps one shared coarse batch and lets the
+ * visibility layer mask promoted instances. Both paths can displace colder
+ * target groups without losing pickable identity or exceeding either budget.
  */
 export class ProgressiveResidency {
   readonly budget: ResidencyBudget;
@@ -134,9 +140,14 @@ export class ProgressiveResidency {
   private readonly pinnedTargetMeshIndexes = new Set<number>();
   private readonly priorityByTargetMesh = new Map<number, number>();
   private readonly lastTouchedByTargetMesh = new Map<number, number>();
+  private readonly aggregateCoarse: boolean;
   private touchSequence = 0;
 
-  constructor(coarse: DecodedCompiledScene, budget: ResidencyBudget) {
+  constructor(
+    coarse: DecodedCompiledScene,
+    budget: ResidencyBudget,
+    options: ProgressiveResidencyOptions = {},
+  ) {
     if (
       !Number.isSafeInteger(budget.decodedBytes) ||
       !Number.isSafeInteger(budget.gpuBytes) ||
@@ -146,11 +157,16 @@ export class ProgressiveResidency {
       throw new TypeError("Residency budgets must be integer values of at least four bytes.");
     }
     this.budget = budget;
+    this.aggregateCoarse = options.aggregateCoarse === true;
     for (const entry of entriesFromScene(coarse)) {
-      if (this.entries.has(entry.key)) {
-        throw new RangeError(`Duplicate coarse residency key ${entry.key}.`);
+      const residencyEntry = this.aggregateCoarse
+        ? { ...entry, key: "coarse:aggregate" }
+        : entry;
+      if (this.entries.has(residencyEntry.key)) {
+        throw new RangeError(`Duplicate coarse residency key ${residencyEntry.key}.`);
       }
-      this.entries.set(entry.key, entry);
+      this.entries.set(residencyEntry.key, residencyEntry);
+      if (this.aggregateCoarse) continue;
       const targetMeshIndex = entry.evidence.targetMeshIndex;
       const group = this.coarseEntriesByTargetMesh.get(targetMeshIndex) ?? [];
       this.coarseEntriesByTargetMesh.set(targetMeshIndex, [...group, entry]);
@@ -281,6 +297,7 @@ export class ProgressiveResidency {
 
   private replaceWithCoarse(entries: Map<string, ResidentBatch>, targetMeshIndex: number): void {
     this.removeTargetMeshes(entries, new Set([targetMeshIndex]));
+    if (this.aggregateCoarse) return;
     const coarse = this.coarseEntriesByTargetMesh.get(targetMeshIndex);
     if (!coarse) {
       throw new RangeError(`Missing coarse fallback for target mesh ${targetMeshIndex}.`);

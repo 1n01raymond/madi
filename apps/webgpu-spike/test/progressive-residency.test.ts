@@ -111,4 +111,24 @@ describe("progressive residency", () => {
     expect(estimateBatchDecodedBytes(value)).toBe(180);
     expect(estimateBatchGpuBytes(value)).toBe(184);
   });
+
+  it("keeps an aggregated coarse batch while target groups are promoted and evicted", () => {
+    const coarse = decoded([batch(1)], [-1]);
+    const firstTarget = decoded([batch(1, 20)], [0]);
+    const selectedTarget = decoded([batch(2, 20)], [1]);
+    const residency = new ProgressiveResidency(
+      coarse,
+      { decodedBytes: 800, gpuBytes: 800 },
+      { aggregateCoarse: true },
+    );
+
+    const first = residency.promote(firstTarget, { priority: 0 });
+    expect(first.entries.map(({ key }) => key)).toEqual(["coarse:aggregate", "0:0"]);
+
+    const selected = residency.promote(selectedTarget, { priority: 1, pin: true });
+    expect(selected.admitted).toBe(true);
+    expect(selected.evictedTargetMeshIndexes).toEqual([0]);
+    expect(selected.targetMeshIndexes).toEqual([1]);
+    expect(selected.entries.map(({ key }) => key)).toEqual(["coarse:aggregate", "1:0"]);
+  });
 });
