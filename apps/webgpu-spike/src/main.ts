@@ -204,8 +204,13 @@ const openSceneUrlButton = requireElement<HTMLButtonElement>("#open-scene-url");
 const localSceneFiles = requireElement<HTMLInputElement>("#local-scene-files");
 const localSceneButton = requireElement<HTMLElement>(".local-scene-button");
 const openDemoSceneButton = requireElement<HTMLButtonElement>("#open-demo-scene");
+const openPygamerSceneButton = requireElement<HTMLButtonElement>("#open-pygamer-scene");
 const cancelSceneLoadButton = requireElement<HTMLButtonElement>("#cancel-scene-load");
-const defaultSceneUrl = new URL("/scene.gltf", window.location.href);
+const defaultSceneUrl = new URL(`${import.meta.env.BASE_URL}scene.gltf`, window.location.href);
+const pygamerSceneUrl = new URL(
+  `${import.meta.env.BASE_URL}pygamer/scene.gltf`,
+  window.location.href,
+);
 requireElement<HTMLLinkElement>("#naru-favicon").href = faviconUrl;
 requireElement<HTMLImageElement>("#naru-brand-mark").src = inverseMarkUrl;
 
@@ -217,6 +222,7 @@ function setSourceControlsBusy(busy: boolean): void {
   sceneUrlInput.disabled = busy;
   localSceneFiles.disabled = busy;
   openDemoSceneButton.disabled = busy;
+  openPygamerSceneButton.disabled = busy;
   cancelSceneLoadButton.hidden = !busy;
   cancelSceneLoadButton.disabled = !busy;
   if (busy) localSceneButton.dataset.disabled = "true";
@@ -279,7 +285,9 @@ async function loadScene(source: SceneSource): Promise<boolean> {
         ? "LOCAL"
         : source.gltfUrl.href === defaultSceneUrl.href
           ? "DEMO"
-          : "URL";
+          : source.gltfUrl.href === pygamerSceneUrl.href
+            ? "STEP"
+            : "URL";
     sceneSourceLabel.textContent = loaded.label;
     sceneSourceLabel.title = loaded.label;
     document.documentElement.dataset.sceneSource = source.kind;
@@ -1116,6 +1124,13 @@ openDemoSceneButton.addEventListener("click", () => {
   sceneUrlInput.value = defaultSceneUrl.href;
   void loadScene({ kind: "url", gltfUrl: defaultSceneUrl }).then((loaded) => {
     if (loaded) replaceSceneQuery();
+  });
+});
+
+openPygamerSceneButton.addEventListener("click", () => {
+  sceneUrlInput.value = pygamerSceneUrl.href;
+  void loadScene({ kind: "url", gltfUrl: pygamerSceneUrl }).then((loaded) => {
+    if (loaded) replaceSceneQuery(pygamerSceneUrl);
   });
 });
 
