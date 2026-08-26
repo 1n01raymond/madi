@@ -1,5 +1,5 @@
 import { inspectCompiledHierarchy } from "@naru3d/runtime-webgpu";
-import type { CompiledGltfDocument, CompiledHierarchy } from "@naru3d/runtime-webgpu";
+import type { CompiledHierarchy } from "@naru3d/runtime-webgpu";
 
 import { resourceFileName } from "./property-sidecar.js";
 import type { PropertySidecarSource } from "./property-sidecar.js";
@@ -33,8 +33,12 @@ export type GeometryBinarySource =
       readonly byteLength?: number;
     };
 
+export type GeometryDocumentSource =
+  | { readonly kind: "bytes"; readonly bytes: ArrayBuffer }
+  | { readonly kind: "file"; readonly file: File };
+
 export interface LoadedSceneHierarchy {
-  readonly document: CompiledGltfDocument;
+  readonly documentSource: GeometryDocumentSource;
   readonly hierarchy: CompiledHierarchy;
   readonly targetBinary: GeometryBinarySource;
   readonly coarseBinary?: GeometryBinarySource;
@@ -121,9 +125,12 @@ export async function loadSceneHierarchy(
     if (!response.ok) {
       throw new Error(`Failed to load compiled hierarchy (${response.status}).`);
     }
-    const { document, hierarchy } = inspectCompiledHierarchy(await response.json());
+    const documentBytes = await response.arrayBuffer();
+    const { hierarchy } = inspectCompiledHierarchy(
+      parseJson(new TextDecoder().decode(documentBytes), source.gltfUrl.href),
+    );
     return {
-      document,
+      documentSource: { kind: "bytes", bytes: documentBytes },
       hierarchy,
       targetBinary: { kind: "url", href: new URL(hierarchy.binaryUri, source.gltfUrl).href },
       ...(hierarchy.coarseBinaryUri
@@ -147,7 +154,7 @@ export async function loadSceneHierarchy(
     };
   }
 
-  const { document, hierarchy } = inspectCompiledHierarchy(
+  const { hierarchy } = inspectCompiledHierarchy(
     parseJson(await source.gltfFile.text(), source.gltfFile.name),
   );
   const fileFor = (uri: string): File | undefined => {
@@ -181,7 +188,7 @@ export async function loadSceneHierarchy(
     );
   }
   return {
-    document,
+    documentSource: { kind: "file", file: source.gltfFile },
     hierarchy,
     targetBinary: { kind: "file", file: targetFile },
     ...(coarseFile ? { coarseBinary: { kind: "file" as const, file: coarseFile } } : {}),

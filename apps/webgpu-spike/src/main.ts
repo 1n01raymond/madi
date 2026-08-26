@@ -4,7 +4,6 @@ import {
   NaruWebGpuRenderer,
 } from "@naru3d/runtime-webgpu";
 import type {
-  CompiledGltfDocument,
   CompiledHierarchy,
   CompiledObjectEvidence,
   CompiledTargetChunk,
@@ -12,7 +11,7 @@ import type {
   GeometryRepresentation,
 } from "@naru3d/runtime-webgpu";
 
-import type { GeometryDecodeResponse } from "./geometry.worker.js";
+import { GeometryDecoder } from "./geometry-decoder.js";
 import { HierarchySearchIndex } from "./hierarchy-search.js";
 import type { HierarchySearchResult } from "./hierarchy-search.js";
 import { AxisSectionPlane } from "./section-plane.js";
@@ -60,58 +59,6 @@ function residencyBudgetFromLocation(): number {
   return Math.round(mebibytes * 1024 * 1024);
 }
 
-function decodeGeometry(
-  document: CompiledGltfDocument,
-  binary: GeometryBinarySource,
-  representation: GeometryRepresentation,
-  signal: AbortSignal,
-  targetChunkId?: string,
-): Promise<{ readonly scene: DecodedCompiledScene; readonly decodeMilliseconds: number }> {
-  return new Promise((resolve, reject) => {
-    const worker = new Worker(new URL("./geometry.worker.ts", import.meta.url), {
-      type: "module",
-      name: "naru-compiled-geometry",
-    });
-    const finish = (): void => {
-      signal.removeEventListener("abort", abort);
-      worker.terminate();
-    };
-    const abort = (): void => {
-      finish();
-      reject(new DOMException("Scene load cancelled.", "AbortError"));
-    };
-    if (signal.aborted) {
-      abort();
-      return;
-    }
-    signal.addEventListener("abort", abort, { once: true });
-    worker.addEventListener(
-      "message",
-      (event: MessageEvent<GeometryDecodeResponse>) => {
-        finish();
-        if (event.data.type === "ready") resolve(event.data);
-        else reject(new Error(event.data.message));
-      },
-      { once: true },
-    );
-    worker.addEventListener(
-      "error",
-      (event) => {
-        finish();
-        reject(new Error(event.message || "The geometry Worker failed."));
-      },
-      { once: true },
-    );
-    worker.postMessage({
-      type: "decode",
-      document,
-      binary,
-      representation,
-      ...(targetChunkId ? { targetChunkId } : {}),
-    });
-  });
-}
-
 function binarySourceForChunk(
   source: GeometryBinarySource,
   chunk: CompiledTargetChunk,
@@ -121,6 +68,21 @@ function binarySourceForChunk(
     byteOffset: chunk.byteOffset,
     byteLength: chunk.byteLength,
   };
+}
+
+function occurrenceVisibilityForResidency(
+  scene: DecodedCompiledScene["gpuScene"],
+  coarseInstanceTargetMeshIndexes: Uint32Array | undefined,
+  residentTargetMeshIndexes: readonly number[],
+): OccurrenceVisibility {
+  if (!coarseInstanceTargetMeshIndexes) return new OccurrenceVisibility(scene);
+  const residentTargets = new Set(residentTargetMeshIndexes);
+  return new OccurrenceVisibility(
+    scene,
+    (batchIndex, instanceIndex) =>
+      batchIndex !== 0 ||
+      !residentTargets.has(coarseInstanceTargetMeshIndexes[instanceIndex] ?? -1),
+  );
 }
 
 function targetChunkByPrototype(
@@ -274,7 +236,7 @@ async function loadScene(source: SceneSource): Promise<boolean> {
     status.textContent = "Loading compiled glTF hierarchy…";
     status.dataset.state = "loading";
     const loaded = await loadSceneHierarchy(source, cancellation.signal);
-    const { document: gltf, hierarchy } = loaded;
+    const { hierarchy } = loaded;
     const chunksByPrototype = targetChunkByPrototype(hierarchy);
     const residencyBudget = residencyBudgetFromLocation();
     disposeActiveScene?.();
@@ -293,6 +255,7 @@ async function loadScene(source: SceneSource): Promise<boolean> {
     document.documentElement.dataset.sceneSource = source.kind;
     const interactions = cancellation;
     pendingCleanup = () => interactions.abort();
+    const geometryDecoder = new GeometryDecoder(loaded.documentSource, interactions.signal);
     const listenerOptions = { signal: interactions.signal };
     renderHierarchy(hierarchy);
     const searchIndex = new HierarchySearchIndex(hierarchy.entries);
@@ -353,6 +316,7 @@ async function loadScene(source: SceneSource): Promise<boolean> {
       interactions.abort();
       sessionResources.resizeObserver?.disconnect();
       if (animationFrame !== 0) cancelAnimationFrame(animationFrame);
+      geometryDecoder.dispose();
       renderer.destroy();
     };
     pendingCleanup = dispose;
@@ -360,11 +324,9 @@ async function loadScene(source: SceneSource): Promise<boolean> {
     const initialRepresentation: GeometryRepresentation = loaded.coarseBinary
       ? "coarse"
       : "target";
-    const initial = await decodeGeometry(
-      gltf,
+    const initial = await geometryDecoder.decode(
       loaded.coarseBinary ?? loaded.targetBinary,
       initialRepresentation,
-      interactions.signal,
     ).catch((error: unknown) => {
       dispose();
       throw error;
@@ -379,6 +341,8 @@ async function loadScene(source: SceneSource): Promise<boolean> {
         ? new ProgressiveResidency(scene, {
             decodedBytes: residencyBudget,
             gpuBytes: residencyBudget,
+          }, {
+            aggregateCoarse: initial.coarseInstanceTargetMeshIndexes !== undefined,
           })
         : undefined;
     if (progressiveResidency) {
@@ -417,11 +381,9 @@ async function loadScene(source: SceneSource): Promise<boolean> {
       requireElement<HTMLElement>("#stage-webgpu").dataset.state = "ready";
 
       if (hierarchy.targetChunks.length === 0) {
-        const target = await decodeGeometry(
-          gltf,
+        const target = await geometryDecoder.decode(
           loaded.targetBinary,
           "target",
-          interactions.signal,
         ).catch((error: unknown) => {
           dispose();
           throw error;
@@ -444,11 +406,9 @@ async function loadScene(source: SceneSource): Promise<boolean> {
         );
 
         for (const chunk of hierarchy.targetChunks) {
-          const target = await decodeGeometry(
-            gltf,
+          const target = await geometryDecoder.decode(
             binarySourceForChunk(loaded.targetBinary, chunk),
             "target",
-            interactions.signal,
             chunk.id,
           ).catch((error: unknown) => {
             dispose();
@@ -465,6 +425,15 @@ async function loadScene(source: SceneSource): Promise<boolean> {
           renderer.reconcileBatches(
             promotion.entries.map(({ key, batch }) => ({ key, batch })),
             { sharedObjectIdsAcrossBatches: true },
+          );
+          const residencyVisibility = occurrenceVisibilityForResidency(
+            { batches: promotion.entries.map(({ batch }) => batch), sharedObjectIdsAcrossBatches: true },
+            initial.coarseInstanceTargetMeshIndexes,
+            promotion.targetMeshIndexes,
+          );
+          renderer.updateVisibleInstances(
+            residencyVisibility.indicesByBatch,
+            residencyVisibility.counts,
           );
           render();
           document.documentElement.dataset.targetChunksReady = String(readyChunks);
@@ -544,7 +513,11 @@ async function loadScene(source: SceneSource): Promise<boolean> {
     requireElement<HTMLElement>("#stage-webgpu").dataset.state = "ready";
     const evidence = new Map(scene.objectEvidence.map((entry) => [entry.objectId, entry]));
     const evidenceByNode = new Map(scene.objectEvidence.map((entry) => [entry.nodeIndex, entry]));
-    let visibility = new OccurrenceVisibility(scene.gpuScene);
+    let visibility = occurrenceVisibilityForResidency(
+      scene.gpuScene,
+      progressiveResidency ? initial.coarseInstanceTargetMeshIndexes : undefined,
+      progressiveResidency?.current().targetMeshIndexes ?? [],
+    );
     const section = new AxisSectionPlane(scene.bounds);
     let selectedObjectId = 0;
 
@@ -713,11 +686,9 @@ async function loadScene(source: SceneSource): Promise<boolean> {
       status.dataset.stage = "selection-residency";
       let target: { readonly scene: DecodedCompiledScene; readonly decodeMilliseconds: number };
       try {
-        target = await decodeGeometry(
-          gltf,
+        target = await geometryDecoder.decode(
           binarySourceForChunk(loaded.targetBinary, chunk),
           "target",
-          interactions.signal,
           chunk.id,
         );
       } catch (error) {
@@ -761,7 +732,11 @@ async function loadScene(source: SceneSource): Promise<boolean> {
         promotion.entries.map(({ key, batch }) => ({ key, batch })),
         { sharedObjectIdsAcrossBatches: true },
       );
-      visibility = new OccurrenceVisibility(scene.gpuScene);
+      visibility = occurrenceVisibilityForResidency(
+        scene.gpuScene,
+        initial.coarseInstanceTargetMeshIndexes,
+        promotion.targetMeshIndexes,
+      );
       visibility.restore(visibilitySnapshot);
       renderer.updateVisibleInstances(visibility.indicesByBatch, visibility.counts);
       residentDecodedBytes = promotion.decodedBytes;

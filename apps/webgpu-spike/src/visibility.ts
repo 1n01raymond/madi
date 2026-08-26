@@ -15,6 +15,11 @@ export interface OccurrenceVisibilitySnapshot {
   readonly isolatedObjectId?: number;
 }
 
+export type InstanceVisibilityFilter = (
+  batchIndex: number,
+  instanceIndex: number,
+) => boolean;
+
 /**
  * Builds dense per-prototype instance tables without allocating during review
  * actions. The renderer consumes these tables through updateVisibleInstances().
@@ -24,13 +29,15 @@ export class OccurrenceVisibility {
   readonly counts: Uint32Array;
 
   private readonly scene: GpuScene;
+  private readonly instanceFilter?: InstanceVisibilityFilter;
   private readonly objectIds = new Set<number>();
   private readonly hiddenObjectIds = new Set<number>();
   private isolatedObjectId?: number;
   private visibleOccurrences = 0;
 
-  constructor(scene: GpuScene) {
+  constructor(scene: GpuScene, instanceFilter?: InstanceVisibilityFilter) {
     this.scene = scene;
+    this.instanceFilter = instanceFilter;
     this.indicesByBatch = scene.batches.map(
       (batch) => new Int32Array(batch.instances.length),
     );
@@ -122,7 +129,10 @@ export class OccurrenceVisibility {
       if (!indices) throw new RangeError(`Missing visibility table ${batchIndex}.`);
       let count = 0;
       batch.instances.forEach((instance, sourceIndex) => {
-        if (this.isVisible(instance.objectId)) {
+        if (
+          this.isVisible(instance.objectId) &&
+          (this.instanceFilter?.(batchIndex, sourceIndex) ?? true)
+        ) {
           indices[count] = sourceIndex;
           count += 1;
           visibleObjectIds.add(instance.objectId);

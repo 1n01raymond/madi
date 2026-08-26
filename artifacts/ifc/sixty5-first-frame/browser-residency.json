@@ -1,0 +1,2056 @@
+{
+  "schemaVersion": "madi.ifc-browser-residency.2",
+  "capturedAt": "2026-08-26T04:23:33.889Z",
+  "browser": {
+    "id": "chrome",
+    "engine": "Blink",
+    "version": "152.0.7977.64",
+    "headless": false,
+    "viewport": {
+      "width": 1320,
+      "height": 1000
+    }
+  },
+  "host": {
+    "platform": "win32",
+    "architecture": "x64"
+  },
+  "source": {
+    "buildReport": "artifacts/ifc/sixty5/build-report.json",
+    "packageDigest": "a2d6c72a6e936ac3ea2a183a1028cc4a06b20985c6d90b16058954323b7c3347",
+    "resources": [
+      {
+        "path": "scene.gltf",
+        "mediaType": "model/gltf+json",
+        "bytes": 448823852,
+        "sha256": "a35b01a5eef5b3492e3a68072ede9cdff53dce8032c7b68f719154651fc54709"
+      },
+      {
+        "path": "scene.bin",
+        "mediaType": "application/octet-stream",
+        "bytes": 120707064,
+        "sha256": "7a04489cfadb39706b7b8c3832402991e8d6f1e15983547d71939cc924fad913"
+      },
+      {
+        "path": "coarse.bin",
+        "mediaType": "application/octet-stream",
+        "bytes": 38700720,
+        "sha256": "258e085d4f3d0b380bb89c3596b2e3bfc4a43177afe9fc7e92d6e1046db9031b"
+      },
+      {
+        "path": "properties.json",
+        "mediaType": "application/json",
+        "bytes": 17705010,
+        "sha256": "dc3394714b73d322dcfe6bad7ce780dbdd18cb547e5eaf45a26c9e66de932312"
+      },
+      {
+        "path": "properties.bin",
+        "mediaType": "application/octet-stream",
+        "bytes": 31179862,
+        "sha256": "dad8d98909c738df930569c4b907c29e64cda2b65d84917936c1c4d86d3dd8c4"
+      }
+    ],
+    "servedFrom": "Vite dev static hosting with HTTP Range support"
+  },
+  "milestones": {
+    "hierarchyReadyMs": 4135,
+    "coarseFrameMs": 12553,
+    "readyMs": 63206
+  },
+  "snapshot": {
+    "status": "Residency budget reached · 20295 surface batches retained · 78173 renderable occurrences",
+    "statusState": "ready",
+    "statusStage": "rendered",
+    "prototypeCount": "42435",
+    "occurrenceCount": "78173",
+    "triangleCount": "1,585,233",
+    "edgeCount": "12",
+    "binarySize": "117,878.0 KiB",
+    "decodeTime": "25892.2 ms",
+    "geometryResult": "64,793.9 KiB CPU / 64,873.1 KiB GPU resident (budget 65,536.0 KiB)",
+    "gpuAdapter": "nvidia",
+    "dataset": {
+      "sceneLoading": "false",
+      "sceneSource": "url",
+      "hierarchyMatches": "0",
+      "hierarchyReady": "true",
+      "coarseReady": "true",
+      "geometryRepresentation": "mixed",
+      "targetChunksTotal": "234",
+      "residencyBudgetBytes": "67108864",
+      "targetChunksReady": "78",
+      "residentDecodedBytes": "66348924",
+      "residentGpuBytes": "66430100",
+      "residencyBudgetReached": "true",
+      "targetReady": "limited",
+      "visibilityMode": "all",
+      "visibleOccurrences": "78173",
+      "selectedObjectId": "0",
+      "sectionEnabled": "false",
+      "sectionAxis": "z"
+    },
+    "usedJsHeapBytes": 1362025666,
+    "totalJsHeapBytes": 1464183846,
+    "timeline": [
+      {
+        "milliseconds": 154,
+        "target": "html",
+        "attribute": "data-scene-loading",
+        "value": "true"
+      },
+      {
+        "milliseconds": 154,
+        "target": "status",
+        "attribute": "data-state",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 4131,
+        "target": "html",
+        "attribute": "data-hierarchy-ready",
+        "value": "true"
+      },
+      {
+        "milliseconds": 4131,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "hierarchy"
+      },
+      {
+        "milliseconds": 12073,
+        "target": "html",
+        "attribute": "data-coarse-ready",
+        "value": "true"
+      },
+      {
+        "milliseconds": 12073,
+        "target": "html",
+        "attribute": "data-geometry-representation",
+        "value": "coarse"
+      },
+      {
+        "milliseconds": 12073,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "coarse"
+      },
+      {
+        "milliseconds": 12073,
+        "target": "html",
+        "attribute": "data-target-chunks-total",
+        "value": "234"
+      },
+      {
+        "milliseconds": 12701,
+        "target": "html",
+        "attribute": "data-target-chunks-ready",
+        "value": "1"
+      },
+      {
+        "milliseconds": 12701,
+        "target": "html",
+        "attribute": "data-geometry-representation",
+        "value": "mixed"
+      },
+      {
+        "milliseconds": 12701,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "target-chunks"
+      },
+      {
+        "milliseconds": 13319,
+        "target": "html",
+        "attribute": "data-target-chunks-ready",
+        "value": "2"
+      },
+      {
+        "milliseconds": 13319,
+        "target": "html",
+        "attribute": "data-geometry-representation",
+        "value": "mixed"
+      },
+      {
+        "milliseconds": 13319,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "target-chunks"
+      },
+      {
+        "milliseconds": 13922,
+        "target": "html",
+        "attribute": "data-target-chunks-ready",
+        "value": "3"
+      },
+      {
+        "milliseconds": 13922,
+        "target": "html",
+        "attribute": "data-geometry-representation",
+        "value": "mixed"
+      },
+      {
+        "milliseconds": 13922,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "target-chunks"
+      },
+      {
+        "milliseconds": 14407,
+        "target": "html",
+        "attribute": "data-target-chunks-ready",
+        "value": "4"
+      },
+      {
+        "milliseconds": 14407,
+        "target": "html",
+        "attribute": "data-geometry-representation",
+        "value": "mixed"
+      },
+      {
+        "milliseconds": 14407,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "target-chunks"
+      },
+      {
+        "milliseconds": 14891,
+        "target": "html",
+        "attribute": "data-target-chunks-ready",
+        "value": "5"
+      },
+      {
+        "milliseconds": 14891,
+        "target": "html",
+        "attribute": "data-geometry-representation",
+        "value": "mixed"
+      },
+      {
+        "milliseconds": 14891,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "target-chunks"
+      },
+      {
+        "milliseconds": 15399,
+        "target": "html",
+        "attribute": "data-target-chunks-ready",
+        "value": "6"
+      },
+      {
+        "milliseconds": 15399,
+        "target": "html",
+        "attribute": "data-geometry-representation",
+        "value": "mixed"
+      },
+      {
+        "milliseconds": 15399,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "target-chunks"
+      },
+      {
+        "milliseconds": 15914,
+        "target": "html",
+        "attribute": "data-target-chunks-ready",
+        "value": "7"
+      },
+      {
+        "milliseconds": 15914,
+        "target": "html",
+        "attribute": "data-geometry-representation",
+        "value": "mixed"
+      },
+      {
+        "milliseconds": 15914,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "target-chunks"
+      },
+      {
+        "milliseconds": 16517,
+        "target": "html",
+        "attribute": "data-target-chunks-ready",
+        "value": "8"
+      },
+      {
+        "milliseconds": 16517,
+        "target": "html",
+        "attribute": "data-geometry-representation",
+        "value": "mixed"
+      },
+      {
+        "milliseconds": 16517,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "target-chunks"
+      },
+      {
+        "milliseconds": 17137,
+        "target": "html",
+        "attribute": "data-target-chunks-ready",
+        "value": "9"
+      },
+      {
+        "milliseconds": 17137,
+        "target": "html",
+        "attribute": "data-geometry-representation",
+        "value": "mixed"
+      },
+      {
+        "milliseconds": 17137,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "target-chunks"
+      },
+      {
+        "milliseconds": 17830,
+        "target": "html",
+        "attribute": "data-target-chunks-ready",
+        "value": "10"
+      },
+      {
+        "milliseconds": 17830,
+        "target": "html",
+        "attribute": "data-geometry-representation",
+        "value": "mixed"
+      },
+      {
+        "milliseconds": 17830,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "target-chunks"
+      },
+      {
+        "milliseconds": 18346,
+        "target": "html",
+        "attribute": "data-target-chunks-ready",
+        "value": "11"
+      },
+      {
+        "milliseconds": 18346,
+        "target": "html",
+        "attribute": "data-geometry-representation",
+        "value": "mixed"
+      },
+      {
+        "milliseconds": 18346,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "target-chunks"
+      },
+      {
+        "milliseconds": 18843,
+        "target": "html",
+        "attribute": "data-target-chunks-ready",
+        "value": "12"
+      },
+      {
+        "milliseconds": 18843,
+        "target": "html",
+        "attribute": "data-geometry-representation",
+        "value": "mixed"
+      },
+      {
+        "milliseconds": 18843,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "target-chunks"
+      },
+      {
+        "milliseconds": 19412,
+        "target": "html",
+        "attribute": "data-target-chunks-ready",
+        "value": "13"
+      },
+      {
+        "milliseconds": 19412,
+        "target": "html",
+        "attribute": "data-geometry-representation",
+        "value": "mixed"
+      },
+      {
+        "milliseconds": 19412,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "target-chunks"
+      },
+      {
+        "milliseconds": 19907,
+        "target": "html",
+        "attribute": "data-target-chunks-ready",
+        "value": "14"
+      },
+      {
+        "milliseconds": 19907,
+        "target": "html",
+        "attribute": "data-geometry-representation",
+        "value": "mixed"
+      },
+      {
+        "milliseconds": 19907,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "target-chunks"
+      },
+      {
+        "milliseconds": 20612,
+        "target": "html",
+        "attribute": "data-target-chunks-ready",
+        "value": "15"
+      },
+      {
+        "milliseconds": 20612,
+        "target": "html",
+        "attribute": "data-geometry-representation",
+        "value": "mixed"
+      },
+      {
+        "milliseconds": 20612,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "target-chunks"
+      },
+      {
+        "milliseconds": 21173,
+        "target": "html",
+        "attribute": "data-target-chunks-ready",
+        "value": "16"
+      },
+      {
+        "milliseconds": 21173,
+        "target": "html",
+        "attribute": "data-geometry-representation",
+        "value": "mixed"
+      },
+      {
+        "milliseconds": 21173,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "target-chunks"
+      },
+      {
+        "milliseconds": 21705,
+        "target": "html",
+        "attribute": "data-target-chunks-ready",
+        "value": "17"
+      },
+      {
+        "milliseconds": 21705,
+        "target": "html",
+        "attribute": "data-geometry-representation",
+        "value": "mixed"
+      },
+      {
+        "milliseconds": 21705,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "target-chunks"
+      },
+      {
+        "milliseconds": 22219,
+        "target": "html",
+        "attribute": "data-target-chunks-ready",
+        "value": "18"
+      },
+      {
+        "milliseconds": 22219,
+        "target": "html",
+        "attribute": "data-geometry-representation",
+        "value": "mixed"
+      },
+      {
+        "milliseconds": 22219,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "target-chunks"
+      },
+      {
+        "milliseconds": 22746,
+        "target": "html",
+        "attribute": "data-target-chunks-ready",
+        "value": "19"
+      },
+      {
+        "milliseconds": 22746,
+        "target": "html",
+        "attribute": "data-geometry-representation",
+        "value": "mixed"
+      },
+      {
+        "milliseconds": 22746,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "target-chunks"
+      },
+      {
+        "milliseconds": 23312,
+        "target": "html",
+        "attribute": "data-target-chunks-ready",
+        "value": "20"
+      },
+      {
+        "milliseconds": 23312,
+        "target": "html",
+        "attribute": "data-geometry-representation",
+        "value": "mixed"
+      },
+      {
+        "milliseconds": 23312,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "target-chunks"
+      },
+      {
+        "milliseconds": 23832,
+        "target": "html",
+        "attribute": "data-target-chunks-ready",
+        "value": "21"
+      },
+      {
+        "milliseconds": 23832,
+        "target": "html",
+        "attribute": "data-geometry-representation",
+        "value": "mixed"
+      },
+      {
+        "milliseconds": 23832,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "target-chunks"
+      },
+      {
+        "milliseconds": 24598,
+        "target": "html",
+        "attribute": "data-target-chunks-ready",
+        "value": "22"
+      },
+      {
+        "milliseconds": 24598,
+        "target": "html",
+        "attribute": "data-geometry-representation",
+        "value": "mixed"
+      },
+      {
+        "milliseconds": 24598,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "target-chunks"
+      },
+      {
+        "milliseconds": 25193,
+        "target": "html",
+        "attribute": "data-target-chunks-ready",
+        "value": "23"
+      },
+      {
+        "milliseconds": 25193,
+        "target": "html",
+        "attribute": "data-geometry-representation",
+        "value": "mixed"
+      },
+      {
+        "milliseconds": 25193,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "target-chunks"
+      },
+      {
+        "milliseconds": 25759,
+        "target": "html",
+        "attribute": "data-target-chunks-ready",
+        "value": "24"
+      },
+      {
+        "milliseconds": 25759,
+        "target": "html",
+        "attribute": "data-geometry-representation",
+        "value": "mixed"
+      },
+      {
+        "milliseconds": 25759,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "target-chunks"
+      },
+      {
+        "milliseconds": 26347,
+        "target": "html",
+        "attribute": "data-target-chunks-ready",
+        "value": "25"
+      },
+      {
+        "milliseconds": 26347,
+        "target": "html",
+        "attribute": "data-geometry-representation",
+        "value": "mixed"
+      },
+      {
+        "milliseconds": 26347,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "target-chunks"
+      },
+      {
+        "milliseconds": 26910,
+        "target": "html",
+        "attribute": "data-target-chunks-ready",
+        "value": "26"
+      },
+      {
+        "milliseconds": 26910,
+        "target": "html",
+        "attribute": "data-geometry-representation",
+        "value": "mixed"
+      },
+      {
+        "milliseconds": 26910,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "target-chunks"
+      },
+      {
+        "milliseconds": 27492,
+        "target": "html",
+        "attribute": "data-target-chunks-ready",
+        "value": "27"
+      },
+      {
+        "milliseconds": 27492,
+        "target": "html",
+        "attribute": "data-geometry-representation",
+        "value": "mixed"
+      },
+      {
+        "milliseconds": 27492,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "target-chunks"
+      },
+      {
+        "milliseconds": 28037,
+        "target": "html",
+        "attribute": "data-target-chunks-ready",
+        "value": "28"
+      },
+      {
+        "milliseconds": 28037,
+        "target": "html",
+        "attribute": "data-geometry-representation",
+        "value": "mixed"
+      },
+      {
+        "milliseconds": 28037,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "target-chunks"
+      },
+      {
+        "milliseconds": 28695,
+        "target": "html",
+        "attribute": "data-target-chunks-ready",
+        "value": "29"
+      },
+      {
+        "milliseconds": 28695,
+        "target": "html",
+        "attribute": "data-geometry-representation",
+        "value": "mixed"
+      },
+      {
+        "milliseconds": 28695,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "target-chunks"
+      },
+      {
+        "milliseconds": 29393,
+        "target": "html",
+        "attribute": "data-target-chunks-ready",
+        "value": "30"
+      },
+      {
+        "milliseconds": 29393,
+        "target": "html",
+        "attribute": "data-geometry-representation",
+        "value": "mixed"
+      },
+      {
+        "milliseconds": 29393,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "target-chunks"
+      },
+      {
+        "milliseconds": 30121,
+        "target": "html",
+        "attribute": "data-target-chunks-ready",
+        "value": "31"
+      },
+      {
+        "milliseconds": 30121,
+        "target": "html",
+        "attribute": "data-geometry-representation",
+        "value": "mixed"
+      },
+      {
+        "milliseconds": 30121,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "target-chunks"
+      },
+      {
+        "milliseconds": 30781,
+        "target": "html",
+        "attribute": "data-target-chunks-ready",
+        "value": "32"
+      },
+      {
+        "milliseconds": 30781,
+        "target": "html",
+        "attribute": "data-geometry-representation",
+        "value": "mixed"
+      },
+      {
+        "milliseconds": 30781,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "target-chunks"
+      },
+      {
+        "milliseconds": 31706,
+        "target": "html",
+        "attribute": "data-target-chunks-ready",
+        "value": "33"
+      },
+      {
+        "milliseconds": 31706,
+        "target": "html",
+        "attribute": "data-geometry-representation",
+        "value": "mixed"
+      },
+      {
+        "milliseconds": 31706,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "target-chunks"
+      },
+      {
+        "milliseconds": 32457,
+        "target": "html",
+        "attribute": "data-target-chunks-ready",
+        "value": "34"
+      },
+      {
+        "milliseconds": 32457,
+        "target": "html",
+        "attribute": "data-geometry-representation",
+        "value": "mixed"
+      },
+      {
+        "milliseconds": 32457,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "target-chunks"
+      },
+      {
+        "milliseconds": 33031,
+        "target": "html",
+        "attribute": "data-target-chunks-ready",
+        "value": "35"
+      },
+      {
+        "milliseconds": 33031,
+        "target": "html",
+        "attribute": "data-geometry-representation",
+        "value": "mixed"
+      },
+      {
+        "milliseconds": 33031,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "target-chunks"
+      },
+      {
+        "milliseconds": 33611,
+        "target": "html",
+        "attribute": "data-target-chunks-ready",
+        "value": "36"
+      },
+      {
+        "milliseconds": 33611,
+        "target": "html",
+        "attribute": "data-geometry-representation",
+        "value": "mixed"
+      },
+      {
+        "milliseconds": 33611,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "target-chunks"
+      },
+      {
+        "milliseconds": 34193,
+        "target": "html",
+        "attribute": "data-target-chunks-ready",
+        "value": "37"
+      },
+      {
+        "milliseconds": 34193,
+        "target": "html",
+        "attribute": "data-geometry-representation",
+        "value": "mixed"
+      },
+      {
+        "milliseconds": 34193,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "target-chunks"
+      },
+      {
+        "milliseconds": 34797,
+        "target": "html",
+        "attribute": "data-target-chunks-ready",
+        "value": "38"
+      },
+      {
+        "milliseconds": 34797,
+        "target": "html",
+        "attribute": "data-geometry-representation",
+        "value": "mixed"
+      },
+      {
+        "milliseconds": 34797,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "target-chunks"
+      },
+      {
+        "milliseconds": 35406,
+        "target": "html",
+        "attribute": "data-target-chunks-ready",
+        "value": "39"
+      },
+      {
+        "milliseconds": 35406,
+        "target": "html",
+        "attribute": "data-geometry-representation",
+        "value": "mixed"
+      },
+      {
+        "milliseconds": 35406,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "target-chunks"
+      },
+      {
+        "milliseconds": 36050,
+        "target": "html",
+        "attribute": "data-target-chunks-ready",
+        "value": "40"
+      },
+      {
+        "milliseconds": 36050,
+        "target": "html",
+        "attribute": "data-geometry-representation",
+        "value": "mixed"
+      },
+      {
+        "milliseconds": 36050,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "target-chunks"
+      },
+      {
+        "milliseconds": 36669,
+        "target": "html",
+        "attribute": "data-target-chunks-ready",
+        "value": "41"
+      },
+      {
+        "milliseconds": 36669,
+        "target": "html",
+        "attribute": "data-geometry-representation",
+        "value": "mixed"
+      },
+      {
+        "milliseconds": 36669,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "target-chunks"
+      },
+      {
+        "milliseconds": 37315,
+        "target": "html",
+        "attribute": "data-target-chunks-ready",
+        "value": "42"
+      },
+      {
+        "milliseconds": 37315,
+        "target": "html",
+        "attribute": "data-geometry-representation",
+        "value": "mixed"
+      },
+      {
+        "milliseconds": 37315,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "target-chunks"
+      },
+      {
+        "milliseconds": 37919,
+        "target": "html",
+        "attribute": "data-target-chunks-ready",
+        "value": "43"
+      },
+      {
+        "milliseconds": 37919,
+        "target": "html",
+        "attribute": "data-geometry-representation",
+        "value": "mixed"
+      },
+      {
+        "milliseconds": 37919,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "target-chunks"
+      },
+      {
+        "milliseconds": 38537,
+        "target": "html",
+        "attribute": "data-target-chunks-ready",
+        "value": "44"
+      },
+      {
+        "milliseconds": 38537,
+        "target": "html",
+        "attribute": "data-geometry-representation",
+        "value": "mixed"
+      },
+      {
+        "milliseconds": 38537,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "target-chunks"
+      },
+      {
+        "milliseconds": 39153,
+        "target": "html",
+        "attribute": "data-target-chunks-ready",
+        "value": "45"
+      },
+      {
+        "milliseconds": 39153,
+        "target": "html",
+        "attribute": "data-geometry-representation",
+        "value": "mixed"
+      },
+      {
+        "milliseconds": 39153,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "target-chunks"
+      },
+      {
+        "milliseconds": 39957,
+        "target": "html",
+        "attribute": "data-target-chunks-ready",
+        "value": "46"
+      },
+      {
+        "milliseconds": 39957,
+        "target": "html",
+        "attribute": "data-geometry-representation",
+        "value": "mixed"
+      },
+      {
+        "milliseconds": 39957,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "target-chunks"
+      },
+      {
+        "milliseconds": 40702,
+        "target": "html",
+        "attribute": "data-target-chunks-ready",
+        "value": "47"
+      },
+      {
+        "milliseconds": 40702,
+        "target": "html",
+        "attribute": "data-geometry-representation",
+        "value": "mixed"
+      },
+      {
+        "milliseconds": 40702,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "target-chunks"
+      },
+      {
+        "milliseconds": 41311,
+        "target": "html",
+        "attribute": "data-target-chunks-ready",
+        "value": "48"
+      },
+      {
+        "milliseconds": 41311,
+        "target": "html",
+        "attribute": "data-geometry-representation",
+        "value": "mixed"
+      },
+      {
+        "milliseconds": 41311,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "target-chunks"
+      },
+      {
+        "milliseconds": 41956,
+        "target": "html",
+        "attribute": "data-target-chunks-ready",
+        "value": "49"
+      },
+      {
+        "milliseconds": 41956,
+        "target": "html",
+        "attribute": "data-geometry-representation",
+        "value": "mixed"
+      },
+      {
+        "milliseconds": 41956,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "target-chunks"
+      },
+      {
+        "milliseconds": 42560,
+        "target": "html",
+        "attribute": "data-target-chunks-ready",
+        "value": "50"
+      },
+      {
+        "milliseconds": 42560,
+        "target": "html",
+        "attribute": "data-geometry-representation",
+        "value": "mixed"
+      },
+      {
+        "milliseconds": 42560,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "target-chunks"
+      },
+      {
+        "milliseconds": 43406,
+        "target": "html",
+        "attribute": "data-target-chunks-ready",
+        "value": "51"
+      },
+      {
+        "milliseconds": 43406,
+        "target": "html",
+        "attribute": "data-geometry-representation",
+        "value": "mixed"
+      },
+      {
+        "milliseconds": 43406,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "target-chunks"
+      },
+      {
+        "milliseconds": 44245,
+        "target": "html",
+        "attribute": "data-target-chunks-ready",
+        "value": "52"
+      },
+      {
+        "milliseconds": 44245,
+        "target": "html",
+        "attribute": "data-geometry-representation",
+        "value": "mixed"
+      },
+      {
+        "milliseconds": 44245,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "target-chunks"
+      },
+      {
+        "milliseconds": 44855,
+        "target": "html",
+        "attribute": "data-target-chunks-ready",
+        "value": "53"
+      },
+      {
+        "milliseconds": 44855,
+        "target": "html",
+        "attribute": "data-geometry-representation",
+        "value": "mixed"
+      },
+      {
+        "milliseconds": 44855,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "target-chunks"
+      },
+      {
+        "milliseconds": 45449,
+        "target": "html",
+        "attribute": "data-target-chunks-ready",
+        "value": "54"
+      },
+      {
+        "milliseconds": 45449,
+        "target": "html",
+        "attribute": "data-geometry-representation",
+        "value": "mixed"
+      },
+      {
+        "milliseconds": 45449,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "target-chunks"
+      },
+      {
+        "milliseconds": 46025,
+        "target": "html",
+        "attribute": "data-target-chunks-ready",
+        "value": "55"
+      },
+      {
+        "milliseconds": 46025,
+        "target": "html",
+        "attribute": "data-geometry-representation",
+        "value": "mixed"
+      },
+      {
+        "milliseconds": 46025,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "target-chunks"
+      },
+      {
+        "milliseconds": 46681,
+        "target": "html",
+        "attribute": "data-target-chunks-ready",
+        "value": "56"
+      },
+      {
+        "milliseconds": 46681,
+        "target": "html",
+        "attribute": "data-geometry-representation",
+        "value": "mixed"
+      },
+      {
+        "milliseconds": 46681,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "target-chunks"
+      },
+      {
+        "milliseconds": 47606,
+        "target": "html",
+        "attribute": "data-target-chunks-ready",
+        "value": "57"
+      },
+      {
+        "milliseconds": 47606,
+        "target": "html",
+        "attribute": "data-geometry-representation",
+        "value": "mixed"
+      },
+      {
+        "milliseconds": 47606,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "target-chunks"
+      },
+      {
+        "milliseconds": 48360,
+        "target": "html",
+        "attribute": "data-target-chunks-ready",
+        "value": "58"
+      },
+      {
+        "milliseconds": 48360,
+        "target": "html",
+        "attribute": "data-geometry-representation",
+        "value": "mixed"
+      },
+      {
+        "milliseconds": 48360,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "target-chunks"
+      },
+      {
+        "milliseconds": 49001,
+        "target": "html",
+        "attribute": "data-target-chunks-ready",
+        "value": "59"
+      },
+      {
+        "milliseconds": 49001,
+        "target": "html",
+        "attribute": "data-geometry-representation",
+        "value": "mixed"
+      },
+      {
+        "milliseconds": 49001,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "target-chunks"
+      },
+      {
+        "milliseconds": 49669,
+        "target": "html",
+        "attribute": "data-target-chunks-ready",
+        "value": "60"
+      },
+      {
+        "milliseconds": 49669,
+        "target": "html",
+        "attribute": "data-geometry-representation",
+        "value": "mixed"
+      },
+      {
+        "milliseconds": 49669,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "target-chunks"
+      },
+      {
+        "milliseconds": 50341,
+        "target": "html",
+        "attribute": "data-target-chunks-ready",
+        "value": "61"
+      },
+      {
+        "milliseconds": 50341,
+        "target": "html",
+        "attribute": "data-geometry-representation",
+        "value": "mixed"
+      },
+      {
+        "milliseconds": 50341,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "target-chunks"
+      },
+      {
+        "milliseconds": 51020,
+        "target": "html",
+        "attribute": "data-target-chunks-ready",
+        "value": "62"
+      },
+      {
+        "milliseconds": 51020,
+        "target": "html",
+        "attribute": "data-geometry-representation",
+        "value": "mixed"
+      },
+      {
+        "milliseconds": 51020,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "target-chunks"
+      },
+      {
+        "milliseconds": 51648,
+        "target": "html",
+        "attribute": "data-target-chunks-ready",
+        "value": "63"
+      },
+      {
+        "milliseconds": 51648,
+        "target": "html",
+        "attribute": "data-geometry-representation",
+        "value": "mixed"
+      },
+      {
+        "milliseconds": 51648,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "target-chunks"
+      },
+      {
+        "milliseconds": 52283,
+        "target": "html",
+        "attribute": "data-target-chunks-ready",
+        "value": "64"
+      },
+      {
+        "milliseconds": 52283,
+        "target": "html",
+        "attribute": "data-geometry-representation",
+        "value": "mixed"
+      },
+      {
+        "milliseconds": 52283,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "target-chunks"
+      },
+      {
+        "milliseconds": 52920,
+        "target": "html",
+        "attribute": "data-target-chunks-ready",
+        "value": "65"
+      },
+      {
+        "milliseconds": 52920,
+        "target": "html",
+        "attribute": "data-geometry-representation",
+        "value": "mixed"
+      },
+      {
+        "milliseconds": 52920,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "target-chunks"
+      },
+      {
+        "milliseconds": 53659,
+        "target": "html",
+        "attribute": "data-target-chunks-ready",
+        "value": "66"
+      },
+      {
+        "milliseconds": 53659,
+        "target": "html",
+        "attribute": "data-geometry-representation",
+        "value": "mixed"
+      },
+      {
+        "milliseconds": 53659,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "target-chunks"
+      },
+      {
+        "milliseconds": 54440,
+        "target": "html",
+        "attribute": "data-target-chunks-ready",
+        "value": "67"
+      },
+      {
+        "milliseconds": 54440,
+        "target": "html",
+        "attribute": "data-geometry-representation",
+        "value": "mixed"
+      },
+      {
+        "milliseconds": 54440,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "target-chunks"
+      },
+      {
+        "milliseconds": 55320,
+        "target": "html",
+        "attribute": "data-target-chunks-ready",
+        "value": "68"
+      },
+      {
+        "milliseconds": 55320,
+        "target": "html",
+        "attribute": "data-geometry-representation",
+        "value": "mixed"
+      },
+      {
+        "milliseconds": 55320,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "target-chunks"
+      },
+      {
+        "milliseconds": 56554,
+        "target": "html",
+        "attribute": "data-target-chunks-ready",
+        "value": "69"
+      },
+      {
+        "milliseconds": 56554,
+        "target": "html",
+        "attribute": "data-geometry-representation",
+        "value": "mixed"
+      },
+      {
+        "milliseconds": 56554,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "target-chunks"
+      },
+      {
+        "milliseconds": 57321,
+        "target": "html",
+        "attribute": "data-target-chunks-ready",
+        "value": "70"
+      },
+      {
+        "milliseconds": 57321,
+        "target": "html",
+        "attribute": "data-geometry-representation",
+        "value": "mixed"
+      },
+      {
+        "milliseconds": 57321,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "target-chunks"
+      },
+      {
+        "milliseconds": 57928,
+        "target": "html",
+        "attribute": "data-target-chunks-ready",
+        "value": "71"
+      },
+      {
+        "milliseconds": 57928,
+        "target": "html",
+        "attribute": "data-geometry-representation",
+        "value": "mixed"
+      },
+      {
+        "milliseconds": 57928,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "target-chunks"
+      },
+      {
+        "milliseconds": 58595,
+        "target": "html",
+        "attribute": "data-target-chunks-ready",
+        "value": "72"
+      },
+      {
+        "milliseconds": 58595,
+        "target": "html",
+        "attribute": "data-geometry-representation",
+        "value": "mixed"
+      },
+      {
+        "milliseconds": 58595,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "target-chunks"
+      },
+      {
+        "milliseconds": 59231,
+        "target": "html",
+        "attribute": "data-target-chunks-ready",
+        "value": "73"
+      },
+      {
+        "milliseconds": 59231,
+        "target": "html",
+        "attribute": "data-geometry-representation",
+        "value": "mixed"
+      },
+      {
+        "milliseconds": 59231,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "target-chunks"
+      },
+      {
+        "milliseconds": 59851,
+        "target": "html",
+        "attribute": "data-target-chunks-ready",
+        "value": "74"
+      },
+      {
+        "milliseconds": 59851,
+        "target": "html",
+        "attribute": "data-geometry-representation",
+        "value": "mixed"
+      },
+      {
+        "milliseconds": 59851,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "target-chunks"
+      },
+      {
+        "milliseconds": 60537,
+        "target": "html",
+        "attribute": "data-target-chunks-ready",
+        "value": "75"
+      },
+      {
+        "milliseconds": 60537,
+        "target": "html",
+        "attribute": "data-geometry-representation",
+        "value": "mixed"
+      },
+      {
+        "milliseconds": 60537,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "target-chunks"
+      },
+      {
+        "milliseconds": 61208,
+        "target": "html",
+        "attribute": "data-target-chunks-ready",
+        "value": "76"
+      },
+      {
+        "milliseconds": 61208,
+        "target": "html",
+        "attribute": "data-geometry-representation",
+        "value": "mixed"
+      },
+      {
+        "milliseconds": 61208,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "target-chunks"
+      },
+      {
+        "milliseconds": 61866,
+        "target": "html",
+        "attribute": "data-target-chunks-ready",
+        "value": "77"
+      },
+      {
+        "milliseconds": 61866,
+        "target": "html",
+        "attribute": "data-geometry-representation",
+        "value": "mixed"
+      },
+      {
+        "milliseconds": 61866,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "target-chunks"
+      },
+      {
+        "milliseconds": 62602,
+        "target": "html",
+        "attribute": "data-target-chunks-ready",
+        "value": "78"
+      },
+      {
+        "milliseconds": 62602,
+        "target": "html",
+        "attribute": "data-geometry-representation",
+        "value": "mixed"
+      },
+      {
+        "milliseconds": 62602,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "target-chunks"
+      },
+      {
+        "milliseconds": 63201,
+        "target": "html",
+        "attribute": "data-residency-budget-reached",
+        "value": "true"
+      },
+      {
+        "milliseconds": 63201,
+        "target": "html",
+        "attribute": "data-geometry-representation",
+        "value": "mixed"
+      },
+      {
+        "milliseconds": 63201,
+        "target": "html",
+        "attribute": "data-target-ready",
+        "value": "limited"
+      },
+      {
+        "milliseconds": 63201,
+        "target": "status",
+        "attribute": "data-state",
+        "value": "ready"
+      },
+      {
+        "milliseconds": 63201,
+        "target": "status",
+        "attribute": "data-stage",
+        "value": "rendered"
+      },
+      {
+        "milliseconds": 63201,
+        "target": "html",
+        "attribute": "data-scene-loading",
+        "value": "false"
+      }
+    ]
+  },
+  "picking": {
+    "selection": "Selected 16_SFO_AT_balk vierkant beton:fundbalk 1000x600 (C30/37):975347 · node 148735 · ID 148736 · 0 CAD edge refs",
+    "selectedObjectId": "148736"
+  },
+  "semanticProperties": {
+    "state": "resolved",
+    "statusText": null,
+    "countLabel": "· 6 · IFC2X3",
+    "entryCount": 6,
+    "sampleEntries": [
+      {
+        "key": "ifc.ObjectType",
+        "value": "16_SFO_AT_balk vierkant beton:fundbalk 1000x600 (C30/37):1103213"
+      },
+      {
+        "key": "ifc.PredefinedType",
+        "value": "NOTDEFINED"
+      },
+      {
+        "key": "ifc.Tag",
+        "value": "975347"
+      },
+      {
+        "key": "ifc.discipline",
+        "value": "structure"
+      },
+      {
+        "key": "ifc.entityId",
+        "value": "152951"
+      },
+      {
+        "key": "ifc.globalId",
+        "value": "21a09V0k97ORkNuf1$cKaV"
+      }
+    ]
+  },
+  "binaryRequests": [
+    {
+      "resource": "?scene=http%3A%2F%2F127.0.0.1%3A4174%2Fscene.gltf",
+      "status": 200,
+      "range": null
+    },
+    {
+      "resource": "scene.gltf",
+      "status": 200,
+      "range": null
+    },
+    {
+      "resource": "coarse.bin",
+      "status": 200,
+      "range": null
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=42207408-42730943"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=67817520-68325167"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=46347360-46869191"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=67301712-67817519"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=44300976-44812943"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=43777680-44300975"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=93075156-93597923"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=118107708-118289819"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=118942848-119419703"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=44812944-45330575"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=68325168-68848319"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=24486288-25009199"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=92555124-93075155"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=120637416-120707063"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=98922588-99422891"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=23962128-24486287"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=91511076-92034179"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=97224924-97741859"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=96700716-97224923"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=119419704-119875139"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=55933740-56457755"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=25009200-25531535"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=68848320-69371471"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=49886172-50362379"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=102041820-102565499"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=46869192-47383991"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=2093940-2603543"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=12001788-12522263"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=93597924-94120211"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=49362888-49886171"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=92034180-92555123"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=21361200-21881087"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=50838216-51361967"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=523764-1047419"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=69893520-70415471"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=0-523763"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=42730944-43253903"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=15647796-16166051"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=18245208-18767399"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=112830804-113355059"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=11479236-12001787"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=23440764-23962127"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=10956972-11479235"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=97741860-98265227"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=1570236-2093939"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=85876872-86399591"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=8337624-8861111"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=73557648-74079839"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=4687560-5211815"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=19288248-19796783"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=69371472-69893519"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=9909456-10432859"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=16690152-17209415"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=7813752-8337623"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=6257976-6779879"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=41239920-41763119"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=26055408-26578511"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=22919088-23440763"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=87446760-87970583"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=9385320-9909455"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=14600688-15123971"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=18767400-19288247"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=71985888-72509903"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=89995392-90466271"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=95655180-96178763"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=3647208-4169807"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=17733336-18245207"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=15123972-15647795"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=5211816-5734631"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=47383992-47901335"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=17209416-17733335"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=2603544-3127223"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=79312104-79835783"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=70415472-70939007"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=8861112-9385319"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=10432860-10956971"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=6779880-7304135"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=104660076-105184043"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=20320056-20842055"
+    },
+    {
+      "resource": "properties.bin",
+      "status": 200,
+      "range": null
+    }
+  ],
+  "consoleIssues": [],
+  "screenshots": {
+    "coarse": {
+      "path": "coarse-frame.png",
+      "bytes": 238014,
+      "sha256": "763282917e82f116c1e8407763737a4eaf39164d82ab01f654a8b98c1c6bcb44"
+    },
+    "budgetLimited": {
+      "path": "budget-limited.png",
+      "bytes": 258665,
+      "sha256": "c97c7cfd361cfeb7970ab1c8d5263eb8324c3c521c869f0002d42ed624b47c5c"
+    },
+    "picked": {
+      "path": "picked.png",
+      "bytes": 260330,
+      "sha256": "8f4ede2480745296f4173a0f65536e2bc028eb83fee501ccaf929fb5acd83394"
+    }
+  }
+}

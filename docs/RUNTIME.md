@@ -417,17 +417,19 @@ batches, and renders per-occurrence transforms, source colors, explicit CAD
 edges, an isometric bounds fit, and integer object picking. Selecting an
 occurrence resolves its glTF node and revision-local OCCT edge references.
 Visibility, navigation, clipping, hierarchy inspection, and local/URL package
-opening are implemented. A progressive package can now decode and render
-prototype AABBs from `coarse.bin`, then replace GPU batches with `scene.bin`
-target geometry while preserving node-derived object IDs. Target prototype
-ranges are fetched and decoded one at a time; unresolved prototypes keep their
-coarse batches. Selecting an unresolved occurrence can pin its requested target
-and demote colder target groups to their retained coarse fallbacks within the
-same decoded/GPU budgets. Scene replacement or an explicit user cancellation
-aborts the active range, terminates its Worker, and prevents later ranges from
-starting. Camera-driven scheduling across spatial chunks, cancellation of
-obsolete view work, persistent cache tiers, and broader eviction policy remain
-unimplemented.
+opening are implemented. One persistent geometry Worker owns the parsed glTF
+for the scene session and reuses it across coarse and target decodes. For the
+compiler's `prototype-aabb-v1` tier, it collapses prototype AABBs into one
+canonical box batch with contiguous occurrence transforms and target-mesh
+indexes. Target prototype ranges are fetched and decoded one at a time;
+promoted targets mask their matching coarse instances, and eviction reveals
+those instances again while preserving node-derived object IDs. Selecting an
+unresolved occurrence can pin its requested target and demote colder target
+groups within the same decoded/GPU budgets. Scene replacement or explicit
+user cancellation aborts the active range, terminates the session Worker, and
+prevents later ranges from starting. Camera-driven scheduling across spatial
+chunks, cancellation of obsolete view work, persistent cache tiers, and
+broader eviction policy remain unimplemented.
 
 The reproducible browser smoke command is `pnpm browser:matrix`. Its committed
 Phase 1 run covers Chrome/Blink and Firefox/Gecko with the same compiled package,

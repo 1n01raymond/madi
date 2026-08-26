@@ -106,4 +106,20 @@ describe("occurrence visibility", () => {
       isolatedObjectId: 3,
     });
   });
+
+  it("combines residency masking with user visibility", () => {
+    const visibility = new OccurrenceVisibility(
+      { batches: [batch([1, 2]), batch([1])], sharedObjectIdsAcrossBatches: true },
+      (batchIndex, instanceIndex) => batchIndex !== 0 || instanceIndex !== 0,
+    );
+
+    expect(Array.from(visibility.counts)).toEqual([1, 1]);
+    expect(visibility.state()).toMatchObject({
+      totalOccurrences: 2,
+      visibleOccurrences: 2,
+    });
+    visibility.hide(1);
+    expect(Array.from(visibility.counts)).toEqual([1, 0]);
+    expect(visibility.state().visibleOccurrences).toBe(1);
+  });
 });
