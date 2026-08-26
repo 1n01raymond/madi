@@ -21,12 +21,16 @@ export {
 } from "./compiled-gltf.js";
 export {
   decodeSpatialDemandIndex,
+  querySpatialDemandIndex,
   SpatialDemandIndexError,
   supportedSpatialDemandIndexSchema,
 } from "./spatial-index.js";
 export type {
   DecodedSpatialDemandIndex,
   DecodeSpatialDemandIndexOptions,
+  SpatialDemandQueryCandidate,
+  SpatialDemandQueryFrame,
+  SpatialDemandQueryResult,
 } from "./spatial-index.js";
 export type {
   CompiledGltfDocument,

@@ -75,8 +75,12 @@ The package boundary also recognizes the optional
 `naru.spatial-demand-index.1`. The decoder preserves float64 bounds and rejects
 invalid sizes, allocation limits, unreachable/cyclic nodes, duplicate
 occurrence ownership, and out-of-range glTF or target-chunk references before
-exposing query arrays. Studio does not yet fetch or query the index, so current
-camera scheduling still uses aggregate retained-coarse chunk bounds.
+exposing query arrays. The Studio authenticates the SHA-256, performs a
+camera-relative frustum traversal, requests only the deduplicated chunks of
+visible leaves, and keeps non-demanded chunks cold for eviction. Packages
+without the optional index retain aggregate retained-coarse chunk scheduling.
+The indexed browser path has unit/oracle coverage but not yet a committed
+headed or real-model evidence record.
 
 Run `pnpm test` for package and committed-fixture regression coverage. The
 headed cross-engine path is recorded by `pnpm browser:matrix`; the focused

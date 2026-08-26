@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { encodeSpatialDemandIndex } from "../../compiler/src/spatial-demand.js";
 import {
   decodeSpatialDemandIndex,
+  querySpatialDemandIndex,
   SpatialDemandIndexError,
   supportedSpatialDemandIndexSchema,
 } from "../src/index.js";
@@ -103,6 +104,71 @@ describe("spatial demand index runtime boundary", () => {
     expect(decoded.stats).toEqual(encoded.stats);
     expect(decoded.bounds[3]).toBe(10_000_000.125_25);
     expect(Math.fround(decoded.bounds[3]!)).not.toBe(decoded.bounds[3]);
+  });
+
+  it("visits only intersecting leaves and returns their deduplicated target demand", () => {
+    const decoded = decodeSpatialDemandIndex(validIndex(), {
+      gltfNodeCount: 8,
+      targetChunkCount: 2,
+    });
+    const viewProjection = new Float64Array([
+      1, 0, 0, 0,
+      0, 1, 0, 0,
+      0, 0, 1, 0,
+      0, 0, 0, 1,
+    ]);
+
+    expect(querySpatialDemandIndex(decoded, { viewProjection, origin: [0, 0, 0] })).toEqual({
+      candidates: [{ targetChunkIndex: 0, screenDistanceSquared: 2.25 }],
+      visitedNodeCount: 3,
+      visibleLeafCount: 1,
+      testedOccurrenceCount: 1,
+    });
+    expect(
+      querySpatialDemandIndex(decoded, {
+        viewProjection,
+        origin: [10_000_000.062_75, 0, 0],
+      }).candidates,
+    ).toEqual([{ targetChunkIndex: 1, screenDistanceSquared: 0.25 }]);
+  });
+
+  it("has no false negatives against a brute-force orthographic oracle", () => {
+    const occurrences = Array.from({ length: 100 }, (_, index) => {
+      const x = (index % 10) * 2 - 9;
+      const y = Math.floor(index / 10) * 2 - 9;
+      return {
+        id: `occurrence:${String(index).padStart(3, "0")}`,
+        nodeIndex: index,
+        targetChunkIndex: index,
+        minimum: [x - 0.25, y - 0.25, 0] as const,
+        maximum: [x + 0.25, y + 0.25, 1] as const,
+      };
+    });
+    const encoded = encodeSpatialDemandIndex(occurrences, { leafCapacity: 4 });
+    const decoded = decodeSpatialDemandIndex(encoded.bytes, {
+      gltfNodeCount: occurrences.length,
+      targetChunkCount: occurrences.length,
+    });
+    const result = querySpatialDemandIndex(decoded, {
+      viewProjection: new Float64Array([
+        0.25, 0, 0, 0,
+        0, 0.25, 0, 0,
+        0, 0, 1, 0,
+        0, 0, 0, 1,
+      ]),
+      origin: [0, 0, 0],
+    });
+    const bruteForce = occurrences
+      .filter(({ minimum, maximum }) =>
+        maximum[0] >= -4 && minimum[0] <= 4 && maximum[1] >= -4 && minimum[1] <= 4,
+      )
+      .map(({ targetChunkIndex }) => targetChunkIndex);
+    const candidates = new Set(result.candidates.map(({ targetChunkIndex }) => targetChunkIndex));
+
+    expect(bruteForce.every((chunkIndex) => candidates.has(chunkIndex))).toBe(true);
+    expect(result.candidates.length).toBeLessThan(occurrences.length);
+    expect(result.visitedNodeCount).toBeLessThan(encoded.stats.nodeCount);
+    expect(result.testedOccurrenceCount).toBeLessThan(occurrences.length);
   });
 
   it("decodes exact f64 bounds and occurrence-to-chunk ownership", () => {

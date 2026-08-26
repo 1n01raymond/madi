@@ -115,6 +115,7 @@ export interface CompiledTargetChunk {
 
 export interface CompiledHierarchy {
   readonly profile: typeof supportedProfile;
+  readonly nodeCount: number;
   readonly sceneId: string;
   readonly sourceFormat: string;
   readonly binaryUri: string;
@@ -555,6 +556,7 @@ export function inspectCompiledHierarchy(value: unknown): {
     document,
     hierarchy: {
       profile: supportedProfile,
+      nodeCount: document.nodes.length,
       sceneId:
         typeof rootMadi.sceneId === "string"
           ? rootMadi.sceneId

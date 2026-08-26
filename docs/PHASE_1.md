@@ -178,12 +178,13 @@ See `artifacts/phase1/README.md` for the compiled package,
 
 ## Not yet proven
 
-- Shape-preserving and screen-space LODs, spatial query scheduling and evidence,
+- Shape-preserving and screen-space LODs, spatial scheduler headed/real-model evidence,
   compression,
   persistent cache tiers, and a general cache-aware eviction policy under a
-  bounded residency budget. The optional ADR-0008 compiler sidecar and strict
-  runtime decoder exist, but the current camera policy still ranks
-  retained-coarse chunk bounds and can only restore their shared fallback batch.
+  bounded residency budget. The optional ADR-0008 compiler sidecar, strict
+  decoder, and frustum-demand scheduler exist, while committed headed and
+  real-model evidence is still pending; historical packages continue through
+  the retained-coarse chunk-bounds fallback.
 - Full material, mass, PMI, and domain-specific property schemas remain
   pending, and Studio search does not index property values (a deliberate
   Phase 1 limit — the sidecar is resolved per selected occurrence only).
@@ -210,8 +211,10 @@ and the browser reconciles only changed GPU batches under fixed 64 MiB decoded
 and GPU admission caps. A selected target now pins its detail and evicts colder
 target groups to their retained coarse fallbacks. Camera navigation now
 re-ranks retained-coarse chunk bounds, cancels obsolete Range/Worker
-work, and updates eviction priority. The next scheduler increment is persistent
-cache tiers plus spatial and screen-space priority.
+work, and updates eviction priority. The optional ADR-0008 path now queries a
+compiler-built occurrence BVH and requests only visible-leaf target demand;
+the next increment is its headed/real-model evidence, followed by persistent
+cache tiers and screen-space priority.
 
 On the compiler side the structure document now streams record by record,
 property keys and key combinations are interned once at scene level, and the

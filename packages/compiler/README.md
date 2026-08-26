@@ -52,7 +52,7 @@ The compiler API can additionally set `coarseBounds: true` and
 bounds for every renderable occurrence and maps each leaf to sorted,
 deduplicated indexes in `targetChunks`; it does not duplicate or reorder target
 geometry. This is the package/decoder slice of Proposed ADR-0008. CLI exposure,
-committed real-model records, and Studio query scheduling are still pending.
+committed real-model records, and headed Studio evidence are still pending.
 Its expanded Scene IR is temporary and is deleted after the package passes
 validation. `phase1:compile:evidence` retains the historical small Scene IR
 regression path without coarse output. The evidence check validates both plus the

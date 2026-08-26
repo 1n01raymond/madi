@@ -1,9 +1,11 @@
 import type {
   CompiledTargetChunk,
+  DecodedSpatialDemandIndex,
   DecodedCompiledScene,
   GpuOccurrenceInstance,
   GpuPrototypeBatch,
 } from "@naru3d/runtime-webgpu";
+import { querySpatialDemandIndex } from "@naru3d/runtime-webgpu";
 
 import type { CameraRelativeFrame } from "./view.js";
 
@@ -15,6 +17,12 @@ export interface RankedTargetChunk {
   readonly viewPriority: number;
   readonly visibleBounds: boolean;
   readonly screenDistanceSquared: number;
+  /** False for cold chunks retained only to update eviction priority. */
+  readonly demanded: boolean;
+}
+
+export interface TargetChunkRanker {
+  rank(frame: CameraRelativeFrame): readonly RankedTargetChunk[];
 }
 
 interface WorldBounds {
@@ -187,7 +195,7 @@ function projectedBounds(
 }
 
 /** Chunk bounds built once from retained coarse occurrences; no target bytes are needed. */
-export class TargetChunkViewIndex {
+export class TargetChunkViewIndex implements TargetChunkRanker {
   private readonly locations: readonly ChunkLocation[];
 
   constructor(
@@ -233,7 +241,68 @@ export class TargetChunkViewIndex {
         left.chunk.priority - right.chunk.priority ||
         left.chunk.id.localeCompare(right.chunk.id, "en"),
     );
-    return scored.map((entry, viewPriority) => ({ ...entry, viewPriority }));
+    return scored.map((entry, viewPriority) => ({ ...entry, viewPriority, demanded: true }));
+  }
+}
+
+export interface SpatialTargetQueryStats {
+  readonly visitedNodeCount: number;
+  readonly visibleLeafCount: number;
+  readonly testedOccurrenceCount: number;
+  readonly candidateChunkCount: number;
+}
+
+/** Ranks only frustum-demanded chunks hot while retaining a stable cold eviction tail. */
+export class SpatialTargetChunkViewIndex implements TargetChunkRanker {
+  private readonly chunks: readonly CompiledTargetChunk[];
+  private readonly spatial: DecodedSpatialDemandIndex;
+  private readonly coldOrder: readonly number[];
+  private latest: SpatialTargetQueryStats = {
+    visitedNodeCount: 0,
+    visibleLeafCount: 0,
+    testedOccurrenceCount: 0,
+    candidateChunkCount: 0,
+  };
+
+  constructor(chunks: readonly CompiledTargetChunk[], spatial: DecodedSpatialDemandIndex) {
+    this.chunks = chunks;
+    this.spatial = spatial;
+    this.coldOrder = chunks
+      .map((_chunk, index) => index)
+      .sort(
+        (left, right) =>
+          chunks[left]!.priority - chunks[right]!.priority ||
+          chunks[left]!.id.localeCompare(chunks[right]!.id, "en"),
+      );
+  }
+
+  queryStats(): SpatialTargetQueryStats {
+    return this.latest;
+  }
+
+  rank(frame: CameraRelativeFrame): readonly RankedTargetChunk[] {
+    const query = querySpatialDemandIndex(this.spatial, frame);
+    this.latest = {
+      visitedNodeCount: query.visitedNodeCount,
+      visibleLeafCount: query.visibleLeafCount,
+      testedOccurrenceCount: query.testedOccurrenceCount,
+      candidateChunkCount: query.candidates.length,
+    };
+    const demanded = new Set(query.candidates.map(({ targetChunkIndex }) => targetChunkIndex));
+    const hot = query.candidates.map(({ targetChunkIndex, screenDistanceSquared }) => {
+      const chunk = this.chunks[targetChunkIndex];
+      if (!chunk) throw new RangeError(`Spatial demand references missing chunk ${targetChunkIndex}.`);
+      return { chunk, visibleBounds: true, screenDistanceSquared, demanded: true };
+    });
+    const cold = this.coldOrder
+      .filter((index) => !demanded.has(index))
+      .map((index) => ({
+        chunk: this.chunks[index]!,
+        visibleBounds: false,
+        screenDistanceSquared: Infinity,
+        demanded: false,
+      }));
+    return [...hot, ...cold].map((entry, viewPriority) => ({ ...entry, viewPriority }));
   }
 }
 
@@ -243,10 +312,10 @@ function isAbortError(error: unknown): boolean {
 
 /** Runs one Range/decode at a time and aborts it when a new view makes it obsolete. */
 export class CameraTargetScheduler<Result> {
-  private readonly index: TargetChunkViewIndex;
+  private readonly index: TargetChunkRanker;
   private readonly hooks: TargetSchedulerHooks<Result>;
   private ranked: readonly RankedTargetChunk[] = [];
-  private attempted = new Set<string>();
+  private rankCursor = 0;
   private active:
     | {
         readonly chunkId: string;
@@ -259,7 +328,7 @@ export class CameraTargetScheduler<Result> {
   private paused = false;
   private stopped = false;
 
-  constructor(index: TargetChunkViewIndex, hooks: TargetSchedulerHooks<Result>) {
+  constructor(index: TargetChunkRanker, hooks: TargetSchedulerHooks<Result>) {
     this.index = index;
     this.hooks = hooks;
   }
@@ -267,9 +336,11 @@ export class CameraTargetScheduler<Result> {
   update(frame: CameraRelativeFrame): void {
     if (this.stopped) return;
     this.ranked = this.index.rank(frame);
-    this.attempted.clear();
+    this.rankCursor = 0;
     this.hooks.reprioritize?.(this.ranked);
-    const next = this.ranked.find(({ chunk }) => !this.hooks.isResident(chunk));
+    const next = this.ranked.find(
+      ({ chunk, demanded }) => demanded && !this.hooks.isResident(chunk),
+    );
     if (
       this.active &&
       !this.active.controller.signal.aborted &&
@@ -294,7 +365,7 @@ export class CameraTargetScheduler<Result> {
   resume(): void {
     if (this.stopped || !this.paused) return;
     this.paused = false;
-    this.attempted.clear();
+    this.rankCursor = 0;
     this.ensureRun();
   }
 
@@ -326,11 +397,16 @@ export class CameraTargetScheduler<Result> {
 
   private async drain(): Promise<void> {
     while (!this.stopped && !this.paused) {
-      const ranked = this.ranked.find(
-        ({ chunk }) => !this.hooks.isResident(chunk) && !this.attempted.has(chunk.id),
-      );
+      let ranked: RankedTargetChunk | undefined;
+      while (this.rankCursor < this.ranked.length) {
+        const candidate = this.ranked[this.rankCursor];
+        this.rankCursor += 1;
+        if (candidate?.demanded && !this.hooks.isResident(candidate.chunk)) {
+          ranked = candidate;
+          break;
+        }
+      }
       if (!ranked) return;
-      this.attempted.add(ranked.chunk.id);
       const controller = new AbortController();
       this.active = {
         chunkId: ranked.chunk.id,

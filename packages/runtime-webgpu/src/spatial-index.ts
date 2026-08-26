@@ -37,6 +37,23 @@ export interface DecodedSpatialDemandIndex {
   };
 }
 
+export interface SpatialDemandQueryFrame {
+  readonly viewProjection: ArrayLike<number>;
+  readonly origin: readonly [number, number, number];
+}
+
+export interface SpatialDemandQueryCandidate {
+  readonly targetChunkIndex: number;
+  readonly screenDistanceSquared: number;
+}
+
+export interface SpatialDemandQueryResult {
+  readonly candidates: readonly SpatialDemandQueryCandidate[];
+  readonly visitedNodeCount: number;
+  readonly visibleLeafCount: number;
+  readonly testedOccurrenceCount: number;
+}
+
 export class SpatialDemandIndexError extends Error {
   constructor(message: string) {
     super(message);
@@ -315,4 +332,121 @@ export function decodeSpatialDemandIndex(
       leafCapacity,
     },
   };
+}
+
+function projectedNodeBounds(
+  index: DecodedSpatialDemandIndex,
+  nodeIndex: number,
+  frame: SpatialDemandQueryFrame,
+): { readonly visible: boolean; readonly distanceSquared: number } {
+  const offset = nodeIndex * 6;
+  const minimumX = index.bounds[offset]! - frame.origin[0];
+  const minimumY = index.bounds[offset + 1]! - frame.origin[1];
+  const minimumZ = index.bounds[offset + 2]! - frame.origin[2];
+  const maximumX = index.bounds[offset + 3]! - frame.origin[0];
+  const maximumY = index.bounds[offset + 4]! - frame.origin[1];
+  const maximumZ = index.bounds[offset + 5]! - frame.origin[2];
+  const matrix = frame.viewProjection;
+  let outsideLeft = true;
+  let outsideRight = true;
+  let outsideBottom = true;
+  let outsideTop = true;
+  let outsideNear = true;
+  let outsideFar = true;
+  for (const x of [minimumX, maximumX]) {
+    for (const y of [minimumY, maximumY]) {
+      for (const z of [minimumZ, maximumZ]) {
+        const clipX =
+          (matrix[0] ?? 0) * x + (matrix[4] ?? 0) * y + (matrix[8] ?? 0) * z +
+          (matrix[12] ?? 0);
+        const clipY =
+          (matrix[1] ?? 0) * x + (matrix[5] ?? 0) * y + (matrix[9] ?? 0) * z +
+          (matrix[13] ?? 0);
+        const clipZ =
+          (matrix[2] ?? 0) * x + (matrix[6] ?? 0) * y + (matrix[10] ?? 0) * z +
+          (matrix[14] ?? 0);
+        const clipW =
+          (matrix[3] ?? 0) * x + (matrix[7] ?? 0) * y + (matrix[11] ?? 0) * z +
+          (matrix[15] ?? 0);
+        outsideLeft &&= clipX < -clipW;
+        outsideRight &&= clipX > clipW;
+        outsideBottom &&= clipY < -clipW;
+        outsideTop &&= clipY > clipW;
+        outsideNear &&= clipZ < 0;
+        outsideFar &&= clipZ > clipW;
+      }
+    }
+  }
+  const centerX = (minimumX + maximumX) / 2;
+  const centerY = (minimumY + maximumY) / 2;
+  const centerZ = (minimumZ + maximumZ) / 2;
+  const projectedX =
+    (matrix[0] ?? 0) * centerX + (matrix[4] ?? 0) * centerY +
+    (matrix[8] ?? 0) * centerZ + (matrix[12] ?? 0);
+  const projectedY =
+    (matrix[1] ?? 0) * centerX + (matrix[5] ?? 0) * centerY +
+    (matrix[9] ?? 0) * centerZ + (matrix[13] ?? 0);
+  const projectedW =
+    (matrix[3] ?? 0) * centerX + (matrix[7] ?? 0) * centerY +
+    (matrix[11] ?? 0) * centerZ + (matrix[15] ?? 0);
+  const screenX = projectedW === 0 ? Infinity : projectedX / projectedW;
+  const screenY = projectedW === 0 ? Infinity : projectedY / projectedW;
+  return {
+    visible:
+      !(outsideLeft || outsideRight || outsideBottom || outsideTop || outsideNear || outsideFar),
+    distanceSquared: screenX * screenX + screenY * screenY,
+  };
+}
+
+/** Conservatively returns the target chunks referenced by frustum-visible BVH leaves. */
+export function querySpatialDemandIndex(
+  index: DecodedSpatialDemandIndex,
+  frame: SpatialDemandQueryFrame,
+): SpatialDemandQueryResult {
+  if (
+    frame.viewProjection.length !== 16 ||
+    Array.from(frame.viewProjection).some((value) => !Number.isFinite(value)) ||
+    frame.origin.some((value) => !Number.isFinite(value))
+  ) {
+    throw new TypeError("A spatial demand query needs a finite 4x4 matrix and world origin.");
+  }
+  const stack = [0];
+  const distances = new Map<number, number>();
+  let visitedNodeCount = 0;
+  let visibleLeafCount = 0;
+  let testedOccurrenceCount = 0;
+  while (stack.length > 0) {
+    const nodeIndex = stack.pop()!;
+    visitedNodeCount += 1;
+    const projection = projectedNodeBounds(index, nodeIndex, frame);
+    if (!projection.visible) continue;
+    const left = index.leftChildren[nodeIndex]!;
+    const right = index.rightChildren[nodeIndex]!;
+    if (left !== leafSentinel) {
+      stack.push(right, left);
+      continue;
+    }
+    visibleLeafCount += 1;
+    testedOccurrenceCount += index.occurrenceReferenceCounts[nodeIndex]!;
+    const first = index.firstChunkReferences[nodeIndex]!;
+    const end = first + index.chunkReferenceCounts[nodeIndex]!;
+    for (let chunkReference = first; chunkReference < end; chunkReference += 1) {
+      const targetChunkIndex = index.chunkReferences[chunkReference]!;
+      distances.set(
+        targetChunkIndex,
+        Math.min(distances.get(targetChunkIndex) ?? Infinity, projection.distanceSquared),
+      );
+    }
+  }
+  const candidates = [...distances]
+    .map(([targetChunkIndex, screenDistanceSquared]) => ({
+      targetChunkIndex,
+      screenDistanceSquared,
+    }))
+    .sort(
+      (left, right) =>
+        left.screenDistanceSquared - right.screenDistanceSquared ||
+        left.targetChunkIndex - right.targetChunkIndex,
+    );
+  return { candidates, visitedNodeCount, visibleLeafCount, testedOccurrenceCount };
 }

@@ -110,7 +110,11 @@ has a fixed admission cap. A selected occurrence can pin a requested target
 chunk and replace colder target detail with retained coarse fallbacks;
 camera navigation now re-ranks retained-coarse chunk bounds, cancels an
 obsolete active Range/Worker decode, and applies the same order to residency
-eviction. Spatial/screen-space policy and persistent cache tiers remain pending.
+eviction. Packages carrying the Proposed ADR-0008 sidecar now fetch and
+authenticate it after the coarse frame, query only frustum-intersecting BVH
+leaves, demand their deduplicated target chunks, and retain all other chunks as
+a cold eviction tail. Committed browser/real-model evidence, screen-space
+policy, and persistent cache tiers remain pending.
 
 The camera-relative precision path is now decision evidence for ADR-0005. A
 project-owned 0.25 mm gap is retained at a 10,000 km offset with
@@ -154,7 +158,8 @@ smoke-checks the live app, package resources, and HTTP Range delivery.
 
 - content-addressed persistent cache;
 - view-prioritized scheduling and cancellation of obsolete camera work
-  (coarse-bounds policy implemented; spatial/screen-space policy pending);
+  (coarse-bounds fallback and optional spatial-demand policy implemented;
+  browser/real-model evidence and screen-space policy pending);
 - dynamic memory budgets and persistent cache tiers (fixed admission budgets and
   selected-target eviction implemented);
 - spatial/draw clustering;
