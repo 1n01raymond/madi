@@ -11,7 +11,9 @@ import hashlib
 import json
 import math
 import os
+import platform
 import re
+import sys
 from collections import Counter, defaultdict
 from dataclasses import dataclass
 from pathlib import Path
@@ -52,6 +54,40 @@ ROOT_FRAME = {
     "upAxis": "Z",
 }
 DISCIPLINE_PATTERN = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
+
+
+def adapter_identity() -> dict[str, Any]:
+    """Return the cheap, compile-affecting identity used by persistent caches."""
+
+    implementation_directory = Path(__file__).resolve().parent
+    implementation_files = [
+        "extract_federation_scene_ir.py",
+        "explicit_edges.py",
+        "placement_math.py",
+        "property_columns.py",
+        "property_index.py",
+    ]
+    implementation_digests = {
+        name: sha256_bytes((implementation_directory / name).read_bytes())
+        for name in implementation_files
+    }
+    toolchain = {
+        "ifcOpenShell": ifcopenshell.version,
+        "numpy": np.__version__,
+        "python": platform.python_version(),
+        "platform": sys.platform,
+        "architecture": platform.machine(),
+    }
+    fingerprint = sha256_json(
+        {"implementation": implementation_digests, "toolchain": toolchain}
+    )
+    return {
+        "schemaVersion": "naru.ifc-adapter-identity.1",
+        "name": "IfcOpenShell",
+        "version": ifcopenshell.version,
+        "fingerprint": fingerprint,
+        "toolchain": toolchain,
+    }
 
 
 @dataclass(frozen=True)
@@ -1217,10 +1253,14 @@ def write_report(path: Path, report: dict[str, Any]) -> None:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
+        "--identity",
+        action="store_true",
+        help="Print the cache-safe adapter/toolchain identity without reading sources.",
+    )
+    parser.add_argument(
         "--document",
         action="append",
         default=[],
-        required=True,
         help="Federation input in discipline=path.ifc form; repeat for each document.",
     )
     parser.add_argument(
@@ -1229,16 +1269,30 @@ def main() -> None:
         default=[],
         help="Non-sensitive source label in discipline=value form.",
     )
-    parser.add_argument("--scene", required=True, type=Path)
-    parser.add_argument("--geometry", required=True, type=Path)
-    parser.add_argument("--properties", required=True, type=Path)
-    parser.add_argument("--report", required=True, type=Path)
+    parser.add_argument("--scene", type=Path)
+    parser.add_argument("--geometry", type=Path)
+    parser.add_argument("--properties", type=Path)
+    parser.add_argument("--report", type=Path)
     parser.add_argument(
         "--threads",
         type=int,
         default=max(1, min(8, os.cpu_count() or 1)),
     )
     arguments = parser.parse_args()
+    if arguments.identity:
+        print(json.dumps(adapter_identity(), sort_keys=True, separators=(",", ":")))
+        return
+    if (
+        not arguments.document
+        or arguments.scene is None
+        or arguments.geometry is None
+        or arguments.properties is None
+        or arguments.report is None
+    ):
+        parser.error(
+            "--document, --scene, --geometry, --properties, and --report are "
+            "required unless --identity is used"
+        )
     if arguments.threads < 1:
         parser.error("--threads must be a positive integer.")
 

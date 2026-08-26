@@ -9,6 +9,7 @@ const usage = `Usage:
 
 STEP options:
   --python <executable>          Python environment containing CadQuery/OCP
+  --cache <directory>           Reuse verified packages by source/toolchain/options
   --linear-tolerance <mm>        Tessellation tolerance (default: 0.15)
   --angular-tolerance <radians>  Angular tolerance (default: 0.15)
 
@@ -16,6 +17,7 @@ IFC options:
   --document <name=path.ifc>     Repeat once per federation discipline
   --uri-hint <name=value>        Optional non-sensitive source label
   --python <executable>          Python environment containing IfcOpenShell
+  --cache <directory>            Reuse verified federation packages
   --threads <count>              Geometry iterator threads (default: up to 8)
   --target-chunk-kib <count>     Coalesced target request budget (default: 512)
   --spatial-payload-order        Co-locate target payloads by dominant BVH leaf
@@ -33,6 +35,7 @@ interface CompileArguments {
   readonly pythonExecutable?: string;
   readonly linearTolerance?: number;
   readonly angularTolerance?: number;
+  readonly cacheDirectory?: string;
   readonly spatialIndex: boolean;
   readonly spatialLeafCapacity?: number;
 }
@@ -47,6 +50,7 @@ interface IfcCompileArguments {
   readonly pythonExecutable?: string;
   readonly threads?: number;
   readonly targetChunkByteBudget?: number;
+  readonly cacheDirectory?: string;
   readonly spatialIndex: boolean;
   readonly spatialLeafCapacity?: number;
   readonly spatialPayloadOrder: boolean;
@@ -91,6 +95,7 @@ function parseCompileArguments(arguments_: string[]): CompileArguments {
   let pythonExecutable: string | undefined;
   let linearTolerance: number | undefined;
   let angularTolerance: number | undefined;
+  let cacheDirectory: string | undefined;
   let spatialIndex = false;
   let spatialLeafCapacity: number | undefined;
   for (let index = 1; index < arguments_.length; index += 1) {
@@ -106,6 +111,9 @@ function parseCompileArguments(arguments_: string[]): CompileArguments {
       index += 1;
     } else if (option === "--angular-tolerance") {
       angularTolerance = numericOption(optionValue(arguments_, index, option), option);
+      index += 1;
+    } else if (option === "--cache") {
+      cacheDirectory = optionValue(arguments_, index, option);
       index += 1;
     } else if (option === "--spatial-index") {
       spatialIndex = true;
@@ -126,6 +134,7 @@ function parseCompileArguments(arguments_: string[]): CompileArguments {
     ...(pythonExecutable ? { pythonExecutable } : {}),
     ...(linearTolerance === undefined ? {} : { linearTolerance }),
     ...(angularTolerance === undefined ? {} : { angularTolerance }),
+    ...(cacheDirectory ? { cacheDirectory } : {}),
     spatialIndex,
     ...(spatialLeafCapacity === undefined ? {} : { spatialLeafCapacity }),
   };
@@ -138,6 +147,7 @@ function parseIfcCompileArguments(arguments_: string[]): IfcCompileArguments {
   let pythonExecutable: string | undefined;
   let threads: number | undefined;
   let targetChunkByteBudget: number | undefined;
+  let cacheDirectory: string | undefined;
   let spatialIndex = false;
   let spatialLeafCapacity: number | undefined;
   let spatialPayloadOrder = false;
@@ -177,6 +187,9 @@ function parseIfcCompileArguments(arguments_: string[]): IfcCompileArguments {
     } else if (option === "--target-chunk-kib") {
       targetChunkByteBudget = integerOption(optionValue(arguments_, index, option), option) * 1024;
       index += 1;
+    } else if (option === "--cache") {
+      cacheDirectory = optionValue(arguments_, index, option);
+      index += 1;
     } else if (option === "--retain-scene-ir") {
       retainSceneIr = true;
     } else if (option === "--spatial-index") {
@@ -215,6 +228,7 @@ function parseIfcCompileArguments(arguments_: string[]): IfcCompileArguments {
     ...(pythonExecutable ? { pythonExecutable } : {}),
     ...(threads === undefined ? {} : { threads }),
     ...(targetChunkByteBudget === undefined ? {} : { targetChunkByteBudget }),
+    ...(cacheDirectory ? { cacheDirectory } : {}),
     spatialIndex,
     ...(spatialLeafCapacity === undefined ? {} : { spatialLeafCapacity }),
     spatialPayloadOrder,
@@ -242,6 +256,9 @@ async function main(): Promise<void> {
         `${result.report.counts.triangleCount.toLocaleString("en-US")} triangles`,
     );
     console.log(`[naru] package ${result.report.output.packageDigest}`);
+    if (result.cache.status !== "disabled") {
+      console.log(`[naru] cache ${result.cache.status}: ${String(result.cache.key)}`);
+    }
     console.log(`[naru] output: ${result.outputDirectory}`);
     return;
   }
@@ -258,6 +275,9 @@ async function main(): Promise<void> {
         `${result.report.counts.triangleCount.toLocaleString("en-US")} unique triangles`,
     );
     console.log(`[naru] package ${result.report.output.packageDigest}`);
+    if (result.cache.status !== "disabled") {
+      console.log(`[naru] cache ${result.cache.status}: ${String(result.cache.key)}`);
+    }
     console.log(`[naru] output: ${result.outputDirectory}`);
     return;
   }

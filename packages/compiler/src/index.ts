@@ -1,5 +1,23 @@
 export { compileSceneToGltf } from "./gltf.js";
 export {
+  compiledCacheEntrySchema,
+  createCompiledCacheKey,
+  currentCompilerCacheIdentity,
+  publishCompiledCacheEntry,
+  readCompiledCacheEntry,
+  restoreCompiledCacheEntry,
+} from "./compiled-cache.js";
+export type {
+  CompiledCacheEntry,
+  CompiledCacheKeyInput,
+  CompiledCacheResource,
+  CompiledCacheSourceInput,
+  CompiledCacheToolInput,
+  CompilationCacheResult,
+  PublishCompiledCacheEntryOptions,
+  RestoreCompiledCacheEntryOptions,
+} from "./compiled-cache.js";
+export {
   defaultSpatialLeafCapacity,
   encodeSpatialDemandIndex,
   spatialDemandIndexSchema,
