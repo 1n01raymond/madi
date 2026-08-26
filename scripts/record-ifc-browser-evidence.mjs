@@ -9,7 +9,8 @@
 //   node scripts/record-ifc-browser-evidence.mjs \
 //     [--scene-dir output/ifc/sixty5] \
 //     [--report artifacts/ifc/sixty5/build-report.json] \
-//     [--output artifacts/ifc/sixty5-browser] [--headless]
+//     [--output artifacts/ifc/sixty5-browser] [--headless] \
+//     [--skip-coarse-screenshot] [--residency-mib 64]
 import { createHash } from "node:crypto";
 import { createReadStream } from "node:fs";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
@@ -45,6 +46,15 @@ if (
   throw new TypeError("Browser evidence output must remain inside the repository.");
 }
 const headless = process.argv.includes("--headless");
+const skipCoarseScreenshot = process.argv.includes("--skip-coarse-screenshot");
+const residencyMiBArgument = argValue("--residency-mib", null);
+const residencyMiB = residencyMiBArgument === null ? null : Number(residencyMiBArgument);
+if (
+  residencyMiB !== null &&
+  (!Number.isFinite(residencyMiB) || residencyMiB < 4 || residencyMiB > 1024)
+) {
+  throw new TypeError("--residency-mib must be between 4 and 1024.");
+}
 
 async function sha256File(path) {
   const hash = createHash("sha256");
@@ -87,6 +97,7 @@ try {
   await vite.listen();
   const viewerUrl = new URL("http://127.0.0.1:4174/");
   viewerUrl.searchParams.set("scene", new URL("scene.gltf", viewerUrl).href);
+  if (residencyMiB !== null) viewerUrl.searchParams.set("residencyMiB", String(residencyMiB));
 
   const context = await browser.newContext({ viewport: { width: 1320, height: 1000 } });
   await context.addInitScript(() => {
@@ -145,6 +156,13 @@ try {
       status: response.status(),
       range: response.request().headers().range ?? null,
     });
+    if (binaryRequests.length <= 10 || binaryRequests.length % 25 === 0) {
+      const current = binaryRequests.at(-1);
+      console.log(
+        `[ifc-browser] response ${binaryRequests.length}: ${current.resource} ` +
+          `${current.status} ${current.range ?? "full"}`,
+      );
+    }
   });
 
   const startedAt = Date.now();
@@ -173,15 +191,40 @@ try {
       document.querySelector("#status")?.getAttribute("data-state") === "error",
     1_200_000,
   );
-  const coarseScreenshot = await screenshot("coarse-frame.png");
-  await waitMilestone(
-    "readyMs",
-    () => {
-      const state = document.querySelector("#status")?.getAttribute("data-state");
-      return state === "ready" || state === "error";
-    },
-    1_800_000,
-  );
+  // On real-large packages, a Playwright screenshot can wait for font
+  // readiness while target decoding monopolizes the page. Keep milestone
+  // observation independent from that optional visual capture.
+  const coarseScreenshot = skipCoarseScreenshot
+    ? null
+    : await screenshot("coarse-frame.png");
+  const progressTimer = setInterval(() => {
+    void page
+      .evaluate(() => ({
+        state: document.querySelector("#status")?.getAttribute("data-state"),
+        targetReady: document.documentElement.dataset.targetReady,
+        chunksReady: document.documentElement.dataset.targetChunksReady,
+        chunksTotal: document.documentElement.dataset.targetChunksTotal,
+        requests: document.documentElement.dataset.targetSchedulerRequests,
+        cancellations: document.documentElement.dataset.targetSchedulerCancellations,
+        chunk: document.documentElement.dataset.targetSchedulerChunk,
+        residentDecodedBytes: document.documentElement.dataset.residentDecodedBytes,
+        residentGpuBytes: document.documentElement.dataset.residentGpuBytes,
+      }))
+      .then((progress) => console.log(`[ifc-browser] progress ${JSON.stringify(progress)}`))
+      .catch(() => {});
+  }, 30_000);
+  try {
+    await waitMilestone(
+      "readyMs",
+      () => {
+        const state = document.querySelector("#status")?.getAttribute("data-state");
+        return state === "ready" || state === "error";
+      },
+      1_800_000,
+    );
+  } finally {
+    clearInterval(progressTimer);
+  }
   const finalState = await page.evaluate(
     () => document.querySelector("#status")?.getAttribute("data-state"),
   );
@@ -294,6 +337,10 @@ try {
       viewport: { width: 1320, height: 1000 },
     },
     host: { platform: process.platform, architecture: process.arch },
+    capture: {
+      coarseScreenshotSkipped: skipCoarseScreenshot,
+      residencyMiB,
+    },
     source: {
       buildReport: relative(repositoryRoot, reportPath).replaceAll(sep, "/"),
       packageDigest: buildReport.output.packageDigest,

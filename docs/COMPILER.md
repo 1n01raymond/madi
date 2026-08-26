@@ -17,14 +17,17 @@ a declared runtime profile and can be rebuilt from authoritative sources.
 pnpm naru compile assembly.step \
   --output ./dist/assembly \
   --linear-tolerance 0.1 \
-  --angular-tolerance 0.15
+  --angular-tolerance 0.15 \
+  --spatial-index \
+  --spatial-leaf-capacity 64
 ```
 
 This local AP242/AP214 command is executable. It requires the pinned
 CadQuery/OCP environment documented in `packages/compiler/README.md`, records
 both adapter and compiler reports, and removes its temporary expanded Scene IR.
-Profile, coarse-error, chunk-budget, and service-oriented options remain future
-compiler work.
+`--spatial-index` is optional and is also available to `compile-ifc`; the leaf
+capacity flag is valid only with it. Profile, coarse-error, and service-oriented
+options remain future compiler work.
 
 Other commands:
 
@@ -214,6 +217,17 @@ Candidate policies:
 - represent chunk dependencies explicitly.
 
 Partition metrics are emitted for tuning.
+
+The first implemented spatial-demand contract follows ADR-0008. When the
+compiler API is given `coarseBounds: true` and `spatialIndex: true`, it writes a
+deterministic `naru.spatial-demand-index.1` `spatial.bin`: a flat float64 BVH
+over renderable occurrence world bounds whose leaves reference existing target
+chunks. Target and coarse geometry bytes are unchanged, so repeated prototype
+payloads remain shared. The browser validates the binary layout, allocation
+limits, tree ownership, and glTF/chunk references, then queries visible leaves
+without fetching cold target chunks. Committed evidence is split: the focused
+headed record passes under `artifacts/spatial-demand/`, while real-model
+evidence remains the next slice. ADR-0008 is therefore still Proposed.
 
 ## 11. LOD and simplification
 
@@ -408,7 +422,24 @@ and `targetChunks` maps target prototype meshes to deterministic, non-overlappin
 ranges into 512 KiB requests (without splitting an oversized prototype), which
 turns the qualified Digital Hub package from 3,383 prototype ranges into 45
 network/decode units. This proves partial range delivery and static request
-scheduling, but not shape-preserving LOD or spatial partitioning.
+scheduling. The optional `spatialPayloadOrder` compiler flag (CLI:
+`--spatial-payload-order`) adds `targetPayloadOrder:
+"spatial-leaf-anchor-v1"`, orders each prototype by the deterministic BVH leaf
+where most of its occurrences land, and then applies the same byte budget.
+The project-owned four-prototype oracle changes one localized co-demand set
+from two target chunks to one while preserving one payload per prototype,
+coarse bytes, and deterministic output. The default prototype-ID order remains
+byte-identical. Digital Hub and sixty5 now reproduce lower leaf requested and
+off-view bytes; localized headed traces and shape-preserving LOD remain
+pending.
+
+Pretty-printed `scene.gltf` remains the deterministic default. IFC compilation
+may explicitly pass `--compact-json` (API: `compactJson: true`) when a
+real-large document would exceed V8's single-string limit with insignificant
+whitespace. The build report records `jsonFormatting: "compact"`; parsed glTF
+values, buffer bytes, and accessor semantics are unchanged. The current
+explicit-edge sixty5 record uses this path, while historical package digests
+remain unchanged when the option is absent.
 
 The public `naru compile` entry now accepts a local AP242 or AP214 Part 21 file,
 invokes the isolated OCCT adapter, verifies schema and source digest parity,
@@ -493,8 +524,10 @@ reproduction command live under `artifacts/ifc/digital-hub/`.
 This now also exercises the first Phase 2 scheduler boundary: its 3,383
 prototype-granular ranges compile into 45 request chunks, the browser updates
 only changed GPU batches, and fixed decoded/GPU admission caps retain coarse
-fallbacks when pressure is reached. It is not yet a spatial scheduler: LOD,
-camera reprioritization, eviction, and cache tiers remain deferred. The focused
+fallbacks when pressure is reached. The optional spatial-demand sidecar,
+authenticated loader, and frustum query scheduler now exist, but this committed
+Digital Hub package predates them. Focused headed evidence passes, while
+indexed real-model evidence, LOD, and cache tiers remain deferred. The focused
 E2.1 record proves IFC boundary extraction; Digital Hub itself remains a
 historical surface-only split.3 package until its next licensed re-recording.
 

@@ -3,6 +3,7 @@ import type { CompiledHierarchy } from "@naru3d/runtime-webgpu";
 
 import { resourceFileName } from "./property-sidecar.js";
 import type { PropertySidecarSource } from "./property-sidecar.js";
+import type { SpatialDemandSource } from "./spatial-demand-source.js";
 
 export interface UrlSceneSource {
   readonly kind: "url";
@@ -43,6 +44,7 @@ export interface LoadedSceneHierarchy {
   readonly targetBinary: GeometryBinarySource;
   readonly coarseBinary?: GeometryBinarySource;
   readonly properties?: PropertySidecarSource;
+  readonly spatialIndex?: SpatialDemandSource;
   readonly label: string;
 }
 
@@ -150,6 +152,15 @@ export async function loadSceneHierarchy(
             },
           }
         : {}),
+      ...(hierarchy.spatialIndex
+        ? {
+            spatialIndex: {
+              kind: "url" as const,
+              ref: hierarchy.spatialIndex,
+              url: new URL(hierarchy.spatialIndex.uri, source.gltfUrl),
+            },
+          }
+        : {}),
       label: source.gltfUrl.href,
     };
   }
@@ -173,11 +184,20 @@ export async function loadSceneHierarchy(
     throw new TypeError(`Select ${hierarchy.coarseBinaryUri} with the glTF file.`);
   }
   if (coarseFile) validateLocalBinary(hierarchy, coarseFile, "coarse");
+  const spatialRef = hierarchy.spatialIndex;
+  const spatialFile = spatialRef ? fileFor(spatialRef.uri) : undefined;
+  if (spatialRef && !spatialFile) {
+    throw new TypeError(`Select ${spatialRef.uri} with the glTF file.`);
+  }
   const propertiesRef = hierarchy.properties;
   const sidecarJsonFile = propertiesRef
     ? source.sidecarFiles.find(({ name }) => name === resourceFileName(propertiesRef.uri))
     : undefined;
-  const geometryFiles = new Set([targetFile, ...(coarseFile ? [coarseFile] : [])]);
+  const geometryFiles = new Set([
+    targetFile,
+    ...(coarseFile ? [coarseFile] : []),
+    ...(spatialFile ? [spatialFile] : []),
+  ]);
   const extraBinaries = source.binaryFiles.filter((file) => !geometryFiles.has(file));
   const allowedExtraBinaries = sidecarJsonFile ? 1 : 0;
   if (extraBinaries.length > allowedExtraBinaries) {
@@ -199,6 +219,15 @@ export async function loadSceneHierarchy(
             ref: propertiesRef,
             jsonFile: sidecarJsonFile,
             resourceFiles: extraBinaries,
+          },
+        }
+      : {}),
+    ...(spatialRef && spatialFile
+      ? {
+          spatialIndex: {
+            kind: "file" as const,
+            ref: spatialRef,
+            file: spatialFile,
           },
         }
       : {}),

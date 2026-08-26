@@ -3,8 +3,10 @@ import { readFile } from "node:fs/promises";
 import { describe, expect, it } from "vitest";
 
 import {
+  compiledSceneTransferables,
   decodeCompiledGltf,
   inspectCompiledHierarchy,
+  prepareCompiledGltfDecoder,
   validateGpuScene,
 } from "../src/index.js";
 import type { CompiledGltfError } from "../src/index.js";
@@ -204,6 +206,51 @@ describe("compiled glTF runtime boundary", () => {
     ).toEqual(target.objectEvidence.map(({ objectId }) => objectId));
   });
 
+  it("prepares active transforms once and decodes repeated target ranges chunk-locally", async () => {
+    const [json, targetBytes, coarseBytes] = await Promise.all([
+      readFile(new URL("scene.gltf", progressiveUrl), "utf8").then(JSON.parse) as Promise<{
+        nodes: unknown[];
+      }>,
+      readFile(new URL("scene.bin", progressiveUrl)),
+      readFile(new URL("coarse.bin", progressiveUrl)),
+    ]);
+    let nodeReads = 0;
+    json.nodes = new Proxy(json.nodes, {
+      get(target, property, receiver) {
+        if (typeof property === "string" && /^\d+$/u.test(property)) nodeReads += 1;
+        return Reflect.get(target, property, receiver) as unknown;
+      },
+    });
+
+    const prepared = prepareCompiledGltfDecoder(json);
+    const readsAfterPrepare = nodeReads;
+    const chunk = prepared.hierarchy.targetChunks.find(({ occurrenceCount }) =>
+      occurrenceCount === 1
+    );
+    if (!chunk) throw new TypeError("Progressive fixture has no single-occurrence chunk.");
+    const range = (): ArrayBuffer => Uint8Array.from(
+      targetBytes.subarray(chunk.byteOffset, chunk.byteOffset + chunk.byteLength),
+    ).buffer;
+
+    const coarse = prepared.decode(Uint8Array.from(coarseBytes).buffer, {
+      representation: "coarse",
+    });
+    expect(coarse.summary.partOccurrences).toBe(10);
+    structuredClone(coarse, { transfer: compiledSceneTransferables(coarse) });
+
+    const first = prepared.decode(range(), { targetChunkId: chunk.id });
+    expect(prepared.activeNodeCount).toBe(prepared.hierarchy.nodeCount);
+    expect(prepared.renderableNodeCount).toBe(10);
+    expect(first.summary.partOccurrences).toBe(1);
+    expect(nodeReads).toBe(readsAfterPrepare);
+
+    structuredClone(first, { transfer: compiledSceneTransferables(first) });
+    const second = prepared.decode(range(), { targetChunkId: chunk.id });
+    expect(second.objectEvidence).toEqual(first.objectEvidence);
+    expect(second.gpuScene.batches[0]?.instances[0]?.transform.byteLength).toBe(128);
+    expect(nodeReads).toBe(readsAfterPrepare);
+  });
+
   it("surfaces semantic references on hierarchy entries and pick evidence", async () => {
     const { json, binary } = await loadPackage();
     const { hierarchy } = inspectCompiledHierarchy(json);
@@ -217,6 +264,38 @@ describe("compiled glTF runtime boundary", () => {
     ).toBe("semantic:prototype:part:center-rail");
     // The committed Phase 1 STEP package carries no property sidecar.
     expect(hierarchy.properties).toBeUndefined();
+  });
+
+  it("validates and exposes an optional spatial demand sidecar pointer", async () => {
+    const json = JSON.parse(await readFile(new URL("scene.gltf", progressiveUrl), "utf8")) as unknown;
+    const copy = structuredClone(json) as {
+      extras: { madi: { progressive?: Record<string, unknown> } };
+    };
+    copy.extras.madi.progressive = {
+      ...copy.extras.madi.progressive,
+      spatialIndex: {
+        schemaVersion: "naru.spatial-demand-index.1",
+        uri: "spatial.bin",
+        byteLength: 512,
+        sha256: "a".repeat(64),
+      },
+    };
+
+    expect(inspectCompiledHierarchy(copy).hierarchy.spatialIndex).toEqual({
+      schemaVersion: "naru.spatial-demand-index.1",
+      uri: "spatial.bin",
+      byteLength: 512,
+      sha256: "a".repeat(64),
+    });
+
+    const invalid = structuredClone(copy);
+    const progressive = invalid.extras.madi.progressive as {
+      spatialIndex: { schemaVersion: string };
+    };
+    progressive.spatialIndex.schemaVersion = "naru.spatial-demand-index.2";
+    expect(() => inspectCompiledHierarchy(invalid)).toThrowError(
+      expect.objectContaining<Partial<CompiledGltfError>>({ code: "INVALID_GLTF" }),
+    );
   });
 
   it("surfaces a property sidecar pointer from extras.madi.properties", async () => {

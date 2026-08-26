@@ -24,14 +24,16 @@ import {
 } from "./scene-source.js";
 import type { GeometryBinarySource, SceneSource } from "./scene-source.js";
 import { formatPropertyValue, PropertySidecarStore } from "./property-sidecar.js";
+import { loadSpatialDemandIndex } from "./spatial-demand-source.js";
 import { OrthographicOrbitCamera } from "./view.js";
-import { OccurrenceVisibility } from "./visibility.js";
+import { OccurrenceVisibility, syncHierarchyVisibility } from "./visibility.js";
 import {
   defaultProgressiveResidencyBudget,
   ProgressiveResidency,
 } from "./progressive-residency.js";
 import {
   CameraTargetScheduler,
+  SpatialTargetChunkViewIndex,
   TargetChunkViewIndex,
 } from "./view-priority-scheduler.js";
 import type {
@@ -219,6 +221,16 @@ function resetSceneUi(): void {
   delete document.documentElement.dataset.targetSchedulerPriority;
   delete document.documentElement.dataset.targetSchedulerCancelledChunk;
   delete document.documentElement.dataset.targetSchedulerOrder;
+  delete document.documentElement.dataset.targetSchedulerDemand;
+  delete document.documentElement.dataset.targetSchedulerMode;
+  delete document.documentElement.dataset.spatialNodesVisited;
+  delete document.documentElement.dataset.spatialNodesTotal;
+  delete document.documentElement.dataset.spatialLeavesVisible;
+  delete document.documentElement.dataset.spatialLeavesTotal;
+  delete document.documentElement.dataset.spatialOccurrencesTested;
+  delete document.documentElement.dataset.spatialOccurrencesTotal;
+  delete document.documentElement.dataset.spatialCandidateChunks;
+  delete document.documentElement.dataset.spatialQueryMilliseconds;
   hierarchySearchInput.value = "";
   hierarchySearchResult.textContent = "Waiting for hierarchy";
   hierarchyEmpty.hidden = true;
@@ -599,15 +611,14 @@ async function loadScene(source: SceneSource): Promise<boolean> {
       document.documentElement.dataset.visibleOccurrences = String(state.visibleOccurrences);
     };
 
-    const applyVisibility = (): void => {
+    const applyVisibility = ({ syncHierarchy = true } = {}): void => {
       renderer.updateVisibleInstances(visibility.indicesByBatch, visibility.counts);
-      for (const entry of scene.objectEvidence) {
-        const item = hierarchyList.querySelector<HTMLElement>(
-          `[data-node-index="${entry.nodeIndex}"]`,
+      if (syncHierarchy) {
+        syncHierarchyVisibility(
+          scene.objectEvidence,
+          hierarchyItems,
+          (objectId) => visibility.isVisible(objectId),
         );
-        if (!item) continue;
-        if (visibility.isVisible(entry.objectId)) delete item.dataset.hidden;
-        else item.dataset.hidden = "true";
       }
       updateSelectionText();
       updateVisibilityControls();
@@ -619,6 +630,8 @@ async function loadScene(source: SceneSource): Promise<boolean> {
     let schedulerFailure: unknown;
     let schedulerRequests = 0;
     let schedulerCancellations = 0;
+    let schedulerBlocked = false;
+    let spatialViewIndex: SpatialTargetChunkViewIndex | undefined;
     const residentChunkCount = (): number => {
       if (!progressiveResidency) return 0;
       return hierarchy.targetChunks.filter((chunk) =>
@@ -658,7 +671,6 @@ async function loadScene(source: SceneSource): Promise<boolean> {
         promotion.targetMeshIndexes,
       );
       visibility.restore(visibilitySnapshot);
-      renderer.updateVisibleInstances(visibility.indicesByBatch, visibility.counts);
       decodeMilliseconds += target.decodeMilliseconds;
       decodedTargetBytes += target.scene.summary.binaryBytes;
       residentDecodedBytes = promotion.decodedBytes;
@@ -685,7 +697,9 @@ async function loadScene(source: SceneSource): Promise<boolean> {
         `${formatBytes(decodedTargetBytes)} range-decoded · ` +
           `${formatBytes(promotion.decodedBytes)} CPU / ${formatBytes(promotion.gpuBytes)} GPU`,
       );
-      applyVisibility();
+      // Residency changes batch membership, not the user's visibility intent. The
+      // hierarchy markers therefore remain valid and must not be rescanned here.
+      applyVisibility({ syncHierarchy: false });
     };
     const finalizeProgressiveStatus = (): void => {
       if (!progressiveResidency) return;
@@ -699,13 +713,26 @@ async function loadScene(source: SceneSource): Promise<boolean> {
       document.documentElement.dataset.residentGpuBytes = String(renderer.residentGpuBytes);
       document.documentElement.dataset.geometryRepresentation = complete ? "target" : "mixed";
       document.documentElement.dataset.targetReady = complete ? "true" : "limited";
-      if (complete) delete document.documentElement.dataset.residencyBudgetReached;
-      else document.documentElement.dataset.residencyBudgetReached = "true";
+      const spatialStats = spatialViewIndex?.queryStats();
+      const spatialDemandSatisfied = spatialStats !== undefined && !schedulerBlocked;
+      if (complete || spatialDemandSatisfied) {
+        delete document.documentElement.dataset.residencyBudgetReached;
+      } else {
+        document.documentElement.dataset.residencyBudgetReached = "true";
+      }
       status.textContent = complete
         ? `Compiled glTF ready · ${scene.summary.prototypeBatches} surface batches · ` +
           `${scene.summary.partOccurrences} renderable occurrences`
+        : spatialDemandSatisfied
+          ? `Spatial target demand ready · ${spatialStats?.candidateChunkCount ?? 0} ` +
+            `visible candidate chunks · ${scene.summary.partOccurrences} renderable occurrences`
         : `Residency budget reached · ${scene.summary.prototypeBatches} surface batches retained · ` +
           `${scene.summary.partOccurrences} renderable occurrences`;
+      document.documentElement.dataset.targetReady = complete
+        ? "true"
+        : spatialDemandSatisfied
+          ? "spatial-idle"
+          : "limited";
       status.dataset.state = "ready";
       status.dataset.stage = "rendered";
       setText("#triangle-count", scene.summary.triangles.toLocaleString("en-US"));
@@ -721,6 +748,7 @@ async function loadScene(source: SceneSource): Promise<boolean> {
       document.documentElement.dataset.targetSchedulerChunk = event.chunkId;
       document.documentElement.dataset.targetSchedulerPriority = String(event.viewPriority);
       if (event.type === "request") {
+        schedulerBlocked = false;
         schedulerRequests += 1;
         document.documentElement.dataset.targetSchedulerRequests = String(schedulerRequests);
       } else if (event.type === "cancel") {
@@ -730,17 +758,36 @@ async function loadScene(source: SceneSource): Promise<boolean> {
         );
         document.documentElement.dataset.targetSchedulerCancelledChunk = event.chunkId;
       } else if (event.type === "blocked") {
+        schedulerBlocked = true;
         finalizeProgressiveStatus();
       } else if (residentChunkCount() === hierarchy.targetChunks.length) {
         finalizeProgressiveStatus();
       }
     };
     if (progressiveResidency) {
-      const viewIndex = new TargetChunkViewIndex(
-        hierarchy.targetChunks,
-        coarseScene,
-        initial.coarseInstanceTargetMeshIndexes,
-      );
+      const spatialIndex = loaded.spatialIndex
+        ? await loadSpatialDemandIndex(loaded.spatialIndex, hierarchy, cancellation.signal)
+        : undefined;
+      const viewIndex = spatialIndex
+        ? (spatialViewIndex = new SpatialTargetChunkViewIndex(
+            hierarchy.targetChunks,
+            spatialIndex,
+          ))
+        : new TargetChunkViewIndex(
+            hierarchy.targetChunks,
+            coarseScene,
+            initial.coarseInstanceTargetMeshIndexes,
+          );
+      document.documentElement.dataset.targetSchedulerMode = spatialIndex
+        ? "spatial-bvh-v1"
+        : "coarse-chunk-bounds-v1";
+      if (spatialIndex) {
+        document.documentElement.dataset.spatialNodesTotal = String(spatialIndex.stats.nodeCount);
+        document.documentElement.dataset.spatialLeavesTotal = String(spatialIndex.stats.leafCount);
+        document.documentElement.dataset.spatialOccurrencesTotal = String(
+          spatialIndex.stats.occurrenceCount,
+        );
+      }
       const scheduler = new CameraTargetScheduler(viewIndex, {
         isResident: (chunk) => progressiveResidency.hasTargetMeshes(chunk.meshIndexes),
         load: (chunk, signal) =>
@@ -762,6 +809,28 @@ async function loadScene(source: SceneSource): Promise<boolean> {
           document.documentElement.dataset.targetSchedulerOrder = ranked
             .map(({ chunk }) => chunk.id)
             .join(",");
+          document.documentElement.dataset.targetSchedulerDemand = ranked
+            .filter(({ demanded }) => demanded)
+            .map(({ chunk }) => chunk.id)
+            .join(",");
+          if (spatialViewIndex) {
+            const stats = spatialViewIndex.queryStats();
+            document.documentElement.dataset.spatialNodesVisited = String(
+              stats.visitedNodeCount,
+            );
+            document.documentElement.dataset.spatialLeavesVisible = String(
+              stats.visibleLeafCount,
+            );
+            document.documentElement.dataset.spatialOccurrencesTested = String(
+              stats.testedOccurrenceCount,
+            );
+            document.documentElement.dataset.spatialCandidateChunks = String(
+              stats.candidateChunkCount,
+            );
+            document.documentElement.dataset.spatialQueryMilliseconds = String(
+              stats.queryMilliseconds,
+            );
+          }
           progressiveResidency.reprioritize(
             ranked.map(({ chunk, viewPriority }) => ({
               targetMeshIndexes: chunk.meshIndexes,

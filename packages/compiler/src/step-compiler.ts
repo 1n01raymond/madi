@@ -23,6 +23,8 @@ export interface StepCompileOptions {
   readonly adapterScriptPath?: string;
   readonly linearTolerance?: number;
   readonly angularTolerance?: number;
+  readonly spatialIndex?: boolean;
+  readonly spatialLeafCapacity?: number;
   readonly environment?: NodeJS.ProcessEnv;
 }
 
@@ -169,7 +171,13 @@ export async function compileStepFile(
     if (scene.revision.sourceDigest !== `sha256:${inspection.sha256}`) {
       throw new TypeError("OCCT Scene IR source digest does not match the STEP input.");
     }
-    const compiled = compileSceneToGltf(scene, { coarseBounds: true });
+    const compiled = compileSceneToGltf(scene, {
+      coarseBounds: true,
+      ...(options.spatialIndex === true ? { spatialIndex: true } : {}),
+      ...(options.spatialLeafCapacity === undefined
+        ? {}
+        : { spatialLeafCapacity: options.spatialLeafCapacity }),
+    });
     const validation = validateCompiledGltf(
       compiled.document,
       compiled.coarseBinary

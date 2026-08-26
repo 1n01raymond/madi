@@ -16,6 +16,12 @@ Direct WebGPU rendering and the Phase 1 compiled glTF runtime boundary.
   external-buffer accessor ranges,
   decodes surface and explicit-edge streams, composes node transforms, preserves
   picking identity, and groups nodes by shared mesh.
+- `prepareCompiledGltfDecoder(value)` validates and traverses the active document
+  once, retaining float64 world transforms plus direct target-chunk occurrence
+  tables. Its `decode(binary, { targetChunkId })` path touches only the selected
+  chunk's occurrences and transforms cached prototype AABB corners rather than
+  every vertex for every occurrence; `decodeCompiledGltf` remains the one-shot
+  compatibility wrapper.
 - `compiledSceneTransferables(scene)` lists owned typed-array buffers for a
   zero-copy Worker-to-main-thread transfer.
 - `NaruWebGpuRenderer` uploads those batches and renders surfaces, edges, and an
@@ -57,7 +63,10 @@ package with separate target and coarse external buffers. The progressive slice
 uses `extras.madi.coarseMesh` and preserves node-derived object IDs while the
 renderer replaces prototype AABBs with target meshes. When target chunk metadata
 is present, `targetChunkId` decodes only one declared byte range and its mesh
-occurrences. The browser requests those ranges sequentially, displays each
+occurrences. The session Worker prepares document transforms and chunk
+membership once, then reuses that state across coarse and target decodes. Each
+result receives its own transform arrays so zero-copy transfer cannot detach
+the prepared state. The browser requests those ranges sequentially, displays each
 promotion before requesting the next, and falls back safely when a host returns
 the complete buffer with HTTP 200. The Studio builds retained-coarse chunk
 bounds once, ranks them in the current camera, keeps one Range/decode active at
@@ -69,6 +78,20 @@ accepts one indexed `TRIANGLES` primitive plus at most one indexed `LINES`
 primitive. It is not a general-purpose glTF loader. Unsupported profiles and
 layouts fail with a typed `CompiledGltfError` instead of silently dropping
 engineering data.
+
+The package boundary also recognizes the optional
+`extras.madi.progressive.spatialIndex` pointer and strictly decodes
+`naru.spatial-demand-index.1`. The decoder preserves float64 bounds and rejects
+invalid sizes, allocation limits, unreachable/cyclic nodes, duplicate
+occurrence ownership, and out-of-range glTF or target-chunk references before
+exposing query arrays. The Studio authenticates the SHA-256, performs a
+camera-relative frustum traversal, requests only the deduplicated chunks of
+visible leaves, and keeps non-demanded chunks cold for eviction. Packages
+without the optional index retain aggregate retained-coarse chunk scheduling.
+The indexed browser path has unit/oracle coverage plus the focused headed
+Chrome/Firefox record under `artifacts/spatial-demand/`. Digital Hub and
+sixty5 pass offline co-demand censuses; localized real-model headed evidence
+is still pending.
 
 Run `pnpm test` for package and committed-fixture regression coverage. The
 headed cross-engine path is recorded by `pnpm browser:matrix`; the focused

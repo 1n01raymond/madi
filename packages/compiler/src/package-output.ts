@@ -26,6 +26,14 @@ export async function writeCompiledPackage(
     }
     writes.push(writeFile(resolve(outputDirectory, coarseBinaryUri), compiled.coarseBinary));
   }
+  if (compiled.spatialBinary) {
+    if (!compiled.spatialBinaryUri) {
+      throw new TypeError("Spatial index package is missing its resource URI.");
+    }
+    writes.push(
+      writeFile(resolve(outputDirectory, compiled.spatialBinaryUri), compiled.spatialBinary),
+    );
+  }
   if (compiled.propertiesJson !== undefined && compiled.propertiesBinary !== undefined) {
     const { propertiesUri, propertiesBinaryUri } = compiled.report.options;
     if (!propertiesUri || !propertiesBinaryUri) {

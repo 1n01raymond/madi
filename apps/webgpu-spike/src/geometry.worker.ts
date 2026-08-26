@@ -1,12 +1,11 @@
 import {
   compiledSceneTransferables,
-  decodeCompiledGltf,
-  parseCompiledGltf,
+  prepareCompiledGltfDecoder,
 } from "@naru3d/runtime-webgpu";
 import type {
-  CompiledGltfDocument,
   DecodedCompiledScene,
   GeometryRepresentation,
+  PreparedCompiledGltfDecoder,
 } from "@naru3d/runtime-webgpu";
 
 import { aggregateCoarseScene } from "./coarse-aggregation.js";
@@ -56,7 +55,7 @@ interface WorkerHost {
 }
 
 const worker = globalThis as unknown as WorkerHost;
-let compiledDocument: CompiledGltfDocument | undefined;
+let compiledDecoder: PreparedCompiledGltfDecoder | undefined;
 const activeDecodes = new Map<number, AbortController>();
 
 worker.addEventListener("message", (event) => {
@@ -75,7 +74,7 @@ async function handleRequest(
       const text = request.source.kind === "bytes"
         ? new TextDecoder().decode(request.source.bytes)
         : await request.source.file.text();
-      compiledDocument = parseCompiledGltf(JSON.parse(text) as unknown);
+      compiledDecoder = prepareCompiledGltfDecoder(JSON.parse(text) as unknown);
       worker.postMessage({ type: "initialized", requestId: request.requestId });
       return;
     }
@@ -153,14 +152,14 @@ async function loadBinary(
 async function decode(
   request: Extract<GeometryWorkerRequest, { readonly type: "decode" }>,
 ): Promise<void> {
-  if (!compiledDocument) throw new Error("The geometry Worker is not initialized.");
+  if (!compiledDecoder) throw new Error("The geometry Worker is not initialized.");
   const cancellation = new AbortController();
   activeDecodes.set(request.requestId, cancellation);
   try {
     const startedAt = performance.now();
     const binary = await loadBinary(request.binary, cancellation.signal);
     throwIfAborted(cancellation.signal);
-    const decoded = decodeCompiledGltf(compiledDocument, binary, {
+    const decoded = compiledDecoder.decode(binary, {
       representation: request.representation,
       ...(request.targetChunkId ? { targetChunkId: request.targetChunkId } : {}),
     });

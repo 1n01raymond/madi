@@ -9,11 +9,14 @@ import type {
   GpuOccurrenceInstance,
 } from "@naru3d/runtime-webgpu";
 import { decodeCompiledGltf, inspectCompiledHierarchy } from "@naru3d/runtime-webgpu";
+import { decodeSpatialDemandIndex } from "@naru3d/runtime-webgpu";
+import { encodeSpatialDemandIndex } from "../../../packages/compiler/src/spatial-demand.js";
 
 import { aggregateCoarseScene } from "../src/coarse-aggregation.js";
 import { OrthographicOrbitCamera } from "../src/view.js";
 import {
   CameraTargetScheduler,
+  SpatialTargetChunkViewIndex,
   TargetChunkViewIndex,
 } from "../src/view-priority-scheduler.js";
 
@@ -168,5 +171,112 @@ describe("view-prioritized target scheduling", () => {
     expect(requested).toEqual(["near", "far"]);
     expect(cancelled).toEqual(["near"]);
     expect([...admitted]).toEqual(["far"]);
+  });
+
+  it("requests only spatially demanded chunks and keeps cold chunks for eviction order", async () => {
+    const chunks = [chunk("near", 0, 0), chunk("far", 1, 1)];
+    const spatial = decodeSpatialDemandIndex(
+      encodeSpatialDemandIndex(
+        [
+          {
+            id: "near",
+            nodeIndex: 3,
+            targetChunkIndex: 0,
+            minimum: [-0.5, -0.5, 0],
+            maximum: [0.5, 0.5, 1],
+          },
+          {
+            id: "far",
+            nodeIndex: 7,
+            targetChunkIndex: 1,
+            minimum: [9.5, -0.5, 0],
+            maximum: [10.5, 0.5, 1],
+          },
+        ],
+        { leafCapacity: 1 },
+      ).bytes,
+      { gltfNodeCount: 8, targetChunkCount: 2 },
+    );
+    const index = new SpatialTargetChunkViewIndex(chunks, spatial);
+    const initial = index.rank({ viewProjection, origin: [0, 0, 0] });
+
+    expect(initial.map(({ chunk, demanded }) => [chunk.id, demanded])).toEqual([
+      ["near", true],
+      ["far", false],
+    ]);
+    expect(index.queryStats()).toEqual({
+      visitedNodeCount: 3,
+      visibleLeafCount: 1,
+      testedOccurrenceCount: 1,
+      candidateChunkCount: 1,
+      queryMilliseconds: expect.any(Number),
+    });
+
+    const requested: string[] = [];
+    const resident = new Set<string>();
+    const scheduler = new CameraTargetScheduler(index, {
+      isResident: (entry) => resident.has(entry.id),
+      load: async (entry) => {
+        requested.push(entry.id);
+        return entry.id;
+      },
+      admit: (entry) => {
+        resident.add(entry.id);
+        return true;
+      },
+      onError: (error) => {
+        throw error;
+      },
+    });
+    scheduler.update({ viewProjection, origin: [0, 0, 0] });
+    await scheduler.whenIdle();
+    scheduler.stop();
+
+    expect(requested).toEqual(["near"]);
+  });
+
+  it("does not retry an unchanged demand set after residency blocks admission", async () => {
+    const chunks = [chunk("near", 0, 0), chunk("far", 1, 1)];
+    const index: { rank: () => readonly {
+      chunk: CompiledTargetChunk;
+      viewPriority: number;
+      visibleBounds: boolean;
+      screenDistanceSquared: number;
+      demanded: boolean;
+    }[] } = {
+      rank: () => chunks.map((entry, viewPriority) => ({
+        chunk: entry,
+        viewPriority,
+        visibleBounds: true,
+        screenDistanceSquared: viewPriority,
+        demanded: true,
+      })),
+    };
+    const requested: string[] = [];
+    const resident = new Set<string>();
+    const scheduler = new CameraTargetScheduler(index, {
+      isResident: (entry) => resident.has(entry.id),
+      load: async (entry) => {
+        requested.push(entry.id);
+        return entry.id;
+      },
+      admit: (entry) => {
+        if (entry.id === "far") return false;
+        resident.add(entry.id);
+        return true;
+      },
+      onError: (error) => {
+        throw error;
+      },
+    });
+
+    scheduler.update({ viewProjection, origin: [0, 0, 0] });
+    await scheduler.whenIdle();
+    scheduler.update({ viewProjection, origin: [0, 0, 0] });
+    scheduler.update({ viewProjection, origin: [0, 0, 0] });
+    await scheduler.whenIdle();
+
+    expect(requested).toEqual(["near", "far"]);
+    scheduler.stop();
   });
 });

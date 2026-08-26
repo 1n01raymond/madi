@@ -428,8 +428,15 @@ batches, and renders per-occurrence transforms, source colors, explicit CAD
 edges, an isometric bounds fit, and integer object picking. Selecting an
 occurrence resolves its glTF node and revision-local OCCT edge references.
 Visibility, navigation, clipping, hierarchy inspection, and local/URL package
-opening are implemented. One persistent geometry Worker owns the parsed glTF
-for the scene session and reuses it across coarse and target decodes. For the
+opening are implemented. One persistent geometry Worker validates the glTF,
+composes active-node float64 transforms, and builds direct target-chunk
+occurrence tables once for the scene session. Coarse and whole-target decodes
+reuse the prepared renderable list; each target Range decode visits only its
+indexed occurrences rather than traversing the active node graph again. Result
+transforms are cloned at the Worker transfer boundary so transferring one
+decoded chunk cannot detach the prepared session state. Prototype-local surface
+bounds are also cached once; each occurrence transforms eight AABB corners
+instead of every vertex, conservatively matching the coarse-bounds contract. For the
 compiler's `prototype-aabb-v1` tier, it collapses prototype AABBs into one
 canonical box batch with contiguous occurrence transforms and target-mesh
 indexes. Target prototype ranges are fetched and decoded one at a time;
@@ -438,13 +445,22 @@ those instances again while preserving node-derived object IDs. Selecting an
 unresolved occurrence can pin its requested target and demote colder target
 groups within the same decoded/GPU budgets. Scene replacement or explicit
 user cancellation aborts the active range, terminates the session Worker, and
-prevents later ranges from starting. The camera scheduler ranks each target
-chunk from retained-coarse bounds built once per scene, visible-first and then
-by distance from the view center. Orbit, pan, zoom, fit, and resize re-rank both
-request and resident-eviction priority; if the hottest nonresident chunk
-changes, the old HTTP Range and Worker decode are aborted before its replacement
-is admitted. Spatial clusters, screen-space LOD, persistent cache tiers, and a
-broader eviction policy remain unimplemented.
+prevents later ranges from starting. Packages without an ADR-0008 index keep
+the existing camera scheduler, which ranks each target chunk from
+retained-coarse bounds built once per scene. An indexed package instead fetches
+and verifies `spatial.bin` after the coarse frame, conservatively traverses its
+float64 BVH in the camera-relative frustum, and requests only the deduplicated
+chunks referenced by visible leaves. Cold chunks remain in the residency order
+but are not fetched. Orbit, pan, zoom, fit, and resize re-query demand and
+re-rank resident eviction priority; if the hottest nonresident chunk changes,
+the old HTTP Range and Worker decode are aborted before its replacement is
+admitted. A budget-blocked demand signature prevents an unchanged camera update
+from refetching the same rejected chunk; selection resume or a changed demand
+order reopens scheduling. Spatial draw clusters, screen-space LOD, persistent cache tiers, and
+a broader eviction policy remain unimplemented. The focused transform-only
+record under `artifacts/spatial-demand/` passes in headed Chrome and Firefox;
+Digital Hub and sixty5 also pass offline co-demand censuses, while localized
+real-model browser evidence is still pending, so ADR-0008 remains Proposed.
 
 The reproducible browser smoke command is `pnpm browser:matrix`. Its committed
 Phase 1 run covers Chrome/Blink and Firefox/Gecko with the same compiled package,
