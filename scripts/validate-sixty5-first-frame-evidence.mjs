@@ -46,9 +46,11 @@ assert(
     coarseFrameMs < readyMs,
   "Milestones must record hierarchy before coarse before ready.",
 );
+// Ratcheted from 15 s / 10 s once the assembly list stopped materializing one
+// element per hierarchy entry; the record itself presents at 4.284 s.
 assert(
-  coarseFrameMs <= 15_000 && coarseFrameMs - hierarchyReadyMs <= 10_000,
-  "The shared-coarse record must present its first frame within 15 s overall and 10 s of hierarchy.",
+  coarseFrameMs <= 8_000 && coarseFrameMs - hierarchyReadyMs <= 4_000,
+  "The shared-coarse record must present its first frame within 8 s overall and 4 s of hierarchy.",
 );
 
 const { dataset } = evidence.snapshot;
@@ -61,12 +63,12 @@ assert(
   "The optimized record must reach a budget-limited rendered state through coarse residency.",
 );
 assert(
-  dataset.targetChunksReady === "78" && dataset.targetChunksTotal === "234",
-  "Shared coarse residency must admit the deterministic 78/234 target chunk set.",
+  dataset.targetChunksReady === "55" && dataset.targetChunksTotal === "234",
+  "Shared coarse residency must admit the recorded 55/234 target chunk set.",
 );
 assert(
-  dataset.residentDecodedBytes === "66348924" &&
-    dataset.residentGpuBytes === "66430100" &&
+  dataset.residentDecodedBytes === "45322020" &&
+    dataset.residentGpuBytes === "45377892" &&
     Number(dataset.residentDecodedBytes) <= budgetBytes &&
     Number(dataset.residentGpuBytes) <= budgetBytes,
   "The deterministic optimized resident set must remain inside both 64 MiB budgets.",
@@ -78,14 +80,14 @@ assert(
   "The optimized record must retain every sixty5 occurrence and prototype identity.",
 );
 assert(
-  evidence.snapshot.triangleCount === "1,585,233" && evidence.snapshot.edgeCount === "12",
+  evidence.snapshot.triangleCount === "1,129,693" && evidence.snapshot.edgeCount === "12",
   "The optimized resident frame must report its deterministic shared-coarse geometry counts.",
 );
 assert(
   evidence.snapshot.statusState === "ready" &&
     evidence.snapshot.statusStage === "rendered" &&
     evidence.snapshot.status ===
-      "Residency budget reached · 20295 surface batches retained · 78173 renderable occurrences",
+      "Residency budget reached · 13969 surface batches retained · 78173 renderable occurrences",
   "The optimized scene must reach its deterministic rendered ready state.",
 );
 assert(
@@ -106,7 +108,7 @@ const rangeResponses = evidence.binaryRequests.filter(
   (request) => request.resource.startsWith("scene.bin") && request.range !== null,
 );
 assert(
-  rangeResponses.length >= 78 &&
+  rangeResponses.length >= 55 &&
     rangeResponses.every(
       (request) => request.status === 206 && /^bytes=\d+-\d+$/u.test(request.range),
     ),

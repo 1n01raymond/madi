@@ -99,13 +99,28 @@ recording. The record is `artifacts/ifc/sixty5-browser/`, checked by
 | First-frame boundary | The Worker decode of the 37.8 MB `coarse.bin` takes 6.6 s; the rest of the 264.7 s to the first frame sits on the main-thread document handoff and 42,588-batch construction path | Recorded as the named Phase 2 optimization input |
 
 The Phase 2 follow-up in `artifacts/ifc/sixty5-first-frame/` closes that named
-boundary without changing the compiled package. A persistent Worker owns the
-parsed glTF once, and `prototype-aabb-v1` is rendered as one canonical box batch
-with an occurrence transform/target table. Three fresh headed-Chrome runs on
-the same host class present the first coarse frame at 12.553, 12.796, and
-13.378 s (12.796 s median, 13.378 s observed p95): a 95.23% median reduction
-from the 268.013 s baseline. All 78,173 occurrences remain visible and pickable,
-the 64 MiB budgets hold, and the same selected IFC properties resolve.
+boundary without changing the compiled package, in two stages.
+
+A persistent Worker owns the parsed glTF once, and `prototype-aabb-v1` is
+rendered as one canonical box batch with an occurrence transform/target table.
+That stage brought the first coarse frame to a 12.796 s median (12.553, 12.796,
+13.378 s), a 95.23% reduction from the 268.013 s baseline.
+
+The Studio then stopped materializing the whole assembly tree. The federation's
+188,319 rows used to be 565,134 elements, 78,173 of them exposed as accessible
+buttons; on a host whose accessibility mode is enabled, the browser process
+saturates walking that tree and stops servicing its own network sockets, so the
+coarse geometry request waits minutes for a response. Only the rows the
+scrollport covers now exist, so the panel holds roughly thirty elements at any
+federation size. Three fresh headed-Chrome runs present the first coarse frame
+at 4.284, 4.159, and 4.242 s (4.242 s median, 4.284 s observed p95): a 98.42%
+reduction from the baseline, and 63.18× faster than it. All 78,173 occurrences
+remain visible and pickable, the 64 MiB budgets hold, and the same selected IFC
+properties resolve. The reviewed record is the slowest of the three runs, which
+is also the only one whose resident set had settled: the residency drain stops
+at the first budget-rejected chunk instead of continuing past it, and the status
+can reach `ready` while the scheduler is still admitting, so a faster page
+reaches a smaller endpoint (55 of 234 target chunks, against 78 before).
 
 ### Persistent import cache
 
@@ -215,6 +230,11 @@ See `artifacts/phase1/README.md` for the compiled package,
 - A Firefox repeat and any benchmark or ADR-0003 renderer-decision claim for
   sixty5 remain unrecorded. The Chrome first-useful-frame boundary itself is now
   closed by `artifacts/ifc/sixty5-first-frame/`.
+- A settled real-large resident endpoint. The recorded run admits 55 of 234
+  target chunks under the unchanged 64 MiB budgets because the drain stops at
+  the first rejected chunk, and two of its three runs reached `ready` while the
+  scheduler was still admitting. Both behaviours are recorded rather than
+  fixed in that slice.
 - Additional repeated reference-hardware profiles for ADR-0003; the first
   Apple-Silicon integrated-GPU record now shows divergent Chrome and Firefox
   CPU-p95 outcomes.
@@ -246,12 +266,16 @@ walks from later target Range decodes. The optional ADR-0008 path now queries a
 compiler-built occurrence BVH and requests only visible-leaf target demand.
 Opt-in leaf-anchor payload ordering now feeds that BVH partition back into the
 existing byte-budget coalescer. The Digital Hub and sixty5 leaf censuses pass
-with 39.89% and 39.47% less off-view payload respectively. The real-large run
-also exposed a headed browser blocker after the coarse frame: target admission
-does not complete promptly even though the same chunk decodes offline in
-milliseconds. The next increment is therefore bounded delta GPU
-reconciliation/visibility followed by localized Digital Hub and sixty5 traces,
-then persistent cache tiers and screen-space priority.
+with 39.89% and 39.47% less off-view payload respectively. The assembly list is
+now virtualized, so hierarchy size no longer bounds the first frame. That
+faster page exposes the remaining real-large residency defects directly: the
+drain stops at the first chunk the byte budget rejects instead of skipping it
+and continuing, and the status can stamp `ready` before the resident set has
+settled — so the recorded endpoint shrank to 55 of 234 target chunks. The next
+increment is therefore skip-and-continue admission with a deferred ready stamp
+and bounded delta GPU reconciliation/visibility, followed by localized Digital
+Hub and sixty5 traces, then persistent cache tiers and screen-space
+priority.
 
 On the compiler side the structure document now streams record by record,
 property keys and key combinations are interned once at scene level, and the
@@ -267,9 +291,9 @@ real-model edge re-record remain future increments. The browser gate for the
 sixty5 package is now
 recorded (`artifacts/ifc/sixty5-browser/`): loading, bounded residency,
 picking, and lazy property resolution hold at real-large scale. The named
-268.0 s main-thread first-frame path is now reduced to a 12.796 s median by
-the shared-coarse/persistent-Worker follow-up in
-`artifacts/ifc/sixty5-first-frame/`. The ADR-0009 persistent import cache is
+268.0 s main-thread first-frame path is now reduced to a 4.242 s median by
+the shared-coarse/persistent-Worker follow-up and the virtualized assembly
+list in `artifacts/ifc/sixty5-first-frame/`. The ADR-0009 persistent import cache is
 now recorded product evidence (`artifacts/cache/`): unchanged pinned sources
 restore byte-identically in seconds instead of recompiling, and corrupt
 entries fail closed. Spatial partitioning, screen-space policy, and runtime

@@ -749,6 +749,10 @@ code {
   margin: 0;
   padding: 0 8px 0 0;
   overflow: auto;
+  /* The list is virtualized: its spacers resize on every scroll, and scroll
+     anchoring compensates for that by moving the scroll offset, which resizes
+     the spacers again. Anchoring has to stay off or the list scrolls itself. */
+  overflow-anchor: none;
   list-style: none;
   font: 11px/1.4 ui-monospace, "Cascadia Code", monospace;
 }
@@ -773,8 +777,24 @@ code {
   color: #b8cbd4;
 }
 
-#hierarchy li[hidden] {
-  display: none;
+/* Virtualized rows are uniform height, so a name never wraps to a second line. */
+#hierarchy li > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#hierarchy li > small {
+  flex: none;
+  white-space: nowrap;
+}
+
+/* Stands in for the rows outside the scrollport; carries no row styling. */
+#hierarchy li.hierarchy-spacer {
+  display: block;
+  margin: 0;
+  padding: 0;
+  border: 0;
 }
 
 #hierarchy li[data-renderable="true"] {
