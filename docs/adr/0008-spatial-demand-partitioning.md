@@ -146,6 +146,22 @@ leaf-anchor records 6,503 / 21,369 ms, with no console issue. The initial fit
 still intersects all 2,048 leaves, and each result is a single run, so neither
 localized camera reduction nor the required three-run p95 is yet proven.
 
+`artifacts/spatial-demand/digital-hub-localized/` closes the localized-query
+gate for the four-discipline federation in headed Chrome 151 on Windows. One
+scripted zoom and pan take the query from the fitted 255/255 nodes, 128/128
+leaves, and 5,152/5,152 occurrences down to 109 nodes, 28 leaves, and 1,129
+occurrences. On that identical view the compatibility package demands 52 of its
+71 chunks (23,065,180 of 35,962,344 target bytes) and the leaf-anchor package 42
+of its 66 (20,111,204 bytes), which is the first browser-side confirmation that
+the offline off-view census predicts real demand rather than only offline
+totals. Across 48 navigation queries the cost is p50 0.035 ms / p95 0.085 ms
+(compatibility) and p50 0.035 ms / p95 0.080 ms (leaf-anchor), no navigation
+frame falls back to a total-occurrence traversal, residency and console output
+stay unchanged while the camera moves, and every pinned counter repeated across
+three runs per payload order. Digital Hub fits the residency budget whole, so
+the trace makes no first-frame claim; the sixty5 localized trace, the three-run
+first-frame p95, Firefox, and the nested/ADR-0005 cross-check remain open.
+
 - every renderable occurrence is indexed exactly once, every leaf bound contains
   its references, and BVH queries have no false negatives against a brute-force
   frustum oracle;
@@ -164,9 +180,10 @@ localized camera reduction nor the required three-run p95 is yet proven.
 - headed Chrome and Firefox reproduce the request sequence with no console
   warnings or errors, while legacy packages retain their current behavior;
 - Digital Hub and sixty5 publish index size/build cost and
-  compatibility-order versus leaf-anchor requested/off-view bytes; localized
-  headed traces must still publish query p50/p95, candidate reduction, and
-  first-frame impact. The
+  compatibility-order versus leaf-anchor requested/off-view bytes; the Digital
+  Hub localized headed trace publishes query p50/p95 and candidate reduction,
+  and the sixty5 localized trace, where the residency budget binds and
+  first-frame impact is measurable, must still follow. The
   sixty5 three-run first-coarse-frame p95 must remain at or below 15 seconds on
   the same recorded host class.
 

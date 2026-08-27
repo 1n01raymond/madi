@@ -158,3 +158,15 @@ node scripts/record-spatial-ifc-browser-comparison.mjs \
   --output output/ifc/sixty5-spatial-analysis/browser-comparison.json
 pnpm spatial:check
 ```
+
+## Digital Hub localized camera trace
+
+`digital-hub-localized/` holds the headed counterpart of the offline censuses
+above: the same two Digital Hub packages, driven through one scripted zoom and
+pan, with the scheduler's own query counters and demand list read out of the
+running Studio. A localized view visits 109 of 255 BVH nodes, 28 of 128 leaves,
+and 1,129 of 5,152 occurrences, and demands 52 of 71 chunks (23,065,180 of
+35,962,344 target bytes) under the default payload order against 42 of 66
+(20,111,204 bytes) under `spatial-leaf-anchor-v1` on the identical view. See
+`digital-hub-localized/README.md` for the method, repeatability, the
+cross-host adapter difference, and what it does not prove.
