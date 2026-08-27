@@ -822,6 +822,23 @@ function positionBounds(positions: Float32Array): SceneBounds {
   return { min: minimum, max: maximum };
 }
 
+/**
+ * Identifies the vertex pool a surface primitive reads. Material groups of one
+ * prototype reference the same POSITION/NORMAL accessors, and the compiler
+ * stores that pool once, so decoding it once per pair reproduces the packaged
+ * layout instead of one copy per material.
+ */
+function vertexPoolKey(primitive: CompiledGltfPrimitive): string {
+  return `${String(primitive.attributes.POSITION)}:${String(primitive.attributes.NORMAL)}`;
+}
+
+interface DecodedVertexPool {
+  /** Interleaved position.xyz + normal.xyz values, shared by sibling batches. */
+  readonly vertices: Float32Array;
+  readonly vertexCount: number;
+  readonly bounds: SceneBounds;
+}
+
 interface DecodedMeshGeometry {
   readonly surfaces: readonly DecodedSurfaceGeometry[];
   readonly edgeVertices: Float32Array;
@@ -918,9 +935,16 @@ function measureMeshBatches(
   const edgeVertexBytes = edge
     ? accessorItemCount(document, edge.indices, `meshes[${meshIndex}] edge indices`) * 3 * 4
     : 0;
+  // `decodeMesh` decodes one vertex pool per attribute pair and hands the same
+  // array to every material group that references it, so the pool is charged
+  // to the first group alone -- exactly as the decoded batches then charge it.
+  const chargedPools = new Set<string>();
   let cost: ResidencyCost = { decodedBytes: 0, gpuBytes: 0 };
   surfaces.forEach(({ primitive, primitiveIndex }, order) => {
     const label = `meshes[${meshIndex}].primitives[${primitiveIndex}]`;
+    const poolKey = vertexPoolKey(primitive);
+    const sharesSurfaceVertices = chargedPools.has(poolKey);
+    chargedPools.add(poolKey);
     cost = addResidencyCost(
       cost,
       batchResidencyCost({
@@ -930,6 +954,7 @@ function measureMeshBatches(
           accessorItemCount(document, primitive.indices, `${label} surface indices`) * 4,
         edgeVertexBytes: order === 0 ? edgeVertexBytes : 0,
         instanceCount,
+        sharesSurfaceVertices,
       }),
     );
   });
@@ -973,6 +998,11 @@ function decodeMesh(
   meshIndex: number,
 ): DecodedMeshGeometry {
   const { surfaces, edge } = selectMeshPrimitives(mesh, meshIndex);
+  // One prototype's material groups index a single vertex pool that the
+  // package stores once. Decoding it per group copied it per material -- the
+  // largest sixty5 prototype has 111 groups over one 673 KB pool, so its
+  // batches cost 75 MB instead of 1.3 MB. Sibling batches share one array.
+  const vertexPools = new Map<string, DecodedVertexPool>();
   const decodedSurfaces = surfaces.map(({ primitive: surface, primitiveIndex }) => {
     if (surface.indices === undefined) {
       throw new CompiledGltfError(
@@ -987,17 +1017,27 @@ function decodeMesh(
         `meshes[${meshIndex}].primitives[${primitiveIndex}] has no POSITION accessor.`,
       );
     }
-    const positions = accessors.float32Vec3(
-      positionAccessor,
-      `meshes[${meshIndex}].primitives[${primitiveIndex}] POSITION`,
-    );
-    const normals =
-      surface.attributes.NORMAL === undefined
-        ? undefined
-        : accessors.float32Vec3(
-            surface.attributes.NORMAL,
-            `meshes[${meshIndex}].primitives[${primitiveIndex}] NORMAL`,
-          );
+    const poolKey = vertexPoolKey(surface);
+    let pool = vertexPools.get(poolKey);
+    if (!pool) {
+      const positions = accessors.float32Vec3(
+        positionAccessor,
+        `meshes[${meshIndex}].primitives[${primitiveIndex}] POSITION`,
+      );
+      const normals =
+        surface.attributes.NORMAL === undefined
+          ? undefined
+          : accessors.float32Vec3(
+              surface.attributes.NORMAL,
+              `meshes[${meshIndex}].primitives[${primitiveIndex}] NORMAL`,
+            );
+      pool = {
+        vertices: interleaveSurface(positions, normals),
+        vertexCount: positions.length / 3,
+        bounds: positionBounds(positions),
+      };
+      vertexPools.set(poolKey, pool);
+    }
     const surfaceIndices = accessors.uint32Scalar(
       surface.indices,
       `meshes[${meshIndex}].primitives[${primitiveIndex}] surface indices`,
@@ -1006,7 +1046,7 @@ function decodeMesh(
       throw new CompiledGltfError("INVALID_GLTF", "Surface indices must contain triangles.");
     }
     for (const index of surfaceIndices) {
-      if (index >= positions.length / 3) {
+      if (index >= pool.vertexCount) {
         throw new CompiledGltfError(
           "INVALID_BINARY",
           `Surface vertex index ${index} is out of range.`,
@@ -1014,9 +1054,9 @@ function decodeMesh(
       }
     }
     return {
-      surfaceVertices: interleaveSurface(positions, normals),
+      surfaceVertices: pool.vertices,
       surfaceIndices,
-      bounds: positionBounds(positions),
+      bounds: pool.bounds,
       color: surfaceColor(document, surface),
       primitiveIndex,
     };

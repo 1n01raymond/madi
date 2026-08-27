@@ -280,10 +280,18 @@ export function rebaseSectionPlane(
   };
 }
 
+/** One vertex buffer, shared by the material groups of a single prototype. */
+interface GpuVertexPool {
+  readonly buffer: GPUBuffer;
+  readonly byteLength: number;
+  refCount: number;
+}
+
 interface GpuBatchResources {
   readonly key: string;
   readonly source: GpuPrototypeBatch;
   readonly includeEdges: boolean;
+  readonly surfaceVertexPool: Float32Array;
   readonly surfaceVertex: GPUBuffer;
   readonly surfaceIndex: GPUBuffer;
   readonly edgeVertex: GPUBuffer;
@@ -293,6 +301,7 @@ interface GpuBatchResources {
   readonly instanceStagingView: DataView;
   readonly indexCount: number;
   readonly edgeVertexCount: number;
+  /** Excludes the shared vertex pool, which `residentGpuBytes` counts once. */
   readonly gpuByteLength: number;
   instanceCount: number;
 }
@@ -342,6 +351,14 @@ export class Phase0Renderer {
   private readonly uniformSectionPlane = new Float32Array(this.uniformData, 96, 4);
   private readonly uniformFlags = new Uint32Array(this.uniformData, 112, 4);
   private batches: GpuBatchResources[] = [];
+  /**
+   * Vertex buffers keyed by the decoded array they hold. The decoder gives one
+   * prototype's material groups the identical interleaved array, so uploading
+   * per batch would allocate the same vertices once per material -- 111 times
+   * for the largest sixty5 prototype. Refcounts release a buffer with its last
+   * batch instead.
+   */
+  private readonly vertexPools = new Map<Float32Array, GpuVertexPool>();
   private hasRendered = false;
   private selectedObjectId = 0;
   private sectionPlane?: NormalizedSectionPlane;
@@ -584,8 +601,12 @@ export class Phase0Renderer {
     }
     const next = planned.map(({ key, batch, current, reuse }) => {
       if (reuse && current) return current;
+      // Acquire before releasing: a replacement that reads the same vertex
+      // pool keeps its refcount above zero, so the buffer is never destroyed
+      // and re-uploaded for geometry that never left the resident set.
+      const resources = this.createBatchResources(key, batch, includeEdges);
       if (current) this.destroyBatch(current);
-      return this.createBatchResources(key, batch, includeEdges);
+      return resources;
     });
     for (const stale of remaining.values()) this.destroyBatch(stale);
     this.batches = next;
@@ -593,7 +614,9 @@ export class Phase0Renderer {
 
   /** Estimated buffer allocation currently retained by this renderer. */
   get residentGpuBytes(): number {
-    return this.batches.reduce((total, batch) => total + batch.gpuByteLength, 0);
+    let total = this.batches.reduce((sum, batch) => sum + batch.gpuByteLength, 0);
+    for (const pool of this.vertexPools.values()) total += pool.byteLength;
+    return total;
   }
 
   /**
@@ -899,16 +922,13 @@ export class Phase0Renderer {
     const uploadedEdges = includeEdges ? batch.edgeVertices : new Float32Array();
     const instanceData = packInstanceData(batch.instances);
     const instanceStaging = new ArrayBuffer(batch.instances.length * instanceStride);
+    const surfaceVertexPool = this.acquireVertexPool(key, batch.surfaceVertices);
     return {
       key,
       source: batch,
       includeEdges,
-      surfaceVertex: createBuffer(
-        this.device,
-        `NARU ${key} surface vertices`,
-        batch.surfaceVertices,
-        GPUBufferUsage.VERTEX,
-      ),
+      surfaceVertexPool: batch.surfaceVertices,
+      surfaceVertex: surfaceVertexPool.buffer,
       surfaceIndex: createBuffer(
         this.device,
         `NARU ${key} surface indices`,
@@ -933,7 +953,6 @@ export class Phase0Renderer {
       indexCount: batch.surfaceIndices.length,
       edgeVertexCount: uploadedEdges.length / 3,
       gpuByteLength:
-        alignedBufferByteLength(batch.surfaceVertices.byteLength) +
         alignedBufferByteLength(batch.surfaceIndices.byteLength) +
         alignedBufferByteLength(uploadedEdges.byteLength) +
         alignedBufferByteLength(instanceData.byteLength),
@@ -941,8 +960,35 @@ export class Phase0Renderer {
     };
   }
 
+  private acquireVertexPool(key: string, vertices: Float32Array): GpuVertexPool {
+    const existing = this.vertexPools.get(vertices);
+    if (existing) {
+      existing.refCount += 1;
+      return existing;
+    }
+    const pool: GpuVertexPool = {
+      buffer: createBuffer(
+        this.device,
+        `NARU ${key} surface vertices`,
+        vertices,
+        GPUBufferUsage.VERTEX,
+      ),
+      byteLength: alignedBufferByteLength(vertices.byteLength),
+      refCount: 1,
+    };
+    this.vertexPools.set(vertices, pool);
+    return pool;
+  }
+
   private destroyBatch(batch: GpuBatchResources): void {
-    batch.surfaceVertex.destroy();
+    const pool = this.vertexPools.get(batch.surfaceVertexPool);
+    if (pool) {
+      pool.refCount -= 1;
+      if (pool.refCount <= 0) {
+        this.vertexPools.delete(batch.surfaceVertexPool);
+        pool.buffer.destroy();
+      }
+    }
     batch.surfaceIndex.destroy();
     batch.edgeVertex.destroy();
     batch.instance.destroy();
