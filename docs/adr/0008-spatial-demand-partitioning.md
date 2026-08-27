@@ -159,8 +159,28 @@ totals. Across 48 navigation queries the cost is p50 0.035 ms / p95 0.085 ms
 frame falls back to a total-occurrence traversal, residency and console output
 stay unchanged while the camera moves, and every pinned counter repeated across
 three runs per payload order. Digital Hub fits the residency budget whole, so
-the trace makes no first-frame claim; the sixty5 localized trace, the three-run
-first-frame p95, Firefox, and the nested/ADR-0005 cross-check remain open.
+the trace makes no first-frame claim.
+
+`artifacts/spatial-demand/sixty5-localized/` closes that gate on the federation
+where the residency budget binds. The fitted view demands all 234 chunks and
+120,707,064 target bytes against a 67,108,864-byte budget, so estimate-gated
+prefetch skips what it cannot admit and a localized view changes what is
+fetched, not only what is demanded. The same scripted zoom and pan take the
+query from 4,095/4,095 nodes, 2,048/2,048 leaves, and 78,173/78,173 occurrences
+down to 889 nodes, 184 leaves, and 7,026 occurrences. On that identical view the
+compatibility package demands 209 of its 234 chunks (107,337,264 bytes) and the
+leaf-anchor package 152 (78,875,544 bytes): 27.3% fewer chunks and 26.5% fewer
+bytes, a wider margin than Digital Hub's, which is what the off-view census
+predicts as a site grows. Localized navigation costs p50 0.295 ms / p95 0.405 ms
+(compatibility) and p50 0.195 ms / p95 0.330 ms (leaf-anchor) over 48 queries,
+with no total-occurrence fallback. Every window of both orders ends at or under
+the residency budget, and the first coarse frame stayed between 4.213 s and
+4.388 s across six runs, so the three-run p95 of each order is far inside the
+15-second bound this decision requires. Because the budget evicts, the two
+orders hold different chunk sets and render 2,180,160 against 2,182,636
+triangles from the same view; the record states that rather than asserting
+equality. Firefox and Safari reproduction of a localized trace and the
+nested/ADR-0005 cross-check remain open.
 
 - every renderable occurrence is indexed exactly once, every leaf bound contains
   its references, and BVH queries have no false negatives against a brute-force
@@ -181,11 +201,11 @@ first-frame p95, Firefox, and the nested/ADR-0005 cross-check remain open.
   warnings or errors, while legacy packages retain their current behavior;
 - Digital Hub and sixty5 publish index size/build cost and
   compatibility-order versus leaf-anchor requested/off-view bytes; the Digital
-  Hub localized headed trace publishes query p50/p95 and candidate reduction,
-  and the sixty5 localized trace, where the residency budget binds and
-  first-frame impact is measurable, must still follow. The
-  sixty5 three-run first-coarse-frame p95 must remain at or below 15 seconds on
-  the same recorded host class.
+  Hub and sixty5 localized headed traces publish query p50/p95 and candidate
+  reduction, the sixty5 trace measuring demand where the residency budget binds.
+  The sixty5 three-run first-coarse-frame p95 must remain at or below 15 seconds
+  on the same recorded host class, which it does at 4.358 s (compatibility) and
+  4.388 s (leaf-anchor).
 
 This evidence may accept the spatial-demand decision only. It does not by
 itself make an ADR-0003 renderer-performance claim, prove screen-space LOD, or

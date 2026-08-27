@@ -126,9 +126,9 @@ kept its own copy of one 673,080-byte pool. Packages
 with `naru.spatial-demand-index.1` instead authenticate `spatial.bin`, query
 only frustum-visible BVH leaves, and keep cold chunks out of the fetch queue.
 The focused headed record plus Digital Hub and sixty5 offline co-demand
-censuses are under `artifacts/spatial-demand/`. Persistent cache tiers, spatial
-draw clusters, screen-space LOD, and localized real-model headed evidence
-remain Phase 2 work.
+censuses and their headed localized camera traces are under
+`artifacts/spatial-demand/`. Persistent cache tiers, spatial draw clusters, and
+screen-space LOD remain Phase 2 work.
 
 ## Open another compiled scene
 

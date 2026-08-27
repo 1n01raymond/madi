@@ -74,6 +74,48 @@ const sha256File = async (path) => {
   await pipeline(createReadStream(path), hash);
   return hash.digest("hex");
 };
+/**
+ * Reads only `extras.madi.progressive` out of scene.gltf. A federation-scale
+ * document is hundreds of megabytes, so it is scanned as a stream and the one
+ * object the pricing needs is brace-matched out of it; parsing the whole
+ * document would cost gigabytes of heap for a table of chunk byte lengths.
+ */
+const readProgressiveMetadata = async (path) => {
+  const key = '"progressive":';
+  let pending = "";
+  let capture;
+  let depth = 0;
+  let inString = false;
+  let escaped = false;
+  for await (const piece of createReadStream(path, { encoding: "utf8" })) {
+    let text = pending + piece;
+    if (capture === undefined) {
+      const at = text.indexOf(key);
+      if (at === -1) {
+        // The key can straddle two reads; keep just enough to rejoin it.
+        pending = text.slice(-key.length);
+        continue;
+      }
+      text = text.slice(at + key.length);
+      capture = "";
+    }
+    for (const character of text) {
+      if (capture.length === 0 && character !== "{") continue;
+      capture += character;
+      if (inString) {
+        if (escaped) escaped = false;
+        else if (character === "\\") escaped = true;
+        else if (character === '"') inString = false;
+        continue;
+      }
+      if (character === '"') inString = true;
+      else if (character === "{") depth += 1;
+      else if (character === "}" && (depth -= 1) === 0) return JSON.parse(capture);
+    }
+    pending = "";
+  }
+  throw new Error(`${path} carries no extras.madi.progressive metadata.`);
+};
 const percentile = (values, fraction) => {
   if (values.length === 0) return null;
   const ordered = [...values].sort((left, right) => left - right);
@@ -109,13 +151,7 @@ console.log(
 // A view demands chunks, but a user pays for their bytes. The progressive
 // metadata prices every chunk so each window can report what a cold client
 // would have had to fetch, whether or not this run still had to fetch it.
-const gltfResource = buildReport.output.resources.find(({ path }) => path === "scene.gltf");
-if (gltfResource.bytes > 512 * 1024 * 1024) {
-  throw new Error("scene.gltf is too large to price chunks by parsing; extend the recorder.");
-}
-const progressive = JSON.parse(
-  await readFile(resolve(sceneDirectory, "scene.gltf"), "utf8"),
-).extras.madi.progressive;
+const progressive = await readProgressiveMetadata(resolve(sceneDirectory, "scene.gltf"));
 const chunkBytes = new Map(
   progressive.targetChunks.map(({ id, byteLength }) => [id, byteLength]),
 );
@@ -359,9 +395,13 @@ try {
   if (!Number.isSafeInteger(navigationSteps) || navigationSteps < 1) {
     throw new TypeError("--navigation-steps must be a positive integer.");
   }
+  // The camera panned, not the canvas, so the drag origin only has to stay on
+  // the viewport; following the pan offset can walk it off the element, and a
+  // drag that starts outside it moves nothing at all.
+  const onCanvas = (value, low, high) => Math.min(Math.max(value, low + 8), high - 8);
   for (let step = 0; step < navigationSteps; step += 1) {
-    const dragX = centerX + camera.panX;
-    const dragY = centerY + camera.panY;
+    const dragX = onCanvas(centerX + camera.panX, bounds.x, bounds.x + bounds.width - 24);
+    const dragY = onCanvas(centerY + camera.panY, bounds.y, bounds.y + bounds.height - 12);
     await page.mouse.move(dragX, dragY);
     await page.mouse.down();
     await page.mouse.move(dragX + 24, dragY + 12, { steps: 4 });

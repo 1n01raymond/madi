@@ -114,8 +114,9 @@ visible leaves, and keeps non-demanded chunks cold for eviction. Packages
 without the optional index retain aggregate retained-coarse chunk scheduling.
 The indexed browser path has unit/oracle coverage plus the focused headed
 Chrome/Firefox record under `artifacts/spatial-demand/`. Digital Hub and
-sixty5 pass offline co-demand censuses; localized real-model headed evidence
-is still pending.
+sixty5 pass offline co-demand censuses, and both have headed localized camera
+traces under `artifacts/spatial-demand/{digital-hub,sixty5}-localized/`; a
+non-Blink localized repeat is still pending.
 
 Run `pnpm test` for package and committed-fixture regression coverage. The
 headed cross-engine path is recorded by `pnpm browser:matrix`; the focused

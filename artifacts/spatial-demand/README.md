@@ -170,3 +170,18 @@ and 1,129 of 5,152 occurrences, and demands 52 of 71 chunks (23,065,180 of
 (20,111,204 bytes) under `spatial-leaf-anchor-v1` on the identical view. See
 `digital-hub-localized/README.md` for the method, repeatability, the
 cross-host adapter difference, and what it does not prove.
+
+## sixty5 localized camera trace
+
+`sixty5-localized/` repeats that trace where the residency budget binds. The
+fitted view demands all 234 chunks and 120,707,064 target bytes against a
+67,108,864-byte budget, so a localized view changes what is fetched at all, not
+only what is nominally demanded. On the identical localized view -- 184 of
+2,048 leaves and 7,026 of 78,173 occurrences -- the default order demands 209
+chunks and 107,337,264 bytes, while `spatial-leaf-anchor-v1` demands 152 chunks
+and 78,875,544 bytes: 27.3% fewer chunks and 26.5% fewer bytes, a wider margin
+than Digital Hub's. Every window of both orders ends inside the budget, and the
+first coarse frame stayed between 4.213 s and 4.388 s across six runs. Because
+the budget evicts, the two orders hold different chunk sets and render
+different triangle counts; `sixty5-localized/README.md` records that, the
+host-local package digests, and the rest of what this does not prove.
