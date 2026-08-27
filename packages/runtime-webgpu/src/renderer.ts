@@ -5,6 +5,7 @@ import {
   packInstanceDataInto,
   splitFloat64,
   validateGpuScene,
+  validatePrototypeBatch,
 } from "./layout.js";
 import type { GpuOccurrenceInstance, GpuPrototypeBatch, GpuScene } from "./layout.js";
 
@@ -537,6 +538,11 @@ export class Phase0Renderer {
   /**
    * Reconciles application-keyed batches without re-uploading untouched GPU
    * resources. This is the residency boundary used by progressive loaders.
+   *
+   * A batch is validated when it is first uploaded, not on every reconcile:
+   * retained batches are treated as immutable, so admission cost scales with
+   * the batches that actually change rather than the whole resident set. All
+   * validation runs before any GPU resource is destroyed or created.
    */
   reconcileBatches(
     entries: readonly GpuSceneBatchEntry[],
@@ -549,18 +555,38 @@ export class Phase0Renderer {
       }
       keys.add(key);
     }
-    validateGpuScene({
-      batches: entries.map(({ batch }) => batch),
-      ...(options.sharedObjectIdsAcrossBatches ? { sharedObjectIdsAcrossBatches: true } : {}),
-    });
+    if (entries.length === 0) {
+      throw new TypeError("A GPU scene must contain at least one prototype batch.");
+    }
     const includeEdges = options.includeEdges ?? true;
     const remaining = new Map(this.batches.map((resource) => [resource.key, resource]));
-    const next = entries.map(({ key, batch }) => {
+    const planned = entries.map(({ key, batch }) => {
       const current = remaining.get(key);
       remaining.delete(key);
-      if (current && current.source === batch && current.includeEdges === includeEdges) {
-        return current;
-      }
+      const reuse =
+        current !== undefined &&
+        current.source === batch &&
+        current.includeEdges === includeEdges;
+      return { key, batch, current, reuse };
+    });
+    for (const { batch, reuse } of planned) {
+      if (!reuse) validatePrototypeBatch(batch);
+    }
+    if (options.sharedObjectIdsAcrossBatches !== true) {
+      const objectIds = new Set<number>();
+      const claim = (batch: GpuPrototypeBatch): void => {
+        for (const instance of batch.instances) {
+          if (objectIds.has(instance.objectId)) {
+            throw new RangeError(`Duplicate scene object ID ${instance.objectId}.`);
+          }
+          objectIds.add(instance.objectId);
+        }
+      };
+      for (const { batch, reuse } of planned) if (reuse) claim(batch);
+      for (const { batch, reuse } of planned) if (!reuse) claim(batch);
+    }
+    const next = planned.map(({ key, batch, current, reuse }) => {
+      if (reuse && current) return current;
       if (current) this.destroyBatch(current);
       return this.createBatchResources(key, batch, includeEdges);
     });
@@ -573,18 +599,24 @@ export class Phase0Renderer {
     return this.batches.reduce((total, batch) => total + batch.gpuByteLength, 0);
   }
 
-  /** Re-packs visible occurrences from dense per-prototype index tables. */
+  /**
+   * Re-packs visible occurrences from dense per-prototype index tables. When
+   * `changedBatchIndexes` is provided, only those batches are re-packed and
+   * re-uploaded; every other batch keeps its current GPU packing and count.
+   */
   updateVisibleInstances(
     indicesByBatch: readonly Int32Array[],
     counts: Uint32Array,
+    changedBatchIndexes?: readonly number[],
   ): void {
     if (indicesByBatch.length !== this.batches.length || counts.length !== this.batches.length) {
       throw new RangeError("Visibility tables must match the uploaded prototype count.");
     }
-    this.batches.forEach((batch, batchIndex) => {
+    const apply = (batchIndex: number): void => {
+      const batch = this.batches[batchIndex];
       const indices = indicesByBatch[batchIndex];
       const count = counts[batchIndex] ?? 0;
-      if (!indices || count > indices.length || count > batch.instances.length) {
+      if (!batch || !indices || count > indices.length || count > batch.instances.length) {
         throw new RangeError(`Invalid visibility count for prototype ${batchIndex}.`);
       }
       const byteLength = packInstanceDataInto(
@@ -597,7 +629,26 @@ export class Phase0Renderer {
         this.device.queue.writeBuffer(batch.instance, 0, batch.instanceStaging, 0, byteLength);
       }
       batch.instanceCount = count;
-    });
+    };
+    if (changedBatchIndexes === undefined) {
+      for (let batchIndex = 0; batchIndex < this.batches.length; batchIndex += 1) {
+        apply(batchIndex);
+      }
+      return;
+    }
+    const applied = new Set<number>();
+    for (const batchIndex of changedBatchIndexes) {
+      if (
+        !Number.isInteger(batchIndex) ||
+        batchIndex < 0 ||
+        batchIndex >= this.batches.length
+      ) {
+        throw new RangeError(`Invalid changed batch index ${String(batchIndex)}.`);
+      }
+      if (applied.has(batchIndex)) continue;
+      applied.add(batchIndex);
+      apply(batchIndex);
+    }
   }
 
   /** Selects an occurrence for surface and explicit-edge highlighting. Zero clears selection. */

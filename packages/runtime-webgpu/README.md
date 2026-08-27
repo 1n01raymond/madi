@@ -41,8 +41,18 @@ For allocation-stable occurrence visibility, `updateVisibleInstances()` accepts
 dense per-prototype `Int32Array` index tables and counts. It repacks visible
 occurrences into reusable CPU staging storage and updates only the active prefix
 of each existing GPU instance buffer; prototype geometry buffers remain intact.
-Studio uses this path for hide/isolate/show-all, and render/picking passes skip
-prototype batches whose visible instance count is zero.
+An optional `changedBatchIndexes` argument restricts the repack and buffer
+writes to the listed batches so a residency admission pays for the batches it
+touched, not the whole resident set. Studio uses this path for
+hide/isolate/show-all, and render/picking passes skip prototype batches whose
+visible instance count is zero.
+
+`reconcileBatches(entries, options)` keeps GPU resources for batches whose key
+and batch object are unchanged and uploads only new ones. Each batch is
+validated when it is first uploaded rather than on every reconcile, and in
+non-shared-ID mode a per-call cross-batch duplicate check preserves the
+`setScene` object-ID guarantees; all validation runs before any GPU resource is
+destroyed or created, so a rejected reconcile leaves the previous scene intact.
 
 `setSectionPlane({ normal, offset })` enables one world-space clipping plane and
 keeps the half-space where `dot(normal, position) <= offset`. The renderer

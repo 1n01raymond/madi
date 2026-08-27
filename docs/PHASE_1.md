@@ -112,15 +112,22 @@ buttons; on a host whose accessibility mode is enabled, the browser process
 saturates walking that tree and stops servicing its own network sockets, so the
 coarse geometry request waits minutes for a response. Only the rows the
 scrollport covers now exist, so the panel holds roughly thirty elements at any
-federation size. Three fresh headed-Chrome runs present the first coarse frame
-at 4.284, 4.159, and 4.242 s (4.242 s median, 4.284 s observed p95): a 98.42%
-reduction from the baseline, and 63.18× faster than it. All 78,173 occurrences
-remain visible and pickable, the 64 MiB budgets hold, and the same selected IFC
-properties resolve. The reviewed record is the slowest of the three runs, which
-is also the only one whose resident set had settled: the residency drain stops
-at the first budget-rejected chunk instead of continuing past it, and the status
-can reach `ready` while the scheduler is still admitting, so a faster page
-reaches a smaller endpoint (55 of 234 target chunks, against 78 before).
+federation size.
+
+The residency drain then stopped giving up early. A chunk the byte budget
+rejects is marked and skipped so the drain continues through the rest of the
+demand, `ready` is stamped only once the scheduler goes idle, and GPU
+visibility is reconciled through the changed batches. Three fresh
+headed-Chrome runs present the first coarse frame at 4.232, 4.419, and 4.340 s
+(4.340 s median, 4.419 s observed p95): a 98.38% reduction from the baseline,
+and 61.75× faster than it. All three settle on the *same* endpoint — 93 of 234
+target chunks, 66,927,984 decoded and 67,011,312 GPU bytes with 97,552 bytes of
+headroom — and reach it at a 9.601 s median, against 15.807 s when the drain
+stopped at the first rejection and 64.445 s before that. All 78,173 occurrences
+remain visible and pickable and the same selected IFC properties resolve. One
+cost is recorded rather than hidden: a drain tries every demanded chunk once,
+so all 234 are fetched and decoded and 141 are rejected afterwards, which is
+why 245 Range responses back a 93-chunk resident set.
 
 ### Persistent import cache
 
@@ -230,11 +237,10 @@ See `artifacts/phase1/README.md` for the compiled package,
 - A Firefox repeat and any benchmark or ADR-0003 renderer-decision claim for
   sixty5 remain unrecorded. The Chrome first-useful-frame boundary itself is now
   closed by `artifacts/ifc/sixty5-first-frame/`.
-- A settled real-large resident endpoint. The recorded run admits 55 of 234
-  target chunks under the unchanged 64 MiB budgets because the drain stops at
-  the first rejected chunk, and two of its three runs reached `ready` while the
-  scheduler was still admitting. Both behaviours are recorded rather than
-  fixed in that slice.
+- An admission path that does not fetch what it cannot admit. The resident
+  endpoint is now settled and identical across three runs, but reaching it
+  Range-fetches and decodes all 234 demanded chunks and rejects 141 of them
+  after decode, including one 75 MB chunk no 64 MiB budget can ever hold.
 - Additional repeated reference-hardware profiles for ADR-0003; the first
   Apple-Silicon integrated-GPU record now shows divergent Chrome and Firefox
   CPU-p95 outcomes.
@@ -272,10 +278,12 @@ faster page exposes the remaining real-large residency defects directly: the
 drain stops at the first chunk the byte budget rejects instead of skipping it
 and continuing, and the status can stamp `ready` before the resident set has
 settled — so the recorded endpoint shrank to 55 of 234 target chunks. The next
-increment is therefore skip-and-continue admission with a deferred ready stamp
-and bounded delta GPU reconciliation/visibility, followed by localized Digital
-Hub and sixty5 traces, then persistent cache tiers and screen-space
-priority.
+drain now skips rejected chunks and continues, `ready` waits for an idle
+scheduler, and visibility is reconciled through changed batches only, so the
+recorded endpoint is stable at 93 of 234 target chunks. The next increment is
+therefore estimate-gated prefetch — never fetching a chunk whose decoded size
+already exceeds the budget — followed by localized Digital Hub and sixty5
+traces, then persistent cache tiers and screen-space priority.
 
 On the compiler side the structure document now streams record by record,
 property keys and key combinations are interned once at scene level, and the
@@ -291,9 +299,10 @@ real-model edge re-record remain future increments. The browser gate for the
 sixty5 package is now
 recorded (`artifacts/ifc/sixty5-browser/`): loading, bounded residency,
 picking, and lazy property resolution hold at real-large scale. The named
-268.0 s main-thread first-frame path is now reduced to a 4.242 s median by
-the shared-coarse/persistent-Worker follow-up and the virtualized assembly
-list in `artifacts/ifc/sixty5-first-frame/`. The ADR-0009 persistent import cache is
+268.0 s main-thread first-frame path is now reduced to a 4.340 s median by
+the shared-coarse/persistent-Worker follow-up, the virtualized assembly list,
+and skip-and-continue residency admission in
+`artifacts/ifc/sixty5-first-frame/`. The ADR-0009 persistent import cache is
 now recorded product evidence (`artifacts/cache/`): unchanged pinned sources
 restore byte-identically in seconds instead of recompiling, and corrupt
 entries fail closed. Spatial partitioning, screen-space policy, and runtime

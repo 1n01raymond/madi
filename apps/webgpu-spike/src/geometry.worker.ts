@@ -3,12 +3,13 @@ import {
   prepareCompiledGltfDecoder,
 } from "@naru3d/runtime-webgpu";
 import type {
-  DecodedCompiledScene,
   GeometryRepresentation,
   PreparedCompiledGltfDecoder,
 } from "@naru3d/runtime-webgpu";
 
 import { aggregateCoarseScene } from "./coarse-aggregation.js";
+import { transitSceneForResponse } from "./geometry-transfer.js";
+import type { GeometryTransitScene } from "./geometry-transfer.js";
 import type { GeometryBinarySource, GeometryDocumentSource } from "./scene-source.js";
 
 export type GeometryWorkerRequest =
@@ -35,7 +36,8 @@ export type GeometryWorkerResponse =
   | {
       readonly type: "ready";
       readonly requestId: number;
-      readonly scene: DecodedCompiledScene;
+      /** Chunk decodes omit the hierarchy; the decoder reattaches its cached copy. */
+      readonly scene: GeometryTransitScene;
       readonly coarseInstanceTargetMeshIndexes?: Uint32Array;
       readonly decodeMilliseconds: number;
     }
@@ -176,7 +178,7 @@ async function decode(
       {
         type: "ready",
         requestId: request.requestId,
-        scene,
+        scene: transitSceneForResponse(scene, request.targetChunkId !== undefined),
         ...(coarseInstanceTargetMeshIndexes ? { coarseInstanceTargetMeshIndexes } : {}),
         decodeMilliseconds: performance.now() - startedAt,
       },

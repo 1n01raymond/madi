@@ -20,6 +20,17 @@ export type InstanceVisibilityFilter = (
   instanceIndex: number,
 ) => boolean;
 
+export interface ResidencyVisibilityUpdate {
+  readonly visibility: OccurrenceVisibility;
+  /** Batch indexes whose instance tables changed and need a GPU re-upload. */
+  readonly changedBatchIndexes: readonly number[];
+}
+
+interface ResidencyReuse {
+  readonly previous: OccurrenceVisibility;
+  readonly filterChangedBatchIndexes: readonly number[];
+}
+
 export interface HierarchyVisibilityEntry {
   readonly nodeIndex: number;
   readonly objectId: number;
@@ -47,14 +58,26 @@ export class OccurrenceVisibility {
 
   private readonly scene: GpuScene;
   private readonly instanceFilter?: InstanceVisibilityFilter;
-  private readonly objectIds = new Set<number>();
+  private readonly objectIds: Set<number>;
   private readonly hiddenObjectIds = new Set<number>();
   private isolatedObjectId?: number;
   private visibleOccurrences = 0;
+  private residencyChangedBatchIndexes?: readonly number[];
 
-  constructor(scene: GpuScene, instanceFilter?: InstanceVisibilityFilter) {
+  constructor(
+    scene: GpuScene,
+    instanceFilter?: InstanceVisibilityFilter,
+    residencyReuse?: ResidencyReuse,
+  ) {
     this.scene = scene;
     this.instanceFilter = instanceFilter;
+    if (residencyReuse) {
+      this.objectIds = residencyReuse.previous.objectIds;
+      this.counts = new Uint32Array(scene.batches.length);
+      this.indicesByBatch = this.buildResidencyTables(residencyReuse);
+      return;
+    }
+    this.objectIds = new Set<number>();
     this.indicesByBatch = scene.batches.map(
       (batch) => new Int32Array(batch.instances.length),
     );
@@ -71,6 +94,79 @@ export class OccurrenceVisibility {
       }
     }
     this.rebuildTables();
+  }
+
+  /**
+   * Rebuilds visibility for a scene whose batch list changed only through
+   * residency (chunk admissions and evictions). Instance tables of batches the
+   * previous scene already carried are reused by object identity; only new
+   * batches and the listed filter-changed batch indexes are recomputed.
+   *
+   * Contract: the distinct object-id universe must be unchanged (target-batch
+   * ids are a subset of the coarse ids they replace), and `previous` must not
+   * be used afterwards — its tables now belong to the returned instance.
+   */
+  static forResidencyUpdate(
+    previous: OccurrenceVisibility,
+    scene: GpuScene,
+    instanceFilter?: InstanceVisibilityFilter,
+    filterChangedBatchIndexes: readonly number[] = [],
+  ): ResidencyVisibilityUpdate {
+    const visibility = new OccurrenceVisibility(scene, instanceFilter, {
+      previous,
+      filterChangedBatchIndexes,
+    });
+    return {
+      visibility,
+      changedBatchIndexes: visibility.residencyChangedBatchIndexes ?? [],
+    };
+  }
+
+  private buildResidencyTables(reuse: ResidencyReuse): readonly Int32Array[] {
+    const { previous } = reuse;
+    for (const objectId of previous.hiddenObjectIds) this.hiddenObjectIds.add(objectId);
+    this.isolatedObjectId = previous.isolatedObjectId;
+    // Distinct visible ids are invariant under residency swaps: an admitted
+    // mesh's coarse instances become masked while its target instances appear,
+    // and an evicted mesh's coarse instances unmask again.
+    this.visibleOccurrences = previous.visibleOccurrences;
+    const priorTables = new Map<
+      GpuScene["batches"][number],
+      { readonly indices: Int32Array; readonly count: number }
+    >();
+    previous.scene.batches.forEach((batch, batchIndex) => {
+      const indices = previous.indicesByBatch[batchIndex];
+      const count = previous.counts[batchIndex];
+      if (indices && count !== undefined) priorTables.set(batch, { indices, count });
+    });
+    const filterChanged = new Set(reuse.filterChangedBatchIndexes);
+    const changed: number[] = [];
+    const tables = this.scene.batches.map((batch, batchIndex) => {
+      const prior = priorTables.get(batch);
+      if (prior && !filterChanged.has(batchIndex)) {
+        this.counts[batchIndex] = prior.count;
+        return prior.indices;
+      }
+      changed.push(batchIndex);
+      const indices = prior?.indices ?? new Int32Array(batch.instances.length);
+      let count = 0;
+      batch.instances.forEach((instance, sourceIndex) => {
+        if (!this.objectIds.has(instance.objectId)) {
+          throw new RangeError(`Unknown scene object ID ${instance.objectId}.`);
+        }
+        if (
+          this.isVisibleKnown(instance.objectId) &&
+          (this.instanceFilter?.(batchIndex, sourceIndex) ?? true)
+        ) {
+          indices[count] = sourceIndex;
+          count += 1;
+        }
+      });
+      this.counts[batchIndex] = count;
+      return indices;
+    });
+    this.residencyChangedBatchIndexes = changed;
+    return tables;
   }
 
   hide(objectId: number): void {
@@ -93,7 +189,10 @@ export class OccurrenceVisibility {
   }
 
   isVisible(objectId: number): boolean {
-    if (!this.objectIds.has(objectId)) return false;
+    return this.objectIds.has(objectId) && this.isVisibleKnown(objectId);
+  }
+
+  private isVisibleKnown(objectId: number): boolean {
     return this.isolatedObjectId === undefined
       ? !this.hiddenObjectIds.has(objectId)
       : this.isolatedObjectId === objectId;

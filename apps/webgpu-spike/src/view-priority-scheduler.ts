@@ -332,6 +332,8 @@ export class CameraTargetScheduler<Result> {
   private paused = false;
   private stopped = false;
   private blockedDemandSignature: string | undefined;
+  private latestDemandSignature = "";
+  private readonly rejectedChunkIds = new Set<string>();
 
   constructor(index: TargetChunkRanker, hooks: TargetSchedulerHooks<Result>) {
     this.index = index;
@@ -342,13 +344,18 @@ export class CameraTargetScheduler<Result> {
     if (this.stopped) return;
     const ranked = this.index.rank(frame);
     const demandSignature = this.signature(ranked);
+    if (demandSignature !== this.latestDemandSignature) {
+      this.latestDemandSignature = demandSignature;
+      this.rejectedChunkIds.clear();
+    }
     this.ranked = ranked;
     this.rankCursor = 0;
     this.hooks.reprioritize?.(this.ranked);
     if (this.blockedDemandSignature === demandSignature) return;
     this.blockedDemandSignature = undefined;
     const next = this.ranked.find(
-      ({ chunk, demanded }) => demanded && !this.hooks.isResident(chunk),
+      ({ chunk, demanded }) =>
+        demanded && !this.rejectedChunkIds.has(chunk.id) && !this.hooks.isResident(chunk),
     );
     if (
       this.active &&
@@ -375,6 +382,7 @@ export class CameraTargetScheduler<Result> {
     if (this.stopped || !this.paused) return;
     this.paused = false;
     this.blockedDemandSignature = undefined;
+    this.rejectedChunkIds.clear();
     this.rankCursor = 0;
     this.ensureRun();
   }
@@ -383,12 +391,18 @@ export class CameraTargetScheduler<Result> {
     while (this.running) await this.running;
   }
 
+  /** True while the current demand still contains chunks the budget rejected. */
+  get blocked(): boolean {
+    return this.blockedDemandSignature !== undefined && this.rejectedChunkIds.size > 0;
+  }
+
   stop(): void {
     if (this.stopped) return;
     this.stopped = true;
     this.active?.controller.abort();
     this.active = undefined;
     this.blockedDemandSignature = undefined;
+    this.rejectedChunkIds.clear();
   }
 
   private ensureRun(): void {
@@ -412,12 +426,23 @@ export class CameraTargetScheduler<Result> {
       while (this.rankCursor < this.ranked.length) {
         const candidate = this.ranked[this.rankCursor];
         this.rankCursor += 1;
-        if (candidate?.demanded && !this.hooks.isResident(candidate.chunk)) {
+        if (
+          candidate?.demanded &&
+          !this.rejectedChunkIds.has(candidate.chunk.id) &&
+          !this.hooks.isResident(candidate.chunk)
+        ) {
           ranked = candidate;
           break;
         }
       }
-      if (!ranked) return;
+      if (!ranked) {
+        // Every remaining demanded chunk is resident or was rejected by the
+        // budget; only a demand change can make a rejected chunk fit again.
+        if (this.rejectedChunkIds.size > 0) {
+          this.blockedDemandSignature = this.latestDemandSignature;
+        }
+        return;
+      }
       const controller = new AbortController();
       this.active = {
         chunkId: ranked.chunk.id,
@@ -445,8 +470,10 @@ export class CameraTargetScheduler<Result> {
           viewPriority: current.viewPriority,
         });
         if (!admitted) {
-          this.blockedDemandSignature = this.signature(this.ranked);
-          return;
+          // Skip-and-continue: a chunk the budget cannot take right now must
+          // not starve smaller chunks ranked behind it.
+          this.rejectedChunkIds.add(ranked.chunk.id);
+          continue;
         }
       } catch (error) {
         if (!isAbortError(error)) {

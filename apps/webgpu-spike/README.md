@@ -89,7 +89,10 @@ surface batches. One session Worker validates the glTF document, composes its
 float64 world transforms, and indexes target-chunk occurrence membership once.
 Every later Range decode reuses that state and visits only the selected chunk's
 renderable occurrences; transferred results clone only their occurrence
-transforms so the prepared state remains attached. Prototype-local surface
+transforms so the prepared state remains attached. Chunk decode responses omit
+the document hierarchy — it crosses the Worker boundary once and the decoder
+reattaches its cached copy, so per-admission messages carry only the chunk's
+own batches. Prototype-local surface
 bounds are cached once and only eight corners are transformed per occurrence,
 rather than rescanning every vertex. IFC compilation coalesces adjacent prototype ranges
 into deterministic requests (512 KiB by default), while the existing
@@ -97,7 +100,11 @@ into deterministic requests (512 KiB by default), while the existing
 with contiguous occurrence transforms. The browser enforces separate 64 MiB
 decoded and GPU admission budgets. Promoted targets mask matching coarse
 instances; evicting colder target groups reveals those shared fallbacks again,
-so visibility intent and stable object IDs survive every batch update. Target
+so visibility intent and stable object IDs survive every batch update. An
+admission is delta-priced end to end: residency totals update incrementally,
+visibility tables of unchanged batches are reused by object identity (only the
+shared coarse mask and new batches recompute), and the renderer re-packs and
+re-uploads instance buffers for the changed batches only. Target
 promotion reuses the hierarchy's node lookup and does not rescan DOM visibility
 markers because residency changes no user visibility intent. Add
 `?residencyMiB=5` to force a small budget during local exploration. Orbit,

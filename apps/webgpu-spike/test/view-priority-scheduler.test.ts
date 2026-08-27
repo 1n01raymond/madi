@@ -19,6 +19,7 @@ import {
   SpatialTargetChunkViewIndex,
   TargetChunkViewIndex,
 } from "../src/view-priority-scheduler.js";
+import type { RankedTargetChunk } from "../src/view-priority-scheduler.js";
 
 const identity = new Float64Array([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]);
 
@@ -74,6 +75,16 @@ function coarse(chunks: readonly CompiledTargetChunk[]): DecodedCompiledScene {
 }
 
 const viewProjection = new Float32Array([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]);
+
+function demandedRanking(chunks: readonly CompiledTargetChunk[]): readonly RankedTargetChunk[] {
+  return chunks.map((entry, viewPriority) => ({
+    chunk: entry,
+    viewPriority,
+    visibleBounds: true,
+    screenDistanceSquared: viewPriority,
+    demanded: true,
+  }));
+}
 
 describe("view-prioritized target scheduling", () => {
   it("reorders the committed progressive package after a fixed pan", async () => {
@@ -277,6 +288,114 @@ describe("view-prioritized target scheduling", () => {
     await scheduler.whenIdle();
 
     expect(requested).toEqual(["near", "far"]);
+    scheduler.stop();
+  });
+
+  it("continues past a rejected chunk to admit later demanded chunks", async () => {
+    const chunks = [chunk("huge", 0, 0), chunk("small-a", 1, 1), chunk("small-b", 2, 2)];
+    const requested: string[] = [];
+    const resident = new Set<string>();
+    const scheduler = new CameraTargetScheduler({ rank: () => demandedRanking(chunks) }, {
+      isResident: (entry) => resident.has(entry.id),
+      load: async (entry) => {
+        requested.push(entry.id);
+        return entry.id;
+      },
+      admit: (entry) => {
+        if (entry.id === "huge") return false;
+        resident.add(entry.id);
+        return true;
+      },
+      onError: (error) => {
+        throw error;
+      },
+    });
+
+    scheduler.update({ viewProjection, origin: [0, 0, 0] });
+    await scheduler.whenIdle();
+
+    expect(requested).toEqual(["huge", "small-a", "small-b"]);
+    expect([...resident]).toEqual(["small-a", "small-b"]);
+    scheduler.stop();
+  });
+
+  it("does not refetch a rejected chunk when the same demand reranks mid-drain", async () => {
+    const chunks = [chunk("huge", 0, 0), chunk("small-a", 1, 1), chunk("small-b", 2, 2)];
+    const requested: string[] = [];
+    const resident = new Set<string>();
+    let releaseSmallA: (() => void) | undefined;
+    let smallAStarted: (() => void) | undefined;
+    const smallARequested = new Promise<void>((resolve) => {
+      smallAStarted = resolve;
+    });
+    const scheduler = new CameraTargetScheduler({ rank: () => demandedRanking(chunks) }, {
+      isResident: (entry) => resident.has(entry.id),
+      load: async (entry) => {
+        requested.push(entry.id);
+        if (entry.id === "small-a") {
+          smallAStarted?.();
+          await new Promise<void>((resolve) => {
+            releaseSmallA = resolve;
+          });
+        }
+        return entry.id;
+      },
+      admit: (entry) => {
+        if (entry.id === "huge") return false;
+        resident.add(entry.id);
+        return true;
+      },
+      onError: (error) => {
+        throw error;
+      },
+    });
+
+    scheduler.update({ viewProjection, origin: [0, 0, 0] });
+    await smallARequested;
+    scheduler.update({ viewProjection, origin: [0, 0, 0] });
+    releaseSmallA?.();
+    await scheduler.whenIdle();
+
+    expect(requested).toEqual(["huge", "small-a", "small-b"]);
+    scheduler.stop();
+  });
+
+  it("retries a rejected chunk after the demand set changes", async () => {
+    const chunks = [chunk("huge", 0, 0), chunk("small", 1, 1)];
+    let demandedIds = ["huge", "small"];
+    let admitHuge = false;
+    const requested: string[] = [];
+    const resident = new Set<string>();
+    const scheduler = new CameraTargetScheduler(
+      { rank: () => demandedRanking(chunks.filter(({ id }) => demandedIds.includes(id))) },
+      {
+        isResident: (entry) => resident.has(entry.id),
+        load: async (entry) => {
+          requested.push(entry.id);
+          return entry.id;
+        },
+        admit: (entry) => {
+          if (entry.id === "huge" && !admitHuge) return false;
+          resident.add(entry.id);
+          return true;
+        },
+        onError: (error) => {
+          throw error;
+        },
+      },
+    );
+
+    scheduler.update({ viewProjection, origin: [0, 0, 0] });
+    await scheduler.whenIdle();
+    expect(requested).toEqual(["huge", "small"]);
+
+    demandedIds = ["huge"];
+    admitHuge = true;
+    scheduler.update({ viewProjection, origin: [0, 0, 0] });
+    await scheduler.whenIdle();
+
+    expect(requested).toEqual(["huge", "small", "huge"]);
+    expect(resident.has("huge")).toBe(true);
     scheduler.stop();
   });
 });

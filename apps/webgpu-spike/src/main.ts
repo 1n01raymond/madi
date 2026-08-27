@@ -28,6 +28,7 @@ import { formatPropertyValue, PropertySidecarStore } from "./property-sidecar.js
 import { loadSpatialDemandIndex } from "./spatial-demand-source.js";
 import { OrthographicOrbitCamera } from "./view.js";
 import { hiddenHierarchyNodeIndices, OccurrenceVisibility } from "./visibility.js";
+import type { ResidencyVisibilityUpdate } from "./visibility.js";
 import {
   defaultProgressiveResidencyBudget,
   ProgressiveResidency,
@@ -82,18 +83,47 @@ function binarySourceForChunk(
   };
 }
 
+function residencyInstanceFilter(
+  coarseInstanceTargetMeshIndexes: Uint32Array,
+  residentTargetMeshIndexes: readonly number[],
+): (batchIndex: number, instanceIndex: number) => boolean {
+  const residentTargets = new Set(residentTargetMeshIndexes);
+  return (batchIndex, instanceIndex) =>
+    batchIndex !== 0 ||
+    !residentTargets.has(coarseInstanceTargetMeshIndexes[instanceIndex] ?? -1);
+}
+
 function occurrenceVisibilityForResidency(
   scene: DecodedCompiledScene["gpuScene"],
   coarseInstanceTargetMeshIndexes: Uint32Array | undefined,
   residentTargetMeshIndexes: readonly number[],
 ): OccurrenceVisibility {
   if (!coarseInstanceTargetMeshIndexes) return new OccurrenceVisibility(scene);
-  const residentTargets = new Set(residentTargetMeshIndexes);
   return new OccurrenceVisibility(
     scene,
-    (batchIndex, instanceIndex) =>
-      batchIndex !== 0 ||
-      !residentTargets.has(coarseInstanceTargetMeshIndexes[instanceIndex] ?? -1),
+    residencyInstanceFilter(coarseInstanceTargetMeshIndexes, residentTargetMeshIndexes),
+  );
+}
+
+/**
+ * Rebuilds only what an admission or eviction changed: reused batch tables are
+ * carried by object identity, the aggregate coarse batch (index 0) recomputes
+ * its promotion mask, and user hide/isolate state transfers without a rescan.
+ */
+function occurrenceVisibilityResidencyUpdate(
+  previous: OccurrenceVisibility,
+  scene: DecodedCompiledScene["gpuScene"],
+  coarseInstanceTargetMeshIndexes: Uint32Array | undefined,
+  residentTargetMeshIndexes: readonly number[],
+): ResidencyVisibilityUpdate {
+  if (!coarseInstanceTargetMeshIndexes) {
+    return OccurrenceVisibility.forResidencyUpdate(previous, scene);
+  }
+  return OccurrenceVisibility.forResidencyUpdate(
+    previous,
+    scene,
+    residencyInstanceFilter(coarseInstanceTargetMeshIndexes, residentTargetMeshIndexes),
+    [0],
   );
 }
 
@@ -580,8 +610,18 @@ async function loadScene(source: SceneSource): Promise<boolean> {
       document.documentElement.dataset.visibleOccurrences = String(state.visibleOccurrences);
     };
 
-    const applyVisibility = ({ syncHierarchy = true } = {}): void => {
-      renderer.updateVisibleInstances(visibility.indicesByBatch, visibility.counts);
+    const applyVisibility = ({
+      syncHierarchy = true,
+      changedBatchIndexes,
+    }: {
+      syncHierarchy?: boolean;
+      changedBatchIndexes?: readonly number[];
+    } = {}): void => {
+      renderer.updateVisibleInstances(
+        visibility.indicesByBatch,
+        visibility.counts,
+        changedBatchIndexes,
+      );
       if (syncHierarchy) {
         hierarchyView.setHiddenNodeIndices(
           hiddenHierarchyNodeIndices(scene.objectEvidence, (objectId) =>
@@ -599,7 +639,7 @@ async function loadScene(source: SceneSource): Promise<boolean> {
     let schedulerFailure: unknown;
     let schedulerRequests = 0;
     let schedulerCancellations = 0;
-    let schedulerBlocked = false;
+    let finalizePending = false;
     let spatialViewIndex: SpatialTargetChunkViewIndex | undefined;
     const residentChunkCount = (): number => {
       if (!progressiveResidency) return 0;
@@ -611,7 +651,6 @@ async function loadScene(source: SceneSource): Promise<boolean> {
       promotion: ReturnType<ProgressiveResidency["promote"]>,
       target: GeometryDecodeResult,
     ): void => {
-      const visibilitySnapshot = visibility.snapshot();
       scene = {
         ...scene,
         gpuScene: {
@@ -634,12 +673,13 @@ async function loadScene(source: SceneSource): Promise<boolean> {
         promotion.entries.map(({ key, batch }) => ({ key, batch })),
         { sharedObjectIdsAcrossBatches: true },
       );
-      visibility = occurrenceVisibilityForResidency(
+      const visibilityUpdate = occurrenceVisibilityResidencyUpdate(
+        visibility,
         scene.gpuScene,
         initial.coarseInstanceTargetMeshIndexes,
         promotion.targetMeshIndexes,
       );
-      visibility.restore(visibilitySnapshot);
+      visibility = visibilityUpdate.visibility;
       decodeMilliseconds += target.decodeMilliseconds;
       decodedTargetBytes += target.scene.summary.binaryBytes;
       residentDecodedBytes = promotion.decodedBytes;
@@ -668,7 +708,10 @@ async function loadScene(source: SceneSource): Promise<boolean> {
       );
       // Residency changes batch membership, not the user's visibility intent. The
       // hierarchy markers therefore remain valid and must not be rescanned here.
-      applyVisibility({ syncHierarchy: false });
+      applyVisibility({
+        syncHierarchy: false,
+        changedBatchIndexes: visibilityUpdate.changedBatchIndexes,
+      });
     };
     const finalizeProgressiveStatus = (): void => {
       if (!progressiveResidency) return;
@@ -682,7 +725,8 @@ async function loadScene(source: SceneSource): Promise<boolean> {
       document.documentElement.dataset.residentGpuBytes = String(renderer.residentGpuBytes);
       document.documentElement.dataset.geometryRepresentation = complete ? "target" : "mixed";
       const spatialStats = spatialViewIndex?.queryStats();
-      const spatialDemandSatisfied = spatialStats !== undefined && !schedulerBlocked;
+      const spatialDemandSatisfied =
+        spatialStats !== undefined && !(sessionResources.targetScheduler?.blocked ?? false);
       if (complete || spatialDemandSatisfied) {
         delete document.documentElement.dataset.residencyBudgetReached;
       } else {
@@ -712,11 +756,24 @@ async function loadScene(source: SceneSource): Promise<boolean> {
           `(budget ${formatBytes(residencyBudget)})`,
       );
     };
+    // A "blocked" event arrives mid-drain: the scheduler skips the rejected
+    // chunk and keeps admitting smaller ones behind it, so stamping the ready
+    // status here would publish a transient below-budget endpoint. Defer the
+    // stamp until the scheduler has drained every admissible chunk.
+    const scheduleDeferredFinalize = (): void => {
+      const scheduler = sessionResources.targetScheduler;
+      if (!scheduler || finalizePending) return;
+      finalizePending = true;
+      void scheduler.whenIdle().then(() => {
+        finalizePending = false;
+        if (disposed) return;
+        finalizeProgressiveStatus();
+      });
+    };
     const recordSchedulerEvent = (event: TargetSchedulerEvent): void => {
       document.documentElement.dataset.targetSchedulerChunk = event.chunkId;
       document.documentElement.dataset.targetSchedulerPriority = String(event.viewPriority);
       if (event.type === "request") {
-        schedulerBlocked = false;
         schedulerRequests += 1;
         document.documentElement.dataset.targetSchedulerRequests = String(schedulerRequests);
       } else if (event.type === "cancel") {
@@ -726,8 +783,7 @@ async function loadScene(source: SceneSource): Promise<boolean> {
         );
         document.documentElement.dataset.targetSchedulerCancelledChunk = event.chunkId;
       } else if (event.type === "blocked") {
-        schedulerBlocked = true;
-        finalizeProgressiveStatus();
+        scheduleDeferredFinalize();
       } else if (residentChunkCount() === hierarchy.targetChunks.length) {
         finalizeProgressiveStatus();
       }
