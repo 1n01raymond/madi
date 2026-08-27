@@ -52,10 +52,9 @@ assert(
   coarseFrameMs <= 8_000 && coarseFrameMs - hierarchyReadyMs <= 4_000,
   "The shared-coarse record must present its first frame within 8 s overall and 4 s of hierarchy.",
 );
-// The drain no longer stops at the first rejected chunk, the ready state is
-// stamped only once the scheduler is idle, and unadmittable chunks are never
-// fetched, so the record settles at 8.277 s (median of three runs: 7.669 s,
-// 8.277 s, 8.459 s) instead of admitting past its own ready stamp.
+// Sharing one vertex pool across a prototype's material groups leaves the
+// record settling at 8.943 s (median of three runs: 8.887 s, 8.943 s,
+// 9.077 s) while admitting 18 more chunks than the per-material copies did.
 assert(readyMs <= 20_000, "The settled record must reach its ready state within 20 s.");
 
 const { dataset } = evidence.snapshot;
@@ -68,22 +67,24 @@ assert(
   "The optimized record must reach a budget-limited rendered state through coarse residency.",
 );
 assert(
-  dataset.targetChunksReady === "93" && dataset.targetChunksTotal === "234",
-  "Skip-and-continue admission must admit the recorded 93/234 target chunk set.",
+  dataset.targetChunksReady === "111" && dataset.targetChunksTotal === "234",
+  "The pooled resident set must admit the recorded 111/234 target chunk set.",
 );
 // Estimate-gated prefetch: every demanded chunk is still considered exactly
-// once per demand signature, but the 141 the budget cannot take are refused
+// once per demand signature, but the ones the budget cannot take are refused
 // from their measured cost, so they cost neither a range request nor a decode.
+// Charging each vertex pool once moves 18 of those chunks from skipped to
+// admitted -- and leaves no chunk that exceeds the budget on its own.
 assert(
-  dataset.targetSchedulerRequests === "93" &&
-    dataset.targetSchedulerSkips === "141" &&
+  dataset.targetSchedulerRequests === "111" &&
+    dataset.targetSchedulerSkips === "123" &&
     Number(dataset.targetSchedulerRequests) + Number(dataset.targetSchedulerSkips) ===
       Number(dataset.targetChunksTotal),
-  "The gate must skip the 141 unadmittable chunks and request only the 93 it admits.",
+  "The gate must skip the 123 chunks the full budget cannot take and request the 111 it admits.",
 );
 assert(
-  dataset.residentDecodedBytes === "66927984" &&
-    dataset.residentGpuBytes === "67011312" &&
+  dataset.residentDecodedBytes === "66686508" &&
+    dataset.residentGpuBytes === "66783808" &&
     Number(dataset.residentDecodedBytes) <= budgetBytes &&
     Number(dataset.residentGpuBytes) <= budgetBytes,
   "The deterministic optimized resident set must remain inside both 64 MiB budgets.",
@@ -95,14 +96,14 @@ assert(
   "The optimized record must retain every sixty5 occurrence and prototype identity.",
 );
 assert(
-  evidence.snapshot.triangleCount === "1,849,190" && evidence.snapshot.edgeCount === "12",
+  evidence.snapshot.triangleCount === "2,255,235" && evidence.snapshot.edgeCount === "12",
   "The optimized resident frame must report its deterministic shared-coarse geometry counts.",
 );
 assert(
   evidence.snapshot.statusState === "ready" &&
     evidence.snapshot.statusStage === "rendered" &&
     evidence.snapshot.status ===
-      "Residency budget reached · 20833 surface batches retained · 78173 renderable occurrences",
+      "Residency budget reached · 24326 surface batches retained · 78173 renderable occurrences",
   "The optimized scene must reach its deterministic rendered ready state.",
 );
 assert(
@@ -122,20 +123,22 @@ assert(
 const rangeResponses = evidence.binaryRequests.filter(
   (request) => request.resource.startsWith("scene.bin") && request.range !== null,
 );
-// 94 = the 93 admitted chunks plus the one the selection path pins after
-// picking. Fetching every demanded chunk cost 245 responses before the gate.
+// 113 = the 111 admitted chunks, the one the selection path pins after
+// picking, and that chunk's second fetch. Fetching every demanded chunk cost
+// 245 responses before the gate, for 93 chunks.
 assert(
-  rangeResponses.length === 94 &&
+  rangeResponses.length === 113 &&
     rangeResponses.every(
       (request) => request.status === 206 && /^bytes=\d+-\d+$/u.test(request.range),
     ),
   "Every promoted target chunk must come from a satisfied HTTP Range request.",
 );
-// Decoding 141 chunks the budget then rejected peaked at 1.788 GB, including a
-// single ~75 MB chunk no 64 MiB budget can ever admit.
+// Fetching and decoding every demanded chunk peaked at 1.788 GB. The gate cut
+// that to 1.481 GB; pooled vertices raise it again to 1.625 GB because 18 more
+// chunks are now admitted and their decoded payload is retained, not discarded.
 assert(
-  evidence.snapshot.usedJsHeapBytes <= 1_600_000_000,
-  "The gated record must stay below the heap the fetch-everything drain reached.",
+  evidence.snapshot.usedJsHeapBytes <= 1_750_000_000,
+  "The pooled record must stay below the heap the fetch-everything drain reached.",
 );
 assert(
   Array.isArray(evidence.consoleIssues) && evidence.consoleIssues.length === 0,
