@@ -10,7 +10,7 @@ outside Git because they are large reproducible inputs or derived caches.
 | `digital-hub/` | First four-discipline IFC → Scene IR → glTF vertical slice |
 | `sixty5/` | First real-large seven-discipline extraction and the measured compiler boundary |
 | `sixty5-browser/` | Original real-large browser/residency record and 268.0 s first-frame baseline |
-| `sixty5-first-frame/` | Shared-coarse and virtualized-list follow-up: 4.242 s median first frame on the identical package |
+| `sixty5-first-frame/` | Shared-coarse, virtualized-list, and skip-and-continue follow-up: 4.340 s median first frame on the identical package |
 
 Normal CI runs `pnpm ifc:edges:check` and `pnpm ifc:federation:check` without
 downloading IFC files or installing IfcOpenShell. Re-recording evidence requires

@@ -53,8 +53,8 @@
       </a>
       <br />
       <sub><strong>真实的超大 IFC federation。</strong> 839.9 MB 的七专业
-      <code>sixty5</code> 模型：2.2 秒内层级与搜索就绪，全部 78,173 个可渲染
-      occurrence 的首个 coarse frame 在 4.2 秒内呈现，geometry 始终保持在
+      <code>sixty5</code> 模型：2.4 秒内层级与搜索就绪，全部 78,173 个可渲染
+      occurrence 的首个 coarse frame 在 4.3 秒内呈现，geometry 始终保持在
       固定的 64 MiB 预算之内，被选中的基础梁解析出自身的 IFC 属性。
       <a href="artifacts/ifc/sixty5-browser/README.md">residency 证据</a> ·
       <a href="artifacts/ifc/sixty5-first-frame/README.md">首帧证据</a></sub>
@@ -75,12 +75,12 @@
 | 细节几何通过普通 HTTP 渐进流式传输 | 28 次 `scene.bin` 请求全部为 HTTP 206 `bytes=` Range 响应（[sixty5 浏览器记录](artifacts/ifc/sixty5-browser/README.md)） |
 | 无论场景多大，内存都保持在声明的预算内 | promotion 在 234 个 chunk 的第 26 个处停止；解码与 GPU 字节均保持在 64 MiB 以下（[sixty5 浏览器记录](artifacts/ifc/sixty5-browser/README.md)） |
 | 选择可解析回源 CAD/BIM 标识 | 被选中的基础梁按需解析出 6 条 IFC 属性条目（[sixty5 浏览器记录](artifacts/ifc/sixty5-browser/README.md)） |
-| 超大规模的首帧以秒计，而不是分钟 | 共享 coarse Worker 路径与虚拟化的装配列表将 sixty5 首个 coarse frame 从 268.0 秒缩短到中位数 4.2 秒 —— 提速 63.2 倍（[首帧记录](artifacts/ifc/sixty5-first-frame/README.md)） |
+| 超大规模的首帧以秒计，而不是分钟 | 共享 coarse Worker 路径、虚拟化的装配列表，以及跳过被拒绝分块的 residency admission 将 sixty5 首个 coarse frame 从 268.0 秒缩短到中位数 4.3 秒 —— 提速 61.8 倍（[首帧记录](artifacts/ifc/sixty5-first-frame/README.md)） |
 | 相机移动会取消过时的下载，而不是等待它们 | 已不需要的 fastener Range 请求被中止，新可见的 mounting-plate Range 优先发出 —— Chrome 与 Firefox 行为一致（[浏览器 matrix](artifacts/browser-matrix/README.md)） |
 | 距原点 10,000 km 的坐标仍保持精度 | 0.25 mm 的板间隙以 ≤ 0.001 mm 的误差编译，两个引擎渲染均零像素漂移（[精度记录](artifacts/precision/large-coordinates/README.md)） |
 | 可将包打包为让邻近 geometry 一起传输（opt-in） | leaf-anchor payload 排序在 Digital Hub census 中将 off-view 字节总量削减 39.9%（[spatial demand 记录](artifacts/spatial-demand/README.md)） |
 | 编译结果逐字节可复现 | 两次完整的 sixty5 编译产生逐字节相同的包（[编译证据](artifacts/ifc/sixty5/README.md)） |
-| **尚未做到：** 超大规模下交互级的就绪状态与跨浏览器性能结论 | 4.2 秒首帧是单台独立 GPU 主机上的单次 Chrome 记录，预算受限的就绪状态仍需 15.8 秒（[首帧记录](artifacts/ifc/sixty5-first-frame/README.md)） |
+| **尚未做到：** 超大规模下交互级的就绪状态与跨浏览器性能结论 | 4.3 秒首帧是单台独立 GPU 主机上的单次 Chrome 记录，抵达 9.6 秒就绪状态仍需获取并解码全部 234 个被请求的分块，事后拒绝其中 141 个（[首帧记录](artifacts/ifc/sixty5-first-frame/README.md)） |
 
 ## 从哪里开始
 
