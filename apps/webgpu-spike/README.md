@@ -52,6 +52,20 @@ result. Viewport, tree, and search selection populate the same source-identity
 property panel, including glTF node/object IDs and a bounded preview of
 revision-local CAD edge references.
 
+The assembly tree is virtualized: only the rows its scrollport covers exist as
+elements, and the rest of the list is two spacers. The sixty5 federation has
+188,319 rows, which used to be 565,134 elements; a host with accessibility mode
+enabled then spent minutes walking that tree before the first frame could be
+painted, because the browser process stops servicing its own network sockets
+while it does. Arrow, Home, and End move a roving focus across the whole list
+rather than the rendered window, so keyboard and screen-reader users still
+reach every row, and search, review visibility, and picked-row reveal all
+address rows by position. Row names ellipsize instead of wrapping, so every row
+is the same height and the window arithmetic
+(`apps/webgpu-spike/src/hierarchy-list.ts`, `pnpm test`) stays exact. The
+measured effect on the sixty5 first frame is in
+`artifacts/ifc/sixty5-first-frame/README.md`.
+
 When the package carries the property sidecar (`properties.json` +
 `properties.bin`, `docs/COMPILER.md` section 21.2), selecting an occurrence
 also resolves its IFC property sets: the sidecar is fetched lazily on the

@@ -53,8 +53,8 @@ captures those records pin by digest.
       <br />
       <sub><strong>A real-large IFC federation.</strong> The 839.9 MB
       seven-discipline <code>sixty5</code> model: hierarchy and search ready in
-      3.3 s, a first coarse frame of all 78,173 renderable occurrences in
-      12.8 s, geometry held inside a fixed 64 MiB budget, and a picked
+      2.2 s, a first coarse frame of all 78,173 renderable occurrences in
+      4.2 s, geometry held inside a fixed 64 MiB budget, and a picked
       foundation beam resolving its IFC properties.
       <a href="artifacts/ifc/sixty5-browser/README.md">Residency evidence</a> ·
       <a href="artifacts/ifc/sixty5-first-frame/README.md">First-frame evidence</a></sub>
@@ -76,12 +76,12 @@ NARU.</sub>
 | Detail streams progressively over plain HTTP | 28 `scene.bin` requests, every one an HTTP 206 `bytes=` Range response ([sixty5 browser record](artifacts/ifc/sixty5-browser/README.md)) |
 | Memory stays inside a declared budget at any scene size | promotion stopped at chunk 26 of 234; decoded and GPU bytes both held under 64 MiB ([sixty5 browser record](artifacts/ifc/sixty5-browser/README.md)) |
 | Selection resolves to source CAD/BIM identity | a picked foundation beam lazily resolves its 6 IFC property entries ([sixty5 browser record](artifacts/ifc/sixty5-browser/README.md)) |
-| A real-large first frame arrives in seconds, not minutes | the shared-coarse Worker path cut the sixty5 first coarse frame from 268.0 s to a 12.8 s median, a 20.9× speedup ([first-frame record](artifacts/ifc/sixty5-first-frame/README.md)) |
+| A real-large first frame arrives in seconds, not minutes | the shared-coarse Worker path and a virtualized assembly list cut the sixty5 first coarse frame from 268.0 s to a 4.2 s median, a 63.2× speedup ([first-frame record](artifacts/ifc/sixty5-first-frame/README.md)) |
 | Camera moves cancel stale downloads instead of waiting on them | an obsolete fastener Range request was aborted and the newly visible mounting-plate Range issued first, in both Chrome and Firefox ([browser matrix](artifacts/browser-matrix/README.md)) |
 | Coordinates 10,000 km from the origin stay precise | a 0.25 mm plate gap compiles with ≤ 0.001 mm error and renders with zero pixel drift in both engines ([precision record](artifacts/precision/large-coordinates/README.md)) |
 | Packages can be packed so nearby geometry travels together (opt-in) | leaf-anchor payload ordering cut summed off-view bytes 39.9% on the Digital Hub census ([spatial demand record](artifacts/spatial-demand/README.md)) |
 | Compiles are reproducible, byte for byte | two full sixty5 compilations produced byte-identical packages ([compile evidence](artifacts/ifc/sixty5/README.md)) |
-| **Not yet:** interactive-grade readiness or cross-browser performance claims at real-large scale | the 12.8 s first frame is a single Chrome record on one discrete-GPU host, and the budget-limited ready state still takes 64.4 s ([first-frame record](artifacts/ifc/sixty5-first-frame/README.md)) |
+| **Not yet:** interactive-grade readiness or cross-browser performance claims at real-large scale | the 4.2 s first frame is a single Chrome record on one discrete-GPU host, and the budget-limited ready state still takes 15.8 s ([first-frame record](artifacts/ifc/sixty5-first-frame/README.md)) |
 
 ## Where to start
 

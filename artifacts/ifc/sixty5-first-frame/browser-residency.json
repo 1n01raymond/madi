@@ -1,10 +1,10 @@
 {
   "schemaVersion": "madi.ifc-browser-residency.2",
-  "capturedAt": "2026-08-26T04:23:33.889Z",
+  "capturedAt": "2026-08-27T06:53:26.159Z",
   "browser": {
     "id": "chrome",
     "engine": "Blink",
-    "version": "152.0.7977.64",
+    "version": "151.0.7922.139",
     "headless": false,
     "viewport": {
       "width": 1320,
@@ -14,6 +14,10 @@
   "host": {
     "platform": "win32",
     "architecture": "x64"
+  },
+  "capture": {
+    "coarseScreenshotSkipped": false,
+    "residencyMiB": null
   },
   "source": {
     "buildReport": "artifacts/ifc/sixty5/build-report.json",
@@ -53,1532 +57,1797 @@
     "servedFrom": "Vite dev static hosting with HTTP Range support"
   },
   "milestones": {
-    "hierarchyReadyMs": 4135,
-    "coarseFrameMs": 12553,
-    "readyMs": 63206
+    "hierarchyReadyMs": 2236,
+    "coarseFrameMs": 4284,
+    "readyMs": 17194
   },
   "snapshot": {
-    "status": "Residency budget reached · 20295 surface batches retained · 78173 renderable occurrences",
+    "status": "Residency budget reached · 13969 surface batches retained · 78173 renderable occurrences",
     "statusState": "ready",
     "statusStage": "rendered",
     "prototypeCount": "42435",
     "occurrenceCount": "78173",
-    "triangleCount": "1,585,233",
+    "triangleCount": "1,129,693",
     "edgeCount": "12",
     "binarySize": "117,878.0 KiB",
-    "decodeTime": "25892.2 ms",
-    "geometryResult": "64,793.9 KiB CPU / 64,873.1 KiB GPU resident (budget 65,536.0 KiB)",
+    "decodeTime": "827.5 ms",
+    "geometryResult": "44,259.8 KiB CPU / 44,314.3 KiB GPU resident (budget 65,536.0 KiB)",
     "gpuAdapter": "nvidia",
     "dataset": {
-      "sceneLoading": "false",
+      "sceneLoading": "true",
       "sceneSource": "url",
       "hierarchyMatches": "0",
       "hierarchyReady": "true",
+      "cameraOrigin": "17.132624119520187,13.750000953674316,-30.785024255514145",
       "coarseReady": "true",
       "geometryRepresentation": "mixed",
       "targetChunksTotal": "234",
       "residencyBudgetBytes": "67108864",
-      "targetChunksReady": "78",
-      "residentDecodedBytes": "66348924",
-      "residentGpuBytes": "66430100",
-      "residencyBudgetReached": "true",
+      "targetChunksReady": "55",
       "targetReady": "limited",
+      "targetSchedulerMode": "coarse-chunk-bounds-v1",
       "visibilityMode": "all",
       "visibleOccurrences": "78173",
       "selectedObjectId": "0",
       "sectionEnabled": "false",
-      "sectionAxis": "z"
+      "sectionAxis": "z",
+      "targetSchedulerOrder": "target:0085:prototype:ifc:architecture-e91ddbbd672b:190239,target:0053:prototype:ifc:architecture-e91ddbbd672b:2691268,target:0076:prototype:ifc:architecture-e91ddbbd672b:247273,target:0046:prototype:ifc:architecture-e91ddbbd672b:2810711,target:0131:prototype:ifc:electrical-adb8d5eda2c7:1471237,target:0095:prototype:ifc:architecture-e91ddbbd672b:2588656,target:0054:prototype:ifc:architecture-e91ddbbd672b:2350460,target:0145:prototype:ifc:electrical-adb8d5eda2c7:1486685,target:0018:prototype:ifc:structure-79f294c64343:190945,target:0048:prototype:ifc:architecture-e91ddbbd672b:2010744,target:0169:prototype:ifc:ventilation-c78f6ad08596:1629737,target:0068:prototype:ifc:architecture-e91ddbbd672b:2134077,target:0122:prototype:ifc:electrical-adb8d5eda2c7:1529721,target:0194:prototype:ifc:plumbing-15382b06d0a6:1480603,target:0141:prototype:ifc:electrical-adb8d5eda2c7:1351457,target:0223:prototype:ifc:plumbing-15382b06d0a6:2009393,target:0116:prototype:ifc:plumbing-15382b06d0a6:983384,target:0075:prototype:ifc:architecture-e91ddbbd672b:3275428,target:0098:prototype:ifc:architecture-e91ddbbd672b:2250880,target:0156:prototype:ifc:plumbing-15382b06d0a6:3378457,target:0206:prototype:ifc:plumbing-15382b06d0a6:1090485,target:0174:prototype:ifc:structure-79f294c64343:109865,target:0147:prototype:ifc:electrical-adb8d5eda2c7:1515125,target:0146:prototype:ifc:electrical-adb8d5eda2c7:1500773,target:0158:prototype:ifc:plumbing-15382b06d0a6:3455225,target:0157:prototype:ifc:plumbing-15382b06d0a6:3416489,target:0079:prototype:ifc:architecture-e91ddbbd672b:3743877,target:0083:prototype:ifc:architecture-e91ddbbd672b:1686583,target:0230:prototype:ifc:plumbing-15382b06d0a6:1931229,target:0071:prototype:ifc:architecture-e91ddbbd672b:1569786,target:0105:prototype:ifc:architecture-e91ddbbd672b:3968407,target:0125:prototype:ifc:plumbing-15382b06d0a6:3673914,target:0210:prototype:ifc:ventilation-c78f6ad08596:2357544,target:0159:prototype:ifc:plumbing-15382b06d0a6:3494735,target:0162:prototype:ifc:ventilation-c78f6ad08596:1518052,target:0132:prototype:ifc:electrical-adb8d5eda2c7:1546025,target:0163:prototype:ifc:ventilation-c78f6ad08596:1592299,target:0196:prototype:ifc:plumbing-15382b06d0a6:1033717,target:0103:prototype:ifc:kitchen-1905b9920717:318003,target:0160:prototype:ifc:plumbing-15382b06d0a6:3790173,target:0137:prototype:ifc:electrical-adb8d5eda2c7:1242323,target:0007:prototype:ifc:ventilation-c78f6ad08596:443897,target:0091:prototype:ifc:architecture-e91ddbbd672b:4511501,target:0067:prototype:ifc:architecture-e91ddbbd672b:4281424,target:0060:prototype:ifc:architecture-e91ddbbd672b:416751,target:0136:prototype:ifc:electrical-adb8d5eda2c7:1224985,target:0135:prototype:ifc:electrical-adb8d5eda2c7:1174909,target:0171:prototype:ifc:structure-79f294c64343:168647,target:0179:prototype:ifc:plumbing-15382b06d0a6:1978,target:0070:prototype:ifc:architecture-e91ddbbd672b:4736690,target:0193:prototype:ifc:ventilation-c78f6ad08596:2030094,target:0231:prototype:ifc:plumbing-15382b06d0a6:2663060,target:0142:prototype:ifc:electrical-adb8d5eda2c7:1365089,target:0130:prototype:ifc:electrical-adb8d5eda2c7:1259830,target:0170:prototype:ifc:plumbing-15382b06d0a6:3584528,target:0232:prototype:ifc:plumbing-15382b06d0a6:404775,target:0140:prototype:ifc:electrical-adb8d5eda2c7:1335326,target:0172:prototype:ifc:plumbing-15382b06d0a6:1669154,target:0030:prototype:ifc:plumbing-15382b06d0a6:770261,target:0183:prototype:ifc:plumbing-15382b06d0a6:4145919,target:0108:prototype:ifc:ventilation-c78f6ad08596:1710292,target:0129:prototype:ifc:ventilation-c78f6ad08596:1440653,target:0052:prototype:ifc:architecture-e91ddbbd672b:4618906,target:0200:prototype:ifc:electrical-adb8d5eda2c7:17088,target:0199:prototype:ifc:plumbing-15382b06d0a6:4248177,target:0151:prototype:ifc:plumbing-15382b06d0a6:1353591,target:0107:prototype:ifc:electrical-adb8d5eda2c7:1455171,target:0227:prototype:ifc:plumbing-15382b06d0a6:4045208,target:0033:prototype:ifc:architecture-e91ddbbd672b:1115379,target:0094:prototype:ifc:plumbing-15382b06d0a6:3339687,target:0185:prototype:ifc:ventilation-c78f6ad08596:1484250,target:0215:prototype:ifc:ventilation-c78f6ad08596:2391860,target:0148:prototype:ifc:electrical-adb8d5eda2c7:1576139,target:0207:prototype:ifc:plumbing-15382b06d0a6:4499321,target:0045:prototype:ifc:plumbing-15382b06d0a6:4193797,target:0084:prototype:ifc:architecture-e91ddbbd672b:3851848,target:0043:prototype:ifc:structure-79f294c64343:60167-openings-60192-60225-60257-60289-60321-60353-60385-60417-60449-60481-60513-60556-60587-60619-60651-60683-60715,target:0166:prototype:ifc:plumbing-15382b06d0a6:4283882,target:0089:prototype:ifc:ventilation-c78f6ad08596:1174314,target:0061:prototype:ifc:architecture-e91ddbbd672b:5086151,target:0173:prototype:ifc:plumbing-15382b06d0a6:3960196,target:0167:prototype:ifc:plumbing-15382b06d0a6:4383976,target:0082:prototype:ifc:electrical-adb8d5eda2c7:1209115,target:0032:prototype:ifc:kitchen-1905b9920717:416349,target:0190:prototype:ifc:plumbing-15382b06d0a6:2233491,target:0099:prototype:ifc:electrical-adb8d5eda2c7:562952,target:0118:prototype:ifc:ventilation-c78f6ad08596:1746547,target:0113:prototype:ifc:plumbing-15382b06d0a6:1140012,target:0161:prototype:ifc:ventilation-c78f6ad08596:1404056,target:0123:prototype:ifc:electrical-adb8d5eda2c7:1440177,target:0127:prototype:ifc:plumbing-15382b06d0a6:3104637,target:0078:prototype:ifc:architecture-e91ddbbd672b:5417874,target:0214:prototype:ifc:plumbing-15382b06d0a6:496516,target:0066:prototype:ifc:architecture-e91ddbbd672b:4849895,target:0035:prototype:ifc:architecture-e91ddbbd672b:1000120,target:0074:prototype:ifc:architecture-e91ddbbd672b:2939832,target:0187:prototype:ifc:ventilation-c78f6ad08596:2671231,target:0178:prototype:ifc:ventilation-c78f6ad08596:1136623,target:0126:prototype:ifc:plumbing-15382b06d0a6:1626831,target:0059:prototype:ifc:architecture-e91ddbbd672b:3054580,target:0023:prototype:ifc:kitchen-1905b9920717:240018,target:0009:prototype:ifc:electrical-adb8d5eda2c7:49229,target:0072:prototype:ifc:plumbing-15382b06d0a6:3751479,target:0221:prototype:ifc:plumbing-15382b06d0a6:66580,target:0191:prototype:ifc:ventilation-c78f6ad08596:1899317,target:0080:prototype:ifc:plumbing-15382b06d0a6:3713905,target:0013:prototype:ifc:ventilation-c78f6ad08596:903745,target:0011:prototype:ifc:architecture-e91ddbbd672b:948587,target:0168:prototype:ifc:ventilation-c78f6ad08596:1242678,target:0025:prototype:ifc:facade-a9a1b20214da:839,target:0015:prototype:ifc:architecture-e91ddbbd672b:835218,target:0212:prototype:ifc:electrical-adb8d5eda2c7:64294,target:0110:prototype:ifc:kitchen-1905b9920717:983264,target:0057:prototype:ifc:architecture-e91ddbbd672b:609205,target:0117:prototype:ifc:ventilation-c78f6ad08596:1670200,target:0088:prototype:ifc:architecture-e91ddbbd672b:1237233,target:0044:prototype:ifc:architecture-e91ddbbd672b:1325352,target:0213:prototype:ifc:plumbing-15382b06d0a6:2492554,target:0065:prototype:ifc:architecture-e91ddbbd672b:1791271,target:0218:prototype:ifc:ventilation-c78f6ad08596:2536425,target:0143:prototype:ifc:electrical-adb8d5eda2c7:1410814,target:0049:prototype:ifc:architecture-e91ddbbd672b:5204937,target:0041:prototype:ifc:architecture-e91ddbbd672b:714069,target:0020:prototype:ifc:plumbing-15382b06d0a6:1251042,target:0064:prototype:ifc:structure-79f294c64343:147456,target:0192:prototype:ifc:kitchen-1905b9920717:707385,target:0012:prototype:ifc:plumbing-15382b06d0a6:822919,target:0029:prototype:ifc:kitchen-1905b9920717:1491738,target:0039:prototype:ifc:ventilation-c78f6ad08596:2198120,target:0180:prototype:ifc:plumbing-15382b06d0a6:4091541,target:0150:prototype:ifc:electrical-adb8d5eda2c7:1605927,target:0021:prototype:ifc:electrical-adb8d5eda2c7:1159413,target:0006:prototype:ifc:plumbing-15382b06d0a6:890507,target:0004:prototype:ifc:electrical-adb8d5eda2c7:40620,target:0003:prototype:ifc:plumbing-15382b06d0a6:2742489,target:0017:prototype:ifc:structure-79f294c64343:33217,target:0228:prototype:ifc:plumbing-15382b06d0a6:2233328,target:0016:prototype:ifc:plumbing-15382b06d0a6:713028,target:0176:prototype:ifc:plumbing-15382b06d0a6:1435363,target:0058:prototype:ifc:plumbing-15382b06d0a6:4325407,target:0056:prototype:ifc:electrical-adb8d5eda2c7:1191481,target:0134:prototype:ifc:ventilation-c78f6ad08596:1331024,target:0034:prototype:ifc:plumbing-15382b06d0a6:3015716,target:0112:prototype:ifc:architecture-e91ddbbd672b:531121,target:0024:prototype:ifc:ventilation-c78f6ad08596:1363523,target:0152:prototype:ifc:plumbing-15382b06d0a6:1394360,target:0205:prototype:ifc:kitchen-1905b9920717:876734,target:0102:prototype:ifc:electrical-adb8d5eda2c7:311957,target:0036:prototype:ifc:electrical-adb8d5eda2c7:269127,target:0031:prototype:ifc:architecture-e91ddbbd672b:56342,target:0086:prototype:ifc:plumbing-15382b06d0a6:1200411,target:0202:prototype:ifc:plumbing-15382b06d0a6:4427929,target:0001:prototype:ifc:plumbing-15382b06d0a6:2805923,target:0005:prototype:ifc:electrical-adb8d5eda2c7:338247,target:0188:prototype:ifc:plumbing-15382b06d0a6:2720894,target:0000:prototype:ifc:electrical-adb8d5eda2c7:227863,target:0106:prototype:ifc:plumbing-15382b06d0a6:3829058,target:0038:prototype:ifc:architecture-e91ddbbd672b:4966528,target:0115:prototype:ifc:ventilation-c78f6ad08596:1823055,target:0047:prototype:ifc:plumbing-15382b06d0a6:3297101,target:0144:prototype:ifc:electrical-adb8d5eda2c7:1426215,target:0037:prototype:ifc:architecture-e91ddbbd672b:439110,target:0040:prototype:ifc:architecture-e91ddbbd672b:3507953,target:0087:prototype:ifc:architecture-e91ddbbd672b:4064763,target:0081:prototype:ifc:kitchen-1905b9920717:497741,target:0198:prototype:ifc:ventilation-c78f6ad08596:2107917,target:0002:prototype:ifc:electrical-adb8d5eda2c7:74560,target:0124:prototype:ifc:ventilation-c78f6ad08596:2632070,target:0050:prototype:ifc:plumbing-15382b06d0a6:2971416,target:0042:prototype:ifc:architecture-e91ddbbd672b:3390853,target:0022:prototype:ifc:plumbing-15382b06d0a6:2927048,target:0051:prototype:ifc:architecture-e91ddbbd672b:3167263,target:0096:prototype:ifc:electrical-adb8d5eda2c7:1289653,target:0111:prototype:ifc:electrical-adb8d5eda2c7:1378721,target:0090:prototype:ifc:architecture-e91ddbbd672b:552492,target:0077:prototype:ifc:ventilation-c78f6ad08596:1556658,target:0119:prototype:ifc:electrical-adb8d5eda2c7:1560923,target:0201:prototype:ifc:plumbing-15382b06d0a6:1757891,target:0063:prototype:ifc:plumbing-15382b06d0a6:53240,target:0203:prototype:ifc:ventilation-c78f6ad08596:2285499,target:0128:prototype:ifc:plumbing-15382b06d0a6:3878489,target:0114:prototype:ifc:electrical-adb8d5eda2c7:1394501,target:0026:prototype:ifc:architecture-e91ddbbd672b:1446017,target:0069:prototype:ifc:kitchen-1905b9920717:1098490,target:0027:prototype:ifc:architecture-e91ddbbd672b:3624654,target:0120:prototype:ifc:kitchen-1905b9920717:1335080,target:0028:prototype:ifc:plumbing-15382b06d0a6:940153,target:0195:prototype:ifc:plumbing-15382b06d0a6:157324,target:0010:prototype:ifc:plumbing-15382b06d0a6:2870097,target:0165:prototype:ifc:electrical-adb8d5eda2c7:1319271,target:0062:prototype:ifc:plumbing-15382b06d0a6:3179776,target:0008:prototype:ifc:ventilation-c78f6ad08596:595980,target:0181:prototype:ifc:plumbing-15382b06d0a6:130830,target:0225:prototype:ifc:ventilation-c78f6ad08596:903626,target:0019:prototype:ifc:ventilation-c78f6ad08596:725697,target:0055:prototype:ifc:electrical-adb8d5eda2c7:1636089,target:0224:prototype:ifc:kitchen-1905b9920717:1234957,target:0109:prototype:ifc:ventilation-c78f6ad08596:1876228,target:0177:prototype:ifc:plumbing-15382b06d0a6:4048085,target:0100:prototype:ifc:plumbing-15382b06d0a6:610214,target:0216:prototype:ifc:architecture-e91ddbbd672b:5861468,target:0182:prototype:ifc:plumbing-15382b06d0a6:1529155,target:0014:prototype:ifc:ventilation-c78f6ad08596:1055401,target:0092:prototype:ifc:plumbing-15382b06d0a6:3626315,target:0186:prototype:ifc:plumbing-15382b06d0a6:1711214,target:0226:prototype:ifc:ventilation-c78f6ad08596:2485166,target:0220:prototype:ifc:ventilation-c78f6ad08596:443776,target:0211:prototype:ifc:kitchen-1905b9920717:794167,target:0073:prototype:ifc:plumbing-15382b06d0a6:3063929,target:0222:prototype:ifc:kitchen-1905b9920717:1412305,target:0097:prototype:ifc:ventilation-c78f6ad08596:1295182,target:0219:prototype:ifc:ventilation-c78f6ad08596:1055282,target:0139:prototype:ifc:electrical-adb8d5eda2c7:1305639,target:0121:prototype:ifc:ventilation-c78f6ad08596:1785332,target:0217:prototype:ifc:ventilation-c78f6ad08596:595910,target:0175:prototype:ifc:ventilation-c78f6ad08596:262373,target:0204:prototype:ifc:ventilation-c78f6ad08596:1973888,target:0184:prototype:ifc:ventilation-c78f6ad08596:194035,target:0093:prototype:ifc:architecture-e91ddbbd672b:5753931,target:0153:prototype:ifc:plumbing-15382b06d0a6:3142570,target:0138:prototype:ifc:electrical-adb8d5eda2c7:1275209,target:0133:prototype:ifc:electrical-adb8d5eda2c7:1621015,target:0189:prototype:ifc:plumbing-15382b06d0a6:3533924,target:0149:prototype:ifc:electrical-adb8d5eda2c7:1590847,target:0101:prototype:ifc:ventilation-c78f6ad08596:2244091,target:0208:prototype:ifc:structure-79f294c64343:106872,target:0209:prototype:ifc:ventilation-c78f6ad08596:2169285,target:0104:prototype:ifc:plumbing-15382b06d0a6:4001326,target:0164:prototype:ifc:plumbing-15382b06d0a6:3921065,target:0154:prototype:ifc:plumbing-15382b06d0a6:3221299,target:0229:prototype:ifc:plumbing-15382b06d0a6:2492391,target:0197:prototype:ifc:ventilation-c78f6ad08596:2067320,target:0155:prototype:ifc:plumbing-15382b06d0a6:3259217,target:0233:prototype:ifc:structure-79f294c64343:99887",
+      "targetSchedulerDemand": "target:0085:prototype:ifc:architecture-e91ddbbd672b:190239,target:0053:prototype:ifc:architecture-e91ddbbd672b:2691268,target:0076:prototype:ifc:architecture-e91ddbbd672b:247273,target:0046:prototype:ifc:architecture-e91ddbbd672b:2810711,target:0131:prototype:ifc:electrical-adb8d5eda2c7:1471237,target:0095:prototype:ifc:architecture-e91ddbbd672b:2588656,target:0054:prototype:ifc:architecture-e91ddbbd672b:2350460,target:0145:prototype:ifc:electrical-adb8d5eda2c7:1486685,target:0018:prototype:ifc:structure-79f294c64343:190945,target:0048:prototype:ifc:architecture-e91ddbbd672b:2010744,target:0169:prototype:ifc:ventilation-c78f6ad08596:1629737,target:0068:prototype:ifc:architecture-e91ddbbd672b:2134077,target:0122:prototype:ifc:electrical-adb8d5eda2c7:1529721,target:0194:prototype:ifc:plumbing-15382b06d0a6:1480603,target:0141:prototype:ifc:electrical-adb8d5eda2c7:1351457,target:0223:prototype:ifc:plumbing-15382b06d0a6:2009393,target:0116:prototype:ifc:plumbing-15382b06d0a6:983384,target:0075:prototype:ifc:architecture-e91ddbbd672b:3275428,target:0098:prototype:ifc:architecture-e91ddbbd672b:2250880,target:0156:prototype:ifc:plumbing-15382b06d0a6:3378457,target:0206:prototype:ifc:plumbing-15382b06d0a6:1090485,target:0174:prototype:ifc:structure-79f294c64343:109865,target:0147:prototype:ifc:electrical-adb8d5eda2c7:1515125,target:0146:prototype:ifc:electrical-adb8d5eda2c7:1500773,target:0158:prototype:ifc:plumbing-15382b06d0a6:3455225,target:0157:prototype:ifc:plumbing-15382b06d0a6:3416489,target:0079:prototype:ifc:architecture-e91ddbbd672b:3743877,target:0083:prototype:ifc:architecture-e91ddbbd672b:1686583,target:0230:prototype:ifc:plumbing-15382b06d0a6:1931229,target:0071:prototype:ifc:architecture-e91ddbbd672b:1569786,target:0105:prototype:ifc:architecture-e91ddbbd672b:3968407,target:0125:prototype:ifc:plumbing-15382b06d0a6:3673914,target:0210:prototype:ifc:ventilation-c78f6ad08596:2357544,target:0159:prototype:ifc:plumbing-15382b06d0a6:3494735,target:0162:prototype:ifc:ventilation-c78f6ad08596:1518052,target:0132:prototype:ifc:electrical-adb8d5eda2c7:1546025,target:0163:prototype:ifc:ventilation-c78f6ad08596:1592299,target:0196:prototype:ifc:plumbing-15382b06d0a6:1033717,target:0103:prototype:ifc:kitchen-1905b9920717:318003,target:0160:prototype:ifc:plumbing-15382b06d0a6:3790173,target:0137:prototype:ifc:electrical-adb8d5eda2c7:1242323,target:0007:prototype:ifc:ventilation-c78f6ad08596:443897,target:0091:prototype:ifc:architecture-e91ddbbd672b:4511501,target:0067:prototype:ifc:architecture-e91ddbbd672b:4281424,target:0060:prototype:ifc:architecture-e91ddbbd672b:416751,target:0136:prototype:ifc:electrical-adb8d5eda2c7:1224985,target:0135:prototype:ifc:electrical-adb8d5eda2c7:1174909,target:0171:prototype:ifc:structure-79f294c64343:168647,target:0179:prototype:ifc:plumbing-15382b06d0a6:1978,target:0070:prototype:ifc:architecture-e91ddbbd672b:4736690,target:0193:prototype:ifc:ventilation-c78f6ad08596:2030094,target:0231:prototype:ifc:plumbing-15382b06d0a6:2663060,target:0142:prototype:ifc:electrical-adb8d5eda2c7:1365089,target:0130:prototype:ifc:electrical-adb8d5eda2c7:1259830,target:0170:prototype:ifc:plumbing-15382b06d0a6:3584528,target:0232:prototype:ifc:plumbing-15382b06d0a6:404775,target:0140:prototype:ifc:electrical-adb8d5eda2c7:1335326,target:0172:prototype:ifc:plumbing-15382b06d0a6:1669154,target:0030:prototype:ifc:plumbing-15382b06d0a6:770261,target:0183:prototype:ifc:plumbing-15382b06d0a6:4145919,target:0108:prototype:ifc:ventilation-c78f6ad08596:1710292,target:0129:prototype:ifc:ventilation-c78f6ad08596:1440653,target:0052:prototype:ifc:architecture-e91ddbbd672b:4618906,target:0200:prototype:ifc:electrical-adb8d5eda2c7:17088,target:0199:prototype:ifc:plumbing-15382b06d0a6:4248177,target:0151:prototype:ifc:plumbing-15382b06d0a6:1353591,target:0107:prototype:ifc:electrical-adb8d5eda2c7:1455171,target:0227:prototype:ifc:plumbing-15382b06d0a6:4045208,target:0033:prototype:ifc:architecture-e91ddbbd672b:1115379,target:0094:prototype:ifc:plumbing-15382b06d0a6:3339687,target:0185:prototype:ifc:ventilation-c78f6ad08596:1484250,target:0215:prototype:ifc:ventilation-c78f6ad08596:2391860,target:0148:prototype:ifc:electrical-adb8d5eda2c7:1576139,target:0207:prototype:ifc:plumbing-15382b06d0a6:4499321,target:0045:prototype:ifc:plumbing-15382b06d0a6:4193797,target:0084:prototype:ifc:architecture-e91ddbbd672b:3851848,target:0043:prototype:ifc:structure-79f294c64343:60167-openings-60192-60225-60257-60289-60321-60353-60385-60417-60449-60481-60513-60556-60587-60619-60651-60683-60715,target:0166:prototype:ifc:plumbing-15382b06d0a6:4283882,target:0089:prototype:ifc:ventilation-c78f6ad08596:1174314,target:0061:prototype:ifc:architecture-e91ddbbd672b:5086151,target:0173:prototype:ifc:plumbing-15382b06d0a6:3960196,target:0167:prototype:ifc:plumbing-15382b06d0a6:4383976,target:0082:prototype:ifc:electrical-adb8d5eda2c7:1209115,target:0032:prototype:ifc:kitchen-1905b9920717:416349,target:0190:prototype:ifc:plumbing-15382b06d0a6:2233491,target:0099:prototype:ifc:electrical-adb8d5eda2c7:562952,target:0118:prototype:ifc:ventilation-c78f6ad08596:1746547,target:0113:prototype:ifc:plumbing-15382b06d0a6:1140012,target:0161:prototype:ifc:ventilation-c78f6ad08596:1404056,target:0123:prototype:ifc:electrical-adb8d5eda2c7:1440177,target:0127:prototype:ifc:plumbing-15382b06d0a6:3104637,target:0078:prototype:ifc:architecture-e91ddbbd672b:5417874,target:0214:prototype:ifc:plumbing-15382b06d0a6:496516,target:0066:prototype:ifc:architecture-e91ddbbd672b:4849895,target:0035:prototype:ifc:architecture-e91ddbbd672b:1000120,target:0074:prototype:ifc:architecture-e91ddbbd672b:2939832,target:0187:prototype:ifc:ventilation-c78f6ad08596:2671231,target:0178:prototype:ifc:ventilation-c78f6ad08596:1136623,target:0126:prototype:ifc:plumbing-15382b06d0a6:1626831,target:0059:prototype:ifc:architecture-e91ddbbd672b:3054580,target:0023:prototype:ifc:kitchen-1905b9920717:240018,target:0009:prototype:ifc:electrical-adb8d5eda2c7:49229,target:0072:prototype:ifc:plumbing-15382b06d0a6:3751479,target:0221:prototype:ifc:plumbing-15382b06d0a6:66580,target:0191:prototype:ifc:ventilation-c78f6ad08596:1899317,target:0080:prototype:ifc:plumbing-15382b06d0a6:3713905,target:0013:prototype:ifc:ventilation-c78f6ad08596:903745,target:0011:prototype:ifc:architecture-e91ddbbd672b:948587,target:0168:prototype:ifc:ventilation-c78f6ad08596:1242678,target:0025:prototype:ifc:facade-a9a1b20214da:839,target:0015:prototype:ifc:architecture-e91ddbbd672b:835218,target:0212:prototype:ifc:electrical-adb8d5eda2c7:64294,target:0110:prototype:ifc:kitchen-1905b9920717:983264,target:0057:prototype:ifc:architecture-e91ddbbd672b:609205,target:0117:prototype:ifc:ventilation-c78f6ad08596:1670200,target:0088:prototype:ifc:architecture-e91ddbbd672b:1237233,target:0044:prototype:ifc:architecture-e91ddbbd672b:1325352,target:0213:prototype:ifc:plumbing-15382b06d0a6:2492554,target:0065:prototype:ifc:architecture-e91ddbbd672b:1791271,target:0218:prototype:ifc:ventilation-c78f6ad08596:2536425,target:0143:prototype:ifc:electrical-adb8d5eda2c7:1410814,target:0049:prototype:ifc:architecture-e91ddbbd672b:5204937,target:0041:prototype:ifc:architecture-e91ddbbd672b:714069,target:0020:prototype:ifc:plumbing-15382b06d0a6:1251042,target:0064:prototype:ifc:structure-79f294c64343:147456,target:0192:prototype:ifc:kitchen-1905b9920717:707385,target:0012:prototype:ifc:plumbing-15382b06d0a6:822919,target:0029:prototype:ifc:kitchen-1905b9920717:1491738,target:0039:prototype:ifc:ventilation-c78f6ad08596:2198120,target:0180:prototype:ifc:plumbing-15382b06d0a6:4091541,target:0150:prototype:ifc:electrical-adb8d5eda2c7:1605927,target:0021:prototype:ifc:electrical-adb8d5eda2c7:1159413,target:0006:prototype:ifc:plumbing-15382b06d0a6:890507,target:0004:prototype:ifc:electrical-adb8d5eda2c7:40620,target:0003:prototype:ifc:plumbing-15382b06d0a6:2742489,target:0017:prototype:ifc:structure-79f294c64343:33217,target:0228:prototype:ifc:plumbing-15382b06d0a6:2233328,target:0016:prototype:ifc:plumbing-15382b06d0a6:713028,target:0176:prototype:ifc:plumbing-15382b06d0a6:1435363,target:0058:prototype:ifc:plumbing-15382b06d0a6:4325407,target:0056:prototype:ifc:electrical-adb8d5eda2c7:1191481,target:0134:prototype:ifc:ventilation-c78f6ad08596:1331024,target:0034:prototype:ifc:plumbing-15382b06d0a6:3015716,target:0112:prototype:ifc:architecture-e91ddbbd672b:531121,target:0024:prototype:ifc:ventilation-c78f6ad08596:1363523,target:0152:prototype:ifc:plumbing-15382b06d0a6:1394360,target:0205:prototype:ifc:kitchen-1905b9920717:876734,target:0102:prototype:ifc:electrical-adb8d5eda2c7:311957,target:0036:prototype:ifc:electrical-adb8d5eda2c7:269127,target:0031:prototype:ifc:architecture-e91ddbbd672b:56342,target:0086:prototype:ifc:plumbing-15382b06d0a6:1200411,target:0202:prototype:ifc:plumbing-15382b06d0a6:4427929,target:0001:prototype:ifc:plumbing-15382b06d0a6:2805923,target:0005:prototype:ifc:electrical-adb8d5eda2c7:338247,target:0188:prototype:ifc:plumbing-15382b06d0a6:2720894,target:0000:prototype:ifc:electrical-adb8d5eda2c7:227863,target:0106:prototype:ifc:plumbing-15382b06d0a6:3829058,target:0038:prototype:ifc:architecture-e91ddbbd672b:4966528,target:0115:prototype:ifc:ventilation-c78f6ad08596:1823055,target:0047:prototype:ifc:plumbing-15382b06d0a6:3297101,target:0144:prototype:ifc:electrical-adb8d5eda2c7:1426215,target:0037:prototype:ifc:architecture-e91ddbbd672b:439110,target:0040:prototype:ifc:architecture-e91ddbbd672b:3507953,target:0087:prototype:ifc:architecture-e91ddbbd672b:4064763,target:0081:prototype:ifc:kitchen-1905b9920717:497741,target:0198:prototype:ifc:ventilation-c78f6ad08596:2107917,target:0002:prototype:ifc:electrical-adb8d5eda2c7:74560,target:0124:prototype:ifc:ventilation-c78f6ad08596:2632070,target:0050:prototype:ifc:plumbing-15382b06d0a6:2971416,target:0042:prototype:ifc:architecture-e91ddbbd672b:3390853,target:0022:prototype:ifc:plumbing-15382b06d0a6:2927048,target:0051:prototype:ifc:architecture-e91ddbbd672b:3167263,target:0096:prototype:ifc:electrical-adb8d5eda2c7:1289653,target:0111:prototype:ifc:electrical-adb8d5eda2c7:1378721,target:0090:prototype:ifc:architecture-e91ddbbd672b:552492,target:0077:prototype:ifc:ventilation-c78f6ad08596:1556658,target:0119:prototype:ifc:electrical-adb8d5eda2c7:1560923,target:0201:prototype:ifc:plumbing-15382b06d0a6:1757891,target:0063:prototype:ifc:plumbing-15382b06d0a6:53240,target:0203:prototype:ifc:ventilation-c78f6ad08596:2285499,target:0128:prototype:ifc:plumbing-15382b06d0a6:3878489,target:0114:prototype:ifc:electrical-adb8d5eda2c7:1394501,target:0026:prototype:ifc:architecture-e91ddbbd672b:1446017,target:0069:prototype:ifc:kitchen-1905b9920717:1098490,target:0027:prototype:ifc:architecture-e91ddbbd672b:3624654,target:0120:prototype:ifc:kitchen-1905b9920717:1335080,target:0028:prototype:ifc:plumbing-15382b06d0a6:940153,target:0195:prototype:ifc:plumbing-15382b06d0a6:157324,target:0010:prototype:ifc:plumbing-15382b06d0a6:2870097,target:0165:prototype:ifc:electrical-adb8d5eda2c7:1319271,target:0062:prototype:ifc:plumbing-15382b06d0a6:3179776,target:0008:prototype:ifc:ventilation-c78f6ad08596:595980,target:0181:prototype:ifc:plumbing-15382b06d0a6:130830,target:0225:prototype:ifc:ventilation-c78f6ad08596:903626,target:0019:prototype:ifc:ventilation-c78f6ad08596:725697,target:0055:prototype:ifc:electrical-adb8d5eda2c7:1636089,target:0224:prototype:ifc:kitchen-1905b9920717:1234957,target:0109:prototype:ifc:ventilation-c78f6ad08596:1876228,target:0177:prototype:ifc:plumbing-15382b06d0a6:4048085,target:0100:prototype:ifc:plumbing-15382b06d0a6:610214,target:0216:prototype:ifc:architecture-e91ddbbd672b:5861468,target:0182:prototype:ifc:plumbing-15382b06d0a6:1529155,target:0014:prototype:ifc:ventilation-c78f6ad08596:1055401,target:0092:prototype:ifc:plumbing-15382b06d0a6:3626315,target:0186:prototype:ifc:plumbing-15382b06d0a6:1711214,target:0226:prototype:ifc:ventilation-c78f6ad08596:2485166,target:0220:prototype:ifc:ventilation-c78f6ad08596:443776,target:0211:prototype:ifc:kitchen-1905b9920717:794167,target:0073:prototype:ifc:plumbing-15382b06d0a6:3063929,target:0222:prototype:ifc:kitchen-1905b9920717:1412305,target:0097:prototype:ifc:ventilation-c78f6ad08596:1295182,target:0219:prototype:ifc:ventilation-c78f6ad08596:1055282,target:0139:prototype:ifc:electrical-adb8d5eda2c7:1305639,target:0121:prototype:ifc:ventilation-c78f6ad08596:1785332,target:0217:prototype:ifc:ventilation-c78f6ad08596:595910,target:0175:prototype:ifc:ventilation-c78f6ad08596:262373,target:0204:prototype:ifc:ventilation-c78f6ad08596:1973888,target:0184:prototype:ifc:ventilation-c78f6ad08596:194035,target:0093:prototype:ifc:architecture-e91ddbbd672b:5753931,target:0153:prototype:ifc:plumbing-15382b06d0a6:3142570,target:0138:prototype:ifc:electrical-adb8d5eda2c7:1275209,target:0133:prototype:ifc:electrical-adb8d5eda2c7:1621015,target:0189:prototype:ifc:plumbing-15382b06d0a6:3533924,target:0149:prototype:ifc:electrical-adb8d5eda2c7:1590847,target:0101:prototype:ifc:ventilation-c78f6ad08596:2244091,target:0208:prototype:ifc:structure-79f294c64343:106872,target:0209:prototype:ifc:ventilation-c78f6ad08596:2169285,target:0104:prototype:ifc:plumbing-15382b06d0a6:4001326,target:0164:prototype:ifc:plumbing-15382b06d0a6:3921065,target:0154:prototype:ifc:plumbing-15382b06d0a6:3221299,target:0229:prototype:ifc:plumbing-15382b06d0a6:2492391,target:0197:prototype:ifc:ventilation-c78f6ad08596:2067320,target:0155:prototype:ifc:plumbing-15382b06d0a6:3259217,target:0233:prototype:ifc:structure-79f294c64343:99887",
+      "targetSchedulerChunk": "target:0140:prototype:ifc:electrical-adb8d5eda2c7:1335326",
+      "targetSchedulerPriority": "56",
+      "targetSchedulerRequests": "57",
+      "residentDecodedBytes": "45322020",
+      "residentGpuBytes": "45377892",
+      "residencyBudgetReached": "true"
     },
-    "usedJsHeapBytes": 1362025666,
-    "totalJsHeapBytes": 1464183846,
+    "usedJsHeapBytes": 932672706,
+    "totalJsHeapBytes": 990006238,
     "timeline": [
       {
-        "milliseconds": 154,
+        "milliseconds": 177,
         "target": "html",
         "attribute": "data-scene-loading",
         "value": "true"
       },
       {
-        "milliseconds": 154,
+        "milliseconds": 177,
         "target": "status",
         "attribute": "data-state",
         "value": "loading"
       },
       {
-        "milliseconds": 4131,
+        "milliseconds": 2229,
         "target": "html",
         "attribute": "data-hierarchy-ready",
         "value": "true"
       },
       {
-        "milliseconds": 4131,
+        "milliseconds": 2229,
         "target": "status",
         "attribute": "data-stage",
         "value": "hierarchy"
       },
       {
-        "milliseconds": 12073,
+        "milliseconds": 4276,
         "target": "html",
         "attribute": "data-coarse-ready",
         "value": "true"
       },
       {
-        "milliseconds": 12073,
+        "milliseconds": 4276,
         "target": "html",
         "attribute": "data-geometry-representation",
         "value": "coarse"
       },
       {
-        "milliseconds": 12073,
+        "milliseconds": 4276,
         "target": "status",
         "attribute": "data-stage",
         "value": "coarse"
       },
       {
-        "milliseconds": 12073,
+        "milliseconds": 4276,
         "target": "html",
         "attribute": "data-target-chunks-total",
         "value": "234"
       },
       {
-        "milliseconds": 12701,
+        "milliseconds": 4276,
+        "target": "html",
+        "attribute": "data-target-chunks-ready",
+        "value": "0"
+      },
+      {
+        "milliseconds": 4276,
+        "target": "html",
+        "attribute": "data-target-ready",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 4474,
         "target": "html",
         "attribute": "data-target-chunks-ready",
         "value": "1"
       },
       {
-        "milliseconds": 12701,
+        "milliseconds": 4474,
         "target": "html",
         "attribute": "data-geometry-representation",
         "value": "mixed"
       },
       {
-        "milliseconds": 12701,
+        "milliseconds": 4474,
+        "target": "html",
+        "attribute": "data-target-ready",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 4474,
+        "target": "status",
+        "attribute": "data-state",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 4474,
         "target": "status",
         "attribute": "data-stage",
         "value": "target-chunks"
       },
       {
-        "milliseconds": 13319,
+        "milliseconds": 4672,
         "target": "html",
         "attribute": "data-target-chunks-ready",
         "value": "2"
       },
       {
-        "milliseconds": 13319,
+        "milliseconds": 4672,
         "target": "html",
         "attribute": "data-geometry-representation",
         "value": "mixed"
       },
       {
-        "milliseconds": 13319,
+        "milliseconds": 4672,
+        "target": "html",
+        "attribute": "data-target-ready",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 4672,
+        "target": "status",
+        "attribute": "data-state",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 4672,
         "target": "status",
         "attribute": "data-stage",
         "value": "target-chunks"
       },
       {
-        "milliseconds": 13922,
+        "milliseconds": 4880,
         "target": "html",
         "attribute": "data-target-chunks-ready",
         "value": "3"
       },
       {
-        "milliseconds": 13922,
+        "milliseconds": 4880,
         "target": "html",
         "attribute": "data-geometry-representation",
         "value": "mixed"
       },
       {
-        "milliseconds": 13922,
+        "milliseconds": 4880,
+        "target": "html",
+        "attribute": "data-target-ready",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 4880,
+        "target": "status",
+        "attribute": "data-state",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 4880,
         "target": "status",
         "attribute": "data-stage",
         "value": "target-chunks"
       },
       {
-        "milliseconds": 14407,
+        "milliseconds": 5090,
         "target": "html",
         "attribute": "data-target-chunks-ready",
         "value": "4"
       },
       {
-        "milliseconds": 14407,
+        "milliseconds": 5090,
         "target": "html",
         "attribute": "data-geometry-representation",
         "value": "mixed"
       },
       {
-        "milliseconds": 14407,
+        "milliseconds": 5090,
+        "target": "html",
+        "attribute": "data-target-ready",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 5090,
+        "target": "status",
+        "attribute": "data-state",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 5090,
         "target": "status",
         "attribute": "data-stage",
         "value": "target-chunks"
       },
       {
-        "milliseconds": 14891,
+        "milliseconds": 5321,
         "target": "html",
         "attribute": "data-target-chunks-ready",
         "value": "5"
       },
       {
-        "milliseconds": 14891,
+        "milliseconds": 5321,
         "target": "html",
         "attribute": "data-geometry-representation",
         "value": "mixed"
       },
       {
-        "milliseconds": 14891,
+        "milliseconds": 5321,
+        "target": "html",
+        "attribute": "data-target-ready",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 5321,
+        "target": "status",
+        "attribute": "data-state",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 5321,
         "target": "status",
         "attribute": "data-stage",
         "value": "target-chunks"
       },
       {
-        "milliseconds": 15399,
+        "milliseconds": 5536,
         "target": "html",
         "attribute": "data-target-chunks-ready",
         "value": "6"
       },
       {
-        "milliseconds": 15399,
+        "milliseconds": 5536,
         "target": "html",
         "attribute": "data-geometry-representation",
         "value": "mixed"
       },
       {
-        "milliseconds": 15399,
+        "milliseconds": 5536,
+        "target": "html",
+        "attribute": "data-target-ready",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 5536,
+        "target": "status",
+        "attribute": "data-state",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 5536,
         "target": "status",
         "attribute": "data-stage",
         "value": "target-chunks"
       },
       {
-        "milliseconds": 15914,
+        "milliseconds": 5750,
         "target": "html",
         "attribute": "data-target-chunks-ready",
         "value": "7"
       },
       {
-        "milliseconds": 15914,
+        "milliseconds": 5750,
         "target": "html",
         "attribute": "data-geometry-representation",
         "value": "mixed"
       },
       {
-        "milliseconds": 15914,
+        "milliseconds": 5750,
+        "target": "html",
+        "attribute": "data-target-ready",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 5750,
+        "target": "status",
+        "attribute": "data-state",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 5750,
         "target": "status",
         "attribute": "data-stage",
         "value": "target-chunks"
       },
       {
-        "milliseconds": 16517,
+        "milliseconds": 6046,
         "target": "html",
         "attribute": "data-target-chunks-ready",
         "value": "8"
       },
       {
-        "milliseconds": 16517,
+        "milliseconds": 6046,
         "target": "html",
         "attribute": "data-geometry-representation",
         "value": "mixed"
       },
       {
-        "milliseconds": 16517,
+        "milliseconds": 6046,
+        "target": "html",
+        "attribute": "data-target-ready",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 6046,
+        "target": "status",
+        "attribute": "data-state",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 6046,
         "target": "status",
         "attribute": "data-stage",
         "value": "target-chunks"
       },
       {
-        "milliseconds": 17137,
+        "milliseconds": 6276,
         "target": "html",
         "attribute": "data-target-chunks-ready",
         "value": "9"
       },
       {
-        "milliseconds": 17137,
+        "milliseconds": 6276,
         "target": "html",
         "attribute": "data-geometry-representation",
         "value": "mixed"
       },
       {
-        "milliseconds": 17137,
+        "milliseconds": 6276,
+        "target": "html",
+        "attribute": "data-target-ready",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 6276,
+        "target": "status",
+        "attribute": "data-state",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 6276,
         "target": "status",
         "attribute": "data-stage",
         "value": "target-chunks"
       },
       {
-        "milliseconds": 17830,
+        "milliseconds": 6486,
         "target": "html",
         "attribute": "data-target-chunks-ready",
         "value": "10"
       },
       {
-        "milliseconds": 17830,
+        "milliseconds": 6486,
         "target": "html",
         "attribute": "data-geometry-representation",
         "value": "mixed"
       },
       {
-        "milliseconds": 17830,
+        "milliseconds": 6486,
+        "target": "html",
+        "attribute": "data-target-ready",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 6486,
+        "target": "status",
+        "attribute": "data-state",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 6486,
         "target": "status",
         "attribute": "data-stage",
         "value": "target-chunks"
       },
       {
-        "milliseconds": 18346,
+        "milliseconds": 6689,
         "target": "html",
         "attribute": "data-target-chunks-ready",
         "value": "11"
       },
       {
-        "milliseconds": 18346,
+        "milliseconds": 6689,
         "target": "html",
         "attribute": "data-geometry-representation",
         "value": "mixed"
       },
       {
-        "milliseconds": 18346,
+        "milliseconds": 6689,
+        "target": "html",
+        "attribute": "data-target-ready",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 6689,
+        "target": "status",
+        "attribute": "data-state",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 6689,
         "target": "status",
         "attribute": "data-stage",
         "value": "target-chunks"
       },
       {
-        "milliseconds": 18843,
+        "milliseconds": 6896,
         "target": "html",
         "attribute": "data-target-chunks-ready",
         "value": "12"
       },
       {
-        "milliseconds": 18843,
+        "milliseconds": 6896,
         "target": "html",
         "attribute": "data-geometry-representation",
         "value": "mixed"
       },
       {
-        "milliseconds": 18843,
+        "milliseconds": 6896,
+        "target": "html",
+        "attribute": "data-target-ready",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 6896,
+        "target": "status",
+        "attribute": "data-state",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 6896,
         "target": "status",
         "attribute": "data-stage",
         "value": "target-chunks"
       },
       {
-        "milliseconds": 19412,
+        "milliseconds": 7104,
         "target": "html",
         "attribute": "data-target-chunks-ready",
         "value": "13"
       },
       {
-        "milliseconds": 19412,
+        "milliseconds": 7104,
         "target": "html",
         "attribute": "data-geometry-representation",
         "value": "mixed"
       },
       {
-        "milliseconds": 19412,
+        "milliseconds": 7104,
+        "target": "html",
+        "attribute": "data-target-ready",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 7104,
+        "target": "status",
+        "attribute": "data-state",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 7104,
         "target": "status",
         "attribute": "data-stage",
         "value": "target-chunks"
       },
       {
-        "milliseconds": 19907,
+        "milliseconds": 7310,
         "target": "html",
         "attribute": "data-target-chunks-ready",
         "value": "14"
       },
       {
-        "milliseconds": 19907,
+        "milliseconds": 7310,
         "target": "html",
         "attribute": "data-geometry-representation",
         "value": "mixed"
       },
       {
-        "milliseconds": 19907,
+        "milliseconds": 7310,
+        "target": "html",
+        "attribute": "data-target-ready",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 7310,
+        "target": "status",
+        "attribute": "data-state",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 7310,
         "target": "status",
         "attribute": "data-stage",
         "value": "target-chunks"
       },
       {
-        "milliseconds": 20612,
+        "milliseconds": 7518,
         "target": "html",
         "attribute": "data-target-chunks-ready",
         "value": "15"
       },
       {
-        "milliseconds": 20612,
+        "milliseconds": 7518,
         "target": "html",
         "attribute": "data-geometry-representation",
         "value": "mixed"
       },
       {
-        "milliseconds": 20612,
+        "milliseconds": 7518,
+        "target": "html",
+        "attribute": "data-target-ready",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 7518,
+        "target": "status",
+        "attribute": "data-state",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 7518,
         "target": "status",
         "attribute": "data-stage",
         "value": "target-chunks"
       },
       {
-        "milliseconds": 21173,
+        "milliseconds": 7733,
         "target": "html",
         "attribute": "data-target-chunks-ready",
         "value": "16"
       },
       {
-        "milliseconds": 21173,
+        "milliseconds": 7733,
         "target": "html",
         "attribute": "data-geometry-representation",
         "value": "mixed"
       },
       {
-        "milliseconds": 21173,
+        "milliseconds": 7733,
+        "target": "html",
+        "attribute": "data-target-ready",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 7733,
+        "target": "status",
+        "attribute": "data-state",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 7733,
         "target": "status",
         "attribute": "data-stage",
         "value": "target-chunks"
       },
       {
-        "milliseconds": 21705,
+        "milliseconds": 7939,
         "target": "html",
         "attribute": "data-target-chunks-ready",
         "value": "17"
       },
       {
-        "milliseconds": 21705,
+        "milliseconds": 7940,
         "target": "html",
         "attribute": "data-geometry-representation",
         "value": "mixed"
       },
       {
-        "milliseconds": 21705,
+        "milliseconds": 7940,
+        "target": "html",
+        "attribute": "data-target-ready",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 7940,
+        "target": "status",
+        "attribute": "data-state",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 7940,
         "target": "status",
         "attribute": "data-stage",
         "value": "target-chunks"
       },
       {
-        "milliseconds": 22219,
+        "milliseconds": 8168,
         "target": "html",
         "attribute": "data-target-chunks-ready",
         "value": "18"
       },
       {
-        "milliseconds": 22219,
+        "milliseconds": 8168,
         "target": "html",
         "attribute": "data-geometry-representation",
         "value": "mixed"
       },
       {
-        "milliseconds": 22219,
+        "milliseconds": 8168,
+        "target": "html",
+        "attribute": "data-target-ready",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 8168,
+        "target": "status",
+        "attribute": "data-state",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 8168,
         "target": "status",
         "attribute": "data-stage",
         "value": "target-chunks"
       },
       {
-        "milliseconds": 22746,
+        "milliseconds": 8382,
         "target": "html",
         "attribute": "data-target-chunks-ready",
         "value": "19"
       },
       {
-        "milliseconds": 22746,
+        "milliseconds": 8382,
         "target": "html",
         "attribute": "data-geometry-representation",
         "value": "mixed"
       },
       {
-        "milliseconds": 22746,
+        "milliseconds": 8382,
+        "target": "html",
+        "attribute": "data-target-ready",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 8382,
+        "target": "status",
+        "attribute": "data-state",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 8382,
         "target": "status",
         "attribute": "data-stage",
         "value": "target-chunks"
       },
       {
-        "milliseconds": 23312,
+        "milliseconds": 8595,
         "target": "html",
         "attribute": "data-target-chunks-ready",
         "value": "20"
       },
       {
-        "milliseconds": 23312,
+        "milliseconds": 8595,
         "target": "html",
         "attribute": "data-geometry-representation",
         "value": "mixed"
       },
       {
-        "milliseconds": 23312,
+        "milliseconds": 8595,
+        "target": "html",
+        "attribute": "data-target-ready",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 8595,
+        "target": "status",
+        "attribute": "data-state",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 8595,
         "target": "status",
         "attribute": "data-stage",
         "value": "target-chunks"
       },
       {
-        "milliseconds": 23832,
+        "milliseconds": 8867,
         "target": "html",
         "attribute": "data-target-chunks-ready",
         "value": "21"
       },
       {
-        "milliseconds": 23832,
+        "milliseconds": 8867,
         "target": "html",
         "attribute": "data-geometry-representation",
         "value": "mixed"
       },
       {
-        "milliseconds": 23832,
+        "milliseconds": 8867,
+        "target": "html",
+        "attribute": "data-target-ready",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 8867,
+        "target": "status",
+        "attribute": "data-state",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 8867,
         "target": "status",
         "attribute": "data-stage",
         "value": "target-chunks"
       },
       {
-        "milliseconds": 24598,
+        "milliseconds": 9107,
         "target": "html",
         "attribute": "data-target-chunks-ready",
         "value": "22"
       },
       {
-        "milliseconds": 24598,
+        "milliseconds": 9107,
         "target": "html",
         "attribute": "data-geometry-representation",
         "value": "mixed"
       },
       {
-        "milliseconds": 24598,
+        "milliseconds": 9107,
+        "target": "html",
+        "attribute": "data-target-ready",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 9107,
+        "target": "status",
+        "attribute": "data-state",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 9107,
         "target": "status",
         "attribute": "data-stage",
         "value": "target-chunks"
       },
       {
-        "milliseconds": 25193,
+        "milliseconds": 9317,
         "target": "html",
         "attribute": "data-target-chunks-ready",
         "value": "23"
       },
       {
-        "milliseconds": 25193,
+        "milliseconds": 9317,
         "target": "html",
         "attribute": "data-geometry-representation",
         "value": "mixed"
       },
       {
-        "milliseconds": 25193,
+        "milliseconds": 9317,
+        "target": "html",
+        "attribute": "data-target-ready",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 9317,
+        "target": "status",
+        "attribute": "data-state",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 9317,
         "target": "status",
         "attribute": "data-stage",
         "value": "target-chunks"
       },
       {
-        "milliseconds": 25759,
+        "milliseconds": 9527,
         "target": "html",
         "attribute": "data-target-chunks-ready",
         "value": "24"
       },
       {
-        "milliseconds": 25759,
+        "milliseconds": 9527,
         "target": "html",
         "attribute": "data-geometry-representation",
         "value": "mixed"
       },
       {
-        "milliseconds": 25759,
+        "milliseconds": 9527,
+        "target": "html",
+        "attribute": "data-target-ready",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 9527,
+        "target": "status",
+        "attribute": "data-state",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 9527,
         "target": "status",
         "attribute": "data-stage",
         "value": "target-chunks"
       },
       {
-        "milliseconds": 26347,
+        "milliseconds": 9737,
         "target": "html",
         "attribute": "data-target-chunks-ready",
         "value": "25"
       },
       {
-        "milliseconds": 26347,
+        "milliseconds": 9737,
         "target": "html",
         "attribute": "data-geometry-representation",
         "value": "mixed"
       },
       {
-        "milliseconds": 26347,
+        "milliseconds": 9737,
+        "target": "html",
+        "attribute": "data-target-ready",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 9737,
+        "target": "status",
+        "attribute": "data-state",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 9737,
         "target": "status",
         "attribute": "data-stage",
         "value": "target-chunks"
       },
       {
-        "milliseconds": 26910,
+        "milliseconds": 9956,
         "target": "html",
         "attribute": "data-target-chunks-ready",
         "value": "26"
       },
       {
-        "milliseconds": 26910,
+        "milliseconds": 9956,
         "target": "html",
         "attribute": "data-geometry-representation",
         "value": "mixed"
       },
       {
-        "milliseconds": 26910,
+        "milliseconds": 9956,
+        "target": "html",
+        "attribute": "data-target-ready",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 9956,
+        "target": "status",
+        "attribute": "data-state",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 9956,
         "target": "status",
         "attribute": "data-stage",
         "value": "target-chunks"
       },
       {
-        "milliseconds": 27492,
+        "milliseconds": 10182,
         "target": "html",
         "attribute": "data-target-chunks-ready",
         "value": "27"
       },
       {
-        "milliseconds": 27492,
+        "milliseconds": 10182,
         "target": "html",
         "attribute": "data-geometry-representation",
         "value": "mixed"
       },
       {
-        "milliseconds": 27492,
+        "milliseconds": 10182,
+        "target": "html",
+        "attribute": "data-target-ready",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 10182,
+        "target": "status",
+        "attribute": "data-state",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 10182,
         "target": "status",
         "attribute": "data-stage",
         "value": "target-chunks"
       },
       {
-        "milliseconds": 28037,
+        "milliseconds": 10410,
         "target": "html",
         "attribute": "data-target-chunks-ready",
         "value": "28"
       },
       {
-        "milliseconds": 28037,
+        "milliseconds": 10410,
         "target": "html",
         "attribute": "data-geometry-representation",
         "value": "mixed"
       },
       {
-        "milliseconds": 28037,
+        "milliseconds": 10410,
+        "target": "html",
+        "attribute": "data-target-ready",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 10410,
+        "target": "status",
+        "attribute": "data-state",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 10410,
         "target": "status",
         "attribute": "data-stage",
         "value": "target-chunks"
       },
       {
-        "milliseconds": 28695,
+        "milliseconds": 10630,
         "target": "html",
         "attribute": "data-target-chunks-ready",
         "value": "29"
       },
       {
-        "milliseconds": 28695,
+        "milliseconds": 10630,
         "target": "html",
         "attribute": "data-geometry-representation",
         "value": "mixed"
       },
       {
-        "milliseconds": 28695,
+        "milliseconds": 10630,
+        "target": "html",
+        "attribute": "data-target-ready",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 10630,
+        "target": "status",
+        "attribute": "data-state",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 10630,
         "target": "status",
         "attribute": "data-stage",
         "value": "target-chunks"
       },
       {
-        "milliseconds": 29393,
+        "milliseconds": 10851,
         "target": "html",
         "attribute": "data-target-chunks-ready",
         "value": "30"
       },
       {
-        "milliseconds": 29393,
+        "milliseconds": 10851,
         "target": "html",
         "attribute": "data-geometry-representation",
         "value": "mixed"
       },
       {
-        "milliseconds": 29393,
+        "milliseconds": 10851,
+        "target": "html",
+        "attribute": "data-target-ready",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 10851,
+        "target": "status",
+        "attribute": "data-state",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 10851,
         "target": "status",
         "attribute": "data-stage",
         "value": "target-chunks"
       },
       {
-        "milliseconds": 30121,
+        "milliseconds": 11118,
         "target": "html",
         "attribute": "data-target-chunks-ready",
         "value": "31"
       },
       {
-        "milliseconds": 30121,
+        "milliseconds": 11118,
         "target": "html",
         "attribute": "data-geometry-representation",
         "value": "mixed"
       },
       {
-        "milliseconds": 30121,
+        "milliseconds": 11118,
+        "target": "html",
+        "attribute": "data-target-ready",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 11118,
+        "target": "status",
+        "attribute": "data-state",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 11118,
         "target": "status",
         "attribute": "data-stage",
         "value": "target-chunks"
       },
       {
-        "milliseconds": 30781,
+        "milliseconds": 11374,
         "target": "html",
         "attribute": "data-target-chunks-ready",
         "value": "32"
       },
       {
-        "milliseconds": 30781,
+        "milliseconds": 11374,
         "target": "html",
         "attribute": "data-geometry-representation",
         "value": "mixed"
       },
       {
-        "milliseconds": 30781,
+        "milliseconds": 11374,
+        "target": "html",
+        "attribute": "data-target-ready",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 11374,
+        "target": "status",
+        "attribute": "data-state",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 11374,
         "target": "status",
         "attribute": "data-stage",
         "value": "target-chunks"
       },
       {
-        "milliseconds": 31706,
+        "milliseconds": 11600,
         "target": "html",
         "attribute": "data-target-chunks-ready",
         "value": "33"
       },
       {
-        "milliseconds": 31706,
+        "milliseconds": 11600,
         "target": "html",
         "attribute": "data-geometry-representation",
         "value": "mixed"
       },
       {
-        "milliseconds": 31706,
+        "milliseconds": 11600,
+        "target": "html",
+        "attribute": "data-target-ready",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 11600,
+        "target": "status",
+        "attribute": "data-state",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 11600,
         "target": "status",
         "attribute": "data-stage",
         "value": "target-chunks"
       },
       {
-        "milliseconds": 32457,
+        "milliseconds": 11899,
         "target": "html",
         "attribute": "data-target-chunks-ready",
         "value": "34"
       },
       {
-        "milliseconds": 32457,
+        "milliseconds": 11899,
         "target": "html",
         "attribute": "data-geometry-representation",
         "value": "mixed"
       },
       {
-        "milliseconds": 32457,
+        "milliseconds": 11899,
+        "target": "html",
+        "attribute": "data-target-ready",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 11899,
+        "target": "status",
+        "attribute": "data-state",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 11899,
         "target": "status",
         "attribute": "data-stage",
         "value": "target-chunks"
       },
       {
-        "milliseconds": 33031,
+        "milliseconds": 12125,
         "target": "html",
         "attribute": "data-target-chunks-ready",
         "value": "35"
       },
       {
-        "milliseconds": 33031,
+        "milliseconds": 12125,
         "target": "html",
         "attribute": "data-geometry-representation",
         "value": "mixed"
       },
       {
-        "milliseconds": 33031,
+        "milliseconds": 12125,
+        "target": "html",
+        "attribute": "data-target-ready",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 12125,
+        "target": "status",
+        "attribute": "data-state",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 12125,
         "target": "status",
         "attribute": "data-stage",
         "value": "target-chunks"
       },
       {
-        "milliseconds": 33611,
+        "milliseconds": 12399,
         "target": "html",
         "attribute": "data-target-chunks-ready",
         "value": "36"
       },
       {
-        "milliseconds": 33611,
+        "milliseconds": 12399,
         "target": "html",
         "attribute": "data-geometry-representation",
         "value": "mixed"
       },
       {
-        "milliseconds": 33611,
+        "milliseconds": 12399,
+        "target": "html",
+        "attribute": "data-target-ready",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 12399,
+        "target": "status",
+        "attribute": "data-state",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 12399,
         "target": "status",
         "attribute": "data-stage",
         "value": "target-chunks"
       },
       {
-        "milliseconds": 34193,
+        "milliseconds": 12657,
         "target": "html",
         "attribute": "data-target-chunks-ready",
         "value": "37"
       },
       {
-        "milliseconds": 34193,
+        "milliseconds": 12657,
         "target": "html",
         "attribute": "data-geometry-representation",
         "value": "mixed"
       },
       {
-        "milliseconds": 34193,
+        "milliseconds": 12657,
+        "target": "html",
+        "attribute": "data-target-ready",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 12657,
+        "target": "status",
+        "attribute": "data-state",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 12657,
         "target": "status",
         "attribute": "data-stage",
         "value": "target-chunks"
       },
       {
-        "milliseconds": 34797,
+        "milliseconds": 12879,
         "target": "html",
         "attribute": "data-target-chunks-ready",
         "value": "38"
       },
       {
-        "milliseconds": 34797,
+        "milliseconds": 12879,
         "target": "html",
         "attribute": "data-geometry-representation",
         "value": "mixed"
       },
       {
-        "milliseconds": 34797,
+        "milliseconds": 12879,
+        "target": "html",
+        "attribute": "data-target-ready",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 12879,
+        "target": "status",
+        "attribute": "data-state",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 12879,
         "target": "status",
         "attribute": "data-stage",
         "value": "target-chunks"
       },
       {
-        "milliseconds": 35406,
+        "milliseconds": 13102,
         "target": "html",
         "attribute": "data-target-chunks-ready",
         "value": "39"
       },
       {
-        "milliseconds": 35406,
+        "milliseconds": 13102,
         "target": "html",
         "attribute": "data-geometry-representation",
         "value": "mixed"
       },
       {
-        "milliseconds": 35406,
+        "milliseconds": 13102,
+        "target": "html",
+        "attribute": "data-target-ready",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 13102,
+        "target": "status",
+        "attribute": "data-state",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 13102,
         "target": "status",
         "attribute": "data-stage",
         "value": "target-chunks"
       },
       {
-        "milliseconds": 36050,
+        "milliseconds": 13328,
         "target": "html",
         "attribute": "data-target-chunks-ready",
         "value": "40"
       },
       {
-        "milliseconds": 36050,
+        "milliseconds": 13328,
         "target": "html",
         "attribute": "data-geometry-representation",
         "value": "mixed"
       },
       {
-        "milliseconds": 36050,
+        "milliseconds": 13328,
+        "target": "html",
+        "attribute": "data-target-ready",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 13328,
+        "target": "status",
+        "attribute": "data-state",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 13328,
         "target": "status",
         "attribute": "data-stage",
         "value": "target-chunks"
       },
       {
-        "milliseconds": 36669,
+        "milliseconds": 13558,
         "target": "html",
         "attribute": "data-target-chunks-ready",
         "value": "41"
       },
       {
-        "milliseconds": 36669,
+        "milliseconds": 13558,
         "target": "html",
         "attribute": "data-geometry-representation",
         "value": "mixed"
       },
       {
-        "milliseconds": 36669,
+        "milliseconds": 13558,
+        "target": "html",
+        "attribute": "data-target-ready",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 13558,
+        "target": "status",
+        "attribute": "data-state",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 13558,
         "target": "status",
         "attribute": "data-stage",
         "value": "target-chunks"
       },
       {
-        "milliseconds": 37315,
+        "milliseconds": 13784,
         "target": "html",
         "attribute": "data-target-chunks-ready",
         "value": "42"
       },
       {
-        "milliseconds": 37315,
+        "milliseconds": 13784,
         "target": "html",
         "attribute": "data-geometry-representation",
         "value": "mixed"
       },
       {
-        "milliseconds": 37315,
+        "milliseconds": 13784,
+        "target": "html",
+        "attribute": "data-target-ready",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 13784,
+        "target": "status",
+        "attribute": "data-state",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 13784,
         "target": "status",
         "attribute": "data-stage",
         "value": "target-chunks"
       },
       {
-        "milliseconds": 37919,
+        "milliseconds": 14017,
         "target": "html",
         "attribute": "data-target-chunks-ready",
         "value": "43"
       },
       {
-        "milliseconds": 37919,
+        "milliseconds": 14017,
         "target": "html",
         "attribute": "data-geometry-representation",
         "value": "mixed"
       },
       {
-        "milliseconds": 37919,
+        "milliseconds": 14017,
+        "target": "html",
+        "attribute": "data-target-ready",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 14017,
+        "target": "status",
+        "attribute": "data-state",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 14017,
         "target": "status",
         "attribute": "data-stage",
         "value": "target-chunks"
       },
       {
-        "milliseconds": 38537,
+        "milliseconds": 14253,
         "target": "html",
         "attribute": "data-target-chunks-ready",
         "value": "44"
       },
       {
-        "milliseconds": 38537,
+        "milliseconds": 14253,
         "target": "html",
         "attribute": "data-geometry-representation",
         "value": "mixed"
       },
       {
-        "milliseconds": 38537,
+        "milliseconds": 14253,
+        "target": "html",
+        "attribute": "data-target-ready",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 14253,
+        "target": "status",
+        "attribute": "data-state",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 14253,
         "target": "status",
         "attribute": "data-stage",
         "value": "target-chunks"
       },
       {
-        "milliseconds": 39153,
+        "milliseconds": 14492,
         "target": "html",
         "attribute": "data-target-chunks-ready",
         "value": "45"
       },
       {
-        "milliseconds": 39153,
+        "milliseconds": 14492,
         "target": "html",
         "attribute": "data-geometry-representation",
         "value": "mixed"
       },
       {
-        "milliseconds": 39153,
+        "milliseconds": 14492,
+        "target": "html",
+        "attribute": "data-target-ready",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 14492,
+        "target": "status",
+        "attribute": "data-state",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 14492,
         "target": "status",
         "attribute": "data-stage",
         "value": "target-chunks"
       },
       {
-        "milliseconds": 39957,
+        "milliseconds": 14742,
         "target": "html",
         "attribute": "data-target-chunks-ready",
         "value": "46"
       },
       {
-        "milliseconds": 39957,
+        "milliseconds": 14742,
         "target": "html",
         "attribute": "data-geometry-representation",
         "value": "mixed"
       },
       {
-        "milliseconds": 39957,
+        "milliseconds": 14742,
+        "target": "html",
+        "attribute": "data-target-ready",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 14742,
+        "target": "status",
+        "attribute": "data-state",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 14742,
         "target": "status",
         "attribute": "data-stage",
         "value": "target-chunks"
       },
       {
-        "milliseconds": 40702,
+        "milliseconds": 14973,
         "target": "html",
         "attribute": "data-target-chunks-ready",
         "value": "47"
       },
       {
-        "milliseconds": 40702,
+        "milliseconds": 14973,
         "target": "html",
         "attribute": "data-geometry-representation",
         "value": "mixed"
       },
       {
-        "milliseconds": 40702,
+        "milliseconds": 14973,
+        "target": "html",
+        "attribute": "data-target-ready",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 14973,
+        "target": "status",
+        "attribute": "data-state",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 14973,
         "target": "status",
         "attribute": "data-stage",
         "value": "target-chunks"
       },
       {
-        "milliseconds": 41311,
+        "milliseconds": 15223,
         "target": "html",
         "attribute": "data-target-chunks-ready",
         "value": "48"
       },
       {
-        "milliseconds": 41311,
+        "milliseconds": 15223,
         "target": "html",
         "attribute": "data-geometry-representation",
         "value": "mixed"
       },
       {
-        "milliseconds": 41311,
+        "milliseconds": 15223,
+        "target": "html",
+        "attribute": "data-target-ready",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 15223,
+        "target": "status",
+        "attribute": "data-state",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 15223,
         "target": "status",
         "attribute": "data-stage",
         "value": "target-chunks"
       },
       {
-        "milliseconds": 41956,
+        "milliseconds": 15457,
         "target": "html",
         "attribute": "data-target-chunks-ready",
         "value": "49"
       },
       {
-        "milliseconds": 41956,
+        "milliseconds": 15457,
         "target": "html",
         "attribute": "data-geometry-representation",
         "value": "mixed"
       },
       {
-        "milliseconds": 41956,
+        "milliseconds": 15457,
+        "target": "html",
+        "attribute": "data-target-ready",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 15457,
+        "target": "status",
+        "attribute": "data-state",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 15457,
         "target": "status",
         "attribute": "data-stage",
         "value": "target-chunks"
       },
       {
-        "milliseconds": 42560,
+        "milliseconds": 15695,
         "target": "html",
         "attribute": "data-target-chunks-ready",
         "value": "50"
       },
       {
-        "milliseconds": 42560,
+        "milliseconds": 15695,
         "target": "html",
         "attribute": "data-geometry-representation",
         "value": "mixed"
       },
       {
-        "milliseconds": 42560,
+        "milliseconds": 15695,
+        "target": "html",
+        "attribute": "data-target-ready",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 15695,
+        "target": "status",
+        "attribute": "data-state",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 15695,
         "target": "status",
         "attribute": "data-stage",
         "value": "target-chunks"
       },
       {
-        "milliseconds": 43406,
+        "milliseconds": 15977,
         "target": "html",
         "attribute": "data-target-chunks-ready",
         "value": "51"
       },
       {
-        "milliseconds": 43406,
+        "milliseconds": 15977,
         "target": "html",
         "attribute": "data-geometry-representation",
         "value": "mixed"
       },
       {
-        "milliseconds": 43406,
+        "milliseconds": 15977,
+        "target": "html",
+        "attribute": "data-target-ready",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 15977,
+        "target": "status",
+        "attribute": "data-state",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 15977,
         "target": "status",
         "attribute": "data-stage",
         "value": "target-chunks"
       },
       {
-        "milliseconds": 44245,
+        "milliseconds": 16239,
         "target": "html",
         "attribute": "data-target-chunks-ready",
         "value": "52"
       },
       {
-        "milliseconds": 44245,
+        "milliseconds": 16239,
         "target": "html",
         "attribute": "data-geometry-representation",
         "value": "mixed"
       },
       {
-        "milliseconds": 44245,
+        "milliseconds": 16239,
+        "target": "html",
+        "attribute": "data-target-ready",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 16239,
+        "target": "status",
+        "attribute": "data-state",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 16239,
         "target": "status",
         "attribute": "data-stage",
         "value": "target-chunks"
       },
       {
-        "milliseconds": 44855,
+        "milliseconds": 16472,
         "target": "html",
         "attribute": "data-target-chunks-ready",
         "value": "53"
       },
       {
-        "milliseconds": 44855,
+        "milliseconds": 16472,
         "target": "html",
         "attribute": "data-geometry-representation",
         "value": "mixed"
       },
       {
-        "milliseconds": 44855,
+        "milliseconds": 16472,
+        "target": "html",
+        "attribute": "data-target-ready",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 16472,
+        "target": "status",
+        "attribute": "data-state",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 16472,
         "target": "status",
         "attribute": "data-stage",
         "value": "target-chunks"
       },
       {
-        "milliseconds": 45449,
+        "milliseconds": 16706,
         "target": "html",
         "attribute": "data-target-chunks-ready",
         "value": "54"
       },
       {
-        "milliseconds": 45449,
+        "milliseconds": 16706,
         "target": "html",
         "attribute": "data-geometry-representation",
         "value": "mixed"
       },
       {
-        "milliseconds": 45449,
+        "milliseconds": 16706,
+        "target": "html",
+        "attribute": "data-target-ready",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 16706,
+        "target": "status",
+        "attribute": "data-state",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 16706,
         "target": "status",
         "attribute": "data-stage",
         "value": "target-chunks"
       },
       {
-        "milliseconds": 46025,
+        "milliseconds": 16942,
         "target": "html",
         "attribute": "data-target-chunks-ready",
         "value": "55"
       },
       {
-        "milliseconds": 46025,
+        "milliseconds": 16942,
         "target": "html",
         "attribute": "data-geometry-representation",
         "value": "mixed"
       },
       {
-        "milliseconds": 46025,
+        "milliseconds": 16942,
+        "target": "html",
+        "attribute": "data-target-ready",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 16942,
+        "target": "status",
+        "attribute": "data-state",
+        "value": "loading"
+      },
+      {
+        "milliseconds": 16942,
         "target": "status",
         "attribute": "data-stage",
         "value": "target-chunks"
       },
       {
-        "milliseconds": 46681,
+        "milliseconds": 17189,
         "target": "html",
         "attribute": "data-target-chunks-ready",
-        "value": "56"
+        "value": "55"
       },
       {
-        "milliseconds": 46681,
+        "milliseconds": 17189,
         "target": "html",
         "attribute": "data-geometry-representation",
         "value": "mixed"
       },
       {
-        "milliseconds": 46681,
-        "target": "status",
-        "attribute": "data-stage",
-        "value": "target-chunks"
-      },
-      {
-        "milliseconds": 47606,
-        "target": "html",
-        "attribute": "data-target-chunks-ready",
-        "value": "57"
-      },
-      {
-        "milliseconds": 47606,
-        "target": "html",
-        "attribute": "data-geometry-representation",
-        "value": "mixed"
-      },
-      {
-        "milliseconds": 47606,
-        "target": "status",
-        "attribute": "data-stage",
-        "value": "target-chunks"
-      },
-      {
-        "milliseconds": 48360,
-        "target": "html",
-        "attribute": "data-target-chunks-ready",
-        "value": "58"
-      },
-      {
-        "milliseconds": 48360,
-        "target": "html",
-        "attribute": "data-geometry-representation",
-        "value": "mixed"
-      },
-      {
-        "milliseconds": 48360,
-        "target": "status",
-        "attribute": "data-stage",
-        "value": "target-chunks"
-      },
-      {
-        "milliseconds": 49001,
-        "target": "html",
-        "attribute": "data-target-chunks-ready",
-        "value": "59"
-      },
-      {
-        "milliseconds": 49001,
-        "target": "html",
-        "attribute": "data-geometry-representation",
-        "value": "mixed"
-      },
-      {
-        "milliseconds": 49001,
-        "target": "status",
-        "attribute": "data-stage",
-        "value": "target-chunks"
-      },
-      {
-        "milliseconds": 49669,
-        "target": "html",
-        "attribute": "data-target-chunks-ready",
-        "value": "60"
-      },
-      {
-        "milliseconds": 49669,
-        "target": "html",
-        "attribute": "data-geometry-representation",
-        "value": "mixed"
-      },
-      {
-        "milliseconds": 49669,
-        "target": "status",
-        "attribute": "data-stage",
-        "value": "target-chunks"
-      },
-      {
-        "milliseconds": 50341,
-        "target": "html",
-        "attribute": "data-target-chunks-ready",
-        "value": "61"
-      },
-      {
-        "milliseconds": 50341,
-        "target": "html",
-        "attribute": "data-geometry-representation",
-        "value": "mixed"
-      },
-      {
-        "milliseconds": 50341,
-        "target": "status",
-        "attribute": "data-stage",
-        "value": "target-chunks"
-      },
-      {
-        "milliseconds": 51020,
-        "target": "html",
-        "attribute": "data-target-chunks-ready",
-        "value": "62"
-      },
-      {
-        "milliseconds": 51020,
-        "target": "html",
-        "attribute": "data-geometry-representation",
-        "value": "mixed"
-      },
-      {
-        "milliseconds": 51020,
-        "target": "status",
-        "attribute": "data-stage",
-        "value": "target-chunks"
-      },
-      {
-        "milliseconds": 51648,
-        "target": "html",
-        "attribute": "data-target-chunks-ready",
-        "value": "63"
-      },
-      {
-        "milliseconds": 51648,
-        "target": "html",
-        "attribute": "data-geometry-representation",
-        "value": "mixed"
-      },
-      {
-        "milliseconds": 51648,
-        "target": "status",
-        "attribute": "data-stage",
-        "value": "target-chunks"
-      },
-      {
-        "milliseconds": 52283,
-        "target": "html",
-        "attribute": "data-target-chunks-ready",
-        "value": "64"
-      },
-      {
-        "milliseconds": 52283,
-        "target": "html",
-        "attribute": "data-geometry-representation",
-        "value": "mixed"
-      },
-      {
-        "milliseconds": 52283,
-        "target": "status",
-        "attribute": "data-stage",
-        "value": "target-chunks"
-      },
-      {
-        "milliseconds": 52920,
-        "target": "html",
-        "attribute": "data-target-chunks-ready",
-        "value": "65"
-      },
-      {
-        "milliseconds": 52920,
-        "target": "html",
-        "attribute": "data-geometry-representation",
-        "value": "mixed"
-      },
-      {
-        "milliseconds": 52920,
-        "target": "status",
-        "attribute": "data-stage",
-        "value": "target-chunks"
-      },
-      {
-        "milliseconds": 53659,
-        "target": "html",
-        "attribute": "data-target-chunks-ready",
-        "value": "66"
-      },
-      {
-        "milliseconds": 53659,
-        "target": "html",
-        "attribute": "data-geometry-representation",
-        "value": "mixed"
-      },
-      {
-        "milliseconds": 53659,
-        "target": "status",
-        "attribute": "data-stage",
-        "value": "target-chunks"
-      },
-      {
-        "milliseconds": 54440,
-        "target": "html",
-        "attribute": "data-target-chunks-ready",
-        "value": "67"
-      },
-      {
-        "milliseconds": 54440,
-        "target": "html",
-        "attribute": "data-geometry-representation",
-        "value": "mixed"
-      },
-      {
-        "milliseconds": 54440,
-        "target": "status",
-        "attribute": "data-stage",
-        "value": "target-chunks"
-      },
-      {
-        "milliseconds": 55320,
-        "target": "html",
-        "attribute": "data-target-chunks-ready",
-        "value": "68"
-      },
-      {
-        "milliseconds": 55320,
-        "target": "html",
-        "attribute": "data-geometry-representation",
-        "value": "mixed"
-      },
-      {
-        "milliseconds": 55320,
-        "target": "status",
-        "attribute": "data-stage",
-        "value": "target-chunks"
-      },
-      {
-        "milliseconds": 56554,
-        "target": "html",
-        "attribute": "data-target-chunks-ready",
-        "value": "69"
-      },
-      {
-        "milliseconds": 56554,
-        "target": "html",
-        "attribute": "data-geometry-representation",
-        "value": "mixed"
-      },
-      {
-        "milliseconds": 56554,
-        "target": "status",
-        "attribute": "data-stage",
-        "value": "target-chunks"
-      },
-      {
-        "milliseconds": 57321,
-        "target": "html",
-        "attribute": "data-target-chunks-ready",
-        "value": "70"
-      },
-      {
-        "milliseconds": 57321,
-        "target": "html",
-        "attribute": "data-geometry-representation",
-        "value": "mixed"
-      },
-      {
-        "milliseconds": 57321,
-        "target": "status",
-        "attribute": "data-stage",
-        "value": "target-chunks"
-      },
-      {
-        "milliseconds": 57928,
-        "target": "html",
-        "attribute": "data-target-chunks-ready",
-        "value": "71"
-      },
-      {
-        "milliseconds": 57928,
-        "target": "html",
-        "attribute": "data-geometry-representation",
-        "value": "mixed"
-      },
-      {
-        "milliseconds": 57928,
-        "target": "status",
-        "attribute": "data-stage",
-        "value": "target-chunks"
-      },
-      {
-        "milliseconds": 58595,
-        "target": "html",
-        "attribute": "data-target-chunks-ready",
-        "value": "72"
-      },
-      {
-        "milliseconds": 58595,
-        "target": "html",
-        "attribute": "data-geometry-representation",
-        "value": "mixed"
-      },
-      {
-        "milliseconds": 58595,
-        "target": "status",
-        "attribute": "data-stage",
-        "value": "target-chunks"
-      },
-      {
-        "milliseconds": 59231,
-        "target": "html",
-        "attribute": "data-target-chunks-ready",
-        "value": "73"
-      },
-      {
-        "milliseconds": 59231,
-        "target": "html",
-        "attribute": "data-geometry-representation",
-        "value": "mixed"
-      },
-      {
-        "milliseconds": 59231,
-        "target": "status",
-        "attribute": "data-stage",
-        "value": "target-chunks"
-      },
-      {
-        "milliseconds": 59851,
-        "target": "html",
-        "attribute": "data-target-chunks-ready",
-        "value": "74"
-      },
-      {
-        "milliseconds": 59851,
-        "target": "html",
-        "attribute": "data-geometry-representation",
-        "value": "mixed"
-      },
-      {
-        "milliseconds": 59851,
-        "target": "status",
-        "attribute": "data-stage",
-        "value": "target-chunks"
-      },
-      {
-        "milliseconds": 60537,
-        "target": "html",
-        "attribute": "data-target-chunks-ready",
-        "value": "75"
-      },
-      {
-        "milliseconds": 60537,
-        "target": "html",
-        "attribute": "data-geometry-representation",
-        "value": "mixed"
-      },
-      {
-        "milliseconds": 60537,
-        "target": "status",
-        "attribute": "data-stage",
-        "value": "target-chunks"
-      },
-      {
-        "milliseconds": 61208,
-        "target": "html",
-        "attribute": "data-target-chunks-ready",
-        "value": "76"
-      },
-      {
-        "milliseconds": 61208,
-        "target": "html",
-        "attribute": "data-geometry-representation",
-        "value": "mixed"
-      },
-      {
-        "milliseconds": 61208,
-        "target": "status",
-        "attribute": "data-stage",
-        "value": "target-chunks"
-      },
-      {
-        "milliseconds": 61866,
-        "target": "html",
-        "attribute": "data-target-chunks-ready",
-        "value": "77"
-      },
-      {
-        "milliseconds": 61866,
-        "target": "html",
-        "attribute": "data-geometry-representation",
-        "value": "mixed"
-      },
-      {
-        "milliseconds": 61866,
-        "target": "status",
-        "attribute": "data-stage",
-        "value": "target-chunks"
-      },
-      {
-        "milliseconds": 62602,
-        "target": "html",
-        "attribute": "data-target-chunks-ready",
-        "value": "78"
-      },
-      {
-        "milliseconds": 62602,
-        "target": "html",
-        "attribute": "data-geometry-representation",
-        "value": "mixed"
-      },
-      {
-        "milliseconds": 62602,
-        "target": "status",
-        "attribute": "data-stage",
-        "value": "target-chunks"
-      },
-      {
-        "milliseconds": 63201,
+        "milliseconds": 17189,
         "target": "html",
         "attribute": "data-residency-budget-reached",
         "value": "true"
       },
       {
-        "milliseconds": 63201,
-        "target": "html",
-        "attribute": "data-geometry-representation",
-        "value": "mixed"
-      },
-      {
-        "milliseconds": 63201,
+        "milliseconds": 17189,
         "target": "html",
         "attribute": "data-target-ready",
         "value": "limited"
       },
       {
-        "milliseconds": 63201,
+        "milliseconds": 17189,
         "target": "status",
         "attribute": "data-state",
         "value": "ready"
       },
       {
-        "milliseconds": 63201,
+        "milliseconds": 17189,
         "target": "status",
         "attribute": "data-stage",
         "value": "rendered"
-      },
-      {
-        "milliseconds": 63201,
-        "target": "html",
-        "attribute": "data-scene-loading",
-        "value": "false"
       }
     ]
   },
@@ -1637,267 +1906,7 @@
     {
       "resource": "scene.bin",
       "status": 206,
-      "range": "bytes=42207408-42730943"
-    },
-    {
-      "resource": "scene.bin",
-      "status": 206,
-      "range": "bytes=67817520-68325167"
-    },
-    {
-      "resource": "scene.bin",
-      "status": 206,
-      "range": "bytes=46347360-46869191"
-    },
-    {
-      "resource": "scene.bin",
-      "status": 206,
-      "range": "bytes=67301712-67817519"
-    },
-    {
-      "resource": "scene.bin",
-      "status": 206,
-      "range": "bytes=44300976-44812943"
-    },
-    {
-      "resource": "scene.bin",
-      "status": 206,
-      "range": "bytes=43777680-44300975"
-    },
-    {
-      "resource": "scene.bin",
-      "status": 206,
-      "range": "bytes=93075156-93597923"
-    },
-    {
-      "resource": "scene.bin",
-      "status": 206,
-      "range": "bytes=118107708-118289819"
-    },
-    {
-      "resource": "scene.bin",
-      "status": 206,
-      "range": "bytes=118942848-119419703"
-    },
-    {
-      "resource": "scene.bin",
-      "status": 206,
-      "range": "bytes=44812944-45330575"
-    },
-    {
-      "resource": "scene.bin",
-      "status": 206,
-      "range": "bytes=68325168-68848319"
-    },
-    {
-      "resource": "scene.bin",
-      "status": 206,
-      "range": "bytes=24486288-25009199"
-    },
-    {
-      "resource": "scene.bin",
-      "status": 206,
-      "range": "bytes=92555124-93075155"
-    },
-    {
-      "resource": "scene.bin",
-      "status": 206,
-      "range": "bytes=120637416-120707063"
-    },
-    {
-      "resource": "scene.bin",
-      "status": 206,
-      "range": "bytes=98922588-99422891"
-    },
-    {
-      "resource": "scene.bin",
-      "status": 206,
-      "range": "bytes=23962128-24486287"
-    },
-    {
-      "resource": "scene.bin",
-      "status": 206,
-      "range": "bytes=91511076-92034179"
-    },
-    {
-      "resource": "scene.bin",
-      "status": 206,
-      "range": "bytes=97224924-97741859"
-    },
-    {
-      "resource": "scene.bin",
-      "status": 206,
-      "range": "bytes=96700716-97224923"
-    },
-    {
-      "resource": "scene.bin",
-      "status": 206,
-      "range": "bytes=119419704-119875139"
-    },
-    {
-      "resource": "scene.bin",
-      "status": 206,
-      "range": "bytes=55933740-56457755"
-    },
-    {
-      "resource": "scene.bin",
-      "status": 206,
-      "range": "bytes=25009200-25531535"
-    },
-    {
-      "resource": "scene.bin",
-      "status": 206,
-      "range": "bytes=68848320-69371471"
-    },
-    {
-      "resource": "scene.bin",
-      "status": 206,
-      "range": "bytes=49886172-50362379"
-    },
-    {
-      "resource": "scene.bin",
-      "status": 206,
-      "range": "bytes=102041820-102565499"
-    },
-    {
-      "resource": "scene.bin",
-      "status": 206,
-      "range": "bytes=46869192-47383991"
-    },
-    {
-      "resource": "scene.bin",
-      "status": 206,
-      "range": "bytes=2093940-2603543"
-    },
-    {
-      "resource": "scene.bin",
-      "status": 206,
-      "range": "bytes=12001788-12522263"
-    },
-    {
-      "resource": "scene.bin",
-      "status": 206,
-      "range": "bytes=93597924-94120211"
-    },
-    {
-      "resource": "scene.bin",
-      "status": 206,
-      "range": "bytes=49362888-49886171"
-    },
-    {
-      "resource": "scene.bin",
-      "status": 206,
-      "range": "bytes=92034180-92555123"
-    },
-    {
-      "resource": "scene.bin",
-      "status": 206,
-      "range": "bytes=21361200-21881087"
-    },
-    {
-      "resource": "scene.bin",
-      "status": 206,
-      "range": "bytes=50838216-51361967"
-    },
-    {
-      "resource": "scene.bin",
-      "status": 206,
-      "range": "bytes=523764-1047419"
-    },
-    {
-      "resource": "scene.bin",
-      "status": 206,
-      "range": "bytes=69893520-70415471"
-    },
-    {
-      "resource": "scene.bin",
-      "status": 206,
-      "range": "bytes=0-523763"
-    },
-    {
-      "resource": "scene.bin",
-      "status": 206,
-      "range": "bytes=42730944-43253903"
-    },
-    {
-      "resource": "scene.bin",
-      "status": 206,
-      "range": "bytes=15647796-16166051"
-    },
-    {
-      "resource": "scene.bin",
-      "status": 206,
-      "range": "bytes=18245208-18767399"
-    },
-    {
-      "resource": "scene.bin",
-      "status": 206,
-      "range": "bytes=112830804-113355059"
-    },
-    {
-      "resource": "scene.bin",
-      "status": 206,
-      "range": "bytes=11479236-12001787"
-    },
-    {
-      "resource": "scene.bin",
-      "status": 206,
-      "range": "bytes=23440764-23962127"
-    },
-    {
-      "resource": "scene.bin",
-      "status": 206,
-      "range": "bytes=10956972-11479235"
-    },
-    {
-      "resource": "scene.bin",
-      "status": 206,
-      "range": "bytes=97741860-98265227"
-    },
-    {
-      "resource": "scene.bin",
-      "status": 206,
-      "range": "bytes=1570236-2093939"
-    },
-    {
-      "resource": "scene.bin",
-      "status": 206,
-      "range": "bytes=85876872-86399591"
-    },
-    {
-      "resource": "scene.bin",
-      "status": 206,
-      "range": "bytes=8337624-8861111"
-    },
-    {
-      "resource": "scene.bin",
-      "status": 206,
-      "range": "bytes=73557648-74079839"
-    },
-    {
-      "resource": "scene.bin",
-      "status": 206,
-      "range": "bytes=4687560-5211815"
-    },
-    {
-      "resource": "scene.bin",
-      "status": 206,
-      "range": "bytes=19288248-19796783"
-    },
-    {
-      "resource": "scene.bin",
-      "status": 206,
-      "range": "bytes=69371472-69893519"
-    },
-    {
-      "resource": "scene.bin",
-      "status": 206,
-      "range": "bytes=9909456-10432859"
-    },
-    {
-      "resource": "scene.bin",
-      "status": 206,
-      "range": "bytes=16690152-17209415"
+      "range": "bytes=4169808-4687559"
     },
     {
       "resource": "scene.bin",
@@ -1907,72 +1916,47 @@
     {
       "resource": "scene.bin",
       "status": 206,
+      "range": "bytes=6779880-7304135"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=8337624-8861111"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=35479296-36003503"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=7304136-7813751"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
       "range": "bytes=6257976-6779879"
     },
     {
       "resource": "scene.bin",
       "status": 206,
-      "range": "bytes=41239920-41763119"
+      "range": "bytes=36003504-36527375"
     },
     {
       "resource": "scene.bin",
       "status": 206,
-      "range": "bytes=26055408-26578511"
+      "range": "bytes=96700716-97224923"
     },
     {
       "resource": "scene.bin",
       "status": 206,
-      "range": "bytes=22919088-23440763"
+      "range": "bytes=4687560-5211815"
     },
     {
       "resource": "scene.bin",
       "status": 206,
-      "range": "bytes=87446760-87970583"
-    },
-    {
-      "resource": "scene.bin",
-      "status": 206,
-      "range": "bytes=9385320-9909455"
-    },
-    {
-      "resource": "scene.bin",
-      "status": 206,
-      "range": "bytes=14600688-15123971"
-    },
-    {
-      "resource": "scene.bin",
-      "status": 206,
-      "range": "bytes=18767400-19288247"
-    },
-    {
-      "resource": "scene.bin",
-      "status": 206,
-      "range": "bytes=71985888-72509903"
-    },
-    {
-      "resource": "scene.bin",
-      "status": 206,
-      "range": "bytes=89995392-90466271"
-    },
-    {
-      "resource": "scene.bin",
-      "status": 206,
-      "range": "bytes=95655180-96178763"
-    },
-    {
-      "resource": "scene.bin",
-      "status": 206,
-      "range": "bytes=3647208-4169807"
-    },
-    {
-      "resource": "scene.bin",
-      "status": 206,
-      "range": "bytes=17733336-18245207"
-    },
-    {
-      "resource": "scene.bin",
-      "status": 206,
-      "range": "bytes=15123972-15647795"
+      "range": "bytes=105707916-106232123"
     },
     {
       "resource": "scene.bin",
@@ -1982,32 +1966,27 @@
     {
       "resource": "scene.bin",
       "status": 206,
-      "range": "bytes=47383992-47901335"
+      "range": "bytes=37575120-38098223"
     },
     {
       "resource": "scene.bin",
       "status": 206,
-      "range": "bytes=17209416-17733335"
+      "range": "bytes=58551660-59075627"
     },
     {
       "resource": "scene.bin",
       "status": 206,
-      "range": "bytes=2603544-3127223"
+      "range": "bytes=31289904-31813775"
     },
     {
       "resource": "scene.bin",
       "status": 206,
-      "range": "bytes=79312104-79835783"
+      "range": "bytes=63291696-63425231"
     },
     {
       "resource": "scene.bin",
       "status": 206,
-      "range": "bytes=70415472-70939007"
-    },
-    {
-      "resource": "scene.bin",
-      "status": 206,
-      "range": "bytes=8861112-9385319"
+      "range": "bytes=94120212-94641131"
     },
     {
       "resource": "scene.bin",
@@ -2017,40 +1996,245 @@
     {
       "resource": "scene.bin",
       "status": 206,
-      "range": "bytes=6779880-7304135"
+      "range": "bytes=5734632-6257975"
     },
     {
       "resource": "scene.bin",
       "status": 206,
-      "range": "bytes=104660076-105184043"
+      "range": "bytes=74603664-75127535"
     },
     {
       "resource": "scene.bin",
       "status": 206,
-      "range": "bytes=20320056-20842055"
+      "range": "bytes=54375036-54891083"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=95164236-95655179"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=37051248-37575119"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=36527376-37051247"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=75651408-76175279"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=75127536-75651407"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=12522264-13046459"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=3127224-3647207"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=62201004-62773199"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=2603544-3127223"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=13570080-14087999"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=78267600-78790223"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=114242820-114733427"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=76175280-76699151"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=104136204-104660075"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=38098224-38621711"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=105184044-105707915"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=53874108-54375035"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=50362380-50838215"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=79835784-80359655"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=27625968-28149839"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=118107708-118289819"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=16166052-16690151"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=15123972-15647795"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=14600688-15123971"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=27102096-27625967"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=25531536-26055407"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=96178764-96700715"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=62773200-63291695"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=17209416-17733335"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=110940996-111465011"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=66207336-66778463"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=31813776-32337647"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=28149840-28673327"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=77221152-77744831"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=83010120-84334439"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=30766032-31289903"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=60634284-61157051"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=92034180-92555123"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=85362552-85876871"
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=95655180-96178763"
     },
     {
       "resource": "properties.bin",
       "status": 200,
       "range": null
+    },
+    {
+      "resource": "scene.bin",
+      "status": 206,
+      "range": "bytes=83010120-84334439"
     }
   ],
   "consoleIssues": [],
   "screenshots": {
     "coarse": {
       "path": "coarse-frame.png",
-      "bytes": 238014,
-      "sha256": "763282917e82f116c1e8407763737a4eaf39164d82ab01f654a8b98c1c6bcb44"
+      "bytes": 238823,
+      "sha256": "384ab3b78d8b496e0b33996f6b13a14d9e5001d2d28a045c597673905151b310"
     },
     "budgetLimited": {
       "path": "budget-limited.png",
-      "bytes": 258665,
-      "sha256": "c97c7cfd361cfeb7970ab1c8d5263eb8324c3c521c869f0002d42ed624b47c5c"
+      "bytes": 248409,
+      "sha256": "d05d7b3a9111e14f712b94d5e7b08c5bd95d6ad031bceef9f12731741815c48e"
     },
     "picked": {
       "path": "picked.png",
-      "bytes": 260330,
-      "sha256": "8f4ede2480745296f4173a0f65536e2bc028eb83fee501ccaf929fb5acd83394"
+      "bytes": 140358,
+      "sha256": "26d48a1768cfc5c54cdf2422351e0ee1b4d19d061f6298dad1707c6d68385d12"
     }
   }
 }
