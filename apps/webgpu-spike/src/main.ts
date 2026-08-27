@@ -13,6 +13,7 @@ import type {
 
 import { GeometryDecoder } from "./geometry-decoder.js";
 import type { GeometryDecodeResult } from "./geometry-decoder.js";
+import { HierarchyListView } from "./hierarchy-list.js";
 import { HierarchySearchIndex } from "./hierarchy-search.js";
 import type { HierarchySearchResult } from "./hierarchy-search.js";
 import { AxisSectionPlane } from "./section-plane.js";
@@ -26,7 +27,7 @@ import type { GeometryBinarySource, SceneSource } from "./scene-source.js";
 import { formatPropertyValue, PropertySidecarStore } from "./property-sidecar.js";
 import { loadSpatialDemandIndex } from "./spatial-demand-source.js";
 import { OrthographicOrbitCamera } from "./view.js";
-import { OccurrenceVisibility, syncHierarchyVisibility } from "./visibility.js";
+import { hiddenHierarchyNodeIndices, OccurrenceVisibility } from "./visibility.js";
 import {
   defaultProgressiveResidencyBudget,
   ProgressiveResidency,
@@ -109,31 +110,6 @@ function targetChunkByPrototype(
     }
   }
   return chunks;
-}
-
-function renderHierarchy(hierarchy: CompiledHierarchy): void {
-  const list = requireElement<HTMLOListElement>("#hierarchy");
-  const fragment = document.createDocumentFragment();
-  for (const entry of hierarchy.entries) {
-    const item = document.createElement("li");
-    item.style.setProperty("--depth", String(entry.depth));
-    item.dataset.renderable = String(entry.renderable);
-    item.dataset.nodeIndex = String(entry.nodeIndex);
-    item.title = entry.occurrenceId;
-    if (entry.renderable) {
-      item.tabIndex = 0;
-      item.setAttribute("role", "button");
-      item.setAttribute("aria-label", `Select ${entry.name}`);
-    }
-
-    const label = document.createElement("span");
-    label.textContent = entry.name;
-    const kind = document.createElement("small");
-    kind.textContent = entry.renderable ? `mesh · node ${entry.nodeIndex}` : "assembly";
-    item.append(label, kind);
-    fragment.append(item);
-  }
-  list.replaceChildren(fragment);
 }
 
 const canvas = requireElement<HTMLCanvasElement>("#viewport");
@@ -284,29 +260,22 @@ async function loadScene(source: SceneSource): Promise<boolean> {
     pendingCleanup = () => interactions.abort();
     const geometryDecoder = new GeometryDecoder(loaded.documentSource, interactions.signal);
     const listenerOptions = { signal: interactions.signal };
-    renderHierarchy(hierarchy);
+    const hierarchyView = new HierarchyListView(hierarchyList, hierarchy.entries, {
+      signal: interactions.signal,
+    });
     const searchIndex = new HierarchySearchIndex(hierarchy.entries);
-    const hierarchyItems = new Map(
-      Array.from(hierarchyList.querySelectorAll<HTMLElement>("li[data-node-index]"), (item) => [
-        Number(item.dataset.nodeIndex),
-        item,
-      ]),
-    );
     let activeSearch: HierarchySearchResult;
     const applyHierarchySearch = (): void => {
       activeSearch = searchIndex.search(hierarchySearchInput.value);
-      const visible = new Set(activeSearch.visibleNodeIndices);
-      const matching = new Set(activeSearch.matchingNodeIndices);
-      for (const [nodeIndex, item] of hierarchyItems) {
-        item.hidden = !visible.has(nodeIndex);
-        if (matching.has(nodeIndex)) item.dataset.searchMatch = "true";
-        else delete item.dataset.searchMatch;
-      }
+      hierarchyView.setFilter(
+        activeSearch.visibleNodeIndices,
+        new Set(activeSearch.matchingNodeIndices),
+      );
       const matches = activeSearch.matchingNodeIndices.length;
       hierarchySearchResult.textContent = activeSearch.query
         ? `${matches} ${matches === 1 ? "match" : "matches"}`
         : `${hierarchy.entries.length} nodes`;
-      hierarchyEmpty.hidden = visible.size !== 0;
+      hierarchyEmpty.hidden = activeSearch.visibleNodeIndices.length !== 0;
       document.documentElement.dataset.hierarchyMatches = String(matches);
     };
     hierarchySearchInput.addEventListener("input", applyHierarchySearch, listenerOptions);
@@ -614,10 +583,10 @@ async function loadScene(source: SceneSource): Promise<boolean> {
     const applyVisibility = ({ syncHierarchy = true } = {}): void => {
       renderer.updateVisibleInstances(visibility.indicesByBatch, visibility.counts);
       if (syncHierarchy) {
-        syncHierarchyVisibility(
-          scene.objectEvidence,
-          hierarchyItems,
-          (objectId) => visibility.isVisible(objectId),
+        hierarchyView.setHiddenNodeIndices(
+          hiddenHierarchyNodeIndices(scene.objectEvidence, (objectId) =>
+            visibility.isVisible(objectId),
+          ),
         );
       }
       updateSelectionText();
@@ -909,30 +878,12 @@ async function loadScene(source: SceneSource): Promise<boolean> {
       const picked = evidence.get(objectId);
       selectedObjectId = picked ? objectId : 0;
       renderer.setSelection(selectedObjectId);
-      for (const item of hierarchyList.querySelectorAll<HTMLElement>("[data-selected='true']")) {
-        delete item.dataset.selected;
-        item.removeAttribute("aria-current");
+      if (picked && !hierarchyView.hasRow(picked.nodeIndex)) {
+        hierarchySearchInput.value = "";
+        applyHierarchySearch();
       }
-      if (picked) {
-        const item = hierarchyList.querySelector<HTMLElement>(
-          `[data-node-index="${picked.nodeIndex}"]`,
-        );
-        if (item) {
-          if (item.hidden) {
-            hierarchySearchInput.value = "";
-            applyHierarchySearch();
-          }
-          item.dataset.selected = "true";
-          item.setAttribute("aria-current", "true");
-          const itemBounds = item.getBoundingClientRect();
-          const listBounds = hierarchyList.getBoundingClientRect();
-          if (itemBounds.top < listBounds.top) {
-            hierarchyList.scrollTop -= listBounds.top - itemBounds.top;
-          } else if (itemBounds.bottom > listBounds.bottom) {
-            hierarchyList.scrollTop += itemBounds.bottom - listBounds.bottom;
-          }
-        }
-      }
+      hierarchyView.setSelected(picked?.nodeIndex);
+      if (picked) hierarchyView.reveal(picked.nodeIndex);
       updateSelectionText();
       updateVisibilityControls();
       scheduleRender();

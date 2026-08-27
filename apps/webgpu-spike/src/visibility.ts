@@ -25,24 +25,16 @@ export interface HierarchyVisibilityEntry {
   readonly objectId: number;
 }
 
-export interface HierarchyVisibilityItem {
-  readonly dataset: {
-    hidden?: string;
-  };
-}
-
-/** Synchronizes hierarchy markers through the node-index lookup built at load time. */
-export function syncHierarchyVisibility(
+/** Collects the hierarchy rows a review action hid, for the list view to mark. */
+export function hiddenHierarchyNodeIndices(
   entries: readonly HierarchyVisibilityEntry[],
-  items: ReadonlyMap<number, HierarchyVisibilityItem>,
   isVisible: (objectId: number) => boolean,
-): void {
+): ReadonlySet<number> {
+  const hidden = new Set<number>();
   for (const entry of entries) {
-    const item = items.get(entry.nodeIndex);
-    if (!item) continue;
-    if (isVisible(entry.objectId)) delete item.dataset.hidden;
-    else item.dataset.hidden = "true";
+    if (!isVisible(entry.objectId)) hidden.add(entry.nodeIndex);
   }
+  return hidden;
 }
 
 /**
