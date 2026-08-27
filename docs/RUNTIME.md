@@ -471,8 +471,14 @@ largest chunk charged 75,373,776 bytes for 673,080 distinct vertex bytes and
 no eviction order could admit it. Spatial draw clusters, screen-space LOD, persistent cache tiers, and
 a broader eviction policy remain unimplemented. The focused transform-only
 record under `artifacts/spatial-demand/` passes in headed Chrome and Firefox;
-Digital Hub and sixty5 also pass offline co-demand censuses, while localized
-real-model browser evidence is still pending, so ADR-0008 remains Proposed.
+Digital Hub and sixty5 also pass offline co-demand censuses. A headed Digital
+Hub localized trace now measures what a real localized view demands: 109 of 255
+BVH nodes, 28 of 128 leaves, 1,129 of 5,152 occurrences, and 52 of 71 chunks
+under the default payload order against 42 of 66 under leaf-anchor ordering, at
+p95 0.085 ms per query over 48 navigation frames
+(`artifacts/spatial-demand/digital-hub-localized/`). The sixty5 localized trace,
+where the residency budget binds, is still pending, so ADR-0008 remains
+Proposed.
 
 The reproducible browser smoke command is `pnpm browser:matrix`. Its committed
 Phase 1 run covers Chrome/Blink and Firefox/Gecko with the same compiled package,
