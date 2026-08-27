@@ -30,17 +30,38 @@ function batch(objectId: number, triangles = 1): GpuPrototypeBatch {
   };
 }
 
+/**
+ * Material groups of one prototype, as the decoder emits them: the same vertex
+ * pool array handed to every group, with its own indices and instances.
+ */
+function materialGroups(
+  objectIds: readonly number[],
+  triangles = 1,
+): readonly GpuPrototypeBatch[] {
+  const [first, ...rest] = objectIds.map((objectId) => batch(objectId, triangles));
+  if (!first) throw new Error("A prototype needs at least one material group.");
+  return [first, ...rest.map((group) => ({ ...group, surfaceVertices: first.surfaceVertices }))];
+}
+
 function decoded(
   batches: readonly GpuPrototypeBatch[],
   targetMeshIndexes: readonly number[],
 ): DecodedCompiledScene {
-  const batchEvidence: CompiledBatchEvidence[] = batches.map((_, batchIndex) => ({
-    batchIndex,
-    meshIndex: targetMeshIndexes[batchIndex] ?? 0,
-    targetMeshIndex: targetMeshIndexes[batchIndex] ?? 0,
-    surfacePrimitiveIndex: 0,
-    prototypeId: `prototype:${String(targetMeshIndexes[batchIndex] ?? 0)}`,
-  }));
+  const primitivesPerMesh = new Map<number, number>();
+  const batchEvidence: CompiledBatchEvidence[] = batches.map((_, batchIndex) => {
+    const targetMeshIndex = targetMeshIndexes[batchIndex] ?? 0;
+    // Repeating a target mesh means repeating its material groups, which the
+    // compiler numbers as separate surface primitives of the same prototype.
+    const surfacePrimitiveIndex = primitivesPerMesh.get(targetMeshIndex) ?? 0;
+    primitivesPerMesh.set(targetMeshIndex, surfacePrimitiveIndex + 1);
+    return {
+      batchIndex,
+      meshIndex: targetMeshIndex,
+      targetMeshIndex,
+      surfacePrimitiveIndex,
+      prototypeId: `prototype:${String(targetMeshIndex)}`,
+    };
+  });
   return {
     gpuScene: { batches },
     bounds: { min: [0, 0, 0], max: [1, 1, 1] },
@@ -302,5 +323,52 @@ describe("progressive residency", () => {
     expect(selected.evictedTargetMeshIndexes).toEqual([0]);
     expect(selected.targetMeshIndexes).toEqual([1]);
     expect(selected.entries.map(({ key }) => key)).toEqual(["coarse:aggregate", "1:0"]);
+  });
+
+  it("charges a shared vertex pool once and releases it with its last group", () => {
+    const coarse = decoded([batch(1), batch(2)], [0, 1]);
+    const base = new ProgressiveResidency(coarse, {
+      decodedBytes: 4_096,
+      gpuBytes: 4_096,
+    }).current();
+    const groups = materialGroups([10, 11, 12], 2);
+    const residency = new ProgressiveResidency(coarse, {
+      decodedBytes: 4_096,
+      gpuBytes: 4_096,
+    });
+
+    const promoted = residency.promote(decoded(groups, [0, 0, 0]), { priority: 0 });
+    expect(promoted.admitted).toBe(true);
+    // Mesh 0 keeps its retained coarse fallback, three material groups
+    // arrived, and the pool all three read is charged once: 72 pool bytes,
+    // then 24 index and 96 instance bytes per group.
+    expect(promoted.decodedBytes).toBe(base.decodedBytes + 72 + 3 * (24 + 96));
+    expect(promoted.triangles).toBe(1 + 3 * 2);
+
+    // Displacing the groups returns everything they took, the pool included.
+    const replacement = batch(20);
+    const restored = residency.promote(decoded([replacement], [0]), { priority: 0 });
+    expect(restored.admitted).toBe(true);
+    expect(restored.decodedBytes).toBe(
+      base.decodedBytes + estimateBatchDecodedBytes(replacement),
+    );
+  });
+
+  it("drops a departing group's own bytes and keeps the pool its siblings read", () => {
+    const coarse = decoded([batch(1), batch(2)], [0, 1]);
+    const groups = materialGroups([10, 11], 2);
+    const residency = new ProgressiveResidency(coarse, {
+      decodedBytes: 4_096,
+      gpuBytes: 4_096,
+    });
+    const both = residency.promote(decoded(groups, [0, 0]), { priority: 0 });
+
+    // Re-promoting mesh 0 with one of the two groups drops that group's own
+    // bytes and keeps the pool, which the surviving group still reads.
+    const one = residency.promote(decoded([groups[0] as GpuPrototypeBatch], [0]), {
+      priority: 0,
+    });
+    expect(one.admitted).toBe(true);
+    expect(both.decodedBytes - one.decodedBytes).toBe(24 + 96);
   });
 });

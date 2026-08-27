@@ -38,6 +38,13 @@ export interface BatchResidencyShape {
   readonly surfaceIndexBytes: number;
   readonly edgeVertexBytes: number;
   readonly instanceCount: number;
+  /**
+   * True when a batch decoded earlier already charges these vertices. Material
+   * groups of one prototype share its vertex pool, so only the batch that owns
+   * the pool pays for it -- and the renderer allocates no second buffer, so a
+   * sharing batch adds nothing, not even an empty buffer's four bytes.
+   */
+  readonly sharesSurfaceVertices?: boolean;
 }
 
 /** WebGPU allocates whole four-byte buffers, and never an empty one. */
@@ -53,14 +60,15 @@ export function alignedBufferByteLength(byteLength: number): number {
  */
 export function batchResidencyCost(shape: BatchResidencyShape): ResidencyCost {
   const instanceBytes = shape.instanceCount * instanceStride;
+  const shared = shape.sharesSurfaceVertices === true;
   return {
     decodedBytes:
-      shape.surfaceVertexBytes +
+      (shared ? 0 : shape.surfaceVertexBytes) +
       shape.surfaceIndexBytes +
       shape.edgeVertexBytes +
       instanceBytes,
     gpuBytes:
-      alignedBufferByteLength(shape.surfaceVertexBytes) +
+      (shared ? 0 : alignedBufferByteLength(shape.surfaceVertexBytes)) +
       alignedBufferByteLength(shape.surfaceIndexBytes) +
       alignedBufferByteLength(shape.edgeVertexBytes) +
       alignedBufferByteLength(instanceBytes),

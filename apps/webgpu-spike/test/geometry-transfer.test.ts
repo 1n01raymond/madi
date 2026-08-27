@@ -1,15 +1,16 @@
 import { describe, expect, it } from "vitest";
 
+import { compiledSceneTransferables } from "@naru3d/runtime-webgpu";
 import type { DecodedCompiledScene } from "@naru3d/runtime-webgpu";
 
 import { adoptTransitScene, transitSceneForResponse } from "../src/geometry-transfer.js";
 
-function decodedScene(): DecodedCompiledScene {
+function decodedScene(surfaceVertices = new Float32Array()): DecodedCompiledScene {
   return {
     gpuScene: {
       batches: [
         {
-          surfaceVertices: new Float32Array(),
+          surfaceVertices,
           surfaceIndices: new Uint32Array(),
           edgeVertices: new Float32Array(),
           instances: [],
@@ -71,6 +72,33 @@ describe("geometry transfer protocol", () => {
     expect(chunk.scene.hierarchy).toBe(scene.hierarchy);
     expect(chunk.hierarchy).toBe(scene.hierarchy);
     expect(chunk.scene.gpuScene).toBe(scene.gpuScene);
+  });
+
+  it("keeps sibling material groups on one vertex pool across the Worker boundary", () => {
+    // The decoder hands one prototype's material groups the identical array
+    // and the residency set charges the pool by that identity, so the
+    // structured clone postMessage performs has to preserve it -- with the
+    // transfer list `compiledSceneTransferables` builds, which lists each
+    // buffer once, as well as without one.
+    const pool = new Float32Array([0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0]);
+    const scene = decodedScene(pool);
+    const [group] = scene.gpuScene.batches;
+    if (!group) throw new Error("The decoded scene has no batch.");
+    scene.gpuScene.batches = [group, { ...group, surfaceIndices: new Uint32Array([0, 1, 0]) }];
+    const transit = transitSceneForResponse(scene, true);
+    const transferables = compiledSceneTransferables(scene as DecodedCompiledScene);
+    expect(transferables.filter((buffer) => buffer === pool.buffer)).toHaveLength(1);
+
+    const poolLength = pool.length;
+    for (const clone of [
+      structuredClone(transit),
+      // Transferring detaches `pool`, so nothing may read it after this.
+      structuredClone(transit, { transfer: transferables }),
+    ]) {
+      const [first, second] = clone.gpuScene.batches;
+      expect(first?.surfaceVertices).toHaveLength(poolLength);
+      expect(second?.surfaceVertices).toBe(first?.surfaceVertices);
+    }
   });
 
   it("rejects a chunk response that arrives before the hierarchy is cached", () => {

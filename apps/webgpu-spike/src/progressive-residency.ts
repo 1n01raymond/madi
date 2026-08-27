@@ -61,12 +61,13 @@ export interface ProgressiveResidencyOptions {
  * decoder also applies to accessor counts, so a chunk measured before its
  * fetch and the same chunk after its decode cost exactly the same.
  */
-function costOfBatch(batch: GpuPrototypeBatch): ResidencyCost {
+function costOfBatch(batch: GpuPrototypeBatch, sharesSurfaceVertices = false): ResidencyCost {
   return batchResidencyCost({
     surfaceVertexBytes: batch.surfaceVertices.byteLength,
     surfaceIndexBytes: batch.surfaceIndices.byteLength,
     edgeVertexBytes: batch.edgeVertices.byteLength,
     instanceCount: batch.instances.length,
+    sharesSurfaceVertices,
   });
 }
 
@@ -106,10 +107,19 @@ interface ResidencyTotals {
   edgeSegments: number;
   /** Retained coarse fallbacks of promoted target groups (legacy mode only). */
   fallbackDecodedBytes: number;
+  /**
+   * Resident batches per shared vertex pool, by array identity. The decoder
+   * hands one prototype's material groups the same interleaved array, and the
+   * renderer allocates one buffer for it, so the pool is charged while at
+   * least one of those batches is resident and released with the last of them.
+   */
+  vertexPools: Map<Float32Array, number>;
 }
 
 function addBatchToTotals(totals: ResidencyTotals, batch: GpuPrototypeBatch): void {
-  const cost = costOfBatch(batch);
+  const resident = totals.vertexPools.get(batch.surfaceVertices) ?? 0;
+  totals.vertexPools.set(batch.surfaceVertices, resident + 1);
+  const cost = costOfBatch(batch, resident > 0);
   totals.decodedBytes += cost.decodedBytes;
   totals.gpuBytes += cost.gpuBytes;
   totals.triangles += batch.surfaceIndices.length / 3;
@@ -117,7 +127,12 @@ function addBatchToTotals(totals: ResidencyTotals, batch: GpuPrototypeBatch): vo
 }
 
 function removeBatchFromTotals(totals: ResidencyTotals, batch: GpuPrototypeBatch): void {
-  const cost = costOfBatch(batch);
+  // Charges are fungible: the pool costs the same whichever sibling paid for
+  // it, so the departing batch keeps the charge exactly when siblings remain.
+  const remaining = (totals.vertexPools.get(batch.surfaceVertices) ?? 1) - 1;
+  if (remaining > 0) totals.vertexPools.set(batch.surfaceVertices, remaining);
+  else totals.vertexPools.delete(batch.surfaceVertices);
+  const cost = costOfBatch(batch, remaining > 0);
   totals.decodedBytes -= cost.decodedBytes;
   totals.gpuBytes -= cost.gpuBytes;
   totals.triangles -= batch.surfaceIndices.length / 3;
@@ -152,12 +167,13 @@ export class ProgressiveResidency {
   private readonly pinnedTargetMeshIndexes = new Set<number>();
   private readonly priorityByTargetMesh = new Map<number, number>();
   private readonly lastTouchedByTargetMesh = new Map<number, number>();
-  private readonly totals: ResidencyTotals = {
+  private totals: ResidencyTotals = {
     decodedBytes: 0,
     gpuBytes: 0,
     triangles: 0,
     edgeSegments: 0,
     fallbackDecodedBytes: 0,
+    vertexPools: new Map(),
   };
   private readonly aggregateCoarse: boolean;
   private touchSequence = 0;
@@ -177,6 +193,9 @@ export class ProgressiveResidency {
     }
     this.budget = budget;
     this.aggregateCoarse = options.aggregateCoarse === true;
+    // A pool belongs to one mesh and a mesh to one target group, so charging
+    // each pool once globally charges each fallback group once.
+    const chargedCoarsePools = new Set<Float32Array>();
     for (const entry of entriesFromScene(coarse)) {
       const residencyEntry = this.aggregateCoarse
         ? { ...entry, key: "coarse:aggregate" }
@@ -190,10 +209,12 @@ export class ProgressiveResidency {
       const targetMeshIndex = entry.evidence.targetMeshIndex;
       const group = this.coarseEntriesByTargetMesh.get(targetMeshIndex) ?? [];
       this.coarseEntriesByTargetMesh.set(targetMeshIndex, [...group, entry]);
+      const sharesSurfaceVertices = chargedCoarsePools.has(entry.batch.surfaceVertices);
+      chargedCoarsePools.add(entry.batch.surfaceVertices);
       this.coarseDecodedBytesByTargetMesh.set(
         targetMeshIndex,
         (this.coarseDecodedBytesByTargetMesh.get(targetMeshIndex) ?? 0) +
-          estimateBatchDecodedBytes(entry.batch),
+          costOfBatch(entry.batch, sharesSurfaceVertices).decodedBytes,
       );
     }
     if (
@@ -298,7 +319,10 @@ export class ProgressiveResidency {
       replacements.map(({ evidence }) => evidence.targetMeshIndex),
     );
     const candidate = new Map(this.entries);
-    const totals: ResidencyTotals = { ...this.totals };
+    const totals: ResidencyTotals = {
+      ...this.totals,
+      vertexPools: new Map(this.totals.vertexPools),
+    };
     const keysByTargetMesh = new Map<number, string[]>();
     for (const entry of candidate.values()) {
       const keys = keysByTargetMesh.get(entry.evidence.targetMeshIndex);
@@ -382,11 +406,7 @@ export class ProgressiveResidency {
 
     this.entries.clear();
     for (const [key, entry] of candidate) this.entries.set(key, entry);
-    this.totals.decodedBytes = totals.decodedBytes;
-    this.totals.gpuBytes = totals.gpuBytes;
-    this.totals.triangles = totals.triangles;
-    this.totals.edgeSegments = totals.edgeSegments;
-    this.totals.fallbackDecodedBytes = totals.fallbackDecodedBytes;
+    this.totals = totals;
     this.replaceSet(this.targetMeshIndexes, candidateTargetMeshes);
     this.replaceSet(this.pinnedTargetMeshIndexes, candidatePins);
     this.replaceMap(this.priorityByTargetMesh, candidatePriorities);

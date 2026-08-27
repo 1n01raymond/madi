@@ -118,7 +118,11 @@ decoded and GPU cost is tested against the budget: a chunk that cannot fit the
 free headroom, and for which no colder unpinned group could be evicted, is
 skipped without a transfer or a decode. The gate refuses only what admission
 would certainly reject, so the resident set is unchanged; `data-target-scheduler-skips`
-counts the skipped chunks beside `data-target-scheduler-requests`. Packages
+counts the skipped chunks beside `data-target-scheduler-requests`. Both that
+price and the resident charge count a prototype's vertex pool once however many
+material groups read it, which is what lets a large multi-material prototype be
+admitted at all: the largest sixty5 chunk cost 75,373,776 bytes when each group
+kept its own copy of one 673,080-byte pool. Packages
 with `naru.spatial-demand-index.1` instead authenticate `spatial.bin`, query
 only frustum-visible BVH leaves, and keep cold chunks out of the fetch queue.
 The focused headed record plus Digital Hub and sixty5 offline co-demand

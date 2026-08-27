@@ -8,10 +8,15 @@ import {
   compiledSceneTransferables,
   decodeCompiledGltf,
   inspectCompiledHierarchy,
+  instanceStride,
   prepareCompiledGltfDecoder,
   validateGpuScene,
 } from "../src/index.js";
-import type { CompiledGltfError } from "../src/index.js";
+import type {
+  CompiledGltfError,
+  GpuPrototypeBatch,
+  ResidencyCost,
+} from "../src/index.js";
 
 const gltfUrl = new URL(
   "../../../artifacts/phase1/repeated-fasteners/scene.gltf",
@@ -25,6 +30,29 @@ const progressiveUrl = new URL(
   "../../../artifacts/phase1/repeated-fasteners-ap242/",
   import.meta.url,
 );
+
+/**
+ * Charges decoded batches the way a residency set does: a vertex pool shared
+ * by the material groups of one prototype is one array and one GPU buffer, so
+ * it is charged to the first batch that holds it and to no other.
+ */
+function residencyCostOfBatches(batches: readonly GpuPrototypeBatch[]): ResidencyCost {
+  const charged = new Set<Float32Array>();
+  return batches.reduce((total, batch) => {
+    const sharesSurfaceVertices = charged.has(batch.surfaceVertices);
+    charged.add(batch.surfaceVertices);
+    return addResidencyCost(
+      total,
+      batchResidencyCost({
+        surfaceVertexBytes: batch.surfaceVertices.byteLength,
+        surfaceIndexBytes: batch.surfaceIndices.byteLength,
+        edgeVertexBytes: batch.edgeVertices.byteLength,
+        instanceCount: batch.instances.length,
+        sharesSurfaceVertices,
+      }),
+    );
+  }, { decodedBytes: 0, gpuBytes: 0 });
+}
 
 async function loadPackage(): Promise<{ json: unknown; binary: ArrayBuffer }> {
   const [json, bytes] = await Promise.all([
@@ -270,19 +298,7 @@ describe("compiled glTF runtime boundary", () => {
         ).buffer,
         { targetChunkId: chunk.id },
       );
-      const decoded = scene.gpuScene.batches.reduce(
-        (total, batch) =>
-          addResidencyCost(
-            total,
-            batchResidencyCost({
-              surfaceVertexBytes: batch.surfaceVertices.byteLength,
-              surfaceIndexBytes: batch.surfaceIndices.byteLength,
-              edgeVertexBytes: batch.edgeVertices.byteLength,
-              instanceCount: batch.instances.length,
-            }),
-          ),
-        { decodedBytes: 0, gpuBytes: 0 },
-      );
+      const decoded = residencyCostOfBatches(scene.gpuScene.batches);
 
       // The gate refuses chunks on this prediction alone, so an underestimate
       // would drop geometry the budget could have held.
@@ -290,6 +306,50 @@ describe("compiled glTF runtime boundary", () => {
       expect(scene.summary.edgeSegments).toBeGreaterThan(0);
       expect(decoded.decodedBytes).toBeGreaterThan(0);
     }
+  });
+
+  it("shares one vertex pool across the material groups of a prototype", async () => {
+    const [json, targetBytes] = await Promise.all([
+      readFile(new URL("scene.gltf", progressiveUrl), "utf8").then(JSON.parse),
+      readFile(new URL("scene.bin", progressiveUrl)),
+    ]);
+    // The committed STEP packages carry one material per prototype. IFC
+    // federations split a prototype into a surface primitive per material,
+    // all reading the accessors the package stores once, so a second group is
+    // added here over the same POSITION/NORMAL/index accessors.
+    const split = structuredClone(json) as {
+      meshes: { primitives: unknown[] }[];
+    };
+    for (const mesh of split.meshes) {
+      mesh.primitives.splice(1, 0, structuredClone(mesh.primitives[0]));
+    }
+
+    const single = prepareCompiledGltfDecoder(json);
+    const grouped = prepareCompiledGltfDecoder(split);
+    const chunk = grouped.hierarchy.targetChunks[0];
+    if (!chunk) throw new Error("The progressive package has no target chunk.");
+    const range = (): ArrayBuffer =>
+      Uint8Array.from(
+        targetBytes.subarray(chunk.byteOffset, chunk.byteOffset + chunk.byteLength),
+      ).buffer;
+    const scene = grouped.decode(range(), { targetChunkId: chunk.id });
+
+    const [first, second] = scene.gpuScene.batches;
+    expect(scene.gpuScene.batches).toHaveLength(2);
+    expect(first?.surfaceVertices.length).toBeGreaterThan(0);
+    // Identity, not equality: the residency set and the renderer both charge
+    // and release the pool by the array they were handed.
+    expect(second?.surfaceVertices).toBe(first?.surfaceVertices);
+    expect(compiledSceneTransferables(scene)).toContain(first?.surfaceVertices.buffer);
+
+    // Splitting one prototype into two material groups adds that group's
+    // indices and instances -- and none of the vertices it re-reads.
+    const singleCost = single.targetChunkResidencyCosts.get(chunk.id);
+    const groupedCost = grouped.targetChunkResidencyCosts.get(chunk.id);
+    expect(groupedCost).toEqual(residencyCostOfBatches(scene.gpuScene.batches));
+    expect((groupedCost?.decodedBytes ?? 0) - (singleCost?.decodedBytes ?? 0)).toBe(
+      (first?.surfaceIndices.byteLength ?? 0) + (first?.instances.length ?? 0) * instanceStride,
+    );
   });
 
   it("surfaces semantic references on hierarchy entries and pick evidence", async () => {

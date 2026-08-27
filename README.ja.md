@@ -79,13 +79,14 @@
 | 詳細形状はプレーンなHTTP上で漸進的にストリーミングされます | 28件の`scene.bin`リクエストがすべてHTTP 206 `bytes=` Range応答 ([sixty5ブラウザ記録](artifacts/ifc/sixty5-browser/README.md)) |
 | シーン規模によらずメモリは宣言された予算内に収まります | promotionは234個中26番目のchunkで停止、デコード・GPUバイトとも64 MiB未満を維持 ([sixty5ブラウザ記録](artifacts/ifc/sixty5-browser/README.md)) |
 | 選択はソースCAD/BIM識別子へ解決されます | 選択した基礎梁が6件のIFCプロパティ項目を遅延resolve ([sixty5ブラウザ記録](artifacts/ifc/sixty5-browser/README.md)) |
-| 実物大の初回フレームは分ではなく秒単位で到着します | 共有coarse Worker経路、仮想化されたアセンブリ一覧、拒否チャンクをスキップするresidency admissionがsixty5の初回coarse frameを268.0秒から中央値4.5秒へ短縮 — 59.9倍の高速化 ([初回フレーム記録](artifacts/ifc/sixty5-first-frame/README.md)) |
-| 予算に収まらないジオメトリはそもそもダウンロードしません | 要求された234個のsixty5チャンクのうち141個をコンパイル済みドキュメントから事前に見積もり、バイトが動く前にスキップ。同一のresident setがRange応答245回ではなく94回で完成します ([初回フレーム記録](artifacts/ifc/sixty5-first-frame/README.md)) |
+| 実物大の初回フレームは分ではなく秒単位で到着します | 共有coarse Worker経路、仮想化されたアセンブリ一覧、拒否チャンクをスキップするresidency admissionがsixty5の初回coarse frameを268.0秒から中央値4.3秒へ短縮 — 62.6倍の高速化 ([初回フレーム記録](artifacts/ifc/sixty5-first-frame/README.md)) |
+| 予算に収まらないジオメトリはそもそもダウンロードしません | 要求されたsixty5チャンクはコンパイル済みドキュメントから事前に見積もられ、バイトが動く前に234個中123個がスキップされます。resident setはRange応答245回ではなく113回で完成します ([初回フレーム記録](artifacts/ifc/sixty5-first-frame/README.md)) |
+| 同じ予算でモデルをより多く保持します | プロトタイプのvertex poolをmaterialグループ間で共有し、sixty5チャンク集合をdecodedで230.7 MBから129.2 MBへ、最大チャンクを75.4 MBから1.3 MBへ削減。同じ 64 MiB予算でresidentの到達点が234個中93個から111個へ、三角形数が185万から226万へ増加します ([初回フレーム記録](artifacts/ifc/sixty5-first-frame/README.md)) |
 | カメラ移動は古いダウンロードを待たずにキャンセルします | 不要になったfastener Rangeリクエストが中断され、新たに見えるmounting-plate Rangeが先に発行 — ChromeとFirefoxで同一 ([ブラウザmatrix](artifacts/browser-matrix/README.md)) |
 | 原点から10,000 km離れた座標でも精度を維持します | 0.25 mmの板間隔が誤差0.001 mm以下でコンパイルされ、両エンジンともピクセルドリフト0で描画 ([精度記録](artifacts/precision/large-coordinates/README.md)) |
 | 近接するgeometryがまとまって転送されるようパッケージをパッキングできます (opt-in) | leaf-anchor payload順序がDigital Hub censusでoff-viewバイト合計を39.9%削減 ([spatial demand記録](artifacts/spatial-demand/README.md)) |
 | コンパイルはバイト単位で再現可能です | 2回の完全なsixty5コンパイルがバイト同一のパッケージを生成 ([コンパイル証拠](artifacts/ifc/sixty5/README.md)) |
-| **まだ達成していないこと:** 実物大スケールでのインタラクティブ級のready状態とブラウザ間性能主張 | 4.5秒の初回フレームはdiscrete GPUホスト1台での単一Chrome記録であり、8.3秒のready状態は234チャンク中93個で安定するため、64 MiB予算のもとでは連合モデルの大半がcoarseのまま残ります ([初回フレーム記録](artifacts/ifc/sixty5-first-frame/README.md)) |
+| **まだ達成していないこと:** 実物大スケールでのインタラクティブ級のready状態とブラウザ間性能主張 | 4.3秒の初回フレームはdiscrete GPUホスト1台での単一Chrome記録であり、8.9秒のready状態は234チャンク中111個で安定するため、64 MiB予算のもとでは連合モデルの大半がcoarseのまま残ります ([初回フレーム記録](artifacts/ifc/sixty5-first-frame/README.md)) |
 
 ## どこから始めるか
 

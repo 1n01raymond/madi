@@ -462,7 +462,13 @@ exceeds the free headroom with no colder unpinned group available to evict is
 skipped where its range request would have been issued. Because promotion only
 ever displaces groups colder than the incoming priority, that condition is
 exactly the one under which admission could not succeed, so the gate changes
-what is transferred and never what becomes resident. Spatial draw clusters, screen-space LOD, persistent cache tiers, and
+what is transferred and never what becomes resident. A prototype's vertex pool
+is decoded once per mesh and shared by the material groups that reference the
+same accessors, so both that estimate and the resident charge count it once;
+the renderer holds one refcounted vertex buffer behind the sibling batches and
+releases it with the last of them. Without that sharing the sixty5 package's
+largest chunk charged 75,373,776 bytes for 673,080 distinct vertex bytes and
+no eviction order could admit it. Spatial draw clusters, screen-space LOD, persistent cache tiers, and
 a broader eviction policy remain unimplemented. The focused transform-only
 record under `artifacts/spatial-demand/` passes in headed Chrome and Firefox;
 Digital Hub and sixty5 also pass offline co-demand censuses, while localized

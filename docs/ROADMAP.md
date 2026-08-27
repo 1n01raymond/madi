@@ -81,10 +81,12 @@ package. Headed Chrome now consumes that package: all 78,173 renderable
 occurrences render, the fixed 64 MiB residency budgets hold, and picking
 resolves the selected occurrence's lazily fetched property sets. The original
 268.0 s first coarse frame (`artifacts/ifc/sixty5-browser/`) is reduced to a
-4.471 s three-run median by shared coarse residency, a persistent document
-Worker, a virtualized assembly list, skip-and-continue residency admission, and
-estimate-gated prefetch that skips the 141 demanded chunks the budget cannot
-hold (`artifacts/ifc/sixty5-first-frame/`).
+4.283 s three-run median by shared coarse residency, a persistent document
+Worker, a virtualized assembly list, skip-and-continue residency admission,
+estimate-gated prefetch that skips the chunks the budget cannot hold, and a
+vertex pool shared across a prototype's material groups, which raises the
+resident endpoint to 111 of 234 chunks
+(`artifacts/ifc/sixty5-first-frame/`).
 
 - local STEP AP242 input;
 - XDE hierarchy, names, colors, units, transforms;

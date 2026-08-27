@@ -24,6 +24,13 @@ Direct WebGPU rendering and the Phase 1 compiled glTF runtime boundary.
   compatibility wrapper. It also publishes `targetChunkResidencyCosts`, the
   decoded and GPU bytes each declared chunk would cost, measured from accessor
   counts alone so a scheduler can refuse a chunk before requesting its range.
+- A prototype mesh is split into one primitive per material but stores its
+  vertex pool once, so every primitive references the same POSITION and NORMAL
+  accessors. Each pool is therefore interleaved once per mesh and the identical
+  `Float32Array` is handed to every sibling batch, which structured clone
+  preserves across a Worker boundary. `batchResidencyCost` charges such a pool
+  once through `sharesSurfaceVertices`, and the renderer keeps one refcounted
+  vertex buffer per pool.
 - `batchResidencyCost(shape)` is the single formula behind that measurement, the
   renderer's buffer allocation, and the Studio's residency accounting, so a
   predicted cost and the charge for the same decoded batch cannot drift apart.
