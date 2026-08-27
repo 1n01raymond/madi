@@ -79,12 +79,13 @@ commit과 고지를 보존해 수정 없이 MIT로 재배포합니다. Adafruit�
 | 상세 형상은 일반 HTTP 위에서 점진적으로 스트리밍됩니다 | 28건의 `scene.bin` 요청이 전부 HTTP 206 `bytes=` Range 응답 ([sixty5 브라우저 기록](artifacts/ifc/sixty5-browser/README.md)) |
 | 장면 크기와 무관하게 메모리는 선언된 예산 안에 머뭅니다 | promotion이 234개 중 26번째 chunk에서 정지, 디코드·GPU 바이트 모두 64 MiB 미만 유지 ([sixty5 브라우저 기록](artifacts/ifc/sixty5-browser/README.md)) |
 | 선택은 원본 CAD/BIM 식별자로 이어집니다 | 선택된 기초 보가 6개 IFC 속성 항목을 지연 resolve ([sixty5 브라우저 기록](artifacts/ifc/sixty5-browser/README.md)) |
-| 실물 대형 첫 프레임이 분이 아니라 초 단위로 도착합니다 | 공유 coarse Worker 경로, 가상화된 어셈블리 목록, 거부된 청크를 건너뛰는 residency admission이 sixty5 첫 coarse frame을 268.0초에서 중앙값 4.3초로 단축 — 61.8배 개선 ([첫 프레임 기록](artifacts/ifc/sixty5-first-frame/README.md)) |
+| 실물 대형 첫 프레임이 분이 아니라 초 단위로 도착합니다 | 공유 coarse Worker 경로, 가상화된 어셈블리 목록, 거부된 청크를 건너뛰는 residency admission이 sixty5 첫 coarse frame을 268.0초에서 중앙값 4.5초로 단축 — 59.9배 개선 ([첫 프레임 기록](artifacts/ifc/sixty5-first-frame/README.md)) |
+| 예산이 담을 수 없는 지오메트리는 아예 내려받지 않습니다 | 요구된 sixty5 청크 234개 중 141개를 컴파일된 문서에서 미리 계산해 바이트 전송 전에 건너뛰며, 동일한 resident set이 Range 응답 245회 대신 94회로 완성 ([첫 프레임 기록](artifacts/ifc/sixty5-first-frame/README.md)) |
 | 카메라 이동은 오래된 다운로드를 기다리지 않고 취소합니다 | 불필요해진 fastener Range 요청이 중단되고 새로 보이는 mounting-plate Range가 먼저 발행 — Chrome과 Firefox 모두 동일 ([브라우저 matrix](artifacts/browser-matrix/README.md)) |
 | 원점에서 10,000 km 떨어진 좌표도 정밀도를 유지합니다 | 0.25 mm 판 간격이 ≤ 0.001 mm 오차로 컴파일되고 두 엔진 모두 픽셀 드리프트 0으로 렌더링 ([정밀도 기록](artifacts/precision/large-coordinates/README.md)) |
 | 가까운 geometry가 함께 전송되도록 패키지를 패킹할 수 있습니다 (opt-in) | leaf-anchor payload 정렬이 Digital Hub census에서 off-view 바이트 합계를 39.9% 절감 ([spatial demand 기록](artifacts/spatial-demand/README.md)) |
 | 컴파일은 바이트 단위로 재현 가능합니다 | 두 번의 전체 sixty5 컴파일이 바이트 동일 패키지 생성 ([컴파일 증거](artifacts/ifc/sixty5/README.md)) |
-| **아직 아닌 것:** 실물 대형 규모의 인터랙티브급 준비 완료와 브라우저 간 성능 주장 | 4.3초 첫 프레임은 discrete GPU 호스트 1대의 단일 Chrome 기록이며, 9.6초 ready 상태에 도달하기까지 요구된 청크 234개를 모두 가져와 디코드한 뒤 141개를 사후 거부합니다 ([첫 프레임 기록](artifacts/ifc/sixty5-first-frame/README.md)) |
+| **아직 아닌 것:** 실물 대형 규모의 인터랙티브급 준비 완료와 브라우저 간 성능 주장 | 4.5초 첫 프레임은 discrete GPU 호스트 1대의 단일 Chrome 기록이며, 8.3초 ready 상태는 청크 234개 중 93개에서 안정되므로 64 MiB 예산 아래에서 연합 모델 대부분은 coarse 상태로 남습니다 ([첫 프레임 기록](artifacts/ifc/sixty5-first-frame/README.md)) |
 
 ## 어디서 시작할까요
 

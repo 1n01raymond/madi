@@ -24,8 +24,8 @@ These are product SLOs, not claims about current evidence. Cold and warm results
 must be reported separately under [the benchmark rules](BENCHMARKS.md). The
 current real-large boundary is a recorded 302-second end-to-end sixty5 import
 ([evidence](../artifacts/ifc/sixty5/README.md)); shared coarse residency, a
-virtualized assembly list, and skip-and-continue admission later record a
-4.340-second first frame
+virtualized assembly list, skip-and-continue admission, and estimate-gated
+prefetch later record a 4.471-second first frame
 ([evidence](../artifacts/ifc/sixty5-first-frame/README.md)). The recorded cache
 evidence proves compile-level warm reopens on the pinned mid-size fixtures
 (0.5 s for the Digital Hub federation, 1.7 s for the PyGamer STEP fixture —

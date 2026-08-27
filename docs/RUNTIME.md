@@ -456,7 +456,13 @@ re-rank resident eviction priority; if the hottest nonresident chunk changes,
 the old HTTP Range and Worker decode are aborted before its replacement is
 admitted. A budget-blocked demand signature prevents an unchanged camera update
 from refetching the same rejected chunk; selection resume or a changed demand
-order reopens scheduling. Spatial draw clusters, screen-space LOD, persistent cache tiers, and
+order reopens scheduling. Prefetch is estimate-gated: each chunk's decoded and
+GPU cost is derived once from the document's accessor counts, and a chunk that
+exceeds the free headroom with no colder unpinned group available to evict is
+skipped where its range request would have been issued. Because promotion only
+ever displaces groups colder than the incoming priority, that condition is
+exactly the one under which admission could not succeed, so the gate changes
+what is transferred and never what becomes resident. Spatial draw clusters, screen-space LOD, persistent cache tiers, and
 a broader eviction policy remain unimplemented. The focused transform-only
 record under `artifacts/spatial-demand/` passes in headed Chrome and Firefox;
 Digital Hub and sixty5 also pass offline co-demand censuses, while localized

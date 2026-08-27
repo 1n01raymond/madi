@@ -1,7 +1,9 @@
+import { addResidencyCost, batchResidencyCost } from "./layout.js";
 import type {
   GpuOccurrenceInstance,
   GpuPrototypeBatch,
   GpuScene,
+  ResidencyCost,
 } from "./layout.js";
 import { supportedSpatialDemandIndexSchema } from "./spatial-index.js";
 
@@ -185,6 +187,12 @@ export interface PreparedCompiledGltfDecoder {
   readonly hierarchy: CompiledHierarchy;
   readonly activeNodeCount: number;
   readonly renderableNodeCount: number;
+  /**
+   * Residency cost each target chunk would add once decoded, keyed by chunk id.
+   * Accessor counts determine it, so a scheduler can refuse a chunk the budget
+   * cannot hold without spending a range request on it.
+   */
+  readonly targetChunkResidencyCosts: ReadonlyMap<string, ResidencyCost>;
   decode(
     binary: ArrayBuffer,
     options?: DecodeCompiledGltfOptions,
@@ -836,6 +844,7 @@ interface PreparedRenderableNode {
 interface PreparedCompiledGltfState {
   readonly document: CompiledGltfDocument;
   readonly hierarchy: CompiledHierarchy;
+  readonly targetChunkResidencyCosts: ReadonlyMap<string, ResidencyCost>;
   readonly activeNodeCount: number;
   readonly renderableNodes: readonly PreparedRenderableNode[];
   readonly renderableNodesByTargetChunk: ReadonlyMap<
@@ -845,12 +854,24 @@ interface PreparedCompiledGltfState {
   readonly targetChunksById: ReadonlyMap<string, CompiledTargetChunk>;
 }
 
-function decodeMesh(
-  document: CompiledGltfDocument,
-  accessors: BinaryAccessors,
+interface SelectedMeshPrimitives {
+  readonly surfaces: readonly {
+    readonly primitive: CompiledGltfPrimitive;
+    readonly primitiveIndex: number;
+  }[];
+  /** At most one LINES primitive, whose vertices attach to the first surface. */
+  readonly edge?: CompiledGltfPrimitive;
+}
+
+/**
+ * The batch decomposition of one mesh. Decoding and pre-fetch measurement both
+ * read it, so a batch can never be measured under one rule and decoded under
+ * another.
+ */
+function selectMeshPrimitives(
   mesh: CompiledGltfMesh,
   meshIndex: number,
-): DecodedMeshGeometry {
+): SelectedMeshPrimitives {
   if (!Array.isArray(mesh.primitives)) {
     throw new CompiledGltfError("INVALID_GLTF", `meshes[${meshIndex}].primitives is missing.`);
   }
@@ -864,6 +885,94 @@ function decodeMesh(
       `meshes[${meshIndex}] must contain TRIANGLES primitives and at most one LINES primitive.`,
     );
   }
+  return { surfaces, ...(edges[0] ? { edge: edges[0] } : {}) };
+}
+
+/** Element count of one accessor, without reading the bytes it describes. */
+function accessorItemCount(
+  document: CompiledGltfDocument,
+  accessorIndex: number | undefined,
+  label: string,
+): number {
+  finiteInteger(accessorIndex, `${label} accessor`, document.accessors.length);
+  const accessor = document.accessors[accessorIndex as number];
+  if (!accessor || !Number.isInteger(accessor.count) || accessor.count <= 0) {
+    throw new CompiledGltfError("INVALID_GLTF", `${label} accessor metadata is invalid.`);
+  }
+  return accessor.count;
+}
+
+/**
+ * Residency cost of one mesh's batches, derived from accessor counts alone.
+ * `decodeMesh` interleaves POSITION with NORMAL into six floats per vertex,
+ * reads surface indices as u32, and expands each edge index into a full
+ * position, so every decoded length is a fixed multiple of a declared count.
+ */
+function measureMeshBatches(
+  document: CompiledGltfDocument,
+  mesh: CompiledGltfMesh,
+  meshIndex: number,
+  instanceCount: number,
+): ResidencyCost {
+  const { surfaces, edge } = selectMeshPrimitives(mesh, meshIndex);
+  const edgeVertexBytes = edge
+    ? accessorItemCount(document, edge.indices, `meshes[${meshIndex}] edge indices`) * 3 * 4
+    : 0;
+  let cost: ResidencyCost = { decodedBytes: 0, gpuBytes: 0 };
+  surfaces.forEach(({ primitive, primitiveIndex }, order) => {
+    const label = `meshes[${meshIndex}].primitives[${primitiveIndex}]`;
+    cost = addResidencyCost(
+      cost,
+      batchResidencyCost({
+        surfaceVertexBytes:
+          accessorItemCount(document, primitive.attributes.POSITION, `${label} POSITION`) * 6 * 4,
+        surfaceIndexBytes:
+          accessorItemCount(document, primitive.indices, `${label} surface indices`) * 4,
+        edgeVertexBytes: order === 0 ? edgeVertexBytes : 0,
+        instanceCount,
+      }),
+    );
+  });
+  return cost;
+}
+
+/** Residency cost of every target chunk, known before any range is fetched. */
+function measureTargetChunks(
+  document: CompiledGltfDocument,
+  hierarchy: CompiledHierarchy,
+  renderableNodesByTargetChunk: ReadonlyMap<string, readonly PreparedRenderableNode[]>,
+): ReadonlyMap<string, ResidencyCost> {
+  const costs = new Map<string, ResidencyCost>();
+  for (const chunk of hierarchy.targetChunks) {
+    const occurrencesByMesh = new Map<number, number>();
+    for (const node of renderableNodesByTargetChunk.get(chunk.id) ?? []) {
+      occurrencesByMesh.set(
+        node.targetMeshIndex,
+        (occurrencesByMesh.get(node.targetMeshIndex) ?? 0) + 1,
+      );
+    }
+    let cost: ResidencyCost = { decodedBytes: 0, gpuBytes: 0 };
+    for (const [meshIndex, instanceCount] of occurrencesByMesh) {
+      const mesh = document.meshes[meshIndex];
+      if (!mesh) throw new CompiledGltfError("INVALID_GLTF", `Missing meshes[${meshIndex}].`);
+      // A mesh belongs to exactly one chunk, so no cost is measured twice.
+      cost = addResidencyCost(
+        cost,
+        measureMeshBatches(document, mesh, meshIndex, instanceCount),
+      );
+    }
+    costs.set(chunk.id, cost);
+  }
+  return costs;
+}
+
+function decodeMesh(
+  document: CompiledGltfDocument,
+  accessors: BinaryAccessors,
+  mesh: CompiledGltfMesh,
+  meshIndex: number,
+): DecodedMeshGeometry {
+  const { surfaces, edge } = selectMeshPrimitives(mesh, meshIndex);
   const decodedSurfaces = surfaces.map(({ primitive: surface, primitiveIndex }) => {
     if (surface.indices === undefined) {
       throw new CompiledGltfError(
@@ -913,7 +1022,6 @@ function decodeMesh(
     };
   });
 
-  const edge = edges[0];
   let edgeVertices: Float32Array<ArrayBufferLike> = new Float32Array();
   let edgeSourceRefs: readonly string[] = [];
   if (edge) {
@@ -1045,6 +1153,11 @@ function prepareCompiledGltfState(value: unknown): PreparedCompiledGltfState {
   return {
     document,
     hierarchy,
+    targetChunkResidencyCosts: measureTargetChunks(
+      document,
+      hierarchy,
+      renderableNodesByTargetChunk,
+    ),
     activeNodeCount,
     renderableNodes,
     renderableNodesByTargetChunk,
@@ -1063,6 +1176,7 @@ export function prepareCompiledGltfDecoder(value: unknown): PreparedCompiledGltf
     hierarchy: state.hierarchy,
     activeNodeCount: state.activeNodeCount,
     renderableNodeCount: state.renderableNodes.length,
+    targetChunkResidencyCosts: state.targetChunkResidencyCosts,
     decode: (binary, options = {}) => decodePreparedCompiledGltf(state, binary, options),
   };
 }

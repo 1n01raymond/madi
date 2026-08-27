@@ -3,6 +3,8 @@ import { readFile } from "node:fs/promises";
 import { describe, expect, it } from "vitest";
 
 import {
+  addResidencyCost,
+  batchResidencyCost,
   compiledSceneTransferables,
   decodeCompiledGltf,
   inspectCompiledHierarchy,
@@ -249,6 +251,45 @@ describe("compiled glTF runtime boundary", () => {
     expect(second.objectEvidence).toEqual(first.objectEvidence);
     expect(second.gpuScene.batches[0]?.instances[0]?.transform.byteLength).toBe(128);
     expect(nodeReads).toBe(readsAfterPrepare);
+  });
+
+  it("measures each target chunk's residency cost before its range is fetched", async () => {
+    const [json, targetBytes] = await Promise.all([
+      readFile(new URL("scene.gltf", progressiveUrl), "utf8").then(JSON.parse),
+      readFile(new URL("scene.bin", progressiveUrl)),
+    ]);
+    const prepared = prepareCompiledGltfDecoder(json);
+
+    expect([...prepared.targetChunkResidencyCosts.keys()]).toEqual(
+      prepared.hierarchy.targetChunks.map(({ id }) => id),
+    );
+    for (const chunk of prepared.hierarchy.targetChunks) {
+      const scene = prepared.decode(
+        Uint8Array.from(
+          targetBytes.subarray(chunk.byteOffset, chunk.byteOffset + chunk.byteLength),
+        ).buffer,
+        { targetChunkId: chunk.id },
+      );
+      const decoded = scene.gpuScene.batches.reduce(
+        (total, batch) =>
+          addResidencyCost(
+            total,
+            batchResidencyCost({
+              surfaceVertexBytes: batch.surfaceVertices.byteLength,
+              surfaceIndexBytes: batch.surfaceIndices.byteLength,
+              edgeVertexBytes: batch.edgeVertices.byteLength,
+              instanceCount: batch.instances.length,
+            }),
+          ),
+        { decodedBytes: 0, gpuBytes: 0 },
+      );
+
+      // The gate refuses chunks on this prediction alone, so an underestimate
+      // would drop geometry the budget could have held.
+      expect(prepared.targetChunkResidencyCosts.get(chunk.id)).toEqual(decoded);
+      expect(scene.summary.edgeSegments).toBeGreaterThan(0);
+      expect(decoded.decodedBytes).toBeGreaterThan(0);
+    }
   });
 
   it("surfaces semantic references on hierarchy entries and pick evidence", async () => {

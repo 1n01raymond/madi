@@ -26,6 +26,54 @@ export interface GpuScene {
 
 export const instanceStride = 96;
 
+/** Decoded payload and GPU allocation one batch contributes to a residency set. */
+export interface ResidencyCost {
+  readonly decodedBytes: number;
+  readonly gpuBytes: number;
+}
+
+/** Batch payload sizes, which accessor counts already determine before a decode. */
+export interface BatchResidencyShape {
+  readonly surfaceVertexBytes: number;
+  readonly surfaceIndexBytes: number;
+  readonly edgeVertexBytes: number;
+  readonly instanceCount: number;
+}
+
+/** WebGPU allocates whole four-byte buffers, and never an empty one. */
+export function alignedBufferByteLength(byteLength: number): number {
+  return Math.max(4, Math.ceil(byteLength / 4) * 4);
+}
+
+/**
+ * The one residency cost formula. A scheduler charges it from accessor counts
+ * before a chunk is fetched and a residency set charges it from the decoded
+ * arrays afterwards; the two must agree exactly, or a pre-fetch admission gate
+ * would refuse chunks the budget would have taken.
+ */
+export function batchResidencyCost(shape: BatchResidencyShape): ResidencyCost {
+  const instanceBytes = shape.instanceCount * instanceStride;
+  return {
+    decodedBytes:
+      shape.surfaceVertexBytes +
+      shape.surfaceIndexBytes +
+      shape.edgeVertexBytes +
+      instanceBytes,
+    gpuBytes:
+      alignedBufferByteLength(shape.surfaceVertexBytes) +
+      alignedBufferByteLength(shape.surfaceIndexBytes) +
+      alignedBufferByteLength(shape.edgeVertexBytes) +
+      alignedBufferByteLength(instanceBytes),
+  };
+}
+
+export function addResidencyCost(total: ResidencyCost, cost: ResidencyCost): ResidencyCost {
+  return {
+    decodedBytes: total.decodedBytes + cost.decodedBytes,
+    gpuBytes: total.gpuBytes + cost.gpuBytes,
+  };
+}
+
 /** Splits one finite f64 value into two f32 values whose sum retains its residual. */
 export function splitFloat64(value: number): readonly [high: number, low: number] {
   if (!Number.isFinite(value)) throw new TypeError("Split values must be finite.");

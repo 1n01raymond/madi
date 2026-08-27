@@ -19,7 +19,10 @@ import {
   SpatialTargetChunkViewIndex,
   TargetChunkViewIndex,
 } from "../src/view-priority-scheduler.js";
-import type { RankedTargetChunk } from "../src/view-priority-scheduler.js";
+import type {
+  RankedTargetChunk,
+  TargetSchedulerEvent,
+} from "../src/view-priority-scheduler.js";
 
 const identity = new Float64Array([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]);
 
@@ -357,6 +360,83 @@ describe("view-prioritized target scheduling", () => {
     await scheduler.whenIdle();
 
     expect(requested).toEqual(["huge", "small-a", "small-b"]);
+    scheduler.stop();
+  });
+
+  it("skips an unadmittable chunk without spending a range request", async () => {
+    const chunks = [chunk("huge", 0, 0), chunk("small-a", 1, 1), chunk("small-b", 2, 2)];
+    const requested: string[] = [];
+    const events: TargetSchedulerEvent[] = [];
+    const resident = new Set<string>();
+    const scheduler = new CameraTargetScheduler({ rank: () => demandedRanking(chunks) }, {
+      isResident: (entry) => resident.has(entry.id),
+      mayAdmit: (entry) => entry.id !== "huge",
+      load: async (entry) => {
+        requested.push(entry.id);
+        return entry.id;
+      },
+      admit: (entry) => {
+        resident.add(entry.id);
+        return true;
+      },
+      onEvent: (event) => events.push(event),
+      onError: (error) => {
+        throw error;
+      },
+    });
+
+    scheduler.update({ viewProjection, origin: [0, 0, 0] });
+    await scheduler.whenIdle();
+
+    expect(requested).toEqual(["small-a", "small-b"]);
+    expect([...resident]).toEqual(["small-a", "small-b"]);
+    expect(events.filter(({ type }) => type === "skipped")).toEqual([
+      { type: "skipped", chunkId: "huge", viewPriority: 0 },
+    ]);
+    expect(scheduler.blocked).toBe(true);
+
+    scheduler.update({ viewProjection, origin: [0, 0, 0] });
+    await scheduler.whenIdle();
+    expect(events.filter(({ type }) => type === "skipped")).toHaveLength(1);
+    scheduler.stop();
+  });
+
+  it("fetches a skipped chunk once the demand set changes and the budget allows it", async () => {
+    const chunks = [chunk("huge", 0, 0), chunk("small", 1, 1)];
+    let demandedIds = ["huge", "small"];
+    let admissible = false;
+    const requested: string[] = [];
+    const resident = new Set<string>();
+    const scheduler = new CameraTargetScheduler(
+      { rank: () => demandedRanking(chunks.filter(({ id }) => demandedIds.includes(id))) },
+      {
+        isResident: (entry) => resident.has(entry.id),
+        mayAdmit: (entry) => entry.id !== "huge" || admissible,
+        load: async (entry) => {
+          requested.push(entry.id);
+          return entry.id;
+        },
+        admit: (entry) => {
+          resident.add(entry.id);
+          return true;
+        },
+        onError: (error) => {
+          throw error;
+        },
+      },
+    );
+
+    scheduler.update({ viewProjection, origin: [0, 0, 0] });
+    await scheduler.whenIdle();
+    expect(requested).toEqual(["small"]);
+
+    demandedIds = ["huge"];
+    admissible = true;
+    scheduler.update({ viewProjection, origin: [0, 0, 0] });
+    await scheduler.whenIdle();
+
+    expect(requested).toEqual(["small", "huge"]);
+    expect(resident.has("huge")).toBe(true);
     scheduler.stop();
   });
 

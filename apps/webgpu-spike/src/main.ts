@@ -223,6 +223,8 @@ function resetSceneUi(): void {
   delete document.documentElement.dataset.evictedTargetMeshCount;
   delete document.documentElement.dataset.targetSchedulerRequests;
   delete document.documentElement.dataset.targetSchedulerCancellations;
+  delete document.documentElement.dataset.targetSchedulerSkips;
+  delete document.documentElement.dataset.targetSchedulerSkippedChunk;
   delete document.documentElement.dataset.targetSchedulerChunk;
   delete document.documentElement.dataset.targetSchedulerPriority;
   delete document.documentElement.dataset.targetSchedulerCancelledChunk;
@@ -639,6 +641,7 @@ async function loadScene(source: SceneSource): Promise<boolean> {
     let schedulerFailure: unknown;
     let schedulerRequests = 0;
     let schedulerCancellations = 0;
+    let schedulerSkips = 0;
     let finalizePending = false;
     let spatialViewIndex: SpatialTargetChunkViewIndex | undefined;
     const residentChunkCount = (): number => {
@@ -782,6 +785,11 @@ async function loadScene(source: SceneSource): Promise<boolean> {
           schedulerCancellations,
         );
         document.documentElement.dataset.targetSchedulerCancelledChunk = event.chunkId;
+      } else if (event.type === "skipped") {
+        schedulerSkips += 1;
+        document.documentElement.dataset.targetSchedulerSkips = String(schedulerSkips);
+        document.documentElement.dataset.targetSchedulerSkippedChunk = event.chunkId;
+        scheduleDeferredFinalize();
       } else if (event.type === "blocked") {
         scheduleDeferredFinalize();
       } else if (residentChunkCount() === hierarchy.targetChunks.length) {
@@ -814,6 +822,11 @@ async function loadScene(source: SceneSource): Promise<boolean> {
       }
       const scheduler = new CameraTargetScheduler(viewIndex, {
         isResident: (chunk) => progressiveResidency.hasTargetMeshes(chunk.meshIndexes),
+        mayAdmit: (chunk, viewPriority) => {
+          const cost = geometryDecoder.targetChunkResidencyCosts.get(chunk.id);
+          // An unmeasured chunk stays admissible: the budget still decides.
+          return cost === undefined || progressiveResidency.mayAdmit(cost, viewPriority);
+        },
         load: (chunk, signal) =>
           geometryDecoder.decode(
             binarySourceForChunk(loaded.targetBinary, chunk),

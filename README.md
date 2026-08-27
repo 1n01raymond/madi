@@ -76,12 +76,13 @@ NARU.</sub>
 | Detail streams progressively over plain HTTP | 28 `scene.bin` requests, every one an HTTP 206 `bytes=` Range response ([sixty5 browser record](artifacts/ifc/sixty5-browser/README.md)) |
 | Memory stays inside a declared budget at any scene size | promotion stopped at chunk 26 of 234; decoded and GPU bytes both held under 64 MiB ([sixty5 browser record](artifacts/ifc/sixty5-browser/README.md)) |
 | Selection resolves to source CAD/BIM identity | a picked foundation beam lazily resolves its 6 IFC property entries ([sixty5 browser record](artifacts/ifc/sixty5-browser/README.md)) |
-| A real-large first frame arrives in seconds, not minutes | the shared-coarse Worker path, a virtualized assembly list, and skip-and-continue residency admission cut the sixty5 first coarse frame from 268.0 s to a 4.3 s median, a 61.8× speedup ([first-frame record](artifacts/ifc/sixty5-first-frame/README.md)) |
+| A real-large first frame arrives in seconds, not minutes | the shared-coarse Worker path, a virtualized assembly list, and skip-and-continue residency admission cut the sixty5 first coarse frame from 268.0 s to a 4.5 s median, a 59.9× speedup ([first-frame record](artifacts/ifc/sixty5-first-frame/README.md)) |
+| Geometry the budget cannot hold is never downloaded | 141 of 234 demanded sixty5 chunks are priced from the compiled document and skipped before any bytes move; the identical resident set now costs 94 Range responses instead of 245 ([first-frame record](artifacts/ifc/sixty5-first-frame/README.md)) |
 | Camera moves cancel stale downloads instead of waiting on them | an obsolete fastener Range request was aborted and the newly visible mounting-plate Range issued first, in both Chrome and Firefox ([browser matrix](artifacts/browser-matrix/README.md)) |
 | Coordinates 10,000 km from the origin stay precise | a 0.25 mm plate gap compiles with ≤ 0.001 mm error and renders with zero pixel drift in both engines ([precision record](artifacts/precision/large-coordinates/README.md)) |
 | Packages can be packed so nearby geometry travels together (opt-in) | leaf-anchor payload ordering cut summed off-view bytes 39.9% on the Digital Hub census ([spatial demand record](artifacts/spatial-demand/README.md)) |
 | Compiles are reproducible, byte for byte | two full sixty5 compilations produced byte-identical packages ([compile evidence](artifacts/ifc/sixty5/README.md)) |
-| **Not yet:** interactive-grade readiness or cross-browser performance claims at real-large scale | the 4.3 s first frame is a single Chrome record on one discrete-GPU host, and reaching the 9.6 s ready state still fetches and decodes every demanded chunk, rejecting 141 of 234 after the fact ([first-frame record](artifacts/ifc/sixty5-first-frame/README.md)) |
+| **Not yet:** interactive-grade readiness or cross-browser performance claims at real-large scale | the 4.5 s first frame is a single Chrome record on one discrete-GPU host, and the 8.3 s ready state settles on 93 of 234 chunks, so most of the federation stays coarse under a 64 MiB budget ([first-frame record](artifacts/ifc/sixty5-first-frame/README.md)) |
 
 ## Where to start
 

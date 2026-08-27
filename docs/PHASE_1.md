@@ -99,7 +99,7 @@ recording. The record is `artifacts/ifc/sixty5-browser/`, checked by
 | First-frame boundary | The Worker decode of the 37.8 MB `coarse.bin` takes 6.6 s; the rest of the 264.7 s to the first frame sits on the main-thread document handoff and 42,588-batch construction path | Recorded as the named Phase 2 optimization input |
 
 The Phase 2 follow-up in `artifacts/ifc/sixty5-first-frame/` closes that named
-boundary without changing the compiled package, in two stages.
+boundary without changing the compiled package, in four stages.
 
 A persistent Worker owns the parsed glTF once, and `prototype-aabb-v1` is
 rendered as one canonical box batch with an occurrence transform/target table.
@@ -117,17 +117,29 @@ federation size.
 The residency drain then stopped giving up early. A chunk the byte budget
 rejects is marked and skipped so the drain continues through the rest of the
 demand, `ready` is stamped only once the scheduler goes idle, and GPU
-visibility is reconciled through the changed batches. Three fresh
-headed-Chrome runs present the first coarse frame at 4.232, 4.419, and 4.340 s
+visibility is reconciled through the changed batches. Three headed-Chrome runs
+of that stage presented the first coarse frame at 4.232, 4.419, and 4.340 s
 (4.340 s median, 4.419 s observed p95): a 98.38% reduction from the baseline,
 and 61.75× faster than it. All three settle on the *same* endpoint — 93 of 234
 target chunks, 66,927,984 decoded and 67,011,312 GPU bytes with 97,552 bytes of
 headroom — and reach it at a 9.601 s median, against 15.807 s when the drain
 stopped at the first rejection and 64.445 s before that. All 78,173 occurrences
-remain visible and pickable and the same selected IFC properties resolve. One
-cost is recorded rather than hidden: a drain tries every demanded chunk once,
-so all 234 are fetched and decoded and 141 are rejected afterwards, which is
-why 245 Range responses back a 93-chunk resident set.
+remain visible and pickable and the same selected IFC properties resolve.
+
+The committed record adds the fourth stage: each target chunk's decoded and GPU
+cost is measured once from the parsed document's accessor counts, and a chunk
+the budget cannot take under any eviction the scheduler would perform is
+refused where its range request would have been issued. The recorded endpoint
+is byte-identical to the stage above it — the same 93 of 234 chunks and the
+same 66,927,984 / 67,011,312 bytes — but it is now reached from 93 requests and
+94 Range responses instead of 234 and 245, with 141 chunks skipped untouched
+(including one 75 MB chunk no 64 MiB budget can ever hold). Used JS heap at the
+ready sample falls from 1.788 GB to 1.481 GB and the ready state arrives at an
+8.277 s median (7.669, 8.277, 8.459 s) against 9.601 s. The first coarse frame
+is unchanged within spread (4.471 s median), because the gate governs traffic
+that begins after that frame is painted. `packages/runtime-webgpu/test/compiled-gltf.test.ts`
+decodes a committed fixture and asserts the predicted cost equals the decoded
+one for every chunk, so the prediction cannot drift from the charge.
 
 ### Persistent import cache
 
@@ -237,10 +249,10 @@ See `artifacts/phase1/README.md` for the compiled package,
 - A Firefox repeat and any benchmark or ADR-0003 renderer-decision claim for
   sixty5 remain unrecorded. The Chrome first-useful-frame boundary itself is now
   closed by `artifacts/ifc/sixty5-first-frame/`.
-- An admission path that does not fetch what it cannot admit. The resident
-  endpoint is now settled and identical across three runs, but reaching it
-  Range-fetches and decodes all 234 demanded chunks and rejects 141 of them
-  after decode, including one 75 MB chunk no 64 MiB budget can ever hold.
+- A resident endpoint that covers the model. Unadmittable chunks are no longer
+  fetched, but 141 of the 234 demanded sixty5 chunks still do not fit a 64 MiB
+  budget, and the largest single chunk (75 MB decoded) cannot fit under any
+  eviction order until prototype vertex data is shared between chunks.
 - Additional repeated reference-hardware profiles for ADR-0003; the first
   Apple-Silicon integrated-GPU record now shows divergent Chrome and Firefox
   CPU-p95 outcomes.
@@ -280,10 +292,13 @@ and continuing, and the status can stamp `ready` before the resident set has
 settled — so the recorded endpoint shrank to 55 of 234 target chunks. The next
 drain now skips rejected chunks and continues, `ready` waits for an idle
 scheduler, and visibility is reconciled through changed batches only, so the
-recorded endpoint is stable at 93 of 234 target chunks. The next increment is
-therefore estimate-gated prefetch — never fetching a chunk whose decoded size
-already exceeds the budget — followed by localized Digital Hub and sixty5
-traces, then persistent cache tiers and screen-space priority.
+recorded endpoint is stable at 93 of 234 target chunks. Prefetch is now
+estimate-gated: a chunk is priced from the parsed document before any bytes
+move, and the 141 the budget cannot take are skipped rather than fetched and
+decoded, holding the same endpoint from 93 requests instead of 234. The next
+increment is therefore the endpoint itself — a shared vertex pool so the
+largest prototypes stop being indivisible — followed by localized Digital Hub
+and sixty5 traces, then persistent cache tiers and screen-space priority.
 
 On the compiler side the structure document now streams record by record,
 property keys and key combinations are interned once at scene level, and the
@@ -299,10 +314,11 @@ real-model edge re-record remain future increments. The browser gate for the
 sixty5 package is now
 recorded (`artifacts/ifc/sixty5-browser/`): loading, bounded residency,
 picking, and lazy property resolution hold at real-large scale. The named
-268.0 s main-thread first-frame path is now reduced to a 4.340 s median by
+268.0 s main-thread first-frame path is now reduced to a 4.471 s median by
 the shared-coarse/persistent-Worker follow-up, the virtualized assembly list,
-and skip-and-continue residency admission in
-`artifacts/ifc/sixty5-first-frame/`. The ADR-0009 persistent import cache is
+skip-and-continue residency admission, and estimate-gated prefetch in
+`artifacts/ifc/sixty5-first-frame/`, which reaches its 93-chunk endpoint from
+93 range requests. The ADR-0009 persistent import cache is
 now recorded product evidence (`artifacts/cache/`): unchanged pinned sources
 restore byte-identically in seconds instead of recompiling, and corrupt
 entries fail closed. Spatial partitioning, screen-space policy, and runtime
