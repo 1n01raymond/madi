@@ -113,7 +113,12 @@ from the view center. If the hottest nonresident chunk
 changes, the scheduler aborts the obsolete HTTP Range and Worker decode before
 starting its replacement; the same order re-ranks eviction priority. An
 unchanged camera does not retry a demand signature already blocked by the
-residency budget. Packages
+residency budget. Before a range is requested at all, the chunk's measured
+decoded and GPU cost is tested against the budget: a chunk that cannot fit the
+free headroom, and for which no colder unpinned group could be evicted, is
+skipped without a transfer or a decode. The gate refuses only what admission
+would certainly reject, so the resident set is unchanged; `data-target-scheduler-skips`
+counts the skipped chunks beside `data-target-scheduler-requests`. Packages
 with `naru.spatial-demand-index.1` instead authenticate `spatial.bin`, query
 only frustum-visible BVH leaves, and keep cold chunks out of the fetch queue.
 The focused headed record plus Digital Hub and sixty5 offline co-demand

@@ -52,9 +52,10 @@ assert(
   coarseFrameMs <= 8_000 && coarseFrameMs - hierarchyReadyMs <= 4_000,
   "The shared-coarse record must present its first frame within 8 s overall and 4 s of hierarchy.",
 );
-// The drain no longer stops at the first rejected chunk and the ready state is
-// stamped only once the scheduler is idle, so the record settles at 8.859 s
-// instead of admitting past its own ready stamp.
+// The drain no longer stops at the first rejected chunk, the ready state is
+// stamped only once the scheduler is idle, and unadmittable chunks are never
+// fetched, so the record settles at 8.277 s (median of three runs: 7.669 s,
+// 8.277 s, 8.459 s) instead of admitting past its own ready stamp.
 assert(readyMs <= 20_000, "The settled record must reach its ready state within 20 s.");
 
 const { dataset } = evidence.snapshot;
@@ -69,6 +70,16 @@ assert(
 assert(
   dataset.targetChunksReady === "93" && dataset.targetChunksTotal === "234",
   "Skip-and-continue admission must admit the recorded 93/234 target chunk set.",
+);
+// Estimate-gated prefetch: every demanded chunk is still considered exactly
+// once per demand signature, but the 141 the budget cannot take are refused
+// from their measured cost, so they cost neither a range request nor a decode.
+assert(
+  dataset.targetSchedulerRequests === "93" &&
+    dataset.targetSchedulerSkips === "141" &&
+    Number(dataset.targetSchedulerRequests) + Number(dataset.targetSchedulerSkips) ===
+      Number(dataset.targetChunksTotal),
+  "The gate must skip the 141 unadmittable chunks and request only the 93 it admits.",
 );
 assert(
   dataset.residentDecodedBytes === "66927984" &&
@@ -111,12 +122,20 @@ assert(
 const rangeResponses = evidence.binaryRequests.filter(
   (request) => request.resource.startsWith("scene.bin") && request.range !== null,
 );
+// 94 = the 93 admitted chunks plus the one the selection path pins after
+// picking. Fetching every demanded chunk cost 245 responses before the gate.
 assert(
-  rangeResponses.length >= 93 &&
+  rangeResponses.length === 94 &&
     rangeResponses.every(
       (request) => request.status === 206 && /^bytes=\d+-\d+$/u.test(request.range),
     ),
   "Every promoted target chunk must come from a satisfied HTTP Range request.",
+);
+// Decoding 141 chunks the budget then rejected peaked at 1.788 GB, including a
+// single ~75 MB chunk no 64 MiB budget can ever admit.
+assert(
+  evidence.snapshot.usedJsHeapBytes <= 1_600_000_000,
+  "The gated record must stay below the heap the fetch-everything drain reached.",
 );
 assert(
   Array.isArray(evidence.consoleIssues) && evidence.consoleIssues.length === 0,
@@ -135,5 +154,6 @@ for (const [label, screenshot] of Object.entries(evidence.screenshots)) {
 console.log(
   `[sixty5-first-frame] validated: ${(coarseFrameMs / 1000).toFixed(3)}s coarse frame · ` +
     `${dataset.targetChunksReady}/${dataset.targetChunksTotal} target chunks · ` +
+    `${dataset.targetSchedulerRequests} requested, ${dataset.targetSchedulerSkips} skipped · ` +
     `${dataset.visibleOccurrences} visible occurrences`,
 );

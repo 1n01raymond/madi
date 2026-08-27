@@ -4,6 +4,7 @@ import type {
   CompiledBatchEvidence,
   DecodedCompiledScene,
   GpuPrototypeBatch,
+  ResidencyCost,
 } from "@naru3d/runtime-webgpu";
 
 import {
@@ -67,6 +68,17 @@ function decoded(
   };
 }
 
+/** What the scheduler would charge for a chunk carrying these batches. */
+function costOf(scene: DecodedCompiledScene): ResidencyCost {
+  return scene.gpuScene.batches.reduce<ResidencyCost>(
+    (total, value) => ({
+      decodedBytes: total.decodedBytes + estimateBatchDecodedBytes(value),
+      gpuBytes: total.gpuBytes + estimateBatchGpuBytes(value),
+    }),
+    { decodedBytes: 0, gpuBytes: 0 },
+  );
+}
+
 describe("progressive residency", () => {
   it("replaces coarse batches atomically and keeps both tiers below budget", () => {
     const coarse = decoded([batch(1), batch(2)], [0, 1]);
@@ -85,6 +97,66 @@ describe("progressive residency", () => {
     expect(rejected.admitted).toBe(false);
     expect(rejected.entries.map(({ key }) => key)).toEqual(["0:0", "1:0"]);
     expect(rejected.triangles).toBe(21);
+  });
+
+  it("refuses a chunk larger than the whole budget before it is fetched", () => {
+    const residency = new ProgressiveResidency(decoded([batch(1), batch(2)], [0, 1]), {
+      decodedBytes: 400,
+      gpuBytes: 400,
+    });
+    const oversized = decoded([batch(2, 30)], [1]);
+    const cost = costOf(oversized);
+
+    expect(cost.decodedBytes).toBeGreaterThan(400);
+    // No eviction order reaches it: its own bytes outlast every other group.
+    expect(residency.mayAdmit(cost, 0)).toBe(false);
+    expect(residency.mayAdmit(cost, 7)).toBe(false);
+    expect(residency.promote(oversized, { priority: 0 }).admitted).toBe(false);
+  });
+
+  it("admits a chunk that fits the free headroom", () => {
+    const residency = new ProgressiveResidency(decoded([batch(1), batch(2)], [0, 1]), {
+      decodedBytes: 800,
+      gpuBytes: 800,
+    });
+    const target = decoded([batch(1, 20)], [0]);
+
+    expect(residency.mayAdmit(costOf(target), 0)).toBe(true);
+    expect(residency.promote(target, { priority: 0 }).admitted).toBe(true);
+  });
+
+  it("refuses a chunk that outgrows the headroom with nothing colder to evict", () => {
+    const residency = new ProgressiveResidency(decoded([batch(1), batch(2)], [0, 1]), {
+      decodedBytes: 800,
+      gpuBytes: 800,
+    });
+    expect(residency.promote(decoded([batch(1, 20)], [0]), { priority: 0 }).admitted).toBe(true);
+
+    const colder = decoded([batch(2, 20)], [1]);
+    expect(residency.mayAdmit(costOf(colder), 5)).toBe(false);
+    expect(residency.promote(colder, { priority: 5 }).admitted).toBe(false);
+  });
+
+  it("admits a chunk hotter than a resident group the budget could evict", () => {
+    const residency = new ProgressiveResidency(decoded([batch(1), batch(2)], [0, 1]), {
+      decodedBytes: 800,
+      gpuBytes: 800,
+    });
+    expect(residency.promote(decoded([batch(1, 20)], [0]), { priority: 9 }).admitted).toBe(true);
+
+    const hotter = decoded([batch(2, 10)], [1]);
+    expect(residency.mayAdmit(costOf(hotter), 0)).toBe(true);
+    const promoted = residency.promote(hotter, { priority: 0 });
+    expect(promoted.admitted).toBe(true);
+    expect(promoted.evictedTargetMeshIndexes).toEqual([0]);
+  });
+
+  it("rejects an invalid priority rather than guessing at admission", () => {
+    const residency = new ProgressiveResidency(decoded([batch(1)], [0]), {
+      decodedBytes: 800,
+      gpuBytes: 800,
+    });
+    expect(() => residency.mayAdmit({ decodedBytes: 4, gpuBytes: 4 }, -1)).toThrow(TypeError);
   });
 
   it("evicts colder detail for a selected target while retaining its coarse fallback", () => {

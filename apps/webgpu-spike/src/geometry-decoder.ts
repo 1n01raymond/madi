@@ -2,6 +2,7 @@ import type {
   CompiledHierarchy,
   DecodedCompiledScene,
   GeometryRepresentation,
+  ResidencyCost,
 } from "@naru3d/runtime-webgpu";
 
 import { adoptTransitScene } from "./geometry-transfer.js";
@@ -36,6 +37,7 @@ export class GeometryDecoder {
   private disposed = false;
   /** Document hierarchy cached from the first hierarchy-bearing response. */
   private hierarchy: CompiledHierarchy | undefined;
+  private chunkCosts: ReadonlyMap<string, ResidencyCost> = new Map();
 
   constructor(source: GeometryDocumentSource, signal: AbortSignal) {
     this.signal = signal;
@@ -57,10 +59,19 @@ export class GeometryDecoder {
       if (response.type !== "initialized") {
         throw new Error("The geometry Worker returned an invalid initialization response.");
       }
+      this.chunkCosts = response.targetChunkResidencyCosts;
     });
     // Initialization starts in parallel with WebGPU adapter/device creation.
     // Keep the rejection observed until decode() forwards it to the load path.
     void this.initialized.catch(() => undefined);
+  }
+
+  /**
+   * Residency cost of each target chunk, measured from the parsed document at
+   * initialization. Empty until the Worker reports it.
+   */
+  get targetChunkResidencyCosts(): ReadonlyMap<string, ResidencyCost> {
+    return this.chunkCosts;
   }
 
   async decode(

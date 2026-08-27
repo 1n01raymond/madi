@@ -5,6 +5,7 @@ import {
 import type {
   GeometryRepresentation,
   PreparedCompiledGltfDecoder,
+  ResidencyCost,
 } from "@naru3d/runtime-webgpu";
 
 import { aggregateCoarseScene } from "./coarse-aggregation.js";
@@ -32,7 +33,12 @@ export type GeometryWorkerRequest =
     };
 
 export type GeometryWorkerResponse =
-  | { readonly type: "initialized"; readonly requestId: number }
+  | {
+      readonly type: "initialized";
+      readonly requestId: number;
+      /** Per-chunk residency cost, so the scheduler can refuse before fetching. */
+      readonly targetChunkResidencyCosts: ReadonlyMap<string, ResidencyCost>;
+    }
   | {
       readonly type: "ready";
       readonly requestId: number;
@@ -77,7 +83,11 @@ async function handleRequest(
         ? new TextDecoder().decode(request.source.bytes)
         : await request.source.file.text();
       compiledDecoder = prepareCompiledGltfDecoder(JSON.parse(text) as unknown);
-      worker.postMessage({ type: "initialized", requestId: request.requestId });
+      worker.postMessage({
+        type: "initialized",
+        requestId: request.requestId,
+        targetChunkResidencyCosts: compiledDecoder.targetChunkResidencyCosts,
+      });
       return;
     }
     await decode(request);

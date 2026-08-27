@@ -21,7 +21,14 @@ Direct WebGPU rendering and the Phase 1 compiled glTF runtime boundary.
   tables. Its `decode(binary, { targetChunkId })` path touches only the selected
   chunk's occurrences and transforms cached prototype AABB corners rather than
   every vertex for every occurrence; `decodeCompiledGltf` remains the one-shot
-  compatibility wrapper.
+  compatibility wrapper. It also publishes `targetChunkResidencyCosts`, the
+  decoded and GPU bytes each declared chunk would cost, measured from accessor
+  counts alone so a scheduler can refuse a chunk before requesting its range.
+- `batchResidencyCost(shape)` is the single formula behind that measurement, the
+  renderer's buffer allocation, and the Studio's residency accounting, so a
+  predicted cost and the charge for the same decoded batch cannot drift apart.
+  `packages/runtime-webgpu/test/compiled-gltf.test.ts` decodes a committed
+  fixture and asserts the two agree for every chunk.
 - `compiledSceneTransferables(scene)` lists owned typed-array buffers for a
   zero-copy Worker-to-main-thread transfer.
 - `NaruWebGpuRenderer` uploads those batches and renders surfaces, edges, and an

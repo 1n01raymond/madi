@@ -1,8 +1,9 @@
-import { instanceStride } from "@naru3d/runtime-webgpu";
+import { batchResidencyCost } from "@naru3d/runtime-webgpu";
 import type {
   CompiledBatchEvidence,
   DecodedCompiledScene,
   GpuPrototypeBatch,
+  ResidencyCost,
 } from "@naru3d/runtime-webgpu";
 
 export const defaultProgressiveResidencyBudget = 64 * 1024 * 1024;
@@ -55,28 +56,28 @@ export interface ProgressiveResidencyOptions {
   readonly aggregateCoarse?: boolean;
 }
 
-function alignedBufferByteLength(byteLength: number): number {
-  return Math.max(4, Math.ceil(byteLength / 4) * 4);
+/**
+ * Charges one decoded batch through the shared cost formula the compiled
+ * decoder also applies to accessor counts, so a chunk measured before its
+ * fetch and the same chunk after its decode cost exactly the same.
+ */
+function costOfBatch(batch: GpuPrototypeBatch): ResidencyCost {
+  return batchResidencyCost({
+    surfaceVertexBytes: batch.surfaceVertices.byteLength,
+    surfaceIndexBytes: batch.surfaceIndices.byteLength,
+    edgeVertexBytes: batch.edgeVertices.byteLength,
+    instanceCount: batch.instances.length,
+  });
 }
 
 /** Exact source payload used to create the four renderer buffers for one batch. */
 export function estimateBatchDecodedBytes(batch: GpuPrototypeBatch): number {
-  return (
-    batch.surfaceVertices.byteLength +
-    batch.surfaceIndices.byteLength +
-    batch.edgeVertices.byteLength +
-    batch.instances.length * instanceStride
-  );
+  return costOfBatch(batch).decodedBytes;
 }
 
 /** WebGPU's four-byte buffer alignment is included in this conservative estimate. */
 export function estimateBatchGpuBytes(batch: GpuPrototypeBatch): number {
-  return (
-    alignedBufferByteLength(batch.surfaceVertices.byteLength) +
-    alignedBufferByteLength(batch.surfaceIndices.byteLength) +
-    alignedBufferByteLength(batch.edgeVertices.byteLength) +
-    alignedBufferByteLength(batch.instances.length * instanceStride)
-  );
+  return costOfBatch(batch).gpuBytes;
 }
 
 export function residentBatchKey(
@@ -108,15 +109,17 @@ interface ResidencyTotals {
 }
 
 function addBatchToTotals(totals: ResidencyTotals, batch: GpuPrototypeBatch): void {
-  totals.decodedBytes += estimateBatchDecodedBytes(batch);
-  totals.gpuBytes += estimateBatchGpuBytes(batch);
+  const cost = costOfBatch(batch);
+  totals.decodedBytes += cost.decodedBytes;
+  totals.gpuBytes += cost.gpuBytes;
   totals.triangles += batch.surfaceIndices.length / 3;
   totals.edgeSegments += batch.edgeVertices.length / 6;
 }
 
 function removeBatchFromTotals(totals: ResidencyTotals, batch: GpuPrototypeBatch): void {
-  totals.decodedBytes -= estimateBatchDecodedBytes(batch);
-  totals.gpuBytes -= estimateBatchGpuBytes(batch);
+  const cost = costOfBatch(batch);
+  totals.decodedBytes -= cost.decodedBytes;
+  totals.gpuBytes -= cost.gpuBytes;
   totals.triangles -= batch.surfaceIndices.length / 3;
   totals.edgeSegments -= batch.edgeVertices.length / 6;
 }
@@ -213,6 +216,48 @@ export class ProgressiveResidency {
       triangles: this.totals.triangles,
       edgeSegments: this.totals.edgeSegments,
     };
+  }
+
+  /**
+   * Whether an admission of `cost` at `priority` could still succeed.
+   *
+   * `promote` only ever displaces groups colder than the incoming priority, so
+   * when none exists the free headroom is the entire answer and a larger chunk
+   * cannot be admitted under any eviction order. The test is deliberately
+   * optimistic everywhere else -- an unknown group priority counts as
+   * evictable, and a legacy-mode coarse fallback is not charged -- because a
+   * caller uses it to skip a fetch, and refusing a chunk `promote` would have
+   * taken would drop geometry the budget could hold.
+   */
+  mayAdmit(cost: ResidencyCost, priority: number): boolean {
+    if (!Number.isSafeInteger(priority) || priority < 0) {
+      throw new TypeError("Target residency priority must be a non-negative safe integer.");
+    }
+    if (
+      cost.decodedBytes > this.budget.decodedBytes ||
+      cost.gpuBytes > this.budget.gpuBytes
+    ) {
+      // Its own bytes outlast every eviction; no view of this scene admits it.
+      return false;
+    }
+    if (
+      cost.decodedBytes <=
+        this.budget.decodedBytes - this.totals.decodedBytes - this.totals.fallbackDecodedBytes &&
+      cost.gpuBytes <= this.budget.gpuBytes - this.totals.gpuBytes
+    ) {
+      return true;
+    }
+    return this.hasColderGroup(priority);
+  }
+
+  private hasColderGroup(priority: number): boolean {
+    for (const targetMeshIndex of this.targetMeshIndexes) {
+      if (this.pinnedTargetMeshIndexes.has(targetMeshIndex)) continue;
+      const meshPriority =
+        this.priorityByTargetMesh.get(targetMeshIndex) ?? Number.MAX_SAFE_INTEGER;
+      if (meshPriority > priority) return true;
+    }
+    return false;
   }
 
   hasTargetMeshes(targetMeshIndexes: readonly number[]): boolean {

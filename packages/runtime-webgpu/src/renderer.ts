@@ -1,4 +1,5 @@
 import {
+  alignedBufferByteLength,
   decodeObjectId,
   instanceStride,
   packInstanceData,
@@ -294,10 +295,6 @@ interface GpuBatchResources {
   readonly edgeVertexCount: number;
   readonly gpuByteLength: number;
   instanceCount: number;
-}
-
-function alignedBufferByteLength(byteLength: number): number {
-  return Math.max(4, Math.ceil(byteLength / 4) * 4);
 }
 
 function createBuffer(

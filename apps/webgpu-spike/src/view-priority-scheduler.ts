@@ -36,13 +36,21 @@ interface ChunkLocation {
 }
 
 export interface TargetSchedulerEvent {
-  readonly type: "request" | "cancel" | "admit" | "blocked";
+  /** `skipped` is a `blocked` the gate reached without spending a request. */
+  readonly type: "request" | "cancel" | "admit" | "blocked" | "skipped";
   readonly chunkId: string;
   readonly viewPriority: number;
 }
 
 export interface TargetSchedulerHooks<Result> {
   readonly isResident: (chunk: CompiledTargetChunk) => boolean;
+  /**
+   * Whether the residency budget could still take this chunk. Answered from
+   * the compiled document before any bytes move, so a chunk that cannot be
+   * admitted costs neither a range request nor a decode. Chunks whose cost is
+   * unknown must answer true: the loaded result then decides, as before.
+   */
+  readonly mayAdmit?: (chunk: CompiledTargetChunk, viewPriority: number) => boolean;
   readonly load: (chunk: CompiledTargetChunk, signal: AbortSignal) => Promise<Result>;
   readonly admit: (
     chunk: CompiledTargetChunk,
@@ -442,6 +450,17 @@ export class CameraTargetScheduler<Result> {
           this.blockedDemandSignature = this.latestDemandSignature;
         }
         return;
+      }
+      if (this.hooks.mayAdmit && !this.hooks.mayAdmit(ranked.chunk, ranked.viewPriority)) {
+        // Estimate-gated prefetch: the budget already refuses this chunk, so
+        // fetching and decoding it could only end in the rejection below.
+        this.rejectedChunkIds.add(ranked.chunk.id);
+        this.hooks.onEvent?.({
+          type: "skipped",
+          chunkId: ranked.chunk.id,
+          viewPriority: ranked.viewPriority,
+        });
+        continue;
       }
       const controller = new AbortController();
       this.active = {

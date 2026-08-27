@@ -1,4 +1,7 @@
 export {
+  addResidencyCost,
+  alignedBufferByteLength,
+  batchResidencyCost,
   decodeObjectId,
   instanceStride,
   packInstanceData,
@@ -8,9 +11,11 @@ export {
   validatePrototypeBatch,
 } from "./layout.js";
 export type {
+  BatchResidencyShape,
   GpuOccurrenceInstance,
   GpuPrototypeBatch,
   GpuScene,
+  ResidencyCost,
 } from "./layout.js";
 export {
   CompiledGltfError,
