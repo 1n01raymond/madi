@@ -115,8 +115,23 @@ require a second dependency index before they are safe:
 3. compiler policy -> dependency version;
 4. federation reconciliation -> cross-document invalidation set.
 
-Until that index has determinism and deletion/rename tests, a changed discipline
-causes a full federation miss. This is slower but correct.
+The index must have determinism and deletion/rename tests before it can drive
+reuse. Until independently reusable adapter and payload artifacts are added, a
+changed discipline still causes a full federation miss. This is slower but
+correct.
+
+The first index contract is now implemented as
+`incremental-dependencies.json` (`naru.ifc-incremental-dependency-index.1`,
+[ADR-0010](adr/0010-ifc-incremental-dependency-index.md)). It maps each
+discipline to semantic, prototype, occurrence, current target-chunk,
+coarse-prototype, spatial-occurrence, and property-semantic selectors, and
+expands cross-document semantic relations to a transitive reconciliation set.
+Focused tests cover changed, deleted, and renamed/relabelled inputs plus
+reconciliation invalidation, and unchanged whole-package cache hits restore the
+index byte-for-byte. The adapter and federation-wide payload files are still
+rebuilt as a whole: independent adapter outputs, content-addressed payloads, and
+clean-full-build equivalence evidence remain the gate before any unchanged
+prototype or byte range is actually reused.
 
 Shared lookup reuses the same manifest and resource hashes. The resolution
 order is local verified entry, authorized shared entry, then local compilation.
@@ -141,7 +156,9 @@ profile under [ADR-0004](adr/0004-format-strategy.md).
 2. **Columnar hierarchy sidecar:** compare size, parse, hierarchy-ready time,
    peak memory, and compatibility against compact glTF JSON.
 3. **Incremental IFC compilation:** discipline dependency index plus changed,
-   deleted, renamed, and reconciliation tests.
+   deleted, renamed, and reconciliation tests implemented; independent adapter
+   documents, content-addressed payload reuse, and clean-full-build equivalence
+   remain.
 4. **Standards export:** retain glTF; evaluate GLB, GPU instancing, and mesh
    compression without making the cache an interchange claim.
 5. **Shared cache:** authenticated lookup/publication, tenant isolation,

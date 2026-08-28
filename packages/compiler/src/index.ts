@@ -29,6 +29,20 @@ export type {
   SpatialVector3,
 } from "./spatial-demand.js";
 export { compileIfcFederation } from "./ifc-federation.js";
+export {
+  createIfcIncrementalDependencyIndex,
+  ifcIncrementalDependencyIndexSchema,
+  planIfcIncrementalInvalidation,
+  serializeIfcIncrementalDependencyIndex,
+} from "./ifc-incremental-dependencies.js";
+export type {
+  IfcIncrementalDependencyIndex,
+  IfcIncrementalDocumentDependency,
+  IfcIncrementalInvalidationPlan,
+  IfcIncrementalPrototypeDependency,
+  IfcIncrementalSourceChange,
+  IfcIncrementalSourceIdentity,
+} from "./ifc-incremental-dependencies.js";
 export { inspectIfcBytes, inspectIfcFile } from "./ifc-source.js";
 export { writeCompiledPackage } from "./package-output.js";
 export { compileStepFile } from "./step-compiler.js";

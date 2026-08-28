@@ -329,6 +329,7 @@ await writeFile(option("--report"), JSON.stringify({
         packageProperties,
         packageColumns,
         spatialIndex,
+        dependencyIndex,
       ] = await Promise.all([
         readFile(join(outputDirectory, "scene.gltf"), "utf8").then(JSON.parse),
         readFile(join(outputDirectory, "scene-ir.json"), "utf8").then(JSON.parse),
@@ -338,6 +339,9 @@ await writeFile(option("--report"), JSON.stringify({
         readFile(join(outputDirectory, "properties.json"), "utf8"),
         readFile(join(outputDirectory, "properties.bin")),
         readFile(join(outputDirectory, "spatial.bin")),
+        readFile(join(outputDirectory, "incremental-dependencies.json"), "utf8").then(
+          JSON.parse,
+        ),
       ]);
       expect(gltf.asset.generator).toContain("IfcOpenShell federation slice");
       expect(gltf.extras.madi.progressive.spatialIndex).toMatchObject({
@@ -349,6 +353,28 @@ await writeFile(option("--report"), JSON.stringify({
       );
       expect(result.report.options.targetPayloadOrder).toBe("spatial-leaf-anchor-v1");
       expect(result.report.options.jsonFormatting).toBe("compact");
+      expect(dependencyIndex).toEqual(result.dependencyIndex);
+      expect(cached.dependencyIndex).toEqual(result.dependencyIndex);
+      expect(dependencyIndex).toMatchObject({
+        schemaVersion: "naru.ifc-incremental-dependency-index.1",
+        scene: { packageDigest: result.report.output.packageDigest },
+        documents: [
+          {
+            discipline: "architecture",
+            sourceDigest: `sha256:${result.sources[0]?.sha256}`,
+            uriHint: "projects/digital_hub/arc.ifc",
+          },
+        ],
+      });
+      expect(dependencyIndex.documents[0].prototypeIds).toHaveLength(
+        result.report.counts.prototypeCount,
+      );
+      expect(dependencyIndex.documents[0].targetChunkIds).toHaveLength(
+        result.report.counts.targetChunkCount,
+      );
+      expect(dependencyIndex.documents[0].semanticIds).toHaveLength(
+        retainedScene.semantics.length,
+      );
       // The package carries the property sidecar: a pointer in the glTF
       // extras, the parsed document, and the adapter column file verbatim.
       expect(gltf.extras.madi.properties).toMatchObject({

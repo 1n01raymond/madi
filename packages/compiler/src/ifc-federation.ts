@@ -1,7 +1,7 @@
 import { spawn } from "node:child_process";
 import { availableParallelism, tmpdir } from "node:os";
 import { createHash } from "node:crypto";
-import { copyFile, mkdtemp, readFile, rm } from "node:fs/promises";
+import { copyFile, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { basename, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -11,6 +11,12 @@ import { readIfcStructure } from "./ifc-structure-stream.js";
 import type { IfcStructureRead } from "./ifc-structure-stream.js";
 import { inspectIfcFile } from "./ifc-source.js";
 import type { IfcSourceInspection } from "./ifc-source.js";
+import {
+  createIfcIncrementalDependencyIndex,
+  ifcIncrementalDependencyIndexSchema,
+  serializeIfcIncrementalDependencyIndex,
+} from "./ifc-incremental-dependencies.js";
+import type { IfcIncrementalDependencyIndex } from "./ifc-incremental-dependencies.js";
 import { writeCompiledPackage } from "./package-output.js";
 import type { CompilerBuildReport } from "./types.js";
 import { validateCompiledGltf } from "./validate.js";
@@ -70,8 +76,11 @@ export interface IfcFederationCompilationResult {
   readonly outputDirectory: string;
   readonly report: CompilerBuildReport;
   readonly adapterReport: unknown;
+  readonly dependencyIndex: IfcIncrementalDependencyIndex;
   readonly cache: CompilationCacheResult;
 }
+
+const incrementalDependencyIndexFilename = "incremental-dependencies.json";
 
 function parseJson(text: string, label: string): unknown {
   try {
@@ -259,6 +268,23 @@ function requireCachedBuildReport(value: unknown, packageDigest: string): Compil
   return report as CompilerBuildReport;
 }
 
+function requireCachedDependencyIndex(
+  value: unknown,
+  packageDigest: string,
+): IfcIncrementalDependencyIndex {
+  const index = asRecord(value, "Cached IFC incremental dependency index");
+  const scene = asRecord(index.scene, "Cached IFC incremental dependency scene identity");
+  if (
+    index.schemaVersion !== ifcIncrementalDependencyIndexSchema ||
+    scene.packageDigest !== packageDigest ||
+    !Array.isArray(index.documents) ||
+    !Array.isArray(index.prototypes)
+  ) {
+    throw new TypeError("Cached IFC incremental dependency index is incompatible.");
+  }
+  return index as unknown as IfcIncrementalDependencyIndex;
+}
+
 function assertAdapterIdentity(
   adapterReport: unknown,
   sources: readonly InspectedIfcFederationDocument[],
@@ -369,16 +395,29 @@ export async function compileIfcFederation(
         outputDirectory,
       });
       if (restored) {
-        const [serializedBuildReport, serializedAdapterReport] = await Promise.all([
+        const [
+          serializedBuildReport,
+          serializedAdapterReport,
+          serializedDependencyIndex,
+        ] = await Promise.all([
           readFile(resolve(outputDirectory, "build-report.json"), "utf8"),
           readFile(resolve(outputDirectory, "adapter-report.json"), "utf8"),
+          readFile(resolve(outputDirectory, incrementalDependencyIndexFilename), "utf8"),
         ]);
+        const report = requireCachedBuildReport(
+          parseJson(serializedBuildReport, "Cached IFC build report"),
+          restored.packageDigest,
+        );
         return {
           sources,
           outputDirectory,
-          report: requireCachedBuildReport(
-            parseJson(serializedBuildReport, "Cached IFC build report"),
-            restored.packageDigest,
+          report,
+          dependencyIndex: requireCachedDependencyIndex(
+            parseJson(
+              serializedDependencyIndex,
+              "Cached IFC incremental dependency index",
+            ),
+            report.output.packageDigest,
           ),
           adapterReport: parseJson(serializedAdapterReport, "Cached IFC adapter report"),
           cache: { status: "hit", key: cacheKey },
@@ -496,7 +535,18 @@ export async function compileIfcFederation(
         ).length,
       },
     };
+    const dependencyIndex = createIfcIncrementalDependencyIndex(
+      scene,
+      sources,
+      compiled.document,
+      compiled.report.output.packageDigest,
+    );
     await writeCompiledPackage(compiled, outputDirectory, adapterReport);
+    await writeFile(
+      resolve(outputDirectory, incrementalDependencyIndexFilename),
+      serializeIfcIncrementalDependencyIndex(dependencyIndex),
+      "utf8",
+    );
     if (retainSceneIr) {
       await Promise.all([
         copyFile(scenePath, resolve(outputDirectory, "scene-ir.json")),
@@ -515,6 +565,7 @@ export async function compileIfcFederation(
             ...compiled.report.output.resources.map(({ path }) => path),
             "adapter-report.json",
             "build-report.json",
+            incrementalDependencyIndexFilename,
             ...(retainSceneIr
               ? ["scene-ir.json", "scene-ir-geometry.bin", "scene-ir-properties.bin"]
               : []),
@@ -532,6 +583,7 @@ export async function compileIfcFederation(
       outputDirectory,
       report: compiled.report,
       adapterReport,
+      dependencyIndex,
       cache: cacheKey ? { status: "miss", key: cacheKey } : { status: "disabled" },
     };
   } finally {
