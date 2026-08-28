@@ -67,29 +67,42 @@ applied before the work it authorizes.
 
 ### Default ceilings
 
-Each default is set above the largest package this repository actually
-compiles, so the reviewed evidence keeps loading unchanged, and close enough to
-it that a hostile package cannot claim orders of magnitude more work. The
-measured column is the sixty5 federation (`output/ifc/sixty5-prb`,
-657,116,508 bytes over five resources) except where a smaller package is the
-deeper one.
+These are backstops against a hostile declaration, not a size policy. A ceiling
+set near the largest real model buys no safety that a ceiling an order of
+magnitude above it lacks, because what stops an attacker is that every response
+is bounded and checked at all. A tight ceiling does reliably turn a legitimate
+larger federation into a load failure. Each default is therefore set far above
+what this repository compiles. The measured column is the sixty5
+federation (`output/ifc/sixty5-prb`, 657,116,508 bytes over five resources)
+except where a smaller package is the deeper one.
 
-| Bound | Largest measured | Default |
-|---|---|---|
-| glTF document bytes | 448,823,852 (sixty5 `scene.gltf`) | 1 GiB |
-| One external resource's bytes | 120,707,064 (sixty5 `scene.bin`) | 1 GiB |
-| Total declared package bytes | 657,116,508 (sixty5) | 2 GiB |
-| External resources per package | 4 (sixty5) | 64 |
-| glTF nodes | 188,320 (sixty5) | 2,000,000 |
-| glTF meshes | 84,870 (sixty5) | 1,000,000 |
-| glTF accessors | 343,886 (sixty5) | 4,000,000 |
-| glTF buffer views | 343,886 (sixty5) | 4,000,000 |
-| Progressive target chunks | 234 (sixty5) | 65,536 |
-| Scene traversal depth | 7 nodes (Digital Hub) | 64 |
+| Bound | Largest measured | Default | Headroom |
+|---|---|---|---:|
+| glTF document bytes | 448,823,852 (sixty5 `scene.gltf`) | 1 GiB | 2.4x |
+| One external resource's bytes | 120,707,064 (sixty5 `scene.bin`) | 2 GiB | 17.8x |
+| Total declared package bytes | 657,116,508 (sixty5) | 8 GiB | 13.1x |
+| External resources per package | 4 (sixty5) | 256 | 64x |
+| glTF nodes | 188,320 (sixty5) | 2,000,000 | 10.6x |
+| glTF meshes | 84,870 (sixty5) | 1,000,000 | 11.8x |
+| glTF accessors | 343,886 (sixty5) | 4,000,000 | 11.6x |
+| glTF buffer views | 343,886 (sixty5) | 4,000,000 | 11.6x |
+| Progressive target chunks | 234 (sixty5) | 65,536 | 280x |
+| Scene traversal depth | 7 nodes (Digital Hub) | 64 | 9.1x |
 
 The depth row uses Digital Hub because federation depth is a property of the
 IFC spatial structure rather than of model size: Digital Hub nests 7 glTF nodes
 and 5 occurrences, PyGamer 4 and 2.
+
+Two rows are not free choices. `documentBytes` is bounded from above by the
+engine: both readers decode the document to a JavaScript string before parsing
+it, so V8's maximum string length of 536,870,888 bytes is a wall this ADR
+cannot move, and the repository has already crossed it once (a 631,943,761-byte
+split.1 Scene IR). One GiB sits above that wall, so the limit never rejects a
+document an engine would have accepted; raising it further would only allocate
+more before the parse fails. `packageBytes`, at the other end, is the weakest
+memory signal of the four, because the package is never fully resident: target
+detail is admitted under a separate residency budget. It is a sanity bound on
+the declaration rather than an allocation bound, and is set accordingly.
 
 ## Consequences
 

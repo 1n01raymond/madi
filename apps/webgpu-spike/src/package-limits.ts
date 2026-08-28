@@ -22,17 +22,27 @@ export interface PackageTransferLimits {
 }
 
 /**
- * Chosen well above what this repository actually compiles: the largest
- * recorded package is the sixty5 federation at 657,116,508 bytes, whose glTF
+ * Deliberately far above what this repository compiles. These are backstops
+ * against a hostile declaration, not a size policy: a limit set near the
+ * largest real model buys no safety a limit an order of magnitude above it
+ * lacks, and only turns a legitimate larger federation into a load failure.
+ * The largest recorded package is sixty5 at 657,116,508 bytes, whose glTF
  * document is 448,823,852 bytes and whose largest buffer is 120,707,064 bytes
- * across 4 resources (artifacts/ifc/sixty5-first-frame). The defaults leave
- * that headroom while still bounding allocation.
+ * across 4 resources (artifacts/ifc/sixty5-first-frame).
+ *
+ * `documentBytes` is the exception, and is generous for a different reason:
+ * both readers decode the document to a string before parsing it, so V8's
+ * maximum string length (536,870,888 bytes) is a wall no ceiling here can
+ * move. One GiB sits above it, so this limit never causes a rejection an
+ * engine would not; raising it further would only allocate more before the
+ * parse fails.
  */
 export const defaultPackageTransferLimits: PackageTransferLimits = {
   documentBytes: 1_073_741_824,
-  resourceBytes: 1_073_741_824,
-  packageBytes: 2_147_483_648,
-  resourceCount: 64,
+  resourceBytes: 2_147_483_648,
+  /** The package is never fully resident -- residency is budgeted separately. */
+  packageBytes: 8_589_934_592,
+  resourceCount: 256,
 };
 
 export type PackageTransferLimitOverrides = Partial<PackageTransferLimits>;
