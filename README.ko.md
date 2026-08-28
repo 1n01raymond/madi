@@ -1,5 +1,7 @@
 <p align="center">
-  <img src="docs/media/naru-hero.svg" alt="NARU — 대규모 CAD·BIM을 위한 WebGPU 네이티브 엔진" width="100%" />
+  <a href="https://1n01raymond.github.io/naru/">
+    <img src="docs/media/naru-hero.svg" alt="NARU — 대규모 CAD·BIM을 위한 WebGPU 네이티브 엔진" width="100%" />
+  </a>
 </p>
 
 <p align="center">
@@ -10,6 +12,8 @@
 </p>
 
 <p align="center">
+  <a href="https://1n01raymond.github.io/naru/"><img alt="라이브 Studio 데모" src="https://img.shields.io/badge/demo-live-FF6B4A?style=flat-square"></a>
+  <a href="https://github.com/1n01raymond/naru/actions/workflows/ci.yml"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/1n01raymond/naru/ci.yml?style=flat-square&label=CI"></a>
   <a href="LICENSE"><img alt="Apache License 2.0" src="https://img.shields.io/badge/license-Apache--2.0-5B8DEF?style=flat-square"></a>
   <img alt="Phase 1 수직 슬라이스 완료" src="https://img.shields.io/badge/status-Phase%201%20complete-20B486?style=flat-square">
   <img alt="WebGPU 렌더러" src="https://img.shields.io/badge/renderer-WebGPU-7C6CFF?style=flat-square">
@@ -20,6 +24,15 @@
   <strong>기존 도구를 대체하지 않고, 엔지니어링 모델을 웹으로.</strong>
   <br />
   대형 CAD·BIM·엔지니어링 장면을 위한 오픈소스 스튜디오, 컴파일러, WebGPU 런타임입니다.
+</p>
+
+<p align="center">
+  <a href="https://1n01raymond.github.io/naru/"><strong>▶&nbsp;라이브 Studio 데모 열기</strong></a>
+  — 실제 4개 분야 IFC 연합 모델을 순수 HTTP Range로 스트리밍합니다. 설치할 것이 없습니다.
+  <br />
+  <sub>실대형 스케일 측정치: 839.9 MB <code>sixty5</code> 연합 모델이 렌더링 가능한 78,173개
+  occurrence 전체의 첫 coarse 프레임에 4.3초 만에 도달하며, 고정 64 MiB 예산을 유지합니다
+  (<a href="artifacts/ifc/sixty5-first-frame/README.md">증거</a>).</sub>
 </p>
 
 > [!IMPORTANT]
