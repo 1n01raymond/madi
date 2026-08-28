@@ -21,15 +21,24 @@ export const externalFixtureManifestPath = resolve(
   "manifest.json",
 );
 
-const datasetKinds = new Set(["step-conformance", "federated-bim"]);
+const datasetKinds = new Set(["step-conformance", "federated-bim", "cad-corpus"]);
 const datasetStatuses = new Set(["qualified", "registered"]);
-const datasetTiers = new Set(["smoke", "real-medium", "real-large"]);
-const assetFormats = new Set(["ifc", "step", "zip"]);
+const datasetTiers = new Set(["smoke", "real-medium", "real-large", "synthetic-control"]);
+const assetFormats = new Set(["ifc", "step", "zip", "parquet"]);
 const assetRoles = new Set(["archive", "source"]);
 const manifestSchemaVersions = new Set(["1.1"]);
 const trimbleConnectProvider = "trimble-connect-public-share";
 const sha256Pattern = /^[a-f0-9]{64}$/u;
+const gitRevisionPattern = /^[a-f0-9]{40}$/u;
 const idPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/u;
+const cadCorpusMetadataColumns = [
+  "part_id",
+  "family",
+  "tier",
+  "seed",
+  "generator_version",
+  "license",
+];
 
 function assertNonEmptyString(value, label) {
   if (typeof value !== "string" || value.trim() === "") {
@@ -87,6 +96,18 @@ function assertStringList(value, label) {
   const values = new Set();
   for (const [index, item] of value.entries()) {
     assertCanonicalId(item, `${label}[${index}]`);
+    if (values.has(item)) throw new TypeError(`${label} contains duplicate ${item}.`);
+    values.add(item);
+  }
+}
+
+function assertUniqueStringList(value, label) {
+  if (!Array.isArray(value) || value.length === 0) {
+    throw new TypeError(`${label} must be a non-empty array.`);
+  }
+  const values = new Set();
+  for (const [index, item] of value.entries()) {
+    assertNonEmptyString(item, `${label}[${index}]`);
     if (values.has(item)) throw new TypeError(`${label} contains duplicate ${item}.`);
     values.add(item);
   }
@@ -156,13 +177,9 @@ function expectedDatasetFiles(dataset) {
   return files;
 }
 
-async function validateEvidence(dataset, manifestSha256) {
-  const label = `Dataset ${dataset.id} evidence`;
-  const evidencePath = resolveRepositoryOutput(dataset.evidenceFile, `${label} file`);
-  await assertRegularFile(evidencePath, `${label} file`);
-  const evidence = JSON.parse(await readFile(evidencePath, "utf8"));
-
-  if (evidence.schemaVersion !== "1.0") {
+function validateEvidenceIdentity(dataset, manifestSha256, evidence, label) {
+  const expectedSchemaVersion = dataset.kind === "cad-corpus" ? "1.1" : "1.0";
+  if (evidence.schemaVersion !== expectedSchemaVersion) {
     throw new TypeError(`${label} has an unsupported schema version.`);
   }
   if (evidence.manifestSha256 !== manifestSha256) {
@@ -171,7 +188,9 @@ async function validateEvidence(dataset, manifestSha256) {
   if (evidence.dataset?.id !== dataset.id || evidence.dataset?.revision !== dataset.source.revision) {
     throw new TypeError(`${label} does not match the registered dataset identity.`);
   }
+}
 
+function validatePart21Evidence(dataset, evidence, label) {
   const expectedFiles = expectedDatasetFiles(dataset);
   if (!Array.isArray(evidence.files) || evidence.files.length !== expectedFiles.length) {
     throw new TypeError(`${label} does not cover every selected source file.`);
@@ -208,6 +227,75 @@ async function validateEvidence(dataset, manifestSha256) {
   ) {
     throw new TypeError(`${label} summary is inconsistent with its file records.`);
   }
+}
+
+function validateCadCorpusEvidence(dataset, evidence, label) {
+  const expectedFiles = expectedDatasetFiles(dataset);
+  if (expectedFiles.length !== 1 || !Array.isArray(evidence.files) || evidence.files.length !== 1) {
+    throw new TypeError(`${label} must inspect the one registered Parquet corpus asset.`);
+  }
+
+  const [expected] = expectedFiles;
+  const [actual] = evidence.files;
+  const parquet = actual?.parquet;
+  const corpus = actual?.corpus;
+  const expectedColumns = dataset.corpus.requiredColumns;
+  if (
+    actual?.id !== expected.id ||
+    actual?.format !== "parquet" ||
+    actual?.byteLength !== expected.byteLength ||
+    actual?.sha256 !== expected.sha256 ||
+    parquet?.magicValid !== true ||
+    parquet?.rowCount !== dataset.corpus.recordCount ||
+    !Number.isSafeInteger(parquet?.rowGroupCount) ||
+    parquet.rowGroupCount < 1 ||
+    !Array.isArray(parquet?.columns) ||
+    parquet.columns.length !== expectedColumns.length ||
+    !expectedColumns.every((column) => parquet.columns.includes(column)) ||
+    corpus?.payloadColumn !== dataset.corpus.payloadColumn ||
+    corpus?.payloadFormat !== dataset.corpus.payloadFormat ||
+    corpus?.payloadNonNullCount !== dataset.corpus.recordCount ||
+    corpus?.identityColumn !== dataset.corpus.identityColumn ||
+    corpus?.identityNonNullCount !== dataset.corpus.recordCount ||
+    corpus?.uniqueIdentityCount !== dataset.corpus.recordCount ||
+    !Array.isArray(corpus?.generatorVersionValues) ||
+    corpus.generatorVersionValues.length !== 1 ||
+    corpus.generatorVersionValues[0] !== dataset.corpus.generatorVersion ||
+    !Array.isArray(corpus?.licenseValues) ||
+    corpus.licenseValues.length !== 1 ||
+    corpus.licenseValues[0] !== dataset.corpus.licenseValue
+  ) {
+    throw new TypeError(`${label} has invalid Parquet corpus inspection data for ${expected.id}.`);
+  }
+
+  if (
+    evidence.summary?.fileCount !== 1 ||
+    evidence.summary?.byteLength !== expected.byteLength ||
+    evidence.summary?.recordCount !== dataset.corpus.recordCount ||
+    evidence.summary?.payloadCount !== dataset.corpus.recordCount ||
+    evidence.summary?.allPayloadsPresent !== true ||
+    evidence.summary?.allIdentitiesUnique !== true
+  ) {
+    throw new TypeError(`${label} summary is inconsistent with its corpus record.`);
+  }
+}
+
+export function validateInspectionEvidence(dataset, manifestSha256, evidence) {
+  const label = `Dataset ${dataset.id} evidence`;
+  validateEvidenceIdentity(dataset, manifestSha256, evidence, label);
+  if (dataset.kind === "cad-corpus") {
+    validateCadCorpusEvidence(dataset, evidence, label);
+  } else {
+    validatePart21Evidence(dataset, evidence, label);
+  }
+}
+
+async function validateEvidence(dataset, manifestSha256) {
+  const label = `Dataset ${dataset.id} evidence`;
+  const evidencePath = resolveRepositoryOutput(dataset.evidenceFile, `${label} file`);
+  await assertRegularFile(evidencePath, `${label} file`);
+  const evidence = JSON.parse(await readFile(evidencePath, "utf8"));
+  validateInspectionEvidence(dataset, manifestSha256, evidence);
 }
 
 export async function validateExternalFixtureManifest(
@@ -276,6 +364,59 @@ export async function validateExternalFixtureManifest(
     );
     await assertRegularFile(licensePath, `Dataset ${dataset.id} license file`);
 
+    if (dataset.kind === "cad-corpus") {
+      const upstream = source.upstream;
+      if (typeof upstream !== "object" || upstream === null) {
+        throw new TypeError(`Dataset ${dataset.id} source.upstream must be an object.`);
+      }
+      assertHttpsUrl(upstream.repository, `Dataset ${dataset.id} source.upstream.repository`);
+      assertNonEmptyString(
+        upstream.licenseRevision,
+        `Dataset ${dataset.id} source.upstream.licenseRevision`,
+      );
+      for (const [field, revision] of [
+        ["source.revision", source.revision],
+        ["source.upstream.licenseRevision", upstream.licenseRevision],
+      ]) {
+        if (!gitRevisionPattern.test(revision)) {
+          throw new TypeError(`Dataset ${dataset.id} ${field} must pin a full Git revision.`);
+        }
+      }
+
+      const corpus = dataset.corpus;
+      if (typeof corpus !== "object" || corpus === null) {
+        throw new TypeError(`Dataset ${dataset.id} corpus must be an object.`);
+      }
+      assertPositiveInteger(corpus.recordCount, `Dataset ${dataset.id} corpus.recordCount`);
+      for (const field of [
+        "payloadColumn",
+        "payloadFormat",
+        "identityColumn",
+        "generatorVersion",
+        "licenseValue",
+      ]) {
+        assertNonEmptyString(corpus[field], `Dataset ${dataset.id} corpus.${field}`);
+      }
+      if (corpus.payloadFormat !== "step") {
+        throw new TypeError(`Dataset ${dataset.id} corpus.payloadFormat must be step.`);
+      }
+      if (corpus.licenseValue !== source.license) {
+        throw new TypeError(`Dataset ${dataset.id} corpus.licenseValue must match source.license.`);
+      }
+      assertUniqueStringList(corpus.requiredColumns, `Dataset ${dataset.id} corpus.requiredColumns`);
+      for (const required of [
+        ...cadCorpusMetadataColumns,
+        corpus.payloadColumn,
+        corpus.identityColumn,
+      ]) {
+        if (!corpus.requiredColumns.includes(required)) {
+          throw new TypeError(`Dataset ${dataset.id} corpus.requiredColumns must include ${required}.`);
+        }
+      }
+    } else if (dataset.corpus !== undefined || source.upstream !== undefined) {
+      throw new TypeError(`Dataset ${dataset.id} cannot declare CAD corpus metadata.`);
+    }
+
     if (!Array.isArray(dataset.assets) || dataset.assets.length === 0) {
       throw new TypeError(`Dataset ${dataset.id} must declare assets.`);
     }
@@ -294,6 +435,12 @@ export async function validateExternalFixtureManifest(
       }
       if (asset.role === "source" && asset.format === "zip") {
         throw new TypeError(`${assetLabel} source must be an inspectable Part 21 file.`);
+      }
+      if (dataset.kind === "cad-corpus" && (asset.role !== "source" || asset.format !== "parquet")) {
+        throw new TypeError(`${assetLabel} CAD corpus asset must be a Parquet source.`);
+      }
+      if (dataset.kind !== "cad-corpus" && asset.format === "parquet") {
+        throw new TypeError(`${assetLabel} Parquet is reserved for CAD corpus assets.`);
       }
       resolveInside(repositoryRoot, asset.path, `${assetLabel} path`);
       if (assetPaths.has(asset.path)) throw new TypeError(`Duplicate asset path ${asset.path}.`);
@@ -349,6 +496,9 @@ export async function validateExternalFixtureManifest(
       throw new TypeError(
         `Dataset ${dataset.id} byte total is ${byteTotal}, expected ${dataset.expectedDownloadBytes}.`,
       );
+    }
+    if (dataset.kind === "cad-corpus" && dataset.assets.length !== 1) {
+      throw new TypeError(`Dataset ${dataset.id} must register exactly one Parquet corpus asset.`);
     }
     if (dataset.tier === "real-large" && !dataset.requiresAllowLarge) {
       throw new TypeError(`Dataset ${dataset.id} must require --allow-large.`);
@@ -795,6 +945,12 @@ function selectedSourceFiles(manifest, dataset) {
 }
 
 export async function inspectDataset(manifest, manifestSha256, dataset) {
+  if (dataset.kind === "cad-corpus") {
+    throw new TypeError(
+      `Dataset ${dataset.id} is registered only: Parquet corpus inspection requires ` +
+        "the bounded scanner proposed by ADR-0014.",
+    );
+  }
   await verifyDataset(manifest, dataset);
   const files = [];
   for (const source of selectedSourceFiles(manifest, dataset)) {

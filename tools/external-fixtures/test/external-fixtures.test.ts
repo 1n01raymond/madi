@@ -7,12 +7,14 @@ import { afterEach, describe, expect, it } from "vitest";
 
 import {
   fetchDataset,
+  inspectDataset,
   inspectPart21,
   loadExternalFixtureManifest,
   readZipMember,
   repositoryRoot,
   resolveInside,
   validateExternalFixtureManifest,
+  validateInspectionEvidence,
 } from "../../../scripts/lib/external-fixtures.mjs";
 
 const temporaryDirectories: string[] = [];
@@ -465,5 +467,119 @@ describe("Trimble Connect public-share downloads", () => {
     await expect(readFile(join(fixtureCachePath, dataset.id, "first.ifc"))).rejects.toMatchObject({
       code: "ENOENT",
     });
+  });
+});
+
+describe("CAD corpus inspection evidence", () => {
+  const dataset = {
+    id: "cadquarry-1k-step",
+    name: "CadQuarry 1k generated STEP corpus",
+    kind: "cad-corpus",
+    tier: "synthetic-control",
+    source: { revision: "b".repeat(40) },
+    corpus: {
+      recordCount: 1_000,
+      payloadColumn: "step_bytes",
+      payloadFormat: "step",
+      identityColumn: "part_id",
+      generatorVersion: "0.6.0",
+      licenseValue: "CC0-1.0",
+      requiredColumns: [
+        "part_id",
+        "family",
+        "tier",
+        "seed",
+        "generator_version",
+        "license",
+        "step_bytes",
+      ],
+    },
+    assets: [
+      {
+        id: "step-corpus",
+        role: "source",
+        format: "parquet",
+        byteLength: 120_015_344,
+        sha256: "a".repeat(64),
+      },
+    ],
+  };
+
+  function inspection() {
+    return {
+      schemaVersion: "1.1",
+      manifestSha256: "c".repeat(64),
+      dataset: { id: dataset.id, revision: dataset.source.revision },
+      summary: {
+        fileCount: 1,
+        byteLength: 120_015_344,
+        recordCount: 1_000,
+        payloadCount: 1_000,
+        allPayloadsPresent: true,
+        allIdentitiesUnique: true,
+      },
+      files: [
+        {
+          id: "step-corpus",
+          format: "parquet",
+          byteLength: 120_015_344,
+          sha256: "a".repeat(64),
+          parquet: {
+            magicValid: true,
+            rowCount: 1_000,
+            rowGroupCount: 1,
+            columns: [...dataset.corpus.requiredColumns],
+          },
+          corpus: {
+            payloadColumn: "step_bytes",
+            payloadFormat: "step",
+            payloadNonNullCount: 1_000,
+            identityColumn: "part_id",
+            identityNonNullCount: 1_000,
+            uniqueIdentityCount: 1_000,
+            generatorVersionValues: ["0.6.0"],
+            licenseValues: ["CC0-1.0"],
+          },
+        },
+      ],
+    };
+  }
+
+  it("accepts checksum-bound Parquet metadata instead of Part 21 counters", () => {
+    expect(() =>
+      validateInspectionEvidence(dataset, "c".repeat(64), inspection()),
+    ).not.toThrow();
+  });
+
+  it("validates the pinned registered corpus without claiming evidence", async () => {
+    const { manifest, sha256 } = await loadExternalFixtureManifest();
+    await expect(
+      validateExternalFixtureManifest(manifest, sha256, { validateEvidence: false }),
+    ).resolves.toBeUndefined();
+
+    const driftedManifest = structuredClone(manifest);
+    const corpus = driftedManifest.datasets.find(
+      (candidate: { id: string }) => candidate.id === dataset.id,
+    );
+    corpus.corpus.requiredColumns = corpus.corpus.requiredColumns.filter(
+      (column: string) => column !== "license",
+    );
+    await expect(
+      validateExternalFixtureManifest(driftedManifest, sha256, { validateEvidence: false }),
+    ).rejects.toThrow(/requiredColumns must include license/u);
+  });
+
+  it("rejects a corpus record whose declared license values drift", () => {
+    const evidence = inspection();
+    evidence.files[0].corpus.licenseValues = ["UNKNOWN"];
+    expect(() => validateInspectionEvidence(dataset, "c".repeat(64), evidence)).toThrow(
+      /invalid Parquet corpus inspection/u,
+    );
+  });
+
+  it("refuses to treat a Parquet container as a Part 21 source", async () => {
+    await expect(inspectDataset({} as never, "c".repeat(64), dataset)).rejects.toThrow(
+      /registered only.*ADR-0014/u,
+    );
   });
 });

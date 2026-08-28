@@ -21,8 +21,8 @@ function usage() {
   pnpm fixtures:external verify <dataset-id>
   pnpm fixtures:external inspect <dataset-id> [--output <repo-relative.json>]
 
-Downloads are explicit and remain under output/external-fixtures. The real-large
-tier additionally requires --allow-large.`);
+Downloads are explicit and remain under output/external-fixtures. Guarded
+datasets require --allow-large.`);
 }
 
 function parseOptions(arguments_) {

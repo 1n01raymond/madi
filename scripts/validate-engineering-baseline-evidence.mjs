@@ -32,7 +32,7 @@ const adapter = JSON.parse(adapterBytes.toString("utf8"));
 const compiler = JSON.parse(compilerBytes.toString("utf8"));
 
 const expectedManifestSha256 =
-  "a9801513920d7a3ea7afd28190a836241559f592615a8a7b8b674876eced6311";
+  "77d7d587d6b32938a371325e281a4584e10c2ff3118a59f300a9da097eb2f478";
 assert(sha256(manifestBytes) === expectedManifestSha256, "fixture manifest digest changed");
 assert(evidence.manifestSha256 === expectedManifestSha256, "evidence manifest digest changed");
 

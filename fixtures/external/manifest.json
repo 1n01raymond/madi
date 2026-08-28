@@ -615,6 +615,69 @@
           "sha256": "1230d0296f27f36efb6133c61ed3952d25017a0628501c48a718ba0a53101067"
         }
       ]
+    },
+    {
+      "id": "cadquarry-1k-step",
+      "name": "CadQuarry 1k generated STEP corpus",
+      "kind": "cad-corpus",
+      "status": "registered",
+      "tier": "synthetic-control",
+      "requiresAllowLarge": true,
+      "expectedDownloadBytes": 120015344,
+      "purposes": [
+        "cad",
+        "step",
+        "brep",
+        "heterogeneous-prototypes",
+        "synthetic-control"
+      ],
+      "source": {
+        "landingPage": "https://huggingface.co/datasets/jacobjennings/cadquarry/tree/be52b95de212431d995c3ebd25bdd9d56a5c96bf/1k",
+        "repository": "https://huggingface.co/datasets/jacobjennings/cadquarry",
+        "revision": "be52b95de212431d995c3ebd25bdd9d56a5c96bf",
+        "license": "CC0-1.0",
+        "licenseUrl": "https://github.com/jacobjennings/CadQuarry/blob/543b067ea9e416bc2e9587cb8775e012480b70ee/DATA_LICENSE",
+        "licenseFile": "licenses/cadquarry-generated-data-CC0-1.0.md",
+        "attribution": "Jacob Jennings; CadQuarry",
+        "upstream": {
+          "repository": "https://github.com/jacobjennings/CadQuarry",
+          "licenseRevision": "543b067ea9e416bc2e9587cb8775e012480b70ee"
+        }
+      },
+      "corpus": {
+        "recordCount": 1000,
+        "payloadColumn": "step_bytes",
+        "payloadFormat": "step",
+        "identityColumn": "part_id",
+        "generatorVersion": "0.6.0",
+        "licenseValue": "CC0-1.0",
+        "requiredColumns": [
+          "part_id",
+          "family",
+          "tier",
+          "seed",
+          "symmetry",
+          "op_count",
+          "ir_hash",
+          "generator_version",
+          "license",
+          "geometry_signature",
+          "params",
+          "source",
+          "step_bytes"
+        ]
+      },
+      "assets": [
+        {
+          "id": "step-corpus",
+          "role": "source",
+          "format": "parquet",
+          "path": "corpus-step.parquet",
+          "url": "https://huggingface.co/datasets/jacobjennings/cadquarry/resolve/be52b95de212431d995c3ebd25bdd9d56a5c96bf/1k/corpus-step.parquet?download=true",
+          "byteLength": 120015344,
+          "sha256": "bfdb6ca01e92409f4373b0f9065d09d268c960cc78c8e5aa9d10b39a31430e6e"
+        }
+      ]
     }
   ]
 }

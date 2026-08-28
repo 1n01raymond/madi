@@ -64,6 +64,7 @@ download is rejected unless its recorded byte length and SHA-256 still match.
 | IFC-Bench Digital Hub | real-medium, qualified | four-file IFC4 architecture/MEP federation and semantic ingestion |
 | IFC-Bench sixty5 | real-large, qualified | opt-in 839.9 MB seven-discipline IFC2X3 federation |
 | SDK-S1 sixty5 Engineering | real-large, qualified | opt-in 654.1 MB official 34-file IFC2X3 fabrication/vendor federation |
+| CadQuarry 1k STEP | synthetic control, registered | pinned CC0 Parquet source for future heterogeneous STEP adapter breadth; not yet inspected or compiled |
 
 The real sources complement, rather than replace, deterministic generated
 workloads. Digital Hub is suitable for building the IFC adapter and checking
@@ -74,6 +75,13 @@ and its Part 21 envelope inspected. Qualification covers source identity and
 complexity only; compiled output, visual review, and a hardware matrix are still
 required before it supports an ADR-0003 claim. See
 `fixtures/external/README.md`.
+
+CadQuarry complements the BIM-heavy real-model ladder with generated CAD shape
+diversity, but it is not a real assembly benchmark. Its published row count is
+not a measured NARU prototype count, and its independent parts provide neither
+occurrence placement nor submitted-triangle scale. It therefore cannot satisfy
+the Phase 2 public-baseline gate or decide ADR-0003. ADR-0014 keeps the Parquet
+container behind a separate bounded-inspection boundary before qualification.
 
 ### 4.2 Industrial scale ladder
 

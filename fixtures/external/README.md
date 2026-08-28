@@ -1,16 +1,18 @@
 # External reference fixtures
 
-This registry adds real public STEP and IFC sources without committing large
-third-party binaries to NARU. `manifest.json` pins the exact source revision or
-content-identity policy, retrieval contract, byte length, SHA-256 digest,
-per-model license, attribution, and intended test role. Downloads stay in the
-ignored `output/external-fixtures/` cache.
+This registry adds public STEP and IFC sources plus explicitly labeled
+synthetic CAD controls without committing large third-party binaries to NARU.
+`manifest.json` pins the exact source revision or content-identity policy,
+retrieval contract, byte length, SHA-256 digest, per-model license, attribution,
+and intended test role. Downloads stay in the ignored
+`output/external-fixtures/` cache.
 
 The registry deliberately separates two states:
 
 - `qualified`: every selected file was downloaded, checksum-verified, and
-  inspected as a STEP Part 21 envelope; reviewed aggregate evidence is
-  committed under `artifacts/fixtures/external/`.
+  inspected through its format-specific contract; reviewed aggregate evidence
+  is committed under `artifacts/fixtures/external/`. Current qualified sources
+  all use the STEP Part 21 contract.
 - `registered`: identity and licensing are pinned, but the source has not yet
   been promoted to reviewed evidence. It must not support a performance claim.
 
@@ -22,6 +24,7 @@ The registry deliberately separates two states:
 | `ifc-bench-digital-hub` | qualified real-medium | 67.8 MB / 4 IFC files | real IFC4 federation across architecture, heating, plumbing, and ventilation | ship/plant scale or ADR-0003 performance |
 | `ifc-bench-sixty5` | qualified real-large | 839.9 MB / 7 IFC files | real IFC2X3 federation an order of magnitude larger than Digital Hub, across architecture, structure, facade, kitchen, electrical, plumbing, and ventilation | IFC4-only semantics, renderer performance, or ADR-0003 evidence |
 | `sixty5-engineering` | qualified real-large | 654.1 MB / 34 IFC files | official SDK-S1 Engineering vendor/fabrication federation delivered by a public Trimble Connect share | stable provider revision IDs, browser delivery, or renderer performance |
+| `cadquarry-1k-step` | registered synthetic control | 120.0 MB / 1 Parquet file | pinned CC0 source for a future 1,000-part STEP breadth/import control | inspected or compiled prototypes, a real assembly, spatial/occurrence scale, or the Phase 2 public-baseline gate |
 
 The qualified Digital Hub files contain 482,994 Part 21 entities in total,
 including 79,663 `IfcRel*` relationships, 2,567 mapped items, twelve building
@@ -58,6 +61,11 @@ pnpm fixtures:external inspect ifc-bench-sixty5
 # Deliberate 654.1 MB opt-in, resolved from the official public share.
 pnpm fixtures:external fetch sixty5-engineering --allow-large
 pnpm fixtures:external inspect sixty5-engineering
+
+# Deliberate 120.0 MB opt-in. Fetch and checksum verification work today;
+# inspection remains blocked until ADR-0014's bounded Parquet scanner lands.
+pnpm fixtures:external fetch cadquarry-1k-step --allow-large
+pnpm fixtures:external verify cadquarry-1k-step
 ```
 
 `pnpm fixtures:external:check` is offline. It validates manifest structure,
@@ -78,6 +86,13 @@ and latest-version policy before resolving each HTTPS download, then applies
 the same byte-length and SHA-256 checks. Direct-URL datasets retain their
 existing shape. See [ADR-0012](../../docs/adr/0012-mutable-public-fixture-downloads.md).
 
+Manifest schema 1.1 records the expected CadQuarry row count, required metadata
+and payload columns, generator version, and row-level license value. These are
+source declarations, not NARU measurements. The offline evidence validator has
+a separate Parquet-corpus contract, while the current `inspect` command refuses
+the container rather than misreading it as Part 21; see
+[ADR-0014](../../docs/adr/0014-parquet-cad-corpus-boundary.md).
+
 ## Why these sources
 
 - The [NIST MBE PMI set](https://www.nist.gov/ctl/smart-connected-systems-division/smart-connected-manufacturing-systems-group/mbe-pmi-0)
@@ -96,6 +111,10 @@ existing shape. See [ADR-0012](../../docs/adr/0012-mutable-public-fixture-downlo
   facade, floor-system, and embedded-component documents. It is licensed at the
   pinned first-party SDK-S1 source revision; expiring delivery URLs are never
   treated as source identity.
+- [CadQuarry](https://github.com/jacobjennings/CadQuarry) supplies deterministic
+  generated CAD shape diversity and embedded STEP B-reps under CC0-1.0. It is a
+  complementary adapter/control corpus, not evidence about authored assembly
+  hierarchy, placement, prototype deduplication, or user-scale scene behavior.
 
 Discovery catalogs are not automatically fixtures. [BIMData's R&D
 list](https://github.com/bimdata/BIMData-Research-and-Development/blob/master/pages/IFC_FILES.md)
@@ -114,7 +133,9 @@ A registered dataset becomes qualified only when all of the following land in
 one reviewed change:
 
 1. every selected source file passes byte-length and SHA-256 verification;
-2. its Part 21 envelope and schema are inspected without parse truncation;
+2. its format-specific structure is inspected without parse truncation: Part 21
+   sources prove envelope/schema integrity, while a CAD corpus must satisfy the
+   bounded Parquet metadata/payload contract in ADR-0014;
 3. aggregate evidence is committed with the current manifest digest;
 4. license and attribution are rechecked at the pinned source revision; and
 5. known scope limits are stated before the source is used in a benchmark.
