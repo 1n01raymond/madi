@@ -4,6 +4,11 @@ Machine-readable benchmark results can be written here during local runs. The
 top-level ad hoc JSON outputs remain ignored because results are meaningful only
 when command, commit, workload, and environment metadata travel together.
 
+The [Phase 1 completion report](../../docs/PHASE_1_REPORT.md) presents these
+records alongside startup, residency, cache, and spatial-demand evidence. It is
+the public reproducible report required by the Phase 1 roadmap; the renderer
+records below retain their `exploratory-not-adr-decision` status.
+
 Reviewed evidence lives in a named subdirectory with its validator and scope.
 The first such record is [`industrial-baseline`](industrial-baseline/README.md),
 an exploratory 10k-occurrence MADI/Three.js browser matrix. It validates the

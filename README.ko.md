@@ -11,7 +11,7 @@
 
 <p align="center">
   <a href="LICENSE"><img alt="Apache License 2.0" src="https://img.shields.io/badge/license-Apache--2.0-5B8DEF?style=flat-square"></a>
-  <img alt="아키텍처 및 프로토타입 단계" src="https://img.shields.io/badge/status-architecture%20%26%20prototype-F5A623?style=flat-square">
+  <img alt="Phase 1 수직 슬라이스 완료" src="https://img.shields.io/badge/status-Phase%201%20complete-20B486?style=flat-square">
   <img alt="WebGPU 렌더러" src="https://img.shields.io/badge/renderer-WebGPU-7C6CFF?style=flat-square">
   <a href="CONTRIBUTING.md"><img alt="기여 환영" src="https://img.shields.io/badge/contributions-welcome-20B486?style=flat-square"></a>
 </p>
@@ -23,9 +23,9 @@
 </p>
 
 > [!IMPORTANT]
-> NARU는 현재 아키텍처 설계 및 프로토타이핑 단계입니다. 이 저장소에는
-> 제품 방향, 시스템 경계, 벤치마크와 구현 계획이 담겨 있으며, 아직 설치
-> 가능한 프로덕션 뷰어는 없습니다.
+> NARU는 증거 기반 Phase 1 수직 슬라이스를 완료했습니다. 이 저장소에는
+> 동작하는 공개 Studio, 컴파일러, WebGPU 런타임과 재현 가능한 증거가 있지만,
+> 아직 프로덕션 뷰어가 아닌 알파 품질 소프트웨어입니다.
 
 > 이 문서는 영문 [`README.md`](README.md)의 번역본입니다. 내용이 다를 경우
 > 영문 문서를 기준으로 하며, 용어와 문장에 대한 번역 검토를 환영합니다.
@@ -176,15 +176,15 @@ Engineering Scene IR은 새로운 교환 포맷이 아니라 논리적인 시스
 | 단계 | 결과 | 상태 |
 |---|---|---|
 | **0 — 타당성 검증** | OCCT 식별자·엣지를 직접 WebGPU 프로토타입까지 연결 | **완료** |
-| **1 — 수직 슬라이스** | 핵심 엔지니어링 인터랙션을 갖춘 공개 STEP-to-browser 데모 | **현재** |
-| **2 — 대형 장면 알파** | 10만+ occurrence, 스트리밍, LOD, 캐시, 메모리 예산 | 예정 |
+| **1 — 수직 슬라이스** | 핵심 엔지니어링 인터랙션을 갖춘 공개 STEP-to-browser 데모 | **완료** |
+| **2 — 대형 장면 알파** | 10만+ occurrence, 스트리밍, LOD, 캐시, 메모리 예산 | **현재** |
 | **3 — 오픈 플랫폼 베타** | 플러그인, IFC, 임베딩 예제, 셀프 호스팅 배포 | 예정 |
 
 전체 [로드맵](docs/ROADMAP.md), [Phase 1 증거](docs/PHASE_1.md),
-[Phase 0 기록](docs/PHASE_0.md),
+[Phase 1 완료 보고서](docs/PHASE_1_REPORT.md), [Phase 0 기록](docs/PHASE_0.md),
 [Chrome/Firefox WebGPU matrix](artifacts/browser-matrix/README.md)를
-확인하세요. 성능 수치는 재배포 가능한 모델, 정확한 하드웨어·브라우저 정보,
-cold/warm 상태, 재현 명령과 함께 공개합니다.
+확인하세요. 공개된 성능 수치에는 재배포 가능한 모델, 정확한 하드웨어·브라우저
+정보, cold/warm 상태와 재현 명령이 함께 제공됩니다.
 
 실제 레퍼런스 소스는 이제 대용량 바이너리를 커밋하지 않고 체크섬으로
 고정됩니다: NIST AP242 적합성 케이스 2건, IFC-Bench의 4개 분야 Digital Hub
