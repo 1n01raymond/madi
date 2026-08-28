@@ -44,6 +44,7 @@ function coarseScene(): DecodedCompiledScene {
     bounds: { min: [2, 4, 6], max: [11, 8, 12] },
     hierarchy: {
       profile: "madi.experimental.gltf.1",
+      nodeCount: 2,
       sceneId: "coarse-test",
       sourceFormat: "test",
       binaryUri: "scene.bin",

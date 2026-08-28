@@ -49,7 +49,7 @@ export class AxisSectionPlane {
   }
 
   setAxis(axis: SectionAxis): void {
-    if (!isSectionAxis(axis)) throw new TypeError(`Unsupported section axis ${axis}.`);
+    if (!isSectionAxis(axis)) throw new TypeError(`Unsupported section axis ${String(axis)}.`);
     this.axis = axis;
   }
 

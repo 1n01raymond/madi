@@ -135,7 +135,7 @@ export function aggregateCoarseScene(scene: DecodedCompiledScene): AggregatedCoa
   );
   const transforms = new Float64Array(instanceCount * 16);
   const targetMeshIndexes = new Uint32Array(instanceCount);
-  const instances: GpuOccurrenceInstance[] = new Array(instanceCount);
+  const instances = new Array<GpuOccurrenceInstance>(instanceCount);
   let outputIndex = 0;
 
   scene.gpuScene.batches.forEach((batch, batchIndex) => {

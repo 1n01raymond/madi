@@ -20,6 +20,7 @@ function decodedScene(surfaceVertices = new Float32Array()): DecodedCompiledScen
     bounds: { min: [0, 0, 0], max: [1, 1, 1] },
     hierarchy: {
       profile: "madi.experimental.gltf.1",
+      nodeCount: 0,
       sceneId: "test",
       sourceFormat: "test",
       binaryUri: "scene.bin",
@@ -81,12 +82,18 @@ describe("geometry transfer protocol", () => {
     // transfer list `compiledSceneTransferables` builds, which lists each
     // buffer once, as well as without one.
     const pool = new Float32Array([0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0]);
-    const scene = decodedScene(pool);
-    const [group] = scene.gpuScene.batches;
+    const decoded = decodedScene(pool);
+    const [group] = decoded.gpuScene.batches;
     if (!group) throw new Error("The decoded scene has no batch.");
-    scene.gpuScene.batches = [group, { ...group, surfaceIndices: new Uint32Array([0, 1, 0]) }];
+    const scene = {
+      ...decoded,
+      gpuScene: {
+        ...decoded.gpuScene,
+        batches: [group, { ...group, surfaceIndices: new Uint32Array([0, 1, 0]) }],
+      },
+    };
     const transit = transitSceneForResponse(scene, true);
-    const transferables = compiledSceneTransferables(scene as DecodedCompiledScene);
+    const transferables = compiledSceneTransferables(scene);
     expect(transferables.filter((buffer) => buffer === pool.buffer)).toHaveLength(1);
 
     const poolLength = pool.length;

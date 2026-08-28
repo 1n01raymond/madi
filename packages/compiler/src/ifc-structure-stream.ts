@@ -70,10 +70,14 @@ class ByteCursor {
   private totalBytes = 0;
   private ended = false;
   private readonly hash = createHash("sha256");
-  private readonly iterator: AsyncIterator<Buffer>;
+  // The return type is pinned so `next()` does not surface `any` at its
+  // default `TReturn`.
+  private readonly iterator: AsyncIterator<Buffer, undefined>;
 
   constructor(source: AsyncIterable<Buffer>) {
-    this.iterator = source[Symbol.asyncIterator]();
+    // `AsyncIterable<Buffer>` leaves `TReturn` as `any`; this stream only ever
+    // reads yielded chunks, so pinning it here keeps `next()` fully typed.
+    this.iterator = source[Symbol.asyncIterator]() as AsyncIterator<Buffer, undefined>;
   }
 
   private async fill(): Promise<boolean> {

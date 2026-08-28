@@ -341,8 +341,9 @@ function assertAdapterIdentity(
     ) {
       throw new TypeError("IFC adapter returned an invalid document artifact cache result.");
     }
-    const covered = [...hits, ...misses].sort((left, right) =>
-      String(left).localeCompare(String(right), "en"),
+    // Both arrays were just proven to hold only strings.
+    const covered = [...(hits as readonly string[]), ...(misses as readonly string[])].sort(
+      (left, right) => left.localeCompare(right, "en"),
     );
     const expected = cache.status === "enabled"
       ? sources.map(({ discipline }) => discipline)

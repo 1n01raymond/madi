@@ -1,0 +1,15 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "allowJs": true,
+    "checkJs": false,
+    "types": ["node", "@webgpu/types"]
+  },
+  "include": [
+    "apps/*/test/**/*.ts",
+    "packages/*/test/**/*.ts",
+    "tools/*/test/**/*.ts",
+    "vitest.config.ts"
+  ]
+}

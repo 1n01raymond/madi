@@ -86,11 +86,12 @@ function source(
 describe("IFC incremental dependency invalidation", () => {
   it("derives transitive reconciliation dependencies from cross-document relations", () => {
     const base = createRepeatedTriangleScene();
-    const architectureId = base.documents[0]?.id;
+    const architectureDocument = base.documents[0];
     const architectureSemantic = base.semantics[0];
-    if (!architectureId || !architectureSemantic) {
+    if (!architectureDocument || !architectureSemantic) {
       throw new TypeError("Repeated triangle fixture is incomplete.");
     }
+    const architectureId = architectureDocument.id;
     const structureId = ids.document("document:structure");
     const structureSemanticId = ids.semantic("semantic:structure");
     const scene: EngineeringScene = {
@@ -101,12 +102,12 @@ describe("IFC incremental dependency invalidation", () => {
       },
       documents: [
         {
-          ...base.documents[0],
+          ...architectureDocument,
           sourceDigest: "sha256:aaa",
           metadata: { entries: { discipline: "architecture" } },
         },
         {
-          ...base.documents[0],
+          ...architectureDocument,
           id: structureId,
           displayName: "Structure",
           sourceDigest: "sha256:bbb",

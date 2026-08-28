@@ -67,6 +67,7 @@ function decoded(
     bounds: { min: [0, 0, 0], max: [1, 1, 1] },
     hierarchy: {
       profile: "madi.experimental.gltf.1",
+      nodeCount: batches.length,
       sceneId: "test",
       sourceFormat: "test",
       binaryUri: "scene.bin",

@@ -247,7 +247,7 @@ export function hydrateIfcSceneSplit(
       const edges = representation.edges
         ? hydrateEdges(aligned, representation.edges)
         : undefined;
-      return { ...representation, surface, edges } as Representation;
+      return { ...representation, surface, edges };
     }),
   };
 }

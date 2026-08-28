@@ -77,6 +77,7 @@ perform the final evidence pass.
 |---|---|---|---|
 | Documentation, roadmap, or ADR | `pnpm docs:links:check`; add `pnpm adr:check` for ADR changes | None | Technical-claim and fluent-translation review |
 | Scene IR, compiler, runtime, or Studio TypeScript | `pnpm test <test-file>` and `pnpm --filter <package> typecheck` | `pnpm install` | Headed browser evidence if user-visible loading, rendering, or interaction changes |
+| Test files | `pnpm exec tsc -p tsconfig.test.json` | `pnpm install` and a prior `pnpm build` | None; a package's own `typecheck` covers `src/` only |
 | IFC adapter | `pnpm adapter:ifc:test -- --python <path>` | Python with pinned `requirements-dev.txt`, including IfcOpenShell | External-fixture extraction/compile record on the disclosed native host |
 | OCCT adapter | `pnpm native:check` plus the affected adapter test or diagnostic validator | Pinned OCCT/CadQuery environment for executable adapter work | Licensed STEP evidence re-record and exact toolchain disclosure |
 | Existing evidence metadata or validator | `pnpm <record>:check` | Committed record only | Re-run the native/headed recorder if measured output changed |

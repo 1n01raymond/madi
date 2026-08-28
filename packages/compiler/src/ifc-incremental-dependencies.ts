@@ -319,7 +319,7 @@ export function createIfcIncrementalDependencyIndex(
         prototypeId,
         documentIds: sorted(documentIds),
         ...(chunkByPrototype.has(prototypeId)
-          ? { targetChunkId: chunkByPrototype.get(prototypeId) as string }
+          ? { targetChunkId: chunkByPrototype.get(prototypeId) }
           : {}),
       })),
   };

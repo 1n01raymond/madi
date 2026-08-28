@@ -144,7 +144,7 @@ function declaredResources(hierarchy: CompiledHierarchy): DeclaredPackageResourc
 function bufferOf(bytes: Uint8Array): ArrayBuffer {
   return bytes.byteOffset === 0 && bytes.byteLength === bytes.buffer.byteLength
     ? (bytes.buffer as ArrayBuffer)
-    : (bytes.slice().buffer as ArrayBuffer);
+    : bytes.slice().buffer;
 }
 
 export async function loadSceneHierarchy(
