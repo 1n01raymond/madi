@@ -1,12 +1,15 @@
 # Contributing to NARU
 
-NARU is in an early vertical-slice phase. Contributions that sharpen a use case,
-add reproducible evidence, challenge an assumption, or reduce implementation
-risk are as valuable as code.
+NARU has completed its first vertical slice and is in the Phase 2 large-scene
+alpha. Contributions that sharpen a use case, add reproducible evidence,
+challenge an assumption, or reduce implementation risk are as valuable as
+code. The current work order and evidence debt are maintained in
+[`docs/PHASE_2.md`](docs/PHASE_2.md).
 
 ## Before opening a change
 
-1. Read `docs/PRODUCT.md` and `docs/ARCHITECTURE.md`.
+1. Read `docs/PRODUCT.md`, `docs/ARCHITECTURE.md`, and the current
+   `docs/PHASE_2.md` tracker.
 2. Search existing issues and architecture decision records.
 3. For a large change, open a design issue before implementation.
 4. Keep vendor-specific code behind an adapter boundary.
@@ -55,14 +58,34 @@ pnpm check
 pnpm dev
 ```
 
-`pnpm check` validates ADR, fixture, OCCT, browser, and Phase 1 compiled
-evidence, then lints, type-checks, tests, and builds every workspace package.
-`pnpm phase1:compile:evidence` reproduces the first glTF package, while
-`pnpm dev` opens the Phase 1 compiled glTF → Worker → direct WebGPU proof. Native OCCT work is isolated
-under `native/adapter-occt`; run
-`pnpm native:check` before configuring it. See the
-[Phase 0 evidence record](docs/PHASE_0.md) for the completed feasibility gates,
-current limits, and Phase 1 handoff.
+`pnpm check` validates every committed evidence record, then lints,
+type-checks, tests, and builds every workspace package.
+`pnpm phase1:compile:evidence` reproduces the historical first glTF package,
+while `pnpm dev` opens the current Studio. Native OCCT work is isolated under
+`native/adapter-occt`; run `pnpm native:check` before configuring it. See the
+[Phase 1 completion report](docs/PHASE_1_REPORT.md) for the closed vertical
+slice and the [Phase 2 tracker](docs/PHASE_2.md) for current work and limits.
+
+## Validation by change area
+
+Start with the narrowest relevant command. Heavy recorders often require a
+licensed external fixture, native toolchain, headed browser, or specific host;
+an issue should say whether a contributor can run them or a maintainer will
+perform the final evidence pass.
+
+| Change area | Narrow validation to start with | Prerequisites | Maintainer-heavy follow-up when applicable |
+|---|---|---|---|
+| Documentation, roadmap, or ADR | `git diff --check`; add `pnpm adr:check` for ADR changes | None | Technical-claim and fluent-translation review |
+| Scene IR, compiler, runtime, or Studio TypeScript | `pnpm test <test-file>` and `pnpm --filter <package> typecheck` | `pnpm install` | Headed browser evidence if user-visible loading, rendering, or interaction changes |
+| IFC adapter | `pnpm adapter:ifc:test -- --python <path>` | Python with pinned `requirements-dev.txt`, including IfcOpenShell | External-fixture extraction/compile record on the disclosed native host |
+| OCCT adapter | `pnpm native:check` plus the affected adapter test or diagnostic validator | Pinned OCCT/CadQuery environment for executable adapter work | Licensed STEP evidence re-record and exact toolchain disclosure |
+| Existing evidence metadata or validator | `pnpm <record>:check` | Committed record only | Re-run the native/headed recorder if measured output changed |
+| Cache behavior | `pnpm cache:check` plus focused compiler/adapter tests | Native adapter environments for a new recording | Cold/warm/corrupt external-fixture record with cache state and host disclosed |
+| Browser or performance claim | The matching `pnpm <record>:check` | None for validation | Matching headed recorder across the browsers/hardware required by `docs/BENCHMARKS.md` |
+
+These commands do not replace the repository gate. Run `pnpm check` before
+opening a pull request; CI runs that gate plus
+`pnpm native:check -- --allow-missing`.
 
 ## Documentation and translations
 

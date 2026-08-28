@@ -69,5 +69,5 @@ The record, screenshots, package digests, recorder, and strict validator are in
 and run through `pnpm precision:check`. This accepts the coordinate strategy for
 the implemented tessellated display path. It does not claim source-exact B-Rep
 measurement, all coordinate reference systems, or Safari rendering support;
-the real Safari 18.6 capability record still has no `navigator.gpu` under
-default settings.
+the current real Safari 26.6.1 capability record on macOS Sequoia still has no
+`navigator.gpu` under default settings.

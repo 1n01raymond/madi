@@ -1,0 +1,111 @@
+name: Evidence task
+description: Define a reproducible measurement or conformance record before collecting it
+title: "[Evidence]: "
+labels: ["evidence"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Predeclare the claim, protocol, and acceptance boundary before recording results. A validator checks committed measurements; it does not recreate a native or headed-browser run. Do not attach proprietary engineering data.
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Outcome and claim
+      description: What narrowly worded claim should this record be allowed to support?
+    validations:
+      required: true
+  - type: textarea
+    id: current_boundary
+    attributes:
+      label: Current evidence boundary
+      description: Link existing records and state exactly what they do and do not prove.
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope
+      description: List the scenarios, metrics, comparison baselines, artifacts, recorder, validator, and documentation updates included.
+    validations:
+      required: true
+  - type: textarea
+    id: non_goals
+    attributes:
+      label: Non-goals
+      description: State platforms, models, product SLOs, or performance conclusions this record will not generalize to.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance and measurement protocol
+      description: Predeclare samples, cache state, warm-up policy, statistics, thresholds, failure handling, exact build identity, and artifact completeness.
+      placeholder: |
+        - [ ] ...
+        - [ ] ...
+    validations:
+      required: true
+  - type: textarea
+    id: fixtures_license
+    attributes:
+      label: Fixtures and licensing
+      description: Name project-owned fixtures or external-manifest IDs, their license/provenance, and which derived artifacts may be committed.
+    validations:
+      required: true
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Dependencies
+      description: List blocking implementations, ADRs, external downloads, host access, and follow-up decisions. Write "None" when independent.
+    validations:
+      required: true
+  - type: textarea
+    id: entry_points
+    attributes:
+      label: Code and documentation entry points
+      description: Link the recorder, validator, artifact README, benchmark contract, implementation under test, and affected phase tracker.
+    validations:
+      required: true
+  - type: textarea
+    id: contributor_validation
+    attributes:
+      label: Contributor validation
+      description: List portable schema/unit checks and dry runs required from the contributor.
+    validations:
+      required: true
+  - type: textarea
+    id: maintainer_validation
+    attributes:
+      label: Maintainer recording and validation
+      description: List the exact large-model, native-toolchain, headed-browser, Safari, hardware-specific, or deployment commands assigned to the maintainer.
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment matrix
+      description: State commit, Node/Python/toolchain, browser, OS, CPU, GPU, memory, display, cache, network, and power conditions that must be recorded.
+    validations:
+      required: true
+  - type: dropdown
+    id: effort
+    attributes:
+      label: Estimated effort
+      description: Include recorder, validator, recording, review, and documentation work.
+      options:
+        - S — one focused pull request
+        - M — one or two pull requests
+        - L — two or three pull requests; split before starting if larger
+    validations:
+      required: true
+  - type: checkboxes
+    id: integrity
+    attributes:
+      label: Evidence integrity
+      options:
+        - label: Thresholds and exclusions are declared before results are collected.
+          required: true
+        - label: Reported measurements will come from commands executed on the recorded commit and host.
+          required: true
+        - label: No proprietary source, geometry, property data, or screenshot will be committed.
+          required: true

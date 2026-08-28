@@ -31,8 +31,9 @@
   — 一个真实的四专业 IFC 联合模型，通过纯 HTTP Range 流式传输。无需安装。
   <br />
   <sub>真实大规模测量结果：839.9 MB 的 <code>sixty5</code> 联合模型在 4.3 秒内呈现
-  全部 78,173 个可渲染 occurrence 的首个 coarse 帧，并始终保持在固定的 64 MiB
-  预算之内（<a href="artifacts/ifc/sixty5-first-frame/README.md">证据</a>）。</sub>
+  全部 78,173 个可渲染 occurrence 的首个 coarse 帧。target detail 按两项独立的固定
+  64 MiB decoded/GPU admission 预算载入；该数值不包含进程总内存
+  （<a href="artifacts/ifc/sixty5-first-frame/README.md">证据</a>）。</sub>
 </p>
 
 > [!IMPORTANT]
@@ -68,8 +69,9 @@
       <br />
       <sub><strong>真实的超大 IFC federation。</strong> 839.9 MB 的七专业
       <code>sixty5</code> 模型：2.4 秒内层级与搜索就绪，全部 78,173 个可渲染
-      occurrence 的首个 coarse frame 在 4.3 秒内呈现，geometry 始终保持在
-      固定的 64 MiB 预算之内，被选中的基础梁解析出自身的 IFC 属性。
+      occurrence 的首个 coarse frame 在 4.3 秒内呈现。渐进式 target detail
+      保持在两项独立的固定 64 MiB decoded/GPU admission 预算内；该数值不包含
+      进程总内存。被选中的基础梁可解析出自身的 IFC 属性。
       <a href="artifacts/ifc/sixty5-browser/README.md">residency 证据</a> ·
       <a href="artifacts/ifc/sixty5-first-frame/README.md">首帧证据</a></sub>
     </td>
@@ -87,7 +89,7 @@
 | CAD 边界取自源 edge 绘制，而非从三角形猜测 | 13,897 条显式 edge segment 一直保留到浏览器（[浏览器 matrix](artifacts/browser-matrix/README.md)） |
 | 树、搜索与属性在 geometry 到达之前即可使用 | 839.9 MB federation 上，188,319 条记录的层级 3.3 秒就绪（[sixty5 浏览器记录](artifacts/ifc/sixty5-browser/README.md)） |
 | 细节几何通过普通 HTTP 渐进流式传输 | 28 次 `scene.bin` 请求全部为 HTTP 206 `bytes=` Range 响应（[sixty5 浏览器记录](artifacts/ifc/sixty5-browser/README.md)） |
-| 无论场景多大，内存都保持在声明的预算内 | promotion 在 234 个 chunk 的第 26 个处停止；解码与 GPU 字节均保持在 64 MiB 以下（[sixty5 浏览器记录](artifacts/ifc/sixty5-browser/README.md)） |
+| 渐进式 target geometry residency 保持在声明的预算内 | promotion 在 234 个 chunk 的第 26 个处停止，target 的 decoded 与 GPU 字节均保持在 64 MiB 以下。该数值不包含层级、sidecar、Worker 状态或进程总内存（[sixty5 浏览器记录](artifacts/ifc/sixty5-browser/README.md)） |
 | 选择可解析回源 CAD/BIM 标识 | 被选中的基础梁按需解析出 6 条 IFC 属性条目（[sixty5 浏览器记录](artifacts/ifc/sixty5-browser/README.md)） |
 | 超大规模的首帧以秒计，而不是分钟 | 共享 coarse Worker 路径、虚拟化的装配列表，以及跳过被拒绝分块的 residency admission 将 sixty5 首个 coarse frame 从 268.0 秒缩短到中位数 4.3 秒 —— 提速 62.6 倍（[首帧记录](artifacts/ifc/sixty5-first-frame/README.md)） |
 | 预算装不下的几何体根本不会被下载 | 被请求的 sixty5 分块先从编译产物中估算成本，在任何字节传输之前被跳过；234 个中有 123 个如此，常驻集合只需 113 次 Range 响应，而不是 245 次（[首帧记录](artifacts/ifc/sixty5-first-frame/README.md)） |
@@ -123,18 +125,19 @@ Blender：由社区共同构建一个拥有强大核心和广泛扩展生态的�
   <tr>
     <td width="33%" valign="top">
       <h3>保留权威数据源</h3>
-      原生 CAD/BIM 和中性交换文件始终是 source of truth。NARU 工作空间保存
-      引用、视图、批注和插件状态，而不是成为一种替代 CAD 格式。
+      原生 CAD/BIM 和中性交换文件目前仍是 source of truth。Phase 2 规划中的
+      工作空间将保存引用、视图、批注和插件状态，而不会成为替代 CAD 格式。
     </td>
     <td width="33%" valign="top">
       <h3>为规模而编译</h3>
-      离线管线在保留 occurrence 与源引用的同时，完成实例化、分区、量化、
-      压缩和渐进式 LOD 构建。
+      当前编译器会保留 occurrence 与源引用、复用 prototype，并输出
+      coarse/target partition。量化、压缩与 shape-preserving LOD 仍处于规划阶段。
     </td>
     <td width="33%" valign="top">
       <h3>以 WebGPU 原生运行</h3>
-      通过紧凑数据、受控内存、Worker、GPU 可见状态与直接 WebGPU 渲染，
-      使每帧 hot path 不依赖庞大的 JavaScript scene graph。
+      通过 Worker、GPU 可见状态、直接 WebGPU 渲染与固定的 target-geometry
+      admission 预算，使每帧 hot path 不依赖庞大的 JavaScript scene graph。
+      进程总内存统计仍处于规划阶段。
     </td>
   </tr>
 </table>
@@ -158,21 +161,22 @@ Engineering Scene IR 是逻辑系统边界，而不是新的交换格式。交�
 
 ## 我们正在构建什么
 
-| 层 | 职责 | 首个垂直切片 |
+| 层 | 职责 | 当前实现 / 规划 |
 |---|---|---|
-| **NARU Studio** | 参考工程工作空间 | 装配树、搜索、属性、选择、隐藏/隔离、剖切、测量 |
-| **NARU Runtime** | Headless 浏览器与 GPU 引擎 | 渐进式流送、Worker 解码、实例化、剔除、拾取、GPU 内存预算 |
-| **NARU Compiler** | 可复现的 source-to-Web 构建管线 | 通过 OCCT 读取 STEP AP242，保留层级与边线，生成 LOD 与分块 |
-| **NARU SDK** | 稳定的嵌入与扩展接口 | 框架无关的 TypeScript API、命令、面板、分析 Worker、能力授权插件 |
+| **NARU Studio** | 参考工程应用 | **已实现：** 装配树、搜索、属性、选择、隐藏/隔离、一个剖切平面。**规划：** 持久化工作空间、测量、批注 |
+| **NARU Runtime** | Headless 浏览器与 GPU 引擎 | **已实现：** 渐进式流送、Worker 解码、实例化、剔除、拾取、target-geometry admission 预算。**规划：** 持久化缓存层、LOD、进程总内存统计 |
+| **NARU Compiler** | 可复现的 source-to-Web 构建管线 | **已实现：** STEP/IFC 适配器、层级/标识/边线、确定性的 coarse/target chunk 与缓存。**规划：** incremental compiled payload 复用、LOD、压缩 |
+| **NARU SDK** | 未来稳定化的嵌入与扩展接口 | **尚未发布：** 框架无关的稳定 API、命令、面板、分析 Worker 与能力授权插件仍处于规划阶段 |
 
 ### 为工程工作而设计
 
 - 保留装配、prototype、occurrence、源对象、名称、颜色、单位和变换关系
 - 渲染显式 CAD 边线，而不是从三角形中猜测所有有意义的边界
 - 在完整目标精度几何到达前，先显示可操作的粗略场景
-- 基于稳定对象身份进行选择、隐藏、隔离、裁剪、测量和批注
-- 即使面对超大场景，也遵守声明的 CPU 与 GPU 内存预算
-- 自托管 Studio，或将运行时嵌入其他产品
+- 当前基于稳定对象身份完成选择、隐藏/隔离与剖切；测量和批注仍处于规划阶段
+- 将渐进式 target geometry residency 保持在声明的 decoded/GPU 预算内，
+  并单独统计进程总内存
+- 待当前应用与包边界稳定后，再提供受支持的自托管与框架无关嵌入路径
 
 ## 项目状态
 
@@ -185,7 +189,8 @@ Engineering Scene IR 是逻辑系统边界，而不是新的交换格式。交�
 | **2 — 大场景 alpha** | 10 万以上 occurrence、流送、LOD、缓存和内存预算 | **当前** |
 | **3 — 开放平台 beta** | 插件、IFC、嵌入示例与自托管部署 | 计划中 |
 
-请查看完整[路线图](docs/ROADMAP.md)、[Phase 1 证据](docs/PHASE_1.md)、
+请查看完整[路线图](docs/ROADMAP.md)、当前的
+[Phase 2 跟踪文档](docs/PHASE_2.md)、[Phase 1 证据](docs/PHASE_1.md)、
 [Phase 1 完成报告](docs/PHASE_1_REPORT.md)、[Phase 0 记录](docs/PHASE_0.md)与
 [Chrome/Firefox WebGPU matrix](artifacts/browser-matrix/README.md)。性能数据
 已与可再分发模型、准确的硬件和浏览器信息、cold/warm 状态及可复现命令一同

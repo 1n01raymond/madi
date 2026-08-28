@@ -22,8 +22,10 @@ compile-affecting identities are unchanged.
 
 These are product SLOs, not claims about current evidence. Cold and warm results
 must be reported separately under [the benchmark rules](BENCHMARKS.md). The
-current real-large boundary is a recorded 302-second end-to-end sixty5 import
-([evidence](../artifacts/ifc/sixty5/README.md)); shared coarse residency, a
+historical real-large boundary is one 302-second end-to-end sixty5 split.1
+diagnostic on a warm OS file cache
+([evidence](../artifacts/ifc/sixty5/README.md)); it is not a current-toolchain
+cold distribution. Shared coarse residency, a
 virtualized assembly list, skip-and-continue admission, estimate-gated
 prefetch, and a shared prototype vertex pool later record a 4.283-second first
 frame ([evidence](../artifacts/ifc/sixty5-first-frame/README.md)). The recorded cache

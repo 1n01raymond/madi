@@ -1,7 +1,8 @@
 # Governance
 
-NARU begins as a maintainer-led open-source project. Governance should remain
-lightweight while the architecture and first vertical slice are being proven.
+NARU is a maintainer-led open-source project in its Phase 2 large-scene alpha.
+Governance remains lightweight during the single-maintainer bootstrap, while
+making current work explicit enough for additional contributors to join.
 
 ## Roles
 
@@ -12,6 +13,10 @@ lightweight while the architecture and first vertical slice are being proven.
 ## Decision making
 
 - Routine changes use pull-request review and maintainer consensus.
+- The roadmap owns phase outcomes, the current phase tracker owns priority and
+  evidence debt, and GitHub issues own reviewed, independently assignable work.
+  Distant or insufficiently specified ideas remain in the roadmap instead of
+  becoming an unmaintainable issue queue.
 - Cross-cutting technical decisions use Architecture Decision Records.
 - Maintainers follow the same branch and pull-request rules as contributors;
   see `docs/BRANCHING.md`. Repository-setting exceptions are reserved for

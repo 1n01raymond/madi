@@ -1,7 +1,7 @@
 name: Design proposal
 description: Propose an architecture, API, schema, or product change
 title: "[Design]: "
-labels: ["design"]
+labels: ["design", "status:needs-design"]
 body:
   - type: textarea
     id: problem

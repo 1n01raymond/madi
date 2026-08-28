@@ -83,5 +83,6 @@ states that it is not required to prove the first vertical slice:
 - broader browser/hardware reproduction and the final ADR-0003 decision; and
 - ADR-0008 completion, including its non-Blink and large-coordinate cross-checks.
 
-Those are Phase 2 or later gates in [the roadmap](ROADMAP.md). A future failure
-in one of them does not retroactively change the evidence recorded here.
+Those are Phase 2 or later gates in [the roadmap](ROADMAP.md) and the live
+[Phase 2 tracker](PHASE_2.md). A future failure in one of them does not
+retroactively change the evidence recorded here.

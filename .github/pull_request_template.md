@@ -14,6 +14,10 @@
 
 <!-- Note user-visible, API, schema, compatibility, security, memory, and performance impact. -->
 
+## AI assistance disclosure
+
+<!-- State whether AI substantially assisted the implementation, tests, documentation, or translation. Name the tool and identify the human review performed. Write "No substantial AI assistance" when this does not apply. -->
+
 ## Checklist
 
 - [ ] This PR contains one logical change and targets `main`.

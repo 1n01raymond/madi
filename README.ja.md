@@ -31,8 +31,9 @@
   — 実在する4分野のIFCフェデレーションを、素のHTTP Rangeでストリーミングします。インストール不要です。
   <br />
   <sub>実大規模スケールでの測定値: 839.9 MBの<code>sixty5</code>フェデレーションが、レンダリング
-  可能な78,173個のオカレンス全体の最初のcoarseフレームに4.3秒で到達し、固定64 MiB予算を
-  維持します（<a href="artifacts/ifc/sixty5-first-frame/README.md">証拠</a>）。</sub>
+  可能な78,173個のオカレンス全体の最初のcoarseフレームに4.3秒で到達します。target detailは
+  別々の固定64 MiB decoded/GPU admission予算に従い、プロセス全体のメモリは含みません
+  （<a href="artifacts/ifc/sixty5-first-frame/README.md">証拠</a>）。</sub>
 </p>
 
 > [!IMPORTANT]
@@ -69,9 +70,10 @@
       <br />
       <sub><strong>実物大のIFC federation。</strong> 839.9 MB・7分野の
       <code>sixty5</code>モデル:2.4秒で階層と検索が準備完了、描画可能な
-      78,173個のoccurrence全体の初回coarse frameが4.3秒、geometryは固定
-      64 MiB予算内に維持、選択した基礎梁が自身のIFCプロパティをresolve
-      します。
+      78,173個のoccurrence全体の初回coarse frameが4.3秒です。段階的なtarget
+      detailは別々の固定64 MiB decoded/GPU admission予算内に収まり、プロセス
+      全体のメモリはこの値に含みません。選択した基礎梁は自身のIFCプロパティを
+      resolveします。
       <a href="artifacts/ifc/sixty5-browser/README.md">residency証拠</a> ·
       <a href="artifacts/ifc/sixty5-first-frame/README.md">初回フレーム証拠</a></sub>
     </td>
@@ -90,7 +92,7 @@
 | CAD境界は三角形から推測せず、ソースのedgeから描画します | 13,897個の明示的edge segmentがブラウザまで維持 ([ブラウザmatrix](artifacts/browser-matrix/README.md)) |
 | ツリー・検索・プロパティはgeometryの到着前に動作します | 839.9 MBのfederationで188,319レコードの階層が3.3秒で準備完了 ([sixty5ブラウザ記録](artifacts/ifc/sixty5-browser/README.md)) |
 | 詳細形状はプレーンなHTTP上で漸進的にストリーミングされます | 28件の`scene.bin`リクエストがすべてHTTP 206 `bytes=` Range応答 ([sixty5ブラウザ記録](artifacts/ifc/sixty5-browser/README.md)) |
-| シーン規模によらずメモリは宣言された予算内に収まります | promotionは234個中26番目のchunkで停止、デコード・GPUバイトとも64 MiB未満を維持 ([sixty5ブラウザ記録](artifacts/ifc/sixty5-browser/README.md)) |
+| 段階的なtarget geometryのresidencyは宣言された予算内に収まります | promotionは234個中26番目のchunkで停止し、targetのdecoded・GPUバイトはいずれも64 MiB未満を維持します。階層、sidecar、Worker状態、プロセス全体のメモリはこの値に含みません ([sixty5ブラウザ記録](artifacts/ifc/sixty5-browser/README.md)) |
 | 選択はソースCAD/BIM識別子へ解決されます | 選択した基礎梁が6件のIFCプロパティ項目を遅延resolve ([sixty5ブラウザ記録](artifacts/ifc/sixty5-browser/README.md)) |
 | 実物大の初回フレームは分ではなく秒単位で到着します | 共有coarse Worker経路、仮想化されたアセンブリ一覧、拒否チャンクをスキップするresidency admissionがsixty5の初回coarse frameを268.0秒から中央値4.3秒へ短縮 — 62.6倍の高速化 ([初回フレーム記録](artifacts/ifc/sixty5-first-frame/README.md)) |
 | 予算に収まらないジオメトリはそもそもダウンロードしません | 要求されたsixty5チャンクはコンパイル済みドキュメントから事前に見積もられ、バイトが動く前に234個中123個がスキップされます。resident setはRange応答245回ではなく113回で完成します ([初回フレーム記録](artifacts/ifc/sixty5-first-frame/README.md)) |
@@ -128,20 +130,21 @@ NARUはソースツールとWebアプリケーションの間にオープンな�
   <tr>
     <td width="33%" valign="top">
       <h3>原本を正とする</h3>
-      ネイティブCAD/BIMと中間交換ファイルは引き続きsource of truthです。
-      NARUワークスペースが保存するのは参照、ビュー、注釈、プラグイン状態であり、
-      代替CAD形式ではありません。
+      ネイティブCAD/BIMと中間交換ファイルは現在もsource of truthです。
+      Phase 2で計画するワークスペースは参照、ビュー、注釈、プラグイン状態を
+      保存しますが、代替CAD形式にはなりません。
     </td>
     <td width="33%" valign="top">
       <h3>大規模シーン向けにコンパイル</h3>
-      オフラインパイプラインはoccurrenceとソース参照を保ちながら、
-      インスタンシング、分割、量子化、圧縮、段階的LODを構築します。
+      現在のコンパイラはoccurrenceとソース参照を保持し、prototypeを再利用して
+      coarse/target partitionを出力します。量子化、圧縮、shape-preserving LODは
+      まだ計画段階です。
     </td>
     <td width="33%" valign="top">
       <h3>WebGPUネイティブで実行</h3>
-      パックされたデータ、メモリ制限、Worker、GPU可視状態、直接WebGPU
-      レンダリングにより、大規模なJavaScript scene graphをフレームの
-      hot pathから切り離します。
+      Worker、GPU可視状態、直接WebGPUレンダリング、固定target-geometry
+      admission予算により、大規模なJavaScript scene graphをフレームのhot
+      pathから切り離します。総メモリの計測はまだ計画段階です。
     </td>
   </tr>
 </table>
@@ -166,21 +169,24 @@ Engineering Scene IRは新しい交換形式ではなく、論理的なシステ
 
 ## 構築するもの
 
-| レイヤー | 役割 | 最初の垂直スライス |
+| レイヤー | 役割 | 現在の実装 / 計画 |
 |---|---|---|
-| **NARU Studio** | リファレンスとなるエンジニアリングワークスペース | アセンブリツリー、検索、プロパティ、選択、表示/分離、断面、計測 |
-| **NARU Runtime** | Headlessブラウザ・GPUエンジン | 段階的ストリーミング、Workerデコード、インスタンシング、カリング、ピッキング、GPUメモリ制限 |
-| **NARU Compiler** | 再現可能なsource-to-Webビルドパイプライン | OCCT経由のSTEP AP242、階層・エッジ保持、LOD・チャンク生成 |
-| **NARU SDK** | 安定した組み込み・拡張インターフェース | フレームワーク非依存TypeScript API、コマンド、パネル、解析Worker、権限ベースのプラグイン |
+| **NARU Studio** | リファレンスとなるエンジニアリングアプリケーション | **実装済み:** アセンブリツリー、検索、プロパティ、選択、表示/分離、断面平面1枚。**計画:** 永続ワークスペース、計測、注釈 |
+| **NARU Runtime** | Headlessブラウザ・GPUエンジン | **実装済み:** 段階的ストリーミング、Workerデコード、インスタンシング、カリング、ピッキング、target-geometry admission予算。**計画:** 永続キャッシュ層、LOD、総メモリ計測 |
+| **NARU Compiler** | 再現可能なsource-to-Webビルドパイプライン | **実装済み:** STEP/IFCアダプター、階層・識別情報・エッジ、決定的coarse/targetチャンクとキャッシュ。**計画:** incremental compiled payload再利用、LOD、圧縮 |
+| **NARU SDK** | 将来安定化する組み込み・拡張インターフェース | **未公開:** フレームワーク非依存の安定API、コマンド、パネル、解析Worker、権限ベースのプラグインは計画段階 |
 
 ### エンジニアリング作業のための設計
 
 - アセンブリ、prototype、occurrence、ソースオブジェクト、名前、色、単位、変換の関係を保持
 - 三角形から境界を推測するのではなく、明示的なCADエッジを描画
 - 目標精度の全形状を待たず、操作可能な粗いシーンを先に表示
-- 安定したオブジェクトIDによる選択、非表示、分離、クリップ、計測、注釈
-- 非常に大きなシーンでも、宣言したCPU/GPUメモリ予算を維持
-- Studioのセルフホスト、または他製品へのランタイム組み込み
+- 安定したオブジェクトIDで現在は選択、非表示/分離、断面を扱い、計測と注釈は
+  計画段階
+- 段階的なtarget geometryのresidencyを宣言したdecoded/GPU予算内に維持し、
+  プロセス全体のメモリは別に計測
+- 現在のアプリケーションとパッケージ境界が安定した後、サポート対象の
+  セルフホストとフレームワーク非依存の組み込み経路を提供予定
 
 ## プロジェクトの状態
 
@@ -193,7 +199,8 @@ Engineering Scene IRは新しい交換形式ではなく、論理的なシステ
 | **2 — 大規模シーンalpha** | 10万以上のoccurrence、ストリーミング、LOD、キャッシュ、メモリ予算 | **現在** |
 | **3 — オープンプラットフォームbeta** | プラグイン、IFC、組み込み例、セルフホスト配布 | 予定 |
 
-詳しくは[ロードマップ](docs/ROADMAP.md)、[Phase 1証拠](docs/PHASE_1.md)、
+詳しくは[ロードマップ](docs/ROADMAP.md)、現在の
+[Phase 2トラッカー](docs/PHASE_2.md)、[Phase 1証拠](docs/PHASE_1.md)、
 [Phase 1完了レポート](docs/PHASE_1_REPORT.md)、[Phase 0記録](docs/PHASE_0.md)、
 [Chrome/Firefox WebGPU matrix](artifacts/browser-matrix/README.md)をご覧
 ください。公開済みの性能値には、再配布可能なモデル、正確なハードウェア・
