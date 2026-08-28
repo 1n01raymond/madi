@@ -1,11 +1,12 @@
 # Phase 1 Evidence Tracker
 
-Status: In progress
+Status: Complete (2026-08-28)
 
 Phase 1 turns the feasibility path into a reproducible STEP-to-browser vertical
 slice and retires selected source-adapter risks before Phase 2. The roadmap
 remains authoritative; this record distinguishes committed evidence from
-planned behavior.
+planned behavior. The five exit criteria and consolidated performance evidence
+are summarized in the [Phase 1 completion report](PHASE_1_REPORT.md).
 
 ## First compiler slice
 
@@ -253,7 +254,10 @@ See `artifacts/phase1/README.md` for the compiled package,
 `artifacts/precision/large-coordinates/README.md` for ADR-0005 evidence, and
 `packages/compiler/README.md` for the profile boundary.
 
-## Not yet proven
+## Phase 2 and later evidence backlog
+
+The items below are known limits and follow-up decision gates. They do not block
+the Phase 1 exit criteria closed in the [completion report](PHASE_1_REPORT.md).
 
 - Shape-preserving and screen-space LODs, compression,
   persistent cache tiers, and a general cache-aware eviction policy under a
@@ -309,7 +313,7 @@ temporary 80.6 MB Scene IR JSON compiles to a 19.2 MB glTF package, exposing the
 next concrete optimization targets: progressive partitions, compression, LOD,
 and bounded residency.
 
-## Next slice
+## Phase 2 implementation context
 
 The IFC-discovered 3,383 prototype ranges now coalesce into 45 deterministic
 512 KiB target requests (one indivisible 1.12 MiB prototype remains whole),

@@ -28,7 +28,8 @@ Status: Complete (2026-08-23). See the [evidence record](PHASE_0.md).
 
 ## Phase 1 — Vertical slice (`0.1.0-alpha`)
 
-Status: Current.
+Status: Complete (2026-08-28). See the
+[completion report](PHASE_1_REPORT.md).
 
 ### Compiler
 
@@ -189,7 +190,13 @@ smoke-checks the live app, package resources, and HTTP Range delivery.
 - no total-scene traversal in the steady navigation hot path;
 - reproducible benchmark report.
 
+All five criteria are closed by the [Phase 1 completion
+report](PHASE_1_REPORT.md). Known limits and proposed ADR gates remain visible
+without extending the completed vertical-slice scope.
+
 ## Phase 2 — Large-scene alpha (`0.2.x`)
+
+Status: Current.
 
 - content-addressed persistent cache under the
   [import/cache product contract](IMPORT_AND_CACHE.md): cancellable background
@@ -289,9 +296,12 @@ at 10,000 km precision gate passed in headed Chrome and Firefox.
 
 ### After Phase 1
 
-Revisit custom delivery structures. If standards-based payloads meet startup,
-memory, and semantic requirements, prefer them. Freeze a custom cache only when
-measured gaps are material.
+Decision: continue to Phase 2. The 2026-08-28 evidence review closed all five
+vertical-slice criteria, including the public reproducible performance report
+([record](PHASE_1_REPORT.md)). Standards-based glTF remains the delivery
+boundary and the compiled cache stays derived. ADR-0003 remains Proposed: the
+Phase 1 report publishes the divergent browser/hardware results instead of
+turning an exploratory comparison into a renderer-decision claim.
 
 ### After Phase 2
 

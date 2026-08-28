@@ -11,7 +11,7 @@
 
 <p align="center">
   <a href="LICENSE"><img alt="Apache License 2.0" src="https://img.shields.io/badge/license-Apache--2.0-5B8DEF?style=flat-square"></a>
-  <img alt="Architecture and prototype stage" src="https://img.shields.io/badge/status-architecture%20%26%20prototype-F5A623?style=flat-square">
+  <img alt="Phase 1 vertical slice complete" src="https://img.shields.io/badge/status-Phase%201%20complete-20B486?style=flat-square">
   <img alt="WebGPU renderer" src="https://img.shields.io/badge/renderer-WebGPU-7C6CFF?style=flat-square">
   <a href="CONTRIBUTING.md"><img alt="Contributions welcome" src="https://img.shields.io/badge/contributions-welcome-20B486?style=flat-square"></a>
 </p>
@@ -23,9 +23,9 @@
 </p>
 
 > [!IMPORTANT]
-> NARU is currently at the architecture and prototyping stage. This repository
-> defines the product, system boundaries, benchmarks, and implementation path;
-> it does not yet contain an installable production viewer.
+> NARU has completed its evidence-gated Phase 1 vertical slice. The repository
+> contains a working public Studio, compiler, WebGPU runtime, and reproducible
+> evidence, but remains alpha-quality software rather than a production viewer.
 
 ## What already runs in the browser
 
@@ -176,14 +176,15 @@ The roadmap is evidence-gated rather than date-driven.
 | Phase | Outcome | Status |
 |---|---|---|
 | **0 — Feasibility** | Connect OCCT identity and edges to a direct WebGPU prototype | **Complete** |
-| **1 — Vertical slice** | Public STEP-to-browser demo with core engineering interaction | **Current** |
-| **2 — Large-scene alpha** | 100k+ occurrences, streaming, LOD, cache, and memory budgets | Planned |
+| **1 — Vertical slice** | Public STEP-to-browser demo with core engineering interaction | **Complete** |
+| **2 — Large-scene alpha** | 100k+ occurrences, streaming, LOD, cache, and memory budgets | **Current** |
 | **3 — Open platform beta** | Plugins, production IFC workflows, embedding, and self-host deployment | Planned |
 
 See the full [roadmap](docs/ROADMAP.md), [Phase 1 evidence](docs/PHASE_1.md),
+[Phase 1 completion report](docs/PHASE_1_REPORT.md),
 [Phase 0 record](docs/PHASE_0.md), and
 [Chrome/Firefox WebGPU matrix](artifacts/browser-matrix/README.md). Performance
-claims will be published with redistributable models, exact hardware and browser
+claims are published with redistributable models, exact hardware and browser
 details, cold/warm states, and reproducible commands.
 
 Real reference sources are now checksum-locked without committing their large

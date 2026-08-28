@@ -11,7 +11,7 @@
 
 <p align="center">
   <a href="LICENSE"><img alt="Apache License 2.0" src="https://img.shields.io/badge/license-Apache--2.0-5B8DEF?style=flat-square"></a>
-  <img alt="架构与原型阶段" src="https://img.shields.io/badge/status-architecture%20%26%20prototype-F5A623?style=flat-square">
+  <img alt="Phase 1 垂直切片已完成" src="https://img.shields.io/badge/status-Phase%201%20complete-20B486?style=flat-square">
   <img alt="WebGPU renderer" src="https://img.shields.io/badge/renderer-WebGPU-7C6CFF?style=flat-square">
   <a href="CONTRIBUTING.md"><img alt="欢迎贡献" src="https://img.shields.io/badge/contributions-welcome-20B486?style=flat-square"></a>
 </p>
@@ -23,8 +23,9 @@
 </p>
 
 > [!IMPORTANT]
-> NARU 目前处于架构设计与原型验证阶段。本仓库定义产品方向、系统边界、
-> 基准测试和实现路径；目前尚不包含可安装的生产级查看器。
+> NARU 已完成以证据为门槛的 Phase 1 垂直切片。本仓库包含可运行的公开
+> Studio、编译器、WebGPU 运行时与可复现证据，但仍是 alpha 质量的软件，
+> 并非生产级查看器。
 
 > 本文是英文 [`README.md`](README.md) 的翻译。如内容存在差异，以英文版为准。
 > 欢迎帮助审校术语和表达。
@@ -167,14 +168,14 @@ Engineering Scene IR 是逻辑系统边界，而不是新的交换格式。交�
 | 阶段 | 成果 | 状态 |
 |---|---|---|
 | **0 — 可行性验证** | 将 OCCT 身份与边线连接到直接 WebGPU 原型 | **完成** |
-| **1 — 垂直切片** | 具备核心工程交互的公开 STEP-to-browser 演示 | **当前** |
-| **2 — 大场景 alpha** | 10 万以上 occurrence、流送、LOD、缓存和内存预算 | 计划中 |
+| **1 — 垂直切片** | 具备核心工程交互的公开 STEP-to-browser 演示 | **完成** |
+| **2 — 大场景 alpha** | 10 万以上 occurrence、流送、LOD、缓存和内存预算 | **当前** |
 | **3 — 开放平台 beta** | 插件、IFC、嵌入示例与自托管部署 | 计划中 |
 
 请查看完整[路线图](docs/ROADMAP.md)、[Phase 1 证据](docs/PHASE_1.md)、
-[Phase 0 记录](docs/PHASE_0.md)与
+[Phase 1 完成报告](docs/PHASE_1_REPORT.md)、[Phase 0 记录](docs/PHASE_0.md)与
 [Chrome/Firefox WebGPU matrix](artifacts/browser-matrix/README.md)。性能数据
-将与可再分发模型、准确的硬件和浏览器信息、cold/warm 状态及可复现命令一同
+已与可再分发模型、准确的硬件和浏览器信息、cold/warm 状态及可复现命令一同
 发布。
 
 真实参照源现已通过校验和锁定，而无需提交其大体积二进制文件：两个 NIST AP242

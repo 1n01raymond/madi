@@ -11,7 +11,7 @@
 
 <p align="center">
   <a href="LICENSE"><img alt="Apache License 2.0" src="https://img.shields.io/badge/license-Apache--2.0-5B8DEF?style=flat-square"></a>
-  <img alt="アーキテクチャ・プロトタイプ段階" src="https://img.shields.io/badge/status-architecture%20%26%20prototype-F5A623?style=flat-square">
+  <img alt="Phase 1垂直スライス完了" src="https://img.shields.io/badge/status-Phase%201%20complete-20B486?style=flat-square">
   <img alt="WebGPU renderer" src="https://img.shields.io/badge/renderer-WebGPU-7C6CFF?style=flat-square">
   <a href="CONTRIBUTING.md"><img alt="コントリビューション歓迎" src="https://img.shields.io/badge/contributions-welcome-20B486?style=flat-square"></a>
 </p>
@@ -23,9 +23,9 @@
 </p>
 
 > [!IMPORTANT]
-> NARUは現在、アーキテクチャ設計とプロトタイピングの段階です。この
-> リポジトリは製品、システム境界、ベンチマーク、実装方針を定義するもので、
-> インストール可能な本番ビューアはまだ含まれていません。
+> NARUは証拠ゲート型のPhase 1垂直スライスを完了しました。このリポジトリ
+> には動作する公開Studio、コンパイラ、WebGPUランタイム、再現可能な証拠が
+> ありますが、本番ビューアではなくalpha品質のソフトウェアです。
 
 > この文書は英語版 [`README.md`](README.md) の翻訳です。内容に差異がある
 > 場合は英語版を正とします。用語や表現のレビューを歓迎します。
@@ -176,15 +176,15 @@ Engineering Scene IRは新しい交換形式ではなく、論理的なシステ
 | フェーズ | 成果 | 状態 |
 |---|---|---|
 | **0 — 実現性検証** | OCCTの識別情報・エッジを直接WebGPUプロトタイプへ接続 | **完了** |
-| **1 — 垂直スライス** | 基本的なエンジニアリング操作を備えた公開STEP-to-browserデモ | **現在** |
-| **2 — 大規模シーンalpha** | 10万以上のoccurrence、ストリーミング、LOD、キャッシュ、メモリ予算 | 予定 |
+| **1 — 垂直スライス** | 基本的なエンジニアリング操作を備えた公開STEP-to-browserデモ | **完了** |
+| **2 — 大規模シーンalpha** | 10万以上のoccurrence、ストリーミング、LOD、キャッシュ、メモリ予算 | **現在** |
 | **3 — オープンプラットフォームbeta** | プラグイン、IFC、組み込み例、セルフホスト配布 | 予定 |
 
 詳しくは[ロードマップ](docs/ROADMAP.md)、[Phase 1証拠](docs/PHASE_1.md)、
-[Phase 0記録](docs/PHASE_0.md)、
+[Phase 1完了レポート](docs/PHASE_1_REPORT.md)、[Phase 0記録](docs/PHASE_0.md)、
 [Chrome/Firefox WebGPU matrix](artifacts/browser-matrix/README.md)をご覧
-ください。性能値は再配布可能なモデル、正確なハードウェア・ブラウザ情報、
-cold/warm状態、再現コマンドとともに公開します。
+ください。公開済みの性能値には、再配布可能なモデル、正確なハードウェア・
+ブラウザ情報、cold/warm状態、再現コマンドが含まれます。
 
 実在の参照ソースは、大きなバイナリをコミットせずにチェックサムで固定される
 ようになりました: NIST AP242適合性ケース2件、IFC-Benchの4分野Digital Hub
