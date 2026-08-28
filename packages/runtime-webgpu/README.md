@@ -118,6 +118,18 @@ sixty5 pass offline co-demand censuses, and both have headed localized camera
 traces under `artifacts/spatial-demand/{digital-hub,sixty5}-localized/`; a
 non-Blink localized repeat is still pending.
 
+`querySpatialDemandIndex` returns each candidate chunk with both the squared
+screen distance to the view centre and the largest clipped normalized-device
+area (0 through 4) any of its visible leaves projects to, and orders them by the
+requested `SpatialDemandPriority`: `"screen-distance"` (the default, and the
+historical order byte for byte) or `"screen-coverage"`, which sorts by area and
+falls back to distance and then chunk index so the order stays total. Coverage
+prices an axis-aligned bound, so it over-estimates a slanted box and gives any
+bound that straddles the eye plane the whole view; it ranks demand rather than
+measuring a chunk's pixels. Which policy renders closer to an unbudgeted
+reference depends on the view — see
+`artifacts/spatial-demand/sixty5-demand-priority/`.
+
 Run `pnpm test` for package and committed-fixture regression coverage. The
 headed cross-engine path is recorded by `pnpm browser:matrix`; the focused
 large-coordinate path is recorded by `pnpm precision:evidence`.

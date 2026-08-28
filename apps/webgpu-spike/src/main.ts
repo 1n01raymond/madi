@@ -9,6 +9,7 @@ import type {
   CompiledTargetChunk,
   DecodedCompiledScene,
   GeometryRepresentation,
+  SpatialDemandPriority,
 } from "@naru3d/runtime-webgpu";
 
 import { GeometryDecoder } from "./geometry-decoder.js";
@@ -70,6 +71,20 @@ function residencyBudgetFromLocation(): number {
     throw new RangeError("residencyMiB must be between 4 and 1024.");
   }
   return Math.round(mebibytes * 1024 * 1024);
+}
+
+/**
+ * Which demanded chunk the scheduler asks for first. The default keeps the
+ * recorded behavior; `screen-coverage` is the opt-in ADR-0008 policy that
+ * ranks by projected area, which only differs once the residency budget binds.
+ */
+function demandPriorityFromLocation(): SpatialDemandPriority {
+  const value = new URL(window.location.href).searchParams.get("demandPriority");
+  if (value === null) return "screen-distance";
+  if (value !== "screen-distance" && value !== "screen-coverage") {
+    throw new RangeError("demandPriority must be screen-distance or screen-coverage.");
+  }
+  return value;
 }
 
 function binarySourceForChunk(
@@ -227,6 +242,7 @@ function resetSceneUi(): void {
   delete document.documentElement.dataset.targetSchedulerSkippedChunk;
   delete document.documentElement.dataset.targetSchedulerChunk;
   delete document.documentElement.dataset.targetSchedulerPriority;
+  delete document.documentElement.dataset.targetSchedulerDemandPriority;
   delete document.documentElement.dataset.targetSchedulerCancelledChunk;
   delete document.documentElement.dataset.targetSchedulerOrder;
   delete document.documentElement.dataset.targetSchedulerDemand;
@@ -800,10 +816,12 @@ async function loadScene(source: SceneSource): Promise<boolean> {
       const spatialIndex = loaded.spatialIndex
         ? await loadSpatialDemandIndex(loaded.spatialIndex, hierarchy, cancellation.signal)
         : undefined;
+      const demandPriority = demandPriorityFromLocation();
       const viewIndex = spatialIndex
         ? (spatialViewIndex = new SpatialTargetChunkViewIndex(
             hierarchy.targetChunks,
             spatialIndex,
+            demandPriority,
           ))
         : new TargetChunkViewIndex(
             hierarchy.targetChunks,
@@ -813,6 +831,9 @@ async function loadScene(source: SceneSource): Promise<boolean> {
       document.documentElement.dataset.targetSchedulerMode = spatialIndex
         ? "spatial-bvh-v1"
         : "coarse-chunk-bounds-v1";
+      document.documentElement.dataset.targetSchedulerDemandPriority = spatialIndex
+        ? demandPriority
+        : "retained-coarse-bounds";
       if (spatialIndex) {
         document.documentElement.dataset.spatialNodesTotal = String(spatialIndex.stats.nodeCount);
         document.documentElement.dataset.spatialLeavesTotal = String(spatialIndex.stats.leafCount);

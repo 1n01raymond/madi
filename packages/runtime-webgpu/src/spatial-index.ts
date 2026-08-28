@@ -45,6 +45,26 @@ export interface SpatialDemandQueryFrame {
 export interface SpatialDemandQueryCandidate {
   readonly targetChunkIndex: number;
   readonly screenDistanceSquared: number;
+  /**
+   * Largest clipped normalized-device area, from 0 through 4, of any visible
+   * leaf that references the chunk. It is the area of the leaf's projected
+   * bounding rectangle, so it over-estimates a slanted box and attributes a
+   * whole leaf to each chunk the leaf references; it ranks demand, it does not
+   * measure a chunk's own pixels.
+   */
+  readonly screenCoverage: number;
+}
+
+/**
+ * How demanded chunks are ordered. `screen-distance` fetches what is nearest
+ * the center of the view first. `screen-coverage` fetches what covers the most
+ * of it first, which under a binding residency budget decides what a client
+ * can hold at all rather than only what it holds first.
+ */
+export type SpatialDemandPriority = "screen-distance" | "screen-coverage";
+
+export interface SpatialDemandQueryOptions {
+  readonly priority?: SpatialDemandPriority;
 }
 
 export interface SpatialDemandQueryResult {
@@ -338,7 +358,11 @@ function projectedNodeBounds(
   index: DecodedSpatialDemandIndex,
   nodeIndex: number,
   frame: SpatialDemandQueryFrame,
-): { readonly visible: boolean; readonly distanceSquared: number } {
+): {
+  readonly visible: boolean;
+  readonly distanceSquared: number;
+  readonly coverage: number;
+} {
   const offset = nodeIndex * 6;
   const minimumX = index.bounds[offset]! - frame.origin[0];
   const minimumY = index.bounds[offset + 1]! - frame.origin[1];
@@ -353,6 +377,12 @@ function projectedNodeBounds(
   let outsideTop = true;
   let outsideNear = true;
   let outsideFar = true;
+  // Screen extent of the projected corners, in normalized device coordinates.
+  let deviceMinimumX = Infinity;
+  let deviceMaximumX = -Infinity;
+  let deviceMinimumY = Infinity;
+  let deviceMaximumY = -Infinity;
+  let straddlesCamera = false;
   for (const x of [minimumX, maximumX]) {
     for (const y of [minimumY, maximumY]) {
       for (const z of [minimumZ, maximumZ]) {
@@ -374,9 +404,30 @@ function projectedNodeBounds(
         outsideTop &&= clipY > clipW;
         outsideNear &&= clipZ < 0;
         outsideFar &&= clipZ > clipW;
+        // A corner at or behind the eye has no projection; such a box is
+        // treated as covering the whole view below rather than folded onto
+        // the wrong side of the screen.
+        if (clipW <= 0) straddlesCamera = true;
+        else {
+          const deviceX = clipX / clipW;
+          const deviceY = clipY / clipW;
+          deviceMinimumX = Math.min(deviceMinimumX, deviceX);
+          deviceMaximumX = Math.max(deviceMaximumX, deviceX);
+          deviceMinimumY = Math.min(deviceMinimumY, deviceY);
+          deviceMaximumY = Math.max(deviceMaximumY, deviceY);
+        }
       }
     }
   }
+  const deviceWidth = Math.max(
+    0,
+    Math.min(deviceMaximumX, 1) - Math.max(deviceMinimumX, -1),
+  );
+  const deviceHeight = Math.max(
+    0,
+    Math.min(deviceMaximumY, 1) - Math.max(deviceMinimumY, -1),
+  );
+  const coverage = straddlesCamera ? 4 : deviceWidth * deviceHeight;
   const centerX = (minimumX + maximumX) / 2;
   const centerY = (minimumY + maximumY) / 2;
   const centerZ = (minimumZ + maximumZ) / 2;
@@ -395,6 +446,7 @@ function projectedNodeBounds(
     visible:
       !(outsideLeft || outsideRight || outsideBottom || outsideTop || outsideNear || outsideFar),
     distanceSquared: screenX * screenX + screenY * screenY,
+    coverage,
   };
 }
 
@@ -409,6 +461,7 @@ function projectedNodeBounds(
 export function querySpatialDemandIndex(
   index: DecodedSpatialDemandIndex,
   frame: SpatialDemandQueryFrame,
+  options: SpatialDemandQueryOptions = {},
 ): SpatialDemandQueryResult {
   if (
     frame.viewProjection.length !== 16 ||
@@ -419,6 +472,7 @@ export function querySpatialDemandIndex(
   }
   const stack = [0];
   const distances = new Map<number, number>();
+  const coverages = new Map<number, number>();
   let visitedNodeCount = 0;
   let visibleLeafCount = 0;
   let testedOccurrenceCount = 0;
@@ -443,15 +497,22 @@ export function querySpatialDemandIndex(
         targetChunkIndex,
         Math.min(distances.get(targetChunkIndex) ?? Infinity, projection.distanceSquared),
       );
+      coverages.set(
+        targetChunkIndex,
+        Math.max(coverages.get(targetChunkIndex) ?? 0, projection.coverage),
+      );
     }
   }
+  const byCoverage = options.priority === "screen-coverage";
   const candidates = [...distances]
     .map(([targetChunkIndex, screenDistanceSquared]) => ({
       targetChunkIndex,
       screenDistanceSquared,
+      screenCoverage: coverages.get(targetChunkIndex) ?? 0,
     }))
     .sort(
       (left, right) =>
+        (byCoverage ? right.screenCoverage - left.screenCoverage : 0) ||
         left.screenDistanceSquared - right.screenDistanceSquared ||
         left.targetChunkIndex - right.targetChunkIndex,
     );

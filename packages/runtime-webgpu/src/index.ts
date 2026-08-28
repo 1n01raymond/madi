@@ -34,8 +34,10 @@ export {
 export type {
   DecodedSpatialDemandIndex,
   DecodeSpatialDemandIndexOptions,
+  SpatialDemandPriority,
   SpatialDemandQueryCandidate,
   SpatialDemandQueryFrame,
+  SpatialDemandQueryOptions,
   SpatialDemandQueryResult,
 } from "./spatial-index.js";
 export type {

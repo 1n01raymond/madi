@@ -242,6 +242,7 @@ pnpm precision:evidence
 pnpm precision:check
 pnpm cache:evidence
 pnpm cache:check
+pnpm demand:priority:check
 pnpm demo:smoke
 pnpm check
 ```
@@ -263,6 +264,14 @@ See `artifacts/phase1/README.md` for the compiled package,
   actually binds; a non-Blink repeat of either is still pending, and so is the
   nested-view cross-check against ADR-0005. Historical packages continue
   through the retained-coarse chunk-bounds fallback.
+- A demand ordering that is better from every viewpoint. Ordering by projected
+  screen area beats the default distance ordering decisively on a close view
+  and loses to it on a mid view of the same model
+  (`artifacts/spatial-demand/sixty5-demand-priority/README.md`), so it ships
+  opt-in; a blended or screen-space-error cost is unrecorded. The score is
+  pixel agreement against an unbudgeted render of the same pose on one host,
+  one browser, and two scripted camera poses — not a frame-time or bandwidth
+  claim.
 - Cross-host byte reproducibility of the IFC adapter. Re-extracting the
   qualified Digital Hub sources on Windows reproduces every count, the
   `properties.bin` column file, the compiled target/coarse byte lengths, and
@@ -343,8 +352,19 @@ of 234 chunks under the default order against 152 under leaf-anchor ordering
 — 27.3% fewer chunks and 26.5% fewer bytes, a wider margin than Digital Hub's
 — while every window stays inside the 64 MiB budget and the first coarse frame
 does not move. ADR-0008 now lacks only a non-Blink repeat and the nested-view
-cross-check against ADR-0005. The next increments are persistent cache tiers
-and screen-space priority.
+cross-check against ADR-0005. Screen-space priority is the increment that
+follows from it and is now recorded
+(`artifacts/spatial-demand/sixty5-demand-priority/`): the scheduler can order
+demand by the clipped screen area a leaf projects to instead of by its distance
+to the view centre, selected per session with `?demandPriority=screen-coverage`
+and scored against a 192 MiB reference render of the identical pose. On a close
+view it agrees with that reference in 99.12% of pixels against 64.95% for the
+default ordering at the same 64 MiB budget; on a mid view the direction
+reverses (93.86% against 96.31%). Area ordering is therefore opt-in, the
+default ordering is unchanged byte for byte, and the validator pins which
+policy wins per record. The next increments are a demand cost that blends
+projected area with distance — neither policy is uniformly better — and
+persistent cache tiers.
 
 On the compiler side the structure document now streams record by record,
 property keys and key combinations are interned once at scene level, and the
@@ -368,8 +388,9 @@ pool shared across a prototype's material groups in
 111 range requests. The ADR-0009 persistent import cache is
 now recorded product evidence (`artifacts/cache/`): unchanged pinned sources
 restore byte-identically in seconds instead of recompiling, and corrupt
-entries fail closed. Spatial partitioning, screen-space policy, and runtime
-cache tiers remain the next runtime increments.
+entries fail closed. Spatial partitioning and a first screen-space demand
+policy are now recorded; a view-independent demand cost and runtime cache
+tiers remain the next runtime increments.
 
 In parallel, the repeated 100k record now carries GPU pass timestamps and a
 backend-owned retained-resource census on both the discrete host and an Apple

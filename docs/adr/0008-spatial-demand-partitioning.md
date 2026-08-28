@@ -63,7 +63,15 @@ The first spatial contract must also remain optional so historical
    one-payload-per-prototype ownership remain unchanged; the selected order is
    declared in progressive metadata and the build report. It cannot become the
    default until real-model requested/off-view-byte evidence passes.
-11. Spatial draw clustering is later still and requires geometry resources to
+11. Order the demanded chunks by the distance from the view centre to the
+   visible leaf's projected centre. An explicit `screen-coverage` policy may
+   instead order by the clipped screen area a leaf projects to, selected per
+   session and never by default: it renders closer to an unbudgeted reference
+   on a close view and further from it on a mid view of the same model
+   (`artifacts/spatial-demand/sixty5-demand-priority/`), so it is a recorded
+   option, not a decision. Ordering changes which demanded chunks a bound
+   budget admits first; it changes neither the demand set nor the package.
+12. Spatial draw clustering is later still and requires geometry resources to
    be separable from instance clusters.
 
 ## Consequences
@@ -209,4 +217,7 @@ nested/ADR-0005 cross-check remain open.
 
 This evidence may accept the spatial-demand decision only. It does not by
 itself make an ADR-0003 renderer-performance claim, prove screen-space LOD, or
-prove spatial draw clustering.
+prove spatial draw clustering. The demand-ordering record
+(`artifacts/spatial-demand/sixty5-demand-priority/`) is outside this gate: it
+compares two orderings of an already-decided demand set, and its own outcome is
+view-dependent, so no ordering may become the default on it.

@@ -10,6 +10,15 @@ import {
 
 const leafSentinel = 0xffff_ffff;
 
+function identityViewProjection(): Float64Array {
+  return new Float64Array([
+    1, 0, 0, 0,
+    0, 1, 0, 0,
+    0, 0, 1, 0,
+    0, 0, 0, 1,
+  ]);
+}
+
 function validIndex(): Uint8Array {
   const bytes = new Uint8Array(64 + 3 * 72 + 2 * 8 + 2 * 4);
   const view = new DataView(bytes.buffer);
@@ -119,7 +128,7 @@ describe("spatial demand index runtime boundary", () => {
     ]);
 
     expect(querySpatialDemandIndex(decoded, { viewProjection, origin: [0, 0, 0] })).toEqual({
-      candidates: [{ targetChunkIndex: 0, screenDistanceSquared: 2.25 }],
+      candidates: [{ targetChunkIndex: 0, screenDistanceSquared: 2.25, screenCoverage: 0 }],
       visitedNodeCount: 3,
       visibleLeafCount: 1,
       testedOccurrenceCount: 1,
@@ -129,7 +138,103 @@ describe("spatial demand index runtime boundary", () => {
         viewProjection,
         origin: [10_000_000.062_75, 0, 0],
       }).candidates,
-    ).toEqual([{ targetChunkIndex: 1, screenDistanceSquared: 0.25 }]);
+    ).toEqual([{ targetChunkIndex: 1, screenDistanceSquared: 0.25, screenCoverage: 0.125 }]);
+  });
+
+  it("ranks demand by clipped screen area under the coverage policy", () => {
+    const encoded = encodeSpatialDemandIndex(
+      [
+        {
+          id: "occurrence:centered-detail",
+          nodeIndex: 1,
+          targetChunkIndex: 0,
+          minimum: [-0.05, -0.05, 0],
+          maximum: [0.05, 0.05, 0.5],
+        },
+        {
+          id: "occurrence:offset-wall",
+          nodeIndex: 2,
+          targetChunkIndex: 1,
+          minimum: [0.2, -0.9, 0],
+          maximum: [0.9, 0.9, 0.5],
+        },
+      ],
+      { leafCapacity: 1 },
+    );
+    const decoded = decodeSpatialDemandIndex(encoded.bytes, {
+      gltfNodeCount: 3,
+      targetChunkCount: 2,
+      expectedOccurrenceCount: 2,
+    });
+    const frame = { viewProjection: identityViewProjection(), origin: [0, 0, 0] as const };
+
+    const byDistance = querySpatialDemandIndex(decoded, frame);
+    expect(byDistance.candidates.map((candidate) => candidate.targetChunkIndex)).toEqual([0, 1]);
+    const [detail, wall] = byDistance.candidates;
+    expect(detail?.screenCoverage).toBeCloseTo(0.01, 12);
+    expect(wall?.screenCoverage).toBeCloseTo(1.26, 12);
+
+    const byCoverage = querySpatialDemandIndex(decoded, frame, { priority: "screen-coverage" });
+    // The wall covers a hundred times the detail's area, so it is fetched first
+    // even though the detail sits under the crosshair.
+    expect(byCoverage.candidates.map((candidate) => candidate.targetChunkIndex)).toEqual([1, 0]);
+    expect(byCoverage.visibleLeafCount).toBe(byDistance.visibleLeafCount);
+  });
+
+  it("clamps coverage to the view and gives a camera-straddling box the whole view", () => {
+    const encoded = encodeSpatialDemandIndex(
+      [
+        {
+          id: "occurrence:overscanned",
+          nodeIndex: 1,
+          targetChunkIndex: 0,
+          minimum: [-10, -10, 0],
+          maximum: [10, 10, 0.5],
+        },
+      ],
+      { leafCapacity: 1 },
+    );
+    expect(
+      querySpatialDemandIndex(
+        decodeSpatialDemandIndex(encoded.bytes, {
+          gltfNodeCount: 2,
+          targetChunkCount: 1,
+          expectedOccurrenceCount: 1,
+        }),
+        { viewProjection: identityViewProjection(), origin: [0, 0, 0] },
+      ).candidates[0]?.screenCoverage,
+    ).toBe(4);
+
+    // This projection divides by depth, so the near corners fall at or behind
+    // the eye and the box has no projected rectangle; it claims the whole view.
+    const throughTheEye = new Float64Array([
+      1, 0, 0, 0,
+      0, 1, 0, 0,
+      0, 0, 1, 1,
+      0, 0, 0, 0,
+    ]);
+    const spanning = encodeSpatialDemandIndex(
+      [
+        {
+          id: "occurrence:through-the-eye",
+          nodeIndex: 1,
+          targetChunkIndex: 0,
+          minimum: [-0.5, -0.5, -1],
+          maximum: [0.5, 0.5, 1],
+        },
+      ],
+      { leafCapacity: 1 },
+    );
+    expect(
+      querySpatialDemandIndex(
+        decodeSpatialDemandIndex(spanning.bytes, {
+          gltfNodeCount: 2,
+          targetChunkCount: 1,
+          expectedOccurrenceCount: 1,
+        }),
+        { viewProjection: throughTheEye, origin: [0, 0, 0] },
+      ).candidates[0]?.screenCoverage,
+    ).toBe(4);
   });
 
   it("has no false negatives against a brute-force orthographic oracle", () => {

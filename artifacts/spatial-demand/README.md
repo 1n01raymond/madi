@@ -185,3 +185,25 @@ first coarse frame stayed between 4.213 s and 4.388 s across six runs. Because
 the budget evicts, the two orders hold different chunk sets and render
 different triangle counts; `sixty5-localized/README.md` records that, the
 host-local package digests, and the rest of what this does not prove.
+
+## sixty5 demand-priority comparison
+
+`sixty5-demand-priority/` asks what the localized trace leaves open: once the
+demand exceeds the residency budget, which demanded chunks should be admitted
+first? It compares the default `screen-distance` ordering against opt-in
+`screen-coverage` ordering at one 64 MiB budget, scoring each against a
+192 MiB reference render of the identical pose by pixel agreement -- the only
+signal that separates them, since both fill the same budget with about the same
+chunk, byte and triangle counts.
+
+| Pose | `screen-distance` agreement | `screen-coverage` agreement |
+|---|---:|---:|
+| close view (`{wheel -5,000, pan 400/-300}`) | 64.95% (215,321 px) | **99.12%** (5,416 px) |
+| mid view (`{wheel -1,200, pan 220/-140}`) | **96.31%** (22,656 px) | 93.86% (37,727 px) |
+
+The outcome is view-dependent: area ordering is decisively better on a close
+view dominated by a few large near surfaces and worse on a mid view of
+similarly sized objects. Both directions are recorded, the validator pins the
+winner per record, and `screen-coverage` therefore ships as an opt-in
+`?demandPriority=` selection with the default ordering unchanged byte for byte.
+See `sixty5-demand-priority/README.md` for the method and limits.
