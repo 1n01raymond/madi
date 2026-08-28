@@ -142,6 +142,9 @@ scene size.
 7. Close the most decision-relevant evidence debt and blockers: non-Blink
    real-large spatial demand, nested precision, total-memory accounting, and
    public Studio delivery of the qualified engineering-scale package.
+8. Qualify the registered CadQuarry 1k STEP corpus through a bounded Parquet
+   scanner, then compile its extracted parts as a CAD breadth/control record.
+   Keep that synthetic corpus separate from the real public-baseline gate.
 
 ### Later — expand only after the core loop is reproducible
 
@@ -180,6 +183,7 @@ evidence debt.
 |---|---|---|
 | Total-process memory accounting | Instrument JavaScript heap, Worker-owned arrays, hierarchy/sidecars, runtime-owned decoded/GPU geometry, and disclose GPU allocations the backend cannot enumerate | Whole-application bounded-memory claim and the complete Phase 2 low-memory exit |
 | Public engineering-package delivery | Publish the qualified [31-document package](../artifacts/ifc/engineering-baseline/README.md) at its recorded digest, open it through Studio, and smoke-check every resource and HTTP Range response; source/package qualification is already recorded | Complete Phase 2 public-scale exit and stronger ADR-0003 relevance |
+| CAD breadth corpus qualification | Implement ADR-0014's bounded Parquet scanner, inspect the pinned CadQuarry 1k STEP corpus, and measure extracted-part compile outcomes without equating rows to prototypes | STEP/OCCT diversity coverage; explicitly not the real public-baseline gate |
 | Cross-host IFC drift | Diagnose or deliberately scope the recorded 8-byte macOS/Windows Scene IR difference ([record](../artifacts/spatial-demand/digital-hub-localized/README.md)) | Cross-host cache portability claim |
 | Real Safari rendering | Run on a Safari/macOS combination that exposes WebGPU under supported default settings; the current Sequoia record proves only graceful unsupported behavior | Safari renderer-conformance claim |
 

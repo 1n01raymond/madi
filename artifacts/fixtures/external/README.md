@@ -19,6 +19,11 @@ Engineering share contributes 34 IFC2X3 documents. Fetching either dataset
 requires `--allow-large`; Engineering delivery is resolved from a public share,
 then every object is checked against its committed byte length and SHA-256.
 
+`cadquarry-1k-step` is registered separately as a synthetic CAD breadth control.
+It has no record in this directory because no bounded Parquet scan or STEP
+payload compilation has been run; registration metadata is not qualification
+evidence and does not close the Phase 2 real public-baseline gate.
+
 Reproduce after explicitly fetching the corresponding source:
 
 ```sh
