@@ -176,7 +176,9 @@ describe("external fixture manifest 1.1", () => {
     const { manifest, sha256: manifestSha256 } = await loadExternalFixtureManifest();
     const next = structuredClone(manifest);
     next.schemaVersion = "1.1";
-    const sixty5 = next.datasets.find((dataset) => dataset.id === "ifc-bench-sixty5");
+    const sixty5 = next.datasets.find(
+      (dataset: { id: string }) => dataset.id === "ifc-bench-sixty5",
+    );
     expect(sixty5).toBeDefined();
     sixty5.download = {
       provider: "trimble-connect-public-share",
@@ -185,7 +187,7 @@ describe("external fixture manifest 1.1", () => {
       shareToken: "public-share-token",
       revisionPolicy: "content-digest-only",
     };
-    sixty5.assets = sixty5.assets.map((asset, index) => {
+    sixty5.assets = sixty5.assets.map((asset: Record<string, unknown>, index: number) => {
       const { url: _url, ...unchanged } = asset;
       return {
         ...unchanged,
@@ -216,7 +218,7 @@ describe("Trimble Connect public-share downloads", () => {
     const { contents, manifest, dataset } = trimbleDataset();
     const calls: Array<{ init: RequestInit | undefined; url: string }> = [];
     const fetchImpl = async (input: RequestInfo | URL, init?: RequestInit) => {
-      const url = String(input);
+      const url = input instanceof URL ? input.href : typeof input === "string" ? input : input.url;
       calls.push({ init, url });
       if (url.includes("/shares/token/")) {
         return jsonResponse({
@@ -235,7 +237,7 @@ describe("Trimble Connect public-share downloads", () => {
       }
       const downloadUrlMatch = /\/files\/fs\/([^/]+)\/downloadurl/u.exec(url);
       if (downloadUrlMatch) {
-        const remoteObjectId = decodeURIComponent(downloadUrlMatch[1]);
+        const remoteObjectId = decodeURIComponent(downloadUrlMatch[1] ?? "");
         return jsonResponse({
           id: remoteObjectId,
           versionId: remoteObjectId,
@@ -264,7 +266,7 @@ describe("Trimble Connect public-share downloads", () => {
     }
     const assetCalls = calls.filter(({ url }) => url.startsWith("https://downloads.example/"));
     expect(assetCalls).toHaveLength(2);
-    expect(new Headers(assetCalls[0].init?.headers).get("authorization")).toBeNull();
+    expect(new Headers(assetCalls[0]?.init?.headers).get("authorization")).toBeNull();
     expect(await readFile(join(fixtureCachePath, dataset.id, "first.ifc"))).toEqual(
       contents.first,
     );
@@ -459,7 +461,7 @@ describe("Trimble Connect public-share downloads", () => {
           url: "https://downloads.example/remote-first",
         });
       }
-      return new Response(Buffer.alloc(dataset.assets[0].byteLength + 1));
+      return new Response(Buffer.alloc((dataset.assets[0]?.byteLength ?? 0) + 1));
     };
 
     await expect(fetchDataset(manifest, dataset, { assetIds: ["first"], fetchImpl }))
@@ -571,14 +573,16 @@ describe("CAD corpus inspection evidence", () => {
 
   it("rejects a corpus record whose declared license values drift", () => {
     const evidence = inspection();
-    evidence.files[0].corpus.licenseValues = ["UNKNOWN"];
+    const [corpusFile] = evidence.files;
+    if (!corpusFile) throw new Error("The inspection has no files.");
+    corpusFile.corpus.licenseValues = ["UNKNOWN"];
     expect(() => validateInspectionEvidence(dataset, "c".repeat(64), evidence)).toThrow(
       /invalid Parquet corpus inspection/u,
     );
   });
 
   it("refuses to treat a Parquet container as a Part 21 source", async () => {
-    await expect(inspectDataset({} as never, "c".repeat(64), dataset)).rejects.toThrow(
+    await expect(inspectDataset({}, "c".repeat(64), dataset)).rejects.toThrow(
       /registered only.*ADR-0014/u,
     );
   });

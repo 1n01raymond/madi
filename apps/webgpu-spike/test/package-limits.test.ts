@@ -101,7 +101,10 @@ describe("package budget", () => {
 
 describe("package transport policy", () => {
   it("fetches without following redirects or reading a cache, and asks for the range", async () => {
-    const fetchMock = vi.fn(async () => new Response(new Uint8Array(4)));
+    const fetchMock = vi.fn(
+      async (_input: RequestInfo | URL, _init?: RequestInit) =>
+        new Response(new Uint8Array(4)),
+    );
     vi.stubGlobal("fetch", fetchMock);
 
     await openPackageResponse(documentUrl, {
@@ -110,12 +113,11 @@ describe("package transport policy", () => {
       range: { byteOffset: 16, byteLength: 8 },
     });
 
-    const init = fetchMock.mock.calls[0]?.[1] as RequestInit & {
-      headers?: Record<string, string>;
-    };
+    const init = fetchMock.mock.calls[0]?.[1];
+    if (!init) throw new Error("fetch was called without an init object.");
     expect(init.redirect).toBe("error");
     expect(init.cache).toBe("no-store");
-    expect(init.headers?.Range).toBe("bytes=16-23");
+    expect((init.headers as Record<string, string> | undefined)?.Range).toBe("bytes=16-23");
   });
 
   it("refuses a document type where a package resource was expected", async () => {

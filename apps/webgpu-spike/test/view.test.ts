@@ -31,7 +31,9 @@ describe("compiled scene camera", () => {
     );
 
     camera.zoomBy(-120);
-    expect(camera.viewProjection(2)[0]).toBeGreaterThan(createCompiledSceneCamera(bounds, 2)[0]);
+    expect(camera.viewProjection(2)[0] ?? 0).toBeGreaterThan(
+      createCompiledSceneCamera(bounds, 2)[0] ?? 0,
+    );
   });
 
   it("rejects invalid scene bounds", () => {
@@ -43,8 +45,8 @@ describe("compiled scene camera", () => {
   it("produces the same relative frame for millimetre geometry at a large offset", () => {
     const offset = [10_000_000, -7_000_000, 3_000_000] as const;
     const translated = {
-      min: bounds.min.map((value, axis) => value + offset[axis]) as [number, number, number],
-      max: bounds.max.map((value, axis) => value + offset[axis]) as [number, number, number],
+      min: bounds.min.map((value, axis) => value + (offset[axis] ?? 0)) as [number, number, number],
+      max: bounds.max.map((value, axis) => value + (offset[axis] ?? 0)) as [number, number, number],
     };
     const near = new OrthographicOrbitCamera(bounds);
     const far = new OrthographicOrbitCamera(translated);
@@ -58,7 +60,7 @@ describe("compiled scene camera", () => {
     const farFrame = far.frame(2);
 
     expect(Array.from(farFrame.viewProjection)).toEqual(Array.from(nearFrame.viewProjection));
-    expect(farFrame.origin.map((value, axis) => value - nearFrame.origin[axis]))
+    expect(farFrame.origin.map((value, axis) => value - (nearFrame.origin[axis] ?? 0)))
       .toEqual(offset);
   });
 });

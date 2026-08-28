@@ -119,7 +119,7 @@ describe("Phase 1 glTF compiler slice", () => {
     expect(madiExtras(fastenerMesh ?? { primitives: [] })).toMatchObject({
       prototypeId: "prototype:part:fastener-01",
     });
-    expect(madiExtras(fastenerMesh?.primitives[1] ?? { attributes: {}, mode: 1 })).toMatchObject({
+    expect(madiExtras(fastenerMesh?.primitives[1] ?? {})).toMatchObject({
       kind: "explicit-cad-edges",
     });
   });
@@ -536,7 +536,7 @@ function toColumnScene(base: EngineeringScene): {
     valueOffsets.push((valueOffsets.at(-1) as number) + encoded.byteLength);
   }
   const heap = new Uint8Array(valueOffsets.at(-1) as number);
-  distinct.forEach((encoded, index) => heap.set(encoded, valueOffsets[index] as number));
+  distinct.forEach((encoded, index) => heap.set(encoded, valueOffsets[index]));
 
   const chunks: Uint8Array[] = [];
   let length = 0;
@@ -573,7 +573,7 @@ function toColumnScene(base: EngineeringScene): {
       semantics,
       propertyIndex: { keys, sets },
       propertyValues: header,
-    } as EngineeringScene,
+    },
     columns,
   };
 }
@@ -598,7 +598,7 @@ describe("compiled-package property sidecar", () => {
       propertiesUri: "properties.json",
       propertiesBinaryUri: "properties.bin",
     });
-    const jsonBytes = new TextEncoder().encode(compiled.propertiesJson as string);
+    const jsonBytes = new TextEncoder().encode(compiled.propertiesJson);
     const pointer = (compiled.document.extras.madi as {
       properties: Record<string, unknown>;
     }).properties;

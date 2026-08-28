@@ -73,7 +73,7 @@ function buildColumns(rows: readonly (readonly PropertyValue[])[]): BuiltColumns
     return ref;
   };
   const heap = new Uint8Array(valueOffsets.at(-1) as number);
-  distinct.forEach((encoded, index) => heap.set(encoded, valueOffsets[index] as number));
+  distinct.forEach((encoded, index) => heap.set(encoded, valueOffsets[index]));
   const header: PropertyValueColumns = {
     encoding: "madi.property-columns.1",
     valueCount: rowRefs.length,

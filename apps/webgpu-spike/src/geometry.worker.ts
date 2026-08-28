@@ -134,7 +134,7 @@ async function loadBinary(
     label: source.href,
     signal,
     ...(ranged
-      ? { range: { byteOffset: source.byteOffset as number, byteLength: source.byteLength as number } }
+      ? { range: { byteOffset: source.byteOffset, byteLength: source.byteLength } }
       : {}),
   });
   // A served range may hold only what was asked for; a host that answers the
@@ -177,7 +177,7 @@ async function loadBinary(
 function toArrayBuffer(bytes: Uint8Array): ArrayBuffer {
   return bytes.byteOffset === 0 && bytes.byteLength === bytes.buffer.byteLength
     ? (bytes.buffer as ArrayBuffer)
-    : (bytes.slice().buffer as ArrayBuffer);
+    : bytes.slice().buffer;
 }
 
 async function decode(

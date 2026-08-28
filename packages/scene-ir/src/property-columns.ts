@@ -151,7 +151,7 @@ export function openPropertyValueColumns(
     const cached = decoded[reference];
     if (cached !== undefined) return cached;
     const text = decoder.decode(
-      heap.subarray(valueOffsets[reference] as number, valueOffsets[reference + 1] as number),
+      heap.subarray(valueOffsets[reference], valueOffsets[reference + 1]),
     );
     const value = JSON.parse(text) as PropertyValue;
     // `null` is a valid property value; re-parsing it on every use is cheap

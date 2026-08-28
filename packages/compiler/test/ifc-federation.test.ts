@@ -428,7 +428,7 @@ await writeFile(option("--report"), JSON.stringify({
         result.report.counts.prototypeCount,
       );
       expect(dependencyIndex.documents[0].targetChunkIds).toHaveLength(
-        result.report.counts.targetChunkCount,
+        result.report.counts.targetChunkCount ?? 0,
       );
       expect(dependencyIndex.documents[0].semanticIds).toHaveLength(
         retainedScene.semantics.length,

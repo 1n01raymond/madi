@@ -221,6 +221,15 @@ function isRecord(value: unknown): value is JsonRecord {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
+/**
+ * Names a declared profile in a diagnostic. A hostile package can put any JSON
+ * value here, and `String()` would report a non-string one as `[object Object]`.
+ */
+function describeProfile(value: unknown): string {
+  if (typeof value === "string") return value;
+  return value === undefined ? "no profile" : JSON.stringify(value);
+}
+
 function recordAt(value: unknown, key: string): JsonRecord | undefined {
   if (!isRecord(value)) return undefined;
   const child = value[key];
@@ -304,7 +313,7 @@ export function parseCompiledGltf(
   if (rootMadi?.profile !== supportedProfile) {
     throw new CompiledGltfError(
       "UNSUPPORTED_PROFILE",
-      `Expected ${supportedProfile}; received ${String(rootMadi?.profile ?? "no profile")}.`,
+      `Expected ${supportedProfile}; received ${describeProfile(rootMadi?.profile)}.`,
     );
   }
 
@@ -955,13 +964,17 @@ function selectMeshPrimitives(
   mesh: CompiledGltfMesh,
   meshIndex: number,
 ): SelectedMeshPrimitives {
-  if (!Array.isArray(mesh.primitives)) {
+  // `Array.isArray` narrows a `readonly T[]` to `any[]`, so the element type is
+  // restored explicitly once the shape is known.
+  const declaredPrimitives: unknown = mesh.primitives;
+  if (!Array.isArray(declaredPrimitives)) {
     throw new CompiledGltfError("INVALID_GLTF", `meshes[${meshIndex}].primitives is missing.`);
   }
-  const surfaces = mesh.primitives
+  const primitives = declaredPrimitives as readonly CompiledGltfPrimitive[];
+  const surfaces = primitives
     .map((primitive, primitiveIndex) => ({ primitive, primitiveIndex }))
     .filter(({ primitive }) => (primitive.mode ?? 4) === 4);
-  const edges = mesh.primitives.filter((primitive) => primitive.mode === 1);
+  const edges = primitives.filter((primitive) => primitive.mode === 1);
   if (surfaces.length === 0 || edges.length > 1) {
     throw new CompiledGltfError(
       "UNSUPPORTED_GEOMETRY",

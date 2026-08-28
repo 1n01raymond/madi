@@ -654,7 +654,8 @@ async function loadScene(source: SceneSource): Promise<boolean> {
 
     const coarseScene = initial.scene;
     let decodedTargetBytes = 0;
-    let schedulerFailure: unknown;
+    // Normalized at capture so the re-throw below stays a real Error.
+    let schedulerFailure: Error | undefined;
     let schedulerRequests = 0;
     let schedulerCancellations = 0;
     let schedulerSkips = 0;
@@ -898,8 +899,8 @@ async function loadScene(source: SceneSource): Promise<boolean> {
         },
         onEvent: recordSchedulerEvent,
         onError: (error) => {
-          schedulerFailure = error;
-          status.textContent = error instanceof Error ? error.message : String(error);
+          schedulerFailure = error instanceof Error ? error : new Error(String(error));
+          status.textContent = schedulerFailure.message;
           status.dataset.state = "error";
         },
       });
@@ -1207,13 +1208,23 @@ async function loadScene(source: SceneSource): Promise<boolean> {
     sessionResources.resizeObserver = new ResizeObserver(scheduleCameraRender);
     sessionResources.resizeObserver.observe(canvas);
 
-    canvas.addEventListener("click", async (event) => {
+    canvas.addEventListener("click", (event) => {
       if (suppressClick) {
         suppressClick = false;
         return;
       }
-      const objectId = await renderer.pick(event.clientX, event.clientY);
-      selectObject(objectId);
+      // `addEventListener` discards the return value, so an async handler would
+      // turn a failed pick into an unhandled rejection that never reaches the
+      // user. Surface it the way every other failure in this session does.
+      renderer
+        .pick(event.clientX, event.clientY)
+        .then((objectId) => {
+          selectObject(objectId);
+        })
+        .catch((error: unknown) => {
+          status.textContent = error instanceof Error ? error.message : String(error);
+          status.dataset.state = "error";
+        });
     }, listenerOptions);
 
     if (sessionResources.targetScheduler) {

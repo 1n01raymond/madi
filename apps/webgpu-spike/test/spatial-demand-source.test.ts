@@ -6,11 +6,30 @@ import { describe, expect, it } from "vitest";
 
 import { loadSpatialDemandIndex } from "../src/spatial-demand-source.js";
 
-const hierarchy = {
+const hierarchy: CompiledHierarchy = {
+  profile: "madi.experimental.gltf.1",
   nodeCount: 2,
+  sceneId: "spatial-test",
+  sourceFormat: "test",
+  binaryUri: "scene.bin",
+  binaryByteLength: 0,
+  targetChunks: [
+    {
+      id: "chunk",
+      buffer: 0,
+      byteOffset: 0,
+      byteLength: 0,
+      meshIndexes: [],
+      prototypeIds: [],
+      prototypeId: "prototype",
+      occurrenceCount: 1,
+      priority: 0,
+    },
+  ],
+  entries: [],
   renderableOccurrences: 1,
-  targetChunks: [{ id: "chunk" }],
-} as CompiledHierarchy;
+  sharedMeshes: 0,
+};
 
 function source() {
   const bytes = encodeSpatialDemandIndex([
@@ -32,7 +51,7 @@ function source() {
         byteLength: bytes.byteLength,
         sha256: createHash("sha256").update(bytes).digest("hex"),
       },
-      file: new File([bytes], "spatial.bin"),
+      file: new File([new Uint8Array(bytes)], "spatial.bin"),
     },
   };
 }

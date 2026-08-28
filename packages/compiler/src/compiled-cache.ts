@@ -114,8 +114,13 @@ function requireText(value: string, label: string): string {
   return value;
 }
 
-function requireSha256(value: string, label: string): string {
-  if (!sha256Pattern.test(value)) throw new TypeError(`${label} must be a lowercase SHA-256.`);
+// Both validators accept `unknown` because their hottest caller parses an
+// on-disk manifest: the field may be absent or the wrong type, and saying so in
+// the signature keeps that check inside the function instead of at each site.
+function requireSha256(value: unknown, label: string): string {
+  if (typeof value !== "string" || !sha256Pattern.test(value)) {
+    throw new TypeError(`${label} must be a lowercase SHA-256.`);
+  }
   return value;
 }
 
@@ -164,9 +169,9 @@ export function createCompiledCacheKey(input: CompiledCacheKeyInput): string {
     .digest("hex");
 }
 
-function requireResourcePath(path: string): string {
-  if (!resourcePathPattern.test(path)) {
-    throw new TypeError(`Cache resource path ${path} must be one portable file name.`);
+function requireResourcePath(path: unknown): string {
+  if (typeof path !== "string" || !resourcePathPattern.test(path)) {
+    throw new TypeError(`Cache resource path ${String(path)} must be one portable file name.`);
   }
   return path;
 }
@@ -205,22 +210,26 @@ function parseEntry(serialized: string, expectedKey: string): CompiledCacheEntry
   if (entry.schemaVersion !== compiledCacheEntrySchema || entry.key !== expectedKey) {
     throw new TypeError("Compiled cache manifest identity changed.");
   }
-  requireSha256(entry.packageDigest ?? "", "Compiled package digest");
+  requireSha256(entry.packageDigest, "Compiled package digest");
   if (entry.input === undefined || createCompiledCacheKey(entry.input) !== expectedKey) {
     throw new TypeError("Compiled cache input does not reproduce its key.");
   }
-  if (!Array.isArray(entry.resources) || entry.resources.length === 0) {
+  // `Array.isArray` narrows a `readonly T[]` to `any[]`, so the declared value
+  // is read as `unknown` and each field is checked on its own below.
+  const declaredResources: unknown = entry.resources;
+  if (!Array.isArray(declaredResources) || declaredResources.length === 0) {
     throw new TypeError("Compiled cache manifest requires resources.");
   }
   const paths = new Set<string>();
-  for (const resource of entry.resources) {
-    requireResourcePath(resource.path);
-    if (paths.has(resource.path)) throw new TypeError(`Duplicate cache resource ${resource.path}.`);
-    paths.add(resource.path);
-    if (!Number.isSafeInteger(resource.bytes) || resource.bytes < 0) {
-      throw new TypeError(`Cache resource ${resource.path} has an invalid byte count.`);
+  for (const declared of declaredResources as readonly Partial<CompiledCacheResource>[]) {
+    const path = requireResourcePath(declared.path);
+    if (paths.has(path)) throw new TypeError(`Duplicate cache resource ${path}.`);
+    paths.add(path);
+    const bytes = declared.bytes;
+    if (typeof bytes !== "number" || !Number.isSafeInteger(bytes) || bytes < 0) {
+      throw new TypeError(`Cache resource ${path} has an invalid byte count.`);
     }
-    requireSha256(resource.sha256, `Cache resource ${resource.path} digest`);
+    requireSha256(declared.sha256, `Cache resource ${path} digest`);
   }
   return entry as CompiledCacheEntry;
 }
