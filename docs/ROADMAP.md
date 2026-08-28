@@ -157,8 +157,9 @@ project-owned 0.25 mm gap is retained at a 10,000 km offset with
 0.000000387 mm measured error, while headed Chrome and Firefox reproduce
 byte-identical near/far frames through navigation, sectioning, and picking.
 The record is `artifacts/precision/large-coordinates/`; real Safari remains a
-graceful unsupported-browser capability result because it does not expose
-WebGPU under the recorded default settings.
+graceful unsupported-browser capability result because Safari 26.6.1 on
+macOS Sequoia does not expose WebGPU under the recorded default settings
+(Apple enables it by default only from Safari 26 on macOS 26 Tahoe).
 
 - manifest/hierarchy-first loading;
 - Worker decode;

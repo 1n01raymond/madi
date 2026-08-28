@@ -204,7 +204,7 @@ direct WebGPU renderer. The Phase 0 Scene IR JSON is no longer a browser input.
 | Spatial localized demand under a binding budget | The same trace over the sixty5 federation, whose 120,707,064 target bytes cannot fit the 67,108,864-byte residency budget, takes the query from 4,095/4,095 nodes, 2,048/2,048 leaves, and 78,173/78,173 occurrences to 889 nodes, 184 leaves, and 7,026 occurrences; on that identical view the compatibility package demands 209 of 234 chunks (107,337,264 bytes) and the leaf-anchor package 152 (78,875,544 bytes), every window stays inside the budget, and 48 navigation queries cost p95 0.405 ms / 0.330 ms | Passed in headed Chrome 151 on Windows over three runs per payload order; first coarse frame 4.213-4.388 s, inside the ADR-0008 15 s bound; Firefox and Safari repeats remain |
 | In-flight cancellation | A second browser run cancels while range 2/3 is pending, observes `Scene load cancelled.`, and proves that range 3/3 is never requested | Passed in headed Chrome and Firefox |
 | Browser conformance | Headed Chrome/Blink and Firefox/Gecko emit no console warnings or errors | Passed by `pnpm browser:matrix` |
-| Safari capability | Real Safari 18.6 loads 87 hierarchy records under default settings, then reports that WebGPU is unavailable because `navigator.gpu` is absent | Graceful unsupported-browser result; rendering conformance not yet available |
+| Safari capability | Real Safari 26.6.1 on macOS Sequoia loads all 87 hierarchy records under default settings, then reports that WebGPU is unavailable because `navigator.gpu` is absent; Apple enables WebGPU by default only in Safari 26 on macOS 26 (Tahoe) and newer OS releases | Graceful unsupported-browser result; rendering conformance not yet available |
 | Public review | [GitHub Pages](https://1n01raymond.github.io/naru/) serves the qualified Digital Hub package by default and PyGamer as a secondary scene; deployment verifies the package digests and smoke-checks the live app, declared resources, and HTTP Range delivery | Passed by `.github/workflows/deploy-demo.yml` and `pnpm demo:smoke` |
 
 ## Large-coordinate precision
@@ -226,8 +226,10 @@ relative frame.
 | Standards/package integrity | Both packages pass Khronos glTF validation with 0 errors / 0 warnings; resources and screenshots are digest-pinned | Passed by `pnpm precision:check` |
 
 See `artifacts/precision/large-coordinates/`. This does not upgrade the real
-Safari capability result: Safari 18.6 still lacks `navigator.gpu` under the
-recorded default settings.
+Safari capability result: Safari 26.6.1 on macOS Sequoia still lacks
+`navigator.gpu` under the recorded default settings, because Apple ships
+WebGPU enabled by default only with Safari 26 on macOS 26 (Tahoe) and newer
+OS releases.
 
 ## Reproduce
 

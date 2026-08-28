@@ -1,6 +1,6 @@
 {
-  "schemaVersion": "madi.safari-compatibility.1",
-  "capturedAt": "2026-08-24T06:47:12.177Z",
+  "schemaVersion": "naru.safari-compatibility.2",
+  "capturedAt": "2026-08-28T03:26:00.528Z",
   "mode": "default-browser-settings",
   "host": {
     "platform": "darwin",
@@ -8,7 +8,7 @@
   },
   "browser": {
     "name": "Safari",
-    "version": "18.6",
+    "version": "26.6.1",
     "platformName": "macOS",
     "platformVersion": "15.6",
     "platformBuildVersion": "24G84",
@@ -20,25 +20,26 @@
   },
   "outcome": "webgpu-unavailable",
   "observed": {
-    "status": "WebGPU is unavailable in this browser.",
-    "hierarchyReady": true,
-    "platform": "MacIntel",
-    "title": "MADI · Compiled glTF to WebGPU",
-    "hierarchyRecords": 87,
-    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.6 Safari/605.1.15",
-    "webGpuAvailable": false,
+    "state": "error",
+    "hierarchyResult": "87 occurrence records ready",
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6.1 Safari/605.1.15",
     "prototypeCount": "34",
+    "title": "NARU · Compiled glTF to WebGPU",
     "brandLoaded": true,
+    "platform": "MacIntel",
     "occurrenceCount": "85",
-    "state": "error"
+    "hierarchyReady": true,
+    "virtualizedHierarchyRows": 15,
+    "webGpuAvailable": false,
+    "status": "WebGPU is unavailable in this browser."
   },
   "limitations": [
     "Safari WebDriver does not expose the Chromium/Firefox console event stream used by the browser matrix recorder.",
     "A webgpu-unavailable result verifies capability detection and hierarchy-first failure only; it is not rendering conformance evidence."
   ],
   "screenshot": {
-    "path": "safari-18-macos-webgpu-unavailable.png",
-    "bytes": 16772,
-    "sha256": "0a0e7814da61f497ee5d655ae8669fc6ef8e5cfd22697741afb07bfd56439514"
+    "path": "safari-26-macos-webgpu-unavailable.png",
+    "bytes": 6898,
+    "sha256": "8db928a70f8d53cac0fc3b884c9a19703d6100a9636006157ffe8c0cb6305167"
   }
 }
