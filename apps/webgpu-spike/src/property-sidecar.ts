@@ -70,11 +70,21 @@ async function fetchBytes(url: URL): Promise<Uint8Array> {
   return new Uint8Array(await response.arrayBuffer());
 }
 
+async function sha256(bytes: Uint8Array): Promise<string> {
+  const copy = new Uint8Array(bytes.byteLength);
+  copy.set(bytes);
+  const digest = await crypto.subtle.digest("SHA-256", copy.buffer);
+  return [...new Uint8Array(digest)]
+    .map((value) => value.toString(16).padStart(2, "0"))
+    .join("");
+}
+
 /**
  * Lazily loads a compiled package's property sidecar: nothing is fetched
  * until the first `entriesFor` call, and both resources are validated once
- * (declared byte lengths, `madi.package-properties.1` parse, column header
- * open) and then reused for every later selection.
+ * (declared byte lengths and SHA-256 digests,
+ * `madi.package-properties.1` parse, column header open) and then reused for
+ * every later selection.
  */
 export class PropertySidecarStore {
   readonly source: PropertySidecarSource;
@@ -125,6 +135,10 @@ export class PropertySidecarStore {
           `received ${String(jsonBytes.byteLength)}.`,
       );
     }
+    const jsonDigest = await sha256(jsonBytes);
+    if (jsonDigest !== ref.sha256) {
+      throw new TypeError(`Property sidecar digest mismatch for ${ref.uri}.`);
+    }
     const document = parsePackageProperties(
       JSON.parse(new TextDecoder().decode(jsonBytes)),
     );
@@ -136,6 +150,10 @@ export class PropertySidecarStore {
         `${document.columns.uri} must be ${String(document.columns.byteLength)} bytes; ` +
           `received ${String(columns.byteLength)}.`,
       );
+    }
+    const columnDigest = await sha256(columns);
+    if (columnDigest !== document.columns.sha256) {
+      throw new TypeError(`Property column digest mismatch for ${document.columns.uri}.`);
     }
     const reader = openPropertyValueColumns(document.propertyValues, columns);
     return {
