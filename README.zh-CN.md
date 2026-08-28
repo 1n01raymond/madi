@@ -30,7 +30,7 @@
   <a href="https://1n01raymond.github.io/naru/"><strong>▶&nbsp;打开在线 Studio 演示</strong></a>
   — 一个真实的四专业 IFC 联合模型，通过纯 HTTP Range 流式传输。无需安装。
   <br />
-  <sub>真实大规模测量结果：839.9 MB 的 <code>sixty5</code> 联合模型在 4.3 秒内呈现
+  <sub>真实大规模测量结果：839.9 MB 的 <code>sixty5</code> 联合模型在 4.5 秒内呈现
   全部 78,173 个可渲染 occurrence 的首个 coarse 帧。target detail 按两项独立的固定
   64 MiB decoded/GPU admission 预算载入；该数值不包含进程总内存
   （<a href="artifacts/ifc/sixty5-first-frame/README.md">证据</a>）。</sub>
@@ -68,8 +68,8 @@
       </a>
       <br />
       <sub><strong>真实的超大 IFC federation。</strong> 839.9 MB 的七专业
-      <code>sixty5</code> 模型：2.4 秒内层级与搜索就绪，全部 78,173 个可渲染
-      occurrence 的首个 coarse frame 在 4.3 秒内呈现。渐进式 target detail
+      <code>sixty5</code> 模型：2.3 秒内层级与搜索就绪，全部 78,173 个可渲染
+      occurrence 的首个 coarse frame 在 4.5 秒内呈现。渐进式 target detail
       保持在两项独立的固定 64 MiB decoded/GPU admission 预算内；该数值不包含
       进程总内存。被选中的基础梁可解析出自身的 IFC 属性。
       <a href="artifacts/ifc/sixty5-browser/README.md">residency 证据</a> ·
@@ -91,14 +91,14 @@
 | 细节几何通过普通 HTTP 渐进流式传输 | 28 次 `scene.bin` 请求全部为 HTTP 206 `bytes=` Range 响应（[sixty5 浏览器记录](artifacts/ifc/sixty5-browser/README.md)） |
 | 渐进式 target geometry residency 保持在声明的预算内 | promotion 在 234 个 chunk 的第 26 个处停止，target 的 decoded 与 GPU 字节均保持在 64 MiB 以下。该数值不包含层级、sidecar、Worker 状态或进程总内存（[sixty5 浏览器记录](artifacts/ifc/sixty5-browser/README.md)） |
 | 选择可解析回源 CAD/BIM 标识 | 被选中的基础梁按需解析出 6 条 IFC 属性条目（[sixty5 浏览器记录](artifacts/ifc/sixty5-browser/README.md)） |
-| 超大规模的首帧以秒计，而不是分钟 | 共享 coarse Worker 路径、虚拟化的装配列表，以及跳过被拒绝分块的 residency admission 将 sixty5 首个 coarse frame 从 268.0 秒缩短到中位数 4.3 秒 —— 提速 62.6 倍（[首帧记录](artifacts/ifc/sixty5-first-frame/README.md)） |
+| 超大规模的首帧以秒计，而不是分钟 | 共享 coarse Worker 路径、虚拟化的装配列表，以及跳过被拒绝分块的 residency admission 将 sixty5 首个 coarse frame 从 268.0 秒缩短到中位数 4.5 秒 —— 提速 59.7 倍（[首帧记录](artifacts/ifc/sixty5-first-frame/README.md)） |
 | 预算装不下的几何体根本不会被下载 | 被请求的 sixty5 分块先从编译产物中估算成本，在任何字节传输之前被跳过；234 个中有 123 个如此，常驻集合只需 113 次 Range 响应，而不是 245 次（[首帧记录](artifacts/ifc/sixty5-first-frame/README.md)） |
 | 同样的预算能容纳更多模型 | 在各 material 分组之间共享原型的 vertex pool，使 sixty5 分块集合的 decoded 体量从 230.7 MB 降到 129.2 MB，最大分块从 75.4 MB 降到 1.3 MB；在相同的 64 MiB 预算下，常驻终点从 234 个中的 93 个提升到 111 个，三角形从 185 万增至 226 万（[首帧记录](artifacts/ifc/sixty5-first-frame/README.md)） |
 | 相机移动会取消过时的下载，而不是等待它们 | 已不需要的 fastener Range 请求被中止，新可见的 mounting-plate Range 优先发出 —— Chrome 与 Firefox 行为一致（[浏览器 matrix](artifacts/browser-matrix/README.md)） |
 | 距原点 10,000 km 的坐标仍保持精度 | 0.25 mm 的板间隙以 ≤ 0.001 mm 的误差编译，两个引擎渲染均零像素漂移（[精度记录](artifacts/precision/large-coordinates/README.md)） |
 | 可将包打包为让邻近 geometry 一起传输（opt-in） | leaf-anchor payload 排序在 Digital Hub census 中将 off-view 字节总量削减 39.9%（[spatial demand 记录](artifacts/spatial-demand/README.md)） |
 | 编译结果逐字节可复现 | 两次完整的 sixty5 编译产生逐字节相同的包（[编译证据](artifacts/ifc/sixty5/README.md)） |
-| **尚未做到：** 超大规模下交互级的就绪状态与跨浏览器性能结论 | 4.3 秒首帧是单台独立 GPU 主机上的单次 Chrome 记录，8.9 秒的就绪状态稳定在 234 个分块中的 111 个，因此在 64 MiB 预算下联合模型的大部分仍保持 coarse（[首帧记录](artifacts/ifc/sixty5-first-frame/README.md)） |
+| **尚未做到：** 超大规模下交互级的就绪状态与跨浏览器性能结论 | 4.5 秒首帧是单台独立 GPU 主机上的单次 Chrome 记录，9.1 秒的就绪状态稳定在 234 个分块中的 111 个，因此在 64 MiB 预算下联合模型的大部分仍保持 coarse（[首帧记录](artifacts/ifc/sixty5-first-frame/README.md)） |
 
 ## 从哪里开始
 

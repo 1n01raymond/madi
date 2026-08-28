@@ -31,7 +31,7 @@
   — a real four-discipline IFC federation, streamed over plain HTTP Ranges. Nothing to install.
   <br />
   <sub>Measured at real-large scale: the 839.9 MB <code>sixty5</code> federation reaches a first
-  coarse frame of all 78,173 renderable occurrences in 4.3 s; target detail is admitted under
+  coarse frame of all 78,173 renderable occurrences in 4.5 s; target detail is admitted under
   separate fixed 64 MiB decoded/GPU budgets, excluding total process memory
   (<a href="artifacts/ifc/sixty5-first-frame/README.md">evidence</a>).</sub>
 </p>
@@ -67,8 +67,8 @@ captures those records pin by digest.
       <br />
       <sub><strong>A real-large IFC federation.</strong> The 839.9 MB
       seven-discipline <code>sixty5</code> model: hierarchy and search ready in
-      2.4 s, and a first coarse frame of all 78,173 renderable occurrences in
-      4.3 s. Progressive target detail stays inside separate fixed 64 MiB
+      2.3 s, and a first coarse frame of all 78,173 renderable occurrences in
+      4.5 s. Progressive target detail stays inside separate fixed 64 MiB
       decoded/GPU admission budgets; total process memory is not included. A
       picked foundation beam resolves its IFC properties.
       <a href="artifacts/ifc/sixty5-browser/README.md">Residency evidence</a> ·
@@ -91,14 +91,14 @@ NARU.</sub>
 | Detail streams progressively over plain HTTP | 28 `scene.bin` requests, every one an HTTP 206 `bytes=` Range response ([sixty5 browser record](artifacts/ifc/sixty5-browser/README.md)) |
 | Progressive target-geometry residency stays inside its declared budgets | promotion stopped at chunk 26 of 234; target decoded and GPU bytes both held under 64 MiB. This does not include hierarchy, sidecars, Worker state, or total process memory ([sixty5 browser record](artifacts/ifc/sixty5-browser/README.md)) |
 | Selection resolves to source CAD/BIM identity | a picked foundation beam lazily resolves its 6 IFC property entries ([sixty5 browser record](artifacts/ifc/sixty5-browser/README.md)) |
-| A real-large first frame arrives in seconds, not minutes | the shared-coarse Worker path, a virtualized assembly list, and skip-and-continue residency admission cut the sixty5 first coarse frame from 268.0 s to a 4.3 s median, a 62.6× speedup ([first-frame record](artifacts/ifc/sixty5-first-frame/README.md)) |
+| A real-large first frame arrives in seconds, not minutes | the shared-coarse Worker path, a virtualized assembly list, and skip-and-continue residency admission cut the sixty5 first coarse frame from 268.0 s to a 4.5 s median, a 59.7× speedup ([first-frame record](artifacts/ifc/sixty5-first-frame/README.md)) |
 | Geometry the budget cannot hold is never downloaded | demanded sixty5 chunks are priced from the compiled document and skipped before any bytes move; 123 of 234 are, so the resident set costs 113 Range responses instead of 245 ([first-frame record](artifacts/ifc/sixty5-first-frame/README.md)) |
 | The same budget holds more of the model | sharing a prototype's vertex pool across its material groups cut the sixty5 chunk set from 230.7 MB to 129.2 MB decoded and its largest chunk from 75.4 MB to 1.3 MB, raising the resident endpoint from 93 to 111 of 234 chunks and 1.85 M to 2.26 M triangles under the same 64 MiB budget ([first-frame record](artifacts/ifc/sixty5-first-frame/README.md)) |
 | Camera moves cancel stale downloads instead of waiting on them | an obsolete fastener Range request was aborted and the newly visible mounting-plate Range issued first, in both Chrome and Firefox ([browser matrix](artifacts/browser-matrix/README.md)) |
 | Coordinates 10,000 km from the origin stay precise | a 0.25 mm plate gap compiles with ≤ 0.001 mm error and renders with zero pixel drift in both engines ([precision record](artifacts/precision/large-coordinates/README.md)) |
 | Packages can be packed so nearby geometry travels together (opt-in) | leaf-anchor payload ordering cut summed off-view bytes 39.9% on the Digital Hub census ([spatial demand record](artifacts/spatial-demand/README.md)) |
 | Compiles are reproducible, byte for byte | two full sixty5 compilations produced byte-identical packages ([compile evidence](artifacts/ifc/sixty5/README.md)) |
-| **Not yet:** interactive-grade readiness or cross-browser performance claims at real-large scale | the 4.3 s first frame is a single Chrome record on one discrete-GPU host, and the 8.9 s ready state settles on 111 of 234 chunks, so much of the federation stays coarse under a 64 MiB budget ([first-frame record](artifacts/ifc/sixty5-first-frame/README.md)) |
+| **Not yet:** interactive-grade readiness or cross-browser performance claims at real-large scale | the 4.5 s first frame is a single Chrome record on one discrete-GPU host, and the 9.1 s ready state settles on 111 of 234 chunks, so much of the federation stays coarse under a 64 MiB budget ([first-frame record](artifacts/ifc/sixty5-first-frame/README.md)) |
 
 ## Where to start
 

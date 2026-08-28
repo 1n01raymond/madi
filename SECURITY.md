@@ -18,7 +18,9 @@ for a private reporting channel without disclosing exploit details.
 - Plugins receive capability-scoped APIs rather than ambient application
   authority.
 - Network loaders enforce origin, redirect, size, checksum, and content-type
-  policy.
+  policy. The reviewed ceilings and the fetch policy that applies them are
+  recorded in [ADR-0011](docs/adr/0011-remote-package-limits.md); an embedding
+  application may lower them, never silently raise them.
 - No document metadata is uploaded unless an embedding application explicitly
   configures a remote service.
 

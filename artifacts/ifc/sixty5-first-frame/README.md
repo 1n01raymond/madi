@@ -42,28 +42,28 @@ disclosed cache condition. The previous record on this measure was captured in
 Chrome 152.0.7977.64; that build is not installed on the recording host, so the
 browser version is not held constant against it.
 
-| Measure | Baseline | Shared coarse | Skip-and-continue | Estimate gate | This record (3 runs) |
-|---|---:|---:|---:|---:|---:|
-| First coarse frame | 268,013 ms | 12,553 ms | 4,340 ms | 4,471 ms | 4,331 / 4,283 / 4,258 ms |
-| First coarse frame median | 268,013 ms | 12,796 ms | 4,340 ms | 4,471 ms | 4,283 ms |
-| Observed p95 (nearest-rank, n=3) | - | 13,378 ms | 4,419 ms | 4,590 ms | 4,331 ms |
-| Hierarchy-to-coarse median | 264,683 ms | 8,471 ms | 1,954 ms | 2,092 ms | 1,960 ms |
-| Ready-state median | 323,307 ms | 64,445 ms | 9,601 ms | 8,277 ms | 8,943 ms |
-| Target chunks admitted | - | - | 93 / 234 | 93 / 234 | 111 / 234 |
-| Resident triangles | - | - | 1,849,190 | 1,849,190 | 2,255,235 |
-| Target chunk requests | - | - | 234 | 93 | 111 |
-| Satisfied Range responses | - | - | 245 | 94 | 113 |
-| Used JS heap at ready | - | 1.349-1.362 GB | 1.788 GB | 1.481 GB | 1.625 GB |
-| Relative first-frame reduction | - | 95.23% | 98.38% | 98.33% | 98.40% |
-| Relative first-frame speedup | - | 20.95x | 61.75x | 59.94x | 62.58x |
+| Measure | Baseline | Shared coarse | Skip-and-continue | Estimate gate | Vertex pool | This record (3 runs) |
+|---|---:|---:|---:|---:|---:|---:|
+| First coarse frame | 268,013 ms | 12,553 ms | 4,340 ms | 4,471 ms | 4,283 ms | 4,495 / 4,487 / 4,422 ms |
+| First coarse frame median | 268,013 ms | 12,796 ms | 4,340 ms | 4,471 ms | 4,283 ms | 4,487 ms |
+| Observed p95 (nearest-rank, n=3) | - | 13,378 ms | 4,419 ms | 4,590 ms | 4,331 ms | 4,495 ms |
+| Hierarchy-to-coarse median | 264,683 ms | 8,471 ms | 1,954 ms | 2,092 ms | 1,960 ms | 2,215 ms |
+| Ready-state median | 323,307 ms | 64,445 ms | 9,601 ms | 8,277 ms | 8,943 ms | 9,104 ms |
+| Target chunks admitted | - | - | 93 / 234 | 93 / 234 | 111 / 234 | 111 / 234 |
+| Resident triangles | - | - | 1,849,190 | 1,849,190 | 2,255,235 | 2,255,235 |
+| Target chunk requests | - | - | 234 | 93 | 111 | 111 |
+| Satisfied Range responses | - | - | 245 | 94 | 113 | 113 |
+| Used JS heap at ready | - | 1.349-1.362 GB | 1.788 GB | 1.481 GB | 1.625 GB | 0.843 GB |
+| Relative first-frame reduction | - | 95.23% | 98.38% | 98.33% | 98.40% | 98.33% |
+| Relative first-frame speedup | - | 20.95x | 61.75x | 59.94x | 62.58x | 59.73x |
 
-The first coarse frame is unchanged within run-to-run spread, as expected: pool
-sharing governs what target chunks cost, and target chunk traffic begins after
-that frame is painted. What it moves is the endpoint. The same 64 MiB budget
-now holds 111 chunks instead of 93 and 2,255,235 resident triangles instead of
-1,849,190 - 22% more geometry for 241,476 fewer decoded bytes.
+The resident endpoint is byte-for-byte the one the shared vertex pool
+established: bounding the transport changed what the loader is allowed to
+accept, not what it accepts here. Every counter below is identical to the
+preceding record. What moved is the cost of reading the 448.8 MB document -
+half the heap, for about 200 ms of first frame.
 
-The reviewed artifact is the 4,283 ms run, the median of the three on the
+The reviewed artifact is the 4,487 ms run, the median of the three on the
 first-frame measure. All three runs reach an identical resident endpoint, so
 the state below is the recorded state of every one of them:
 
@@ -75,12 +75,15 @@ the state below is the recorded state of every one of them:
 - the same center-canvas foundation beam pick and 6 IFC2X3 property entries;
 - zero console warnings, console errors, or page errors.
 
-Main-page used JS heap at the ready sample was 1.625 GB for the reviewed run
-(1.622-1.626 GB across the three), against 1.481 GB when the budget stopped at
-93 chunks. The rise is the extra resident geometry, not extra duplication: 18
-more chunks and 406,045 more triangles are retained. The validator holds the
-heap under 1.75 GB; the exact figure depends on GC timing and is recorded
-rather than pinned.
+Main-page used JS heap at the ready sample was 0.843 GB for the reviewed run
+(0.835-0.853 GB across the three), against 1.625 GB for the same resident set
+before the loader was bounded. The saving is the document read itself: the
+bounded reader fills one buffer of exactly the declared `Content-Length`,
+where `Response.arrayBuffer()` accumulated the 448.8 MB body and then
+concatenated it. The first coarse frame pays about 200 ms for that copy
+(4,487 ms against 4,283 ms), and the ready state about 160 ms. The validator
+holds the heap under 1.75 GB; the exact figure depends on GC timing and is
+recorded rather than pinned.
 
 ### What sharing the pool changes
 

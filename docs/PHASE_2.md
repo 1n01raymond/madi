@@ -28,13 +28,13 @@ or localized follow-up work proportional to what changed.
 | User path | Product target | Current baseline | Gate state |
 |---|---:|---|---|
 | First real-large source import | Minutes are allowed | A historical split.1 sixty5 diagnostic took 302 s end to end in one run with a warm OS file cache ([record](../artifacts/ifc/sixty5/README.md)); a current-toolchain cold distribution is unrecorded | Progress, cancellation, background execution, and durable completion are **Pending** |
-| Hierarchy and coarse preview during first import | 5–15 s | An already compiled sixty5 package reaches hierarchy/search in 2.4 s and its first coarse frame in a 4.283 s three-run median ([record](../artifacts/ifc/sixty5-first-frame/README.md)) | The compiled-package path is **Recorded**; publishing that preview while source import continues is **Pending** |
+| Hierarchy and coarse preview during first import | 5–15 s | An already compiled sixty5 package reaches hierarchy/search in 2.3 s and its first coarse frame in a 4.487 s three-run median ([record](../artifacts/ifc/sixty5-first-frame/README.md)) | The compiled-package path is **Recorded**; publishing that preview while source import continues is **Pending** |
 | Reopen unchanged inputs | 1–5 s | Recorded single warm runs are 1.7 s for PyGamer STEP and 0.5 s for Digital Hub IFC ([record](../artifacts/cache/README.md)) | Mid-size behavior is **Recorded**; a real-large three-run distribution is **Pending** |
 | Change one IFC discipline | Work proportional to the affected dependency set | Unchanged document extraction can skip IfcOpenShell; federation-wide compiled resources are still rebuilt ([integration test](../native/adapter-ifc/tests/test_document_artifact_integration.py), [ADR-0010](adr/0010-ifc-incremental-dependency-index.md)) | Adapter reuse is **Implemented**; partial compiled-payload reuse is **Pending** |
 | Reuse within a team | Avoid duplicate local import when policy permits | A local verified [whole-package cache](../artifacts/cache/README.md) and [document-artifact cache](../native/adapter-ifc/tests/test_document_artifact_cache.py) exist | Authorized shared lookup/publication is **Pending** |
 
-The 4.283 s browser result above starts from an existing compiled package. It
-must not be reported as a 4.283 s first source import. The complete product
+The 4.487 s browser result above starts from an existing compiled package. It
+must not be reported as a 4.487 s first source import. The complete product
 contract, including cache identity and security, is in
 [Import and compiled-cache product contract](IMPORT_AND_CACHE.md).
 
@@ -93,7 +93,7 @@ scene size.
 |---|---|---|
 | Public Studio | **Recorded** in the [Phase 1 exit evidence](PHASE_1_REPORT.md#exit-decision) for the deployed Digital Hub/PyGamer paths; the [Studio guide](../apps/webgpu-spike/README.md) documents the live smoke check | Keep deployment digests and Range delivery smoke-checked as package schemas move |
 | Sidecar integrity | Spatial and property sidecar loaders verify declared byte lengths and SHA-256 values before decode; [property-sidecar tests](../apps/webgpu-spike/test/property-sidecar.test.ts) cover local and URL same-length mutations | Preserve the fail-closed checks while remote limits expand to geometry, coarse resources, and aggregate package work |
-| Untrusted package limits | **Pending** | Bound resource bytes, object counts, hierarchy depth, redirects/origins, and accepted content types; add malformed-package/fuzz coverage |
+| Untrusted package limits | **Implemented** under [ADR-0011](adr/0011-remote-package-limits.md): every Studio fetch applies one transport policy (same origin, `redirect: "error"`, content-type allowlist, byte ceilings enforced while the body streams) and the compiled-glTF reader bounds node/mesh/accessor/buffer-view/chunk counts and traversal depth; [transport tests](../apps/webgpu-spike/test/package-limits.test.ts) and [structural tests](../packages/runtime-webgpu/test/compiled-gltf.test.ts) cover each branch | Add malformed-package/fuzz coverage over compiled documents, and a check-chain regression that the recorded packages still open under the reviewed defaults |
 | Workspace | **Pending** | Persist source references, views, selection sets, and source fingerprints; reopen unchanged state and report changed sources |
 | Framework-neutral embedding | **Pending** | Publish and test one application outside the reference Studio |
 | Installable alpha release | **Pending**; workspace packages remain private pre-release packages | Define the supported public surface, compatibility policy, release notes, and installation smoke test |
@@ -121,8 +121,8 @@ scene size.
    restore-stage timing, and peak RSS on a disclosed host.
 3. Specify and implement content-addressed compiled prototype/chunk/property
    payloads without accepting ADR-0010 yet.
-4. Bound remote package sizes, counts, nesting, redirects/origins, and content
-   types before broad external-input testing.
+4. Extend the reviewed package bounds (ADR-0011) with malformed-package and
+   fuzz coverage before broad external-input testing.
 
 ### Next — finish the user-visible import loop and bounded fidelity
 

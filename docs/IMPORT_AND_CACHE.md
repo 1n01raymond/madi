@@ -27,7 +27,7 @@ diagnostic on a warm OS file cache
 ([evidence](../artifacts/ifc/sixty5/README.md)); it is not a current-toolchain
 cold distribution. Shared coarse residency, a
 virtualized assembly list, skip-and-continue admission, estimate-gated
-prefetch, and a shared prototype vertex pool later record a 4.283-second first
+prefetch, and a shared prototype vertex pool later record a 4.487-second first
 frame ([evidence](../artifacts/ifc/sixty5-first-frame/README.md)). The recorded cache
 evidence proves compile-level warm reopens on the pinned mid-size fixtures
 (0.5 s for the Digital Hub federation, 1.7 s for the PyGamer STEP fixture —

@@ -136,10 +136,27 @@ and 5 occurrences, PyGamer 4 and 2.
 
 ## Validation
 
-Focused Vitest coverage over mocked `fetch` and generated malformed packages,
-covering each ceiling, each policy branch, and each cleanup path; the pinned
-public demo continues to load under the reviewed defaults through
-`pnpm demo:smoke`; and `pnpm check` runs the whole suite. This ADR stays
-Proposed until the loader implementation is complete on both the transport and
-structural halves and a headed browser check confirms that the recorded sixty5
-and Digital Hub packages still open unchanged.
+Focused Vitest coverage over stubbed `fetch` and malformed documents, covering
+each ceiling, each policy branch, and each cleanup path:
+`apps/webgpu-spike/test/package-limits.test.ts` for the transport half (URL
+policy, budget arithmetic, request shape, the content-type allowlist, and the
+bounded body reader on its declared-length, dishonest-length, truncated, and
+undeclared-length paths) and `apps/webgpu-spike/test/scene-source.test.ts` for
+resource resolution and the pre-fetch package budget over a real compiled
+document. `packages/runtime-webgpu/test/compiled-gltf.test.ts` covers the
+structural half. `pnpm check` runs the whole suite.
+
+Both recorded packages were confirmed to open unchanged in headed Chrome
+151.0.7922.139 under the reviewed defaults. The 657 MB sixty5 package was
+loaded three times: every residency, geometry, and traffic counter matched the
+previous record exactly (111/234 chunks, 66,686,508 decoded bytes, 2,255,235
+triangles, 111 requests, 113 Range responses, 0 console issues), so
+`artifacts/ifc/sixty5-first-frame/` was re-recorded for its timing and heap
+figures alone. The Digital Hub localized trace reproduced its committed record
+field for field, including both screenshots byte-identical
+(`artifacts/spatial-demand/digital-hub-localized/compatibility/`), so that
+record is unchanged.
+
+This ADR stays Proposed until the embedder-facing override surface is settled
+against a second consumer; nothing in this repository exercises an override
+other than the tests.

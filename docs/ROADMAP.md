@@ -88,7 +88,7 @@ all 78,173 renderable occurrences render, the separate fixed 64 MiB target
 decoded/GPU admission budgets hold, and picking
 resolves the selected occurrence's lazily fetched property sets. The original
 268.0 s first coarse frame (`artifacts/ifc/sixty5-browser/`) is reduced to a
-4.283 s three-run median by shared coarse residency, a persistent document
+4.487 s three-run median by shared coarse residency, a persistent document
 Worker, a virtualized assembly list, skip-and-continue residency admission,
 estimate-gated prefetch that skips the chunks the budget cannot hold, and a
 vertex pool shared across a prototype's material groups, which raises the

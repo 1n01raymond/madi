@@ -1,6 +1,14 @@
 import { inspectCompiledHierarchy } from "@naru3d/runtime-webgpu";
 import type { CompiledHierarchy } from "@naru3d/runtime-webgpu";
 
+import {
+  assertPackageBudget,
+  assertPackageUrl,
+  fetchPackageResource,
+  resolvePackageResourceUrl,
+  resolvePackageTransferLimits,
+} from "./package-limits.js";
+import type { DeclaredPackageResource, PackageTransferLimitOverrides } from "./package-limits.js";
 import { resourceFileName } from "./property-sidecar.js";
 import type { PropertySidecarSource } from "./property-sidecar.js";
 import type { SpatialDemandSource } from "./spatial-demand-source.js";
@@ -52,9 +60,7 @@ export function parseSceneUrl(value: string, baseHref: string): URL {
   const trimmed = value.trim();
   if (trimmed === "") throw new TypeError("Enter a compiled glTF URL.");
   const url = new URL(trimmed, baseHref);
-  if (url.protocol !== "http:" && url.protocol !== "https:") {
-    throw new TypeError("Compiled scene URLs must use HTTP or HTTPS.");
-  }
+  assertPackageUrl(url, "Compiled scene URLs");
   return url;
 }
 
@@ -118,46 +124,82 @@ function parseJson(text: string, label: string): unknown {
   }
 }
 
+/** The external resources a compiled glTF declares, for the package budget. */
+function declaredResources(hierarchy: CompiledHierarchy): DeclaredPackageResource[] {
+  const resources: DeclaredPackageResource[] = [
+    { uri: hierarchy.binaryUri, byteLength: hierarchy.binaryByteLength },
+  ];
+  if (hierarchy.coarseBinaryUri && hierarchy.coarseBinaryByteLength !== undefined) {
+    resources.push({
+      uri: hierarchy.coarseBinaryUri,
+      byteLength: hierarchy.coarseBinaryByteLength,
+    });
+  }
+  if (hierarchy.properties) resources.push(hierarchy.properties);
+  if (hierarchy.spatialIndex) resources.push(hierarchy.spatialIndex);
+  return resources;
+}
+
+/** The bounded reader returns exact-size views; only a partial view is copied. */
+function bufferOf(bytes: Uint8Array): ArrayBuffer {
+  return bytes.byteOffset === 0 && bytes.byteLength === bytes.buffer.byteLength
+    ? (bytes.buffer as ArrayBuffer)
+    : (bytes.slice().buffer as ArrayBuffer);
+}
+
 export async function loadSceneHierarchy(
   source: SceneSource,
   signal?: AbortSignal,
+  limitOverrides?: PackageTransferLimitOverrides,
 ): Promise<LoadedSceneHierarchy> {
   if (source.kind === "url") {
-    const response = await fetch(source.gltfUrl, { cache: "no-store", signal });
-    if (!response.ok) {
-      throw new Error(`Failed to load compiled hierarchy (${response.status}).`);
-    }
-    const documentBytes = await response.arrayBuffer();
+    const limits = resolvePackageTransferLimits(limitOverrides);
+    const documentBytes = await fetchPackageResource(source.gltfUrl, {
+      kind: "gltf",
+      label: source.gltfUrl.href,
+      limitBytes: limits.documentBytes,
+      ...(signal ? { signal } : {}),
+    });
     const { hierarchy } = inspectCompiledHierarchy(
       parseJson(new TextDecoder().decode(documentBytes), source.gltfUrl.href),
     );
+    // Every resource is resolved against the document URL and held to the
+    // package budget before one of them is requested.
+    const resourceUrl = (uri: string): URL =>
+      resolvePackageResourceUrl(uri, source.gltfUrl, source.gltfUrl.href);
+    const targetUrl = resourceUrl(hierarchy.binaryUri);
+    const coarseUrl = hierarchy.coarseBinaryUri
+      ? resourceUrl(hierarchy.coarseBinaryUri)
+      : undefined;
+    const propertiesUrl = hierarchy.properties
+      ? resourceUrl(hierarchy.properties.uri)
+      : undefined;
+    const spatialUrl = hierarchy.spatialIndex
+      ? resourceUrl(hierarchy.spatialIndex.uri)
+      : undefined;
+    assertPackageBudget(documentBytes.byteLength, declaredResources(hierarchy), limits);
     return {
-      documentSource: { kind: "bytes", bytes: documentBytes },
+      documentSource: { kind: "bytes", bytes: bufferOf(documentBytes) },
       hierarchy,
-      targetBinary: { kind: "url", href: new URL(hierarchy.binaryUri, source.gltfUrl).href },
-      ...(hierarchy.coarseBinaryUri
-        ? {
-            coarseBinary: {
-              kind: "url" as const,
-              href: new URL(hierarchy.coarseBinaryUri, source.gltfUrl).href,
-            },
-          }
-        : {}),
-      ...(hierarchy.properties
+      targetBinary: { kind: "url", href: targetUrl.href },
+      ...(coarseUrl ? { coarseBinary: { kind: "url" as const, href: coarseUrl.href } } : {}),
+      ...(hierarchy.properties && propertiesUrl
         ? {
             properties: {
               kind: "url" as const,
               ref: hierarchy.properties,
-              jsonUrl: new URL(hierarchy.properties.uri, source.gltfUrl),
+              jsonUrl: propertiesUrl,
+              limits,
             },
           }
         : {}),
-      ...(hierarchy.spatialIndex
+      ...(hierarchy.spatialIndex && spatialUrl
         ? {
             spatialIndex: {
               kind: "url" as const,
               ref: hierarchy.spatialIndex,
-              url: new URL(hierarchy.spatialIndex.uri, source.gltfUrl),
+              url: spatialUrl,
+              limits,
             },
           }
         : {}),
