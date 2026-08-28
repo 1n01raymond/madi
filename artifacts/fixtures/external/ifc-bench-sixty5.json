@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0",
-  "generatedAt": "2026-08-23T14:55:58.097Z",
-  "manifestSha256": "984c801cb605cc0d7b6ab32f951c2a16317a163d7e5dbbb59c421569af4beed9",
+  "generatedAt": "2026-08-28T06:40:26.065Z",
+  "manifestSha256": "a9801513920d7a3ea7afd28190a836241559f592615a8a7b8b674876eced6311",
   "dataset": {
     "id": "ifc-bench-sixty5",
     "name": "IFC-Bench sixty5 multi-discipline federation",
@@ -10,7 +10,7 @@
     "revision": "4b37e5d77f12f30dfd7cb7375e15278e1037c808",
     "landingPage": "https://huggingface.co/datasets/sylvainHellin/ifc-bench/tree/main/projects/sixty5",
     "license": "CC-BY-4.0",
-    "attribution": "Selahattin Doelger; buildingSMART Community Sample Test Files"
+    "attribution": "Stam + De Koning; Selahattin Dülger; buildingSMART Community; IFC-Bench mirror"
   },
   "summary": {
     "fileCount": 7,

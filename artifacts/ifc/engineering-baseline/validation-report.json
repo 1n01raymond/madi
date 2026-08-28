@@ -1,0 +1,420 @@
+{
+  "schemaVersion": "naru.engineering-baseline-evidence.1",
+  "recordedAt": "2026-08-28T06:51:36.446Z",
+  "status": "qualified-package-not-yet-published",
+  "manifestSha256": "a9801513920d7a3ea7afd28190a836241559f592615a8a7b8b674876eced6311",
+  "datasets": [
+    {
+      "id": "ifc-bench-sixty5",
+      "name": "IFC-Bench sixty5 multi-discipline federation",
+      "revision": "4b37e5d77f12f30dfd7cb7375e15278e1037c808",
+      "license": "CC-BY-4.0",
+      "licenseUrl": "https://github.com/buildingSMART-community/Community-Sample-Test-Files/blob/7ddf57a201f88a0c213d5322b02ed15e94a60a40/IFC%202.3.0.1%20(IFC%202x3)/SDK%20-%20S1/README.md#license",
+      "attribution": "Stam + De Koning; Selahattin Dülger; buildingSMART Community; IFC-Bench mirror"
+    },
+    {
+      "id": "sixty5-engineering",
+      "name": "SDK-S1 sixty5 Engineering federation",
+      "revision": "7ddf57a201f88a0c213d5322b02ed15e94a60a40",
+      "license": "CC-BY-4.0",
+      "licenseUrl": "https://github.com/buildingSMART-community/Community-Sample-Test-Files/blob/7ddf57a201f88a0c213d5322b02ed15e94a60a40/IFC%202.3.0.1%20(IFC%202x3)/SDK%20-%20S1/README.md#license",
+      "attribution": "Stam + De Koning; Selahattin Dülger; buildingSMART Community"
+    }
+  ],
+  "selection": {
+    "policy": "sixty5-design-plus-complete-geelen-aarts-cohort-v1",
+    "sha256": "9d02e0efaf2f47c2e9f7b9cdb38a58ea78abcb0763c0cd4d3b02c828ea6834a7",
+    "documentCount": 31,
+    "sourceBytes": 899467071,
+    "documents": [
+      {
+        "datasetId": "ifc-bench-sixty5",
+        "assetId": "architecture",
+        "discipline": "d-architecture",
+        "uriHint": "sixty5/design/arc.ifc",
+        "byteLength": 342657851,
+        "sha256": "e91ddbbd672bbde946af14631de4c732f0cf8a7cfae5dbbf06fbeab03b5c46df"
+      },
+      {
+        "datasetId": "ifc-bench-sixty5",
+        "assetId": "electrical",
+        "discipline": "d-electrical",
+        "uriHint": "sixty5/design/electrical.ifc",
+        "byteLength": 97058912,
+        "sha256": "adb8d5eda2c706a1fded2a00bd38d845e35f513e2f6ba048fc6228274dfb3986"
+      },
+      {
+        "datasetId": "ifc-bench-sixty5",
+        "assetId": "facade",
+        "discipline": "d-facade",
+        "uriHint": "sixty5/design/facade.ifc",
+        "byteLength": 6067026,
+        "sha256": "a9a1b20214da8ac1e1bea1f8670bef24f20a0d53a8ebaef4eb20b5a447640c79"
+      },
+      {
+        "datasetId": "ifc-bench-sixty5",
+        "assetId": "kitchen",
+        "discipline": "d-kitchen",
+        "uriHint": "sixty5/design/kitchen.ifc",
+        "byteLength": 49670229,
+        "sha256": "1905b992071729d1c780b18f6103e4d1d08307a4707d5f33a4413216f36776ac"
+      },
+      {
+        "datasetId": "ifc-bench-sixty5",
+        "assetId": "plumbing",
+        "discipline": "d-plumbing",
+        "uriHint": "sixty5/design/plumbing.ifc",
+        "byteLength": 222099255,
+        "sha256": "15382b06d0a63464b95ba451ce7d5fa981bf6c236ebe3f4f62bb9d2b9abfd821"
+      },
+      {
+        "datasetId": "ifc-bench-sixty5",
+        "assetId": "structure",
+        "discipline": "d-structure",
+        "uriHint": "sixty5/design/str.ifc",
+        "byteLength": 7422441,
+        "sha256": "79f294c643438ac7a494e4871857244c2de0eefa536eda5977af20640a301a22"
+      },
+      {
+        "datasetId": "ifc-bench-sixty5",
+        "assetId": "ventilation",
+        "discipline": "d-ventilation",
+        "uriHint": "sixty5/design/ventilation.ifc",
+        "byteLength": 114891068,
+        "sha256": "c78f6ad085961500f0890bbffda9e171c1342c5865ca152f64098dd4da644cca"
+      },
+      {
+        "datasetId": "sixty5-engineering",
+        "assetId": "e-bvt-rwb-geelen-beton-10-10e-verdieping",
+        "discipline": "e-bvt-geelen-10",
+        "uriHint": "sixty5/engineering/e-bvt-rwb-geelen-beton-10-10e-verdieping.ifc",
+        "byteLength": 5052483,
+        "sha256": "7a273c3d5b5e63b5b79fbda49db31d7ff1944e1b0b06c1f13866dd9001b170cf"
+      },
+      {
+        "datasetId": "sixty5-engineering",
+        "assetId": "e-bvt-rwb-geelen-beton-11-11e-verdieping",
+        "discipline": "e-bvt-geelen-11",
+        "uriHint": "sixty5/engineering/e-bvt-rwb-geelen-beton-11-11e-verdieping.ifc",
+        "byteLength": 2378382,
+        "sha256": "84d514ec9a5269f736d2ab9a1121fa0328cf75dde50bfec69c6d93b3dd5213a3"
+      },
+      {
+        "datasetId": "sixty5-engineering",
+        "assetId": "e-s1-rwb-geelen-beton-01-1e-verdieping",
+        "discipline": "e-s1-geelen-01",
+        "uriHint": "sixty5/engineering/e-s1-rwb-geelen-beton-01-1e-verdieping.ifc",
+        "byteLength": 3499508,
+        "sha256": "9d44a304126ea30312d98b0cf2984c26cae62cd3f04d6463dad9939236f7decf"
+      },
+      {
+        "datasetId": "sixty5-engineering",
+        "assetId": "e-s1-rwb-geelen-beton-02-2e-verdieping",
+        "discipline": "e-s1-geelen-02",
+        "uriHint": "sixty5/engineering/e-s1-rwb-geelen-beton-02-2e-verdieping.ifc",
+        "byteLength": 3641377,
+        "sha256": "994e68e57f62e6f9681af941ce8d1e4ef35c6fa7f09c6ee06e3e1425abfb208a"
+      },
+      {
+        "datasetId": "sixty5-engineering",
+        "assetId": "e-s1-rwb-geelen-beton-03-3e-verdieping",
+        "discipline": "e-s1-geelen-03",
+        "uriHint": "sixty5/engineering/e-s1-rwb-geelen-beton-03-3e-verdieping.ifc",
+        "byteLength": 3641611,
+        "sha256": "73f3b9c513de737ac245a779a5dc6b5f3f62e29799743aedc0549fe1ab8d26c4"
+      },
+      {
+        "datasetId": "sixty5-engineering",
+        "assetId": "e-s1-rwb-geelen-beton-04-4e-verdieping",
+        "discipline": "e-s1-geelen-04",
+        "uriHint": "sixty5/engineering/e-s1-rwb-geelen-beton-04-4e-verdieping.ifc",
+        "byteLength": 3680308,
+        "sha256": "7315291424feefba8354d99056e6f7e57a8a2542987a3104345e1e9646f960d8"
+      },
+      {
+        "datasetId": "sixty5-engineering",
+        "assetId": "e-s1-rwb-geelen-beton-05-5e-verdieping",
+        "discipline": "e-s1-geelen-05",
+        "uriHint": "sixty5/engineering/e-s1-rwb-geelen-beton-05-5e-verdieping.ifc",
+        "byteLength": 3528053,
+        "sha256": "6443de0f70c5cadadecf9d91abf1594b772b8a698d2f85ddc907bdfa77a811e5"
+      },
+      {
+        "datasetId": "sixty5-engineering",
+        "assetId": "e-s1-rwb-geelen-beton-06-6e-verdieping",
+        "discipline": "e-s1-geelen-06",
+        "uriHint": "sixty5/engineering/e-s1-rwb-geelen-beton-06-6e-verdieping.ifc",
+        "byteLength": 3531797,
+        "sha256": "fc087293e79b41825c0ad9a37082f80c3e2305e814942ff4f21f2df80e92c7f8"
+      },
+      {
+        "datasetId": "sixty5-engineering",
+        "assetId": "e-s1-rwb-geelen-beton-07-7e-verdieping",
+        "discipline": "e-s1-geelen-07",
+        "uriHint": "sixty5/engineering/e-s1-rwb-geelen-beton-07-7e-verdieping.ifc",
+        "byteLength": 3508210,
+        "sha256": "7e24d1c06ed5c5d5cedf3e3287ad1bc399cf1a590836271f64384adb02bc2419"
+      },
+      {
+        "datasetId": "sixty5-engineering",
+        "assetId": "e-s1-rwb-geelen-beton-08-8e-verdieping",
+        "discipline": "e-s1-geelen-08",
+        "uriHint": "sixty5/engineering/e-s1-rwb-geelen-beton-08-8e-verdieping.ifc",
+        "byteLength": 3044851,
+        "sha256": "0f6de32467ad47edd6ba3a3103606c0669d0c2848e193f9c50cd21b9962d15a8"
+      },
+      {
+        "datasetId": "sixty5-engineering",
+        "assetId": "e-s1-rwb-geelen-beton-09-9e-verdieping",
+        "discipline": "e-s1-geelen-09",
+        "uriHint": "sixty5/engineering/e-s1-rwb-geelen-beton-09-9e-verdieping.ifc",
+        "byteLength": 2945300,
+        "sha256": "3e04895df8470a60a619676caa810fc1a715f39d08898e4e475b974393560459"
+      },
+      {
+        "datasetId": "sixty5-engineering",
+        "assetId": "e-s1-rwb-geelen-beton-10-10e-verdieping",
+        "discipline": "e-s1-geelen-10",
+        "uriHint": "sixty5/engineering/e-s1-rwb-geelen-beton-10-10e-verdieping.ifc",
+        "byteLength": 2548680,
+        "sha256": "7317aec5842183a0a11507dc9c345b5653b436bada0c4a23cf943db405abdd66"
+      },
+      {
+        "datasetId": "sixty5-engineering",
+        "assetId": "e-s1-rwb-geelen-beton-11-11e-verdieping",
+        "discipline": "e-s1-geelen-11",
+        "uriHint": "sixty5/engineering/e-s1-rwb-geelen-beton-11-11e-verdieping.ifc",
+        "byteLength": 2359536,
+        "sha256": "a79e7a652250a6d5db85977bd4de73bb9fcb3d2a767c0aafefb8a18ce2f24266"
+      },
+      {
+        "datasetId": "sixty5-engineering",
+        "assetId": "e-s1-rwb-geelen-beton-12-12e-verdieping",
+        "discipline": "e-s1-geelen-12",
+        "uriHint": "sixty5/engineering/e-s1-rwb-geelen-beton-12-12e-verdieping.ifc",
+        "byteLength": 1968762,
+        "sha256": "d16a5dfc6d882b333fe5b8b95b22db57986084b9be4ac2138664e73d421dd6e4"
+      },
+      {
+        "datasetId": "sixty5-engineering",
+        "assetId": "e-s1-rwb-geelen-beton-13-13e-verdieping",
+        "discipline": "e-s1-geelen-13",
+        "uriHint": "sixty5/engineering/e-s1-rwb-geelen-beton-13-13e-verdieping.ifc",
+        "byteLength": 1772012,
+        "sha256": "468a4736d89be9b76538119e38b136471f880611ff8ab41b406d838cdb920c25"
+      },
+      {
+        "datasetId": "sixty5-engineering",
+        "assetId": "e-s1-rwb-geelen-beton-14-14e-verdieping",
+        "discipline": "e-s1-geelen-14",
+        "uriHint": "sixty5/engineering/e-s1-rwb-geelen-beton-14-14e-verdieping.ifc",
+        "byteLength": 1632915,
+        "sha256": "7ba361a086d03741947fef5e73d51ea71ce25ed1d0d919e70b6a150682cedf8a"
+      },
+      {
+        "datasetId": "sixty5-engineering",
+        "assetId": "e-s1-rwb-geelen-beton-15-15e-verdieping",
+        "discipline": "e-s1-geelen-15",
+        "uriHint": "sixty5/engineering/e-s1-rwb-geelen-beton-15-15e-verdieping.ifc",
+        "byteLength": 1521448,
+        "sha256": "78accbec75760ddcb96cd781298f57721df6b6f338c592a858a6ca2067a9e8b6"
+      },
+      {
+        "datasetId": "sixty5-engineering",
+        "assetId": "e-s1-rwb-geelen-beton-16-16e-verdieping",
+        "discipline": "e-s1-geelen-16",
+        "uriHint": "sixty5/engineering/e-s1-rwb-geelen-beton-16-16e-verdieping.ifc",
+        "byteLength": 734375,
+        "sha256": "3a7bc8f28a08609606bbcc10aa9958fbe711a25c229bbca426980c9ddbfd8987"
+      },
+      {
+        "datasetId": "sixty5-engineering",
+        "assetId": "e-s1-rwb-geelen-beton-17-dakvloer",
+        "discipline": "e-s1-geelen-17",
+        "uriHint": "sixty5/engineering/e-s1-rwb-geelen-beton-17-dakvloer.ifc",
+        "byteLength": 1808735,
+        "sha256": "e9cf93391d1efb933c53a275cf1524606519d7d3d9c58d1f438229c731549672"
+      },
+      {
+        "datasetId": "sixty5-engineering",
+        "assetId": "e-s1-rwb-staalconstructie-aarts-1-6",
+        "discipline": "e-aarts-1-6",
+        "uriHint": "sixty5/engineering/e-s1-rwb-staalconstructie-aarts-1-6.ifc",
+        "byteLength": 776211,
+        "sha256": "5c99a072e06e5a173b16820022c0073e547a8f7e3ef484327eb71eecdde3d289"
+      },
+      {
+        "datasetId": "sixty5-engineering",
+        "assetId": "e-s1-rwb-staalconstructie-aarts-6-8",
+        "discipline": "e-aarts-6-8",
+        "uriHint": "sixty5/engineering/e-s1-rwb-staalconstructie-aarts-6-8.ifc",
+        "byteLength": 1271440,
+        "sha256": "f0c0d43c1827fb568cc9e30f3294b4d8ba3e711515d06744df4ff8c36dc08d15"
+      },
+      {
+        "datasetId": "sixty5-engineering",
+        "assetId": "e-s1-rwb-staalconstructie-aarts-9-12",
+        "discipline": "e-aarts-9-12",
+        "uriHint": "sixty5/engineering/e-s1-rwb-staalconstructie-aarts-9-12.ifc",
+        "byteLength": 2152010,
+        "sha256": "07ac9d82f5db850984e76544574b301afd6c3aad9dcab0c77045f92e42149c5f"
+      },
+      {
+        "datasetId": "sixty5-engineering",
+        "assetId": "e-s1-rwb-staalconstructie-aarts-13-17",
+        "discipline": "e-aarts-13-17",
+        "uriHint": "sixty5/engineering/e-s1-rwb-staalconstructie-aarts-13-17.ifc",
+        "byteLength": 2401371,
+        "sha256": "467dee4835a29bf43776bfa670990fc0982704774300bb0240c14773abdafc4b"
+      },
+      {
+        "datasetId": "sixty5-engineering",
+        "assetId": "e-s1-rwb-staalconstructie-aarts-schoren",
+        "discipline": "e-aarts-schoren",
+        "uriHint": "sixty5/engineering/e-s1-rwb-staalconstructie-aarts-schoren.ifc",
+        "byteLength": 200914,
+        "sha256": "c6a6b542ee778d0332c5370f31b7dc03879ac24098f13088ed0a4c66d335d98a"
+      }
+    ]
+  },
+  "toolchain": {
+    "adapter": {
+      "geometryLibrary": "opencascade",
+      "name": "IfcOpenShell",
+      "version": "0.8.5"
+    },
+    "sceneIrEncoding": "naru.ifc-scene-ir-split.4",
+    "compiler": {
+      "name": "@madi/compiler",
+      "version": "0.0.0",
+      "generator": "MADI compiler 0.0.0 / IfcOpenShell federation slice"
+    },
+    "gltfValidator": "2.0.0-dev.3.10"
+  },
+  "host": {
+    "node": "25.2.1",
+    "platform": "darwin",
+    "architecture": "arm64",
+    "release": "24.6.0",
+    "cpu": "Apple M4 Pro",
+    "logicalCpuCount": 14,
+    "totalMemoryBytes": 51539607552
+  },
+  "counts": {
+    "occurrenceCount": 268001,
+    "geometricOccurrenceCount": 104337,
+    "geometricPrototypeCount": 66396,
+    "submittedTriangleCount": 46059890,
+    "triangleCount": 10394938,
+    "edgeSegmentCount": 5598195,
+    "submittedEdgeSegmentCount": 50324345
+  },
+  "gate": {
+    "geometricOccurrenceCount": {
+      "minimum": 100000,
+      "measured": 104337
+    },
+    "submittedTriangleCount": {
+      "minimum": 10000000,
+      "measured": 46059890
+    },
+    "geometricPrototypeCount": {
+      "minimum": 10000,
+      "measured": 66396
+    },
+    "passed": true
+  },
+  "reports": {
+    "adapter": {
+      "path": "adapter-report.json",
+      "bytes": 70814,
+      "sha256": "fa1cb3fe28592c2906bb06420f34dc009ae077cbea4899b4e7e5c7e0a4fbe17c"
+    },
+    "compiler": {
+      "path": "build-report.json",
+      "bytes": 157882,
+      "sha256": "fd4078e66e5c69792c56e9aad02b59e827724ea24034bb6e1110e97d5c6eca5c"
+    }
+  },
+  "package": {
+    "digest": "6d23bffd6632345f8b2714684abbbb3b68ef59158beee4474b87b381f4df9acf",
+    "resources": [
+      {
+        "path": "scene.gltf",
+        "mediaType": "model/gltf+json",
+        "bytes": 405570167,
+        "sha256": "13a8160b7a371e06ffbe454596ddf050e11d405feaaacaf2d7d43cef9c746930"
+      },
+      {
+        "path": "scene.bin",
+        "mediaType": "application/octet-stream",
+        "bytes": 325019652,
+        "sha256": "3f78235d58181f10a241e5b30302595761534c713d15e70e7eb92f51a2062e3b"
+      },
+      {
+        "path": "coarse.bin",
+        "mediaType": "application/octet-stream",
+        "bytes": 60553152,
+        "sha256": "b5e245dc909e6c45115078726f26114730a8e1b35758a3107eac4f92b8f42f85"
+      },
+      {
+        "path": "spatial.bin",
+        "mediaType": "application/octet-stream",
+        "bytes": 1217288,
+        "sha256": "d614f2e6880dd171f0658184a3e09af72809225262053f8597e81fd07a872f53"
+      },
+      {
+        "path": "properties.json",
+        "mediaType": "application/json",
+        "bytes": 24778000,
+        "sha256": "fb5342589c1ac08fba0c0bed7a00784106baa6fa2776d3f59ae1dea67aa4cd79"
+      },
+      {
+        "path": "properties.bin",
+        "mediaType": "application/octet-stream",
+        "bytes": 37308484,
+        "sha256": "03fc3ead3b0b133bb1b6860946a21864529e7426227a17752d54d1ff42ef4747"
+      }
+    ],
+    "totalBytes": 854446743,
+    "documentStringLimitBytes": 536870888,
+    "publicUrl": null
+  },
+  "spatialDemandIndex": {
+    "schemaVersion": "naru.spatial-demand-index.1",
+    "nodeCount": 4095,
+    "leafCount": 2048,
+    "occurrenceCount": 104337,
+    "chunkReferenceCount": 21922,
+    "maxDepth": 11,
+    "leafCapacity": 64,
+    "rootBoundsMeters": {
+      "minimum": [
+        -2.2400381565093994,
+        -30.399999618530273,
+        -62.0700503502861
+      ],
+      "maximum": [
+        42.28521084799495,
+        57.900001525878906,
+        0.5
+      ]
+    }
+  },
+  "khronosValidation": {
+    "validator": "Khronos glTF Validator",
+    "version": "2.0.0-dev.3.10",
+    "issues": {
+      "numErrors": 0,
+      "numWarnings": 0,
+      "numInfos": 100,
+      "numHints": 0
+    }
+  },
+  "limitations": [
+    "This record qualifies source, compilation, package identity, and the engineering-scale floor; it is not a startup, frame-time, memory, or renderer comparison.",
+    "The compiled package has not yet been published or opened through the public Studio delivery path, so the Phase 2 public-baseline exit criterion remains partial.",
+    "West Riverside Hospital is excluded: its upstream publisher does not state redistribution terms, so no source-derived artifact from it is included.",
+    "CadQuarry is tracked separately as a source-derived synthetic STEP/OCCT breadth control and cannot satisfy this real-engineering-source gate."
+  ]
+}

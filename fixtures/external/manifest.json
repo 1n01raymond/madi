@@ -1,5 +1,5 @@
 {
-  "schemaVersion": "1.0",
+  "schemaVersion": "1.1",
   "storagePolicy": "external-cache-only",
   "cacheDirectory": "output/external-fixtures",
   "datasets": [
@@ -162,9 +162,9 @@
         "repository": "https://huggingface.co/datasets/sylvainHellin/ifc-bench",
         "revision": "4b37e5d77f12f30dfd7cb7375e15278e1037c808",
         "license": "CC-BY-4.0",
-        "licenseUrl": "https://huggingface.co/datasets/sylvainHellin/ifc-bench/blob/4b37e5d77f12f30dfd7cb7375e15278e1037c808/projects/sixty5/license.txt",
-        "licenseFile": "licenses/ifc-bench-sixty5-CC-BY-4.0.txt",
-        "attribution": "Selahattin Doelger; buildingSMART Community Sample Test Files"
+        "licenseUrl": "https://github.com/buildingSMART-community/Community-Sample-Test-Files/blob/7ddf57a201f88a0c213d5322b02ed15e94a60a40/IFC%202.3.0.1%20(IFC%202x3)/SDK%20-%20S1/README.md#license",
+        "licenseFile": "licenses/sixty5-upstream-CC-BY-4.0.md",
+        "attribution": "Stam + De Koning; Selahattin Dülger; buildingSMART Community; IFC-Bench mirror"
       },
       "assets": [
         {
@@ -236,6 +236,383 @@
           "url": "https://huggingface.co/datasets/sylvainHellin/ifc-bench/resolve/4b37e5d77f12f30dfd7cb7375e15278e1037c808/projects/sixty5/ventilation.ifc?download=true",
           "byteLength": 114891068,
           "sha256": "c78f6ad085961500f0890bbffda9e171c1342c5865ca152f64098dd4da644cca"
+        }
+      ]
+    },
+    {
+      "id": "sixty5-engineering",
+      "name": "SDK-S1 sixty5 Engineering federation",
+      "kind": "federated-bim",
+      "status": "qualified",
+      "tier": "real-large",
+      "requiresAllowLarge": true,
+      "expectedDownloadBytes": 654076269,
+      "purposes": [
+        "ifc",
+        "bim",
+        "federation",
+        "large-scene",
+        "fabrication",
+        "spatial-hierarchy",
+        "properties"
+      ],
+      "evidenceFile": "artifacts/fixtures/external/sixty5-engineering.json",
+      "source": {
+        "landingPage": "https://github.com/buildingSMART-community/Community-Sample-Test-Files/tree/7ddf57a201f88a0c213d5322b02ed15e94a60a40/IFC%202.3.0.1%20(IFC%202x3)/SDK%20-%20S1",
+        "repository": "https://github.com/buildingSMART-community/Community-Sample-Test-Files",
+        "revision": "7ddf57a201f88a0c213d5322b02ed15e94a60a40",
+        "license": "CC-BY-4.0",
+        "licenseUrl": "https://github.com/buildingSMART-community/Community-Sample-Test-Files/blob/7ddf57a201f88a0c213d5322b02ed15e94a60a40/IFC%202.3.0.1%20(IFC%202x3)/SDK%20-%20S1/README.md#license",
+        "licenseFile": "licenses/sixty5-upstream-CC-BY-4.0.md",
+        "attribution": "Stam + De Koning; Selahattin Dülger; buildingSMART Community"
+      },
+      "download": {
+        "provider": "trimble-connect-public-share",
+        "apiBaseUrl": "https://app21.connect.trimble.com/tc/api/2.0",
+        "projectId": "Z4ehtcBhI_g",
+        "shareToken": "9OiYR4Ezs66anlHPqRCwND0TO9vt4k-EqLGcTpDYtPUpEGPLEmuiIIuXRNFg6BB1",
+        "revisionPolicy": "content-digest-only"
+      },
+      "assets": [
+        {
+          "id": "e-bvt-rwb-geelen-beton-10-10e-verdieping",
+          "role": "source",
+          "format": "ifc",
+          "path": "e-bvt-rwb-geelen-beton-10-10e-verdieping.ifc",
+          "remoteObjectId": "5P6423slk9I",
+          "remoteName": "E-BVT-RWB-Geelen-Beton 10 10e verdieping.ifc",
+          "byteLength": 5052483,
+          "sha256": "7a273c3d5b5e63b5b79fbda49db31d7ff1944e1b0b06c1f13866dd9001b170cf"
+        },
+        {
+          "id": "e-bvt-rwb-geelen-beton-11-11e-verdieping",
+          "role": "source",
+          "format": "ifc",
+          "path": "e-bvt-rwb-geelen-beton-11-11e-verdieping.ifc",
+          "remoteObjectId": "RN2soeYW2FA",
+          "remoteName": "E-BVT-RWB-Geelen-Beton 11 11e verdieping.ifc",
+          "byteLength": 2378382,
+          "sha256": "84d514ec9a5269f736d2ab9a1121fa0328cf75dde50bfec69c6d93b3dd5213a3"
+        },
+        {
+          "id": "e-s1-aan-gevelonderhoudsinstallatie-ankerpunten",
+          "role": "source",
+          "format": "ifc",
+          "path": "e-s1-aan-gevelonderhoudsinstallatie-ankerpunten.ifc",
+          "remoteObjectId": "qKNiDrKfPbI",
+          "remoteName": "E-S1-AAN-Gevelonderhoudsinstallatie ankerpunten.ifc",
+          "byteLength": 379564,
+          "sha256": "aaeb3a46c16870985b4133b40248ca1d53943bdc55f46336fafc0082774cbeb6"
+        },
+        {
+          "id": "e-s1-afb-jonkers-trappen-en-balustraden",
+          "role": "source",
+          "format": "ifc",
+          "path": "e-s1-afb-jonkers-trappen-en-balustraden.ifc",
+          "remoteObjectId": "pLygaFEIHM4",
+          "remoteName": "E-S1-AFB-JONKERS-TRAPPEN EN BALUSTRADEN.IFC",
+          "byteLength": 11900184,
+          "sha256": "3be9c60d348a9b210a4ca7947fa257aa26d9c1658c362dc27e2d2285149d3a50"
+        },
+        {
+          "id": "e-s1-afb-straatman-balustraden",
+          "role": "source",
+          "format": "ifc",
+          "path": "e-s1-afb-straatman-balustraden.ifc",
+          "remoteObjectId": "6iFDXp8_8_M",
+          "remoteName": "E-S1-AFB-Straatman-balustraden.ifc",
+          "byteLength": 23174525,
+          "sha256": "ede85fb7eb0a8b4db88e984b956dab2902e8b307a8ff8c0bb3b3593cb1e86f20"
+        },
+        {
+          "id": "e-s1-rwb-dycore-kanaalplaatvloer",
+          "role": "source",
+          "format": "ifc",
+          "path": "e-s1-rwb-dycore-kanaalplaatvloer.ifc",
+          "remoteObjectId": "bBSkMdALhGU",
+          "remoteName": "E-S1-RWB-Dycore-Kanaalplaatvloer.ifc",
+          "byteLength": 841214,
+          "sha256": "b91875f149bd3f2b56caeb6a1d2adb332d5d6d919e2871dc72bde8da09962517"
+        },
+        {
+          "id": "e-s1-rwb-geelen-beton-01-1e-verdieping",
+          "role": "source",
+          "format": "ifc",
+          "path": "e-s1-rwb-geelen-beton-01-1e-verdieping.ifc",
+          "remoteObjectId": "oKJ3sdVjmL0",
+          "remoteName": "E-S1-RWB-Geelen-Beton 01 1e verdieping.ifc",
+          "byteLength": 3499508,
+          "sha256": "9d44a304126ea30312d98b0cf2984c26cae62cd3f04d6463dad9939236f7decf"
+        },
+        {
+          "id": "e-s1-rwb-geelen-beton-02-2e-verdieping",
+          "role": "source",
+          "format": "ifc",
+          "path": "e-s1-rwb-geelen-beton-02-2e-verdieping.ifc",
+          "remoteObjectId": "L7lNZQeFLkU",
+          "remoteName": "E-S1-RWB-Geelen-Beton 02 2e verdieping.ifc",
+          "byteLength": 3641377,
+          "sha256": "994e68e57f62e6f9681af941ce8d1e4ef35c6fa7f09c6ee06e3e1425abfb208a"
+        },
+        {
+          "id": "e-s1-rwb-geelen-beton-03-3e-verdieping",
+          "role": "source",
+          "format": "ifc",
+          "path": "e-s1-rwb-geelen-beton-03-3e-verdieping.ifc",
+          "remoteObjectId": "Wwptq20eXms",
+          "remoteName": "E-S1-RWB-Geelen-Beton 03 3e verdieping.ifc",
+          "byteLength": 3641611,
+          "sha256": "73f3b9c513de737ac245a779a5dc6b5f3f62e29799743aedc0549fe1ab8d26c4"
+        },
+        {
+          "id": "e-s1-rwb-geelen-beton-04-4e-verdieping",
+          "role": "source",
+          "format": "ifc",
+          "path": "e-s1-rwb-geelen-beton-04-4e-verdieping.ifc",
+          "remoteObjectId": "AIFreEBU3Ts",
+          "remoteName": "E-S1-RWB-Geelen-Beton 04 4e verdieping.ifc",
+          "byteLength": 3680308,
+          "sha256": "7315291424feefba8354d99056e6f7e57a8a2542987a3104345e1e9646f960d8"
+        },
+        {
+          "id": "e-s1-rwb-geelen-beton-05-5e-verdieping",
+          "role": "source",
+          "format": "ifc",
+          "path": "e-s1-rwb-geelen-beton-05-5e-verdieping.ifc",
+          "remoteObjectId": "5jqBuD2o0w8",
+          "remoteName": "E-S1-RWB-Geelen-Beton 05 5e verdieping.ifc",
+          "byteLength": 3528053,
+          "sha256": "6443de0f70c5cadadecf9d91abf1594b772b8a698d2f85ddc907bdfa77a811e5"
+        },
+        {
+          "id": "e-s1-rwb-geelen-beton-06-6e-verdieping",
+          "role": "source",
+          "format": "ifc",
+          "path": "e-s1-rwb-geelen-beton-06-6e-verdieping.ifc",
+          "remoteObjectId": "Wc6kzqqbHy4",
+          "remoteName": "E-S1-RWB-Geelen-Beton 06 6e verdieping.ifc",
+          "byteLength": 3531797,
+          "sha256": "fc087293e79b41825c0ad9a37082f80c3e2305e814942ff4f21f2df80e92c7f8"
+        },
+        {
+          "id": "e-s1-rwb-geelen-beton-07-7e-verdieping",
+          "role": "source",
+          "format": "ifc",
+          "path": "e-s1-rwb-geelen-beton-07-7e-verdieping.ifc",
+          "remoteObjectId": "MmRGLqaZD-w",
+          "remoteName": "E-S1-RWB-Geelen-Beton 07 7e verdieping.ifc",
+          "byteLength": 3508210,
+          "sha256": "7e24d1c06ed5c5d5cedf3e3287ad1bc399cf1a590836271f64384adb02bc2419"
+        },
+        {
+          "id": "e-s1-rwb-geelen-beton-08-8e-verdieping",
+          "role": "source",
+          "format": "ifc",
+          "path": "e-s1-rwb-geelen-beton-08-8e-verdieping.ifc",
+          "remoteObjectId": "tFenAddkoF4",
+          "remoteName": "E-S1-RWB-Geelen-Beton 08 8e verdieping.ifc",
+          "byteLength": 3044851,
+          "sha256": "0f6de32467ad47edd6ba3a3103606c0669d0c2848e193f9c50cd21b9962d15a8"
+        },
+        {
+          "id": "e-s1-rwb-geelen-beton-09-9e-verdieping",
+          "role": "source",
+          "format": "ifc",
+          "path": "e-s1-rwb-geelen-beton-09-9e-verdieping.ifc",
+          "remoteObjectId": "uulhcdgPouk",
+          "remoteName": "E-S1-RWB-Geelen-Beton 09 9e verdieping.ifc",
+          "byteLength": 2945300,
+          "sha256": "3e04895df8470a60a619676caa810fc1a715f39d08898e4e475b974393560459"
+        },
+        {
+          "id": "e-s1-rwb-geelen-beton-10-10e-verdieping",
+          "role": "source",
+          "format": "ifc",
+          "path": "e-s1-rwb-geelen-beton-10-10e-verdieping.ifc",
+          "remoteObjectId": "twKfy3Z4ggU",
+          "remoteName": "E-S1-RWB-Geelen-Beton 10 10e verdieping.ifc",
+          "byteLength": 2548680,
+          "sha256": "7317aec5842183a0a11507dc9c345b5653b436bada0c4a23cf943db405abdd66"
+        },
+        {
+          "id": "e-s1-rwb-geelen-beton-11-11e-verdieping",
+          "role": "source",
+          "format": "ifc",
+          "path": "e-s1-rwb-geelen-beton-11-11e-verdieping.ifc",
+          "remoteObjectId": "FDaayEJV5Nw",
+          "remoteName": "E-S1-RWB-Geelen-Beton 11 11e verdieping.ifc",
+          "byteLength": 2359536,
+          "sha256": "a79e7a652250a6d5db85977bd4de73bb9fcb3d2a767c0aafefb8a18ce2f24266"
+        },
+        {
+          "id": "e-s1-rwb-geelen-beton-12-12e-verdieping",
+          "role": "source",
+          "format": "ifc",
+          "path": "e-s1-rwb-geelen-beton-12-12e-verdieping.ifc",
+          "remoteObjectId": "d8jpJPTQ5xE",
+          "remoteName": "E-S1-RWB-Geelen-Beton 12 12e verdieping.ifc",
+          "byteLength": 1968762,
+          "sha256": "d16a5dfc6d882b333fe5b8b95b22db57986084b9be4ac2138664e73d421dd6e4"
+        },
+        {
+          "id": "e-s1-rwb-geelen-beton-13-13e-verdieping",
+          "role": "source",
+          "format": "ifc",
+          "path": "e-s1-rwb-geelen-beton-13-13e-verdieping.ifc",
+          "remoteObjectId": "73c08d1nt0E",
+          "remoteName": "E-S1-RWB-Geelen-Beton 13 13e verdieping.ifc",
+          "byteLength": 1772012,
+          "sha256": "468a4736d89be9b76538119e38b136471f880611ff8ab41b406d838cdb920c25"
+        },
+        {
+          "id": "e-s1-rwb-geelen-beton-14-14e-verdieping",
+          "role": "source",
+          "format": "ifc",
+          "path": "e-s1-rwb-geelen-beton-14-14e-verdieping.ifc",
+          "remoteObjectId": "cTcutPQl5IY",
+          "remoteName": "E-S1-RWB-Geelen-Beton 14 14e verdieping.ifc",
+          "byteLength": 1632915,
+          "sha256": "7ba361a086d03741947fef5e73d51ea71ce25ed1d0d919e70b6a150682cedf8a"
+        },
+        {
+          "id": "e-s1-rwb-geelen-beton-15-15e-verdieping",
+          "role": "source",
+          "format": "ifc",
+          "path": "e-s1-rwb-geelen-beton-15-15e-verdieping.ifc",
+          "remoteObjectId": "ZBO51PLP33A",
+          "remoteName": "E-S1-RWB-Geelen-Beton 15 15e verdieping.ifc",
+          "byteLength": 1521448,
+          "sha256": "78accbec75760ddcb96cd781298f57721df6b6f338c592a858a6ca2067a9e8b6"
+        },
+        {
+          "id": "e-s1-rwb-geelen-beton-16-16e-verdieping",
+          "role": "source",
+          "format": "ifc",
+          "path": "e-s1-rwb-geelen-beton-16-16e-verdieping.ifc",
+          "remoteObjectId": "XYH_ZPIk3OU",
+          "remoteName": "E-S1-RWB-Geelen-Beton 16 16e verdieping.ifc",
+          "byteLength": 734375,
+          "sha256": "3a7bc8f28a08609606bbcc10aa9958fbe711a25c229bbca426980c9ddbfd8987"
+        },
+        {
+          "id": "e-s1-rwb-geelen-beton-17-dakvloer",
+          "role": "source",
+          "format": "ifc",
+          "path": "e-s1-rwb-geelen-beton-17-dakvloer.ifc",
+          "remoteObjectId": "Bt--2CbyfJk",
+          "remoteName": "E-S1-RWB-Geelen-Beton 17 Dakvloer.ifc",
+          "byteLength": 1808735,
+          "sha256": "e9cf93391d1efb933c53a275cf1524606519d7d3d9c58d1f438229c731549672"
+        },
+        {
+          "id": "e-s1-rwb-jordahl-instortvoorzieningen-casco",
+          "role": "source",
+          "format": "ifc",
+          "path": "e-s1-rwb-jordahl-instortvoorzieningen-casco.ifc",
+          "remoteObjectId": "urX6Yb4CP7w",
+          "remoteName": "E-S1-RWB-Jordahl-Instortvoorzieningen-Casco.ifc",
+          "byteLength": 11037992,
+          "sha256": "2ef9a0d8390c9da463b87c464f8b6d6eb79d989e89266f715e2a365314cd444b"
+        },
+        {
+          "id": "e-s1-rwb-jordahl-instortvoorzieningen-prefab",
+          "role": "source",
+          "format": "ifc",
+          "path": "e-s1-rwb-jordahl-instortvoorzieningen-prefab.ifc",
+          "remoteObjectId": "g30uGBmWSb0",
+          "remoteName": "E-S1-RWB-Jordahl-Instortvoorzieningen-Prefab.ifc",
+          "byteLength": 100336397,
+          "sha256": "72202a389d7a92b1571b1f56de33bae274cff210917b5d6a9ff2b62e8311634f"
+        },
+        {
+          "id": "e-s1-rwb-jordahl-verankeringsconsoles",
+          "role": "source",
+          "format": "ifc",
+          "path": "e-s1-rwb-jordahl-verankeringsconsoles.ifc",
+          "remoteObjectId": "_-c2R_Iss7Q",
+          "remoteName": "E-S1-RWB-Jordahl-Verankeringsconsoles.ifc",
+          "byteLength": 249187771,
+          "sha256": "610da1bf38352f36fb7dc497266dd053883dfb9d8b232d94f78daf1ea1988d6f"
+        },
+        {
+          "id": "e-s1-rwb-lammers-prefab-beton-rvt2018",
+          "role": "source",
+          "format": "ifc",
+          "path": "e-s1-rwb-lammers-prefab-beton-rvt2018.ifc",
+          "remoteObjectId": "higm4biqK2Q",
+          "remoteName": "E-S1-RWB-Lammers-Prefab beton_rvt2018.ifc",
+          "byteLength": 164455599,
+          "sha256": "e92ae98647dcf6a9d163f952676fd64f81ccfef176391601dc5b44d8745e5170"
+        },
+        {
+          "id": "e-s1-rwb-staalconstructie-aarts-1-6",
+          "role": "source",
+          "format": "ifc",
+          "path": "e-s1-rwb-staalconstructie-aarts-1-6.ifc",
+          "remoteObjectId": "f5Zscbf_KNk",
+          "remoteName": "E-S1-RWB-Staalconstructie-Aarts 1-6.ifc",
+          "byteLength": 776211,
+          "sha256": "5c99a072e06e5a173b16820022c0073e547a8f7e3ef484327eb71eecdde3d289"
+        },
+        {
+          "id": "e-s1-rwb-staalconstructie-aarts-13-17",
+          "role": "source",
+          "format": "ifc",
+          "path": "e-s1-rwb-staalconstructie-aarts-13-17.ifc",
+          "remoteObjectId": "z6byjoKGhpo",
+          "remoteName": "E-S1-RWB-Staalconstructie-Aarts 13-17.ifc",
+          "byteLength": 2401371,
+          "sha256": "467dee4835a29bf43776bfa670990fc0982704774300bb0240c14773abdafc4b"
+        },
+        {
+          "id": "e-s1-rwb-staalconstructie-aarts-6-8",
+          "role": "source",
+          "format": "ifc",
+          "path": "e-s1-rwb-staalconstructie-aarts-6-8.ifc",
+          "remoteObjectId": "5gcaqCObb-I",
+          "remoteName": "E-S1-RWB-Staalconstructie-Aarts 6-8.ifc",
+          "byteLength": 1271440,
+          "sha256": "f0c0d43c1827fb568cc9e30f3294b4d8ba3e711515d06744df4ff8c36dc08d15"
+        },
+        {
+          "id": "e-s1-rwb-staalconstructie-aarts-9-12",
+          "role": "source",
+          "format": "ifc",
+          "path": "e-s1-rwb-staalconstructie-aarts-9-12.ifc",
+          "remoteObjectId": "PKlbNO7N0C4",
+          "remoteName": "E-S1-RWB-Staalconstructie-Aarts 9-12.ifc",
+          "byteLength": 2152010,
+          "sha256": "07ac9d82f5db850984e76544574b301afd6c3aad9dcab0c77045f92e42149c5f"
+        },
+        {
+          "id": "e-s1-rwb-staalconstructie-aarts-schoren",
+          "role": "source",
+          "format": "ifc",
+          "path": "e-s1-rwb-staalconstructie-aarts-schoren.ifc",
+          "remoteObjectId": "dR3wW1W9BWo",
+          "remoteName": "E-S1-RWB-Staalconstructie-Aarts schoren.ifc",
+          "byteLength": 200914,
+          "sha256": "c6a6b542ee778d0332c5370f31b7dc03879ac24098f13088ed0a4c66d335d98a"
+        },
+        {
+          "id": "e-s1-rwb-vpg-aluminium-kozijnen",
+          "role": "source",
+          "format": "ifc",
+          "path": "e-s1-rwb-vpg-aluminium-kozijnen.ifc",
+          "remoteObjectId": "zjfCoaX15DA",
+          "remoteName": "E-S1-RWB-VPG-Aluminium kozijnen.ifc",
+          "byteLength": 24290919,
+          "sha256": "1b0656dc87d52e70125b86df9d91090afe900c8dd7c077883503b87ac91d3021"
+        },
+        {
+          "id": "e-s1-rwb-westo-prefab-gevel",
+          "role": "source",
+          "format": "ifc",
+          "path": "e-s1-rwb-westo-prefab-gevel.ifc",
+          "remoteObjectId": "OzorSBI9LcQ",
+          "remoteName": "E-S1-RWB-Westo-Prefab gevel.ifc",
+          "byteLength": 8871815,
+          "sha256": "1230d0296f27f36efb6133c61ed3952d25017a0628501c48a718ba0a53101067"
         }
       ]
     }

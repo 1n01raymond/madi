@@ -441,6 +441,17 @@ values, buffer bytes, and accessor semantics are unchanged. The current
 explicit-edge sixty5 record uses this path, while historical package digests
 remain unchanged when the option is absent.
 
+Large packages may also pass `--omit-resource-names` (API:
+`omitResourceNames: true`) to remove optional diagnostic `name` strings from
+meshes, buffer views, and accessors. Scene, node, and material names remain, as
+do every `extras` identity/source-mapping field; the option therefore does not
+weaken assembly navigation, picking, properties, or source traceability. The
+build report records `resourceNames: "omitted"`, and the option participates in
+compiled-cache identity. Named output remains the deterministic default and is
+byte-identical when the option is absent. The 31-document [engineering-scale
+qualification](../artifacts/ifc/engineering-baseline/README.md) records the
+compact/omitted combination and a Khronos-clean package.
+
 The public `naru compile` entry now accepts a local AP242 or AP214 Part 21 file,
 invokes the isolated OCCT adapter, verifies schema and source digest parity,
 and writes the compiled package plus `adapter-report.json`. The committed

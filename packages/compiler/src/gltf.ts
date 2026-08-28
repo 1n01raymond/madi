@@ -835,9 +835,19 @@ export function compileSceneToGltf(
   const scaleToMeters = scene.units.scaleToMeters;
   const bufferViews: GltfBufferView[] = [];
   const accessors: GltfAccessor[] = [];
-  const builder = new GltfBinaryBuilder({ bufferIndex: 0, bufferViews, accessors });
+  const builder = new GltfBinaryBuilder({
+    bufferIndex: 0,
+    bufferViews,
+    accessors,
+    omitNames: options.omitResourceNames,
+  });
   const coarseBuilder = coarseBounds
-    ? new GltfBinaryBuilder({ bufferIndex: 1, bufferViews, accessors })
+    ? new GltfBinaryBuilder({
+        bufferIndex: 1,
+        bufferViews,
+        accessors,
+        omitNames: options.omitResourceNames,
+      })
     : undefined;
   const representations = new Map(scene.representations.map((value) => [value.id, value]));
   const occurrences = [...scene.occurrences].sort(compareId);
@@ -969,7 +979,9 @@ export function compileSceneToGltf(
 
     const meshIndex = meshes.length;
     meshes.push({
-      name: resource.prototype.name ?? resource.prototype.id,
+      ...(options.omitResourceNames === true
+        ? {}
+        : { name: resource.prototype.name ?? resource.prototype.id }),
       primitives,
       extras: {
         madi: {
@@ -996,7 +1008,9 @@ export function compileSceneToGltf(
     if (existing !== undefined) return existing;
     const meshIndex = meshes.length;
     meshes.push({
-      name: `${resource.prototype.name ?? resource.prototype.id} coarse bounds`,
+      ...(options.omitResourceNames === true
+        ? {}
+        : { name: `${resource.prototype.name ?? resource.prototype.id} coarse bounds` }),
       primitives: [
         {
           attributes: {
@@ -1298,6 +1312,7 @@ export function compileSceneToGltf(
       coordinateSystem: "right-handed-y-up-meters",
       geometryEncoding: "gltf-f32",
       ...(options.compactJson === true ? { jsonFormatting: "compact" as const } : {}),
+      ...(options.omitResourceNames === true ? { resourceNames: "omitted" as const } : {}),
       ...(coarseBinary ? { progressiveRepresentation: "prototype-aabb-v1" as const } : {}),
       ...(coarseBinary
         ? {

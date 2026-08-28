@@ -1,10 +1,10 @@
 # External reference fixtures
 
 This registry adds real public STEP and IFC sources without committing large
-third-party binaries to MADI. `manifest.json` pins the exact source revision or
-dated release, download URL, byte length, SHA-256 digest, per-model license,
-attribution, and intended test role. Downloads stay in the ignored
-`output/external-fixtures/` cache.
+third-party binaries to NARU. `manifest.json` pins the exact source revision or
+content-identity policy, retrieval contract, byte length, SHA-256 digest,
+per-model license, attribution, and intended test role. Downloads stay in the
+ignored `output/external-fixtures/` cache.
 
 The registry deliberately separates two states:
 
@@ -21,6 +21,7 @@ The registry deliberately separates two states:
 | `nist-pmi-step-files` | qualified smoke | 14.0 MB archive | AP242 edition 3 B-rep/PMI and an AP242 tessellated-geometry edge case | assembly or runtime scale |
 | `ifc-bench-digital-hub` | qualified real-medium | 67.8 MB / 4 IFC files | real IFC4 federation across architecture, heating, plumbing, and ventilation | ship/plant scale or ADR-0003 performance |
 | `ifc-bench-sixty5` | qualified real-large | 839.9 MB / 7 IFC files | real IFC2X3 federation an order of magnitude larger than Digital Hub, across architecture, structure, facade, kitchen, electrical, plumbing, and ventilation | IFC4-only semantics, renderer performance, or ADR-0003 evidence |
+| `sixty5-engineering` | qualified real-large | 654.1 MB / 34 IFC files | official SDK-S1 Engineering vendor/fabrication federation delivered by a public Trimble Connect share | stable provider revision IDs, browser delivery, or renderer performance |
 
 The qualified Digital Hub files contain 482,994 Part 21 entities in total,
 including 79,663 `IfcRel*` relationships, 2,567 mapped items, twelve building
@@ -29,6 +30,12 @@ storeys, and 161,695 single-value properties. The qualified sixty5 files contain
 relationships, 38,812 mapped items, seven buildings, 129 building storeys, and
 2,867,886 single-value properties. These are source-complexity signals, not
 triangle, occurrence, memory, or frame-time measurements.
+
+The official SDK-S1 Engineering share contains 654,076,269 bytes and
+11,892,551 Part 21 entities across 34 IFC2X3 documents. Its public share exposes
+mutable latest-version URLs, so the registry pins each remote object ID and
+filename and treats the independently verified byte length and SHA-256 as the
+immutable revision identity under [ADR-0012](../../docs/adr/0012-mutable-public-fixture-downloads.md).
 
 Every sixty5 document declares `IFC2X3`, so the federation qualifies the older
 schema path rather than IFC4 additions such as `IfcProjectedCRS`.
@@ -47,6 +54,10 @@ pnpm fixtures:external inspect ifc-bench-digital-hub
 # Deliberate 839.9 MB opt-in; never run by CI or the normal repository check.
 pnpm fixtures:external fetch ifc-bench-sixty5 --allow-large
 pnpm fixtures:external inspect ifc-bench-sixty5
+
+# Deliberate 654.1 MB opt-in, resolved from the official public share.
+pnpm fixtures:external fetch sixty5-engineering --allow-large
+pnpm fixtures:external inspect sixty5-engineering
 ```
 
 `pnpm fixtures:external:check` is offline. It validates manifest structure,
@@ -57,6 +68,15 @@ The fetcher refuses an existing file with the wrong digest, writes new downloads
 through a temporary file, and renames only after size and SHA-256 verification.
 For NIST's ZIP distribution it extracts only the two explicitly registered
 members and verifies each member independently.
+
+Manifest schema 1.1 also permits a dataset-level
+`trimble-connect-public-share` downloader for a publisher whose stable public
+share resolves to short-lived per-file URLs. Those assets register the remote
+object ID and exact remote filename instead of an expiring URL. The fetcher
+checks the share's public download permission, project, object identity, name,
+and latest-version policy before resolving each HTTPS download, then applies
+the same byte-length and SHA-256 checks. Direct-URL datasets retain their
+existing shape. See [ADR-0012](../../docs/adr/0012-mutable-public-fixture-downloads.md).
 
 ## Why these sources
 
@@ -72,6 +92,10 @@ members and verifies each member independently.
 - `sixty5` is large enough to be a meaningful ingestion and memory-pressure
   tier. Its download stays opt-in, but its qualification run is reviewed and its
   per-file identity is committed.
+- The official `sixty5-engineering` share adds vendor-authored precast, steel,
+  facade, floor-system, and embedded-component documents. It is licensed at the
+  pinned first-party SDK-S1 source revision; expiring delivery URLs are never
+  treated as source identity.
 
 Discovery catalogs are not automatically fixtures. [BIMData's R&D
 list](https://github.com/bimdata/BIMData-Research-and-Development/blob/master/pages/IFC_FILES.md)
@@ -97,5 +121,5 @@ one reviewed change:
 
 Qualification still does not make a dataset ADR-0003 decision evidence. That
 requires the same compiled output, visual features, camera trace, browser and
-hardware matrix, and memory/frame-time methodology for MADI and the optimized
+hardware matrix, and memory/frame-time methodology for NARU and the optimized
 baseline.

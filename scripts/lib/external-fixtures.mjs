@@ -26,6 +26,8 @@ const datasetStatuses = new Set(["qualified", "registered"]);
 const datasetTiers = new Set(["smoke", "real-medium", "real-large"]);
 const assetFormats = new Set(["ifc", "step", "zip"]);
 const assetRoles = new Set(["archive", "source"]);
+const manifestSchemaVersions = new Set(["1.1"]);
+const trimbleConnectProvider = "trimble-connect-public-share";
 const sha256Pattern = /^[a-f0-9]{64}$/u;
 const idPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/u;
 
@@ -48,8 +50,28 @@ function assertSha256(value, label) {
 
 function assertHttpsUrl(value, label) {
   assertNonEmptyString(value, label);
-  const url = new URL(value);
+  let url;
+  try {
+    url = new URL(value);
+  } catch {
+    throw new TypeError(`${label} must be a valid URL.`);
+  }
   if (url.protocol !== "https:") throw new TypeError(`${label} must use HTTPS.`);
+}
+
+function assertTrimbleConnectDownload(download, label) {
+  if (typeof download !== "object" || download === null) {
+    throw new TypeError(`${label} must be an object.`);
+  }
+  if (download.provider !== trimbleConnectProvider) {
+    throw new TypeError(`${label}.provider is unsupported.`);
+  }
+  assertHttpsUrl(download.apiBaseUrl, `${label}.apiBaseUrl`);
+  assertNonEmptyString(download.projectId, `${label}.projectId`);
+  assertNonEmptyString(download.shareToken, `${label}.shareToken`);
+  if (download.revisionPolicy !== "content-digest-only") {
+    throw new TypeError(`${label}.revisionPolicy is unsupported.`);
+  }
 }
 
 function assertPositiveInteger(value, label) {
@@ -194,7 +216,7 @@ export async function validateExternalFixtureManifest(
   options = {},
 ) {
   if (
-    manifest?.schemaVersion !== "1.0" ||
+    !manifestSchemaVersions.has(manifest?.schemaVersion) ||
     manifest.storagePolicy !== "external-cache-only" ||
     typeof manifest.cacheDirectory !== "string" ||
     !Array.isArray(manifest.datasets) ||
@@ -228,6 +250,14 @@ export async function validateExternalFixtureManifest(
     assertStringList(dataset.purposes, `Dataset ${dataset.id} purposes`);
     assertPositiveInteger(dataset.expectedDownloadBytes, `Dataset ${dataset.id} download bytes`);
 
+    const dynamicDownload = dataset.download !== undefined;
+    if (dynamicDownload) {
+      if (manifest.schemaVersion !== "1.1") {
+        throw new TypeError(`Dataset ${dataset.id} download requires manifest schema 1.1.`);
+      }
+      assertTrimbleConnectDownload(dataset.download, `Dataset ${dataset.id} download`);
+    }
+
     const source = dataset.source;
     if (typeof source !== "object" || source === null) {
       throw new TypeError(`Dataset ${dataset.id} source must be an object.`);
@@ -251,6 +281,7 @@ export async function validateExternalFixtureManifest(
     }
     const assetIds = new Set();
     const assetPaths = new Set();
+    const remoteObjectIds = new Set();
     let byteTotal = 0;
     for (const [assetIndex, asset] of dataset.assets.entries()) {
       const assetLabel = `Dataset ${dataset.id} asset ${assetIndex}`;
@@ -266,7 +297,24 @@ export async function validateExternalFixtureManifest(
       }
       resolveInside(repositoryRoot, asset.path, `${assetLabel} path`);
       if (assetPaths.has(asset.path)) throw new TypeError(`Duplicate asset path ${asset.path}.`);
-      assertHttpsUrl(asset.url, `${assetLabel} url`);
+      if (dynamicDownload) {
+        if (asset.url !== undefined) {
+          throw new TypeError(`${assetLabel} cannot declare url with a dataset downloader.`);
+        }
+        assertNonEmptyString(asset.remoteObjectId, `${assetLabel} remoteObjectId`);
+        assertNonEmptyString(asset.remoteName, `${assetLabel} remoteName`);
+        if (remoteObjectIds.has(asset.remoteObjectId)) {
+          throw new TypeError(
+            `Dataset ${dataset.id} has duplicate remoteObjectId ${asset.remoteObjectId}.`,
+          );
+        }
+        remoteObjectIds.add(asset.remoteObjectId);
+      } else {
+        assertHttpsUrl(asset.url, `${assetLabel} url`);
+        if (asset.remoteObjectId !== undefined || asset.remoteName !== undefined) {
+          throw new TypeError(`${assetLabel} remote identity requires a dataset downloader.`);
+        }
+      }
       assertPositiveInteger(asset.byteLength, `${assetLabel} byteLength`);
       assertSha256(asset.sha256, `${assetLabel} sha256`);
       byteTotal += asset.byteLength;
@@ -365,7 +413,127 @@ async function verifyFile(path, expected, label) {
   return actual;
 }
 
-async function downloadFile(asset, targetPath) {
+async function fetchProviderJson(fetchImpl, url, init, label) {
+  let response;
+  try {
+    response = await fetchImpl(url, init);
+  } catch {
+    throw new TypeError(`${label} request failed.`);
+  }
+  if (!response.ok) {
+    throw new TypeError(`${label} request failed: HTTP ${response.status}.`);
+  }
+  try {
+    return await response.json();
+  } catch {
+    throw new TypeError(`${label} returned invalid JSON.`);
+  }
+}
+
+function providerUrl(apiBaseUrl, path) {
+  return new URL(`${apiBaseUrl.replace(/\/+$/u, "")}/${path}`);
+}
+
+async function resolveTrimbleConnectShare(dataset, fetchImpl) {
+  const provider = dataset.download;
+  assertTrimbleConnectDownload(provider, `Dataset ${dataset.id} download`);
+
+  const shareUrl = providerUrl(
+    provider.apiBaseUrl,
+    `shares/token/${encodeURIComponent(provider.shareToken)}`,
+  );
+  const share = await fetchProviderJson(
+    fetchImpl,
+    shareUrl,
+    { redirect: "error" },
+    `Dataset ${dataset.id} public share`,
+  );
+
+  if (share?.mode !== "PUBLIC" || share.permission !== "DOWNLOAD") {
+    throw new TypeError(`Dataset ${dataset.id} public share is not PUBLIC/DOWNLOAD.`);
+  }
+  if (share.projectId !== provider.projectId) {
+    throw new TypeError(`Dataset ${dataset.id} public share project does not match the manifest.`);
+  }
+  assertNonEmptyString(share.accessToken, `Dataset ${dataset.id} public share accessToken`);
+  if (!Array.isArray(share.objects)) {
+    throw new TypeError(`Dataset ${dataset.id} public share objects must be an array.`);
+  }
+
+  const objectsById = new Map();
+  for (const object of share.objects) {
+    if (typeof object?.id !== "string" || objectsById.has(object.id)) {
+      throw new TypeError(`Dataset ${dataset.id} public share has invalid object identities.`);
+    }
+    objectsById.set(object.id, object);
+  }
+
+  const resolvedObjects = new Map();
+  for (const asset of dataset.assets) {
+    const object = objectsById.get(asset.remoteObjectId);
+    if (
+      object?.id !== asset.remoteObjectId ||
+      object.name !== asset.remoteName ||
+      object.type !== "FILE" ||
+      object.useLatestVersion !== true
+    ) {
+      throw new TypeError(
+        `Dataset ${dataset.id} public share object ${asset.id} does not match the manifest.`,
+      );
+    }
+    resolvedObjects.set(asset.id, object);
+  }
+
+  return {
+    accessToken: share.accessToken,
+    objectsByAssetId: resolvedObjects,
+    provider,
+  };
+}
+
+function createAssetDownloadResolver(dataset, fetchImpl) {
+  if (dataset.download === undefined) {
+    return async (asset) => asset.url;
+  }
+
+  let sharePromise;
+  return async (asset) => {
+    sharePromise ??= resolveTrimbleConnectShare(dataset, fetchImpl);
+    const share = await sharePromise;
+    const object = share.objectsByAssetId.get(asset.id);
+    if (!object) {
+      throw new TypeError(`Dataset ${dataset.id} public share has no object for ${asset.id}.`);
+    }
+
+    const versionId = object.id;
+    const downloadUrl = providerUrl(
+      share.provider.apiBaseUrl,
+      `files/fs/${encodeURIComponent(object.id)}/downloadurl`,
+    );
+    downloadUrl.searchParams.set("versionId", versionId);
+    const resolved = await fetchProviderJson(
+      fetchImpl,
+      downloadUrl,
+      {
+        redirect: "error",
+        headers: {
+          authorization: `Bearer ${share.accessToken}`,
+          "x-share-token": share.provider.shareToken,
+        },
+      },
+      `Dataset ${dataset.id} asset ${asset.id} download URL`,
+    );
+    if (resolved?.id !== object.id || resolved.versionId !== versionId) {
+      throw new TypeError(
+        `Dataset ${dataset.id} asset ${asset.id} download identity does not match the share.`,
+      );
+    }
+    assertHttpsUrl(resolved.url, `Dataset ${dataset.id} asset ${asset.id} download URL`);
+    return resolved.url;
+  };
+}
+
+async function downloadFile(asset, targetPath, resolveDownloadUrl, fetchImpl) {
   try {
     await verifyFile(targetPath, asset, `Cached asset ${asset.id}`);
     return { downloaded: false };
@@ -376,7 +544,13 @@ async function downloadFile(asset, targetPath) {
   await mkdir(dirname(targetPath), { recursive: true });
   const temporaryPath = `${targetPath}.partial-${process.pid}`;
   await rm(temporaryPath, { force: true });
-  const response = await fetch(asset.url, { redirect: "follow" });
+  const url = await resolveDownloadUrl(asset);
+  let response;
+  try {
+    response = await fetchImpl(url, { redirect: "follow" });
+  } catch {
+    throw new TypeError(`Download failed for ${asset.id}.`);
+  }
   if (!response.ok || response.body === null) {
     throw new TypeError(`Download failed for ${asset.id}: HTTP ${response.status}.`);
   }
@@ -389,6 +563,12 @@ async function downloadFile(asset, targetPath) {
       const bytes = Buffer.from(chunk);
       hash.update(bytes);
       byteLength += bytes.length;
+      if (byteLength > asset.byteLength) {
+        throw new TypeError(
+          `Downloaded asset ${asset.id} failed verification: exceeded the pinned ` +
+            `${asset.byteLength}-byte limit.`,
+        );
+      }
       await file.write(bytes);
     }
   } catch (error) {
@@ -500,11 +680,16 @@ export async function fetchDataset(manifest, dataset, options = {}) {
     }
   }
 
+  const fetchImpl = options.fetchImpl ?? fetch;
+  if (typeof fetchImpl !== "function") {
+    throw new TypeError("fetchImpl must be a function.");
+  }
+  const resolveDownloadUrl = createAssetDownloadResolver(dataset, fetchImpl);
   const results = [];
   for (const asset of dataset.assets) {
     if (selectedIds && !selectedIds.has(asset.id)) continue;
     const path = assetCachePath(manifest, dataset, asset);
-    const result = await downloadFile(asset, path);
+    const result = await downloadFile(asset, path, resolveDownloadUrl, fetchImpl);
     if (asset.role === "archive") await extractSelectedMembers(manifest, dataset, asset, path);
     results.push({ id: asset.id, path, ...result });
   }

@@ -221,9 +221,19 @@ and evidence debt live in the [Phase 2 tracker](PHASE_2.md).
 - workspace with sources, views, selection sets, and annotations;
 - framework-neutral embedding examples.
 
+Current scale evidence: the [31-document sixty5 Design + Engineering
+qualification](../artifacts/ifc/engineering-baseline/README.md) records 104,337
+renderable geometric occurrences, 46,059,890 submitted triangles, 66,396
+geometric prototypes, and 10,394,938 unique triangles in a Khronos-clean
+package. It closes the source/package measurement portion of the first exit
+criterion. The package is not yet publicly hosted or smoke-tested through
+Studio, so that criterion remains partial.
+
 ### Exit criteria
 
-- baseline public scene with 100k+ occurrences and 10M+ triangles;
+- one redistributable source-derived engineering package with at least 100,000
+  renderable geometric occurrences, 10,000,000 submitted triangles, and 10,000
+  geometric prototypes, with unique triangle count reported alongside;
 - cold/warm startup, frame, memory, and interaction results published;
 - forced low-memory scenario remains functional;
 - workspace reopens against unchanged source and detects changed source.

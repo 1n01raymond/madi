@@ -46,7 +46,7 @@ closed gate.
 
 | Roadmap criterion | Current evidence | Missing before exit | State |
 |---|---|---|---|
-| Public baseline scene with 100k+ occurrences and 10M+ triangles | The [public benchmark](../artifacts/benchmarks/heterogeneous-repeatability/README.md) reaches 100,000 occurrences and 10,223,768 submitted triangles | A redistributable engineering scene at that scale, with source/license provenance and a published package | **Partial** |
+| Public engineering baseline: 100k+ renderable geometric occurrences, 10M+ submitted triangles, and 10k+ geometric prototypes | The qualified [31-document sixty5 Design + Engineering package](../artifacts/ifc/engineering-baseline/README.md) passes all three floors together: 104,337 renderable occurrences, 46,059,890 submitted triangles, and 66,396 geometric prototypes; it reports 10,394,938 unique triangles and Khronos validation at 0 errors / 0 warnings | Publish the digest-locked 854,446,743-byte package, open it through Studio, and add public-delivery smoke evidence; this committed record qualifies the source and package but does not measure startup, rendering, or delivery | **Partial** |
 | Cold/warm startup, frame, memory, and interaction results published | Real-large [first-frame](../artifacts/ifc/sixty5-first-frame/README.md) and [localized-demand](../artifacts/spatial-demand/sixty5-localized/README.md) records exist; mid-size STEP/IFC [cache records](../artifacts/cache/README.md) publish single cold/warm runs | One coherent real-large cold/warm matrix with repeated samples, cache size, stage timing, total client memory, and interaction results | **Partial** |
 | Forced low-memory scenario remains functional | [sixty5 browser evidence](../artifacts/ifc/sixty5-browser/README.md) retains all coarse occurrences and source-aware interaction while target geometry is admitted under separate fixed 64 MiB decoded/GPU budgets | An explicit forced-low-memory profile and total-process accounting; current residency counters do not bound hierarchy, sidecars, Worker state, JavaScript heap, or every GPU allocation | **Partial** |
 | Workspace reopens against unchanged source and detects changed source | [Cache tests](../packages/compiler/test/compiled-cache.test.ts) inspect source identity, and [IFC dependency tests](../packages/compiler/test/ifc-incremental-dependencies.test.ts) detect changed/deleted/renamed inputs | A persisted workspace manifest with sources, views, and reopen behavior exercised through Studio | **Pending** |
@@ -140,8 +140,8 @@ scene size.
 6. Add the first minimal workspace manifest and prove unchanged reopen plus
    changed-source detection.
 7. Close the most decision-relevant evidence debt and blockers: non-Blink
-   real-large spatial demand, nested precision, total-memory accounting, and an
-   engineering-scale public baseline.
+   real-large spatial demand, nested precision, total-memory accounting, and
+   public Studio delivery of the qualified engineering-scale package.
 
 ### Later — expand only after the core loop is reproducible
 
@@ -179,7 +179,7 @@ evidence debt.
 | Blocker | Required change or external condition | Gate blocked |
 |---|---|---|
 | Total-process memory accounting | Instrument JavaScript heap, Worker-owned arrays, hierarchy/sidecars, runtime-owned decoded/GPU geometry, and disclose GPU allocations the backend cannot enumerate | Whole-application bounded-memory claim and the complete Phase 2 low-memory exit |
-| Public engineering-scale fixture | Qualify a redistributable 100k+ occurrence / 10M+ triangle source-derived engineering input or a documented design-partner aggregate | Phase 2 scale exit and stronger ADR-0003 relevance |
+| Public engineering-package delivery | Publish the qualified [31-document package](../artifacts/ifc/engineering-baseline/README.md) at its recorded digest, open it through Studio, and smoke-check every resource and HTTP Range response; source/package qualification is already recorded | Complete Phase 2 public-scale exit and stronger ADR-0003 relevance |
 | Cross-host IFC drift | Diagnose or deliberately scope the recorded 8-byte macOS/Windows Scene IR difference ([record](../artifacts/spatial-demand/digital-hub-localized/README.md)) | Cross-host cache portability claim |
 | Real Safari rendering | Run on a Safari/macOS combination that exposes WebGPU under supported default settings; the current Sequoia record proves only graceful unsupported behavior | Safari renderer-conformance claim |
 

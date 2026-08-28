@@ -25,6 +25,8 @@ reverse. They explain context and trade-offs rather than only the final choice.
 | [0009](0009-persistent-compiled-cache.md) | Key persistent compiled caches by complete import identity | Accepted |
 | [0010](0010-ifc-incremental-dependency-index.md) | Index IFC document dependencies before partial compilation | Proposed |
 | [0011](0011-remote-package-limits.md) | Bound remote compiled packages before parsing or allocating | Proposed |
+| [0012](0012-mutable-public-fixture-downloads.md) | Pin mutable public-share fixtures by content identity | Proposed |
+| [0013](0013-optional-gltf-resource-name-elision.md) | Allow opt-in glTF resource-name elision | Proposed |
 
 ## Phase 0 review
 

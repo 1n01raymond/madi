@@ -52,15 +52,18 @@ Private partner datasets may guide optimization but cannot be the only evidence.
 
 Large third-party source files are registered in
 `fixtures/external/manifest.json` and cached outside Git. A `qualified` source
-has pinned revision, URL, byte length, SHA-256, per-model license, attribution,
-and committed Part 21 inspection evidence. A merely `registered` source cannot
-support a benchmark claim.
+has pinned provenance and download identity, byte length, SHA-256, per-model
+license, attribution, and committed inspection evidence. A merely `registered`
+source cannot support a benchmark claim. A host without immutable object
+revisions is acceptable only when its stable public resolver is pinned and the
+download is rejected unless its recorded byte length and SHA-256 still match.
 
 | Dataset | Tier | Current role |
 |---|---|---|
 | NIST MBE PMI STEP files | smoke, qualified | AP242 B-rep/PMI and tessellated-geometry conformance |
 | IFC-Bench Digital Hub | real-medium, qualified | four-file IFC4 architecture/MEP federation and semantic ingestion |
 | IFC-Bench sixty5 | real-large, qualified | opt-in 839.9 MB seven-discipline IFC2X3 federation |
+| SDK-S1 sixty5 Engineering | real-large, qualified | opt-in 654.1 MB official 34-file IFC2X3 fabrication/vendor federation |
 
 The real sources complement, rather than replace, deterministic generated
 workloads. Digital Hub is suitable for building the IFC adapter and checking
@@ -89,12 +92,45 @@ heterogeneous tier must add many unique pipe spools, plates, and equipment
 prototypes before ADR-0003 can be decided. Repetition-only results are not
 representative because optimized engine instancing is already strong there.
 
+The Phase 2 public engineering gate is deliberately stricter than the scale
+control. One compiled, source-derived engineering package must satisfy all of:
+
+- `geometricOccurrenceCount >= 100,000` (renderable occurrences, excluding
+  semantic-only hierarchy and grouping records);
+- `submittedTriangleCount >= 10,000,000` (pre-instancing raster workload); and
+- `geometricPrototypeCount >= 10,000` (a diversity guard against satisfying the
+  occurrence floor through repetition alone).
+
+The same record reports unique `triangleCount` so submitted scene scale is not
+misrepresented as stored or uploaded geometry. The existing controls split the
+gate: the heterogeneous synthetic record passes the occurrence and submitted
+triangle floors with 256 prototypes, while the original seven-document sixty5
+record passes the submitted triangle and prototype floors with 78,173
+renderable occurrences. The [31-document sixty5 Design + Engineering
+record](../artifacts/ifc/engineering-baseline/README.md) now passes all three at
+once: 104,337 renderable occurrences, 46,059,890 submitted triangles, and
+66,396 geometric prototypes, with 10,394,938 unique triangles reported. Its
+package and source identity are qualified; public Studio delivery and any
+startup, memory, frame-time, or renderer comparison remain unrecorded.
+
 ### 4.3 Evidence layers
 
 1. **Public scale control:** deterministic and redistributable at every tier.
-2. **Public real model:** license-audited STEP or IFC industrial surrogate.
-3. **Private shadow model:** customer-controlled source stays private; only
+2. **Public real model:** license-audited, source-derived STEP or IFC engineering
+   input. Only this lane can close the Phase 2 public engineering gate.
+3. **Source-derived synthetic CAD control:** a license-pinned generated corpus
+   can exercise STEP/OCCT breadth and deterministic import, but is neither a
+   real authored assembly nor a substitute for the public real-model gate.
+4. **Local diagnostic:** inaccessible, proprietary, or ambiguously licensed
+   input may guide local feasibility work, but no source-derived geometry,
+   properties, screenshot, or public claim leaves the local ignored cache.
+5. **Private shadow model:** customer-controlled source stays private; only
    approved aggregate metrics, configuration, and source digest are published.
+
+West Riverside Hospital remains in the local-diagnostic lane because its
+upstream publisher does not state redistribution terms; no source-derived
+artifact is public evidence. CadQuarry is tracked separately in the synthetic
+CAD-control lane and cannot substitute for the authored real-model gate.
 
 The private profile is compiled and served entirely inside the customer
 network. It records outbound requests and fails if the core runtime requires an
@@ -329,11 +365,22 @@ multi-host evidence is contractually required. The integrated-GPU profile,
 explicit-edge and bounded-residency slices, and a real industrial assembly
 remain outstanding. See `artifacts/benchmarks/heterogeneous-gpu-timing/`.
 
-The external-source registry now supplies two qualified correctness layers:
-two NIST AP242 cases (30,100 Part 21 entities) and the four-discipline IFC-Bench
-Digital Hub federation (482,994 Part 21 entities). Their source files remain in
-an ignored local cache; only provenance, license snapshots, checksums, and
-aggregate inspections are committed. See `artifacts/fixtures/external/`.
+The external-source registry now supplies four qualified datasets: two NIST
+AP242 files (30,100 Part 21 entities), the four-document IFC-Bench Digital Hub
+federation (482,994), the seven-document sixty5 Design federation (11,376,756),
+and the official 34-document SDK-S1 Engineering share (11,892,551). Their source
+files remain in an ignored local cache; only provenance, license snapshots,
+checksums, and aggregate inspections are committed. See
+`artifacts/fixtures/external/`.
+
+The Design package plus the complete 24-document Geelen Beton/Aarts Engineering
+cohort also has a compiled qualification record under
+`artifacts/ifc/engineering-baseline/`. Across 31 documents it records 104,337
+renderable occurrences, 66,396 geometric prototypes, 46,059,890 submitted and
+10,394,938 unique triangles, an 854,446,743-byte package, a decoded 2,048-leaf
+spatial index, and Khronos validation with zero errors and zero warnings. The
+package is not committed or publicly hosted; browser delivery and performance
+remain separate gates.
 
 Digital Hub now also has a compiled correctness record under
 `artifacts/ifc/digital-hub/`: 5,152 renderable occurrences, 3,383 unique

@@ -4,6 +4,7 @@ export class GltfBinaryBuilder {
   readonly bufferViews: GltfBufferView[];
   readonly accessors: GltfAccessor[];
   readonly #bufferIndex: number;
+  readonly #omitNames: boolean;
   readonly #chunks: { readonly offset: number; readonly bytes: Uint8Array }[] = [];
   #byteLength = 0;
 
@@ -15,8 +16,10 @@ export class GltfBinaryBuilder {
     readonly bufferIndex?: number;
     readonly bufferViews?: GltfBufferView[];
     readonly accessors?: GltfAccessor[];
+    readonly omitNames?: boolean;
   } = {}) {
     this.#bufferIndex = options.bufferIndex ?? 0;
+    this.#omitNames = options.omitNames === true;
     this.bufferViews = options.bufferViews ?? [];
     this.accessors = options.accessors ?? [];
   }
@@ -42,7 +45,7 @@ export class GltfBinaryBuilder {
       byteOffset: this.#byteLength,
       byteLength: bytes.byteLength,
       ...(options.target === undefined ? {} : { target: options.target }),
-      ...(options.name === undefined ? {} : { name: options.name }),
+      ...(this.#omitNames || options.name === undefined ? {} : { name: options.name }),
     });
     this.#chunks.push({ offset: this.#byteLength, bytes });
     this.#byteLength += bytes.byteLength;
@@ -55,7 +58,7 @@ export class GltfBinaryBuilder {
       type: options.type,
       ...(options.min === undefined ? {} : { min: options.min }),
       ...(options.max === undefined ? {} : { max: options.max }),
-      ...(options.name === undefined ? {} : { name: options.name }),
+      ...(this.#omitNames || options.name === undefined ? {} : { name: options.name }),
     });
     return accessor;
   }
