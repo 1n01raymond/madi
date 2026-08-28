@@ -38,15 +38,18 @@ external binary geometry, and build reports from local AP242/AP214 through the
 isolated OCCT adapter. It preserves hierarchy, prototype reuse, explicit edges,
 and source identity; expanded Scene IR is temporary. Direct STEP output now
 separates prototype AABB proxies from target geometry in two standard glTF
-buffers. Shape-preserving LOD and spatial chunks remain pending. See the
+buffers. Shape-preserving LOD remains pending; optional spatial-demand indexing
+and payload ordering were implemented after this initial slice and are tracked
+in the [Phase 2 tracker](PHASE_2.md). See the historical
 [Phase 1 tracker](PHASE_1.md).
 
 The direct AP242 package also records deterministic prototype byte ranges over
 `scene.bin`. The browser promotes each completed HTTP Range while retaining
-coarse batches for unresolved prototypes. The current streaming order is static,
-but a selected occurrence can pin its target detail and demote colder target
-groups back to retained coarse batches under the same budgets. Camera-driven
-reprioritization remains pending.
+coarse batches for unresolved prototypes. A selected occurrence can pin its
+target detail and demote colder target groups back to retained coarse batches
+under the same budgets. Camera-driven chunk-bounds reprioritization and an
+optional spatial-demand path are now implemented; a view-independent demand
+cost remains pending.
 
 An early IFC risk slice now compiles the qualified four-discipline Digital Hub
 federation through isolated IfcOpenShell into the same Scene IR and glTF path.
@@ -55,8 +58,9 @@ groups, and flattened properties. Its 3,383 prototype ranges now coalesce into
 45 static target requests; the browser reconciles stable GPU batches under
 separate 64 MiB decoded/GPU admission budgets. A selected target can replace
 colder detail with retained coarse fallbacks, preserving visibility and picking
-identity. It is not the Phase 3 BIM workflow or a Phase 2 performance result:
-spatial chunks, view-driven scheduling, and cache tiers remain pending. A
+identity. It is not the Phase 3 BIM workflow or, by itself, a Phase 2
+performance result. Spatial demand and view-driven scheduling now have separate
+Phase 2 evidence; persistent browser cache tiers remain pending. A
 focused project-owned IFC4 wall now proves the E2.1 boundary path separately:
 12 OpenCascade face-boundary segments survive into glTF with source-item
 mapping while six triangle face diagonals are excluded. Analytic curve kinds,
@@ -77,9 +81,11 @@ materializing a value. The compiled package republishes those properties as a
 `madi.package-properties.1` sidecar (`properties.json` + the column file byte
 for byte), so viewers resolve a picked occurrence's property sets without any
 Scene IR intermediate; the Studio does exactly that, lazily per selection.
-sixty5 compiles end to end into a recorded, Khronos-validated 608.2 MB
-package. Headed Chrome now consumes that package: all 78,173 renderable
-occurrences render, the fixed 64 MiB residency budgets hold, and picking
+sixty5 compiles end to end into 608.2 MB of Khronos-validated core glTF
+resources (`scene.gltf`, `scene.bin`, and `coarse.bin`), or a 657.1 MB compiled
+package including the property sidecar. Headed Chrome consumes that package:
+all 78,173 renderable occurrences render, the separate fixed 64 MiB target
+decoded/GPU admission budgets hold, and picking
 resolves the selected occurrence's lazily fetched property sets. The original
 268.0 s first coarse frame (`artifacts/ifc/sixty5-browser/`) is reduced to a
 4.283 s three-run median by shared coarse residency, a persistent document
@@ -149,8 +155,8 @@ integration pairs pass for both models: Digital Hub records 71→66 target Range
 while sixty5 records 6,417/6,503 ms coarse frames and completes budget-limited
 selection/property checks after target promotion stopped rescanning all 188,319
 hierarchy records. The fitted sixty5 view sees every leaf and does not improve
-Range count (45→46), so localized real-model navigation and repeated timing
-remain pending.
+Range count (45→46); the localized repeated record above is therefore the
+relevant demand result. A non-Blink real-model repeat remains pending.
 
 The camera-relative precision path is now decision evidence for ADR-0005. A
 project-owned 0.25 mm gap is retained at a 10,000 km offset with
@@ -197,26 +203,16 @@ without extending the completed vertical-slice scope.
 
 ## Phase 2 — Large-scene alpha (`0.2.x`)
 
-Status: Current.
+Status: Current. Detailed implementation state, dependencies, prioritized work,
+and evidence debt live in the [Phase 2 tracker](PHASE_2.md).
 
 - content-addressed persistent cache under the
   [import/cache product contract](IMPORT_AND_CACHE.md): cancellable background
   cold import, hierarchy/coarse preview in 5–15 s, unchanged reopen in 1–5 s,
-  followed by dependency-safe per-discipline rebuild and authorized shared reuse
-  (verified STEP/IFC whole-package storage and adapter-skipping orchestration
-  implemented; pinned real-fixture cold/warm and corruption evidence recorded
-  in `artifacts/cache/`, ADR-0009 Accepted; deterministic IFC dependency index
-  and changed/deleted/renamed/reconciliation tests implemented under proposed
-  ADR-0010; unchanged per-document IfcOpenShell extraction reuse and clean
-  adapter-merge equivalence implemented; content-addressed compiled payloads,
-  complete-package equivalence, and shared reuse pending);
-- view-prioritized scheduling and cancellation of obsolete camera work
-  (coarse-bounds fallback, optional spatial-demand policy, and an opt-in
-  screen-coverage demand ordering implemented; focused browser, real-model
-  localized, and demand-ordering evidence passed, a view-independent demand
-  cost pending);
-- dynamic memory budgets and persistent cache tiers (fixed admission budgets and
-  selected-target eviction implemented);
+  dependency-safe per-discipline rebuild, and later authorized shared reuse;
+- view-prioritized scheduling and cancellation of obsolete camera work;
+- dynamic target-geometry budgets, total-memory accounting, and persistent
+  browser cache tiers;
 - spatial/draw clustering;
 - screen-space LOD policy;
 - broader selected-object residency policy and multi-selection pinning;

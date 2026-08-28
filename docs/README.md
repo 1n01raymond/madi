@@ -25,10 +25,12 @@ Read in this order:
     known limits.
 12. [Phase 1 completion report](PHASE_1_REPORT.md) — exit decision and
     consolidated reproducible performance summary.
-13. [Architecture decisions](adr/README.md) — decisions and alternatives.
-14. [Branching and releases](BRANCHING.md) — work branches, pull requests,
+13. [Phase 2 tracker](PHASE_2.md) — current priorities, dependencies, official
+    exit-gate status, and evidence debt.
+14. [Architecture decisions](adr/README.md) — decisions and alternatives.
+15. [Branching and releases](BRANCHING.md) — work branches, pull requests,
     merge rules, backports, tags, and enforcement gates.
-15. [Translations](TRANSLATIONS.md) — README languages, terminology, and
+16. [Translations](TRANSLATIONS.md) — README languages, terminology, and
     maintenance workflow.
 
 ## Documentation rules

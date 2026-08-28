@@ -31,7 +31,8 @@
   — a real four-discipline IFC federation, streamed over plain HTTP Ranges. Nothing to install.
   <br />
   <sub>Measured at real-large scale: the 839.9 MB <code>sixty5</code> federation reaches a first
-  coarse frame of all 78,173 renderable occurrences in 4.3 s inside a fixed 64 MiB budget
+  coarse frame of all 78,173 renderable occurrences in 4.3 s; target detail is admitted under
+  separate fixed 64 MiB decoded/GPU budgets, excluding total process memory
   (<a href="artifacts/ifc/sixty5-first-frame/README.md">evidence</a>).</sub>
 </p>
 
@@ -66,9 +67,10 @@ captures those records pin by digest.
       <br />
       <sub><strong>A real-large IFC federation.</strong> The 839.9 MB
       seven-discipline <code>sixty5</code> model: hierarchy and search ready in
-      2.4 s, a first coarse frame of all 78,173 renderable occurrences in
-      4.3 s, geometry held inside a fixed 64 MiB budget, and a picked
-      foundation beam resolving its IFC properties.
+      2.4 s, and a first coarse frame of all 78,173 renderable occurrences in
+      4.3 s. Progressive target detail stays inside separate fixed 64 MiB
+      decoded/GPU admission budgets; total process memory is not included. A
+      picked foundation beam resolves its IFC properties.
       <a href="artifacts/ifc/sixty5-browser/README.md">Residency evidence</a> ·
       <a href="artifacts/ifc/sixty5-first-frame/README.md">First-frame evidence</a></sub>
     </td>
@@ -87,7 +89,7 @@ NARU.</sub>
 | CAD boundaries are drawn from source edges, not guessed from triangles | 13,897 explicit edge segments survive into the browser ([browser matrix](artifacts/browser-matrix/README.md)) |
 | The tree, search, and properties work before geometry arrives | a 188,319-record hierarchy is ready in 3.3 s on the 839.9 MB federation ([sixty5 browser record](artifacts/ifc/sixty5-browser/README.md)) |
 | Detail streams progressively over plain HTTP | 28 `scene.bin` requests, every one an HTTP 206 `bytes=` Range response ([sixty5 browser record](artifacts/ifc/sixty5-browser/README.md)) |
-| Memory stays inside a declared budget at any scene size | promotion stopped at chunk 26 of 234; decoded and GPU bytes both held under 64 MiB ([sixty5 browser record](artifacts/ifc/sixty5-browser/README.md)) |
+| Progressive target-geometry residency stays inside its declared budgets | promotion stopped at chunk 26 of 234; target decoded and GPU bytes both held under 64 MiB. This does not include hierarchy, sidecars, Worker state, or total process memory ([sixty5 browser record](artifacts/ifc/sixty5-browser/README.md)) |
 | Selection resolves to source CAD/BIM identity | a picked foundation beam lazily resolves its 6 IFC property entries ([sixty5 browser record](artifacts/ifc/sixty5-browser/README.md)) |
 | A real-large first frame arrives in seconds, not minutes | the shared-coarse Worker path, a virtualized assembly list, and skip-and-continue residency admission cut the sixty5 first coarse frame from 268.0 s to a 4.3 s median, a 62.6× speedup ([first-frame record](artifacts/ifc/sixty5-first-frame/README.md)) |
 | Geometry the budget cannot hold is never downloaded | demanded sixty5 chunks are priced from the compiled document and skipped before any bytes move; 123 of 234 are, so the resident set costs 113 Range responses instead of 245 ([first-frame record](artifacts/ifc/sixty5-first-frame/README.md)) |
@@ -125,21 +127,21 @@ focus is deliberately narrower—excellent large-scene delivery and interaction.
   <tr>
     <td width="33%" valign="top">
       <h3>Keep the source of truth</h3>
-      Native CAD/BIM and neutral exchange files remain authoritative. NARU
-      workspaces store references, views, annotations, and plugin state—not a
-      replacement CAD format.
+      Native CAD/BIM and neutral exchange files remain authoritative today.
+      Planned Phase 2 workspaces will store references, views, annotations, and
+      plugin state—not a replacement CAD format.
     </td>
     <td width="33%" valign="top">
       <h3>Compile for scale</h3>
-      The offline pipeline preserves occurrences and source references while
-      instancing, partitioning, quantizing, compressing, and building
-      progressive levels of detail.
+      The compiler currently preserves occurrences and source references,
+      reuses prototypes, and emits coarse/target partitions. Quantization,
+      compression, and shape-preserving LOD remain planned.
     </td>
     <td width="33%" valign="top">
       <h3>Run WebGPU-native</h3>
-      Packed data, bounded memory, Workers, GPU-visible state, and direct
-      WebGPU rendering keep the frame hot path independent of a large
-      JavaScript scene graph.
+      Workers, GPU-visible state, direct WebGPU rendering, and fixed
+      target-geometry admission budgets keep the frame hot path independent of
+      a large JavaScript scene graph. Total-memory accounting remains planned.
     </td>
   </tr>
 </table>
@@ -164,12 +166,12 @@ is introduced only when public benchmarks demonstrate a material gap.
 
 ## What we are building
 
-| Layer | Responsibility | First vertical slice |
+| Layer | Responsibility | Implemented now / planned |
 |---|---|---|
-| **NARU Studio** | Reference engineering workspace | Assembly tree, search, properties, selection, hide/isolate, section, measurement |
-| **NARU Runtime** | Headless browser and GPU engine | Progressive streaming, Worker decode, instancing, culling, picking, bounded GPU memory |
-| **NARU Compiler** | Reproducible source-to-Web build pipeline | STEP AP242 through OCCT, hierarchy and edge preservation, LOD and chunk generation |
-| **NARU SDK** | Stable embedding and extension surface | Framework-neutral TypeScript API, commands, panels, analysis Workers, capability-scoped plugins |
+| **NARU Studio** | Reference engineering application | **Implemented:** assembly tree, search, properties, selection, hide/isolate, one section plane. **Planned:** persisted workspace, measurement, annotations |
+| **NARU Runtime** | Headless browser and GPU engine | **Implemented:** progressive streaming, Worker decode, instancing, culling, picking, target-geometry admission budgets. **Planned:** persistent cache tiers, LOD, total-memory accounting |
+| **NARU Compiler** | Reproducible source-to-Web build pipeline | **Implemented:** STEP/IFC adapters, hierarchy/identity/edges, deterministic coarse/target chunks and cache. **Planned:** incremental compiled-payload reuse, LOD, compression |
+| **NARU SDK** | Future stable embedding and extension surface | **Not published:** framework-neutral stable API, commands, panels, analysis Workers, and capability-scoped plugins remain planned |
 
 ### Designed for engineering work
 
@@ -178,9 +180,12 @@ is introduced only when public benchmarks demonstrate a material gap.
 - Draw explicit CAD edges instead of guessing every meaningful boundary from
   tessellated triangles.
 - Show a useful coarse scene before all target-detail geometry arrives.
-- Select, hide, isolate, clip, measure, and annotate by stable object identity.
-- Keep CPU and GPU memory inside declared budgets, even on very large scenes.
-- Self-host the Studio or embed the runtime inside another product.
+- Use stable object identity for implemented selection, hide/isolate, and
+  sectioning; measurement and annotations remain planned.
+- Keep progressive target-geometry residency inside declared decoded/GPU
+  budgets, and account for total process memory separately.
+- Plan a supported self-host and framework-neutral embedding path after the
+  current application and package boundaries stabilize.
 
 ## Project status
 
@@ -193,7 +198,8 @@ The roadmap is evidence-gated rather than date-driven.
 | **2 — Large-scene alpha** | 100k+ occurrences, streaming, LOD, cache, and memory budgets | **Current** |
 | **3 — Open platform beta** | Plugins, production IFC workflows, embedding, and self-host deployment | Planned |
 
-See the full [roadmap](docs/ROADMAP.md), [Phase 1 evidence](docs/PHASE_1.md),
+See the full [roadmap](docs/ROADMAP.md), the current
+[Phase 2 tracker](docs/PHASE_2.md), [Phase 1 evidence](docs/PHASE_1.md),
 [Phase 1 completion report](docs/PHASE_1_REPORT.md),
 [Phase 0 record](docs/PHASE_0.md), and
 [Chrome/Firefox WebGPU matrix](artifacts/browser-matrix/README.md). Performance

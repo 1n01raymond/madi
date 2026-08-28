@@ -31,7 +31,8 @@
   — 실제 4개 분야 IFC 연합 모델을 순수 HTTP Range로 스트리밍합니다. 설치할 것이 없습니다.
   <br />
   <sub>실대형 스케일 측정치: 839.9 MB <code>sixty5</code> 연합 모델이 렌더링 가능한 78,173개
-  occurrence 전체의 첫 coarse 프레임에 4.3초 만에 도달하며, 고정 64 MiB 예산을 유지합니다
+  occurrence 전체의 첫 coarse 프레임에 4.3초 만에 도달합니다. target detail은 별도의 고정
+  64 MiB decoded·GPU 예산에 따라 admission되며 전체 프로세스 메모리는 포함되지 않습니다
   (<a href="artifacts/ifc/sixty5-first-frame/README.md">증거</a>).</sub>
 </p>
 
@@ -69,8 +70,9 @@
       <br />
       <sub><strong>실물 대형 IFC federation.</strong> 839.9 MB 7개 분야
       <code>sixty5</code> 모델: 2.4초 만에 계층과 검색 준비, 렌더링 가능한
-      78,173개 occurrence 전체의 첫 coarse frame이 4.3초, 고정 64 MiB 예산
-      안에 유지되는 geometry, 그리고 선택된 기초 보가 자신의 IFC 속성을
+      78,173개 occurrence 전체의 첫 coarse frame이 4.3초입니다. 점진적 target
+      detail은 별도의 고정 64 MiB decoded·GPU admission 예산 안에 머물며 전체
+      프로세스 메모리는 포함되지 않습니다. 선택된 기초 보는 자신의 IFC 속성을
       resolve합니다.
       <a href="artifacts/ifc/sixty5-browser/README.md">residency 증거</a> ·
       <a href="artifacts/ifc/sixty5-first-frame/README.md">첫 프레임 증거</a></sub>
@@ -90,7 +92,7 @@ commit과 고지를 보존해 수정 없이 MIT로 재배포합니다. Adafruit�
 | CAD 경계는 삼각형에서 추측하지 않고 원본 edge에서 그립니다 | 13,897개 명시적 edge segment가 브라우저까지 유지 ([브라우저 matrix](artifacts/browser-matrix/README.md)) |
 | 트리·검색·속성은 geometry가 도착하기 전에 동작합니다 | 839.9 MB federation에서 188,319개 레코드 계층이 3.3초 만에 준비 ([sixty5 브라우저 기록](artifacts/ifc/sixty5-browser/README.md)) |
 | 상세 형상은 일반 HTTP 위에서 점진적으로 스트리밍됩니다 | 28건의 `scene.bin` 요청이 전부 HTTP 206 `bytes=` Range 응답 ([sixty5 브라우저 기록](artifacts/ifc/sixty5-browser/README.md)) |
-| 장면 크기와 무관하게 메모리는 선언된 예산 안에 머뭅니다 | promotion이 234개 중 26번째 chunk에서 정지, 디코드·GPU 바이트 모두 64 MiB 미만 유지 ([sixty5 브라우저 기록](artifacts/ifc/sixty5-browser/README.md)) |
+| 점진적 target geometry residency는 선언된 예산 안에 머뭅니다 | promotion이 234개 중 26번째 chunk에서 정지하고 target decoded·GPU 바이트가 모두 64 MiB 미만을 유지합니다. 계층, sidecar, Worker 상태와 전체 프로세스 메모리는 이 수치에 포함되지 않습니다 ([sixty5 브라우저 기록](artifacts/ifc/sixty5-browser/README.md)) |
 | 선택은 원본 CAD/BIM 식별자로 이어집니다 | 선택된 기초 보가 6개 IFC 속성 항목을 지연 resolve ([sixty5 브라우저 기록](artifacts/ifc/sixty5-browser/README.md)) |
 | 실물 대형 첫 프레임이 분이 아니라 초 단위로 도착합니다 | 공유 coarse Worker 경로, 가상화된 어셈블리 목록, 거부된 청크를 건너뛰는 residency admission이 sixty5 첫 coarse frame을 268.0초에서 중앙값 4.3초로 단축 — 62.6배 개선 ([첫 프레임 기록](artifacts/ifc/sixty5-first-frame/README.md)) |
 | 예산이 담을 수 없는 지오메트리는 아예 내려받지 않습니다 | 요구된 sixty5 청크는 컴파일된 문서에서 미리 계산되어 바이트 전송 전에 거부되며, 234개 중 123개가 그렇게 되어 resident set이 Range 응답 245회 대신 113회로 완성 ([첫 프레임 기록](artifacts/ifc/sixty5-first-frame/README.md)) |
@@ -128,20 +130,21 @@ NARU는 원본 도구와 웹 애플리케이션 사이의 열린 계층을 제�
   <tr>
     <td width="33%" valign="top">
       <h3>원본을 그대로 기준으로</h3>
-      네이티브 CAD/BIM과 중립 교환 파일은 계속 source of truth입니다. NARU
-      워크스페이스는 원본 참조, 뷰, 주석, 플러그인 상태를 저장하며 대체 CAD
-      포맷이 되려 하지 않습니다.
+      네이티브 CAD/BIM과 중립 교환 파일은 현재도 source of truth입니다. Phase 2에
+      계획된 워크스페이스는 원본 참조, 뷰, 주석, 플러그인 상태를 저장하되 대체
+      CAD 포맷이 되지 않습니다.
     </td>
     <td width="33%" valign="top">
       <h3>대형 장면에 맞게 컴파일</h3>
-      오프라인 파이프라인은 occurrence와 원본 참조를 보존하면서 인스턴싱,
-      공간 분할, 양자화, 압축, 점진적 LOD를 구성합니다.
+      현재 컴파일러는 occurrence와 원본 참조를 보존하고 prototype을 재사용하며
+      coarse/target partition을 생성합니다. 양자화, 압축, shape-preserving LOD는
+      아직 계획 단계입니다.
     </td>
     <td width="33%" valign="top">
       <h3>WebGPU 네이티브 실행</h3>
-      패킹된 데이터, 제한된 메모리, Worker, GPU 가시 상태와 직접 WebGPU
-      렌더링을 사용해 프레임 hot path가 거대한 JavaScript scene graph에
-      의존하지 않도록 합니다.
+      Worker, GPU 가시 상태, 직접 WebGPU 렌더링과 고정 target-geometry admission
+      예산으로 프레임 hot path가 거대한 JavaScript scene graph에 의존하지 않게
+      합니다. 전체 메모리 계측은 아직 계획 단계입니다.
     </td>
   </tr>
 </table>
@@ -166,21 +169,24 @@ Engineering Scene IR은 새로운 교환 포맷이 아니라 논리적인 시스
 
 ## 만들고 있는 것
 
-| 계층 | 역할 | 첫 번째 수직 슬라이스 |
+| 계층 | 역할 | 현재 구현 / 계획 |
 |---|---|---|
-| **NARU Studio** | 레퍼런스 엔지니어링 워크스페이스 | 어셈블리 트리, 검색, 속성, 선택, 숨김/격리, 단면, 측정 |
-| **NARU Runtime** | Headless 브라우저·GPU 엔진 | 점진적 스트리밍, Worker 디코딩, 인스턴싱, 컬링, 피킹, GPU 메모리 제한 |
-| **NARU Compiler** | 재현 가능한 source-to-Web 빌드 파이프라인 | OCCT 기반 STEP AP242, 계층·엣지 보존, LOD·청크 생성 |
-| **NARU SDK** | 안정적인 임베딩·확장 인터페이스 | 프레임워크 중립 TypeScript API, 명령, 패널, 분석 Worker, 권한 기반 플러그인 |
+| **NARU Studio** | 레퍼런스 엔지니어링 애플리케이션 | **구현:** 어셈블리 트리, 검색, 속성, 선택, 숨김/격리, 단면 평면 1개. **계획:** 영속 워크스페이스, 측정, 주석 |
+| **NARU Runtime** | Headless 브라우저·GPU 엔진 | **구현:** 점진적 스트리밍, Worker 디코딩, 인스턴싱, 컬링, 피킹, target-geometry admission 예산. **계획:** 영속 캐시 계층, LOD, 전체 메모리 계측 |
+| **NARU Compiler** | 재현 가능한 source-to-Web 빌드 파이프라인 | **구현:** STEP/IFC 어댑터, 계층·식별자·엣지, 결정적 coarse/target 청크와 캐시. **계획:** incremental compiled payload 재사용, LOD, 압축 |
+| **NARU SDK** | 향후 안정화할 임베딩·확장 인터페이스 | **미출시:** 프레임워크 중립 안정 API, 명령, 패널, 분석 Worker와 권한 기반 플러그인은 계획 단계 |
 
 ### 엔지니어링 작업을 위한 설계
 
 - 어셈블리, prototype, occurrence, 원본 객체, 이름, 색상, 단위, 변환 관계 보존
 - 삼각형에서 모든 경계를 추측하는 대신 명시적인 CAD 엣지 렌더링
 - 전체 정밀도 형상이 도착하기 전에 사용할 수 있는 coarse scene 표시
-- 안정적인 객체 식별자를 기준으로 선택, 숨김, 격리, 클리핑, 측정, 주석 처리
-- 매우 큰 장면에서도 선언된 CPU·GPU 메모리 예산 준수
-- Studio를 직접 호스팅하거나 런타임을 다른 제품에 임베드
+- 안정적인 객체 식별자를 기준으로 현재 선택, 숨김/격리, 단면을 처리하며 측정과
+  주석은 계획 단계
+- 점진적 target geometry residency는 선언된 decoded·GPU 예산 안에 유지하고,
+  전체 프로세스 메모리는 별도로 계측
+- 현재 애플리케이션과 패키지 경계가 안정된 뒤 지원되는 self-host 및
+  프레임워크 중립 임베딩 경로 제공 예정
 
 ## 프로젝트 상태
 
@@ -193,8 +199,9 @@ Engineering Scene IR은 새로운 교환 포맷이 아니라 논리적인 시스
 | **2 — 대형 장면 알파** | 10만+ occurrence, 스트리밍, LOD, 캐시, 메모리 예산 | **현재** |
 | **3 — 오픈 플랫폼 베타** | 플러그인, IFC, 임베딩 예제, 셀프 호스팅 배포 | 예정 |
 
-전체 [로드맵](docs/ROADMAP.md), [Phase 1 증거](docs/PHASE_1.md),
-[Phase 1 완료 보고서](docs/PHASE_1_REPORT.md), [Phase 0 기록](docs/PHASE_0.md),
+전체 [로드맵](docs/ROADMAP.md), 현재 [Phase 2 트래커](docs/PHASE_2.md),
+[Phase 1 증거](docs/PHASE_1.md), [Phase 1 완료 보고서](docs/PHASE_1_REPORT.md),
+[Phase 0 기록](docs/PHASE_0.md),
 [Chrome/Firefox WebGPU matrix](artifacts/browser-matrix/README.md)를
 확인하세요. 공개된 성능 수치에는 재배포 가능한 모델, 정확한 하드웨어·브라우저
 정보, cold/warm 상태와 재현 명령이 함께 제공됩니다.

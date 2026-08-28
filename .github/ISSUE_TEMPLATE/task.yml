@@ -1,0 +1,127 @@
+name: Implementation task
+description: Propose a bounded, independently reviewable Phase 2 implementation task
+title: "[Task]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Keep this task small enough for one to three focused pull requests. Do not attach proprietary engineering data or derived geometry.
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      description: Which ownership boundary contains most of the work?
+      options:
+        - Compiler
+        - Runtime
+        - Studio
+        - STEP adapter
+        - IFC adapter
+        - Evidence and benchmarks
+        - Project and contributor tooling
+        - Documentation
+    validations:
+      required: true
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Outcome
+      description: Describe the user-visible or engineering outcome, not only the proposed implementation.
+      placeholder: When this is complete...
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope
+      description: List the concrete code, tests, evidence, and documentation included in this task.
+    validations:
+      required: true
+  - type: textarea
+    id: non_goals
+    attributes:
+      label: Non-goals
+      description: State adjacent work that this task deliberately does not authorize or claim.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: Provide objective, reviewable completion criteria. Distinguish implemented behavior from measured evidence.
+      placeholder: |
+        - [ ] ...
+        - [ ] ...
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence contract
+      description: Identify required unit, integration, browser, native, benchmark, or recorded evidence and the claims it may support.
+    validations:
+      required: true
+  - type: textarea
+    id: fixtures_license
+    attributes:
+      label: Fixtures and licensing
+      description: Name redistributable fixtures or external-manifest entries and their license/provenance constraints. Write "No fixture change" when applicable.
+    validations:
+      required: true
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Dependencies
+      description: List blocking issues, ADRs, external tools, and follow-up work. Write "None" when independent.
+    validations:
+      required: true
+  - type: textarea
+    id: entry_points
+    attributes:
+      label: Code and documentation entry points
+      description: Link the smallest relevant files, tests, ADRs, and design documents so a new contributor can start without repository archaeology.
+    validations:
+      required: true
+  - type: textarea
+    id: contributor_validation
+    attributes:
+      label: Contributor validation
+      description: List the narrow, portable commands the contributor must run before opening a pull request.
+    validations:
+      required: true
+  - type: textarea
+    id: maintainer_validation
+    attributes:
+      label: Maintainer-only or heavy validation
+      description: List large-model, native-toolchain, headed-browser, Safari, hardware-specific, or deployment checks the maintainer will run. Write "None" when fully portable.
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment requirements
+      description: State Node, Python/native adapters, browser, OS, GPU, memory, external fixture, or network requirements.
+    validations:
+      required: true
+  - type: dropdown
+    id: effort
+    attributes:
+      label: Estimated effort
+      description: Estimate implementation and focused validation, excluding review wait time.
+      options:
+        - S — one focused pull request
+        - M — one or two pull requests
+        - L — two or three pull requests; split before starting if larger
+    validations:
+      required: true
+  - type: checkboxes
+    id: readiness
+    attributes:
+      label: Readiness
+      options:
+        - label: I searched existing issues and ADRs for overlapping work.
+          required: true
+        - label: This task does not require proprietary CAD/BIM data to review.
+          required: true
+        - label: Public API, serialized format, trust-boundary, and major dependency changes are routed through an ADR.
+          required: true

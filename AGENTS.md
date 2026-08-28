@@ -9,9 +9,9 @@ trackers; those documents win whenever this file disagrees with them.
 NARU compiles CAD/BIM sources (STEP through an isolated OCCT adapter, IFC
 through an isolated IfcOpenShell adapter) into a neutral Engineering Scene IR,
 packages it as standard glTF 2.0, and renders it in the browser through a
-direct, data-oriented WebGPU runtime. Status: Phase 1 vertical slice
-(`docs/ROADMAP.md`). The roadmap is evidence-gated: a capability counts only
-when the repository reproduces it.
+direct, data-oriented WebGPU runtime. Status: Phase 2 large-scene alpha; Phase 1
+is complete (`docs/ROADMAP.md`, `docs/PHASE_2.md`). The roadmap is
+evidence-gated: a capability counts only when the repository reproduces it.
 
 ## AI-assisted contributions
 
@@ -77,10 +77,11 @@ Nearly every feature lands as one vertical slice:
 3. re-recorded evidence under `artifacts/<record>/` with its README;
 4. an updated or new validator in `scripts/validate-*-evidence.mjs`, wired into
    the `check` script in `package.json`;
-5. documentation sync: `docs/PHASE_1.md` (evidence tables, "Not yet proven",
-   "Next slice"), `docs/ROADMAP.md` phase status, the affected design document
+5. documentation sync: `docs/PHASE_2.md` (current state, next gate, and evidence
+   debt), `docs/ROADMAP.md` phase status, the affected design document
    (`COMPILER.md`, `RUNTIME.md`, `SCENE_IR.md`, `BENCHMARKS.md`), and the
-   package or app README whose behavior changed.
+   package or app README whose behavior changed. Edit `docs/PHASE_1.md` only to
+   correct its historical exit record or handoff.
 
 Rules that recur:
 
