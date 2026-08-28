@@ -529,3 +529,156 @@ describe("compiled package structural limits", () => {
     );
   });
 });
+
+describe("elided node identities and default transforms", () => {
+  const IDENTITY = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1] as const;
+
+  /** A two-node document whose identities exercise one derivation rule. */
+  function identityPackage(
+    derivation: unknown,
+    madi: readonly Record<string, unknown>[],
+  ): unknown {
+    return {
+      asset: { version: "2.0" },
+      extras: {
+        madi: {
+          profile: "madi.experimental.gltf.1",
+          sceneId: "identities",
+          ...(derivation === undefined ? {} : { nodeIdentityDerivation: derivation }),
+        },
+      },
+      scene: 0,
+      scenes: [{ name: "identities", nodes: madi.map((_, index) => index) }],
+      nodes: madi.map((extras, index) => ({ name: `node-${String(index)}`, extras: { madi: extras } })),
+      meshes: [],
+      materials: [],
+      bufferViews: [],
+      accessors: [],
+      buffers: [{ uri: "scene.bin", byteLength: 64 }],
+    };
+  }
+
+  it("reconstructs both identities from the declared bases", () => {
+    const { hierarchy } = inspectCompiledHierarchy(
+      identityPackage(
+        { semanticId: "prototypeId", sourceRef: "semanticId" },
+        [{ occurrenceId: "occurrence:a", prototypeId: "prototype:beam" }],
+      ),
+    );
+
+    expect(hierarchy.entries[0]).toMatchObject({
+      semanticId: "semantic:prototype:beam",
+      sourceRef: "source:prototype:beam",
+    });
+  });
+
+  it("derives sourceRef from the occurrence id when that rule is declared", () => {
+    const { hierarchy } = inspectCompiledHierarchy(
+      identityPackage({ sourceRef: "occurrenceId" }, [
+        { occurrenceId: "occurrence:a", prototypeId: "prototype:beam" },
+      ]),
+    );
+
+    expect(hierarchy.entries[0]?.semanticId).toBeUndefined();
+    expect(hierarchy.entries[0]?.sourceRef).toBe("source:occurrence:a");
+  });
+
+  it("keeps a serialized identity and reads null as genuinely absent", () => {
+    const { hierarchy } = inspectCompiledHierarchy(
+      identityPackage({ semanticId: "prototypeId", sourceRef: "semanticId" }, [
+        {
+          occurrenceId: "occurrence:a",
+          prototypeId: "prototype:beam",
+          semanticId: "semantic:bespoke",
+          sourceRef: "source:bespoke",
+        },
+        { occurrenceId: "occurrence:b", prototypeId: "prototype:beam", semanticId: null, sourceRef: null },
+      ]),
+    );
+
+    expect(hierarchy.entries[0]).toMatchObject({
+      semanticId: "semantic:bespoke",
+      sourceRef: "source:bespoke",
+    });
+    expect(hierarchy.entries[1]?.semanticId).toBeUndefined();
+    expect(hierarchy.entries[1]?.sourceRef).toBeUndefined();
+  });
+
+  it("reconstructs nothing when the document declares no derivation", () => {
+    const { hierarchy } = inspectCompiledHierarchy(
+      identityPackage(undefined, [{ occurrenceId: "occurrence:a", prototypeId: "prototype:beam" }]),
+    );
+
+    expect(hierarchy.entries[0]?.semanticId).toBeUndefined();
+    expect(hierarchy.entries[0]?.sourceRef).toBeUndefined();
+  });
+
+  it("ignores a derivation base this runtime does not know", () => {
+    const { hierarchy } = inspectCompiledHierarchy(
+      identityPackage({ semanticId: "occurrenceId", sourceRef: "prototypeId" }, [
+        { occurrenceId: "occurrence:a", prototypeId: "prototype:beam" },
+      ]),
+    );
+
+    expect(hierarchy.entries[0]?.semanticId).toBeUndefined();
+    expect(hierarchy.entries[0]?.sourceRef).toBeUndefined();
+  });
+
+  it("decodes omitted and translation-only transforms into the same instances", async () => {
+    const { json, binary } = await loadPackage();
+    const rewritten = JSON.parse(JSON.stringify(json)) as { nodes: { matrix?: number[] }[] };
+    let translations = 0;
+    let identities = 0;
+    for (const node of rewritten.nodes) {
+      const matrix = node.matrix;
+      if (!matrix) continue;
+      if (!IDENTITY.every((value, index) => (index >= 12 && index <= 14) || matrix[index] === value)) {
+        continue;
+      }
+      delete node.matrix;
+      if (matrix[12] === 0 && matrix[13] === 0 && matrix[14] === 0) identities += 1;
+      else {
+        translations += 1;
+        (node as { translation?: number[] }).translation = matrix.slice(12, 15);
+      }
+    }
+
+    expect({ translations, identities }).toEqual({ translations: 8, identities: 4 });
+    expect(decodeCompiledGltf(rewritten, binary).gpuScene.batches.map(({ instances }) => instances))
+      .toEqual(decodeCompiledGltf(json, binary).gpuScene.batches.map(({ instances }) => instances));
+  });
+
+  it("composes rotation and scale in the glTF T * R * S order", async () => {
+    const { json, binary } = await loadPackage();
+    const rotated = JSON.parse(JSON.stringify(json)) as { nodes: Record<string, unknown>[] };
+    const composed = JSON.parse(JSON.stringify(json)) as { nodes: Record<string, unknown>[] };
+    // A quarter turn about +Y, doubled, then moved: column-major M = T * R * S.
+    for (const node of rotated.nodes) {
+      if (node.matrix === undefined) continue;
+      node.matrix = [0, 0, -2, 0, 0, 2, 0, 0, 2, 0, 0, 0, 1, 2, 3, 1];
+      break;
+    }
+    for (const node of composed.nodes) {
+      if (node.matrix === undefined) continue;
+      delete node.matrix;
+      node.translation = [1, 2, 3];
+      node.rotation = [0, Math.SQRT1_2, 0, Math.SQRT1_2];
+      node.scale = [2, 2, 2];
+      break;
+    }
+
+    const fromTrs = decodeCompiledGltf(composed, binary).gpuScene.batches[0]?.instances ?? [];
+    const fromMatrix = decodeCompiledGltf(rotated, binary).gpuScene.batches[0]?.instances ?? [];
+
+    expect(fromTrs.length).toBeGreaterThan(0);
+    expect(fromTrs.length).toBe(fromMatrix.length);
+    for (const [index, instance] of fromTrs.entries()) {
+      // The quaternion form reproduces the matrix to double precision; it is
+      // not bit-identical, which is why the compiler never decomposes one.
+      const expected = fromMatrix[index]?.transform ?? [];
+      for (const [element, value] of [...instance.transform].entries()) {
+        expect(value).toBeCloseTo(expected[element] ?? Number.NaN, 12);
+      }
+    }
+  });
+});

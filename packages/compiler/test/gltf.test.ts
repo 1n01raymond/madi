@@ -693,3 +693,214 @@ describe("compiled-package property sidecar", () => {
     ).toThrow(/distinct URIs/u);
   });
 });
+
+/**
+ * A scene whose identities cover every branch of the derivation rules: two
+ * occurrences the loader can reconstruct, one that carries bespoke identities,
+ * and one that genuinely has none.
+ */
+function createDerivableIdentityScene(): EngineeringScene {
+  const base = createRepeatedTriangleScene();
+  const prototype = base.prototypes[0];
+  const template = base.occurrences[0];
+  const document = base.documents[0];
+  const semantic = base.semantics[0];
+  if (!prototype || !template || !document || !semantic) {
+    throw new TypeError("Triangle fixture is incomplete.");
+  }
+  const derivedSemanticId = ids.semantic(`semantic:${prototype.id}`);
+  const derivedSourceRef = ids.sourceRef(`source:${prototype.id}`);
+  const bespokeSemanticId = ids.semantic("semantic:bespoke-brace");
+  // Deliberately not `source:bespoke-brace`, so neither rule reconstructs it.
+  const bespokeSourceRef = ids.sourceRef("source:brace-weldment");
+  const sourceRefFor = (id: typeof derivedSourceRef) => ({
+    id,
+    documentId: document.id,
+    namespace: "generated",
+    value: id as string,
+    kind: "part" as const,
+    stability: "revision-local" as const,
+  });
+  const transforms = {
+    identity: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1],
+    moved: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0.5, 0, 0, 1],
+    // A quarter turn about +Y; a rotation never becomes a TRS triple.
+    rotated: [0, 0, -1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1],
+  } as const;
+
+  return {
+    ...base,
+    sceneId: "scene:derivable-identities",
+    documents: [
+      {
+        ...document,
+        sourceRefs: [
+          ...document.sourceRefs,
+          sourceRefFor(derivedSourceRef),
+          sourceRefFor(bespokeSourceRef),
+        ],
+      },
+    ],
+    semantics: [
+      ...base.semantics,
+      { ...semantic, id: derivedSemanticId, sourceRef: derivedSourceRef },
+      { ...semantic, id: bespokeSemanticId, sourceRef: bespokeSourceRef },
+    ],
+    occurrences: [
+      {
+        ...template,
+        id: ids.occurrence("occurrence:triangle:derived-identity"),
+        semanticId: derivedSemanticId,
+        sourceRef: derivedSourceRef,
+        localTransform: transforms.identity,
+      },
+      {
+        ...template,
+        id: ids.occurrence("occurrence:triangle:derived-moved"),
+        semanticId: derivedSemanticId,
+        sourceRef: derivedSourceRef,
+        localTransform: transforms.moved,
+      },
+      {
+        ...template,
+        id: ids.occurrence("occurrence:triangle:bespoke"),
+        semanticId: bespokeSemanticId,
+        sourceRef: bespokeSourceRef,
+        localTransform: transforms.rotated,
+      },
+      {
+        ...template,
+        id: ids.occurrence("occurrence:triangle:anonymous"),
+        semanticId: undefined,
+        sourceRef: undefined,
+        localTransform: transforms.moved,
+      },
+    ],
+  };
+}
+
+/** Occurrence nodes keyed by their id; node 0 is always the source frame. */
+function occurrenceNodes(document: {
+  nodes: readonly {
+    readonly matrix?: readonly number[];
+    readonly translation?: readonly number[];
+    readonly extras?: Readonly<Record<string, unknown>>;
+  }[];
+}) {
+  return new Map(
+    document.nodes
+      .map((node) => ({ node, madi: madiExtras(node) ?? {} }))
+      .filter(({ madi }) => typeof madi.occurrenceId === "string")
+      .map(({ node, madi }) => [madi.occurrenceId as string, { ...node, madi }]),
+  );
+}
+
+const derivableIds = {
+  identity: "occurrence:triangle:derived-identity",
+  moved: "occurrence:triangle:derived-moved",
+  bespoke: "occurrence:triangle:bespoke",
+  anonymous: "occurrence:triangle:anonymous",
+} as const;
+
+describe("optional node size policies", () => {
+  const scene = createDerivableIdentityScene();
+
+  it("elides only the identities the declared rules reconstruct", () => {
+    const kept = compileSceneToGltf(scene);
+    const elided = compileSceneToGltf(scene, { elideDerivedIdentifiers: true });
+    const rootMadi = elided.document.extras?.madi as Record<string, unknown>;
+
+    expect(rootMadi.nodeIdentityDerivation).toEqual({
+      semanticId: "prototypeId",
+      sourceRef: "semanticId",
+    });
+    const elidedNodes = occurrenceNodes(elided.document);
+    const keptNodes = occurrenceNodes(kept.document);
+    const identities = (nodes: typeof elidedNodes) =>
+      Object.fromEntries(
+        Object.entries(derivableIds).map(([key, id]) => [
+          key,
+          [nodes.get(id)?.madi.semanticId, nodes.get(id)?.madi.sourceRef],
+        ]),
+      );
+
+    expect(identities(elidedNodes)).toEqual({
+      identity: [undefined, undefined],
+      moved: [undefined, undefined],
+      // Neither rule reconstructs these, so both stay serialized.
+      bespoke: ["semantic:bespoke-brace", "source:brace-weldment"],
+      // An occurrence with no identity says so explicitly.
+      anonymous: [null, null],
+    });
+    expect(identities(keptNodes)).toEqual({
+      identity: ["semantic:prototype:triangle", "source:prototype:triangle"],
+      moved: ["semantic:prototype:triangle", "source:prototype:triangle"],
+      bespoke: ["semantic:bespoke-brace", "source:brace-weldment"],
+      anonymous: [undefined, undefined],
+    });
+    expect((kept.document.extras?.madi as Record<string, unknown>).nodeIdentityDerivation)
+      .toBeUndefined();
+    expect(elided.json.length).toBeLessThan(kept.json.length);
+    expect(elided.binary).toEqual(kept.binary);
+    expect(elided.report.options.nodeIdentifiers).toBe("derived-elided");
+    expect(kept.report.options.nodeIdentifiers).toBeUndefined();
+    expect(validateCompiledGltf(elided.document, elided.binary)).toEqual({ ok: true, issues: [] });
+  });
+
+  it("omits identity transforms and keeps rotations as matrices", () => {
+    const kept = compileSceneToGltf(scene);
+    const omitted = compileSceneToGltf(scene, { omitDefaultNodeTransforms: true });
+
+    const omittedNodes = occurrenceNodes(omitted.document);
+    const keptNodes = occurrenceNodes(kept.document);
+
+    expect(kept.document.nodes.every(({ matrix }) => matrix !== undefined)).toBe(true);
+    expect(
+      Object.fromEntries(
+        Object.entries(derivableIds).map(([key, id]) => [
+          key,
+          { matrix: omittedNodes.get(id)?.matrix, translation: omittedNodes.get(id)?.translation },
+        ]),
+      ),
+    ).toEqual({
+      identity: { matrix: undefined, translation: undefined },
+      moved: { matrix: undefined, translation: [0.5, 0, 0] },
+      // A rotation is never decomposed, because a quaternion would not
+      // reproduce this matrix exactly.
+      bespoke: { matrix: keptNodes.get(derivableIds.bespoke)?.matrix, translation: undefined },
+      anonymous: { matrix: undefined, translation: [0.5, 0, 0] },
+    });
+    // The source-frame root keeps its matrix: that matrix is the declaration.
+    expect(omitted.document.nodes[0]?.matrix).toEqual(kept.document.nodes[0]?.matrix);
+    expect(omitted.binary).toEqual(kept.binary);
+    expect(omitted.json.length).toBeLessThan(kept.json.length);
+    expect(omitted.report.options.nodeTransforms).toBe("default-omitted");
+    expect(kept.report.options.nodeTransforms).toBeUndefined();
+    expect(validateCompiledGltf(omitted.document, omitted.binary)).toEqual({ ok: true, issues: [] });
+  });
+
+  it("leaves default output byte-identical and repeats itself exactly", () => {
+    const options = { elideDerivedIdentifiers: true, omitDefaultNodeTransforms: true } as const;
+
+    expect(compileSceneToGltf(scene).json).toBe(compileSceneToGltf(scene).json);
+    expect(compileSceneToGltf(scene, options).json).toBe(compileSceneToGltf(scene, options).json);
+    expect(compileSceneToGltf(scene, {}).json).toBe(compileSceneToGltf(scene).json);
+  });
+
+  it("declares no rule when nothing in the scene is derivable", () => {
+    const bespokeOnly = {
+      ...scene,
+      occurrences: scene.occurrences.filter(({ semanticId }) => semanticId !== undefined
+        && (semanticId as string) === "semantic:bespoke-brace"),
+    };
+    const elided = compileSceneToGltf(bespokeOnly, { elideDerivedIdentifiers: true });
+    const rootMadi = elided.document.extras?.madi as Record<string, unknown>;
+
+    expect(rootMadi.nodeIdentityDerivation).toBeUndefined();
+    expect(elided.report.options.nodeIdentifiers).toBeUndefined();
+    expect(occurrenceNodes(elided.document).get(derivableIds.bespoke)?.madi).toMatchObject({
+      semanticId: "semantic:bespoke-brace",
+      sourceRef: "source:brace-weldment",
+    });
+  });
+});

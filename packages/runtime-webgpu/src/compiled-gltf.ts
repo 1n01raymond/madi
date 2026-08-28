@@ -53,6 +53,9 @@ interface CompiledGltfNode {
   readonly name?: string;
   readonly children?: readonly number[];
   readonly matrix?: readonly number[];
+  readonly translation?: readonly number[];
+  readonly rotation?: readonly number[];
+  readonly scale?: readonly number[];
   readonly mesh?: number;
   readonly extras?: JsonRecord;
 }
@@ -257,7 +260,113 @@ function stringArray(value: unknown): string[] {
     : [];
 }
 
+/**
+ * Composes a node transform in the glTF order M = T * R * S.
+ *
+ * Standard glTF lets a node carry either a matrix or any subset of TRS, and
+ * NARU packages compiled with `omitDefaultNodeTransforms` use the translation
+ * form for axis-aligned occurrences. Absent members are the glTF defaults, so
+ * a node with neither form is the identity.
+ */
+function composeTrs(node: CompiledGltfNode): readonly number[] | undefined {
+  const { translation, rotation, scale } = node;
+  if (translation === undefined && rotation === undefined && scale === undefined) {
+    return undefined;
+  }
+  const [tx, ty, tz] = [translation?.[0] ?? 0, translation?.[1] ?? 0, translation?.[2] ?? 0];
+  const [x, y, z, w] = [
+    rotation?.[0] ?? 0,
+    rotation?.[1] ?? 0,
+    rotation?.[2] ?? 0,
+    rotation?.[3] ?? 1,
+  ];
+  const [sx, sy, sz] = [scale?.[0] ?? 1, scale?.[1] ?? 1, scale?.[2] ?? 1];
+  return [
+    (1 - 2 * (y * y + z * z)) * sx,
+    (2 * (x * y + z * w)) * sx,
+    (2 * (x * z - y * w)) * sx,
+    0,
+    (2 * (x * y - z * w)) * sy,
+    (1 - 2 * (x * x + z * z)) * sy,
+    (2 * (y * z + x * w)) * sy,
+    0,
+    (2 * (x * z + y * w)) * sz,
+    (2 * (y * z - x * w)) * sz,
+    (1 - 2 * (x * x + y * y)) * sz,
+    0,
+    tx,
+    ty,
+    tz,
+    1,
+  ];
+}
+
+/** How a document reconstructs the node identities it does not serialize. */
+interface NodeIdentityDerivation {
+  readonly semanticId?: "prototypeId";
+  readonly sourceRef?: "semanticId" | "occurrenceId";
+}
+
+interface NodeIdentity {
+  readonly semanticId?: string;
+  readonly sourceRef?: string;
+}
+
+/**
+ * Reads the document-level derivation declaration, ignoring rules this
+ * runtime does not know: an unrecognized base leaves the field unreconstructed
+ * rather than inventing an identity.
+ */
+function nodeIdentityDerivationFrom(rootMadi: JsonRecord): NodeIdentityDerivation {
+  const declared = recordAt(rootMadi, "nodeIdentityDerivation");
+  if (!declared) return {};
+  return {
+    ...(declared.semanticId === "prototypeId" ? { semanticId: "prototypeId" as const } : {}),
+    ...(declared.sourceRef === "semanticId" || declared.sourceRef === "occurrenceId"
+      ? { sourceRef: declared.sourceRef }
+      : {}),
+  };
+}
+
+/**
+ * Resolves one node identity pair against the declared derivation.
+ *
+ * A serialized string always wins. Under a declared rule an absent key means
+ * "reconstruct me" and an explicit `null` means the occurrence genuinely had
+ * no identity, so the pair round-trips exactly either way. `sourceRef` is
+ * resolved after `semanticId` because it may derive from it.
+ */
+function resolveNodeIdentity(
+  madi: JsonRecord,
+  derivation: NodeIdentityDerivation,
+): NodeIdentity {
+  const prototypeId = madi.prototypeId;
+  const semanticId = typeof madi.semanticId === "string"
+    ? madi.semanticId
+    : madi.semanticId === undefined &&
+        derivation.semanticId === "prototypeId" &&
+        typeof prototypeId === "string"
+      ? `semantic:${prototypeId}`
+      : undefined;
+  const base = derivation.sourceRef === "occurrenceId" ? madi.occurrenceId : semanticId;
+  const sourceRef = typeof madi.sourceRef === "string"
+    ? madi.sourceRef
+    : madi.sourceRef === undefined &&
+        derivation.sourceRef !== undefined &&
+        typeof base === "string"
+      ? `source:${base.startsWith("semantic:") ? base.slice("semantic:".length) : base}`
+      : undefined;
+  return {
+    ...(semanticId === undefined ? {} : { semanticId }),
+    ...(sourceRef === undefined ? {} : { sourceRef }),
+  };
+}
+
 function matrixFor(node: CompiledGltfNode, nodeIndex: number): readonly number[] {
+  if (node.matrix === undefined) {
+    const composed = composeTrs(node);
+    if (composed) return composed;
+  }
   const matrix = node.matrix ?? identityMatrix;
   if (matrix.length !== 16 || matrix.some((value) => !Number.isFinite(value))) {
     throw new CompiledGltfError(
@@ -602,6 +711,7 @@ export function inspectCompiledHierarchy(
     ? finiteInteger(progressive.coarseBuffer, "extras.madi.progressive.coarseBuffer", document.buffers.length)
     : undefined;
   const targetChunks = targetChunksFor(progressive, document, targetBufferIndex, limits);
+  const derivation = nodeIdentityDerivationFrom(rootMadi);
   const entries: CompiledHierarchyEntry[] = [];
   const renderedMeshes = new Set<number>();
 
@@ -610,6 +720,7 @@ export function inspectCompiledHierarchy(
     (node, nodeIndex, depth) => {
       const madi = madiExtras(node);
       if (typeof madi.occurrenceId !== "string") return;
+      const identity = resolveNodeIdentity(madi, derivation);
       if (node.mesh !== undefined) renderedMeshes.add(node.mesh);
       entries.push({
         nodeIndex,
@@ -618,8 +729,7 @@ export function inspectCompiledHierarchy(
         renderable: node.mesh !== undefined,
         occurrenceId: madi.occurrenceId,
         prototypeId: typeof madi.prototypeId === "string" ? madi.prototypeId : "unknown",
-        ...(typeof madi.semanticId === "string" ? { semanticId: madi.semanticId } : {}),
-        ...(typeof madi.sourceRef === "string" ? { sourceRef: madi.sourceRef } : {}),
+        ...identity,
       });
     },
     limits,
@@ -1197,6 +1307,7 @@ function prepareCompiledGltfState(
   // Inspection already bounded this node graph's depth, so the transform walk
   // below recurses over an already-limited tree.
   const { document, hierarchy } = inspectCompiledHierarchy(value, options);
+  const derivation = nodeIdentityDerivationFrom(recordAt(document.extras, "madi") ?? {});
   const renderableNodes: PreparedRenderableNode[] = [];
   const renderableNodesByTargetMesh = new Map<number, PreparedRenderableNode[]>();
   let activeNodeCount = 0;
@@ -1218,6 +1329,7 @@ function prepareCompiledGltfState(
     if (node.mesh !== undefined) {
       const targetMeshIndex = node.mesh;
       const nodeMadi = madiExtras(node);
+      const identity = resolveNodeIdentity(nodeMadi, derivation);
       const occurrenceId =
         typeof nodeMadi.occurrenceId === "string"
           ? nodeMadi.occurrenceId
@@ -1241,12 +1353,7 @@ function prepareCompiledGltfState(
         ...(typeof nodeMadi.prototypeId === "string"
           ? { prototypeId: nodeMadi.prototypeId }
           : {}),
-        ...(typeof nodeMadi.semanticId === "string"
-          ? { semanticId: nodeMadi.semanticId }
-          : {}),
-        ...(typeof nodeMadi.sourceRef === "string"
-          ? { sourceRef: nodeMadi.sourceRef }
-          : {}),
+        ...identity,
       };
       renderableNodes.push(prepared);
       const meshNodes = renderableNodesByTargetMesh.get(targetMeshIndex) ?? [];

@@ -203,6 +203,95 @@ function scaledOccurrenceMatrix(matrix: Matrix4d, scaleToMeters: number): number
   );
 }
 
+const identityMatrix = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1] as const;
+
+/** True when every element outside the translation column matches the identity. */
+function isTranslationOnly(matrix: readonly number[]): boolean {
+  return identityMatrix.every(
+    (value, index) => index >= 12 && index <= 14 ? true : matrix[index] === value,
+  );
+}
+
+/**
+ * Chooses the transform member for one occurrence node.
+ *
+ * glTF already defaults a missing transform to the identity and composes
+ * `translation` exactly, so both forms reproduce the source matrix without
+ * arithmetic. A matrix carrying any rotation or scale stays a matrix: this
+ * never decomposes a rotation, because that would not round-trip exactly.
+ */
+function nodeTransform(
+  matrix: readonly number[],
+  omitDefaults: boolean,
+): Pick<GltfNode, "matrix" | "translation"> {
+  if (!omitDefaults) return { matrix };
+  if (!isTranslationOnly(matrix)) return { matrix };
+  const translation = [matrix[12] ?? 0, matrix[13] ?? 0, matrix[14] ?? 0];
+  return translation.every((value) => value === 0) ? {} : { translation };
+}
+
+/** How a document reconstructs the node identities it does not serialize. */
+export interface NodeIdentityDerivation {
+  readonly semanticId?: "prototypeId";
+  readonly sourceRef?: "semanticId" | "occurrenceId";
+}
+
+const derivedSemanticId = (prototypeId: string): string => `semantic:${prototypeId}`;
+const derivedSourceRef = (base: string): string =>
+  `source:${base.startsWith("semantic:") ? base.slice("semantic:".length) : base}`;
+
+/**
+ * Picks the derivation rules that hold for at least one occurrence.
+ *
+ * The rules are document-level so that an elided node costs nothing at all:
+ * a per-node discriminator would spend most of what the elision saves. Where
+ * more than one base reconstructs `sourceRef`, the one that covers the most
+ * occurrences wins, and a tie keeps the first of a fixed order so two
+ * compilations of the same scene always declare the same rule.
+ */
+export function nodeIdentityDerivationFor(
+  occurrences: readonly Occurrence[],
+): NodeIdentityDerivation {
+  let semanticIdMatches = 0;
+  const sourceRefMatches = new Map<"semanticId" | "occurrenceId", number>([
+    ["semanticId", 0],
+    ["occurrenceId", 0],
+  ]);
+  for (const occurrence of occurrences) {
+    if (occurrence.semanticId === derivedSemanticId(occurrence.prototypeId)) {
+      semanticIdMatches += 1;
+    }
+    if (occurrence.sourceRef === undefined) continue;
+    for (const [base, value] of [
+      ["semanticId", occurrence.semanticId],
+      ["occurrenceId", occurrence.id],
+    ] as const) {
+      if (value !== undefined && occurrence.sourceRef === derivedSourceRef(value)) {
+        sourceRefMatches.set(base, (sourceRefMatches.get(base) ?? 0) + 1);
+      }
+    }
+  }
+  const [sourceRefBase, sourceRefCount] = [...sourceRefMatches].reduce((best, entry) =>
+    entry[1] > best[1] ? entry : best,
+  );
+  return {
+    ...(semanticIdMatches > 0 ? { semanticId: "prototypeId" as const } : {}),
+    ...(sourceRefCount > 0 ? { sourceRef: sourceRefBase } : {}),
+  };
+}
+
+/**
+ * Serializes one node identity under a derivation rule.
+ *
+ * An occurrence that carries no identity at all emits `null`, so an absent key
+ * always means "the declared rule reconstructs this" and never "there was
+ * nothing here".
+ */
+function elidableIdentity(value: string | undefined, derived: string | undefined): unknown {
+  if (value === undefined) return null;
+  return value === derived ? undefined : value;
+}
+
 function multiplyMatrices(a: ArrayLike<number>, b: ArrayLike<number>): Float64Array {
   const result = new Float64Array(16);
   for (let column = 0; column < 4; column += 1) {
@@ -1079,6 +1168,14 @@ export function compileSceneToGltf(
   for (const entries of children.values()) entries.sort(compareId);
   const rootOccurrences = occurrences.filter(({ parentId }) => parentId === undefined);
 
+  const elideIdentifiers = options.elideDerivedIdentifiers === true;
+  const omitDefaultTransforms = options.omitDefaultNodeTransforms === true;
+  const derivation = elideIdentifiers
+    ? nodeIdentityDerivationFor(occurrences)
+    : ({} as NodeIdentityDerivation);
+  const declaresDerivation =
+    derivation.semanticId !== undefined || derivation.sourceRef !== undefined;
+
   const nodes: GltfNode[] = [
     {
       name: "MADI source frame",
@@ -1110,17 +1207,32 @@ export function compileSceneToGltf(
     const coarseMesh = coarseGeometry === undefined
       ? undefined
       : coarseMeshFor(coarseGeometry, occurrence.materialOverrideId);
+    const semanticId = declaresDerivation && derivation.semanticId !== undefined
+      ? elidableIdentity(occurrence.semanticId, derivedSemanticId(occurrence.prototypeId))
+      : occurrence.semanticId;
+    const sourceRefBase = derivation.sourceRef === "occurrenceId"
+      ? occurrence.id
+      : occurrence.semanticId;
+    const sourceRef = declaresDerivation && derivation.sourceRef !== undefined
+      ? elidableIdentity(
+          occurrence.sourceRef,
+          sourceRefBase === undefined ? undefined : derivedSourceRef(sourceRefBase),
+        )
+      : occurrence.sourceRef;
     nodes.push({
       name: occurrence.name ?? occurrence.id,
       ...(childIndexes.length === 0 ? {} : { children: childIndexes }),
-      matrix: scaledOccurrenceMatrix(occurrence.localTransform, scaleToMeters),
+      ...nodeTransform(
+        scaledOccurrenceMatrix(occurrence.localTransform, scaleToMeters),
+        omitDefaultTransforms,
+      ),
       ...(mesh === undefined ? {} : { mesh }),
       extras: {
         madi: {
           occurrenceId: occurrence.id,
           prototypeId: occurrence.prototypeId,
-          semanticId: occurrence.semanticId,
-          sourceRef: occurrence.sourceRef,
+          semanticId,
+          sourceRef,
           initialVisibility: occurrence.initialVisibility,
           tags: [...occurrence.tags],
           ...(coarseMesh === undefined ? {} : { coarseMesh }),
@@ -1226,6 +1338,7 @@ export function compileSceneToGltf(
         revisionId: scene.revision.id,
         sourceDigest: scene.revision.sourceDigest,
         optionsDigest: scene.revision.optionsDigest,
+        ...(declaresDerivation ? { nodeIdentityDerivation: derivation } : {}),
         ...(coarseBinary
           ? {
               progressive: {
@@ -1313,6 +1426,8 @@ export function compileSceneToGltf(
       geometryEncoding: "gltf-f32",
       ...(options.compactJson === true ? { jsonFormatting: "compact" as const } : {}),
       ...(options.omitResourceNames === true ? { resourceNames: "omitted" as const } : {}),
+      ...(declaresDerivation ? { nodeIdentifiers: "derived-elided" as const } : {}),
+      ...(omitDefaultTransforms ? { nodeTransforms: "default-omitted" as const } : {}),
       ...(coarseBinary ? { progressiveRepresentation: "prototype-aabb-v1" as const } : {}),
       ...(coarseBinary
         ? {
