@@ -1,0 +1,2872 @@
+{
+  "schemaVersion": "naru.memory-envelope.1",
+  "capturedAt": "2026-08-28T10:52:46.275Z",
+  "mode": "headed-phase-sampled-memory-ledger",
+  "timingComparability": "Milestone offsets in this record are perturbed: every phase sample calls performance.measureUserAgentSpecificMemory(), which forces a collection and blocks for seconds. Use artifacts/ifc/sixty5-first-frame for timing.",
+  "browser": {
+    "id": "chrome",
+    "engine": "Blink",
+    "version": "151.0.7922.139",
+    "headless": false,
+    "viewport": {
+      "width": 1320,
+      "height": 1000
+    },
+    "launchArguments": [
+      "--enable-precise-memory-info"
+    ]
+  },
+  "host": {
+    "platform": "win32",
+    "architecture": "x64",
+    "cpuCount": 16,
+    "totalMemoryBytes": 33463021568,
+    "node": "v22.14.0"
+  },
+  "source": {
+    "buildReport": "artifacts/ifc/sixty5/build-report.json",
+    "sceneDirectory": "output/ifc/sixty5-prb",
+    "packageDigest": "a2d6c72a6e936ac3ea2a183a1028cc4a06b20985c6d90b16058954323b7c3347",
+    "resources": [
+      {
+        "path": "scene.gltf",
+        "mediaType": "model/gltf+json",
+        "bytes": 448823852,
+        "sha256": "a35b01a5eef5b3492e3a68072ede9cdff53dce8032c7b68f719154651fc54709"
+      },
+      {
+        "path": "scene.bin",
+        "mediaType": "application/octet-stream",
+        "bytes": 120707064,
+        "sha256": "7a04489cfadb39706b7b8c3832402991e8d6f1e15983547d71939cc924fad913"
+      },
+      {
+        "path": "coarse.bin",
+        "mediaType": "application/octet-stream",
+        "bytes": 38700720,
+        "sha256": "258e085d4f3d0b380bb89c3596b2e3bfc4a43177afe9fc7e92d6e1046db9031b"
+      },
+      {
+        "path": "properties.json",
+        "mediaType": "application/json",
+        "bytes": 17705010,
+        "sha256": "dc3394714b73d322dcfe6bad7ce780dbdd18cb547e5eaf45a26c9e66de932312"
+      },
+      {
+        "path": "properties.bin",
+        "mediaType": "application/octet-stream",
+        "bytes": 31179862,
+        "sha256": "dad8d98909c738df930569c4b907c29e64cda2b65d84917936c1c4d86d3dd8c4"
+      }
+    ],
+    "servedFrom": "Vite dev static hosting with HTTP Range support"
+  },
+  "method": {
+    "phases": [
+      "hierarchy",
+      "coarse-frame",
+      "budget-limited",
+      "navigation",
+      "selection",
+      "eviction"
+    ],
+    "runsPerProfile": 3,
+    "profiles": [
+      {
+        "name": "default-budget",
+        "residencyMiB": null,
+        "budgetBytes": 67108864
+      },
+      {
+        "name": "forced-low-budget",
+        "residencyMiB": 8,
+        "budgetBytes": 8388608
+      }
+    ],
+    "camera": {
+      "wheelDelta": -5000,
+      "panX": 400,
+      "panY": -300
+    },
+    "screenshots": "Each capture is taken while the page is quiet: the coarse frame before its memory sample, the others after the scheduler settles. A full-page capture requested while the residency drain is running is serviced only when the compositor is free again, which would date the image to a later phase.",
+    "processSampling": "Win32_Process rows for chrome.exe, summed over the tree rooted at the launched browser.",
+    "evictionProbe": "The centre selection is the first candidate: a promotion that admits an absent chunk while the budget is full evicts colder groups and is recorded with source 'selection'. Only if that pick was already resident are twenty viewport points scanned in a fixed order, and the first pick that evicts ends the scan.",
+    "evictionQuiescence": "The eviction sample is taken after a bounded 180 s wait for the scheduler counters to stop moving. Each run records whether that wait succeeded and, when it did not, what kept changing; a budget too small to hold the demanded set re-admits around the pinned selection indefinitely."
+  },
+  "ledgerCategories": [
+    {
+      "id": "package.documentBytes",
+      "owner": "compiled glTF document, held by the main thread and the geometry Worker",
+      "lifetime": "whole session; the Worker keeps the parsed document until the scene closes",
+      "method": "exact-declared",
+      "partOf": null,
+      "note": "Transferred byte length. What the parsed form costs in the heap is a different, engine-owned number; see page.uaMemoryBytes."
+    },
+    {
+      "id": "package.propertyIndexBytes",
+      "owner": "property sidecar index document (properties.json), fetched on the first selection",
+      "lifetime": "from the first selection to the end of the session",
+      "method": "exact-declared",
+      "partOf": null,
+      "note": "The index only. Property values live in properties.bin, which is read by range per selection and not retained; those bytes appear in page.uaMemoryBytes while a selection holds them, never here."
+    },
+    {
+      "id": "package.spatialIndexBytes",
+      "owner": "spatial demand index, when the package carries one",
+      "lifetime": "whole session",
+      "method": "exact-declared",
+      "partOf": null,
+      "note": "Zero means the package has no spatial index, not that the index is free."
+    },
+    {
+      "id": "package.declaredGeometryBytes",
+      "owner": "target geometry declared by the document",
+      "lifetime": "never resident as a whole",
+      "method": "exact-declared",
+      "partOf": null,
+      "note": "Bounds the Range requests, not the memory: only admitted chunks are ever decoded."
+    },
+    {
+      "id": "residency.budgetBytes",
+      "owner": "ProgressiveResidency, configured by ?residencyMiB",
+      "lifetime": "whole session",
+      "method": "exact-declared",
+      "partOf": null,
+      "note": "The only memory figure in the Studio that is a policy rather than a measurement."
+    },
+    {
+      "id": "residency.decodedBytes",
+      "owner": "decoded target geometry arrays held by ProgressiveResidency",
+      "lifetime": "until eviction",
+      "method": "exact-counted",
+      "partOf": "page.uaMemoryBytes",
+      "note": "Counts each shared vertex pool once, as the admission cost formula does."
+    },
+    {
+      "id": "residency.gpuBytes",
+      "owner": "GPU buffers charged to admitted target chunks",
+      "lifetime": "until eviction",
+      "method": "exact-counted",
+      "partOf": "renderer.gpuBufferBytes",
+      "note": "Target detail only. Coarse batches and the camera uniform are outside this charge, which is why the renderer total is larger."
+    },
+    {
+      "id": "renderer.gpuVertexPoolBytes",
+      "owner": "one GPUBuffer per shared prototype vertex pool",
+      "lifetime": "until the last batch referencing the pool is released",
+      "method": "exact-counted",
+      "partOf": "renderer.gpuBufferBytes",
+      "note": "Counted once per pool. Summing per batch would report allocations that were never made."
+    },
+    {
+      "id": "renderer.gpuBatchBufferBytes",
+      "owner": "per-batch index, edge, and instance GPUBuffers",
+      "lifetime": "until the batch is released",
+      "method": "exact-counted",
+      "partOf": "renderer.gpuBufferBytes"
+    },
+    {
+      "id": "renderer.gpuUniformBytes",
+      "owner": "the camera uniform buffer",
+      "lifetime": "whole session",
+      "method": "exact-counted",
+      "partOf": "renderer.gpuBufferBytes"
+    },
+    {
+      "id": "renderer.gpuBufferBytes",
+      "owner": "the renderer's GPUBuffer allocations",
+      "lifetime": "mixed; see the three categories it contains",
+      "method": "exact-counted",
+      "partOf": null,
+      "includes": [
+        "renderer.gpuVertexPoolBytes",
+        "renderer.gpuBatchBufferBytes",
+        "renderer.gpuUniformBytes"
+      ]
+    },
+    {
+      "id": "renderer.gpuAttachmentBytes",
+      "owner": "the depth and object-id render attachments",
+      "lifetime": "until the canvas is resized",
+      "method": "upper-bound",
+      "partOf": null,
+      "note": "depth24plus storage is implementation-defined, so the wider 4-byte layout is charged. Deliberately outside renderer.gpuBufferBytes: a texture is not a buffer allocation."
+    },
+    {
+      "id": "renderer.cpuStagingBytes",
+      "owner": "per-batch instance staging arrays on the JavaScript heap",
+      "lifetime": "until the batch is released",
+      "method": "exact-counted",
+      "partOf": "page.usedJsHeapBytes"
+    },
+    {
+      "id": "page.usedJsHeapBytes",
+      "owner": "the main-thread V8 isolate",
+      "lifetime": "sampled",
+      "method": "browser-estimated",
+      "partOf": null,
+      "note": "performance.memory with --enable-precise-memory-info. Excludes the geometry Worker's isolate entirely."
+    },
+    {
+      "id": "page.uaMemoryBytes",
+      "owner": "the whole agent cluster, including dedicated workers",
+      "lifetime": "sampled",
+      "method": "browser-estimated",
+      "partOf": "process.workingSetBytes",
+      "note": "performance.measureUserAgentSpecificMemory(). Requires cross-origin isolation, forces a collection, and blocks for seconds -- which is why this record's timings are marked perturbed."
+    },
+    {
+      "id": "process.workingSetBytes",
+      "owner": "the headed browser process tree (browser, renderer, GPU, utility)",
+      "lifetime": "sampled",
+      "method": "os-sampled",
+      "partOf": null,
+      "note": "Win32_Process WorkingSetSize summed over the tree rooted at the launched browser. Includes pages shared with other processes, so it is not additive across trees."
+    },
+    {
+      "id": "process.privateBytes",
+      "owner": "the same process tree",
+      "lifetime": "sampled",
+      "method": "os-sampled",
+      "partOf": null,
+      "note": "Win32_Process PrivatePageCount, which this API reports in bytes: private committed pages, excluding pages shared with other processes. A committed page need not be resident, so this figure runs well above process.workingSetBytes and is not a claim about how much RAM the browser holds."
+    },
+    {
+      "id": "gpu.driverAllocationBytes",
+      "owner": "the graphics driver's device-side allocations",
+      "lifetime": "unknown",
+      "method": "unsupported",
+      "partOf": null,
+      "value": null,
+      "note": "No browser or operating-system interface available to page or host script reports what the WebGPU driver allocated on the device. Recorded as unavailable, never as zero; renderer.gpu* are the requested sizes, not the driver's."
+    }
+  ],
+  "declaredTargets": [
+    {
+      "id": "residency-decoded-within-budget",
+      "statement": "Decoded target residency never exceeds the configured budget, in either profile.",
+      "applies": "every phase of every run",
+      "metric": "residency.decodedBytes <= residency.budgetBytes"
+    },
+    {
+      "id": "residency-gpu-within-budget",
+      "statement": "GPU target residency never exceeds the configured budget, in either profile.",
+      "applies": "every phase of every run",
+      "metric": "residency.gpuBytes <= residency.budgetBytes"
+    },
+    {
+      "id": "process-working-set-ceiling",
+      "statement": "The browser process tree stays below 4 GiB while a 657 MB package is open.",
+      "applies": "every phase of every run",
+      "metric": "process.workingSetBytes <= 4294967296",
+      "ceilingBytes": 4294967296
+    },
+    {
+      "id": "js-heap-ceiling",
+      "statement": "The main-thread JavaScript heap stays below 2 GiB.",
+      "applies": "every phase of every run",
+      "metric": "page.usedJsHeapBytes <= 2147483648",
+      "ceilingBytes": 2147483648
+    },
+    {
+      "id": "forced-low-remains-usable",
+      "statement": "Under the forced-low budget the hierarchy and a coarse frame still appear, and a source-aware selection still resolves; full target residency is not required.",
+      "applies": "the forced-low profile (8 MiB)",
+      "metric": "phases hierarchy and coarse-frame reached, selection resolves property entries"
+    }
+  ],
+  "targetOutcomes": [
+    {
+      "id": "residency-decoded-within-budget",
+      "met": true,
+      "observedMaximum": {
+        "value": 67009152,
+        "profile": "default-budget",
+        "runIndex": 1,
+        "phase": "selection"
+      }
+    },
+    {
+      "id": "residency-gpu-within-budget",
+      "met": true,
+      "observedMaximum": {
+        "value": 67108748,
+        "profile": "default-budget",
+        "runIndex": 1,
+        "phase": "navigation"
+      }
+    },
+    {
+      "id": "process-working-set-ceiling",
+      "met": true,
+      "observedMaximum": {
+        "value": 3373060096,
+        "profile": "default-budget",
+        "runIndex": 1,
+        "phase": "coarse-frame"
+      }
+    },
+    {
+      "id": "js-heap-ceiling",
+      "met": true,
+      "observedMaximum": {
+        "value": 859187750,
+        "profile": "default-budget",
+        "runIndex": 2,
+        "phase": "budget-limited"
+      }
+    },
+    {
+      "id": "forced-low-remains-usable",
+      "met": true,
+      "observedMaximum": null
+    }
+  ],
+  "summary": {
+    "defaultBudget": {
+      "runs": 3,
+      "medianWorkingSetBytes": 2586112000,
+      "medianPrivateBytes": 8339120128,
+      "medianUsedJsHeapBytes": 847065463,
+      "medianUaMemoryBytes": 730751608,
+      "medianResidentDecodedBytes": 66686508,
+      "medianResidentGpuBytes": 66783808,
+      "medianRendererGpuBufferBytes": 66783936,
+      "chunksReady": [
+        111,
+        111,
+        111
+      ]
+    },
+    "forcedLowBudget": {
+      "runs": 3,
+      "medianWorkingSetBytes": 1439883264,
+      "medianPrivateBytes": 1312243712,
+      "medianUsedJsHeapBytes": 294224238,
+      "medianUaMemoryBytes": 632819320,
+      "medianResidentDecodedBytes": 8249400,
+      "medianResidentGpuBytes": 8251192,
+      "medianRendererGpuBufferBytes": 8251320,
+      "chunksReady": [
+        4,
+        4,
+        4
+      ]
+    },
+    "budgetToWorkingSetDeltaBytes": 1146228736,
+    "residencyShareOfWorkingSet": 0.0258
+  },
+  "runs": [
+    {
+      "profile": "default-budget",
+      "runIndex": 1,
+      "residencyMiB": null,
+      "budgetBytes": 67108864,
+      "startedAt": "2026-08-28T10:44:57.669Z",
+      "browserVersion": "151.0.7922.139",
+      "rootPid": 21652,
+      "samples": [
+        {
+          "phase": "hierarchy",
+          "atMilliseconds": 2304,
+          "statusText": "Hierarchy ready · 188319 occurrences · decoding 117,878.0 KiB in Worker…",
+          "statusState": "loading",
+          "statusStage": "hierarchy",
+          "crossOriginIsolated": true,
+          "package": {
+            "documentBytes": 448823852,
+            "propertyIndexBytes": 17705010,
+            "spatialIndexBytes": 0,
+            "declaredGeometryBytes": 120707064
+          },
+          "residency": {
+            "budgetBytes": null,
+            "decodedBytes": null,
+            "gpuBytes": null,
+            "budgetReached": false,
+            "chunksReady": null,
+            "chunksTotal": null,
+            "schedulerRequests": null,
+            "schedulerSkips": null,
+            "evictedTargetMeshCount": null,
+            "selectionResidency": null
+          },
+          "renderer": {
+            "gpuVertexPoolBytes": null,
+            "gpuBatchBufferBytes": null,
+            "gpuUniformBytes": null,
+            "gpuBufferBytes": null,
+            "gpuAttachmentBytes": null,
+            "cpuStagingBytes": null
+          },
+          "page": {
+            "usedJsHeapBytes": 851087975,
+            "totalJsHeapBytes": 901852911,
+            "jsHeapLimitBytes": 4395630592,
+            "usedJsHeapUnavailableReason": null,
+            "uaMemoryBytes": 896164365,
+            "uaMemoryByType": {
+              "JavaScript": 892290061,
+              "Shared": 3765856,
+              "DOM": 108448,
+              "Unattributed": 0
+            },
+            "uaMemoryByScope": {
+              "DedicatedWorkerGlobalScope": 760326537,
+              "Unattributed": 3874304,
+              "Window": 131963524
+            },
+            "uaMemoryEntryCount": 5,
+            "uaMemorySampleMilliseconds": 1414,
+            "uaMemoryUnavailableReason": null
+          },
+          "process": {
+            "rootPid": 21652,
+            "processCount": 8,
+            "chromeProcessesOnHost": 46,
+            "workingSetBytes": 3089653760,
+            "privateBytes": 2907770880
+          }
+        },
+        {
+          "phase": "coarse-frame",
+          "atMilliseconds": 4640,
+          "statusText": "View-priority target detail 3/234 · 78173 occurrences retained · 8,986.3 KiB GPU resident",
+          "statusState": "loading",
+          "statusStage": "target-chunks",
+          "crossOriginIsolated": true,
+          "package": {
+            "documentBytes": 448823852,
+            "propertyIndexBytes": 17705010,
+            "spatialIndexBytes": 0,
+            "declaredGeometryBytes": 120707064
+          },
+          "residency": {
+            "budgetBytes": 67108864,
+            "decodedBytes": 9197064,
+            "gpuBytes": 9202020,
+            "budgetReached": false,
+            "chunksReady": 3,
+            "chunksTotal": 234,
+            "schedulerRequests": 4,
+            "schedulerSkips": null,
+            "evictedTargetMeshCount": null,
+            "selectionResidency": null
+          },
+          "renderer": {
+            "gpuVertexPoolBytes": 826800,
+            "gpuBatchBufferBytes": 8375220,
+            "gpuUniformBytes": 128,
+            "gpuBufferBytes": 9202148,
+            "gpuAttachmentBytes": 4900480,
+            "cpuStagingBytes": 7630176
+          },
+          "page": {
+            "usedJsHeapBytes": 346973572,
+            "totalJsHeapBytes": 394935208,
+            "jsHeapLimitBytes": 4395630592,
+            "usedJsHeapUnavailableReason": null,
+            "uaMemoryBytes": 669658863,
+            "uaMemoryByType": {
+              "JavaScript": 661499655,
+              "Unattributed": 0,
+              "Canvas": 2450240,
+              "DOM": 109128,
+              "Shared": 5599840
+            },
+            "uaMemoryByScope": {
+              "DedicatedWorkerGlobalScope": 351349721,
+              "Window": 312600174,
+              "Unattributed": 5708968
+            },
+            "uaMemoryEntryCount": 6,
+            "uaMemorySampleMilliseconds": 7777,
+            "uaMemoryUnavailableReason": null
+          },
+          "process": {
+            "rootPid": 21652,
+            "processCount": 8,
+            "chromeProcessesOnHost": 46,
+            "workingSetBytes": 3373060096,
+            "privateBytes": 9139916800
+          }
+        },
+        {
+          "phase": "budget-limited",
+          "atMilliseconds": 16926,
+          "statusText": "Residency budget reached · 24326 surface batches retained · 78173 renderable occurrences",
+          "statusState": "ready",
+          "statusStage": "rendered",
+          "crossOriginIsolated": true,
+          "package": {
+            "documentBytes": 448823852,
+            "propertyIndexBytes": 17705010,
+            "spatialIndexBytes": 0,
+            "declaredGeometryBytes": 120707064
+          },
+          "residency": {
+            "budgetBytes": 67108864,
+            "decodedBytes": 66686508,
+            "gpuBytes": 66783808,
+            "budgetReached": true,
+            "chunksReady": 111,
+            "chunksTotal": 234,
+            "schedulerRequests": 111,
+            "schedulerSkips": 123,
+            "evictedTargetMeshCount": null,
+            "selectionResidency": null
+          },
+          "renderer": {
+            "gpuVertexPoolBytes": 28790184,
+            "gpuBatchBufferBytes": 37993624,
+            "gpuUniformBytes": 128,
+            "gpuBufferBytes": 66783936,
+            "gpuAttachmentBytes": 4900480,
+            "cpuStagingBytes": 10833216
+          },
+          "page": {
+            "usedJsHeapBytes": 840352553,
+            "totalJsHeapBytes": 908969785,
+            "jsHeapLimitBytes": 4395630592,
+            "usedJsHeapUnavailableReason": null,
+            "uaMemoryBytes": 730783367,
+            "uaMemoryByType": {
+              "Canvas": 4900480,
+              "JavaScript": 722960471,
+              "DOM": 108688,
+              "Shared": 2813728,
+              "Unattributed": 0
+            },
+            "uaMemoryByScope": {
+              "Window": 376674894,
+              "DedicatedWorkerGlobalScope": 351186057,
+              "Unattributed": 2922416
+            },
+            "uaMemoryEntryCount": 6,
+            "uaMemorySampleMilliseconds": 14055,
+            "uaMemoryUnavailableReason": null
+          },
+          "process": {
+            "rootPid": 21652,
+            "processCount": 8,
+            "chromeProcessesOnHost": 46,
+            "workingSetBytes": 2650783744,
+            "privateBytes": 8425656320
+          }
+        },
+        {
+          "phase": "navigation",
+          "atMilliseconds": 37856,
+          "statusText": "Residency budget reached · 24930 surface batches retained · 78173 renderable occurrences",
+          "statusState": "ready",
+          "statusStage": "rendered",
+          "crossOriginIsolated": true,
+          "package": {
+            "documentBytes": 448823852,
+            "propertyIndexBytes": 17705010,
+            "spatialIndexBytes": 0,
+            "declaredGeometryBytes": 120707064
+          },
+          "residency": {
+            "budgetBytes": 67108864,
+            "decodedBytes": 67009032,
+            "gpuBytes": 67108748,
+            "budgetReached": true,
+            "chunksReady": 110,
+            "chunksTotal": 234,
+            "schedulerRequests": 139,
+            "schedulerSkips": 247,
+            "evictedTargetMeshCount": null,
+            "selectionResidency": null
+          },
+          "renderer": {
+            "gpuVertexPoolBytes": 28889112,
+            "gpuBatchBufferBytes": 38219636,
+            "gpuUniformBytes": 128,
+            "gpuBufferBytes": 67108876,
+            "gpuAttachmentBytes": 4900480,
+            "cpuStagingBytes": 10996224
+          },
+          "page": {
+            "usedJsHeapBytes": 451539211,
+            "totalJsHeapBytes": 501738419,
+            "jsHeapLimitBytes": 4395630592,
+            "usedJsHeapUnavailableReason": null,
+            "uaMemoryBytes": 732940606,
+            "uaMemoryByType": {
+              "Canvas": 4900480,
+              "DOM": 108992,
+              "JavaScript": 723758590,
+              "Shared": 4172544,
+              "Unattributed": 0
+            },
+            "uaMemoryByScope": {
+              "Window": 376914781,
+              "Unattributed": 4281536,
+              "DedicatedWorkerGlobalScope": 351744289
+            },
+            "uaMemoryEntryCount": 6,
+            "uaMemorySampleMilliseconds": 16070,
+            "uaMemoryUnavailableReason": null
+          },
+          "process": {
+            "rootPid": 21652,
+            "processCount": 8,
+            "chromeProcessesOnHost": 46,
+            "workingSetBytes": 2613407744,
+            "privateBytes": 8666963968
+          }
+        },
+        {
+          "phase": "selection",
+          "atMilliseconds": 54971,
+          "statusText": "Residency budget reached · 24840 surface batches retained · 78173 renderable occurrences",
+          "statusState": "ready",
+          "statusStage": "rendered",
+          "crossOriginIsolated": true,
+          "package": {
+            "documentBytes": 448823852,
+            "propertyIndexBytes": 17705010,
+            "spatialIndexBytes": 0,
+            "declaredGeometryBytes": 120707064
+          },
+          "residency": {
+            "budgetBytes": 67108864,
+            "decodedBytes": 67009152,
+            "gpuBytes": 67108508,
+            "budgetReached": true,
+            "chunksReady": 110,
+            "chunksTotal": 234,
+            "schedulerRequests": 139,
+            "schedulerSkips": 371,
+            "evictedTargetMeshCount": 199,
+            "selectionResidency": "target"
+          },
+          "renderer": {
+            "gpuVertexPoolBytes": 28891224,
+            "gpuBatchBufferBytes": 38217284,
+            "gpuUniformBytes": 128,
+            "gpuBufferBytes": 67108636,
+            "gpuAttachmentBytes": 4900480,
+            "cpuStagingBytes": 10985184
+          },
+          "page": {
+            "usedJsHeapBytes": 565719561,
+            "totalJsHeapBytes": 621632645,
+            "jsHeapLimitBytes": 4395630592,
+            "usedJsHeapUnavailableReason": null,
+            "uaMemoryBytes": 789889936,
+            "uaMemoryByType": {
+              "Canvas": 4900480,
+              "DOM": 113640,
+              "JavaScript": 780624765,
+              "Shared": 4251051,
+              "Unattributed": 0
+            },
+            "uaMemoryByScope": {
+              "Window": 434393628,
+              "Unattributed": 4364691,
+              "DedicatedWorkerGlobalScope": 351131617
+            },
+            "uaMemoryEntryCount": 6,
+            "uaMemorySampleMilliseconds": 8105,
+            "uaMemoryUnavailableReason": null
+          },
+          "process": {
+            "rootPid": 21652,
+            "processCount": 8,
+            "chromeProcessesOnHost": 46,
+            "workingSetBytes": 2594103296,
+            "privateBytes": 8679829504
+          }
+        },
+        {
+          "phase": "eviction",
+          "atMilliseconds": 67660,
+          "statusText": "Residency budget reached · 24840 surface batches retained · 78173 renderable occurrences",
+          "statusState": "ready",
+          "statusStage": "rendered",
+          "crossOriginIsolated": true,
+          "package": {
+            "documentBytes": 448823852,
+            "propertyIndexBytes": 17705010,
+            "spatialIndexBytes": 0,
+            "declaredGeometryBytes": 120707064
+          },
+          "residency": {
+            "budgetBytes": 67108864,
+            "decodedBytes": 67009152,
+            "gpuBytes": 67108508,
+            "budgetReached": true,
+            "chunksReady": 110,
+            "chunksTotal": 234,
+            "schedulerRequests": 139,
+            "schedulerSkips": 371,
+            "evictedTargetMeshCount": 199,
+            "selectionResidency": "target"
+          },
+          "renderer": {
+            "gpuVertexPoolBytes": 28891224,
+            "gpuBatchBufferBytes": 38217284,
+            "gpuUniformBytes": 128,
+            "gpuBufferBytes": 67108636,
+            "gpuAttachmentBytes": 4900480,
+            "cpuStagingBytes": 10985184
+          },
+          "page": {
+            "usedJsHeapBytes": 433645098,
+            "totalJsHeapBytes": 440316986,
+            "jsHeapLimitBytes": 4395630592,
+            "usedJsHeapUnavailableReason": null,
+            "uaMemoryBytes": 789882138,
+            "uaMemoryByType": {
+              "JavaScript": 780608877,
+              "Shared": 4259141,
+              "Canvas": 4900480,
+              "DOM": 113640,
+              "Unattributed": 0
+            },
+            "uaMemoryByScope": {
+              "Window": 434384364,
+              "Unattributed": 4372781,
+              "DedicatedWorkerGlobalScope": 351124993
+            },
+            "uaMemoryEntryCount": 6,
+            "uaMemorySampleMilliseconds": 10057,
+            "uaMemoryUnavailableReason": null
+          },
+          "process": {
+            "rootPid": 21652,
+            "processCount": 8,
+            "chromeProcessesOnHost": 46,
+            "workingSetBytes": 2431823872,
+            "privateBytes": 8570327040
+          }
+        }
+      ],
+      "selection": {
+        "selectedObjectId": "148339",
+        "selectionResidency": "target",
+        "evictedTargetMeshCount": "199",
+        "semanticProperties": {
+          "state": "resolved",
+          "entryCount": 6,
+          "countLabel": "· 6 · IFC2X3"
+        }
+      },
+      "eviction": {
+        "observed": true,
+        "source": "selection",
+        "selected": "148339",
+        "selectionResidency": "target",
+        "evictedTargetMeshCount": 199
+      },
+      "evictionAttempts": [],
+      "evictionQuiescence": {
+        "settled": true,
+        "waitedMilliseconds": 4044,
+        "state": "ready|139|371|110|67108508"
+      },
+      "consoleIssues": [],
+      "screenshots": {
+        "coarse-frame.png": {
+          "path": "default-budget/coarse-frame.png",
+          "bytes": 239555,
+          "sha256": "978f84c02750efaac8e5c0b2a8901837b2e92a8ed5af8d090035f4f8d7475e67"
+        },
+        "budget-limited.png": {
+          "path": "default-budget/budget-limited.png",
+          "bytes": 254255,
+          "sha256": "641495e34bb2cf851f164b9992bc0724ac9c828009c5622d8a7949ba0c0426e2"
+        },
+        "selection.png": {
+          "path": "default-budget/selection.png",
+          "bytes": 282490,
+          "sha256": "543082ed979c286218848cbfea0e7dff4f331cd6827d34762e3c8a04a629d15b"
+        }
+      }
+    },
+    {
+      "profile": "default-budget",
+      "runIndex": 2,
+      "residencyMiB": null,
+      "budgetBytes": 67108864,
+      "startedAt": "2026-08-28T10:46:16.389Z",
+      "browserVersion": "151.0.7922.139",
+      "rootPid": 11924,
+      "samples": [
+        {
+          "phase": "hierarchy",
+          "atMilliseconds": 2400,
+          "statusText": "Hierarchy ready · 188319 occurrences · decoding 117,878.0 KiB in Worker…",
+          "statusState": "loading",
+          "statusStage": "hierarchy",
+          "crossOriginIsolated": true,
+          "package": {
+            "documentBytes": 448823852,
+            "propertyIndexBytes": 17705010,
+            "spatialIndexBytes": 0,
+            "declaredGeometryBytes": 120707064
+          },
+          "residency": {
+            "budgetBytes": null,
+            "decodedBytes": null,
+            "gpuBytes": null,
+            "budgetReached": false,
+            "chunksReady": null,
+            "chunksTotal": null,
+            "schedulerRequests": null,
+            "schedulerSkips": null,
+            "evictedTargetMeshCount": null,
+            "selectionResidency": null
+          },
+          "renderer": {
+            "gpuVertexPoolBytes": null,
+            "gpuBatchBufferBytes": null,
+            "gpuUniformBytes": null,
+            "gpuBufferBytes": null,
+            "gpuAttachmentBytes": null,
+            "cpuStagingBytes": null
+          },
+          "page": {
+            "usedJsHeapBytes": 851089911,
+            "totalJsHeapBytes": 901852911,
+            "jsHeapLimitBytes": 4395630592,
+            "usedJsHeapUnavailableReason": null,
+            "uaMemoryBytes": 896164321,
+            "uaMemoryByType": {
+              "JavaScript": 892636763,
+              "Shared": 3419110,
+              "Unattributed": 0,
+              "DOM": 108448
+            },
+            "uaMemoryByScope": {
+              "Window": 132310226,
+              "Unattributed": 3527558,
+              "DedicatedWorkerGlobalScope": 760326537
+            },
+            "uaMemoryEntryCount": 5,
+            "uaMemorySampleMilliseconds": 1564,
+            "uaMemoryUnavailableReason": null
+          },
+          "process": {
+            "rootPid": 11924,
+            "processCount": 8,
+            "chromeProcessesOnHost": 46,
+            "workingSetBytes": 3069284352,
+            "privateBytes": 2889981952
+          }
+        },
+        {
+          "phase": "coarse-frame",
+          "atMilliseconds": 4810,
+          "statusText": "Coarse bounds ready · 78173 renderable occurrences · loading 117,878.0 KiB target geometry…",
+          "statusState": "loading",
+          "statusStage": "coarse",
+          "crossOriginIsolated": true,
+          "package": {
+            "documentBytes": 448823852,
+            "propertyIndexBytes": 17705010,
+            "spatialIndexBytes": 0,
+            "declaredGeometryBytes": 120707064
+          },
+          "residency": {
+            "budgetBytes": 67108864,
+            "decodedBytes": null,
+            "gpuBytes": null,
+            "budgetReached": false,
+            "chunksReady": 0,
+            "chunksTotal": 234,
+            "schedulerRequests": 1,
+            "schedulerSkips": null,
+            "evictedTargetMeshCount": null,
+            "selectionResidency": null
+          },
+          "renderer": {
+            "gpuVertexPoolBytes": 576,
+            "gpuBatchBufferBytes": 7505040,
+            "gpuUniformBytes": 128,
+            "gpuBufferBytes": 7505744,
+            "gpuAttachmentBytes": 4900480,
+            "cpuStagingBytes": 7504608
+          },
+          "page": {
+            "usedJsHeapBytes": 326661421,
+            "totalJsHeapBytes": 391403481,
+            "jsHeapLimitBytes": 4395630592,
+            "usedJsHeapUnavailableReason": null,
+            "uaMemoryBytes": 670412417,
+            "uaMemoryByType": {
+              "DOM": 109128,
+              "JavaScript": 659814191,
+              "Canvas": 2450240,
+              "Unattributed": 0,
+              "Shared": 8038858
+            },
+            "uaMemoryByScope": {
+              "Unattributed": 8147986,
+              "DedicatedWorkerGlobalScope": 351348669,
+              "Window": 310915762
+            },
+            "uaMemoryEntryCount": 6,
+            "uaMemorySampleMilliseconds": 15683,
+            "uaMemoryUnavailableReason": null
+          },
+          "process": {
+            "rootPid": 11924,
+            "processCount": 8,
+            "chromeProcessesOnHost": 46,
+            "workingSetBytes": 3356979200,
+            "privateBytes": 9082028032
+          }
+        },
+        {
+          "phase": "budget-limited",
+          "atMilliseconds": 25013,
+          "statusText": "Residency budget reached · 24326 surface batches retained · 78173 renderable occurrences",
+          "statusState": "ready",
+          "statusStage": "rendered",
+          "crossOriginIsolated": true,
+          "package": {
+            "documentBytes": 448823852,
+            "propertyIndexBytes": 17705010,
+            "spatialIndexBytes": 0,
+            "declaredGeometryBytes": 120707064
+          },
+          "residency": {
+            "budgetBytes": 67108864,
+            "decodedBytes": 66686508,
+            "gpuBytes": 66783808,
+            "budgetReached": true,
+            "chunksReady": 111,
+            "chunksTotal": 234,
+            "schedulerRequests": 111,
+            "schedulerSkips": 123,
+            "evictedTargetMeshCount": null,
+            "selectionResidency": null
+          },
+          "renderer": {
+            "gpuVertexPoolBytes": 28790184,
+            "gpuBatchBufferBytes": 37993624,
+            "gpuUniformBytes": 128,
+            "gpuBufferBytes": 66783936,
+            "gpuAttachmentBytes": 4900480,
+            "cpuStagingBytes": 10833216
+          },
+          "page": {
+            "usedJsHeapBytes": 859187750,
+            "totalJsHeapBytes": 910829318,
+            "jsHeapLimitBytes": 4395630592,
+            "usedJsHeapUnavailableReason": null,
+            "uaMemoryBytes": 730750500,
+            "uaMemoryByType": {
+              "Shared": 3645509,
+              "Canvas": 4900480,
+              "JavaScript": 722095823,
+              "Unattributed": 0,
+              "DOM": 108688
+            },
+            "uaMemoryByScope": {
+              "Unattributed": 3754197,
+              "Window": 375812230,
+              "DedicatedWorkerGlobalScope": 351184073
+            },
+            "uaMemoryEntryCount": 6,
+            "uaMemorySampleMilliseconds": 7583,
+            "uaMemoryUnavailableReason": null
+          },
+          "process": {
+            "rootPid": 11924,
+            "processCount": 8,
+            "chromeProcessesOnHost": 46,
+            "workingSetBytes": 2586112000,
+            "privateBytes": 8339120128
+          }
+        },
+        {
+          "phase": "navigation",
+          "atMilliseconds": 39195,
+          "statusText": "Residency budget reached · 24930 surface batches retained · 78173 renderable occurrences",
+          "statusState": "ready",
+          "statusStage": "rendered",
+          "crossOriginIsolated": true,
+          "package": {
+            "documentBytes": 448823852,
+            "propertyIndexBytes": 17705010,
+            "spatialIndexBytes": 0,
+            "declaredGeometryBytes": 120707064
+          },
+          "residency": {
+            "budgetBytes": 67108864,
+            "decodedBytes": 67009032,
+            "gpuBytes": 67108748,
+            "budgetReached": true,
+            "chunksReady": 110,
+            "chunksTotal": 234,
+            "schedulerRequests": 134,
+            "schedulerSkips": 247,
+            "evictedTargetMeshCount": null,
+            "selectionResidency": null
+          },
+          "renderer": {
+            "gpuVertexPoolBytes": 28889112,
+            "gpuBatchBufferBytes": 38219636,
+            "gpuUniformBytes": 128,
+            "gpuBufferBytes": 67108876,
+            "gpuAttachmentBytes": 4900480,
+            "cpuStagingBytes": 10996224
+          },
+          "page": {
+            "usedJsHeapBytes": 439116223,
+            "totalJsHeapBytes": 496077935,
+            "jsHeapLimitBytes": 4395630592,
+            "usedJsHeapUnavailableReason": null,
+            "uaMemoryBytes": 729861819,
+            "uaMemoryByType": {
+              "Shared": 3810067,
+              "JavaScript": 723492520,
+              "Canvas": 2450240,
+              "Unattributed": 0,
+              "DOM": 108992
+            },
+            "uaMemoryByScope": {
+              "Unattributed": 3919059,
+              "Window": 374766591,
+              "DedicatedWorkerGlobalScope": 351176169
+            },
+            "uaMemoryEntryCount": 6,
+            "uaMemorySampleMilliseconds": 13075,
+            "uaMemoryUnavailableReason": null
+          },
+          "process": {
+            "rootPid": 11924,
+            "processCount": 8,
+            "chromeProcessesOnHost": 46,
+            "workingSetBytes": 2635153408,
+            "privateBytes": 8648695808
+          }
+        },
+        {
+          "phase": "selection",
+          "atMilliseconds": 53315,
+          "statusText": "Residency budget reached · 24840 surface batches retained · 78173 renderable occurrences",
+          "statusState": "ready",
+          "statusStage": "rendered",
+          "crossOriginIsolated": true,
+          "package": {
+            "documentBytes": 448823852,
+            "propertyIndexBytes": 17705010,
+            "spatialIndexBytes": 0,
+            "declaredGeometryBytes": 120707064
+          },
+          "residency": {
+            "budgetBytes": 67108864,
+            "decodedBytes": 67009152,
+            "gpuBytes": 67108508,
+            "budgetReached": true,
+            "chunksReady": 110,
+            "chunksTotal": 234,
+            "schedulerRequests": 134,
+            "schedulerSkips": 371,
+            "evictedTargetMeshCount": 199,
+            "selectionResidency": "target"
+          },
+          "renderer": {
+            "gpuVertexPoolBytes": 28891224,
+            "gpuBatchBufferBytes": 38217284,
+            "gpuUniformBytes": 128,
+            "gpuBufferBytes": 67108636,
+            "gpuAttachmentBytes": 4900480,
+            "cpuStagingBytes": 10985184
+          },
+          "page": {
+            "usedJsHeapBytes": 565374489,
+            "totalJsHeapBytes": 630610993,
+            "jsHeapLimitBytes": 4395630592,
+            "usedJsHeapUnavailableReason": null,
+            "uaMemoryBytes": 789888299,
+            "uaMemoryByType": {
+              "JavaScript": 780368769,
+              "DOM": 113640,
+              "Unattributed": 0,
+              "Canvas": 4900480,
+              "Shared": 4505410
+            },
+            "uaMemoryByScope": {
+              "Window": 434137328,
+              "Unattributed": 4619050,
+              "DedicatedWorkerGlobalScope": 351131921
+            },
+            "uaMemoryEntryCount": 6,
+            "uaMemorySampleMilliseconds": 17071,
+            "uaMemoryUnavailableReason": null
+          },
+          "process": {
+            "rootPid": 11924,
+            "processCount": 8,
+            "chromeProcessesOnHost": 46,
+            "workingSetBytes": 2577465344,
+            "privateBytes": 8663502848
+          }
+        },
+        {
+          "phase": "eviction",
+          "atMilliseconds": 74886,
+          "statusText": "Residency budget reached · 24840 surface batches retained · 78173 renderable occurrences",
+          "statusState": "ready",
+          "statusStage": "rendered",
+          "crossOriginIsolated": true,
+          "package": {
+            "documentBytes": 448823852,
+            "propertyIndexBytes": 17705010,
+            "spatialIndexBytes": 0,
+            "declaredGeometryBytes": 120707064
+          },
+          "residency": {
+            "budgetBytes": 67108864,
+            "decodedBytes": 67009152,
+            "gpuBytes": 67108508,
+            "budgetReached": true,
+            "chunksReady": 110,
+            "chunksTotal": 234,
+            "schedulerRequests": 134,
+            "schedulerSkips": 371,
+            "evictedTargetMeshCount": 199,
+            "selectionResidency": "target"
+          },
+          "renderer": {
+            "gpuVertexPoolBytes": 28891224,
+            "gpuBatchBufferBytes": 38217284,
+            "gpuUniformBytes": 128,
+            "gpuBufferBytes": 67108636,
+            "gpuAttachmentBytes": 4900480,
+            "cpuStagingBytes": 10985184
+          },
+          "page": {
+            "usedJsHeapBytes": 433604178,
+            "totalJsHeapBytes": 437957606,
+            "jsHeapLimitBytes": 4395630592,
+            "usedJsHeapUnavailableReason": null,
+            "uaMemoryBytes": 789863857,
+            "uaMemoryByType": {
+              "JavaScript": 780779631,
+              "Canvas": 4900480,
+              "Shared": 4070106,
+              "Unattributed": 0,
+              "DOM": 113640
+            },
+            "uaMemoryByScope": {
+              "DedicatedWorkerGlobalScope": 351125297,
+              "Window": 434554814,
+              "Unattributed": 4183746
+            },
+            "uaMemoryEntryCount": 6,
+            "uaMemorySampleMilliseconds": 18074,
+            "uaMemoryUnavailableReason": null
+          },
+          "process": {
+            "rootPid": 11924,
+            "processCount": 8,
+            "chromeProcessesOnHost": 46,
+            "workingSetBytes": 2505252864,
+            "privateBytes": 8659341312
+          }
+        }
+      ],
+      "selection": {
+        "selectedObjectId": "148339",
+        "selectionResidency": "target",
+        "evictedTargetMeshCount": "199",
+        "semanticProperties": {
+          "state": "resolved",
+          "entryCount": 6,
+          "countLabel": "· 6 · IFC2X3"
+        }
+      },
+      "eviction": {
+        "observed": true,
+        "source": "selection",
+        "selected": "148339",
+        "selectionResidency": "target",
+        "evictedTargetMeshCount": 199
+      },
+      "evictionAttempts": [],
+      "evictionQuiescence": {
+        "settled": true,
+        "waitedMilliseconds": 4052,
+        "state": "ready|134|371|110|67108508"
+      },
+      "consoleIssues": [],
+      "screenshots": {}
+    },
+    {
+      "profile": "default-budget",
+      "runIndex": 3,
+      "residencyMiB": null,
+      "budgetBytes": 67108864,
+      "startedAt": "2026-08-28T10:47:50.340Z",
+      "browserVersion": "151.0.7922.139",
+      "rootPid": 26936,
+      "samples": [
+        {
+          "phase": "hierarchy",
+          "atMilliseconds": 2330,
+          "statusText": "Hierarchy ready · 188319 occurrences · decoding 117,878.0 KiB in Worker…",
+          "statusState": "loading",
+          "statusStage": "hierarchy",
+          "crossOriginIsolated": true,
+          "package": {
+            "documentBytes": 448823852,
+            "propertyIndexBytes": 17705010,
+            "spatialIndexBytes": 0,
+            "declaredGeometryBytes": 120707064
+          },
+          "residency": {
+            "budgetBytes": null,
+            "decodedBytes": null,
+            "gpuBytes": null,
+            "budgetReached": false,
+            "chunksReady": null,
+            "chunksTotal": null,
+            "schedulerRequests": null,
+            "schedulerSkips": null,
+            "evictedTargetMeshCount": null,
+            "selectionResidency": null
+          },
+          "renderer": {
+            "gpuVertexPoolBytes": null,
+            "gpuBatchBufferBytes": null,
+            "gpuUniformBytes": null,
+            "gpuBufferBytes": null,
+            "gpuAttachmentBytes": null,
+            "cpuStagingBytes": null
+          },
+          "page": {
+            "usedJsHeapBytes": 851079467,
+            "totalJsHeapBytes": 902377199,
+            "jsHeapLimitBytes": 4395630592,
+            "usedJsHeapUnavailableReason": null,
+            "uaMemoryBytes": 896164365,
+            "uaMemoryByType": {
+              "JavaScript": 892609581,
+              "Unattributed": 0,
+              "Shared": 3446336,
+              "DOM": 108448
+            },
+            "uaMemoryByScope": {
+              "DedicatedWorkerGlobalScope": 760326537,
+              "Unattributed": 3554784,
+              "Window": 132283044
+            },
+            "uaMemoryEntryCount": 5,
+            "uaMemorySampleMilliseconds": 1267,
+            "uaMemoryUnavailableReason": null
+          },
+          "process": {
+            "rootPid": 26936,
+            "processCount": 8,
+            "chromeProcessesOnHost": 46,
+            "workingSetBytes": 3093053440,
+            "privateBytes": 2911617024
+          }
+        },
+        {
+          "phase": "coarse-frame",
+          "atMilliseconds": 4376,
+          "statusText": "Coarse bounds ready · 78173 renderable occurrences · loading 117,878.0 KiB target geometry…",
+          "statusState": "loading",
+          "statusStage": "coarse",
+          "crossOriginIsolated": true,
+          "package": {
+            "documentBytes": 448823852,
+            "propertyIndexBytes": 17705010,
+            "spatialIndexBytes": 0,
+            "declaredGeometryBytes": 120707064
+          },
+          "residency": {
+            "budgetBytes": 67108864,
+            "decodedBytes": null,
+            "gpuBytes": null,
+            "budgetReached": false,
+            "chunksReady": 0,
+            "chunksTotal": 234,
+            "schedulerRequests": 1,
+            "schedulerSkips": null,
+            "evictedTargetMeshCount": null,
+            "selectionResidency": null
+          },
+          "renderer": {
+            "gpuVertexPoolBytes": 576,
+            "gpuBatchBufferBytes": 7505040,
+            "gpuUniformBytes": 128,
+            "gpuBufferBytes": 7505744,
+            "gpuAttachmentBytes": 4900480,
+            "cpuStagingBytes": 7504608
+          },
+          "page": {
+            "usedJsHeapBytes": 330499881,
+            "totalJsHeapBytes": 393734105,
+            "jsHeapLimitBytes": 4395630592,
+            "usedJsHeapUnavailableReason": null,
+            "uaMemoryBytes": 670413507,
+            "uaMemoryByType": {
+              "JavaScript": 658994122,
+              "DOM": 109128,
+              "Canvas": 2450240,
+              "Unattributed": 0,
+              "Shared": 8860017
+            },
+            "uaMemoryByScope": {
+              "Window": 310094585,
+              "DedicatedWorkerGlobalScope": 351349777,
+              "Unattributed": 8969145
+            },
+            "uaMemoryEntryCount": 6,
+            "uaMemorySampleMilliseconds": 17037,
+            "uaMemoryUnavailableReason": null
+          },
+          "process": {
+            "rootPid": 26936,
+            "processCount": 8,
+            "chromeProcessesOnHost": 46,
+            "workingSetBytes": 3308265472,
+            "privateBytes": 9089302528
+          }
+        },
+        {
+          "phase": "budget-limited",
+          "atMilliseconds": 25908,
+          "statusText": "Residency budget reached · 24326 surface batches retained · 78173 renderable occurrences",
+          "statusState": "ready",
+          "statusStage": "rendered",
+          "crossOriginIsolated": true,
+          "package": {
+            "documentBytes": 448823852,
+            "propertyIndexBytes": 17705010,
+            "spatialIndexBytes": 0,
+            "declaredGeometryBytes": 120707064
+          },
+          "residency": {
+            "budgetBytes": 67108864,
+            "decodedBytes": 66686508,
+            "gpuBytes": 66783808,
+            "budgetReached": true,
+            "chunksReady": 111,
+            "chunksTotal": 234,
+            "schedulerRequests": 111,
+            "schedulerSkips": 123,
+            "evictedTargetMeshCount": null,
+            "selectionResidency": null
+          },
+          "renderer": {
+            "gpuVertexPoolBytes": 28790184,
+            "gpuBatchBufferBytes": 37993624,
+            "gpuUniformBytes": 128,
+            "gpuBufferBytes": 66783936,
+            "gpuAttachmentBytes": 4900480,
+            "cpuStagingBytes": 10833216
+          },
+          "page": {
+            "usedJsHeapBytes": 847065463,
+            "totalJsHeapBytes": 922855123,
+            "jsHeapLimitBytes": 4395630592,
+            "usedJsHeapUnavailableReason": null,
+            "uaMemoryBytes": 730751608,
+            "uaMemoryByType": {
+              "Shared": 3657710,
+              "JavaScript": 722084730,
+              "Unattributed": 0,
+              "Canvas": 4900480,
+              "DOM": 108688
+            },
+            "uaMemoryByScope": {
+              "Unattributed": 3766398,
+              "Window": 375800029,
+              "DedicatedWorkerGlobalScope": 351185181
+            },
+            "uaMemoryEntryCount": 6,
+            "uaMemorySampleMilliseconds": 6617,
+            "uaMemoryUnavailableReason": null
+          },
+          "process": {
+            "rootPid": 26936,
+            "processCount": 8,
+            "chromeProcessesOnHost": 46,
+            "workingSetBytes": 2538606592,
+            "privateBytes": 8329601024
+          }
+        },
+        {
+          "phase": "navigation",
+          "atMilliseconds": 39130,
+          "statusText": "Residency budget reached · 24930 surface batches retained · 78173 renderable occurrences",
+          "statusState": "ready",
+          "statusStage": "rendered",
+          "crossOriginIsolated": true,
+          "package": {
+            "documentBytes": 448823852,
+            "propertyIndexBytes": 17705010,
+            "spatialIndexBytes": 0,
+            "declaredGeometryBytes": 120707064
+          },
+          "residency": {
+            "budgetBytes": 67108864,
+            "decodedBytes": 67009032,
+            "gpuBytes": 67108748,
+            "budgetReached": true,
+            "chunksReady": 110,
+            "chunksTotal": 234,
+            "schedulerRequests": 136,
+            "schedulerSkips": 247,
+            "evictedTargetMeshCount": null,
+            "selectionResidency": null
+          },
+          "renderer": {
+            "gpuVertexPoolBytes": 28889112,
+            "gpuBatchBufferBytes": 38219636,
+            "gpuUniformBytes": 128,
+            "gpuBufferBytes": 67108876,
+            "gpuAttachmentBytes": 4900480,
+            "cpuStagingBytes": 10996224
+          },
+          "page": {
+            "usedJsHeapBytes": 448924149,
+            "totalJsHeapBytes": 511946157,
+            "jsHeapLimitBytes": 4395630592,
+            "usedJsHeapUnavailableReason": null,
+            "uaMemoryBytes": 732339111,
+            "uaMemoryByType": {
+              "Unattributed": 0,
+              "JavaScript": 724683073,
+              "Shared": 2646566,
+              "Canvas": 4900480,
+              "DOM": 108992
+            },
+            "uaMemoryByScope": {
+              "Unattributed": 2755558,
+              "Window": 378382628,
+              "DedicatedWorkerGlobalScope": 351200925
+            },
+            "uaMemoryEntryCount": 6,
+            "uaMemorySampleMilliseconds": 16069,
+            "uaMemoryUnavailableReason": null
+          },
+          "process": {
+            "rootPid": 26936,
+            "processCount": 8,
+            "chromeProcessesOnHost": 46,
+            "workingSetBytes": 2580275200,
+            "privateBytes": 8650878976
+          }
+        },
+        {
+          "phase": "selection",
+          "atMilliseconds": 56238,
+          "statusText": "Residency budget reached · 24840 surface batches retained · 78173 renderable occurrences",
+          "statusState": "ready",
+          "statusStage": "rendered",
+          "crossOriginIsolated": true,
+          "package": {
+            "documentBytes": 448823852,
+            "propertyIndexBytes": 17705010,
+            "spatialIndexBytes": 0,
+            "declaredGeometryBytes": 120707064
+          },
+          "residency": {
+            "budgetBytes": 67108864,
+            "decodedBytes": 67009152,
+            "gpuBytes": 67108508,
+            "budgetReached": true,
+            "chunksReady": 110,
+            "chunksTotal": 234,
+            "schedulerRequests": 136,
+            "schedulerSkips": 371,
+            "evictedTargetMeshCount": 199,
+            "selectionResidency": "target"
+          },
+          "renderer": {
+            "gpuVertexPoolBytes": 28891224,
+            "gpuBatchBufferBytes": 38217284,
+            "gpuUniformBytes": 128,
+            "gpuBufferBytes": 67108636,
+            "gpuAttachmentBytes": 4900480,
+            "cpuStagingBytes": 10985184
+          },
+          "page": {
+            "usedJsHeapBytes": 569900202,
+            "totalJsHeapBytes": 593124410,
+            "jsHeapLimitBytes": 4395630592,
+            "usedJsHeapUnavailableReason": null,
+            "uaMemoryBytes": 789840290,
+            "uaMemoryByType": {
+              "JavaScript": 780937623,
+              "Unattributed": 0,
+              "Shared": 3888547,
+              "DOM": 113640,
+              "Canvas": 4900480
+            },
+            "uaMemoryByScope": {
+              "Window": 434705242,
+              "Unattributed": 4002187,
+              "DedicatedWorkerGlobalScope": 351132861
+            },
+            "uaMemoryEntryCount": 6,
+            "uaMemorySampleMilliseconds": 8084,
+            "uaMemoryUnavailableReason": null
+          },
+          "process": {
+            "rootPid": 26936,
+            "processCount": 8,
+            "chromeProcessesOnHost": 46,
+            "workingSetBytes": 2535112704,
+            "privateBytes": 8638373888
+          }
+        },
+        {
+          "phase": "eviction",
+          "atMilliseconds": 68809,
+          "statusText": "Residency budget reached · 24840 surface batches retained · 78173 renderable occurrences",
+          "statusState": "ready",
+          "statusStage": "rendered",
+          "crossOriginIsolated": true,
+          "package": {
+            "documentBytes": 448823852,
+            "propertyIndexBytes": 17705010,
+            "spatialIndexBytes": 0,
+            "declaredGeometryBytes": 120707064
+          },
+          "residency": {
+            "budgetBytes": 67108864,
+            "decodedBytes": 67009152,
+            "gpuBytes": 67108508,
+            "budgetReached": true,
+            "chunksReady": 110,
+            "chunksTotal": 234,
+            "schedulerRequests": 136,
+            "schedulerSkips": 371,
+            "evictedTargetMeshCount": 199,
+            "selectionResidency": "target"
+          },
+          "renderer": {
+            "gpuVertexPoolBytes": 28891224,
+            "gpuBatchBufferBytes": 38217284,
+            "gpuUniformBytes": 128,
+            "gpuBufferBytes": 67108636,
+            "gpuAttachmentBytes": 4900480,
+            "cpuStagingBytes": 10985184
+          },
+          "page": {
+            "usedJsHeapBytes": 433610906,
+            "totalJsHeapBytes": 440316902,
+            "jsHeapLimitBytes": 4395630592,
+            "usedJsHeapUnavailableReason": null,
+            "uaMemoryBytes": 789833218,
+            "uaMemoryByType": {
+              "Shared": 616864,
+              "Canvas": 4900480,
+              "DOM": 113640,
+              "JavaScript": 784202234,
+              "Unattributed": 0
+            },
+            "uaMemoryByScope": {
+              "Unattributed": 730504,
+              "Window": 437976477,
+              "DedicatedWorkerGlobalScope": 351126237
+            },
+            "uaMemoryEntryCount": 6,
+            "uaMemorySampleMilliseconds": 15065,
+            "uaMemoryUnavailableReason": null
+          },
+          "process": {
+            "rootPid": 26936,
+            "processCount": 8,
+            "chromeProcessesOnHost": 46,
+            "workingSetBytes": 2470322176,
+            "privateBytes": 8635424768
+          }
+        }
+      ],
+      "selection": {
+        "selectedObjectId": "148339",
+        "selectionResidency": "target",
+        "evictedTargetMeshCount": "199",
+        "semanticProperties": {
+          "state": "resolved",
+          "entryCount": 6,
+          "countLabel": "· 6 · IFC2X3"
+        }
+      },
+      "eviction": {
+        "observed": true,
+        "source": "selection",
+        "selected": "148339",
+        "selectionResidency": "target",
+        "evictedTargetMeshCount": 199
+      },
+      "evictionAttempts": [],
+      "evictionQuiescence": {
+        "settled": true,
+        "waitedMilliseconds": 4042,
+        "state": "ready|136|371|110|67108508"
+      },
+      "consoleIssues": [],
+      "screenshots": {}
+    },
+    {
+      "profile": "forced-low-budget",
+      "runIndex": 1,
+      "residencyMiB": 8,
+      "budgetBytes": 8388608,
+      "startedAt": "2026-08-28T10:49:15.215Z",
+      "browserVersion": "151.0.7922.139",
+      "rootPid": 6584,
+      "samples": [
+        {
+          "phase": "hierarchy",
+          "atMilliseconds": 2321,
+          "statusText": "Hierarchy ready · 188319 occurrences · decoding 117,878.0 KiB in Worker…",
+          "statusState": "loading",
+          "statusStage": "hierarchy",
+          "crossOriginIsolated": true,
+          "package": {
+            "documentBytes": 448823852,
+            "propertyIndexBytes": 17705010,
+            "spatialIndexBytes": 0,
+            "declaredGeometryBytes": 120707064
+          },
+          "residency": {
+            "budgetBytes": null,
+            "decodedBytes": null,
+            "gpuBytes": null,
+            "budgetReached": false,
+            "chunksReady": null,
+            "chunksTotal": null,
+            "schedulerRequests": null,
+            "schedulerSkips": null,
+            "evictedTargetMeshCount": null,
+            "selectionResidency": null
+          },
+          "renderer": {
+            "gpuVertexPoolBytes": null,
+            "gpuBatchBufferBytes": null,
+            "gpuUniformBytes": null,
+            "gpuBufferBytes": null,
+            "gpuAttachmentBytes": null,
+            "cpuStagingBytes": null
+          },
+          "page": {
+            "usedJsHeapBytes": 851110867,
+            "totalJsHeapBytes": 902115071,
+            "jsHeapLimitBytes": 4395630592,
+            "usedJsHeapUnavailableReason": null,
+            "uaMemoryBytes": 896164333,
+            "uaMemoryByType": {
+              "Shared": 3463593,
+              "Unattributed": 0,
+              "DOM": 108448,
+              "JavaScript": 892592292
+            },
+            "uaMemoryByScope": {
+              "Unattributed": 3572041,
+              "Window": 132265755,
+              "DedicatedWorkerGlobalScope": 760326537
+            },
+            "uaMemoryEntryCount": 5,
+            "uaMemorySampleMilliseconds": 1408,
+            "uaMemoryUnavailableReason": null
+          },
+          "process": {
+            "rootPid": 6584,
+            "processCount": 8,
+            "chromeProcessesOnHost": 46,
+            "workingSetBytes": 3087499264,
+            "privateBytes": 2915770368
+          }
+        },
+        {
+          "phase": "coarse-frame",
+          "atMilliseconds": 4649,
+          "statusText": "View-priority target detail 3/234 · 78173 occurrences retained · 8,051.7 KiB GPU resident",
+          "statusState": "loading",
+          "statusStage": "target-chunks",
+          "crossOriginIsolated": true,
+          "package": {
+            "documentBytes": 448823852,
+            "propertyIndexBytes": 17705010,
+            "spatialIndexBytes": 0,
+            "declaredGeometryBytes": 120707064
+          },
+          "residency": {
+            "budgetBytes": 8388608,
+            "decodedBytes": 8243160,
+            "gpuBytes": 8244948,
+            "budgetReached": false,
+            "chunksReady": 3,
+            "chunksTotal": 234,
+            "schedulerRequests": 4,
+            "schedulerSkips": 230,
+            "evictedTargetMeshCount": null,
+            "selectionResidency": null
+          },
+          "renderer": {
+            "gpuVertexPoolBytes": 361128,
+            "gpuBatchBufferBytes": 7883820,
+            "gpuUniformBytes": 128,
+            "gpuBufferBytes": 8245076,
+            "gpuAttachmentBytes": 4900480,
+            "cpuStagingBytes": 7554144
+          },
+          "page": {
+            "usedJsHeapBytes": 336356242,
+            "totalJsHeapBytes": 384807962,
+            "jsHeapLimitBytes": 4395630592,
+            "usedJsHeapUnavailableReason": null,
+            "uaMemoryBytes": 633021771,
+            "uaMemoryByType": {
+              "Canvas": 2450240,
+              "DOM": 108688,
+              "JavaScript": 626493072,
+              "Unattributed": 0,
+              "Shared": 3969771
+            },
+            "uaMemoryByScope": {
+              "Window": 277678355,
+              "Unattributed": 4078459,
+              "DedicatedWorkerGlobalScope": 351264957
+            },
+            "uaMemoryEntryCount": 6,
+            "uaMemorySampleMilliseconds": 15739,
+            "uaMemoryUnavailableReason": null
+          },
+          "process": {
+            "rootPid": 6584,
+            "processCount": 8,
+            "chromeProcessesOnHost": 46,
+            "workingSetBytes": 1649946624,
+            "privateBytes": 1533476864
+          }
+        },
+        {
+          "phase": "budget-limited",
+          "atMilliseconds": 24917,
+          "statusText": "Residency budget reached · 449 surface batches retained · 78173 renderable occurrences",
+          "statusState": "ready",
+          "statusStage": "rendered",
+          "crossOriginIsolated": true,
+          "package": {
+            "documentBytes": 448823852,
+            "propertyIndexBytes": 17705010,
+            "spatialIndexBytes": 0,
+            "declaredGeometryBytes": 120707064
+          },
+          "residency": {
+            "budgetBytes": 8388608,
+            "decodedBytes": 8249400,
+            "gpuBytes": 8251192,
+            "budgetReached": true,
+            "chunksReady": 4,
+            "chunksTotal": 234,
+            "schedulerRequests": 4,
+            "schedulerSkips": 230,
+            "evictedTargetMeshCount": null,
+            "selectionResidency": null
+          },
+          "renderer": {
+            "gpuVertexPoolBytes": 364200,
+            "gpuBatchBufferBytes": 7886992,
+            "gpuUniformBytes": 128,
+            "gpuBufferBytes": 8251320,
+            "gpuAttachmentBytes": 4900480,
+            "cpuStagingBytes": 7554240
+          },
+          "page": {
+            "usedJsHeapBytes": 294392921,
+            "totalJsHeapBytes": 303140017,
+            "jsHeapLimitBytes": 4395630592,
+            "usedJsHeapUnavailableReason": null,
+            "uaMemoryBytes": 632845298,
+            "uaMemoryByType": {
+              "Unattributed": 0,
+              "Shared": 916254,
+              "JavaScript": 629370116,
+              "Canvas": 2450240,
+              "DOM": 108688
+            },
+            "uaMemoryByScope": {
+              "Unattributed": 1024942,
+              "Window": 280720995,
+              "DedicatedWorkerGlobalScope": 351099361
+            },
+            "uaMemoryEntryCount": 6,
+            "uaMemorySampleMilliseconds": 7610,
+            "uaMemoryUnavailableReason": null
+          },
+          "process": {
+            "rootPid": 6584,
+            "processCount": 8,
+            "chromeProcessesOnHost": 46,
+            "workingSetBytes": 1442369536,
+            "privateBytes": 1321201664
+          }
+        },
+        {
+          "phase": "navigation",
+          "atMilliseconds": 37825,
+          "statusText": "Residency budget reached · 650 surface batches retained · 78173 renderable occurrences",
+          "statusState": "ready",
+          "statusStage": "rendered",
+          "crossOriginIsolated": true,
+          "package": {
+            "documentBytes": 448823852,
+            "propertyIndexBytes": 17705010,
+            "spatialIndexBytes": 0,
+            "declaredGeometryBytes": 120707064
+          },
+          "residency": {
+            "budgetBytes": 8388608,
+            "decodedBytes": 8385360,
+            "gpuBytes": 8387956,
+            "budgetReached": true,
+            "chunksReady": 1,
+            "chunksTotal": 234,
+            "schedulerRequests": 98,
+            "schedulerSkips": 1621,
+            "evictedTargetMeshCount": null,
+            "selectionResidency": null
+          },
+          "renderer": {
+            "gpuVertexPoolBytes": 430728,
+            "gpuBatchBufferBytes": 7957228,
+            "gpuUniformBytes": 128,
+            "gpuBufferBytes": 8388084,
+            "gpuAttachmentBytes": 4900480,
+            "cpuStagingBytes": 7570464
+          },
+          "page": {
+            "usedJsHeapBytes": 322349649,
+            "totalJsHeapBytes": 402679193,
+            "jsHeapLimitBytes": 4395630592,
+            "usedJsHeapUnavailableReason": null,
+            "uaMemoryBytes": 636267444,
+            "uaMemoryByType": {
+              "JavaScript": 629417523,
+              "Canvas": 4900480,
+              "Unattributed": 0,
+              "Shared": 1840449,
+              "DOM": 108992
+            },
+            "uaMemoryByScope": {
+              "DedicatedWorkerGlobalScope": 351342995,
+              "Window": 282975008,
+              "Unattributed": 1949441
+            },
+            "uaMemoryEntryCount": 6,
+            "uaMemorySampleMilliseconds": 3660,
+            "uaMemoryUnavailableReason": null
+          },
+          "process": {
+            "rootPid": 6584,
+            "processCount": 8,
+            "chromeProcessesOnHost": 46,
+            "workingSetBytes": 1637138432,
+            "privateBytes": 1622630400
+          }
+        },
+        {
+          "phase": "selection",
+          "atMilliseconds": 42237,
+          "statusText": "Residency budget reached · 355 surface batches retained · 78173 renderable occurrences",
+          "statusState": "ready",
+          "statusStage": "rendered",
+          "crossOriginIsolated": true,
+          "package": {
+            "documentBytes": 448823852,
+            "propertyIndexBytes": 17705010,
+            "spatialIndexBytes": 0,
+            "declaredGeometryBytes": 120707064
+          },
+          "residency": {
+            "budgetBytes": 8388608,
+            "decodedBytes": 8375808,
+            "gpuBytes": 8377224,
+            "budgetReached": true,
+            "chunksReady": 2,
+            "chunksTotal": 234,
+            "schedulerRequests": 99,
+            "schedulerSkips": 1853,
+            "evictedTargetMeshCount": 325,
+            "selectionResidency": "target"
+          },
+          "renderer": {
+            "gpuVertexPoolBytes": 429600,
+            "gpuBatchBufferBytes": 7947624,
+            "gpuUniformBytes": 128,
+            "gpuBufferBytes": 8377352,
+            "gpuAttachmentBytes": 4900480,
+            "cpuStagingBytes": 7538592
+          },
+          "page": {
+            "usedJsHeapBytes": 472602023,
+            "totalJsHeapBytes": 521603675,
+            "jsHeapLimitBytes": 4395630592,
+            "usedJsHeapUnavailableReason": null,
+            "uaMemoryBytes": 693420317,
+            "uaMemoryByType": {
+              "Shared": 4877227,
+              "JavaScript": 683528970,
+              "Unattributed": 0,
+              "Canvas": 4900480,
+              "DOM": 113640
+            },
+            "uaMemoryByScope": {
+              "Unattributed": 4990867,
+              "DedicatedWorkerGlobalScope": 351140789,
+              "Window": 337288661
+            },
+            "uaMemoryEntryCount": 6,
+            "uaMemorySampleMilliseconds": 17064,
+            "uaMemoryUnavailableReason": null
+          },
+          "process": {
+            "rootPid": 6584,
+            "processCount": 8,
+            "chromeProcessesOnHost": 46,
+            "workingSetBytes": 1631698944,
+            "privateBytes": 1620242432
+          }
+        },
+        {
+          "phase": "eviction",
+          "atMilliseconds": 63876,
+          "statusText": "Residency budget reached · 355 surface batches retained · 78173 renderable occurrences",
+          "statusState": "ready",
+          "statusStage": "rendered",
+          "crossOriginIsolated": true,
+          "package": {
+            "documentBytes": 448823852,
+            "propertyIndexBytes": 17705010,
+            "spatialIndexBytes": 0,
+            "declaredGeometryBytes": 120707064
+          },
+          "residency": {
+            "budgetBytes": 8388608,
+            "decodedBytes": 8375808,
+            "gpuBytes": 8377224,
+            "budgetReached": true,
+            "chunksReady": 2,
+            "chunksTotal": 234,
+            "schedulerRequests": 99,
+            "schedulerSkips": 1853,
+            "evictedTargetMeshCount": 325,
+            "selectionResidency": "target"
+          },
+          "renderer": {
+            "gpuVertexPoolBytes": 429600,
+            "gpuBatchBufferBytes": 7947624,
+            "gpuUniformBytes": 128,
+            "gpuBufferBytes": 8377352,
+            "gpuAttachmentBytes": 4900480,
+            "cpuStagingBytes": 7538592
+          },
+          "page": {
+            "usedJsHeapBytes": 337164496,
+            "totalJsHeapBytes": 341467616,
+            "jsHeapLimitBytes": 4395630592,
+            "usedJsHeapUnavailableReason": null,
+            "uaMemoryBytes": 693409691,
+            "uaMemoryByType": {
+              "Unattributed": 0,
+              "Canvas": 4900480,
+              "Shared": 3812061,
+              "DOM": 113640,
+              "JavaScript": 684583510
+            },
+            "uaMemoryByScope": {
+              "Unattributed": 3925701,
+              "Window": 338349925,
+              "DedicatedWorkerGlobalScope": 351134065
+            },
+            "uaMemoryEntryCount": 6,
+            "uaMemorySampleMilliseconds": 13064,
+            "uaMemoryUnavailableReason": null
+          },
+          "process": {
+            "rootPid": 6584,
+            "processCount": 8,
+            "chromeProcessesOnHost": 46,
+            "workingSetBytes": 1614065664,
+            "privateBytes": 1605971968
+          }
+        }
+      ],
+      "selection": {
+        "selectedObjectId": "148339",
+        "selectionResidency": "target",
+        "evictedTargetMeshCount": "325",
+        "semanticProperties": {
+          "state": "resolved",
+          "entryCount": 6,
+          "countLabel": "· 6 · IFC2X3"
+        }
+      },
+      "eviction": {
+        "observed": true,
+        "source": "selection",
+        "selected": "148339",
+        "selectionResidency": "target",
+        "evictedTargetMeshCount": 325
+      },
+      "evictionAttempts": [],
+      "evictionQuiescence": {
+        "settled": true,
+        "waitedMilliseconds": 4051,
+        "state": "ready|99|1853|2|8377224"
+      },
+      "consoleIssues": [],
+      "screenshots": {
+        "coarse-frame.png": {
+          "path": "forced-low-budget/coarse-frame.png",
+          "bytes": 239547,
+          "sha256": "c3f60caee1de47aabdc5e5e7acf30f3bff014692fc0f61d7f87ee91cc5a28895"
+        },
+        "budget-limited.png": {
+          "path": "forced-low-budget/budget-limited.png",
+          "bytes": 238118,
+          "sha256": "594cdd02b4a39426d93ad22d9075047d71d377d65a25f5be6116479fd437b993"
+        },
+        "selection.png": {
+          "path": "forced-low-budget/selection.png",
+          "bytes": 284870,
+          "sha256": "a613f30507abe17c7a6fbb259e0c8c46088f9e35c6c5efc6456148fab641351c"
+        }
+      }
+    },
+    {
+      "profile": "forced-low-budget",
+      "runIndex": 2,
+      "residencyMiB": 8,
+      "budgetBytes": 8388608,
+      "startedAt": "2026-08-28T10:50:32.932Z",
+      "browserVersion": "151.0.7922.139",
+      "rootPid": 35200,
+      "samples": [
+        {
+          "phase": "hierarchy",
+          "atMilliseconds": 2285,
+          "statusText": "Hierarchy ready · 188319 occurrences · decoding 117,878.0 KiB in Worker…",
+          "statusState": "loading",
+          "statusStage": "hierarchy",
+          "crossOriginIsolated": true,
+          "package": {
+            "documentBytes": 448823852,
+            "propertyIndexBytes": 17705010,
+            "spatialIndexBytes": 0,
+            "declaredGeometryBytes": 120707064
+          },
+          "residency": {
+            "budgetBytes": null,
+            "decodedBytes": null,
+            "gpuBytes": null,
+            "budgetReached": false,
+            "chunksReady": null,
+            "chunksTotal": null,
+            "schedulerRequests": null,
+            "schedulerSkips": null,
+            "evictedTargetMeshCount": null,
+            "selectionResidency": null
+          },
+          "renderer": {
+            "gpuVertexPoolBytes": null,
+            "gpuBatchBufferBytes": null,
+            "gpuUniformBytes": null,
+            "gpuBufferBytes": null,
+            "gpuAttachmentBytes": null,
+            "cpuStagingBytes": null
+          },
+          "page": {
+            "usedJsHeapBytes": 851059547,
+            "totalJsHeapBytes": 901852927,
+            "jsHeapLimitBytes": 4395630592,
+            "usedJsHeapUnavailableReason": null,
+            "uaMemoryBytes": 896164485,
+            "uaMemoryByType": {
+              "DOM": 108448,
+              "JavaScript": 894597247,
+              "Unattributed": 0,
+              "Shared": 1458790
+            },
+            "uaMemoryByScope": {
+              "Unattributed": 1567238,
+              "Window": 134270710,
+              "DedicatedWorkerGlobalScope": 760326537
+            },
+            "uaMemoryEntryCount": 5,
+            "uaMemorySampleMilliseconds": 1259,
+            "uaMemoryUnavailableReason": null
+          },
+          "process": {
+            "rootPid": 35200,
+            "processCount": 8,
+            "chromeProcessesOnHost": 46,
+            "workingSetBytes": 3053694976,
+            "privateBytes": 2884952064
+          }
+        },
+        {
+          "phase": "coarse-frame",
+          "atMilliseconds": 4344,
+          "statusText": "Coarse bounds ready · 78173 renderable occurrences · loading 117,878.0 KiB target geometry…",
+          "statusState": "loading",
+          "statusStage": "coarse",
+          "crossOriginIsolated": true,
+          "package": {
+            "documentBytes": 448823852,
+            "propertyIndexBytes": 17705010,
+            "spatialIndexBytes": 0,
+            "declaredGeometryBytes": 120707064
+          },
+          "residency": {
+            "budgetBytes": 8388608,
+            "decodedBytes": null,
+            "gpuBytes": null,
+            "budgetReached": false,
+            "chunksReady": 0,
+            "chunksTotal": 234,
+            "schedulerRequests": 1,
+            "schedulerSkips": null,
+            "evictedTargetMeshCount": null,
+            "selectionResidency": null
+          },
+          "renderer": {
+            "gpuVertexPoolBytes": 576,
+            "gpuBatchBufferBytes": 7505040,
+            "gpuUniformBytes": 128,
+            "gpuBufferBytes": 7505744,
+            "gpuAttachmentBytes": 4900480,
+            "cpuStagingBytes": 7504608
+          },
+          "page": {
+            "usedJsHeapBytes": 307143916,
+            "totalJsHeapBytes": 379054056,
+            "jsHeapLimitBytes": 4395630592,
+            "usedJsHeapUnavailableReason": null,
+            "uaMemoryBytes": 632995828,
+            "uaMemoryByType": {
+              "DOM": 108688,
+              "JavaScript": 626558648,
+              "Shared": 3878252,
+              "Canvas": 2450240,
+              "Unattributed": 0
+            },
+            "uaMemoryByScope": {
+              "Unattributed": 3986940,
+              "DedicatedWorkerGlobalScope": 351264261,
+              "Window": 277744627
+            },
+            "uaMemoryEntryCount": 6,
+            "uaMemorySampleMilliseconds": 16029,
+            "uaMemoryUnavailableReason": null
+          },
+          "process": {
+            "rootPid": 35200,
+            "processCount": 8,
+            "chromeProcessesOnHost": 46,
+            "workingSetBytes": 1639198720,
+            "privateBytes": 1524236288
+          }
+        },
+        {
+          "phase": "budget-limited",
+          "atMilliseconds": 24865,
+          "statusText": "Residency budget reached · 449 surface batches retained · 78173 renderable occurrences",
+          "statusState": "ready",
+          "statusStage": "rendered",
+          "crossOriginIsolated": true,
+          "package": {
+            "documentBytes": 448823852,
+            "propertyIndexBytes": 17705010,
+            "spatialIndexBytes": 0,
+            "declaredGeometryBytes": 120707064
+          },
+          "residency": {
+            "budgetBytes": 8388608,
+            "decodedBytes": 8249400,
+            "gpuBytes": 8251192,
+            "budgetReached": true,
+            "chunksReady": 4,
+            "chunksTotal": 234,
+            "schedulerRequests": 4,
+            "schedulerSkips": 230,
+            "evictedTargetMeshCount": null,
+            "selectionResidency": null
+          },
+          "renderer": {
+            "gpuVertexPoolBytes": 364200,
+            "gpuBatchBufferBytes": 7886992,
+            "gpuUniformBytes": 128,
+            "gpuBufferBytes": 8251320,
+            "gpuAttachmentBytes": 4900480,
+            "cpuStagingBytes": 7554240
+          },
+          "page": {
+            "usedJsHeapBytes": 294224206,
+            "totalJsHeapBytes": 303139918,
+            "jsHeapLimitBytes": 4395630592,
+            "usedJsHeapUnavailableReason": null,
+            "uaMemoryBytes": 632818957,
+            "uaMemoryByType": {
+              "Canvas": 2450240,
+              "DOM": 108688,
+              "JavaScript": 626745461,
+              "Unattributed": 0,
+              "Shared": 3514568
+            },
+            "uaMemoryByScope": {
+              "Window": 278097036,
+              "Unattributed": 3623256,
+              "DedicatedWorkerGlobalScope": 351098665
+            },
+            "uaMemoryEntryCount": 6,
+            "uaMemorySampleMilliseconds": 7612,
+            "uaMemoryUnavailableReason": null
+          },
+          "process": {
+            "rootPid": 35200,
+            "processCount": 8,
+            "chromeProcessesOnHost": 46,
+            "workingSetBytes": 1431064576,
+            "privateBytes": 1312243712
+          }
+        },
+        {
+          "phase": "navigation",
+          "atMilliseconds": 37696,
+          "statusText": "Residency budget reached · 650 surface batches retained · 78173 renderable occurrences",
+          "statusState": "ready",
+          "statusStage": "rendered",
+          "crossOriginIsolated": true,
+          "package": {
+            "documentBytes": 448823852,
+            "propertyIndexBytes": 17705010,
+            "spatialIndexBytes": 0,
+            "declaredGeometryBytes": 120707064
+          },
+          "residency": {
+            "budgetBytes": 8388608,
+            "decodedBytes": 8385360,
+            "gpuBytes": 8387956,
+            "budgetReached": true,
+            "chunksReady": 1,
+            "chunksTotal": 234,
+            "schedulerRequests": 99,
+            "schedulerSkips": 1621,
+            "evictedTargetMeshCount": null,
+            "selectionResidency": null
+          },
+          "renderer": {
+            "gpuVertexPoolBytes": 430728,
+            "gpuBatchBufferBytes": 7957228,
+            "gpuUniformBytes": 128,
+            "gpuBufferBytes": 8388084,
+            "gpuAttachmentBytes": 4900480,
+            "cpuStagingBytes": 7570464
+          },
+          "page": {
+            "usedJsHeapBytes": 322900257,
+            "totalJsHeapBytes": 403241965,
+            "jsHeapLimitBytes": 4395630592,
+            "usedJsHeapUnavailableReason": null,
+            "uaMemoryBytes": 636241637,
+            "uaMemoryByType": {
+              "JavaScript": 627468757,
+              "DOM": 108992,
+              "Shared": 3763408,
+              "Unattributed": 0,
+              "Canvas": 4900480
+            },
+            "uaMemoryByScope": {
+              "DedicatedWorkerGlobalScope": 351340739,
+              "Unattributed": 3872400,
+              "Window": 281028498
+            },
+            "uaMemoryEntryCount": 6,
+            "uaMemorySampleMilliseconds": 3667,
+            "uaMemoryUnavailableReason": null
+          },
+          "process": {
+            "rootPid": 35200,
+            "processCount": 8,
+            "chromeProcessesOnHost": 46,
+            "workingSetBytes": 1633738752,
+            "privateBytes": 1614643200
+          }
+        },
+        {
+          "phase": "selection",
+          "atMilliseconds": 42104,
+          "statusText": "Residency budget reached · 355 surface batches retained · 78173 renderable occurrences",
+          "statusState": "ready",
+          "statusStage": "rendered",
+          "crossOriginIsolated": true,
+          "package": {
+            "documentBytes": 448823852,
+            "propertyIndexBytes": 17705010,
+            "spatialIndexBytes": 0,
+            "declaredGeometryBytes": 120707064
+          },
+          "residency": {
+            "budgetBytes": 8388608,
+            "decodedBytes": 8375808,
+            "gpuBytes": 8377224,
+            "budgetReached": true,
+            "chunksReady": 2,
+            "chunksTotal": 234,
+            "schedulerRequests": 100,
+            "schedulerSkips": 1853,
+            "evictedTargetMeshCount": 325,
+            "selectionResidency": "target"
+          },
+          "renderer": {
+            "gpuVertexPoolBytes": 429600,
+            "gpuBatchBufferBytes": 7947624,
+            "gpuUniformBytes": 128,
+            "gpuBufferBytes": 8377352,
+            "gpuAttachmentBytes": 4900480,
+            "cpuStagingBytes": 7538592
+          },
+          "page": {
+            "usedJsHeapBytes": 472909963,
+            "totalJsHeapBytes": 521538055,
+            "jsHeapLimitBytes": 4395630592,
+            "usedJsHeapUnavailableReason": null,
+            "uaMemoryBytes": 693351497,
+            "uaMemoryByType": {
+              "JavaScript": 687019441,
+              "DOM": 113640,
+              "Canvas": 4900480,
+              "Unattributed": 0,
+              "Shared": 1317936
+            },
+            "uaMemoryByScope": {
+              "Window": 340780488,
+              "Unattributed": 1431576,
+              "DedicatedWorkerGlobalScope": 351139433
+            },
+            "uaMemoryEntryCount": 6,
+            "uaMemorySampleMilliseconds": 7993,
+            "uaMemoryUnavailableReason": null
+          },
+          "process": {
+            "rootPid": 35200,
+            "processCount": 8,
+            "chromeProcessesOnHost": 46,
+            "workingSetBytes": 1639354368,
+            "privateBytes": 1624895488
+          }
+        },
+        {
+          "phase": "eviction",
+          "atMilliseconds": 54584,
+          "statusText": "Residency budget reached · 355 surface batches retained · 78173 renderable occurrences",
+          "statusState": "ready",
+          "statusStage": "rendered",
+          "crossOriginIsolated": true,
+          "package": {
+            "documentBytes": 448823852,
+            "propertyIndexBytes": 17705010,
+            "spatialIndexBytes": 0,
+            "declaredGeometryBytes": 120707064
+          },
+          "residency": {
+            "budgetBytes": 8388608,
+            "decodedBytes": 8375808,
+            "gpuBytes": 8377224,
+            "budgetReached": true,
+            "chunksReady": 2,
+            "chunksTotal": 234,
+            "schedulerRequests": 100,
+            "schedulerSkips": 1853,
+            "evictedTargetMeshCount": 325,
+            "selectionResidency": "target"
+          },
+          "renderer": {
+            "gpuVertexPoolBytes": 429600,
+            "gpuBatchBufferBytes": 7947624,
+            "gpuUniformBytes": 128,
+            "gpuBufferBytes": 8377352,
+            "gpuAttachmentBytes": 4900480,
+            "cpuStagingBytes": 7538592
+          },
+          "page": {
+            "usedJsHeapBytes": 337126077,
+            "totalJsHeapBytes": 342778253,
+            "jsHeapLimitBytes": 4395630592,
+            "usedJsHeapUnavailableReason": null,
+            "uaMemoryBytes": 693355479,
+            "uaMemoryByType": {
+              "DOM": 113640,
+              "Canvas": 4900480,
+              "Unattributed": 0,
+              "JavaScript": 684095539,
+              "Shared": 4245820
+            },
+            "uaMemoryByScope": {
+              "Unattributed": 4359460,
+              "Window": 337863310,
+              "DedicatedWorkerGlobalScope": 351132709
+            },
+            "uaMemoryEntryCount": 6,
+            "uaMemorySampleMilliseconds": 12060,
+            "uaMemoryUnavailableReason": null
+          },
+          "process": {
+            "rootPid": 35200,
+            "processCount": 8,
+            "chromeProcessesOnHost": 46,
+            "workingSetBytes": 1624252416,
+            "privateBytes": 1608437760
+          }
+        }
+      ],
+      "selection": {
+        "selectedObjectId": "148339",
+        "selectionResidency": "target",
+        "evictedTargetMeshCount": "325",
+        "semanticProperties": {
+          "state": "resolved",
+          "entryCount": 6,
+          "countLabel": "· 6 · IFC2X3"
+        }
+      },
+      "eviction": {
+        "observed": true,
+        "source": "selection",
+        "selected": "148339",
+        "selectionResidency": "target",
+        "evictedTargetMeshCount": 325
+      },
+      "evictionAttempts": [],
+      "evictionQuiescence": {
+        "settled": true,
+        "waitedMilliseconds": 4036,
+        "state": "ready|100|1853|2|8377224"
+      },
+      "consoleIssues": [],
+      "screenshots": {}
+    },
+    {
+      "profile": "forced-low-budget",
+      "runIndex": 3,
+      "residencyMiB": 8,
+      "budgetBytes": 8388608,
+      "startedAt": "2026-08-28T10:51:40.338Z",
+      "browserVersion": "151.0.7922.139",
+      "rootPid": 13636,
+      "samples": [
+        {
+          "phase": "hierarchy",
+          "atMilliseconds": 2323,
+          "statusText": "Hierarchy ready · 188319 occurrences · decoding 117,878.0 KiB in Worker…",
+          "statusState": "loading",
+          "statusStage": "hierarchy",
+          "crossOriginIsolated": true,
+          "package": {
+            "documentBytes": 448823852,
+            "propertyIndexBytes": 17705010,
+            "spatialIndexBytes": 0,
+            "declaredGeometryBytes": 120707064
+          },
+          "residency": {
+            "budgetBytes": null,
+            "decodedBytes": null,
+            "gpuBytes": null,
+            "budgetReached": false,
+            "chunksReady": null,
+            "chunksTotal": null,
+            "schedulerRequests": null,
+            "schedulerSkips": null,
+            "evictedTargetMeshCount": null,
+            "selectionResidency": null
+          },
+          "renderer": {
+            "gpuVertexPoolBytes": null,
+            "gpuBatchBufferBytes": null,
+            "gpuUniformBytes": null,
+            "gpuBufferBytes": null,
+            "gpuAttachmentBytes": null,
+            "cpuStagingBytes": null
+          },
+          "page": {
+            "usedJsHeapBytes": 851242883,
+            "totalJsHeapBytes": 901852927,
+            "jsHeapLimitBytes": 4395630592,
+            "usedJsHeapUnavailableReason": null,
+            "uaMemoryBytes": 896164365,
+            "uaMemoryByType": {
+              "Unattributed": 0,
+              "JavaScript": 892616345,
+              "DOM": 108448,
+              "Shared": 3439572
+            },
+            "uaMemoryByScope": {
+              "Unattributed": 3548020,
+              "DedicatedWorkerGlobalScope": 760326537,
+              "Window": 132289808
+            },
+            "uaMemoryEntryCount": 5,
+            "uaMemorySampleMilliseconds": 1330,
+            "uaMemoryUnavailableReason": null
+          },
+          "process": {
+            "rootPid": 13636,
+            "processCount": 8,
+            "chromeProcessesOnHost": 46,
+            "workingSetBytes": 3087368192,
+            "privateBytes": 2897989632
+          }
+        },
+        {
+          "phase": "coarse-frame",
+          "atMilliseconds": 4445,
+          "statusText": "Coarse bounds ready · 78173 renderable occurrences · loading 117,878.0 KiB target geometry…",
+          "statusState": "loading",
+          "statusStage": "coarse",
+          "crossOriginIsolated": true,
+          "package": {
+            "documentBytes": 448823852,
+            "propertyIndexBytes": 17705010,
+            "spatialIndexBytes": 0,
+            "declaredGeometryBytes": 120707064
+          },
+          "residency": {
+            "budgetBytes": 8388608,
+            "decodedBytes": null,
+            "gpuBytes": null,
+            "budgetReached": false,
+            "chunksReady": 0,
+            "chunksTotal": 234,
+            "schedulerRequests": 1,
+            "schedulerSkips": null,
+            "evictedTargetMeshCount": null,
+            "selectionResidency": null
+          },
+          "renderer": {
+            "gpuVertexPoolBytes": 576,
+            "gpuBatchBufferBytes": 7505040,
+            "gpuUniformBytes": 128,
+            "gpuBufferBytes": 7505744,
+            "gpuAttachmentBytes": 4900480,
+            "cpuStagingBytes": 7504608
+          },
+          "page": {
+            "usedJsHeapBytes": 307086736,
+            "totalJsHeapBytes": 391374824,
+            "jsHeapLimitBytes": 4395630592,
+            "usedJsHeapUnavailableReason": null,
+            "uaMemoryBytes": 632996165,
+            "uaMemoryByType": {
+              "JavaScript": 626911874,
+              "DOM": 108688,
+              "Shared": 3525363,
+              "Unattributed": 0,
+              "Canvas": 2450240
+            },
+            "uaMemoryByScope": {
+              "Window": 278097493,
+              "DedicatedWorkerGlobalScope": 351264621,
+              "Unattributed": 3634051
+            },
+            "uaMemoryEntryCount": 6,
+            "uaMemorySampleMilliseconds": 16965,
+            "uaMemoryUnavailableReason": null
+          },
+          "process": {
+            "rootPid": 13636,
+            "processCount": 8,
+            "chromeProcessesOnHost": 46,
+            "workingSetBytes": 1650421760,
+            "privateBytes": 1526661120
+          }
+        },
+        {
+          "phase": "budget-limited",
+          "atMilliseconds": 25919,
+          "statusText": "Residency budget reached · 449 surface batches retained · 78173 renderable occurrences",
+          "statusState": "ready",
+          "statusStage": "rendered",
+          "crossOriginIsolated": true,
+          "package": {
+            "documentBytes": 448823852,
+            "propertyIndexBytes": 17705010,
+            "spatialIndexBytes": 0,
+            "declaredGeometryBytes": 120707064
+          },
+          "residency": {
+            "budgetBytes": 8388608,
+            "decodedBytes": 8249400,
+            "gpuBytes": 8251192,
+            "budgetReached": true,
+            "chunksReady": 4,
+            "chunksTotal": 234,
+            "schedulerRequests": 4,
+            "schedulerSkips": 230,
+            "evictedTargetMeshCount": null,
+            "selectionResidency": null
+          },
+          "renderer": {
+            "gpuVertexPoolBytes": 364200,
+            "gpuBatchBufferBytes": 7886992,
+            "gpuUniformBytes": 128,
+            "gpuBufferBytes": 8251320,
+            "gpuAttachmentBytes": 4900480,
+            "cpuStagingBytes": 7554240
+          },
+          "page": {
+            "usedJsHeapBytes": 294224238,
+            "totalJsHeapBytes": 304188494,
+            "jsHeapLimitBytes": 4395630592,
+            "usedJsHeapUnavailableReason": null,
+            "uaMemoryBytes": 632819320,
+            "uaMemoryByType": {
+              "JavaScript": 626736406,
+              "Shared": 3523986,
+              "Unattributed": 0,
+              "DOM": 108688,
+              "Canvas": 2450240
+            },
+            "uaMemoryByScope": {
+              "DedicatedWorkerGlobalScope": 351099025,
+              "Unattributed": 3632674,
+              "Window": 278087621
+            },
+            "uaMemoryEntryCount": 6,
+            "uaMemorySampleMilliseconds": 6613,
+            "uaMemoryUnavailableReason": null
+          },
+          "process": {
+            "rootPid": 13636,
+            "processCount": 8,
+            "chromeProcessesOnHost": 46,
+            "workingSetBytes": 1439883264,
+            "privateBytes": 1310810112
+          }
+        },
+        {
+          "phase": "navigation",
+          "atMilliseconds": 37763,
+          "statusText": "Residency budget reached · 650 surface batches retained · 78173 renderable occurrences",
+          "statusState": "ready",
+          "statusStage": "rendered",
+          "crossOriginIsolated": true,
+          "package": {
+            "documentBytes": 448823852,
+            "propertyIndexBytes": 17705010,
+            "spatialIndexBytes": 0,
+            "declaredGeometryBytes": 120707064
+          },
+          "residency": {
+            "budgetBytes": 8388608,
+            "decodedBytes": 8385360,
+            "gpuBytes": 8387956,
+            "budgetReached": true,
+            "chunksReady": 1,
+            "chunksTotal": 234,
+            "schedulerRequests": 95,
+            "schedulerSkips": 1621,
+            "evictedTargetMeshCount": null,
+            "selectionResidency": null
+          },
+          "renderer": {
+            "gpuVertexPoolBytes": 430728,
+            "gpuBatchBufferBytes": 7957228,
+            "gpuUniformBytes": 128,
+            "gpuBufferBytes": 8388084,
+            "gpuAttachmentBytes": 4900480,
+            "cpuStagingBytes": 7570464
+          },
+          "page": {
+            "usedJsHeapBytes": 322960925,
+            "totalJsHeapBytes": 405924093,
+            "jsHeapLimitBytes": 4395630592,
+            "usedJsHeapUnavailableReason": null,
+            "uaMemoryBytes": 636235881,
+            "uaMemoryByType": {
+              "Canvas": 4900480,
+              "Unattributed": 0,
+              "JavaScript": 627424333,
+              "Shared": 3802076,
+              "DOM": 108992
+            },
+            "uaMemoryByScope": {
+              "Window": 280989598,
+              "Unattributed": 3911068,
+              "DedicatedWorkerGlobalScope": 351335215
+            },
+            "uaMemoryEntryCount": 6,
+            "uaMemorySampleMilliseconds": 4211,
+            "uaMemoryUnavailableReason": null
+          },
+          "process": {
+            "rootPid": 13636,
+            "processCount": 8,
+            "chromeProcessesOnHost": 46,
+            "workingSetBytes": 1628618752,
+            "privateBytes": 1602945024
+          }
+        },
+        {
+          "phase": "selection",
+          "atMilliseconds": 42707,
+          "statusText": "Residency budget reached · 355 surface batches retained · 78173 renderable occurrences",
+          "statusState": "ready",
+          "statusStage": "rendered",
+          "crossOriginIsolated": true,
+          "package": {
+            "documentBytes": 448823852,
+            "propertyIndexBytes": 17705010,
+            "spatialIndexBytes": 0,
+            "declaredGeometryBytes": 120707064
+          },
+          "residency": {
+            "budgetBytes": 8388608,
+            "decodedBytes": 8375808,
+            "gpuBytes": 8377224,
+            "budgetReached": true,
+            "chunksReady": 2,
+            "chunksTotal": 234,
+            "schedulerRequests": 96,
+            "schedulerSkips": 1853,
+            "evictedTargetMeshCount": 325,
+            "selectionResidency": "target"
+          },
+          "renderer": {
+            "gpuVertexPoolBytes": 429600,
+            "gpuBatchBufferBytes": 7947624,
+            "gpuUniformBytes": 128,
+            "gpuBufferBytes": 8377352,
+            "gpuAttachmentBytes": 4900480,
+            "cpuStagingBytes": 7538592
+          },
+          "page": {
+            "usedJsHeapBytes": 471050224,
+            "totalJsHeapBytes": 520358392,
+            "jsHeapLimitBytes": 4395630592,
+            "usedJsHeapUnavailableReason": null,
+            "uaMemoryBytes": 693347133,
+            "uaMemoryByType": {
+              "DOM": 113640,
+              "Shared": 3447253,
+              "JavaScript": 684885760,
+              "Unattributed": 0,
+              "Canvas": 4900480
+            },
+            "uaMemoryByScope": {
+              "Unattributed": 3560893,
+              "DedicatedWorkerGlobalScope": 351135053,
+              "Window": 338651187
+            },
+            "uaMemoryEntryCount": 6,
+            "uaMemorySampleMilliseconds": 8074,
+            "uaMemoryUnavailableReason": null
+          },
+          "process": {
+            "rootPid": 13636,
+            "processCount": 8,
+            "chromeProcessesOnHost": 46,
+            "workingSetBytes": 1644888064,
+            "privateBytes": 1627766784
+          }
+        },
+        {
+          "phase": "eviction",
+          "atMilliseconds": 55268,
+          "statusText": "Residency budget reached · 355 surface batches retained · 78173 renderable occurrences",
+          "statusState": "ready",
+          "statusStage": "rendered",
+          "crossOriginIsolated": true,
+          "package": {
+            "documentBytes": 448823852,
+            "propertyIndexBytes": 17705010,
+            "spatialIndexBytes": 0,
+            "declaredGeometryBytes": 120707064
+          },
+          "residency": {
+            "budgetBytes": 8388608,
+            "decodedBytes": 8375808,
+            "gpuBytes": 8377224,
+            "budgetReached": true,
+            "chunksReady": 2,
+            "chunksTotal": 234,
+            "schedulerRequests": 96,
+            "schedulerSkips": 1853,
+            "evictedTargetMeshCount": 325,
+            "selectionResidency": "target"
+          },
+          "renderer": {
+            "gpuVertexPoolBytes": 429600,
+            "gpuBatchBufferBytes": 7947624,
+            "gpuUniformBytes": 128,
+            "gpuBufferBytes": 8377352,
+            "gpuAttachmentBytes": 4900480,
+            "cpuStagingBytes": 7538592
+          },
+          "page": {
+            "usedJsHeapBytes": 337086684,
+            "totalJsHeapBytes": 341467224,
+            "jsHeapLimitBytes": 4395630592,
+            "usedJsHeapUnavailableReason": null,
+            "uaMemoryBytes": 693338509,
+            "uaMemoryByType": {
+              "Shared": 4221742,
+              "JavaScript": 684102647,
+              "Unattributed": 0,
+              "DOM": 113640,
+              "Canvas": 4900480
+            },
+            "uaMemoryByScope": {
+              "Unattributed": 4335382,
+              "DedicatedWorkerGlobalScope": 351128345,
+              "Window": 337874782
+            },
+            "uaMemoryEntryCount": 6,
+            "uaMemorySampleMilliseconds": 10054,
+            "uaMemoryUnavailableReason": null
+          },
+          "process": {
+            "rootPid": 13636,
+            "processCount": 8,
+            "chromeProcessesOnHost": 46,
+            "workingSetBytes": 1622368256,
+            "privateBytes": 1602363392
+          }
+        }
+      ],
+      "selection": {
+        "selectedObjectId": "148339",
+        "selectionResidency": "target",
+        "evictedTargetMeshCount": "325",
+        "semanticProperties": {
+          "state": "resolved",
+          "entryCount": 6,
+          "countLabel": "· 6 · IFC2X3"
+        }
+      },
+      "eviction": {
+        "observed": true,
+        "source": "selection",
+        "selected": "148339",
+        "selectionResidency": "target",
+        "evictedTargetMeshCount": 325
+      },
+      "evictionAttempts": [],
+      "evictionQuiescence": {
+        "settled": true,
+        "waitedMilliseconds": 4044,
+        "state": "ready|96|1853|2|8377224"
+      },
+      "consoleIssues": [],
+      "screenshots": {}
+    }
+  ],
+  "consoleIssues": []
+}

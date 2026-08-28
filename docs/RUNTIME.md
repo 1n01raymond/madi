@@ -166,6 +166,29 @@ Each tier has independent accounting and eviction. Content hashes allow cache
 reuse across workspace revisions and model manifests. Selected content,
 currently visible target LOD, and resources with active operations are pinned.
 
+### Residency budgets are not a process bound
+
+The decoded and GPU budgets bound admitted target geometry and nothing else.
+The compiled document, the property sidecar, the hierarchy, the render
+attachments, the staging arrays, and the browser process that holds all of them
+are outside that accounting, so a residency figure must never be reported as
+whole-application memory.
+
+The [memory envelope](../artifacts/memory/sixty5-envelope/README.md) measures
+both quantities in the same runs. Over three headed Chrome runs on the 657.1 MB
+sixty5 package, target residency at the default 64 MiB budget is 66,686,508
+decoded bytes inside a browser process tree whose working set medians
+2,586,112,000 B — 2.58% of it. Each of the eighteen categories in that record
+names its owner, lifetime, and collection method; the graphics driver's
+device-side allocation has no interface that reports it and is recorded as
+unavailable rather than as zero.
+
+Repeating the same six phases under a forced 8 MiB budget keeps all 78,173
+renderable occurrences visible through shared coarse geometry, completes
+navigation, selection, and eviction, and reports the budget-limited state it is
+actually in. A budget too small to hold the view is expected to constrain
+detail, not to strand the scheduler in a loading state.
+
 ## 8. Model tables
 
 The runtime decodes semantic convenience on demand while retaining dense tables

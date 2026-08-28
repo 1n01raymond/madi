@@ -15,6 +15,13 @@ import type {
 import { GeometryDecoder } from "./geometry-decoder.js";
 import type { GeometryDecodeResult } from "./geometry-decoder.js";
 import { HierarchyListView } from "./hierarchy-list.js";
+import {
+  clearMemoryDataset,
+  packageRetentionBytes,
+  packageRetentionDataset,
+  publishMemoryDataset,
+  rendererMemoryDataset,
+} from "./memory-ledger.js";
 import { HierarchySearchIndex } from "./hierarchy-search.js";
 import type { HierarchySearchResult } from "./hierarchy-search.js";
 import { AxisSectionPlane } from "./section-plane.js";
@@ -255,6 +262,7 @@ function resetSceneUi(): void {
   delete document.documentElement.dataset.spatialOccurrencesTotal;
   delete document.documentElement.dataset.spatialCandidateChunks;
   delete document.documentElement.dataset.spatialQueryMilliseconds;
+  clearMemoryDataset();
   hierarchySearchInput.value = "";
   hierarchySearchResult.textContent = "Waiting for hierarchy";
   hierarchyEmpty.hidden = true;
@@ -335,6 +343,7 @@ async function loadScene(source: SceneSource): Promise<boolean> {
     setText("#hierarchy-result", `${hierarchy.entries.length} occurrence records ready`);
     requireElement<HTMLElement>("#stage-hierarchy").dataset.state = "ready";
     document.documentElement.dataset.hierarchyReady = "true";
+    publishMemoryDataset(packageRetentionDataset(packageRetentionBytes(loaded)));
     status.textContent =
       `Hierarchy ready · ${hierarchy.entries.length} occurrences · ` +
       `decoding ${formatBytes(hierarchy.binaryByteLength)} in Worker…`;
@@ -427,6 +436,7 @@ async function loadScene(source: SceneSource): Promise<boolean> {
     if (initialRepresentation === "coarse") {
       await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
       document.documentElement.dataset.coarseReady = "true";
+      publishMemoryDataset(rendererMemoryDataset(renderer.resourceStats()));
       document.documentElement.dataset.geometryRepresentation = "coarse";
       status.textContent =
         `Coarse bounds ready · ${scene.summary.partOccurrences} renderable occurrences · ` +
@@ -660,6 +670,10 @@ async function loadScene(source: SceneSource): Promise<boolean> {
     let schedulerCancellations = 0;
     let schedulerSkips = 0;
     let finalizePending = false;
+    // A selection promotion pauses the scheduler and stamps its own terminal
+    // status; a finalize resolving inside that window would overwrite the
+    // "loading selected detail" message with a ready state.
+    let selectionPromotionInFlight = false;
     let spatialViewIndex: SpatialTargetChunkViewIndex | undefined;
     const residentChunkCount = (): number => {
       if (!progressiveResidency) return 0;
@@ -708,6 +722,7 @@ async function loadScene(source: SceneSource): Promise<boolean> {
       document.documentElement.dataset.targetChunksReady = String(readyChunks);
       document.documentElement.dataset.residentDecodedBytes = String(promotion.decodedBytes);
       document.documentElement.dataset.residentGpuBytes = String(renderer.residentGpuBytes);
+      publishMemoryDataset(rendererMemoryDataset(renderer.resourceStats()));
       document.documentElement.dataset.geometryRepresentation =
         readyChunks === hierarchy.targetChunks.length ? "target" : "mixed";
       document.documentElement.dataset.targetReady =
@@ -743,6 +758,7 @@ async function loadScene(source: SceneSource): Promise<boolean> {
       document.documentElement.dataset.targetChunksReady = String(readyChunks);
       document.documentElement.dataset.residentDecodedBytes = String(current.decodedBytes);
       document.documentElement.dataset.residentGpuBytes = String(renderer.residentGpuBytes);
+      publishMemoryDataset(rendererMemoryDataset(renderer.resourceStats()));
       document.documentElement.dataset.geometryRepresentation = complete ? "target" : "mixed";
       const spatialStats = spatialViewIndex?.queryStats();
       const spatialDemandSatisfied =
@@ -786,7 +802,7 @@ async function loadScene(source: SceneSource): Promise<boolean> {
       finalizePending = true;
       void scheduler.whenIdle().then(() => {
         finalizePending = false;
-        if (disposed) return;
+        if (disposed || selectionPromotionInFlight) return;
         finalizeProgressiveStatus();
       });
     };
@@ -811,6 +827,14 @@ async function loadScene(source: SceneSource): Promise<boolean> {
         scheduleDeferredFinalize();
       } else if (residentChunkCount() === hierarchy.targetChunks.length) {
         finalizeProgressiveStatus();
+      } else {
+        // An admission leaves the mid-drain status on screen. A drain normally
+        // ends on a skip or a block, which stamps the terminal state, but one
+        // that ends on its own last admission -- what a budget too small to
+        // take anything more does once a pinned selection resumes the
+        // scheduler -- would otherwise leave a loading message with nothing in
+        // flight behind it.
+        scheduleDeferredFinalize();
       }
     };
     if (progressiveResidency) {
@@ -925,6 +949,7 @@ async function loadScene(source: SceneSource): Promise<boolean> {
       status.dataset.stage = "selection-residency";
       const targetScheduler = sessionResources.targetScheduler;
       targetScheduler?.pause();
+      selectionPromotionInFlight = true;
       try {
         const target = await geometryDecoder.decode(
           binarySourceForChunk(loaded.targetBinary, chunk),
@@ -961,6 +986,7 @@ async function loadScene(source: SceneSource): Promise<boolean> {
         if (error instanceof DOMException && error.name === "AbortError") return;
         throw error;
       } finally {
+        selectionPromotionInFlight = false;
         targetScheduler?.resume();
       }
     };
@@ -1205,7 +1231,10 @@ async function loadScene(source: SceneSource): Promise<boolean> {
       listenerOptions,
     );
 
-    sessionResources.resizeObserver = new ResizeObserver(scheduleCameraRender);
+    sessionResources.resizeObserver = new ResizeObserver(() => {
+      scheduleCameraRender();
+      publishMemoryDataset(rendererMemoryDataset(renderer.resourceStats()));
+    });
     sessionResources.resizeObserver.observe(canvas);
 
     canvas.addEventListener("click", (event) => {

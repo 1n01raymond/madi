@@ -1,5 +1,6 @@
 import {
   alignedBufferByteLength,
+  attachmentPairByteLength,
   decodeObjectId,
   instanceStride,
   packInstanceData,
@@ -222,10 +223,32 @@ export interface RenderOptions {
   readonly cameraOrigin?: readonly [number, number, number];
 }
 
-/** Exact allocation census of renderer-owned scene resources. */
+/**
+ * Allocation census of renderer-owned resources, split so that each number has
+ * one owner and the inclusion relationships between them are stated rather than
+ * inferred. Every buffer figure is exact -- WebGPU allocates what was asked for
+ * -- while the attachment figure is an upper bound (see
+ * `attachmentPairByteLength`).
+ */
 export interface RendererResourceStats {
-  /** Sum of live GPUBuffer allocations owned by the renderer, in bytes. */
+  /**
+   * Prototype vertex pools, charged once each however many material groups
+   * share one. Summing per batch would count the largest sixty5 prototype's
+   * pool 111 times.
+   */
+  readonly gpuVertexPoolBytes: number;
+  /** Per-batch index, edge, and instance buffers. Disjoint from the pools. */
+  readonly gpuBatchBufferBytes: number;
+  /** The single camera uniform buffer, which no batch owns. */
+  readonly gpuUniformBytes: number;
+  /** The three figures above, and nothing else. */
   readonly gpuBufferBytes: number;
+  /**
+   * Upper bound on the depth and object-id attachments at the current size.
+   * Zero before the first sizing, and excluded from `gpuBufferBytes` because a
+   * texture is not a buffer allocation.
+   */
+  readonly gpuAttachmentBytes: number;
   /** CPU staging memory retained for per-prototype instance re-packing. */
   readonly cpuStagingBytes: number;
   /** Current depth/pick attachment size in pixels, when a frame has rendered. */
@@ -752,21 +775,31 @@ export class Phase0Renderer {
   }
 
   /**
-   * Exact byte census of renderer-owned resources: GPU buffer allocations,
-   * CPU instance staging, and the current attachment size in pixels. It does
-   * not include caller-owned workload typed arrays or GPU attachments.
+   * Byte census of renderer-owned resources. Vertex pools are walked from the
+   * pool map rather than from the batches that reference them: several material
+   * groups hold the same `GPUBuffer`, so a per-batch sum reports allocations
+   * that were never made.
+   *
+   * It does not include caller-owned decoded typed arrays; those are charged by
+   * the residency set that retains them.
    */
   resourceStats(): RendererResourceStats {
-    let gpuBufferBytes = this.cameraBuffer.size;
+    let gpuVertexPoolBytes = 0;
+    for (const pool of this.vertexPools.values()) gpuVertexPoolBytes += pool.buffer.size;
+    let gpuBatchBufferBytes = 0;
     let cpuStagingBytes = 0;
     for (const batch of this.batches) {
-      gpuBufferBytes +=
-        batch.surfaceVertex.size + batch.surfaceIndex.size + batch.edgeVertex.size +
+      gpuBatchBufferBytes += batch.surfaceIndex.size + batch.edgeVertex.size +
         batch.instance.size;
       cpuStagingBytes += batch.instanceStaging.byteLength;
     }
+    const gpuUniformBytes = this.cameraBuffer.size;
     return {
-      gpuBufferBytes,
+      gpuVertexPoolBytes,
+      gpuBatchBufferBytes,
+      gpuUniformBytes,
+      gpuBufferBytes: gpuVertexPoolBytes + gpuBatchBufferBytes + gpuUniformBytes,
+      gpuAttachmentBytes: attachmentPairByteLength(this.targetWidth, this.targetHeight),
       cpuStagingBytes,
       attachmentSizePx:
         this.targetWidth > 0 && this.targetHeight > 0

@@ -48,6 +48,12 @@ export type GeometryDocumentSource =
 
 export interface LoadedSceneHierarchy {
   readonly documentSource: GeometryDocumentSource;
+  /**
+   * Bytes of the compiled glTF document as transferred. Recorded here because
+   * the Worker takes ownership of the buffer, after which its own byte length
+   * reads as zero.
+   */
+  readonly documentByteLength: number;
   readonly hierarchy: CompiledHierarchy;
   readonly targetBinary: GeometryBinarySource;
   readonly coarseBinary?: GeometryBinarySource;
@@ -180,6 +186,7 @@ export async function loadSceneHierarchy(
     assertPackageBudget(documentBytes.byteLength, declaredResources(hierarchy), limits);
     return {
       documentSource: { kind: "bytes", bytes: bufferOf(documentBytes) },
+      documentByteLength: documentBytes.byteLength,
       hierarchy,
       targetBinary: { kind: "url", href: targetUrl.href },
       ...(coarseUrl ? { coarseBinary: { kind: "url" as const, href: coarseUrl.href } } : {}),
@@ -251,6 +258,7 @@ export async function loadSceneHierarchy(
   }
   return {
     documentSource: { kind: "file", file: source.gltfFile },
+    documentByteLength: source.gltfFile.size,
     hierarchy,
     targetBinary: { kind: "file", file: targetFile },
     ...(coarseFile ? { coarseBinary: { kind: "file" as const, file: coarseFile } } : {}),
