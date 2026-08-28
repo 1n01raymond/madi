@@ -69,11 +69,14 @@ measured effect on the sixty5 first frame is in
 When the package carries the property sidecar (`properties.json` +
 `properties.bin`, `docs/COMPILER.md` section 21.2), selecting an occurrence
 also resolves its IFC property sets: the sidecar is fetched lazily on the
-first selection, validated once, and each lookup decodes only the selected
-occurrence's rows through `resolvePropertyEntries`. Search deliberately does
-not index property values in Phase 1 — it stays hierarchy-metadata-only, and
-property resolution stays selection-driven so the 31.2 MB sixty5 column file
-is never scanned wholesale on the main thread.
+first selection, and both resources must match their declared byte lengths and
+SHA-256 digests before JSON parsing or column decoding. Each later lookup
+decodes only the selected occurrence's rows through `resolvePropertyEntries`.
+These digest checks verify package integrity; they are not a signature or a
+claim about who published the glTF. Search deliberately does not index property
+values in Phase 1 — it stays hierarchy-metadata-only, and property resolution
+stays selection-driven so the 31.2 MB sixty5 column file is never scanned
+wholesale on the main thread.
 
 To serve another locally compiled package as `/scene.gltf`, set
 `NARU_SCENE_DIR` to an absolute path or a repository-relative directory before
@@ -148,6 +151,8 @@ its external `.bin` and `.json` resources (including the optional
 `properties.json` / `properties.bin` sidecar pair and `spatial.bin`). The browser validates each
 declared file name and byte length before sending local `File` objects to the
 geometry Worker.
+Declared property and spatial sidecars are also checked against their SHA-256
+digests before they are parsed or decoded.
 Local files stay on the client and do not create a shareable URL. This is a
 compiled scene workflow; direct STEP AP242/AP214 input belongs to the compiler.
 For progressive packages, local `File.slice()` provides the same target chunk
