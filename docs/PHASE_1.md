@@ -199,7 +199,8 @@ direct WebGPU renderer. The Phase 0 Scene IR JSON is no longer a browser input.
 | View-priority scheduling | Recorder holds the initial fastener Range, pans the camera, observes its Worker cancellation, and receives the newly hottest mounting-plate Range before releasing the obsolete response | Passed in headed Chrome and Firefox |
 | Spatial demand scheduling | Optional `spatial.bin` is authenticated once; a transform-only localized oracle reduces 19→9/7 visited nodes, 10→1 tested occurrences, and 3→1 candidate chunks while cancelling the obsolete Range before its body is delivered | Passed in headed Chrome and Firefox; real-model gates remain |
 | Spatial payload packing | Opt-in `spatial-leaf-anchor-v1` orders prototype blocks by dominant deterministic BVH leaf before byte-budget coalescing; Digital Hub reduces chunks 71→66, leaf references 1,458→882, and off-view bytes 637,689,824→383,315,164; explicit-edge sixty5 changes global chunks 324→325 but reduces leaf references 34,167→21,246 and off-view bytes 15,972,343,228→9,668,115,064, with unchanged useful/target/coarse bytes and Khronos-clean deterministic repeats | Focused oracle plus Digital Hub and sixty5 offline censuses passed; Digital Hub headed full-fit integration passed; localized real-model browser traces remain |
-| Spatial localized demand | A scripted zoom and pan over the Digital Hub federation take the BVH query from 255/255 nodes, 128/128 leaves, and 5,152/5,152 occurrences to 109 nodes, 28 leaves, and 1,129 occurrences; on that identical view the compatibility package demands 52 of 71 chunks (23,065,180 of 35,962,344 target bytes) and the leaf-anchor package 42 of 66 (20,111,204 bytes), and 48 navigation queries cost p95 0.085 ms / 0.080 ms without a total-occurrence traversal | Passed in headed Chrome 151 on Windows over three runs per payload order; the sixty5 localized trace, where the residency budget binds, remains |
+| Spatial localized demand | A scripted zoom and pan over the Digital Hub federation take the BVH query from 255/255 nodes, 128/128 leaves, and 5,152/5,152 occurrences to 109 nodes, 28 leaves, and 1,129 occurrences; on that identical view the compatibility package demands 52 of 71 chunks (23,065,180 of 35,962,344 target bytes) and the leaf-anchor package 42 of 66 (20,111,204 bytes), and 48 navigation queries cost p95 0.085 ms / 0.080 ms without a total-occurrence traversal | Passed in headed Chrome 151 on Windows over three runs per payload order |
+| Spatial localized demand under a binding budget | The same trace over the sixty5 federation, whose 120,707,064 target bytes cannot fit the 67,108,864-byte residency budget, takes the query from 4,095/4,095 nodes, 2,048/2,048 leaves, and 78,173/78,173 occurrences to 889 nodes, 184 leaves, and 7,026 occurrences; on that identical view the compatibility package demands 209 of 234 chunks (107,337,264 bytes) and the leaf-anchor package 152 (78,875,544 bytes), every window stays inside the budget, and 48 navigation queries cost p95 0.405 ms / 0.330 ms | Passed in headed Chrome 151 on Windows over three runs per payload order; first coarse frame 4.213-4.388 s, inside the ADR-0008 15 s bound; Firefox and Safari repeats remain |
 | In-flight cancellation | A second browser run cancels while range 2/3 is pending, observes `Scene load cancelled.`, and proves that range 3/3 is never requested | Passed in headed Chrome and Firefox |
 | Browser conformance | Headed Chrome/Blink and Firefox/Gecko emit no console warnings or errors | Passed by `pnpm browser:matrix` |
 | Safari capability | Real Safari 18.6 loads 87 hierarchy records under default settings, then reports that WebGPU is unavailable because `navigator.gpu` is absent | Graceful unsupported-browser result; rendering conformance not yet available |
@@ -257,17 +258,19 @@ See `artifacts/phase1/README.md` for the compiled package,
   persistent cache tiers, and a general cache-aware eviction policy under a
   bounded residency budget. The optional ADR-0008 compiler sidecar, strict
   decoder, and frustum-demand scheduler have focused headed evidence, Digital
-  Hub/sixty5 offline co-demand censuses, and a headed Digital Hub localized
-  trace; the sixty5 localized trace, where the residency budget actually binds
-  and first-frame impact is measurable, is still pending, and so is a
-  non-Blink repeat of either. Historical packages continue through the
-  retained-coarse chunk-bounds fallback.
+  Hub/sixty5 offline co-demand censuses, and headed Digital Hub and sixty5
+  localized traces, the latter measuring demand where the residency budget
+  actually binds; a non-Blink repeat of either is still pending, and so is the
+  nested-view cross-check against ADR-0005. Historical packages continue
+  through the retained-coarse chunk-bounds fallback.
 - Cross-host byte reproducibility of the IFC adapter. Re-extracting the
   qualified Digital Hub sources on Windows reproduces every count, the
   `properties.bin` column file, the compiled target/coarse byte lengths, and
   both `spatial.bin` sidecars byte for byte, but the Scene IR differs by 8
   bytes from the macOS record (`artifacts/spatial-demand/digital-hub-localized/README.md`),
-  so the compiled package digests differ across hosts. Determinism is proven
+  so the compiled package digests differ across hosts. The sixty5 spatial
+  packages are pinned from this Windows host for the same reason
+  (`artifacts/spatial-demand/sixty5-localized/README.md`). Determinism is proven
   per host, not across them.
 - Full material, mass, PMI, and domain-specific property schemas remain
   pending, and Studio search does not index property values (a deliberate
@@ -334,9 +337,14 @@ than a chunk-shape one. The Digital Hub localized trace is now recorded
 of 71 chunks under the default order and 42 of 66 under leaf-anchor ordering,
 which is the first browser-side confirmation that the offline off-view census
 predicts what the scheduler actually asks for. Digital Hub fits the residency
-budget whole, so the next increment is the same trace over sixty5, where a
-localized view can change what is fetched at all, followed by persistent cache
-tiers and screen-space priority.
+budget whole, so that trace was repeated over sixty5, where it does not
+(`artifacts/spatial-demand/sixty5-localized/`): the localized view demands 209
+of 234 chunks under the default order against 152 under leaf-anchor ordering
+— 27.3% fewer chunks and 26.5% fewer bytes, a wider margin than Digital Hub's
+— while every window stays inside the 64 MiB budget and the first coarse frame
+does not move. ADR-0008 now lacks only a non-Blink repeat and the nested-view
+cross-check against ADR-0005. The next increments are persistent cache tiers
+and screen-space priority.
 
 On the compiler side the structure document now streams record by record,
 property keys and key combinations are interned once at scene level, and the

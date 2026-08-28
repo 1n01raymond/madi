@@ -46,6 +46,7 @@
     "spatial:check": "node scripts/validate-spatial-demand-evidence.mjs",
     "spatial:localized:check": "node scripts/validate-spatial-localized-trace-evidence.mjs",
     "spatial:localized:evidence": "node scripts/record-spatial-localized-trace-evidence.mjs",
+    "spatial:package": "pnpm --filter @naru3d/compiler... run build && node scripts/compile-ifc-spatial-package.mjs",
     "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "pnpm --filter @naru3d/scene-ir run build && pnpm --filter @naru3d/runtime-webgpu run build && pnpm --recursive --if-present run typecheck",

@@ -1,0 +1,801 @@
+{
+  "schemaVersion": "naru.spatial-localized-trace.1",
+  "capturedAt": "2026-08-27T09:30:51.406Z",
+  "payloadOrder": "spatial-leaf-anchor",
+  "mode": "headed-localized-camera-trace",
+  "browser": {
+    "id": "chrome",
+    "engine": "Blink",
+    "version": "151.0.7922.139",
+    "headless": false,
+    "viewport": {
+      "width": 1320,
+      "height": 1000
+    }
+  },
+  "host": {
+    "platform": "win32",
+    "architecture": "x64"
+  },
+  "capture": {
+    "residencyMiB": null,
+    "cameraMove": {
+      "wheelDelta": -5000,
+      "panX": 400,
+      "panY": -300
+    }
+  },
+  "source": {
+    "buildReport": "output/ifc/sixty5-spatial/spatial-leaf-anchor/build-report.json",
+    "packageDigest": "1fdbb5a88ad7b44dd7c616c2d23475fc86f6108eb34978be9afa1ebd958f1636",
+    "resources": [
+      {
+        "path": "scene.gltf",
+        "mediaType": "model/gltf+json",
+        "bytes": 445520755,
+        "sha256": "ae40c818ed5704e46651c476c06bbbe06ab3e0f4a1ae6f692904b0d5d5dfcc9e"
+      },
+      {
+        "path": "scene.bin",
+        "mediaType": "application/octet-stream",
+        "bytes": 120707064,
+        "sha256": "95fd96dac3e74b5b69872d39811605647d23ebbca7a9f4911b5b4221e0ccdffb"
+      },
+      {
+        "path": "coarse.bin",
+        "mediaType": "application/octet-stream",
+        "bytes": 38700720,
+        "sha256": "258e085d4f3d0b380bb89c3596b2e3bfc4a43177afe9fc7e92d6e1046db9031b"
+      },
+      {
+        "path": "spatial.bin",
+        "mediaType": "application/octet-stream",
+        "bytes": 1002720,
+        "sha256": "d42d000bcc322d7c80a8900e57b5488656241cf34263dc32174a6b9bee5bbac1"
+      },
+      {
+        "path": "properties.json",
+        "mediaType": "application/json",
+        "bytes": 17705010,
+        "sha256": "dc3394714b73d322dcfe6bad7ce780dbdd18cb547e5eaf45a26c9e66de932312"
+      },
+      {
+        "path": "properties.bin",
+        "mediaType": "application/octet-stream",
+        "bytes": 31179862,
+        "sha256": "dad8d98909c738df930569c4b907c29e64cda2b65d84917936c1c4d86d3dd8c4"
+      }
+    ],
+    "servedFrom": "Vite dev static hosting with HTTP Range support"
+  },
+  "milestones": {
+    "hierarchyReadyMs": 2352,
+    "coarseFrameMs": 4384,
+    "readyMs": 7705
+  },
+  "schedulerMode": "spatial-bvh-v1",
+  "totals": {
+    "spatialNodeCount": 4095,
+    "spatialLeafCount": 2048,
+    "spatialOccurrenceCount": 78173,
+    "targetChunkCount": 234,
+    "totalTargetBytes": 120707064
+  },
+  "fitted": {
+    "visitedNodeCount": 4095,
+    "visibleLeafCount": 2048,
+    "testedOccurrenceCount": 78173,
+    "candidateChunkCount": 234,
+    "queryMilliseconds": {
+      "sampleCount": 2,
+      "minimum": 0.7149999998509884,
+      "p50": 0.7149999998509884,
+      "p95": 2.25,
+      "maximum": 2.25
+    },
+    "visibleLeafCounts": {
+      "sampleCount": 2,
+      "minimum": 2048,
+      "p50": 2048,
+      "p95": 2048,
+      "maximum": 2048
+    },
+    "candidateChunkCounts": {
+      "sampleCount": 2,
+      "minimum": 234,
+      "p50": 234,
+      "p95": 234,
+      "maximum": 234
+    },
+    "schedulerRequests": 106,
+    "schedulerSkips": 128,
+    "schedulerCancellations": 0,
+    "targetChunksReady": 106,
+    "residentDecodedBytes": 66999984,
+    "residentGpuBytes": 67078424,
+    "targetRangeResponses": 106,
+    "demandedBytes": 120707064,
+    "samples": [
+      {
+        "milliseconds": 4398,
+        "queryMilliseconds": 2.25,
+        "visitedNodes": 4095,
+        "visibleLeaves": 2048,
+        "testedOccurrences": 78173,
+        "candidateChunks": 234
+      },
+      {
+        "milliseconds": 4410,
+        "queryMilliseconds": 0.7149999998509884,
+        "visitedNodes": 4095,
+        "visibleLeaves": 2048,
+        "testedOccurrences": 78173,
+        "candidateChunks": 234
+      }
+    ]
+  },
+  "localized": {
+    "visitedNodeCount": 889,
+    "visibleLeafCount": 184,
+    "testedOccurrenceCount": 7026,
+    "candidateChunkCount": 152,
+    "queryMilliseconds": {
+      "sampleCount": 17,
+      "minimum": 0.1550000011920929,
+      "p50": 0.1699999999254942,
+      "p95": 0.23499999940395355,
+      "maximum": 0.23499999940395355
+    },
+    "visibleLeafCounts": {
+      "sampleCount": 17,
+      "minimum": 179,
+      "p50": 181,
+      "p95": 192,
+      "maximum": 192
+    },
+    "candidateChunkCounts": {
+      "sampleCount": 17,
+      "minimum": 152,
+      "p50": 154,
+      "p95": 161,
+      "maximum": 161
+    },
+    "schedulerRequests": 128,
+    "schedulerSkips": 486,
+    "schedulerCancellations": 4,
+    "targetChunksReady": 103,
+    "residentDecodedBytes": 67027692,
+    "residentGpuBytes": 67103956,
+    "targetRangeResponses": 22,
+    "demandedBytes": 78875544,
+    "samples": [
+      {
+        "milliseconds": 11903,
+        "queryMilliseconds": 0.20999999903142452,
+        "visitedNodes": 955,
+        "visibleLeaves": 192,
+        "testedOccurrences": 7331,
+        "candidateChunks": 161
+      },
+      {
+        "milliseconds": 12409,
+        "queryMilliseconds": 0.18999999947845936,
+        "visitedNodes": 949,
+        "visibleLeaves": 191,
+        "testedOccurrences": 7293,
+        "candidateChunks": 161
+      },
+      {
+        "milliseconds": 12422,
+        "queryMilliseconds": 0.17000000178813934,
+        "visitedNodes": 927,
+        "visibleLeaves": 187,
+        "testedOccurrences": 7139,
+        "candidateChunks": 161
+      },
+      {
+        "milliseconds": 12595,
+        "queryMilliseconds": 0.1699999999254942,
+        "visitedNodes": 905,
+        "visibleLeaves": 185,
+        "testedOccurrences": 7063,
+        "candidateChunks": 159
+      },
+      {
+        "milliseconds": 12609,
+        "queryMilliseconds": 0.1550000011920929,
+        "visitedNodes": 899,
+        "visibleLeaves": 183,
+        "testedOccurrences": 6987,
+        "candidateChunks": 157
+      },
+      {
+        "milliseconds": 12833,
+        "queryMilliseconds": 0.16499999910593033,
+        "visitedNodes": 887,
+        "visibleLeaves": 179,
+        "testedOccurrences": 6835,
+        "candidateChunks": 154
+      },
+      {
+        "milliseconds": 12896,
+        "queryMilliseconds": 0.17500000074505806,
+        "visitedNodes": 885,
+        "visibleLeaves": 179,
+        "testedOccurrences": 6835,
+        "candidateChunks": 154
+      },
+      {
+        "milliseconds": 12908,
+        "queryMilliseconds": 0.16500000096857548,
+        "visitedNodes": 881,
+        "visibleLeaves": 179,
+        "testedOccurrences": 6835,
+        "candidateChunks": 154
+      },
+      {
+        "milliseconds": 13110,
+        "queryMilliseconds": 0.1699999999254942,
+        "visitedNodes": 881,
+        "visibleLeaves": 179,
+        "testedOccurrences": 6835,
+        "candidateChunks": 154
+      },
+      {
+        "milliseconds": 13346,
+        "queryMilliseconds": 0.18500000052154064,
+        "visitedNodes": 883,
+        "visibleLeaves": 180,
+        "testedOccurrences": 6873,
+        "candidateChunks": 154
+      },
+      {
+        "milliseconds": 13375,
+        "queryMilliseconds": 0.17999999970197678,
+        "visitedNodes": 885,
+        "visibleLeaves": 181,
+        "testedOccurrences": 6911,
+        "candidateChunks": 154
+      },
+      {
+        "milliseconds": 13398,
+        "queryMilliseconds": 0.23499999940395355,
+        "visitedNodes": 883,
+        "visibleLeaves": 181,
+        "testedOccurrences": 6911,
+        "candidateChunks": 154
+      },
+      {
+        "milliseconds": 13413,
+        "queryMilliseconds": 0.1600000001490116,
+        "visitedNodes": 885,
+        "visibleLeaves": 179,
+        "testedOccurrences": 6835,
+        "candidateChunks": 152
+      },
+      {
+        "milliseconds": 13523,
+        "queryMilliseconds": 0.1699999999254942,
+        "visitedNodes": 885,
+        "visibleLeaves": 179,
+        "testedOccurrences": 6834,
+        "candidateChunks": 152
+      },
+      {
+        "milliseconds": 13747,
+        "queryMilliseconds": 0.1699999999254942,
+        "visitedNodes": 883,
+        "visibleLeaves": 179,
+        "testedOccurrences": 6835,
+        "candidateChunks": 152
+      },
+      {
+        "milliseconds": 13810,
+        "queryMilliseconds": 0.1699999999254942,
+        "visitedNodes": 879,
+        "visibleLeaves": 181,
+        "testedOccurrences": 6911,
+        "candidateChunks": 152
+      },
+      {
+        "milliseconds": 13934,
+        "queryMilliseconds": 0.16499999910593033,
+        "visitedNodes": 889,
+        "visibleLeaves": 184,
+        "testedOccurrences": 7026,
+        "candidateChunks": 152
+      }
+    ]
+  },
+  "navigation": {
+    "visitedNodeCount": 1191,
+    "visibleLeafCount": 262,
+    "testedOccurrenceCount": 9991,
+    "candidateChunkCount": 182,
+    "queryMilliseconds": {
+      "sampleCount": 48,
+      "minimum": 0.16500000096857548,
+      "p50": 0.19500000029802322,
+      "p95": 0.3300000000745058,
+      "maximum": 1.425000000745058
+    },
+    "visibleLeafCounts": {
+      "sampleCount": 48,
+      "minimum": 166,
+      "p50": 209,
+      "p95": 268,
+      "maximum": 273
+    },
+    "candidateChunkCounts": {
+      "sampleCount": 48,
+      "minimum": 156,
+      "p50": 171,
+      "p95": 187,
+      "maximum": 187
+    },
+    "schedulerRequests": 252,
+    "schedulerSkips": 690,
+    "schedulerCancellations": 25,
+    "targetChunksReady": 104,
+    "residentDecodedBytes": 67022880,
+    "residentGpuBytes": 67103200,
+    "targetRangeResponses": 124,
+    "demandedBytes": 94150116,
+    "samples": [
+      {
+        "milliseconds": 18105,
+        "queryMilliseconds": 0.19500000029802322,
+        "visitedNodes": 917,
+        "visibleLeaves": 196,
+        "testedOccurrences": 7482,
+        "candidateChunks": 156
+      },
+      {
+        "milliseconds": 18119,
+        "queryMilliseconds": 0.2050000000745058,
+        "visitedNodes": 975,
+        "visibleLeaves": 200,
+        "testedOccurrences": 7632,
+        "candidateChunks": 163
+      },
+      {
+        "milliseconds": 18287,
+        "queryMilliseconds": 0.17999999970197678,
+        "visitedNodes": 971,
+        "visibleLeaves": 204,
+        "testedOccurrences": 7784,
+        "candidateChunks": 161
+      },
+      {
+        "milliseconds": 18524,
+        "queryMilliseconds": 0.18500000052154064,
+        "visitedNodes": 985,
+        "visibleLeaves": 206,
+        "testedOccurrences": 7859,
+        "candidateChunks": 161
+      },
+      {
+        "milliseconds": 18861,
+        "queryMilliseconds": 0.19500000029802322,
+        "visitedNodes": 985,
+        "visibleLeaves": 205,
+        "testedOccurrences": 7823,
+        "candidateChunks": 162
+      },
+      {
+        "milliseconds": 18875,
+        "queryMilliseconds": 0.17999999970197678,
+        "visitedNodes": 993,
+        "visibleLeaves": 208,
+        "testedOccurrences": 7937,
+        "candidateChunks": 165
+      },
+      {
+        "milliseconds": 18971,
+        "queryMilliseconds": 0.18999999947845936,
+        "visitedNodes": 981,
+        "visibleLeaves": 212,
+        "testedOccurrences": 8089,
+        "candidateChunks": 167
+      },
+      {
+        "milliseconds": 19029,
+        "queryMilliseconds": 0.18500000052154064,
+        "visitedNodes": 971,
+        "visibleLeaves": 211,
+        "testedOccurrences": 8049,
+        "candidateChunks": 166
+      },
+      {
+        "milliseconds": 19611,
+        "queryMilliseconds": 0.18999999947845936,
+        "visitedNodes": 981,
+        "visibleLeaves": 209,
+        "testedOccurrences": 7973,
+        "candidateChunks": 165
+      },
+      {
+        "milliseconds": 19624,
+        "queryMilliseconds": 0.1900000013411045,
+        "visitedNodes": 973,
+        "visibleLeaves": 216,
+        "testedOccurrences": 8241,
+        "candidateChunks": 166
+      },
+      {
+        "milliseconds": 19873,
+        "queryMilliseconds": 0.2000000011175871,
+        "visitedNodes": 961,
+        "visibleLeaves": 211,
+        "testedOccurrences": 8047,
+        "candidateChunks": 165
+      },
+      {
+        "milliseconds": 19982,
+        "queryMilliseconds": 0.18500000052154064,
+        "visitedNodes": 979,
+        "visibleLeaves": 209,
+        "testedOccurrences": 7972,
+        "candidateChunks": 168
+      },
+      {
+        "milliseconds": 20480,
+        "queryMilliseconds": 0.22499999962747097,
+        "visitedNodes": 967,
+        "visibleLeaves": 206,
+        "testedOccurrences": 7860,
+        "candidateChunks": 168
+      },
+      {
+        "milliseconds": 20496,
+        "queryMilliseconds": 0.18500000052154064,
+        "visitedNodes": 921,
+        "visibleLeaves": 197,
+        "testedOccurrences": 7516,
+        "candidateChunks": 168
+      },
+      {
+        "milliseconds": 20685,
+        "queryMilliseconds": 0.1900000013411045,
+        "visitedNodes": 907,
+        "visibleLeaves": 192,
+        "testedOccurrences": 7325,
+        "candidateChunks": 169
+      },
+      {
+        "milliseconds": 20916,
+        "queryMilliseconds": 0.1849999986588955,
+        "visitedNodes": 871,
+        "visibleLeaves": 181,
+        "testedOccurrences": 6904,
+        "candidateChunks": 168
+      },
+      {
+        "milliseconds": 21360,
+        "queryMilliseconds": 0.17500000074505806,
+        "visitedNodes": 857,
+        "visibleLeaves": 180,
+        "testedOccurrences": 6867,
+        "candidateChunks": 169
+      },
+      {
+        "milliseconds": 21480,
+        "queryMilliseconds": 0.1699999999254942,
+        "visitedNodes": 835,
+        "visibleLeaves": 179,
+        "testedOccurrences": 6831,
+        "candidateChunks": 171
+      },
+      {
+        "milliseconds": 21661,
+        "queryMilliseconds": 0.17000000178813934,
+        "visitedNodes": 821,
+        "visibleLeaves": 175,
+        "testedOccurrences": 6678,
+        "candidateChunks": 170
+      },
+      {
+        "milliseconds": 21888,
+        "queryMilliseconds": 0.16500000096857548,
+        "visitedNodes": 811,
+        "visibleLeaves": 173,
+        "testedOccurrences": 6602,
+        "candidateChunks": 170
+      },
+      {
+        "milliseconds": 22305,
+        "queryMilliseconds": 0.25,
+        "visitedNodes": 799,
+        "visibleLeaves": 170,
+        "testedOccurrences": 6488,
+        "candidateChunks": 170
+      },
+      {
+        "milliseconds": 22402,
+        "queryMilliseconds": 0.16500000096857548,
+        "visitedNodes": 775,
+        "visibleLeaves": 166,
+        "testedOccurrences": 6336,
+        "candidateChunks": 169
+      },
+      {
+        "milliseconds": 22419,
+        "queryMilliseconds": 0.1699999999254942,
+        "visitedNodes": 825,
+        "visibleLeaves": 169,
+        "testedOccurrences": 6452,
+        "candidateChunks": 169
+      },
+      {
+        "milliseconds": 22660,
+        "queryMilliseconds": 0.1699999999254942,
+        "visitedNodes": 847,
+        "visibleLeaves": 174,
+        "testedOccurrences": 6643,
+        "candidateChunks": 171
+      },
+      {
+        "milliseconds": 22922,
+        "queryMilliseconds": 0.1749999988824129,
+        "visitedNodes": 885,
+        "visibleLeaves": 184,
+        "testedOccurrences": 7022,
+        "candidateChunks": 173
+      },
+      {
+        "milliseconds": 23053,
+        "queryMilliseconds": 0.28999999910593033,
+        "visitedNodes": 913,
+        "visibleLeaves": 196,
+        "testedOccurrences": 7485,
+        "candidateChunks": 175
+      },
+      {
+        "milliseconds": 23283,
+        "queryMilliseconds": 0.19500000029802322,
+        "visitedNodes": 919,
+        "visibleLeaves": 199,
+        "testedOccurrences": 7600,
+        "candidateChunks": 175
+      },
+      {
+        "milliseconds": 23544,
+        "queryMilliseconds": 0.20999999903142452,
+        "visitedNodes": 933,
+        "visibleLeaves": 198,
+        "testedOccurrences": 7560,
+        "candidateChunks": 173
+      },
+      {
+        "milliseconds": 23945,
+        "queryMilliseconds": 0.19999999925494194,
+        "visitedNodes": 961,
+        "visibleLeaves": 204,
+        "testedOccurrences": 7788,
+        "candidateChunks": 173
+      },
+      {
+        "milliseconds": 23957,
+        "queryMilliseconds": 0.1749999988824129,
+        "visitedNodes": 985,
+        "visibleLeaves": 210,
+        "testedOccurrences": 8017,
+        "candidateChunks": 176
+      },
+      {
+        "milliseconds": 24087,
+        "queryMilliseconds": 0.2000000011175871,
+        "visitedNodes": 1011,
+        "visibleLeaves": 213,
+        "testedOccurrences": 8131,
+        "candidateChunks": 177
+      },
+      {
+        "milliseconds": 24325,
+        "queryMilliseconds": 0.2050000000745058,
+        "visitedNodes": 1035,
+        "visibleLeaves": 217,
+        "testedOccurrences": 8286,
+        "candidateChunks": 179
+      },
+      {
+        "milliseconds": 24744,
+        "queryMilliseconds": 0.19500000029802322,
+        "visitedNodes": 1049,
+        "visibleLeaves": 216,
+        "testedOccurrences": 8249,
+        "candidateChunks": 178
+      },
+      {
+        "milliseconds": 24960,
+        "queryMilliseconds": 0.19999999925494194,
+        "visitedNodes": 1063,
+        "visibleLeaves": 226,
+        "testedOccurrences": 8630,
+        "candidateChunks": 180
+      },
+      {
+        "milliseconds": 25180,
+        "queryMilliseconds": 0.20999999903142452,
+        "visitedNodes": 1087,
+        "visibleLeaves": 231,
+        "testedOccurrences": 8820,
+        "candidateChunks": 181
+      },
+      {
+        "milliseconds": 25193,
+        "queryMilliseconds": 0.19999999925494194,
+        "visitedNodes": 1143,
+        "visibleLeaves": 246,
+        "testedOccurrences": 9393,
+        "candidateChunks": 183
+      },
+      {
+        "milliseconds": 25706,
+        "queryMilliseconds": 0.2599999997764826,
+        "visitedNodes": 1171,
+        "visibleLeaves": 245,
+        "testedOccurrences": 9357,
+        "candidateChunks": 184
+      },
+      {
+        "milliseconds": 25723,
+        "queryMilliseconds": 0.2050000000745058,
+        "visitedNodes": 1187,
+        "visibleLeaves": 250,
+        "testedOccurrences": 9547,
+        "candidateChunks": 184
+      },
+      {
+        "milliseconds": 25839,
+        "queryMilliseconds": 0.22499999962747097,
+        "visitedNodes": 1199,
+        "visibleLeaves": 254,
+        "testedOccurrences": 9699,
+        "candidateChunks": 184
+      },
+      {
+        "milliseconds": 26206,
+        "queryMilliseconds": 0.4900000002235174,
+        "visitedNodes": 1229,
+        "visibleLeaves": 258,
+        "testedOccurrences": 9852,
+        "candidateChunks": 185
+      },
+      {
+        "milliseconds": 26870,
+        "queryMilliseconds": 0.24000000022351742,
+        "visitedNodes": 1241,
+        "visibleLeaves": 263,
+        "testedOccurrences": 10042,
+        "candidateChunks": 185
+      },
+      {
+        "milliseconds": 26953,
+        "queryMilliseconds": 0.2199999988079071,
+        "visitedNodes": 1239,
+        "visibleLeaves": 263,
+        "testedOccurrences": 10042,
+        "candidateChunks": 186
+      },
+      {
+        "milliseconds": 27134,
+        "queryMilliseconds": 1.425000000745058,
+        "visitedNodes": 1247,
+        "visibleLeaves": 267,
+        "testedOccurrences": 10195,
+        "candidateChunks": 187
+      },
+      {
+        "milliseconds": 27349,
+        "queryMilliseconds": 0.23000000044703484,
+        "visitedNodes": 1243,
+        "visibleLeaves": 266,
+        "testedOccurrences": 10156,
+        "candidateChunks": 187
+      },
+      {
+        "milliseconds": 27959,
+        "queryMilliseconds": 0.22000000067055225,
+        "visitedNodes": 1229,
+        "visibleLeaves": 268,
+        "testedOccurrences": 10229,
+        "candidateChunks": 186
+      },
+      {
+        "milliseconds": 28167,
+        "queryMilliseconds": 0.2199999988079071,
+        "visitedNodes": 1227,
+        "visibleLeaves": 273,
+        "testedOccurrences": 10415,
+        "candidateChunks": 186
+      },
+      {
+        "milliseconds": 28301,
+        "queryMilliseconds": 0.3300000000745058,
+        "visitedNodes": 1221,
+        "visibleLeaves": 270,
+        "testedOccurrences": 10298,
+        "candidateChunks": 187
+      },
+      {
+        "milliseconds": 28320,
+        "queryMilliseconds": 0.20999999903142452,
+        "visitedNodes": 1191,
+        "visibleLeaves": 262,
+        "testedOccurrences": 9991,
+        "candidateChunks": 182
+      }
+    ]
+  },
+  "reductions": {
+    "demandedBytes": 41831520,
+    "visitedNodes": 3206,
+    "visibleLeaves": 1864,
+    "testedOccurrences": 71147,
+    "candidateChunks": 82
+  },
+  "snapshot": {
+    "status": "Residency budget reached · 20081 surface batches retained · 78173 renderable occurrences",
+    "statusState": "ready",
+    "statusStage": "rendered",
+    "triangleCount": "2,182,636",
+    "edgeCount": "12",
+    "decodeTime": "1747.2 ms",
+    "geometryResult": "65,452.0 KiB CPU / 65,530.5 KiB GPU resident (budget 65,536.0 KiB)",
+    "gpuAdapter": "nvidia",
+    "dataset": {
+      "sceneLoading": "false",
+      "sceneSource": "url",
+      "hierarchyMatches": "0",
+      "hierarchyReady": "true",
+      "cameraOrigin": "17.14943395528039,13.680760656092513,-29.52153421502242",
+      "coarseReady": "true",
+      "geometryRepresentation": "mixed",
+      "targetChunksTotal": "234",
+      "residencyBudgetBytes": "67108864",
+      "targetChunksReady": "104",
+      "targetReady": "limited",
+      "targetSchedulerMode": "spatial-bvh-v1",
+      "spatialNodesTotal": "4095",
+      "spatialLeavesTotal": "2048",
+      "spatialOccurrencesTotal": "78173",
+      "visibilityMode": "all",
+      "visibleOccurrences": "78173",
+      "selectedObjectId": "0",
+      "sectionEnabled": "false",
+      "sectionAxis": "z",
+      "spatialNodesVisited": "1191",
+      "spatialLeavesVisible": "262",
+      "spatialOccurrencesTested": "9991",
+      "spatialCandidateChunks": "182",
+      "spatialQueryMilliseconds": "0.20999999903142452",
+      "targetSchedulerChunk": "target:0194:prototype:ifc:ventilation-c78f6ad08596:2127505",
+      "targetSchedulerPriority": "181",
+      "targetSchedulerRequests": "252",
+      "residentDecodedBytes": "67022880",
+      "residentGpuBytes": "67103200",
+      "targetSchedulerSkips": "690",
+      "targetSchedulerSkippedChunk": "target:0194:prototype:ifc:ventilation-c78f6ad08596:2127505",
+      "residencyBudgetReached": "true",
+      "targetSchedulerCancellations": "25",
+      "targetSchedulerCancelledChunk": "target:0161:prototype:ifc:plumbing-15382b06d0a6:1481807",
+      "targetSchedulerOrderChunks": "234",
+      "targetSchedulerDemandChunks": "182"
+    },
+    "usedJsHeapBytes": 593869709
+  },
+  "consoleIssues": [],
+  "screenshots": {
+    "fitted": {
+      "path": "fitted-view.png",
+      "bytes": 256908,
+      "sha256": "63e1bebac320e124ddb40d0c63f22ae602d372a7ed5b8b21cf60b2e0e540dd35"
+    },
+    "localized": {
+      "path": "localized-view.png",
+      "bytes": 270409,
+      "sha256": "d9a88e711f995b8dc5f365c79119c0e3e1ffbc1e8507240cbcbc3b3ba085faf0"
+    }
+  }
+}
