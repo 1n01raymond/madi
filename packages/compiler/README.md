@@ -100,8 +100,11 @@ four-document Digital Hub federation closes the ADR-0009 acceptance gate
 ([record](../../artifacts/cache/README.md), `pnpm cache:check`). IFC compilation
 also emits `naru.ifc-incremental-dependency-index.1`, and whole-package cache
 hits restore it byte-for-byte. That index and its changed/deleted/renamed plus
-reconciliation tests are the correctness prerequisite for partial rebuild; the
-adapter and package resources still compile as one federation, and shared-cache
+reconciliation tests are the correctness prerequisite for partial rebuild. On
+a whole-package miss, the IFC adapter now reuses verified unchanged document
+extractions from `<cache>/ifc-documents`, so only missed disciplines run
+IfcOpenShell parsing and tessellation before the deterministic federation merge.
+The package resources still compile as one federation, and shared-cache
 authorization remains a separate gate.
 
 ## Compile an IFC federation

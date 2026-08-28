@@ -57,5 +57,5 @@ jobs:
       - name: Install adapter test dependencies
         run: python -m pip install -r native/adapter-ifc/tools/requirements-dev.txt
 
-      - name: Run placement_math unit tests
+      - name: Run IFC adapter tests
         run: node scripts/run-adapter-ifc-tests.mjs

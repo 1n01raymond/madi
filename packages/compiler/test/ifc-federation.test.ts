@@ -36,7 +36,7 @@ describe("IFC federation compiler orchestration", () => {
       await writeFile(
         adapterPath,
         `import { createHash } from "node:crypto";
-import { readFile, writeFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 const args = process.argv.slice(2);
 if (args.includes("--identity")) {
   console.log(JSON.stringify({
@@ -50,6 +50,13 @@ if (args.includes("--identity")) {
 const option = (name) => args[args.indexOf(name) + 1];
 const adapterCount = Number(await readFile(${JSON.stringify(adapterCountPath)}, "utf8"));
 await writeFile(${JSON.stringify(adapterCountPath)}, String(adapterCount + 1));
+const documentCache = args.includes("--document-cache")
+  ? option("--document-cache")
+  : undefined;
+if (documentCache) {
+  await mkdir(documentCache, { recursive: true });
+  await writeFile(documentCache + "/fake-marker", "document-cache-enabled");
+}
 const documentArgument = option("--document");
 const uriArgument = option("--uri-hint");
 const discipline = documentArgument.slice(0, documentArgument.indexOf("="));
@@ -185,7 +192,7 @@ const identify = (bytes) => ({
   sha256: createHash("sha256").update(bytes).digest("hex"),
 });
 await writeFile(option("--report"), JSON.stringify({
-  schemaVersion: "madi.ifc-adapter-report.4",
+  schemaVersion: "naru.ifc-adapter-report.6",
   federation: { sourceDigest: federationDigest },
   sources: [{
     discipline,
@@ -194,8 +201,14 @@ await writeFile(option("--report"), JSON.stringify({
     sha256: sourceDigest,
     schema: "IFC4",
   }],
+  documentArtifactCache: {
+    schemaVersion: "naru.ifc-document-artifact.1",
+    status: documentCache ? "enabled" : "disabled",
+    hits: [],
+    misses: documentCache ? [discipline] : [],
+  },
   scene: {
-    encodingVersion: "madi.ifc-scene-ir-split.3",
+    encodingVersion: "naru.ifc-scene-ir-split.4",
     structure: identify(structure),
     geometry: identify(geometry),
     properties: identify(properties),
@@ -248,12 +261,19 @@ await writeFile(option("--report"), JSON.stringify({
         uriHint: "projects/digital_hub/arc.ifc",
       });
       expect(result.adapterReport).toMatchObject({
+        documentArtifactCache: {
+          status: "enabled",
+          misses: ["architecture"],
+        },
         sceneIrValidation: { ok: true, errorCount: 0, warningCount: 0 },
       });
       expect(result.cache).toMatchObject({ status: "miss" });
       expect(cached.cache).toEqual({ status: "hit", key: result.cache.key });
       expect(cached.report.output.packageDigest).toBe(result.report.output.packageDigest);
       expect(await readFile(adapterCountPath, "utf8")).toBe("1");
+      await expect(
+        readFile(join(cacheDirectory, "ifc-documents", "fake-marker"), "utf8"),
+      ).resolves.toBe("document-cache-enabled");
       await expect(readFile(join(cachedOutputDirectory, "scene-ir.json"))).resolves.toEqual(
         await readFile(join(outputDirectory, "scene-ir.json")),
       );

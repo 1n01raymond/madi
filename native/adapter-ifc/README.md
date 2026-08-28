@@ -43,9 +43,10 @@ time (`ValueError`) instead of emitting invalid JSON with a bare `NaN` token.
 
 ## Adapter unit tests
 
-`placement_math.py`, `property_index.py`, `property_columns.py`, and
-`explicit_edges.py` have no IfcOpenShell import, so their tests run without the pinned adapter
-environment:
+`placement_math.py`, `property_index.py`, `property_columns.py`,
+`explicit_edges.py`, and the document-artifact storage module remain pure
+Python. The suite also runs one pinned IfcOpenShell integration fixture to prove
+selective document reuse produces the same federation bytes as a clean build:
 
 ```sh
 python -m venv output/venv-ifc-test  # or reuse output/venv-ifc
@@ -59,7 +60,8 @@ pnpm adapter:ifc:test
 `numpy` importable via `--python <path>`, `NARU_PYTHON`, then plain `python`/
 `python3` on `PATH`, and runs `native/adapter-ifc/tests/`. This is separate
 from `pnpm check`, the same way `native:check` is: it needs a Python
-interpreter present, and CI runs it in its own `python-adapter` job.
+interpreter present, and CI installs the pinned IfcOpenShell development
+requirements and runs it in its own `python-adapter` job.
 
 ## Persistent-cache identity
 
@@ -70,6 +72,22 @@ the IfcOpenShell/numpy/Python/OS/architecture toolchain. The compiler combines
 that identity with ordered discipline digests, stable URI hints, and every
 compile-affecting option before it permits an adapter-skipping cache hit. An
 unknown or malformed identity fails closed rather than reusing output.
+
+On a whole-package miss, `naru compile-ifc --cache <directory>` also supplies
+`<directory>/ifc-documents` to the adapter. Each
+`naru.ifc-document-artifact.1` entry contains the pre-federation extraction for
+one discipline as canonical JSON in deterministic gzip, keyed by discipline,
+source digest, URI hint, thread count, and the exact adapter fingerprint. The
+loader verifies the key and payload SHA-256, treats corruption as a miss, and
+never loads executable serialization such as pickle. Publication is atomic.
+
+Adapter report `naru.ifc-adapter-report.6` records ordered per-document hits and
+misses. The compiler requires those lists to cover every selected discipline.
+The real explicit-wall integration test proves cold, warm, and one-document-
+changed adapter structure/geometry/property bytes equal a clean federation
+build. The federation-level property columns and compiled package are still
+rebuilt; this tier skips unchanged IfcOpenShell parsing/tessellation but does not
+yet reuse old glTF byte ranges.
 
 ## Reproduce the Digital Hub extraction
 

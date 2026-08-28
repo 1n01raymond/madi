@@ -26,6 +26,13 @@ import ifcopenshell.util.placement
 import ifcopenshell.util.unit
 import numpy as np
 
+from document_artifact_cache import (
+    DOCUMENT_ARTIFACT_SCHEMA,
+    prepare_document_payload,
+    publish_document_artifact,
+    read_document_artifact,
+    restore_document_payload,
+)
 from explicit_edges import explicit_edge_geometry
 from placement_math import (
     column_major_values,
@@ -62,6 +69,7 @@ def adapter_identity() -> dict[str, Any]:
     implementation_directory = Path(__file__).resolve().parent
     implementation_files = [
         "extract_federation_scene_ir.py",
+        "document_artifact_cache.py",
         "explicit_edges.py",
         "placement_math.py",
         "property_columns.py",
@@ -416,8 +424,11 @@ def parse_inputs(document_values: Sequence[str], uri_values: Sequence[str]) -> l
 def inspect_document(
     document: DocumentInput,
     threads: int,
+    source_bytes: bytes | None = None,
 ) -> dict[str, Any]:
-    source_bytes = document.path.read_bytes()
+    source_bytes = (
+        source_bytes if source_bytes is not None else document.path.read_bytes()
+    )
     source_digest = sha256_bytes(source_bytes)
     document_token = f"{document.discipline}-{source_digest[:12]}"
     document_id = f"document:ifc:{document_token}"
@@ -922,8 +933,70 @@ def inspect_document(
     }
 
 
-def extract_federation(documents: Sequence[DocumentInput], threads: int) -> tuple[dict[str, Any], dict[str, Any]]:
-    extracted = [inspect_document(document, threads) for document in documents]
+def inspect_documents(
+    documents: Sequence[DocumentInput],
+    threads: int,
+    document_cache_directory: Path | None,
+) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+    extracted: list[dict[str, Any]] = []
+    hits: list[str] = []
+    misses: list[str] = []
+    adapter_fingerprint = (
+        adapter_identity()["fingerprint"]
+        if document_cache_directory is not None
+        else None
+    )
+    for document in documents:
+        source_bytes = document.path.read_bytes()
+        source_digest = sha256_bytes(source_bytes)
+        key_input = {
+            "schemaVersion": "naru.ifc-document-artifact-key.1",
+            "discipline": document.discipline,
+            "sourceDigest": source_digest,
+            "uriHint": document.uri_hint,
+            "threads": threads,
+            "adapterFingerprint": adapter_fingerprint,
+        }
+        payload = (
+            read_document_artifact(document_cache_directory, key_input)
+            if document_cache_directory is not None
+            else None
+        )
+        if payload is not None:
+            item = restore_document_payload(payload, document)
+            hits.append(document.discipline)
+        else:
+            item = inspect_document(document, threads, source_bytes)
+            if document_cache_directory is not None:
+                misses.append(document.discipline)
+                publish_document_artifact(
+                    document_cache_directory,
+                    key_input,
+                    prepare_document_payload(item),
+                )
+        if item["sourceDigest"] != source_digest:
+            raise ValueError(
+                f"IFC document artifact digest mismatch for {document.discipline}."
+            )
+        extracted.append(item)
+    return extracted, {
+        "schemaVersion": DOCUMENT_ARTIFACT_SCHEMA,
+        "status": "enabled" if document_cache_directory is not None else "disabled",
+        "hits": hits,
+        "misses": misses,
+    }
+
+
+def extract_federation(
+    documents: Sequence[DocumentInput],
+    threads: int,
+    document_cache_directory: Path | None = None,
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    extracted, document_artifact_cache = inspect_documents(
+        documents,
+        threads,
+        document_cache_directory,
+    )
     digest_input = [
         {"discipline": item["input"].discipline, "sha256": item["sourceDigest"]}
         for item in extracted
@@ -1057,7 +1130,7 @@ def extract_federation(documents: Sequence[DocumentInput], threads: int) -> tupl
             f"{expected_value_count}, encoded {property_columns['value_count']}."
         )
     report = {
-        "schemaVersion": "naru.ifc-adapter-report.5",
+        "schemaVersion": "naru.ifc-adapter-report.6",
         "adapter": {
             "name": "IfcOpenShell",
             "version": ifcopenshell.version,
@@ -1080,6 +1153,7 @@ def extract_federation(documents: Sequence[DocumentInput], threads: int) -> tupl
             }
             for item in extracted
         ],
+        "documentArtifactCache": document_artifact_cache,
         "counts": dict(sorted(totals.items())),
         "prototypeReuse": [
             record
@@ -1274,6 +1348,11 @@ def main() -> None:
     parser.add_argument("--properties", type=Path)
     parser.add_argument("--report", type=Path)
     parser.add_argument(
+        "--document-cache",
+        type=Path,
+        help="Optional verified cache directory for per-document extraction artifacts.",
+    )
+    parser.add_argument(
         "--threads",
         type=int,
         default=max(1, min(8, os.cpu_count() or 1)),
@@ -1297,7 +1376,11 @@ def main() -> None:
         parser.error("--threads must be a positive integer.")
 
     documents = parse_inputs(arguments.document, arguments.uri_hint)
-    scene, report = extract_federation(documents, arguments.threads)
+    scene, report = extract_federation(
+        documents,
+        arguments.threads,
+        arguments.document_cache,
+    )
     report["scene"] = write_scene(
         arguments.scene, arguments.geometry, arguments.properties, scene
     )
@@ -1310,6 +1393,13 @@ def main() -> None:
         f"{counts['geometricOccurrenceCount']} geometric occurrences, "
         f"{counts['triangleCount']} triangles"
     )
+    document_cache = report["documentArtifactCache"]
+    if document_cache["status"] == "enabled":
+        print(
+            "[ifc] document artifacts: "
+            f"{len(document_cache['hits'])} hit(s), "
+            f"{len(document_cache['misses'])} miss(es)"
+        )
     print(f"[ifc] scene: {arguments.scene}")
     print(f"[ifc] report: {arguments.report}")
 
