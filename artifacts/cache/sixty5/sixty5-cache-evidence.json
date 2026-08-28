@@ -1,0 +1,892 @@
+{
+  "schemaVersion": "naru.sixty5-cache-evidence.1",
+  "mode": "fresh-process-cache-state-distributions",
+  "recordedAt": "2026-08-28T15:46:19.623Z",
+  "host": {
+    "platform": "win32",
+    "architecture": "x64",
+    "node": "22.14.0",
+    "cpuCount": 16,
+    "cpuModel": "AMD Ryzen 7 9800X3D 8-Core Processor           ",
+    "totalMemoryBytes": 33463021568
+  },
+  "commit": {
+    "head": "404a55eb70428bc5c40fc92816580888ce871372",
+    "describe": "feat: record a whole-process memory envelope for sixty5 (#89)",
+    "workingTreeClean": false
+  },
+  "fixture": {
+    "datasetId": "ifc-bench-sixty5",
+    "manifest": {
+      "path": "fixtures/external/manifest.json",
+      "sha256": "77d7d587d6b32938a371325e281a4584e10c2ff3118a59f300a9da097eb2f478"
+    },
+    "documents": [
+      {
+        "discipline": "architecture",
+        "uriHint": "projects/sixty5/arc.ifc",
+        "bytes": 342657851,
+        "sha256": "e91ddbbd672bbde946af14631de4c732f0cf8a7cfae5dbbf06fbeab03b5c46df"
+      },
+      {
+        "discipline": "electrical",
+        "uriHint": "projects/sixty5/electrical.ifc",
+        "bytes": 97058912,
+        "sha256": "adb8d5eda2c706a1fded2a00bd38d845e35f513e2f6ba048fc6228274dfb3986"
+      },
+      {
+        "discipline": "facade",
+        "uriHint": "projects/sixty5/facade.ifc",
+        "bytes": 6067026,
+        "sha256": "a9a1b20214da8ac1e1bea1f8670bef24f20a0d53a8ebaef4eb20b5a447640c79"
+      },
+      {
+        "discipline": "kitchen",
+        "uriHint": "projects/sixty5/kitchen.ifc",
+        "bytes": 49670229,
+        "sha256": "1905b992071729d1c780b18f6103e4d1d08307a4707d5f33a4413216f36776ac"
+      },
+      {
+        "discipline": "plumbing",
+        "uriHint": "projects/sixty5/plumbing.ifc",
+        "bytes": 222099255,
+        "sha256": "15382b06d0a63464b95ba451ce7d5fa981bf6c236ebe3f4f62bb9d2b9abfd821"
+      },
+      {
+        "discipline": "structure",
+        "uriHint": "projects/sixty5/str.ifc",
+        "bytes": 7422441,
+        "sha256": "79f294c643438ac7a494e4871857244c2de0eefa536eda5977af20640a301a22"
+      },
+      {
+        "discipline": "ventilation",
+        "uriHint": "projects/sixty5/ventilation.ifc",
+        "bytes": 114891068,
+        "sha256": "c78f6ad085961500f0890bbffda9e171c1342c5865ca152f64098dd4da644cca"
+      }
+    ]
+  },
+  "adapter": {
+    "fingerprint": "cbdac37456c929716533ce1b026c0feaf1e823f25f2bf49bee508331c9a7d093",
+    "name": "IfcOpenShell",
+    "schemaVersion": "naru.ifc-adapter-identity.1",
+    "toolchain": {
+      "architecture": "AMD64",
+      "ifcOpenShell": "0.8.5",
+      "numpy": "2.5.2",
+      "platform": "win32",
+      "python": "3.13.2"
+    },
+    "version": "0.8.5"
+  },
+  "compileOptions": {
+    "threads": 6,
+    "cacheDirectory": "output/sixty5-cache/cache",
+    "pythonExecutable": "output/venv-ifc/Scripts/python.exe"
+  },
+  "protocol": {
+    "samplesPerState": 5,
+    "states": [
+      "cold",
+      "warm",
+      "corrupt-entry"
+    ],
+    "processIsolation": "One fresh node process per sample. A second compile inside one process would reuse a warm module graph and a grown V8 heap that a user reopening a model tomorrow does not have.",
+    "iteration": "Each iteration clears both caches, takes the cold sample that repopulates them, takes the warm sample against that entry, corrupts scene.gltf inside the entry, and takes the corrupt-entry sample.",
+    "coldPreparation": "The whole cache directory is removed, so both the compiled package entry and the adapter document artifact cache start empty.",
+    "warmPreparation": "The cache is left exactly as the preceding cold sample published it; nothing is warmed up beyond that compile.",
+    "corruptEntryPreparation": "The first byte of scene.gltf inside the cache entry is flipped. The adapter document artifact cache is deliberately left intact, because that is the state a user with one damaged package entry actually has; the record reports which documents each run restored.",
+    "outputHandling": "Every sample compiles into its own output directory, which is hashed in full and then deleted; only digests are retained.",
+    "failedRunHandling": "A sample whose compile throws, or whose cache status is not the one its state requires, is recorded in discardedSamples with its reason and immediately re-run. The retained samples are the first valid ones per state.",
+    "statistics": {
+      "median": "The middle value of the sorted retained samples; the mean of the two middle values when the count is even.",
+      "p95": "Nearest-rank observed p95: the ceil(0.95 * n)-th value of the sorted samples, which is the maximum at n = 5. It is an order statistic of the samples taken, not an estimate of the population."
+    },
+    "peakProcessMemory": {
+      "method": "os-sampled-win32-process-tree",
+      "intervalMilliseconds": 500,
+      "note": "Win32_Process WorkingSetSize summed over the tree rooted at the sample process, so the native IfcOpenShell adapter is included. A peak that rises and falls entirely between two snapshots is invisible to it; the summed per-process PeakWorkingSetSize counter is reported beside it as an upper bound that no sampling gap can miss but that charges peaks which never coincided."
+    },
+    "uncontrolled": [
+      "The operating system file cache is not cleared between samples, so after the first iteration the 840 MB of source documents are likely already resident. Cold here means both compiler caches are empty, not that the host is cold.",
+      "The sampler itself runs one PowerShell process for the whole session and is not excluded from the host's load."
+    ],
+    "gltfFormatting": "Every sample compiles with compactJson: true. The compiler's default pretty-printed document exceeds V8's maximum string length for this federation now that explicit boundary edges are always emitted, so the default cannot produce a package here at all; defaultFormattingProbe records that failure from a run taken before the samples.",
+    "unchangedReopenTargetMs": {
+      "minimum": 1000,
+      "maximum": 5000
+    },
+    "reportComparison": {
+      "byteIdenticalResources": "Every file a sample writes except adapter-report.json.",
+      "semanticExclusions": [
+        "adapter-report.json:documentArtifactCache"
+      ],
+      "note": "The document artifact cache result is the only execution-path telemetry excluded, and its value is recorded per sample instead of being normalized away. A cold run records seven misses; a corrupt-entry fallback records seven hits, because only the package entry was damaged; a warm hit does not run the adapter at all and restores the publishing run's report verbatim."
+    }
+  },
+  "states": {
+    "cold": {
+      "samples": 5,
+      "compileMilliseconds": {
+        "values": [
+          380439,
+          378988.3,
+          378810,
+          378702.2,
+          382044.7
+        ],
+        "median": 378988.3,
+        "p95": 382044.7,
+        "minimum": 378702.2,
+        "maximum": 382044.7
+      },
+      "processMilliseconds": {
+        "values": [
+          380628.9,
+          379165.9,
+          378995.3,
+          378873.9,
+          382233.6
+        ],
+        "median": 379165.9,
+        "p95": 382233.6,
+        "minimum": 378873.9,
+        "maximum": 382233.6
+      },
+      "peakProcessTreeWorkingSetBytes": {
+        "values": [
+          5082648576,
+          5130252288,
+          5082726400,
+          5088456704,
+          5091295232
+        ],
+        "median": 5088456704,
+        "p95": 5130252288,
+        "minimum": 5082648576,
+        "maximum": 5130252288
+      },
+      "summedPeakWorkingSetUpperBoundBytes": {
+        "values": [
+          5936222208,
+          6209368064,
+          5941366784,
+          5945270272,
+          5938774016
+        ],
+        "median": 5941366784,
+        "p95": 6209368064,
+        "minimum": 5936222208,
+        "maximum": 6209368064
+      },
+      "runs": [
+        {
+          "index": 1,
+          "compileMilliseconds": 380439,
+          "processMilliseconds": 380628.9,
+          "cacheStatus": "miss",
+          "peakWorkingSetBytes": 5082648576,
+          "peakPrivateBytes": 5752975360,
+          "osPeakWorkingSetBytes": 5936222208,
+          "memorySamples": 656,
+          "maxProcessCount": 4,
+          "documentArtifactCache": {
+            "hits": [],
+            "misses": [
+              "architecture",
+              "electrical",
+              "facade",
+              "kitchen",
+              "plumbing",
+              "structure",
+              "ventilation"
+            ],
+            "schemaVersion": "naru.ifc-document-artifact.1",
+            "status": "enabled"
+          },
+          "warnings": []
+        },
+        {
+          "index": 2,
+          "compileMilliseconds": 378988.3,
+          "processMilliseconds": 379165.9,
+          "cacheStatus": "miss",
+          "peakWorkingSetBytes": 5130252288,
+          "peakPrivateBytes": 5807210496,
+          "osPeakWorkingSetBytes": 6209368064,
+          "memorySamples": 652,
+          "maxProcessCount": 5,
+          "documentArtifactCache": {
+            "hits": [],
+            "misses": [
+              "architecture",
+              "electrical",
+              "facade",
+              "kitchen",
+              "plumbing",
+              "structure",
+              "ventilation"
+            ],
+            "schemaVersion": "naru.ifc-document-artifact.1",
+            "status": "enabled"
+          },
+          "warnings": []
+        },
+        {
+          "index": 3,
+          "compileMilliseconds": 378810,
+          "processMilliseconds": 378995.3,
+          "cacheStatus": "miss",
+          "peakWorkingSetBytes": 5082726400,
+          "peakPrivateBytes": 5747478528,
+          "osPeakWorkingSetBytes": 5941366784,
+          "memorySamples": 652,
+          "maxProcessCount": 4,
+          "documentArtifactCache": {
+            "hits": [],
+            "misses": [
+              "architecture",
+              "electrical",
+              "facade",
+              "kitchen",
+              "plumbing",
+              "structure",
+              "ventilation"
+            ],
+            "schemaVersion": "naru.ifc-document-artifact.1",
+            "status": "enabled"
+          },
+          "warnings": []
+        },
+        {
+          "index": 4,
+          "compileMilliseconds": 378702.2,
+          "processMilliseconds": 378873.9,
+          "cacheStatus": "miss",
+          "peakWorkingSetBytes": 5088456704,
+          "peakPrivateBytes": 5748674560,
+          "osPeakWorkingSetBytes": 5945270272,
+          "memorySamples": 652,
+          "maxProcessCount": 4,
+          "documentArtifactCache": {
+            "hits": [],
+            "misses": [
+              "architecture",
+              "electrical",
+              "facade",
+              "kitchen",
+              "plumbing",
+              "structure",
+              "ventilation"
+            ],
+            "schemaVersion": "naru.ifc-document-artifact.1",
+            "status": "enabled"
+          },
+          "warnings": []
+        },
+        {
+          "index": 5,
+          "compileMilliseconds": 382044.7,
+          "processMilliseconds": 382233.6,
+          "cacheStatus": "miss",
+          "peakWorkingSetBytes": 5091295232,
+          "peakPrivateBytes": 5756030976,
+          "osPeakWorkingSetBytes": 5938774016,
+          "memorySamples": 654,
+          "maxProcessCount": 4,
+          "documentArtifactCache": {
+            "hits": [],
+            "misses": [
+              "architecture",
+              "electrical",
+              "facade",
+              "kitchen",
+              "plumbing",
+              "structure",
+              "ventilation"
+            ],
+            "schemaVersion": "naru.ifc-document-artifact.1",
+            "status": "enabled"
+          },
+          "warnings": []
+        }
+      ]
+    },
+    "warm": {
+      "samples": 5,
+      "compileMilliseconds": {
+        "values": [
+          1366.1,
+          1355.1,
+          1358.4,
+          1384.2,
+          1366.5
+        ],
+        "median": 1366.1,
+        "p95": 1384.2,
+        "minimum": 1355.1,
+        "maximum": 1384.2
+      },
+      "processMilliseconds": {
+        "values": [
+          1441.6,
+          1429.9,
+          1428.2,
+          1459.7,
+          1439.3
+        ],
+        "median": 1439.3,
+        "p95": 1459.7,
+        "minimum": 1428.2,
+        "maximum": 1459.7
+      },
+      "peakProcessTreeWorkingSetBytes": {
+        "values": [
+          896159744,
+          976785408,
+          895967232,
+          708472832,
+          915382272
+        ],
+        "median": 896159744,
+        "p95": 976785408,
+        "minimum": 708472832,
+        "maximum": 976785408
+      },
+      "summedPeakWorkingSetUpperBoundBytes": {
+        "values": [
+          902033408,
+          989077504,
+          898781184,
+          964186112,
+          919670784
+        ],
+        "median": 919670784,
+        "p95": 989077504,
+        "minimum": 898781184,
+        "maximum": 989077504
+      },
+      "runs": [
+        {
+          "index": 1,
+          "compileMilliseconds": 1366.1,
+          "processMilliseconds": 1441.6,
+          "cacheStatus": "hit",
+          "peakWorkingSetBytes": 896159744,
+          "peakPrivateBytes": 902459392,
+          "osPeakWorkingSetBytes": 902033408,
+          "memorySamples": 2,
+          "maxProcessCount": 1,
+          "documentArtifactCache": {
+            "hits": [],
+            "misses": [
+              "architecture",
+              "electrical",
+              "facade",
+              "kitchen",
+              "plumbing",
+              "structure",
+              "ventilation"
+            ],
+            "schemaVersion": "naru.ifc-document-artifact.1",
+            "status": "enabled"
+          },
+          "warnings": []
+        },
+        {
+          "index": 2,
+          "compileMilliseconds": 1355.1,
+          "processMilliseconds": 1429.9,
+          "cacheStatus": "hit",
+          "peakWorkingSetBytes": 976785408,
+          "peakPrivateBytes": 942415872,
+          "osPeakWorkingSetBytes": 989077504,
+          "memorySamples": 2,
+          "maxProcessCount": 4,
+          "documentArtifactCache": {
+            "hits": [],
+            "misses": [
+              "architecture",
+              "electrical",
+              "facade",
+              "kitchen",
+              "plumbing",
+              "structure",
+              "ventilation"
+            ],
+            "schemaVersion": "naru.ifc-document-artifact.1",
+            "status": "enabled"
+          },
+          "warnings": []
+        },
+        {
+          "index": 3,
+          "compileMilliseconds": 1358.4,
+          "processMilliseconds": 1428.2,
+          "cacheStatus": "hit",
+          "peakWorkingSetBytes": 895967232,
+          "peakPrivateBytes": 901955584,
+          "osPeakWorkingSetBytes": 898781184,
+          "memorySamples": 2,
+          "maxProcessCount": 1,
+          "documentArtifactCache": {
+            "hits": [],
+            "misses": [
+              "architecture",
+              "electrical",
+              "facade",
+              "kitchen",
+              "plumbing",
+              "structure",
+              "ventilation"
+            ],
+            "schemaVersion": "naru.ifc-document-artifact.1",
+            "status": "enabled"
+          },
+          "warnings": []
+        },
+        {
+          "index": 4,
+          "compileMilliseconds": 1384.2,
+          "processMilliseconds": 1459.7,
+          "cacheStatus": "hit",
+          "peakWorkingSetBytes": 708472832,
+          "peakPrivateBytes": 899301376,
+          "osPeakWorkingSetBytes": 964186112,
+          "memorySamples": 3,
+          "maxProcessCount": 4,
+          "documentArtifactCache": {
+            "hits": [],
+            "misses": [
+              "architecture",
+              "electrical",
+              "facade",
+              "kitchen",
+              "plumbing",
+              "structure",
+              "ventilation"
+            ],
+            "schemaVersion": "naru.ifc-document-artifact.1",
+            "status": "enabled"
+          },
+          "warnings": []
+        },
+        {
+          "index": 5,
+          "compileMilliseconds": 1366.5,
+          "processMilliseconds": 1439.3,
+          "cacheStatus": "hit",
+          "peakWorkingSetBytes": 915382272,
+          "peakPrivateBytes": 906534912,
+          "osPeakWorkingSetBytes": 919670784,
+          "memorySamples": 2,
+          "maxProcessCount": 4,
+          "documentArtifactCache": {
+            "hits": [],
+            "misses": [
+              "architecture",
+              "electrical",
+              "facade",
+              "kitchen",
+              "plumbing",
+              "structure",
+              "ventilation"
+            ],
+            "schemaVersion": "naru.ifc-document-artifact.1",
+            "status": "enabled"
+          },
+          "warnings": []
+        }
+      ]
+    },
+    "corrupt-entry": {
+      "samples": 5,
+      "compileMilliseconds": {
+        "values": [
+          87659.8,
+          87197.9,
+          87158.7,
+          88804.3,
+          87784.7
+        ],
+        "median": 87659.8,
+        "p95": 88804.3,
+        "minimum": 87158.7,
+        "maximum": 88804.3
+      },
+      "processMilliseconds": {
+        "values": [
+          87855.2,
+          87390.3,
+          87346,
+          88996.2,
+          87971.7
+        ],
+        "median": 87855.2,
+        "p95": 88996.2,
+        "minimum": 87346,
+        "maximum": 88996.2
+      },
+      "peakProcessTreeWorkingSetBytes": {
+        "values": [
+          3776491520,
+          3777515520,
+          3775647744,
+          3778793472,
+          3709345792
+        ],
+        "median": 3776491520,
+        "p95": 3778793472,
+        "minimum": 3709345792,
+        "maximum": 3778793472
+      },
+      "summedPeakWorkingSetUpperBoundBytes": {
+        "values": [
+          4228247552,
+          4230000640,
+          4228243456,
+          4227473408,
+          4226207744
+        ],
+        "median": 4228243456,
+        "p95": 4230000640,
+        "minimum": 4226207744,
+        "maximum": 4230000640
+      },
+      "runs": [
+        {
+          "index": 1,
+          "compileMilliseconds": 87659.8,
+          "processMilliseconds": 87855.2,
+          "cacheStatus": "miss",
+          "peakWorkingSetBytes": 3776491520,
+          "peakPrivateBytes": 4534677504,
+          "osPeakWorkingSetBytes": 4228247552,
+          "memorySamples": 152,
+          "maxProcessCount": 4,
+          "documentArtifactCache": {
+            "hits": [
+              "architecture",
+              "electrical",
+              "facade",
+              "kitchen",
+              "plumbing",
+              "structure",
+              "ventilation"
+            ],
+            "misses": [],
+            "schemaVersion": "naru.ifc-document-artifact.1",
+            "status": "enabled"
+          },
+          "warnings": [
+            "[naru] cache restore failed (Compiled cache resource scene.gltf failed integrity verification.); recompiling.",
+            "[naru] cache publish failed (Compiled cache resource scene.gltf failed integrity verification.); compiled output kept without a cache entry."
+          ]
+        },
+        {
+          "index": 2,
+          "compileMilliseconds": 87197.9,
+          "processMilliseconds": 87390.3,
+          "cacheStatus": "miss",
+          "peakWorkingSetBytes": 3777515520,
+          "peakPrivateBytes": 4536070144,
+          "osPeakWorkingSetBytes": 4230000640,
+          "memorySamples": 150,
+          "maxProcessCount": 4,
+          "documentArtifactCache": {
+            "hits": [
+              "architecture",
+              "electrical",
+              "facade",
+              "kitchen",
+              "plumbing",
+              "structure",
+              "ventilation"
+            ],
+            "misses": [],
+            "schemaVersion": "naru.ifc-document-artifact.1",
+            "status": "enabled"
+          },
+          "warnings": [
+            "[naru] cache restore failed (Compiled cache resource scene.gltf failed integrity verification.); recompiling.",
+            "[naru] cache publish failed (Compiled cache resource scene.gltf failed integrity verification.); compiled output kept without a cache entry."
+          ]
+        },
+        {
+          "index": 3,
+          "compileMilliseconds": 87158.7,
+          "processMilliseconds": 87346,
+          "cacheStatus": "miss",
+          "peakWorkingSetBytes": 3775647744,
+          "peakPrivateBytes": 4533915648,
+          "osPeakWorkingSetBytes": 4228243456,
+          "memorySamples": 151,
+          "maxProcessCount": 4,
+          "documentArtifactCache": {
+            "hits": [
+              "architecture",
+              "electrical",
+              "facade",
+              "kitchen",
+              "plumbing",
+              "structure",
+              "ventilation"
+            ],
+            "misses": [],
+            "schemaVersion": "naru.ifc-document-artifact.1",
+            "status": "enabled"
+          },
+          "warnings": [
+            "[naru] cache restore failed (Compiled cache resource scene.gltf failed integrity verification.); recompiling.",
+            "[naru] cache publish failed (Compiled cache resource scene.gltf failed integrity verification.); compiled output kept without a cache entry."
+          ]
+        },
+        {
+          "index": 4,
+          "compileMilliseconds": 88804.3,
+          "processMilliseconds": 88996.2,
+          "cacheStatus": "miss",
+          "peakWorkingSetBytes": 3778793472,
+          "peakPrivateBytes": 4537368576,
+          "osPeakWorkingSetBytes": 4227473408,
+          "memorySamples": 152,
+          "maxProcessCount": 4,
+          "documentArtifactCache": {
+            "hits": [
+              "architecture",
+              "electrical",
+              "facade",
+              "kitchen",
+              "plumbing",
+              "structure",
+              "ventilation"
+            ],
+            "misses": [],
+            "schemaVersion": "naru.ifc-document-artifact.1",
+            "status": "enabled"
+          },
+          "warnings": [
+            "[naru] cache restore failed (Compiled cache resource scene.gltf failed integrity verification.); recompiling.",
+            "[naru] cache publish failed (Compiled cache resource scene.gltf failed integrity verification.); compiled output kept without a cache entry."
+          ]
+        },
+        {
+          "index": 5,
+          "compileMilliseconds": 87784.7,
+          "processMilliseconds": 87971.7,
+          "cacheStatus": "miss",
+          "peakWorkingSetBytes": 3709345792,
+          "peakPrivateBytes": 4536143872,
+          "osPeakWorkingSetBytes": 4226207744,
+          "memorySamples": 151,
+          "maxProcessCount": 4,
+          "documentArtifactCache": {
+            "hits": [
+              "architecture",
+              "electrical",
+              "facade",
+              "kitchen",
+              "plumbing",
+              "structure",
+              "ventilation"
+            ],
+            "misses": [],
+            "schemaVersion": "naru.ifc-document-artifact.1",
+            "status": "enabled"
+          },
+          "warnings": [
+            "[naru] cache restore failed (Compiled cache resource scene.gltf failed integrity verification.); recompiling.",
+            "[naru] cache publish failed (Compiled cache resource scene.gltf failed integrity verification.); compiled output kept without a cache entry."
+          ]
+        }
+      ]
+    }
+  },
+  "packageIdentity": {
+    "baseline": {
+      "state": "cold",
+      "index": 1
+    },
+    "packageDigest": "3206ea40835d8ca70a0a82208e397a8dcdcd66351b29b4df0e8102ff910e6454",
+    "resources": [
+      {
+        "path": "adapter-report.json",
+        "bytes": 39022,
+        "sha256": "cbfa5985404883c9472c80641bb9901cf78c21fb832cf4e4bc080bce3130bab7"
+      },
+      {
+        "path": "build-report.json",
+        "bytes": 141563,
+        "sha256": "8279b380161f9eef995a9242288bd77ed9014e3dd7add42f743332ff11731af3"
+      },
+      {
+        "path": "coarse.bin",
+        "bytes": 38700720,
+        "sha256": "258e085d4f3d0b380bb89c3596b2e3bfc4a43177afe9fc7e92d6e1046db9031b"
+      },
+      {
+        "path": "incremental-dependencies.json",
+        "bytes": 38342167,
+        "sha256": "5c4091bf9be6464212a10843569d3e0fe2ff363acbdef4306dc93403f87fecd1"
+      },
+      {
+        "path": "properties.bin",
+        "bytes": 31179862,
+        "sha256": "dad8d98909c738df930569c4b907c29e64cda2b65d84917936c1c4d86d3dd8c4"
+      },
+      {
+        "path": "properties.json",
+        "bytes": 17705010,
+        "sha256": "dc3394714b73d322dcfe6bad7ce780dbdd18cb547e5eaf45a26c9e66de932312"
+      },
+      {
+        "path": "scene.bin",
+        "bytes": 169752328,
+        "sha256": "8860f0f545e6d5ca1f8d225a339fca107389fbdba4069b930850625e7c0f60d1"
+      },
+      {
+        "path": "scene.gltf",
+        "bytes": 357999930,
+        "sha256": "e8aae670655445cb3d351ea89bb37af18c3f955fb9fc9ccc9a9a9dfa63cf95ac"
+      }
+    ],
+    "buildReportResources": [
+      {
+        "path": "scene.gltf",
+        "mediaType": "model/gltf+json",
+        "bytes": 357999930,
+        "sha256": "e8aae670655445cb3d351ea89bb37af18c3f955fb9fc9ccc9a9a9dfa63cf95ac"
+      },
+      {
+        "path": "scene.bin",
+        "mediaType": "application/octet-stream",
+        "bytes": 169752328,
+        "sha256": "8860f0f545e6d5ca1f8d225a339fca107389fbdba4069b930850625e7c0f60d1"
+      },
+      {
+        "path": "coarse.bin",
+        "mediaType": "application/octet-stream",
+        "bytes": 38700720,
+        "sha256": "258e085d4f3d0b380bb89c3596b2e3bfc4a43177afe9fc7e92d6e1046db9031b"
+      },
+      {
+        "path": "properties.json",
+        "mediaType": "application/json",
+        "bytes": 17705010,
+        "sha256": "dc3394714b73d322dcfe6bad7ce780dbdd18cb547e5eaf45a26c9e66de932312"
+      },
+      {
+        "path": "properties.bin",
+        "mediaType": "application/octet-stream",
+        "bytes": 31179862,
+        "sha256": "dad8d98909c738df930569c4b907c29e64cda2b65d84917936c1c4d86d3dd8c4"
+      }
+    ],
+    "comparisons": [
+      {
+        "phase": "cold",
+        "index": 2,
+        "failures": []
+      },
+      {
+        "phase": "cold",
+        "index": 3,
+        "failures": []
+      },
+      {
+        "phase": "cold",
+        "index": 4,
+        "failures": []
+      },
+      {
+        "phase": "cold",
+        "index": 5,
+        "failures": []
+      },
+      {
+        "phase": "warm",
+        "index": 1,
+        "failures": []
+      },
+      {
+        "phase": "warm",
+        "index": 2,
+        "failures": []
+      },
+      {
+        "phase": "warm",
+        "index": 3,
+        "failures": []
+      },
+      {
+        "phase": "warm",
+        "index": 4,
+        "failures": []
+      },
+      {
+        "phase": "warm",
+        "index": 5,
+        "failures": []
+      },
+      {
+        "phase": "corrupt-entry",
+        "index": 1,
+        "failures": []
+      },
+      {
+        "phase": "corrupt-entry",
+        "index": 2,
+        "failures": []
+      },
+      {
+        "phase": "corrupt-entry",
+        "index": 3,
+        "failures": []
+      },
+      {
+        "phase": "corrupt-entry",
+        "index": 4,
+        "failures": []
+      },
+      {
+        "phase": "corrupt-entry",
+        "index": 5,
+        "failures": []
+      }
+    ],
+    "identical": true
+  },
+  "unchangedReopen": {
+    "target": {
+      "minimum": 1000,
+      "maximum": 5000
+    },
+    "compileMedianMs": 1366.1,
+    "compileP95Ms": 1384.2,
+    "wholeProcessMedianMs": 1439.3,
+    "wholeProcessP95Ms": 1459.7,
+    "meetsCompile": true,
+    "meetsWholeProcess": true,
+    "note": "Measured against the upper bound of the target; a warm reopen faster than the lower bound passes. meetsWholeProcess includes node startup and module loading, which a user reopening a model also pays."
+  },
+  "defaultFormattingProbe": {
+    "compactJson": false,
+    "outcome": "failed",
+    "compileMilliseconds": 376070.6,
+    "processMilliseconds": 376362,
+    "peakWorkingSetBytes": 5097619456,
+    "failure": {
+      "name": "RangeError",
+      "message": "Invalid string length",
+      "stack": "RangeError: Invalid string length\n    at JSON.stringify (<anonymous>)\n    at compileSceneToGltf (<repository>/packages/compiler/dist/gltf.js:1103:26)\n    at compileIfcFederation (<repository>/packages/compiler/dist/ifc-federation.js:353:26)\n    at async <repository>/scripts/lib/ifc-cache-sample.mjs:58:12"
+    },
+    "note": "One run of the same federation with the compiler's default pretty-printed glTF document, taken before the samples. It is reported as measured; a host where it compiles would record outcome: compiled."
+  },
+  "committedRecordComparison": {
+    "record": "artifacts/ifc/sixty5",
+    "packageDigest": "a2d6c72a6e936ac3ea2a183a1028cc4a06b20985c6d90b16058954323b7c3347",
+    "reproduced": false,
+    "note": "The committed sixty5 package predates explicit IFC boundary edges (PR #42), which the compiler now emits by default, so the digests are expected to differ. This record pins what current main compiles on this host; it does not retarget the committed record."
+  },
+  "discardedSamples": []
+}

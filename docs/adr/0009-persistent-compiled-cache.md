@@ -77,4 +77,10 @@ intermediate restore, and URI-hint invalidation. The acceptance gate defined in
 pinned PyGamer STEP fixture and the four-document Digital Hub IFC federation
 each record a cold miss, a byte-identical warm restore (19.9 s → 1.7 s STEP,
 46.3 s → 0.5 s IFC), and a corrupted-entry run that fails closed and recompiles
-byte-identically.
+byte-identically. A later real-large record extends the same properties to the
+seven-document sixty5 federation with five fresh-process samples per cache
+state (`artifacts/cache/sixty5/sixty5-cache-evidence.json`,
+`naru.sixty5-cache-evidence.1`, validated by
+`scripts/validate-sixty5-cache-evidence.mjs`): cold median 379.0 s, warm median
+1.37 s, corrupt-entry median 87.7 s, one package digest across all fifteen
+samples, and a fallback that leaves the damaged entry unpublished.

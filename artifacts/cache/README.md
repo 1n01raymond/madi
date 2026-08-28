@@ -36,6 +36,12 @@ pre-E2.1 record extracted with `includeEdges: false`; refreshing that
 federation record — and the deployed demo package its digests verify — is
 tracked as its own slice.
 
+These are mid-size single runs. The real-large distribution lives beside them
+in [`sixty5/`](sixty5/README.md): five fresh-process samples per cache state on
+the seven-document, 839.9 MB sixty5 federation — cold median 379.0 s, warm
+median 1.37 s, corrupt-entry median 87.7 s — with cache footprint,
+process-tree peak memory, and the 1–5 s unchanged-reopen verdict.
+
 Adapter identities are embedded in the record (`naru.occt-adapter-identity.1`:
 cadquery 2.8.0 / OCP 7.9.3.1; `naru.ifc-adapter-identity.1`: IfcOpenShell
 0.8.5), and the compiler contributes its content-hashed identity to each cache

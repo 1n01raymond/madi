@@ -98,6 +98,7 @@
 | 距原点 10,000 km 的坐标仍保持精度 | 0.25 mm 的板间隙以 ≤ 0.001 mm 的误差编译，两个引擎渲染均零像素漂移（[精度记录](artifacts/precision/large-coordinates/README.md)） |
 | 可将包打包为让邻近 geometry 一起传输（opt-in） | leaf-anchor payload 排序在 Digital Hub census 中将 off-view 字节总量削减 39.9%（[spatial demand 记录](artifacts/spatial-demand/README.md)） |
 | 编译结果逐字节可复现 | 两次完整的 sixty5 编译产生逐字节相同的包（[编译证据](artifacts/ifc/sixty5/README.md)） |
+| 重新打开未更改的大型模型只需数秒而非数分钟 | 相同 839.9 MB 联邦的冷导入为 379.0 s，而 5 次全新进程的热重开中位数为 1.44 s（含 `node` 启动）（[缓存分布](artifacts/cache/sixty5/README.md)） |
 | **尚未做到：** 超大规模下交互级的就绪状态与跨浏览器性能结论 | 4.5 秒首帧是单台独立 GPU 主机上的单次 Chrome 记录，9.1 秒的就绪状态稳定在 234 个分块中的 111 个，因此在 64 MiB 预算下联合模型的大部分仍保持 coarse（[首帧记录](artifacts/ifc/sixty5-first-frame/README.md)） |
 
 ## 从哪里开始
@@ -230,7 +231,10 @@ federation 上记录的证据显示：相对 19.9 秒与 46.3 秒的冷编译，
 热恢复仅需 1.7 秒与 0.5 秒
 （[缓存证据](artifacts/cache/README.md)、
 [ADR-0009](docs/adr/0009-persistent-compiled-cache.md)、
-[导入与缓存设计](docs/IMPORT_AND_CACHE.md)）。
+[导入与缓存设计](docs/IMPORT_AND_CACHE.md)）。在大规模场景下，对 839.9 MB
+的 sixty5 federation 每种缓存状态各取 5 个全新进程样本，冷编译中位数
+379.0 秒、热恢复 1.37 秒、损坏条目回退 87.7 秒，15 个样本全部产生逐字节
+相同的包（[缓存分布](artifacts/cache/sixty5/README.md)）。
 
 ## 从设计文档开始
 

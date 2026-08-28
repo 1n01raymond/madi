@@ -98,6 +98,7 @@ NARU.</sub>
 | Coordinates 10,000 km from the origin stay precise | a 0.25 mm plate gap compiles with ≤ 0.001 mm error and renders with zero pixel drift in both engines ([precision record](artifacts/precision/large-coordinates/README.md)) |
 | Packages can be packed so nearby geometry travels together (opt-in) | leaf-anchor payload ordering cut summed off-view bytes 39.9% on the Digital Hub census ([spatial demand record](artifacts/spatial-demand/README.md)) |
 | Compiles are reproducible, byte for byte | two full sixty5 compilations produced byte-identical packages ([compile evidence](artifacts/ifc/sixty5/README.md)) |
+| Reopening an unchanged real-large model costs seconds, not minutes | five fresh-process sixty5 warm reopens median 1.44 s including `node` startup, against a 379.0 s cold import of the same 839.9 MB federation ([cache distributions](artifacts/cache/sixty5/README.md)) |
 | **Not yet:** interactive-grade readiness or cross-browser performance claims at real-large scale | the 4.5 s first frame is a single Chrome record on one discrete-GPU host, and the 9.1 s ready state settles on 111 of 234 chunks, so much of the federation stays coarse under a 64 MiB budget ([first-frame record](artifacts/ifc/sixty5-first-frame/README.md)) |
 
 ## Where to start
@@ -247,7 +248,11 @@ and the Digital Hub federation shows byte-identical warm restores of 1.7 s and
 0.5 s against 19.9 s and 46.3 s cold compiles
 ([cache evidence](artifacts/cache/README.md),
 [ADR-0009](docs/adr/0009-persistent-compiled-cache.md),
-[import and cache design](docs/IMPORT_AND_CACHE.md)).
+[import and cache design](docs/IMPORT_AND_CACHE.md)). At real-large scale,
+five fresh-process samples per cache state on the 839.9 MB sixty5 federation
+median 379.0 s cold, 1.37 s warm, and 87.7 s for a corrupt-entry fallback,
+with every one of the fifteen samples producing the same package byte for byte
+([cache distributions](artifacts/cache/sixty5/README.md)).
 
 ## Start with the design
 
