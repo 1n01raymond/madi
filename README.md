@@ -1,5 +1,7 @@
 <p align="center">
-  <img src="docs/media/naru-hero.svg" alt="NARU — A WebGPU-native engine for massive CAD and BIM" width="100%" />
+  <a href="https://1n01raymond.github.io/naru/">
+    <img src="docs/media/naru-hero.svg" alt="NARU — A WebGPU-native engine for massive CAD and BIM" width="100%" />
+  </a>
 </p>
 
 <p align="center">
@@ -10,6 +12,8 @@
 </p>
 
 <p align="center">
+  <a href="https://1n01raymond.github.io/naru/"><img alt="Live Studio demo" src="https://img.shields.io/badge/demo-live-FF6B4A?style=flat-square"></a>
+  <a href="https://github.com/1n01raymond/naru/actions/workflows/ci.yml"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/1n01raymond/naru/ci.yml?style=flat-square&label=CI"></a>
   <a href="LICENSE"><img alt="Apache License 2.0" src="https://img.shields.io/badge/license-Apache--2.0-5B8DEF?style=flat-square"></a>
   <img alt="Phase 1 vertical slice complete" src="https://img.shields.io/badge/status-Phase%201%20complete-20B486?style=flat-square">
   <img alt="WebGPU renderer" src="https://img.shields.io/badge/renderer-WebGPU-7C6CFF?style=flat-square">
@@ -20,6 +24,15 @@
   <strong>Bring engineering models to the Web—without replacing the tools that created them.</strong>
   <br />
   An open-source studio, compiler, and WebGPU runtime for massive CAD, BIM, and engineering scenes.
+</p>
+
+<p align="center">
+  <a href="https://1n01raymond.github.io/naru/"><strong>▶&nbsp;Open the live Studio demo</strong></a>
+  — a real four-discipline IFC federation, streamed over plain HTTP Ranges. Nothing to install.
+  <br />
+  <sub>Measured at real-large scale: the 839.9 MB <code>sixty5</code> federation reaches a first
+  coarse frame of all 78,173 renderable occurrences in 4.3 s inside a fixed 64 MiB budget
+  (<a href="artifacts/ifc/sixty5-first-frame/README.md">evidence</a>).</sub>
 </p>
 
 > [!IMPORTANT]

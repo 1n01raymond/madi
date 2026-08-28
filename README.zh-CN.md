@@ -1,5 +1,7 @@
 <p align="center">
-  <img src="docs/media/naru-hero.svg" alt="NARU — 面向海量 CAD 与 BIM 的 WebGPU 原生引擎" width="100%" />
+  <a href="https://1n01raymond.github.io/naru/">
+    <img src="docs/media/naru-hero.svg" alt="NARU — 面向海量 CAD 与 BIM 的 WebGPU 原生引擎" width="100%" />
+  </a>
 </p>
 
 <p align="center">
@@ -10,6 +12,8 @@
 </p>
 
 <p align="center">
+  <a href="https://1n01raymond.github.io/naru/"><img alt="在线 Studio 演示" src="https://img.shields.io/badge/demo-live-FF6B4A?style=flat-square"></a>
+  <a href="https://github.com/1n01raymond/naru/actions/workflows/ci.yml"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/1n01raymond/naru/ci.yml?style=flat-square&label=CI"></a>
   <a href="LICENSE"><img alt="Apache License 2.0" src="https://img.shields.io/badge/license-Apache--2.0-5B8DEF?style=flat-square"></a>
   <img alt="Phase 1 垂直切片已完成" src="https://img.shields.io/badge/status-Phase%201%20complete-20B486?style=flat-square">
   <img alt="WebGPU renderer" src="https://img.shields.io/badge/renderer-WebGPU-7C6CFF?style=flat-square">
@@ -20,6 +24,15 @@
   <strong>无需替换现有工具，让工程模型进入 Web。</strong>
   <br />
   面向大型 CAD、BIM 与工程场景的开源工作室、编译器和 WebGPU 运行时。
+</p>
+
+<p align="center">
+  <a href="https://1n01raymond.github.io/naru/"><strong>▶&nbsp;打开在线 Studio 演示</strong></a>
+  — 一个真实的四专业 IFC 联合模型，通过纯 HTTP Range 流式传输。无需安装。
+  <br />
+  <sub>真实大规模测量结果：839.9 MB 的 <code>sixty5</code> 联合模型在 4.3 秒内呈现
+  全部 78,173 个可渲染 occurrence 的首个 coarse 帧，并始终保持在固定的 64 MiB
+  预算之内（<a href="artifacts/ifc/sixty5-first-frame/README.md">证据</a>）。</sub>
 </p>
 
 > [!IMPORTANT]
