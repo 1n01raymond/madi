@@ -1,7 +1,7 @@
 {
   "schemaVersion": "naru.sixty5-cache-evidence.1",
   "mode": "fresh-process-cache-state-distributions",
-  "recordedAt": "2026-08-28T15:46:19.623Z",
+  "recordedAt": "2026-08-28T17:37:45.052Z",
   "host": {
     "platform": "win32",
     "architecture": "x64",
@@ -11,8 +11,8 @@
     "totalMemoryBytes": 33463021568
   },
   "commit": {
-    "head": "404a55eb70428bc5c40fc92816580888ce871372",
-    "describe": "feat: record a whole-process memory envelope for sixty5 (#89)",
+    "head": "1aa3b0f1f53b28d2b9a7adb911f81b3cc7233a48",
+    "describe": "feat: record sixty5 cold, warm, and corrupt compiled-cache distributions (#90)",
     "workingTreeClean": false
   },
   "fixture": {
@@ -111,7 +111,7 @@
       "The operating system file cache is not cleared between samples, so after the first iteration the 840 MB of source documents are likely already resident. Cold here means both compiler caches are empty, not that the host is cold.",
       "The sampler itself runs one PowerShell process for the whole session and is not excluded from the host's load."
     ],
-    "gltfFormatting": "Every sample compiles with compactJson: true. The compiler's default pretty-printed document exceeds V8's maximum string length for this federation now that explicit boundary edges are always emitted, so the default cannot produce a package here at all; defaultFormattingProbe records that failure from a run taken before the samples.",
+    "gltfFormatting": "Every sample compiles with compactJson: true, which is what the committed sixty5 packages were compiled with, so the digests here stay comparable to them. The default pretty-printed document for this federation is larger than the runtime's maximum string length, which is why the compiler writes it as a stream instead of building it as one string (ADR-0016); defaultFormattingProbe compiles that default once, before the samples, and reports what it produced.",
     "unchangedReopenTargetMs": {
       "minimum": 1000,
       "maximum": 5000
@@ -129,66 +129,66 @@
       "samples": 5,
       "compileMilliseconds": {
         "values": [
-          380439,
-          378988.3,
-          378810,
-          378702.2,
-          382044.7
+          381405.1,
+          379473.5,
+          382203.4,
+          385288.8,
+          379302
         ],
-        "median": 378988.3,
-        "p95": 382044.7,
-        "minimum": 378702.2,
-        "maximum": 382044.7
+        "median": 381405.1,
+        "p95": 385288.8,
+        "minimum": 379302,
+        "maximum": 385288.8
       },
       "processMilliseconds": {
         "values": [
-          380628.9,
-          379165.9,
-          378995.3,
-          378873.9,
-          382233.6
+          381581.2,
+          379677.9,
+          382387.8,
+          385506.5,
+          379513.6
         ],
-        "median": 379165.9,
-        "p95": 382233.6,
-        "minimum": 378873.9,
-        "maximum": 382233.6
+        "median": 381581.2,
+        "p95": 385506.5,
+        "minimum": 379513.6,
+        "maximum": 385506.5
       },
       "peakProcessTreeWorkingSetBytes": {
         "values": [
-          5082648576,
-          5130252288,
-          5082726400,
-          5088456704,
-          5091295232
+          5084332032,
+          5087645696,
+          5086642176,
+          5082386432,
+          5082578944
         ],
-        "median": 5088456704,
-        "p95": 5130252288,
-        "minimum": 5082648576,
-        "maximum": 5130252288
+        "median": 5084332032,
+        "p95": 5087645696,
+        "minimum": 5082386432,
+        "maximum": 5087645696
       },
       "summedPeakWorkingSetUpperBoundBytes": {
         "values": [
-          5936222208,
-          6209368064,
-          5941366784,
-          5945270272,
-          5938774016
+          5940559872,
+          5946249216,
+          5947396096,
+          5943128064,
+          5936254976
         ],
-        "median": 5941366784,
-        "p95": 6209368064,
-        "minimum": 5936222208,
-        "maximum": 6209368064
+        "median": 5943128064,
+        "p95": 5947396096,
+        "minimum": 5936254976,
+        "maximum": 5947396096
       },
       "runs": [
         {
           "index": 1,
-          "compileMilliseconds": 380439,
-          "processMilliseconds": 380628.9,
+          "compileMilliseconds": 381405.1,
+          "processMilliseconds": 381581.2,
           "cacheStatus": "miss",
-          "peakWorkingSetBytes": 5082648576,
-          "peakPrivateBytes": 5752975360,
-          "osPeakWorkingSetBytes": 5936222208,
-          "memorySamples": 656,
+          "peakWorkingSetBytes": 5084332032,
+          "peakPrivateBytes": 5746995200,
+          "osPeakWorkingSetBytes": 5940559872,
+          "memorySamples": 657,
           "maxProcessCount": 4,
           "documentArtifactCache": {
             "hits": [],
@@ -208,14 +208,14 @@
         },
         {
           "index": 2,
-          "compileMilliseconds": 378988.3,
-          "processMilliseconds": 379165.9,
+          "compileMilliseconds": 379473.5,
+          "processMilliseconds": 379677.9,
           "cacheStatus": "miss",
-          "peakWorkingSetBytes": 5130252288,
-          "peakPrivateBytes": 5807210496,
-          "osPeakWorkingSetBytes": 6209368064,
+          "peakWorkingSetBytes": 5087645696,
+          "peakPrivateBytes": 5744918528,
+          "osPeakWorkingSetBytes": 5946249216,
           "memorySamples": 652,
-          "maxProcessCount": 5,
+          "maxProcessCount": 4,
           "documentArtifactCache": {
             "hits": [],
             "misses": [
@@ -234,13 +234,13 @@
         },
         {
           "index": 3,
-          "compileMilliseconds": 378810,
-          "processMilliseconds": 378995.3,
+          "compileMilliseconds": 382203.4,
+          "processMilliseconds": 382387.8,
           "cacheStatus": "miss",
-          "peakWorkingSetBytes": 5082726400,
-          "peakPrivateBytes": 5747478528,
-          "osPeakWorkingSetBytes": 5941366784,
-          "memorySamples": 652,
+          "peakWorkingSetBytes": 5086642176,
+          "peakPrivateBytes": 5749870592,
+          "osPeakWorkingSetBytes": 5947396096,
+          "memorySamples": 657,
           "maxProcessCount": 4,
           "documentArtifactCache": {
             "hits": [],
@@ -260,13 +260,13 @@
         },
         {
           "index": 4,
-          "compileMilliseconds": 378702.2,
-          "processMilliseconds": 378873.9,
+          "compileMilliseconds": 385288.8,
+          "processMilliseconds": 385506.5,
           "cacheStatus": "miss",
-          "peakWorkingSetBytes": 5088456704,
-          "peakPrivateBytes": 5748674560,
-          "osPeakWorkingSetBytes": 5945270272,
-          "memorySamples": 652,
+          "peakWorkingSetBytes": 5082386432,
+          "peakPrivateBytes": 5750673408,
+          "osPeakWorkingSetBytes": 5943128064,
+          "memorySamples": 663,
           "maxProcessCount": 4,
           "documentArtifactCache": {
             "hits": [],
@@ -286,13 +286,13 @@
         },
         {
           "index": 5,
-          "compileMilliseconds": 382044.7,
-          "processMilliseconds": 382233.6,
+          "compileMilliseconds": 379302,
+          "processMilliseconds": 379513.6,
           "cacheStatus": "miss",
-          "peakWorkingSetBytes": 5091295232,
-          "peakPrivateBytes": 5756030976,
-          "osPeakWorkingSetBytes": 5938774016,
-          "memorySamples": 654,
+          "peakWorkingSetBytes": 5082578944,
+          "peakPrivateBytes": 5744754688,
+          "osPeakWorkingSetBytes": 5936254976,
+          "memorySamples": 653,
           "maxProcessCount": 4,
           "documentArtifactCache": {
             "hits": [],
@@ -316,91 +316,65 @@
       "samples": 5,
       "compileMilliseconds": {
         "values": [
-          1366.1,
-          1355.1,
-          1358.4,
-          1384.2,
-          1366.5
+          1361.3,
+          1352,
+          1377.8,
+          1358.5,
+          1344.2
         ],
-        "median": 1366.1,
-        "p95": 1384.2,
-        "minimum": 1355.1,
-        "maximum": 1384.2
+        "median": 1358.5,
+        "p95": 1377.8,
+        "minimum": 1344.2,
+        "maximum": 1377.8
       },
       "processMilliseconds": {
         "values": [
-          1441.6,
-          1429.9,
-          1428.2,
-          1459.7,
-          1439.3
+          1432.7,
+          1424.1,
+          1448.8,
+          1429.3,
+          1413.4
         ],
-        "median": 1439.3,
-        "p95": 1459.7,
-        "minimum": 1428.2,
-        "maximum": 1459.7
+        "median": 1429.3,
+        "p95": 1448.8,
+        "minimum": 1413.4,
+        "maximum": 1448.8
       },
       "peakProcessTreeWorkingSetBytes": {
         "values": [
-          896159744,
-          976785408,
-          895967232,
-          708472832,
-          915382272
+          975515648,
+          959209472,
+          896905216,
+          929644544,
+          896126976
         ],
-        "median": 896159744,
-        "p95": 976785408,
-        "minimum": 708472832,
-        "maximum": 976785408
+        "median": 929644544,
+        "p95": 975515648,
+        "minimum": 896126976,
+        "maximum": 975515648
       },
       "summedPeakWorkingSetUpperBoundBytes": {
         "values": [
-          902033408,
-          989077504,
-          898781184,
-          964186112,
-          919670784
+          988950528,
+          963534848,
+          897822720,
+          933978112,
+          899117056
         ],
-        "median": 919670784,
-        "p95": 989077504,
-        "minimum": 898781184,
-        "maximum": 989077504
+        "median": 933978112,
+        "p95": 988950528,
+        "minimum": 897822720,
+        "maximum": 988950528
       },
       "runs": [
         {
           "index": 1,
-          "compileMilliseconds": 1366.1,
-          "processMilliseconds": 1441.6,
+          "compileMilliseconds": 1361.3,
+          "processMilliseconds": 1432.7,
           "cacheStatus": "hit",
-          "peakWorkingSetBytes": 896159744,
-          "peakPrivateBytes": 902459392,
-          "osPeakWorkingSetBytes": 902033408,
-          "memorySamples": 2,
-          "maxProcessCount": 1,
-          "documentArtifactCache": {
-            "hits": [],
-            "misses": [
-              "architecture",
-              "electrical",
-              "facade",
-              "kitchen",
-              "plumbing",
-              "structure",
-              "ventilation"
-            ],
-            "schemaVersion": "naru.ifc-document-artifact.1",
-            "status": "enabled"
-          },
-          "warnings": []
-        },
-        {
-          "index": 2,
-          "compileMilliseconds": 1355.1,
-          "processMilliseconds": 1429.9,
-          "cacheStatus": "hit",
-          "peakWorkingSetBytes": 976785408,
-          "peakPrivateBytes": 942415872,
-          "osPeakWorkingSetBytes": 989077504,
+          "peakWorkingSetBytes": 975515648,
+          "peakPrivateBytes": 941441024,
+          "osPeakWorkingSetBytes": 988950528,
           "memorySamples": 2,
           "maxProcessCount": 4,
           "documentArtifactCache": {
@@ -420,13 +394,39 @@
           "warnings": []
         },
         {
-          "index": 3,
-          "compileMilliseconds": 1358.4,
-          "processMilliseconds": 1428.2,
+          "index": 2,
+          "compileMilliseconds": 1352,
+          "processMilliseconds": 1424.1,
           "cacheStatus": "hit",
-          "peakWorkingSetBytes": 895967232,
-          "peakPrivateBytes": 901955584,
-          "osPeakWorkingSetBytes": 898781184,
+          "peakWorkingSetBytes": 959209472,
+          "peakPrivateBytes": 931971072,
+          "osPeakWorkingSetBytes": 963534848,
+          "memorySamples": 3,
+          "maxProcessCount": 4,
+          "documentArtifactCache": {
+            "hits": [],
+            "misses": [
+              "architecture",
+              "electrical",
+              "facade",
+              "kitchen",
+              "plumbing",
+              "structure",
+              "ventilation"
+            ],
+            "schemaVersion": "naru.ifc-document-artifact.1",
+            "status": "enabled"
+          },
+          "warnings": []
+        },
+        {
+          "index": 3,
+          "compileMilliseconds": 1377.8,
+          "processMilliseconds": 1448.8,
+          "cacheStatus": "hit",
+          "peakWorkingSetBytes": 896905216,
+          "peakPrivateBytes": 902971392,
+          "osPeakWorkingSetBytes": 897822720,
           "memorySamples": 2,
           "maxProcessCount": 1,
           "documentArtifactCache": {
@@ -447,13 +447,13 @@
         },
         {
           "index": 4,
-          "compileMilliseconds": 1384.2,
-          "processMilliseconds": 1459.7,
+          "compileMilliseconds": 1358.5,
+          "processMilliseconds": 1429.3,
           "cacheStatus": "hit",
-          "peakWorkingSetBytes": 708472832,
-          "peakPrivateBytes": 899301376,
-          "osPeakWorkingSetBytes": 964186112,
-          "memorySamples": 3,
+          "peakWorkingSetBytes": 929644544,
+          "peakPrivateBytes": 916492288,
+          "osPeakWorkingSetBytes": 933978112,
+          "memorySamples": 2,
           "maxProcessCount": 4,
           "documentArtifactCache": {
             "hits": [],
@@ -473,14 +473,14 @@
         },
         {
           "index": 5,
-          "compileMilliseconds": 1366.5,
-          "processMilliseconds": 1439.3,
+          "compileMilliseconds": 1344.2,
+          "processMilliseconds": 1413.4,
           "cacheStatus": "hit",
-          "peakWorkingSetBytes": 915382272,
-          "peakPrivateBytes": 906534912,
-          "osPeakWorkingSetBytes": 919670784,
+          "peakWorkingSetBytes": 896126976,
+          "peakPrivateBytes": 902324224,
+          "osPeakWorkingSetBytes": 899117056,
           "memorySamples": 2,
-          "maxProcessCount": 4,
+          "maxProcessCount": 1,
           "documentArtifactCache": {
             "hits": [],
             "misses": [
@@ -503,66 +503,66 @@
       "samples": 5,
       "compileMilliseconds": {
         "values": [
-          87659.8,
-          87197.9,
-          87158.7,
-          88804.3,
-          87784.7
+          88920.8,
+          89089,
+          88958.6,
+          88575.3,
+          89065.2
         ],
-        "median": 87659.8,
-        "p95": 88804.3,
-        "minimum": 87158.7,
-        "maximum": 88804.3
+        "median": 88958.6,
+        "p95": 89089,
+        "minimum": 88575.3,
+        "maximum": 89089
       },
       "processMilliseconds": {
         "values": [
-          87855.2,
-          87390.3,
-          87346,
-          88996.2,
-          87971.7
+          89119,
+          89289.1,
+          89166.5,
+          88780.4,
+          89261.4
         ],
-        "median": 87855.2,
-        "p95": 88996.2,
-        "minimum": 87346,
-        "maximum": 88996.2
+        "median": 89166.5,
+        "p95": 89289.1,
+        "minimum": 88780.4,
+        "maximum": 89289.1
       },
       "peakProcessTreeWorkingSetBytes": {
         "values": [
-          3776491520,
-          3777515520,
-          3775647744,
-          3778793472,
-          3709345792
+          3274371072,
+          3298349056,
+          3309453312,
+          3330191360,
+          3296276480
         ],
-        "median": 3776491520,
-        "p95": 3778793472,
-        "minimum": 3709345792,
-        "maximum": 3778793472
+        "median": 3298349056,
+        "p95": 3330191360,
+        "minimum": 3274371072,
+        "maximum": 3330191360
       },
       "summedPeakWorkingSetUpperBoundBytes": {
         "values": [
-          4228247552,
-          4230000640,
-          4228243456,
-          4227473408,
-          4226207744
+          4232642560,
+          4230246400,
+          4228390912,
+          4228784128,
+          4225871872
         ],
-        "median": 4228243456,
-        "p95": 4230000640,
-        "minimum": 4226207744,
-        "maximum": 4230000640
+        "median": 4228784128,
+        "p95": 4232642560,
+        "minimum": 4225871872,
+        "maximum": 4232642560
       },
       "runs": [
         {
           "index": 1,
-          "compileMilliseconds": 87659.8,
-          "processMilliseconds": 87855.2,
+          "compileMilliseconds": 88920.8,
+          "processMilliseconds": 89119,
           "cacheStatus": "miss",
-          "peakWorkingSetBytes": 3776491520,
-          "peakPrivateBytes": 4534677504,
-          "osPeakWorkingSetBytes": 4228247552,
-          "memorySamples": 152,
+          "peakWorkingSetBytes": 3274371072,
+          "peakPrivateBytes": 3758227456,
+          "osPeakWorkingSetBytes": 4232642560,
+          "memorySamples": 153,
           "maxProcessCount": 4,
           "documentArtifactCache": {
             "hits": [
@@ -585,13 +585,13 @@
         },
         {
           "index": 2,
-          "compileMilliseconds": 87197.9,
-          "processMilliseconds": 87390.3,
+          "compileMilliseconds": 89089,
+          "processMilliseconds": 89289.1,
           "cacheStatus": "miss",
-          "peakWorkingSetBytes": 3777515520,
-          "peakPrivateBytes": 4536070144,
-          "osPeakWorkingSetBytes": 4230000640,
-          "memorySamples": 150,
+          "peakWorkingSetBytes": 3298349056,
+          "peakPrivateBytes": 3782270976,
+          "osPeakWorkingSetBytes": 4230246400,
+          "memorySamples": 154,
           "maxProcessCount": 4,
           "documentArtifactCache": {
             "hits": [
@@ -614,13 +614,13 @@
         },
         {
           "index": 3,
-          "compileMilliseconds": 87158.7,
-          "processMilliseconds": 87346,
+          "compileMilliseconds": 88958.6,
+          "processMilliseconds": 89166.5,
           "cacheStatus": "miss",
-          "peakWorkingSetBytes": 3775647744,
-          "peakPrivateBytes": 4533915648,
-          "osPeakWorkingSetBytes": 4228243456,
-          "memorySamples": 151,
+          "peakWorkingSetBytes": 3309453312,
+          "peakPrivateBytes": 3793596416,
+          "osPeakWorkingSetBytes": 4228390912,
+          "memorySamples": 154,
           "maxProcessCount": 4,
           "documentArtifactCache": {
             "hits": [
@@ -643,13 +643,13 @@
         },
         {
           "index": 4,
-          "compileMilliseconds": 88804.3,
-          "processMilliseconds": 88996.2,
+          "compileMilliseconds": 88575.3,
+          "processMilliseconds": 88780.4,
           "cacheStatus": "miss",
-          "peakWorkingSetBytes": 3778793472,
-          "peakPrivateBytes": 4537368576,
-          "osPeakWorkingSetBytes": 4227473408,
-          "memorySamples": 152,
+          "peakWorkingSetBytes": 3330191360,
+          "peakPrivateBytes": 3813675008,
+          "osPeakWorkingSetBytes": 4228784128,
+          "memorySamples": 153,
           "maxProcessCount": 4,
           "documentArtifactCache": {
             "hits": [
@@ -672,13 +672,13 @@
         },
         {
           "index": 5,
-          "compileMilliseconds": 87784.7,
-          "processMilliseconds": 87971.7,
+          "compileMilliseconds": 89065.2,
+          "processMilliseconds": 89261.4,
           "cacheStatus": "miss",
-          "peakWorkingSetBytes": 3709345792,
-          "peakPrivateBytes": 4536143872,
-          "osPeakWorkingSetBytes": 4226207744,
-          "memorySamples": 151,
+          "peakWorkingSetBytes": 3296276480,
+          "peakPrivateBytes": 3782586368,
+          "osPeakWorkingSetBytes": 4225871872,
+          "memorySamples": 154,
           "maxProcessCount": 4,
           "documentArtifactCache": {
             "hits": [
@@ -861,26 +861,25 @@
       "minimum": 1000,
       "maximum": 5000
     },
-    "compileMedianMs": 1366.1,
-    "compileP95Ms": 1384.2,
-    "wholeProcessMedianMs": 1439.3,
-    "wholeProcessP95Ms": 1459.7,
+    "compileMedianMs": 1358.5,
+    "compileP95Ms": 1377.8,
+    "wholeProcessMedianMs": 1429.3,
+    "wholeProcessP95Ms": 1448.8,
     "meetsCompile": true,
     "meetsWholeProcess": true,
     "note": "Measured against the upper bound of the target; a warm reopen faster than the lower bound passes. meetsWholeProcess includes node startup and module loading, which a user reopening a model also pays."
   },
   "defaultFormattingProbe": {
     "compactJson": false,
-    "outcome": "failed",
-    "compileMilliseconds": 376070.6,
-    "processMilliseconds": 376362,
-    "peakWorkingSetBytes": 5097619456,
-    "failure": {
-      "name": "RangeError",
-      "message": "Invalid string length",
-      "stack": "RangeError: Invalid string length\n    at JSON.stringify (<anonymous>)\n    at compileSceneToGltf (<repository>/packages/compiler/dist/gltf.js:1103:26)\n    at compileIfcFederation (<repository>/packages/compiler/dist/ifc-federation.js:353:26)\n    at async <repository>/scripts/lib/ifc-cache-sample.mjs:58:12"
-    },
-    "note": "One run of the same federation with the compiler's default pretty-printed glTF document, taken before the samples. It is reported as measured; a host where it compiles would record outcome: compiled."
+    "outcome": "compiled",
+    "compileMilliseconds": 383009.9,
+    "processMilliseconds": 383202,
+    "peakWorkingSetBytes": 5098733568,
+    "documentBytes": 545470166,
+    "maximumStringLength": 536870888,
+    "packageDigest": "67675e2aead37e90e1cfb06a1fbc2aea8fb0049bf53ea8d434efe52d54979d55",
+    "failure": null,
+    "note": "One run of the same federation with the compiler's default pretty-printed glTF document, taken before the samples. The document is written as a stream rather than built as one string (ADR-0016), so a result larger than the runtime's maximum string length is expected to compile; a host where it still fails would record outcome: failed with the RangeError."
   },
   "committedRecordComparison": {
     "record": "artifacts/ifc/sixty5",

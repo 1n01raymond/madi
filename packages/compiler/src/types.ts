@@ -1,5 +1,7 @@
 import type { ValidationResult } from "@naru3d/scene-ir";
 
+import type { StreamedJsonDocument } from "./json-document.js";
+
 export const experimentalGltfProfile = "madi.experimental.gltf.1";
 export const compilerEvidenceSchema = "madi.phase1.compiler-report.1";
 
@@ -154,7 +156,11 @@ export interface CompilerBuildReport {
 
 export interface CompiledGltfPackage {
   readonly document: GltfDocument;
-  readonly json: string;
+  /**
+   * The serialized glTF document. Streamed rather than held as a string: a
+   * real-large federation exceeds the runtime's maximum string length.
+   */
+  readonly json: StreamedJsonDocument;
   readonly binary: Uint8Array;
   readonly coarseBinary?: Uint8Array;
   /** Optional `naru.spatial-demand-index.1` derived-cache sidecar. */

@@ -1,7 +1,30 @@
+import { closeSync, openSync, writeSync } from "node:fs";
 import { mkdir, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 
+import type { StreamedJsonDocument } from "./json-document.js";
 import type { CompiledGltfPackage } from "./types.js";
+
+/**
+ * Writes a streamed document straight to the file, one chunk at a time.
+ *
+ * Synchronous on purpose: the writer hands over chunks synchronously, so
+ * queueing them for an asynchronous write would rebuild in memory the exact
+ * whole-document copy that streaming exists to avoid.
+ */
+function writeStreamedDocument(path: string, document: StreamedJsonDocument): void {
+  const file = openSync(path, "w");
+  try {
+    document.write((chunk) => {
+      let written = 0;
+      while (written < chunk.byteLength) {
+        written += writeSync(file, chunk, written, chunk.byteLength - written);
+      }
+    });
+  } finally {
+    closeSync(file);
+  }
+}
 
 export async function writeCompiledPackage(
   compiled: CompiledGltfPackage,
@@ -10,8 +33,8 @@ export async function writeCompiledPackage(
 ): Promise<string> {
   const outputDirectory = resolve(outputDirectoryArgument);
   await mkdir(outputDirectory, { recursive: true });
+  writeStreamedDocument(resolve(outputDirectory, "scene.gltf"), compiled.json);
   const writes: Promise<void>[] = [
-    writeFile(resolve(outputDirectory, "scene.gltf"), compiled.json, "utf8"),
     writeFile(resolve(outputDirectory, compiled.report.options.binaryUri), compiled.binary),
     writeFile(
       resolve(outputDirectory, "build-report.json"),

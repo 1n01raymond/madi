@@ -62,9 +62,10 @@ remains byte-identical when the flag is absent. Digital Hub and sixty5 offline
 packing records now pass, while localized headed traces remain pending, so
 ADR-0008 remains Proposed. Current explicit-edge sixty5 packages also pass
 `--compact-json`: it removes insignificant `scene.gltf` whitespace and records
-`jsonFormatting: "compact"` in the build report, avoiding V8's single-string
-limit without changing the parsed glTF document. Pretty output remains the
-default and historical digests remain unchanged.
+`jsonFormatting: "compact"` in the build report without changing the parsed glTF
+document. Pretty output remains the default at every size -- the document is
+written as a stream, so it is not bounded by the runtime's maximum string length
+-- and historical digests remain unchanged.
 Its expanded Scene IR is temporary and is deleted after the package passes
 validation. `phase1:compile:evidence` retains the historical small Scene IR
 regression path without coarse output. The evidence check validates both plus the
@@ -99,11 +100,13 @@ corrupted-entry evidence on the pinned PyGamer STEP fixture and the
 four-document Digital Hub federation closes the ADR-0009 acceptance gate
 ([record](../../artifacts/cache/README.md), `pnpm cache:check`). At real-large
 scale, five fresh-process samples per cache state on the 839.9 MB sixty5
-federation median 379.0 s cold, 1.37 s warm, and 87.7 s for a corrupt-entry
+federation median 381.4 s cold, 1.36 s warm, and 89.0 s for a corrupt-entry
 fallback, all fifteen producing the same package byte for byte
 ([record](../../artifacts/cache/sixty5/README.md), `pnpm cache:sixty5:check`);
-that record also shows why `--compact-json` is currently mandatory there, since
-the default pretty-printed document exceeds V8's maximum string length. IFC compilation
+that record also compiles the same federation once under the default
+pretty-printed formatting, producing a 545,470,166 B document against the
+runtime's 536,870,888-byte maximum string length, which is possible only because
+`scene.gltf` is written as a stream. IFC compilation
 also emits `naru.ifc-incremental-dependency-index.1`, and whole-package cache
 hits restore it byte-for-byte. That index and its changed/deleted/renamed plus
 reconciliation tests are the correctness prerequisite for partial rebuild. On

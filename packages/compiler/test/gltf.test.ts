@@ -128,7 +128,7 @@ describe("Phase 1 glTF compiler slice", () => {
     const first = await compileEvidence();
     const second = await compileEvidence();
 
-    expect(second.json).toBe(first.json);
+    expect(second.json.sha256).toBe(first.json.sha256);
     expect(second.binary).toEqual(first.binary);
     expect(second.report).toEqual(first.report);
   });
@@ -197,9 +197,9 @@ describe("Phase 1 glTF compiler slice", () => {
     const pretty = await compileEvidence({ coarseBounds: true });
     const compact = await compileEvidence({ coarseBounds: true, compactJson: true });
 
-    expect(JSON.parse(compact.json)).toEqual(JSON.parse(pretty.json));
-    expect(compact.json.length).toBeLessThan(pretty.json.length);
-    expect(compact.json).not.toContain("\n  \"");
+    expect(JSON.parse(compact.json.text())).toEqual(JSON.parse(pretty.json.text()));
+    expect(compact.json.bytes).toBeLessThan(pretty.json.bytes);
+    expect(compact.json.text()).not.toContain("\n  \"");
     expect(compact.report.options.jsonFormatting).toBe("compact");
     expect(pretty.report.options.jsonFormatting).toBeUndefined();
   });
@@ -207,7 +207,7 @@ describe("Phase 1 glTF compiler slice", () => {
   it("can omit only non-semantic glTF resource names", async () => {
     const named = await compileEvidence({ coarseBounds: true });
     const unnamed = await compileEvidence({ coarseBounds: true, omitResourceNames: true });
-    const expectedDocument = JSON.parse(named.json) as {
+    const expectedDocument = JSON.parse(named.json.text()) as {
       meshes: { name?: string }[];
       bufferViews: { name?: string }[];
       accessors: { name?: string }[];
@@ -240,7 +240,7 @@ describe("Phase 1 glTF compiler slice", () => {
 
   it("validates unnamed POSITION accessor bounds from primitive references", async () => {
     const unnamed = await compileEvidence({ omitResourceNames: true });
-    const corrupted = JSON.parse(unnamed.json) as typeof unnamed.document;
+    const corrupted = JSON.parse(unnamed.json.text()) as typeof unnamed.document;
     const positionAccessorIndex = corrupted.meshes[0]?.primitives[0]?.attributes.POSITION;
     if (positionAccessorIndex === undefined) {
       throw new TypeError("Compiler fixture is missing a POSITION accessor.");
@@ -296,7 +296,7 @@ describe("Phase 1 glTF compiler slice", () => {
     });
     expect(first.report.output.packageDigest).toBe(
       createHash("sha256")
-        .update(first.json)
+        .update(first.json.text())
         .update(first.binary)
         .update(first.coarseBinary as Uint8Array)
         .update(spatial)
@@ -406,12 +406,12 @@ describe("Phase 1 glTF compiler slice", () => {
     // The synthetic prototypes intentionally share byte-identical geometry;
     // chunk ownership changes even though permuting equal byte blocks does not.
     expect(packed.binary.byteLength).toBe(baseline.binary.byteLength);
-    expect(packed.json).not.toBe(baseline.json);
+    expect(packed.json.sha256).not.toBe(baseline.json.sha256);
     expect(packed.coarseBinary).toEqual(baseline.coarseBinary);
-    expect(repeated.json).toBe(packed.json);
+    expect(repeated.json.sha256).toBe(packed.json.sha256);
     expect(repeated.binary).toEqual(packed.binary);
     expect(repeated.spatialBinary).toEqual(packed.spatialBinary);
-    expect(permuted.json).toBe(packed.json);
+    expect(permuted.json.sha256).toBe(packed.json.sha256);
     expect(permuted.binary).toEqual(packed.binary);
     expect(permuted.spatialBinary).toEqual(packed.spatialBinary);
     expect(validateCompiledGltf(packed.document, [
@@ -439,7 +439,7 @@ describe("Phase 1 glTF compiler slice", () => {
       readFile(new URL("build-report.json", compiledArtifactUrl), "utf8").then(JSON.parse),
     ]);
 
-    expect(compiled.json).toBe(json);
+    expect(compiled.json.text()).toBe(json);
     expect(Buffer.from(compiled.binary)).toEqual(binary);
     expect(compiled.report).toEqual(report);
   });
@@ -654,7 +654,7 @@ describe("compiled-package property sidecar", () => {
     expect(second.report).toEqual(first.report);
     expect(first.report.output.packageDigest).toBe(
       createHash("sha256")
-        .update(first.json)
+        .update(first.json.text())
         .update(first.binary)
         .update(new TextEncoder().encode(first.propertiesJson as string))
         .update(columns)
@@ -840,7 +840,7 @@ describe("optional node size policies", () => {
     });
     expect((kept.document.extras?.madi as Record<string, unknown>).nodeIdentityDerivation)
       .toBeUndefined();
-    expect(elided.json.length).toBeLessThan(kept.json.length);
+    expect(elided.json.bytes).toBeLessThan(kept.json.bytes);
     expect(elided.binary).toEqual(kept.binary);
     expect(elided.report.options.nodeIdentifiers).toBe("derived-elided");
     expect(kept.report.options.nodeIdentifiers).toBeUndefined();
@@ -873,7 +873,7 @@ describe("optional node size policies", () => {
     // The source-frame root keeps its matrix: that matrix is the declaration.
     expect(omitted.document.nodes[0]?.matrix).toEqual(kept.document.nodes[0]?.matrix);
     expect(omitted.binary).toEqual(kept.binary);
-    expect(omitted.json.length).toBeLessThan(kept.json.length);
+    expect(omitted.json.bytes).toBeLessThan(kept.json.bytes);
     expect(omitted.report.options.nodeTransforms).toBe("default-omitted");
     expect(kept.report.options.nodeTransforms).toBeUndefined();
     expect(validateCompiledGltf(omitted.document, omitted.binary)).toEqual({ ok: true, issues: [] });
@@ -882,9 +882,11 @@ describe("optional node size policies", () => {
   it("leaves default output byte-identical and repeats itself exactly", () => {
     const options = { elideDerivedIdentifiers: true, omitDefaultNodeTransforms: true } as const;
 
-    expect(compileSceneToGltf(scene).json).toBe(compileSceneToGltf(scene).json);
-    expect(compileSceneToGltf(scene, options).json).toBe(compileSceneToGltf(scene, options).json);
-    expect(compileSceneToGltf(scene, {}).json).toBe(compileSceneToGltf(scene).json);
+    expect(compileSceneToGltf(scene).json.sha256).toBe(compileSceneToGltf(scene).json.sha256);
+    expect(compileSceneToGltf(scene, options).json.sha256).toBe(
+      compileSceneToGltf(scene, options).json.sha256,
+    );
+    expect(compileSceneToGltf(scene, {}).json.sha256).toBe(compileSceneToGltf(scene).json.sha256);
   });
 
   it("declares no rule when nothing in the scene is derivable", () => {

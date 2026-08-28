@@ -23,8 +23,8 @@ compile-affecting identities are unchanged.
 These are product SLOs, not claims about current evidence. Cold and warm results
 must be reported separately under [the benchmark rules](BENCHMARKS.md). The
 current-toolchain real-large boundary is five fresh-process sixty5 imports
-per cache state on one disclosed Windows host: cold median 379.0 s, warm
-median 1.37 s, corrupt-entry fallback median 87.7 s
+per cache state on one disclosed Windows host: cold median 381.4 s, warm
+median 1.36 s, corrupt-entry fallback median 89.0 s
 ([evidence](../artifacts/cache/sixty5/README.md)). The older 302-second
 end-to-end sixty5 split.1 diagnostic on a warm OS file cache
 ([evidence](../artifacts/ifc/sixty5/README.md)) is not that distribution and
@@ -36,7 +36,7 @@ evidence proves compile-level warm reopens on the pinned mid-size fixtures
 (0.5 s for the Digital Hub federation, 1.7 s for the PyGamer STEP fixture —
 [record](../artifacts/cache/README.md)), and the sixty5 distribution meets the
 1–5 s reopen SLO at real-large scale on the harder whole-process reading:
-1,439 ms including `node` startup, 277× faster than the cold import that
+1,429 ms including `node` startup, 281× faster than the cold import that
 published the entry.
 
 ## 2. User-visible lifecycle
@@ -188,8 +188,11 @@ corrupted-entry recompile ([record](../artifacts/cache/README.md), validated by
 `pnpm cache:check`). The real-large product gate is closed on one host class
 by five fresh-process samples per cache state, with cache footprint and
 process-tree peak memory ([record](../artifacts/cache/sixty5/README.md),
-validated by `pnpm cache:sixty5:check`). That record also fixes a current
-limit: explicit IFC boundary edges push the sixty5 glTF document past V8's
-maximum string length, so a default-formatting import of that federation
-cannot produce a package at all and `--compact-json` is mandatory at
-real-large scale until the document is written as a stream.
+validated by `pnpm cache:sixty5:check`). That record also measures the largest
+document the compiler produces: explicit IFC boundary edges push the sixty5
+glTF document past the runtime's maximum string length, and because the
+compiler writes it as a stream rather than building it as one string
+(accepted [ADR-0016](adr/0016-streamed-gltf-document.md)) that federation now
+imports under the default formatting, at 545,470,166 B against a
+536,870,888-byte limit. `--compact-json` remains an option that removes
+insignificant whitespace, not a requirement for importing a large model.

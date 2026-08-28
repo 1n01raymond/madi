@@ -38,8 +38,8 @@ tracked as its own slice.
 
 These are mid-size single runs. The real-large distribution lives beside them
 in [`sixty5/`](sixty5/README.md): five fresh-process samples per cache state on
-the seven-document, 839.9 MB sixty5 federation — cold median 379.0 s, warm
-median 1.37 s, corrupt-entry median 87.7 s — with cache footprint,
+the seven-document, 839.9 MB sixty5 federation — cold median 381.4 s, warm
+median 1.36 s, corrupt-entry median 89.0 s — with cache footprint,
 process-tree peak memory, and the 1–5 s unchanged-reopen verdict.
 
 Adapter identities are embedded in the record (`naru.occt-adapter-identity.1`:

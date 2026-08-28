@@ -47,23 +47,23 @@ that charges peaks which never coincided.
 
 Host: Windows x64, Ryzen 7 9800X3D (16 threads), 33.5 GB RAM, Node 22.14.0,
 IfcOpenShell 0.8.5 / numpy 2.5.2 / Python 3.13.2, `--threads 6`, at commit
-`404a55e`.
+`1aa3b0f` plus the streaming document writer this record re-measures.
 
 | State | Compile median | Compile p95 | Whole process median | Peak process tree (median) | Summed peak upper bound (median) |
 |---|---:|---:|---:|---:|---:|
-| cold | 379.0 s | 382.0 s | 379.2 s | 5.09 GB | 5.94 GB |
-| warm | 1.37 s | 1.38 s | 1.44 s | 0.90 GB | 0.92 GB |
-| corrupt-entry | 87.7 s | 88.8 s | 87.9 s | 3.78 GB | 4.23 GB |
+| cold | 381.4 s | 385.3 s | 381.6 s | 5.08 GB | 5.94 GB |
+| warm | 1.36 s | 1.38 s | 1.43 s | 0.93 GB | 0.93 GB |
+| corrupt-entry | 89.0 s | 89.1 s | 89.2 s | 3.30 GB | 4.23 GB |
 
 **The 1–5 s unchanged-reopen target passes**, and it passes on the harder of the
-two readings: 1,366 ms of compiler time, 1,439 ms of whole-process time
+two readings: 1,359 ms of compiler time, 1,429 ms of whole-process time
 including `node` startup and module loading, which a user reopening a model also
-pays. A warm reopen is 277× faster than the cold import that produced it.
+pays. A warm reopen is 281× faster than the cold import that produced it.
 
 Because the three states differ by exactly one stage each, their medians
 decompose the cold import by difference: adapter extraction of the seven
-documents accounts for 291.3 s, packaging for 87.7 s, and restoring a published
-entry for 1.37 s.
+documents accounts for 292.4 s, packaging for 89.0 s, and restoring a published
+entry for 1.36 s.
 
 A corrupt-entry fallback is **not** a cold compile, and the record says why: only
 the package entry was damaged, so all seven documents are still restored from the
@@ -109,15 +109,26 @@ directory after the run, not from the validated JSON.
 
 ## Two findings this record carries
 
-**The compiler's default glTF formatting cannot package this federation at
-all.** Now that explicit IFC boundary edges are emitted by default (PR #42), the
-pretty-printed document exceeds V8's maximum string length, and
-`JSON.stringify(document, null, 2)` throws `RangeError: Invalid string length`
-after 376.1 s of completed work. Every sample here therefore compiles with
-`compactJson: true`, and the failure is recorded as a first-class
-`defaultFormattingProbe` taken before the samples rather than worked around
-silently. A streaming document writer is the fix; until it exists, real-large
-IFC packaging requires `--compact-json`.
+**The largest document the compiler produces is larger than a JavaScript
+string.** Now that explicit IFC boundary edges are emitted by default (PR #42),
+this federation's default pretty-printed `scene.gltf` measures
+**545,470,166 bytes** against the runtime's **536,870,888-byte** maximum string
+length — 8,599,278 bytes past it. The `defaultFormattingProbe` compiles exactly
+that document once, before the samples, and records both numbers side by side;
+it produced package
+`67675e2aead37e90e1cfb06a1fbc2aea8fb0049bf53ea8d434efe52d54979d55` in 383.0 s at
+a 5.10 GB peak, within the spread of the compact cold samples beside it.
+
+The previous recording of this same probe is the reason it exists: it caught
+`JSON.stringify(document, null, 2)` throwing `RangeError: Invalid string length`
+after 376.1 s of completed work, which made `--compact-json` mandatory for this
+model. The compiler now writes the document as a stream of bounded chunks
+instead of building it as one string (accepted
+[ADR-0016](../../../docs/adr/0016-streamed-gltf-document.md)), so the default
+formatting compiles. The samples still use `compactJson: true` — that is what the
+committed sixty5 packages were compiled with, so their digests stay comparable —
+and `3206ea40…` below is byte-identical to the digest the previous recording
+published, which is the evidence that streaming changed no bytes.
 
 **This host does not reproduce the committed sixty5 package.**
 `artifacts/ifc/sixty5/` records `a2d6c72a…`, compiled before explicit edges
