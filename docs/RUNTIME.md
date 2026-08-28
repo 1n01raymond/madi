@@ -507,7 +507,9 @@ hierarchy-before-binary assertion, viewport, pick coordinate, expected
 occurrence/source mapping, and console-error policy. See
 `artifacts/browser-matrix` for exact versions, adapter disclosure, screenshots,
 and hashes. A separate real-Safari probe, `pnpm safari:compatibility`, uses the
-macOS-provided SafariDriver. The reviewed Safari 18.6 default-settings run loads
-all 87 hierarchy records but does not expose `navigator.gpu`, then reaches the
-expected unsupported-browser diagnostic; it is capability/failure evidence,
-not rendering conformance.
+macOS-provided SafariDriver. The reviewed Safari 26.6.1 default-settings run on
+macOS Sequoia loads all 87 hierarchy records but does not expose
+`navigator.gpu` — Apple enables WebGPU by default only in Safari 26 on
+macOS 26 (Tahoe) and newer OS releases — then reaches the expected
+unsupported-browser diagnostic; it is capability/failure evidence, not
+rendering conformance.

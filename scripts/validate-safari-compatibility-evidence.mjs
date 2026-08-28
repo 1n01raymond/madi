@@ -20,7 +20,7 @@ function assertNonEmptyString(value, label) {
 }
 
 assert(
-  evidence.schemaVersion === "madi.safari-compatibility.1",
+  evidence.schemaVersion === "naru.safari-compatibility.2",
   "Unsupported Safari compatibility evidence schema.",
 );
 assert(evidence.mode === "default-browser-settings", "Safari evidence must use default settings.");
@@ -28,7 +28,7 @@ assert(evidence.host?.platform === "darwin", "Safari evidence must be recorded o
 assert(evidence.host?.architecture === "arm64", "Expected the Apple Silicon evidence host.");
 assert(evidence.browser?.name === "Safari", "Expected real Safari, not Playwright WebKit.");
 assert(evidence.browser?.headless === false, "Safari evidence must be a headed record.");
-assertNonEmptyString(evidence.browser?.version, "browser.version");
+assert(evidence.browser?.version === "26.6.1", "Reviewed Safari version changed.");
 assert(evidence.browser?.platformName === "macOS", "Safari platform name changed.");
 assertNonEmptyString(evidence.browser?.platformVersion, "browser.platformVersion");
 assertNonEmptyString(evidence.browser?.platformBuildVersion, "browser.platformBuildVersion");
@@ -40,15 +40,24 @@ assert(
 assert(evidence.outcome === "webgpu-unavailable", "Reviewed Safari outcome changed.");
 assert(evidence.observed?.webGpuAvailable === false, "Reviewed Safari unexpectedly exposed WebGPU.");
 assert(evidence.observed?.hierarchyReady === true, "Safari did not load hierarchy first.");
-assert(evidence.observed?.hierarchyRecords === 87, "Safari hierarchy record count changed.");
-assert(evidence.observed?.brandLoaded === true, "Safari did not load the MADI brand asset.");
+assert(
+  evidence.observed?.hierarchyResult === "87 occurrence records ready",
+  "Safari hierarchy record count changed.",
+);
+assert(
+  Number.isInteger(evidence.observed?.virtualizedHierarchyRows) &&
+    evidence.observed.virtualizedHierarchyRows >= 1 &&
+    evidence.observed.virtualizedHierarchyRows < 87,
+  "Safari hierarchy list must stay virtualized below the 87-record total.",
+);
+assert(evidence.observed?.brandLoaded === true, "Safari did not load the NARU brand asset.");
 assert(evidence.observed?.state === "error", "Safari capability state must be error.");
 assert(
   evidence.observed?.status === "WebGPU is unavailable in this browser.",
   "Safari capability diagnostic changed.",
 );
 assert(
-  evidence.observed?.title === "MADI · Compiled glTF to WebGPU",
+  evidence.observed?.title === "NARU · Compiled glTF to WebGPU",
   "Safari application title changed.",
 );
 assert(Array.isArray(evidence.limitations) && evidence.limitations.length === 2, "Expected limitations.");

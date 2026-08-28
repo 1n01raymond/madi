@@ -144,7 +144,8 @@ try {
       status: document.querySelector("#status")?.textContent ?? null,
       state: document.querySelector("#status")?.getAttribute("data-state") ?? null,
       hierarchyReady: document.documentElement.dataset.hierarchyReady === "true",
-      hierarchyRecords: document.querySelectorAll("#hierarchy li").length,
+      hierarchyResult: document.querySelector("#hierarchy-result")?.textContent ?? null,
+      virtualizedHierarchyRows: document.querySelectorAll("#hierarchy li").length,
       prototypeCount: document.querySelector("#prototype-count")?.textContent ?? null,
       occurrenceCount: document.querySelector("#occurrence-count")?.textContent ?? null,
       brandLoaded: (() => {
@@ -154,7 +155,13 @@ try {
     };`,
   );
 
-  if (!observed.hierarchyReady || observed.hierarchyRecords !== 87 || !observed.brandLoaded) {
+  if (
+    !observed.hierarchyReady ||
+    observed.hierarchyResult !== "87 occurrence records ready" ||
+    observed.virtualizedHierarchyRows < 1 ||
+    observed.virtualizedHierarchyRows > 87 ||
+    !observed.brandLoaded
+  ) {
     throw new Error(`Safari did not load the expected NARU shell and hierarchy: ${JSON.stringify(observed)}.`);
   }
   const outcome = observed.webGpuAvailable ? "webgpu-ready" : "webgpu-unavailable";
@@ -188,7 +195,7 @@ try {
   await writeFile(resolve(outputDirectory, screenshotName), screenshot);
 
   const evidence = {
-    schemaVersion: "madi.safari-compatibility.1",
+    schemaVersion: "naru.safari-compatibility.2",
     capturedAt: new Date().toISOString(),
     mode: "default-browser-settings",
     host: { platform: process.platform, architecture: process.arch },
@@ -223,7 +230,7 @@ try {
   );
   console.log(
     `[safari-compatibility] Safari ${evidence.browser.version}: ${outcome}; ` +
-      `${observed.hierarchyRecords} hierarchy records`,
+      `${observed.hierarchyResult} (${observed.virtualizedHierarchyRows} virtualized rows)`,
   );
   console.log(`[safari-compatibility] evidence: ${outputDirectory}`);
 } finally {
