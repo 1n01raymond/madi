@@ -1,0 +1,289 @@
+{
+  "schemaVersion": "naru.demand-priority-evidence.1",
+  "capturedAt": "2026-08-28T01:36:57.332Z",
+  "mode": "headed-budget-bound-policy-comparison",
+  "browser": {
+    "id": "chrome",
+    "engine": "Blink",
+    "version": "151.0.7922.139",
+    "headless": false,
+    "viewport": {
+      "width": 1320,
+      "height": 1000
+    }
+  },
+  "host": {
+    "platform": "win32",
+    "architecture": "x64"
+  },
+  "capture": {
+    "residencyMiB": 64,
+    "referenceResidencyMiB": 192,
+    "cameraMove": {
+      "wheelDelta": -5000,
+      "panX": 400,
+      "panY": -300
+    }
+  },
+  "source": {
+    "buildReport": "output/ifc/sixty5-spatial/spatial-leaf-anchor/build-report.json",
+    "packageDigest": "1fdbb5a88ad7b44dd7c616c2d23475fc86f6108eb34978be9afa1ebd958f1636",
+    "resources": [
+      {
+        "path": "scene.gltf",
+        "mediaType": "model/gltf+json",
+        "bytes": 445520755,
+        "sha256": "ae40c818ed5704e46651c476c06bbbe06ab3e0f4a1ae6f692904b0d5d5dfcc9e"
+      },
+      {
+        "path": "scene.bin",
+        "mediaType": "application/octet-stream",
+        "bytes": 120707064,
+        "sha256": "95fd96dac3e74b5b69872d39811605647d23ebbca7a9f4911b5b4221e0ccdffb"
+      },
+      {
+        "path": "coarse.bin",
+        "mediaType": "application/octet-stream",
+        "bytes": 38700720,
+        "sha256": "258e085d4f3d0b380bb89c3596b2e3bfc4a43177afe9fc7e92d6e1046db9031b"
+      },
+      {
+        "path": "spatial.bin",
+        "mediaType": "application/octet-stream",
+        "bytes": 1002720,
+        "sha256": "d42d000bcc322d7c80a8900e57b5488656241cf34263dc32174a6b9bee5bbac1"
+      },
+      {
+        "path": "properties.json",
+        "mediaType": "application/json",
+        "bytes": 17705010,
+        "sha256": "dc3394714b73d322dcfe6bad7ce780dbdd18cb547e5eaf45a26c9e66de932312"
+      },
+      {
+        "path": "properties.bin",
+        "mediaType": "application/octet-stream",
+        "bytes": 31179862,
+        "sha256": "dad8d98909c738df930569c4b907c29e64cda2b65d84917936c1c4d86d3dd8c4"
+      }
+    ],
+    "servedFrom": "Vite dev static hosting with HTTP Range support"
+  },
+  "reference": {
+    "name": "reference",
+    "priority": "screen-distance",
+    "residencyMiB": 192,
+    "milestones": {
+      "hierarchyReadyMs": 2311,
+      "coarseFrameMs": 4221,
+      "readyMs": 15686
+    },
+    "schedulerMode": "spatial-bvh-v1",
+    "targetChunkCount": 234,
+    "demandedChunkCount": 152,
+    "residentChunkCount": 234,
+    "residentDecodedBytes": 136659624,
+    "residentGpuBytes": 136846980,
+    "schedulerRequests": 234,
+    "schedulerSkips": 0,
+    "targetRangeResponses": 234,
+    "triangleCount": 4866398,
+    "status": "Compiled glTF ready · 46840 surface batches · 78173 renderable occurrences",
+    "statusState": "ready",
+    "usedJsHeapBytes": 1273115325,
+    "dataset": {
+      "sceneLoading": "false",
+      "sceneSource": "url",
+      "hierarchyMatches": "0",
+      "hierarchyReady": "true",
+      "cameraOrigin": "16.106767305199458,13.130035882717308,-31.190916640874935",
+      "coarseReady": "true",
+      "geometryRepresentation": "target",
+      "targetChunksTotal": "234",
+      "residencyBudgetBytes": "201326592",
+      "targetChunksReady": "234",
+      "targetReady": "true",
+      "targetSchedulerMode": "spatial-bvh-v1",
+      "targetSchedulerDemandPriority": "screen-distance",
+      "spatialNodesTotal": "4095",
+      "spatialLeavesTotal": "2048",
+      "spatialOccurrencesTotal": "78173",
+      "visibilityMode": "all",
+      "visibleOccurrences": "78173",
+      "selectedObjectId": "0",
+      "sectionEnabled": "false",
+      "sectionAxis": "z",
+      "spatialNodesVisited": "889",
+      "spatialLeavesVisible": "184",
+      "spatialOccurrencesTested": "7026",
+      "spatialCandidateChunks": "152",
+      "spatialQueryMilliseconds": "0.32999999821186066",
+      "targetSchedulerChunk": "target:0122:prototype:ifc:plumbing-15382b06d0a6:579120",
+      "targetSchedulerPriority": "233",
+      "targetSchedulerRequests": "234",
+      "residentDecodedBytes": "136659624",
+      "residentGpuBytes": "136846980"
+    },
+    "screenshot": {
+      "path": "reference.png",
+      "bytes": 102822,
+      "sha256": "e80f5a1f997c0d9e88affb453612e0aa3633d78e742aa1df202c5b81faad8314"
+    }
+  },
+  "policies": [
+    {
+      "name": "screen-distance",
+      "priority": "screen-distance",
+      "residencyMiB": 64,
+      "milestones": {
+        "hierarchyReadyMs": 2454,
+        "coarseFrameMs": 4529,
+        "readyMs": 8497
+      },
+      "schedulerMode": "spatial-bvh-v1",
+      "targetChunkCount": 234,
+      "demandedChunkCount": 152,
+      "residentChunkCount": 103,
+      "residentDecodedBytes": 67027692,
+      "residentGpuBytes": 67103956,
+      "schedulerRequests": 127,
+      "schedulerSkips": 534,
+      "targetRangeResponses": 127,
+      "triangleCount": 2178547,
+      "status": "Residency budget reached · 19067 surface batches retained · 78173 renderable occurrences",
+      "statusState": "ready",
+      "usedJsHeapBytes": 1534146369,
+      "dataset": {
+        "sceneLoading": "false",
+        "sceneSource": "url",
+        "hierarchyMatches": "0",
+        "hierarchyReady": "true",
+        "cameraOrigin": "16.106767305199458,13.130035882717308,-31.190916640874935",
+        "coarseReady": "true",
+        "geometryRepresentation": "mixed",
+        "targetChunksTotal": "234",
+        "residencyBudgetBytes": "67108864",
+        "targetChunksReady": "103",
+        "targetReady": "limited",
+        "targetSchedulerMode": "spatial-bvh-v1",
+        "targetSchedulerDemandPriority": "screen-distance",
+        "spatialNodesTotal": "4095",
+        "spatialLeavesTotal": "2048",
+        "spatialOccurrencesTotal": "78173",
+        "visibilityMode": "all",
+        "visibleOccurrences": "78173",
+        "selectedObjectId": "0",
+        "sectionEnabled": "false",
+        "sectionAxis": "z",
+        "spatialNodesVisited": "889",
+        "spatialLeavesVisible": "184",
+        "spatialOccurrencesTested": "7026",
+        "spatialCandidateChunks": "152",
+        "spatialQueryMilliseconds": "0.2750000059604645",
+        "targetSchedulerChunk": "target:0074:prototype:ifc:architecture-e91ddbbd672b:2827335",
+        "targetSchedulerPriority": "151",
+        "targetSchedulerRequests": "127",
+        "residentDecodedBytes": "67027692",
+        "residentGpuBytes": "67103956",
+        "targetSchedulerSkips": "534",
+        "targetSchedulerSkippedChunk": "target:0074:prototype:ifc:architecture-e91ddbbd672b:2827335",
+        "residencyBudgetReached": "true",
+        "targetSchedulerCancellations": "1",
+        "targetSchedulerCancelledChunk": "target:0157:prototype:ifc:electrical-adb8d5eda2c7:1345267"
+      },
+      "screenshot": {
+        "path": "screen-distance.png",
+        "bytes": 77782,
+        "sha256": "9124cccd383dd10538f4dbb4198dd732f47662006006261bdc4d50b38758f2bb"
+      },
+      "agreementWithReference": {
+        "width": 1179,
+        "height": 521,
+        "pixelCount": 614259,
+        "differingPixels": 215321,
+        "agreementRatio": 0.6494621975420791,
+        "meanChannelDifference": 12.51171519939743
+      }
+    },
+    {
+      "name": "screen-coverage",
+      "priority": "screen-coverage",
+      "residencyMiB": 64,
+      "milestones": {
+        "hierarchyReadyMs": 2361,
+        "coarseFrameMs": 4368,
+        "readyMs": 8425
+      },
+      "schedulerMode": "spatial-bvh-v1",
+      "targetChunkCount": 234,
+      "demandedChunkCount": 152,
+      "residentChunkCount": 104,
+      "residentDecodedBytes": 66886380,
+      "residentGpuBytes": 66962280,
+      "schedulerRequests": 145,
+      "schedulerSkips": 173,
+      "targetRangeResponses": 145,
+      "triangleCount": 2174307,
+      "status": "Residency budget reached · 18976 surface batches retained · 78173 renderable occurrences",
+      "statusState": "ready",
+      "usedJsHeapBytes": 1699565851,
+      "dataset": {
+        "sceneLoading": "false",
+        "sceneSource": "url",
+        "hierarchyMatches": "0",
+        "hierarchyReady": "true",
+        "cameraOrigin": "16.106767305199458,13.130035882717308,-31.190916640874935",
+        "coarseReady": "true",
+        "geometryRepresentation": "mixed",
+        "targetChunksTotal": "234",
+        "residencyBudgetBytes": "67108864",
+        "targetChunksReady": "104",
+        "targetReady": "limited",
+        "targetSchedulerMode": "spatial-bvh-v1",
+        "targetSchedulerDemandPriority": "screen-coverage",
+        "spatialNodesTotal": "4095",
+        "spatialLeavesTotal": "2048",
+        "spatialOccurrencesTotal": "78173",
+        "visibilityMode": "all",
+        "visibleOccurrences": "78173",
+        "selectedObjectId": "0",
+        "sectionEnabled": "false",
+        "sectionAxis": "z",
+        "spatialNodesVisited": "889",
+        "spatialLeavesVisible": "184",
+        "spatialOccurrencesTested": "7026",
+        "spatialCandidateChunks": "152",
+        "spatialQueryMilliseconds": "0.3150000125169754",
+        "targetSchedulerChunk": "target:0144:prototype:ifc:plumbing-15382b06d0a6:3899859",
+        "targetSchedulerPriority": "151",
+        "targetSchedulerRequests": "145",
+        "residentDecodedBytes": "66886380",
+        "residentGpuBytes": "66962280",
+        "targetSchedulerSkips": "173",
+        "targetSchedulerSkippedChunk": "target:0144:prototype:ifc:plumbing-15382b06d0a6:3899859",
+        "residencyBudgetReached": "true",
+        "targetSchedulerCancellations": "4",
+        "targetSchedulerCancelledChunk": "target:0093:prototype:ifc:plumbing-15382b06d0a6:3658778"
+      },
+      "screenshot": {
+        "path": "screen-coverage.png",
+        "bytes": 103517,
+        "sha256": "3f7cc7c0cdc4ab6311542942993cee1e158f52e75c6f8b8c14f22e8e2261c290"
+      },
+      "agreementWithReference": {
+        "width": 1179,
+        "height": 521,
+        "pixelCount": 614259,
+        "differingPixels": 5416,
+        "agreementRatio": 0.9911828723714264,
+        "meanChannelDifference": 0.5006297560692368
+      }
+    }
+  ],
+  "comparison": {
+    "residentChunkDelta": 1,
+    "triangleDelta": -4240,
+    "differingPixelDelta": -209905,
+    "agreementRatioDelta": 0.3417206748293473
+  },
+  "consoleIssues": []
+}

@@ -486,6 +486,21 @@ coarse frame unmoved at 4.213-4.388 s
 nested-view ADR-0005 cross-check are still pending, so ADR-0008 remains
 Proposed.
 
+The scheduler orders that demand before the budget cuts it off. The default
+policy ranks a visible leaf by the squared distance from the view centre to its
+projected centre; `?demandPriority=screen-coverage` instead ranks by the
+clipped normalized-device area the leaf's bounds project to, aggregated per
+chunk as a maximum, with the distance rank as the tiebreak so the ordering
+stays total and deterministic. Coverage is a ranking signal, not a measurement:
+it prices an axis-aligned bound, attributes a leaf's area to every chunk that
+leaf references, and gives any bound straddling the eye plane the whole view.
+Both policies were recorded against a 192 MiB reference render of the same pose
+at a 64 MiB budget: on a close view area ordering agrees with that reference in
+99.12% of pixels against 64.95%, and on a mid view it loses, 93.86% against
+96.31% (`artifacts/spatial-demand/sixty5-demand-priority/`). Area ordering is
+therefore opt-in and the default ordering is unchanged; a demand cost that
+blends the two is unimplemented.
+
 The reproducible browser smoke command is `pnpm browser:matrix`. Its committed
 Phase 1 run covers Chrome/Blink and Firefox/Gecko with the same compiled package,
 hierarchy-before-binary assertion, viewport, pick coordinate, expected

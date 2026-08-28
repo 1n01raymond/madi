@@ -126,8 +126,14 @@ chunks against 42 of 66 under leaf-anchor ordering
 the budget binds, records 184/2,048 leaves, 7,026/78,173 occurrences, and 209 of
 234 demanded chunks against 152 under leaf-anchor ordering, inside the budget
 and without moving the first coarse frame
-(`artifacts/spatial-demand/sixty5-localized/`). A non-Blink localized repeat,
-screen-space policy, and persistent cache tiers remain pending. The session Worker now also prepares
+(`artifacts/spatial-demand/sixty5-localized/`). An opt-in screen-space demand
+ordering is now recorded against an unbudgeted reference render: it wins
+decisively on a close view (99.12% pixel agreement against 64.95%) and loses on
+a mid view (93.86% against 96.31%), so it ships behind
+`?demandPriority=screen-coverage` with the default ordering unchanged
+(`artifacts/spatial-demand/sixty5-demand-priority/`). A non-Blink localized
+repeat, a view-independent demand cost, and persistent cache tiers remain
+pending. The session Worker now also prepares
 active float64 transforms and direct chunk occurrence tables once, so target
 Range decodes no longer traverse the document node graph; transferred result
 buffers remain isolated from that prepared state. The compiler also has an
@@ -194,8 +200,10 @@ smoke-checks the live app, package resources, and HTTP Range delivery.
   in `artifacts/cache/`, ADR-0009 Accepted; per-discipline rebuild and shared
   reuse pending);
 - view-prioritized scheduling and cancellation of obsolete camera work
-  (coarse-bounds fallback and optional spatial-demand policy implemented;
-  focused browser evidence passed, real-model and screen-space policy pending);
+  (coarse-bounds fallback, optional spatial-demand policy, and an opt-in
+  screen-coverage demand ordering implemented; focused browser, real-model
+  localized, and demand-ordering evidence passed, a view-independent demand
+  cost pending);
 - dynamic memory budgets and persistent cache tiers (fixed admission budgets and
   selected-target eviction implemented);
 - spatial/draw clustering;

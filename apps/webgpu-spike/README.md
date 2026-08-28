@@ -127,8 +127,15 @@ with `naru.spatial-demand-index.1` instead authenticate `spatial.bin`, query
 only frustum-visible BVH leaves, and keep cold chunks out of the fetch queue.
 The focused headed record plus Digital Hub and sixty5 offline co-demand
 censuses and their headed localized camera traces are under
-`artifacts/spatial-demand/`. Persistent cache tiers, spatial draw clusters, and
-screen-space LOD remain Phase 2 work.
+`artifacts/spatial-demand/`. Those packages also accept
+`?demandPriority=screen-coverage`, which admits the demanded chunks by the
+screen area their leaves cover instead of by distance from the view centre;
+`data-target-scheduler-demand-priority` reports the policy in force. It is
+opt-in because the recorded outcome is view-dependent — 99.12% pixel agreement
+with an unbudgeted reference render against the default's 64.95% on a close
+view, and 93.86% against 96.31% on a mid view
+(`artifacts/spatial-demand/sixty5-demand-priority/`). Persistent cache tiers,
+spatial draw clusters, and screen-space LOD remain Phase 2 work.
 
 ## Open another compiled scene
 

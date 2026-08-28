@@ -4,6 +4,7 @@ import type {
   DecodedCompiledScene,
   GpuOccurrenceInstance,
   GpuPrototypeBatch,
+  SpatialDemandPriority,
 } from "@naru3d/runtime-webgpu";
 import { querySpatialDemandIndex } from "@naru3d/runtime-webgpu";
 
@@ -265,6 +266,7 @@ export interface SpatialTargetQueryStats {
 export class SpatialTargetChunkViewIndex implements TargetChunkRanker {
   private readonly chunks: readonly CompiledTargetChunk[];
   private readonly spatial: DecodedSpatialDemandIndex;
+  private readonly priority: SpatialDemandPriority;
   private readonly coldOrder: readonly number[];
   private latest: SpatialTargetQueryStats = {
     visitedNodeCount: 0,
@@ -274,9 +276,14 @@ export class SpatialTargetChunkViewIndex implements TargetChunkRanker {
     queryMilliseconds: 0,
   };
 
-  constructor(chunks: readonly CompiledTargetChunk[], spatial: DecodedSpatialDemandIndex) {
+  constructor(
+    chunks: readonly CompiledTargetChunk[],
+    spatial: DecodedSpatialDemandIndex,
+    priority: SpatialDemandPriority = "screen-distance",
+  ) {
     this.chunks = chunks;
     this.spatial = spatial;
+    this.priority = priority;
     this.coldOrder = chunks
       .map((_chunk, index) => index)
       .sort(
@@ -292,7 +299,7 @@ export class SpatialTargetChunkViewIndex implements TargetChunkRanker {
 
   rank(frame: CameraRelativeFrame): readonly RankedTargetChunk[] {
     const started = performance.now();
-    const query = querySpatialDemandIndex(this.spatial, frame);
+    const query = querySpatialDemandIndex(this.spatial, frame, { priority: this.priority });
     this.latest = {
       visitedNodeCount: query.visitedNodeCount,
       visibleLeafCount: query.visibleLeafCount,
@@ -304,6 +311,8 @@ export class SpatialTargetChunkViewIndex implements TargetChunkRanker {
     const hot = query.candidates.map(({ targetChunkIndex, screenDistanceSquared }) => {
       const chunk = this.chunks[targetChunkIndex];
       if (!chunk) throw new RangeError(`Spatial demand references missing chunk ${targetChunkIndex}.`);
+      // The query already ordered the candidates by the configured policy; the
+      // scheduler keeps that order and does not re-sort demanded chunks.
       return { chunk, visibleBounds: true, screenDistanceSquared, demanded: true };
     });
     const cold = this.coldOrder
