@@ -75,7 +75,7 @@ perform the final evidence pass.
 
 | Change area | Narrow validation to start with | Prerequisites | Maintainer-heavy follow-up when applicable |
 |---|---|---|---|
-| Documentation, roadmap, or ADR | `git diff --check`; add `pnpm adr:check` for ADR changes | None | Technical-claim and fluent-translation review |
+| Documentation, roadmap, or ADR | `pnpm docs:links:check`; add `pnpm adr:check` for ADR changes | None | Technical-claim and fluent-translation review |
 | Scene IR, compiler, runtime, or Studio TypeScript | `pnpm test <test-file>` and `pnpm --filter <package> typecheck` | `pnpm install` | Headed browser evidence if user-visible loading, rendering, or interaction changes |
 | IFC adapter | `pnpm adapter:ifc:test -- --python <path>` | Python with pinned `requirements-dev.txt`, including IfcOpenShell | External-fixture extraction/compile record on the disclosed native host |
 | OCCT adapter | `pnpm native:check` plus the affected adapter test or diagnostic validator | Pinned OCCT/CadQuery environment for executable adapter work | Licensed STEP evidence re-record and exact toolchain disclosure |
@@ -97,6 +97,29 @@ and terminology guidance.
 Documentation-only contributions are welcome. A translation generated or
 substantially assisted by a machine should be identified in the pull request so
 a fluent reviewer can focus on terminology and natural phrasing.
+
+`pnpm docs:links:check` rejects broken repository-local Markdown links and
+heading anchors across every tracked Markdown file, and `pnpm check` runs it.
+The check is offline: it never requests an external URL, and it resolves
+targets against Git's tracked paths rather than the working filesystem, so a
+link that only works on a case-insensitive volume or points at an untracked
+file still fails. `http:`, `https:`, `mailto:`, `tel:`, `ftp:`, `ftps:`,
+`news:`, `irc:`, and `ssh:` targets are skipped; any other scheme is reported
+so a typo stays visible. Links inside fenced code blocks, inline code spans,
+and HTML comments are ignored, so documentation can show a broken example.
+
+Fix the link rather than silencing it. When a repository-local target genuinely
+cannot resolve, add one reviewed entry to
+`scripts/markdown-link-exceptions.json` with the exact `file`, the exact
+`target`, and a `reason`:
+
+```json
+{ "file": "docs/EXAMPLE.md", "target": "generated/report.md", "reason": "written by pnpm example:evidence and never committed" }
+```
+
+An exception matches a single file/target pair; there is no directory, file, or
+anchor wildcard. An entry that stops matching a real finding fails the check,
+so obsolete exceptions cannot accumulate.
 
 ## Architecture changes
 

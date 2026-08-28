@@ -97,6 +97,7 @@ scene size.
 | Workspace | **Pending** | Persist source references, views, selection sets, and source fingerprints; reopen unchanged state and report changed sources |
 | Framework-neutral embedding | **Pending** | Publish and test one application outside the reference Studio |
 | Installable alpha release | **Pending**; workspace packages remain private pre-release packages | Define the supported public surface, compatibility policy, release notes, and installation smoke test |
+| Documentation link integrity | **Recorded**: `pnpm docs:links:check` resolves every repository-local Markdown link and heading anchor against Git's tracked paths, offline, and `pnpm check` runs it; [focused tests](../tools/markdown-links/test/markdown-links.test.ts) cover fences, percent encoding, duplicate headings, Unicode anchors, and repository escapes | Extend the same portable gate to any generated documentation the repository starts publishing |
 
 ## Dependency order
 
