@@ -101,6 +101,7 @@
 | 原点から10,000 km離れた座標でも精度を維持します | 0.25 mmの板間隔が誤差0.001 mm以下でコンパイルされ、両エンジンともピクセルドリフト0で描画 ([精度記録](artifacts/precision/large-coordinates/README.md)) |
 | 近接するgeometryがまとまって転送されるようパッケージをパッキングできます (opt-in) | leaf-anchor payload順序がDigital Hub censusでoff-viewバイト合計を39.9%削減 ([spatial demand記録](artifacts/spatial-demand/README.md)) |
 | コンパイルはバイト単位で再現可能です | 2回の完全なsixty5コンパイルがバイト同一のパッケージを生成 ([コンパイル証拠](artifacts/ifc/sixty5/README.md)) |
+| 変更のない大規模モデルの再オープンは分ではなく秒で済みます | 同じ839.9 MBフェデレーションの379.0 sのコールドインポートに対し、新規プロセス5回のウォーム再オープンは中央値1.44 s（`node`起動を含む） ([キャッシュ分布](artifacts/cache/sixty5/README.md)) |
 | **まだ達成していないこと:** 実物大スケールでのインタラクティブ級のready状態とブラウザ間性能主張 | 4.5秒の初回フレームはdiscrete GPUホスト1台での単一Chrome記録であり、9.1秒のready状態は234チャンク中111個で安定するため、64 MiB予算のもとでは連合モデルの大半がcoarseのまま残ります ([初回フレーム記録](artifacts/ifc/sixty5-first-frame/README.md)) |
 
 ## どこから始めるか
@@ -246,7 +247,11 @@ Digital Hub federationで記録された証拠は、19.9秒・46.3秒のコー�
 に対し1.7秒・0.5秒のバイト同一ウォーム復元を示します
 ([キャッシュ証拠](artifacts/cache/README.md)、
 [ADR-0009](docs/adr/0009-persistent-compiled-cache.md)、
-[インポートとキャッシュ設計](docs/IMPORT_AND_CACHE.md))。
+[インポートとキャッシュ設計](docs/IMPORT_AND_CACHE.md))。大規模では、
+839.9 MBのsixty5 federationに対しキャッシュ状態ごとに新規プロセスで5回ずつ
+サンプルを取得し、コールド379.0秒・ウォーム1.37秒・破損エントリフォール
+バック87.7秒の中央値を記録、15サンプルすべてがバイト同一のパッケージを
+生成しました([キャッシュ分布](artifacts/cache/sixty5/README.md))。
 
 ## 設計から読み始める
 

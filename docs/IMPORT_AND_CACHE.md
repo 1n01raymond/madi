@@ -22,17 +22,22 @@ compile-affecting identities are unchanged.
 
 These are product SLOs, not claims about current evidence. Cold and warm results
 must be reported separately under [the benchmark rules](BENCHMARKS.md). The
-historical real-large boundary is one 302-second end-to-end sixty5 split.1
-diagnostic on a warm OS file cache
-([evidence](../artifacts/ifc/sixty5/README.md)); it is not a current-toolchain
-cold distribution. Shared coarse residency, a
+current-toolchain real-large boundary is five fresh-process sixty5 imports
+per cache state on one disclosed Windows host: cold median 379.0 s, warm
+median 1.37 s, corrupt-entry fallback median 87.7 s
+([evidence](../artifacts/cache/sixty5/README.md)). The older 302-second
+end-to-end sixty5 split.1 diagnostic on a warm OS file cache
+([evidence](../artifacts/ifc/sixty5/README.md)) is not that distribution and
+is superseded by it. Shared coarse residency, a
 virtualized assembly list, skip-and-continue admission, estimate-gated
 prefetch, and a shared prototype vertex pool later record a 4.487-second first
 frame ([evidence](../artifacts/ifc/sixty5-first-frame/README.md)). The recorded cache
 evidence proves compile-level warm reopens on the pinned mid-size fixtures
 (0.5 s for the Digital Hub federation, 1.7 s for the PyGamer STEP fixture —
-[record](../artifacts/cache/README.md)); a real-large sixty5 reopen
-distribution remains unproven.
+[record](../artifacts/cache/README.md)), and the sixty5 distribution meets the
+1–5 s reopen SLO at real-large scale on the harder whole-process reading:
+1,439 ms including `node` startup, 277× faster than the cold import that
+published the entry.
 
 ## 2. User-visible lifecycle
 
@@ -180,5 +185,11 @@ orchestration falls back to recompilation. The persistent-cache gate is closed:
 the pinned PyGamer STEP fixture and the four-document Digital Hub federation
 reproduce those properties with published cold/warm timings and a fail-closed
 corrupted-entry recompile ([record](../artifacts/cache/README.md), validated by
-`pnpm cache:check`). The real-large product gate additionally requires
-three-run distributions for the SLO table on a recorded host class.
+`pnpm cache:check`). The real-large product gate is closed on one host class
+by five fresh-process samples per cache state, with cache footprint and
+process-tree peak memory ([record](../artifacts/cache/sixty5/README.md),
+validated by `pnpm cache:sixty5:check`). That record also fixes a current
+limit: explicit IFC boundary edges push the sixty5 glTF document past V8's
+maximum string length, so a default-formatting import of that federation
+cannot produce a package at all and `--compact-json` is mandatory at
+real-large scale until the document is written as a stream.

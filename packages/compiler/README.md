@@ -97,7 +97,13 @@ stable URI hint, adapter thread count, chunk budget, JSON formatting, and
 retained-intermediate policy. Recorded real-fixture cold/warm and
 corrupted-entry evidence on the pinned PyGamer STEP fixture and the
 four-document Digital Hub federation closes the ADR-0009 acceptance gate
-([record](../../artifacts/cache/README.md), `pnpm cache:check`). IFC compilation
+([record](../../artifacts/cache/README.md), `pnpm cache:check`). At real-large
+scale, five fresh-process samples per cache state on the 839.9 MB sixty5
+federation median 379.0 s cold, 1.37 s warm, and 87.7 s for a corrupt-entry
+fallback, all fifteen producing the same package byte for byte
+([record](../../artifacts/cache/sixty5/README.md), `pnpm cache:sixty5:check`);
+that record also shows why `--compact-json` is currently mandatory there, since
+the default pretty-printed document exceeds V8's maximum string length. IFC compilation
 also emits `naru.ifc-incremental-dependency-index.1`, and whole-package cache
 hits restore it byte-for-byte. That index and its changed/deleted/renamed plus
 reconciliation tests are the correctness prerequisite for partial rebuild. On

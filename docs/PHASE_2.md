@@ -27,9 +27,9 @@ or localized follow-up work proportional to what changed.
 
 | User path | Product target | Current baseline | Gate state |
 |---|---:|---|---|
-| First real-large source import | Minutes are allowed | A historical split.1 sixty5 diagnostic took 302 s end to end in one run with a warm OS file cache ([record](../artifacts/ifc/sixty5/README.md)); a current-toolchain cold distribution is unrecorded | Progress, cancellation, background execution, and durable completion are **Pending** |
+| First real-large source import | Minutes are allowed | Five fresh-process cold sixty5 imports median 379.0 s, observed p95 382.0 s, peaking at a 5.09 GB process tree ([record](../artifacts/cache/sixty5/README.md)); their medians decompose it into 291.3 s of adapter extraction and 87.7 s of packaging | The cold cost is **Recorded**; progress, cancellation, background execution, and durable completion are **Pending** |
 | Hierarchy and coarse preview during first import | 5–15 s | An already compiled sixty5 package reaches hierarchy/search in 2.3 s and its first coarse frame in a 4.487 s three-run median ([record](../artifacts/ifc/sixty5-first-frame/README.md)) | The compiled-package path is **Recorded**; publishing that preview while source import continues is **Pending** |
-| Reopen unchanged inputs | 1–5 s | Recorded single warm runs are 1.7 s for PyGamer STEP and 0.5 s for Digital Hub IFC ([record](../artifacts/cache/README.md)) | Mid-size behavior is **Recorded**; a real-large three-run distribution is **Pending** |
+| Reopen unchanged inputs | 1–5 s | Five fresh-process warm sixty5 reopens median 1.37 s of compiler time and 1.44 s including `node` startup, 277× faster than the cold import that published the entry ([record](../artifacts/cache/sixty5/README.md)); mid-size single runs are 1.7 s for PyGamer STEP and 0.5 s for Digital Hub IFC ([record](../artifacts/cache/README.md)) | **Recorded** at real-large scale on one disclosed host |
 | Change one IFC discipline | Work proportional to the affected dependency set | Unchanged document extraction can skip IfcOpenShell; federation-wide compiled resources are still rebuilt ([integration test](../native/adapter-ifc/tests/test_document_artifact_integration.py), [ADR-0010](adr/0010-ifc-incremental-dependency-index.md)) | Adapter reuse is **Implemented**; partial compiled-payload reuse is **Pending** |
 | Reuse within a team | Avoid duplicate local import when policy permits | A local verified [whole-package cache](../artifacts/cache/README.md) and [document-artifact cache](../native/adapter-ifc/tests/test_document_artifact_cache.py) exist | Authorized shared lookup/publication is **Pending** |
 
@@ -47,7 +47,7 @@ closed gate.
 | Roadmap criterion | Current evidence | Missing before exit | State |
 |---|---|---|---|
 | Public engineering baseline: 100k+ renderable geometric occurrences, 10M+ submitted triangles, and 10k+ geometric prototypes | The qualified [31-document sixty5 Design + Engineering package](../artifacts/ifc/engineering-baseline/README.md) passes all three floors together: 104,337 renderable occurrences, 46,059,890 submitted triangles, and 66,396 geometric prototypes; it reports 10,394,938 unique triangles and Khronos validation at 0 errors / 0 warnings | Publish the digest-locked 854,446,743-byte package, open it through Studio, and add public-delivery smoke evidence; this committed record qualifies the source and package but does not measure startup, rendering, or delivery | **Partial** |
-| Cold/warm startup, frame, memory, and interaction results published | Real-large [first-frame](../artifacts/ifc/sixty5-first-frame/README.md) and [localized-demand](../artifacts/spatial-demand/sixty5-localized/README.md) records exist; mid-size STEP/IFC [cache records](../artifacts/cache/README.md) publish single cold/warm runs | One coherent real-large cold/warm matrix with repeated samples, cache size, stage timing, total client memory, and interaction results | **Partial** |
+| Cold/warm startup, frame, memory, and interaction results published | Real-large [first-frame](../artifacts/ifc/sixty5-first-frame/README.md), [localized-demand](../artifacts/spatial-demand/sixty5-localized/README.md), [memory-envelope](../artifacts/memory/sixty5-envelope/README.md), and five-sample [cold/warm/corrupt cache](../artifacts/cache/sixty5/README.md) records exist | One coherent matrix that presents them together, and a repeat on a second engine and operating system | **Partial** |
 | Forced low-memory scenario remains functional | The [memory envelope](../artifacts/memory/sixty5-envelope/README.md) records three default-budget and three forced-low 8 MiB sixty5 runs: hierarchy, coarse rendering, navigation, source-aware selection, and eviction all complete in both profiles, and every reported byte names its owner, lifetime, and collection method rather than folding unmeasurable categories into zero | A repeat on a second engine and operating system, and a resident-set figure that does not depend on one browser's own estimator; GPU driver allocation stays unavailable | **Partial** |
 | Workspace reopens against unchanged source and detects changed source | [Cache tests](../packages/compiler/test/compiled-cache.test.ts) inspect source identity, and [IFC dependency tests](../packages/compiler/test/ifc-incremental-dependencies.test.ts) detect changed/deleted/renamed inputs | A persisted workspace manifest with sources, views, and reopen behavior exercised through Studio | **Pending** |
 
@@ -60,7 +60,7 @@ much in risk and effort for a raw item count to be meaningful.
 
 | Capability | Current state | Next acceptance gate |
 |---|---|---|
-| Verified whole-package cache | **Recorded** under accepted [ADR-0009](adr/0009-persistent-compiled-cache.md): [warm restore evidence](../artifacts/cache/README.md) is byte-identical and corruption fails closed; [focused storage tests](../packages/compiler/test/compiled-cache.test.ts) cover identity and restore rules | Add a repeated real-large reopen distribution and resource/RSS measurements |
+| Verified whole-package cache | **Recorded** under accepted [ADR-0009](adr/0009-persistent-compiled-cache.md): [warm restore evidence](../artifacts/cache/README.md) is byte-identical and corruption fails closed, and a [real-large five-sample distribution](../artifacts/cache/sixty5/README.md) adds cold/warm/corrupt medians, cache footprint, and process-tree peak memory; [focused storage tests](../packages/compiler/test/compiled-cache.test.ts) cover identity and restore rules | Break the restore itself into stages, and repeat the distribution on a second host class |
 | IFC dependency ownership | **Implemented** under proposed [ADR-0010](adr/0010-ifc-incremental-dependency-index.md), including [changed/deleted/renamed/reconciliation tests](../packages/compiler/test/ifc-incremental-dependencies.test.ts) | Keep the index conservative while physical payload ownership is introduced |
 | Per-document IFC extraction reuse | **Implemented** with [deterministic verified-artifact tests](../native/adapter-ifc/tests/test_document_artifact_cache.py) and [clean adapter-merge equivalence](../native/adapter-ifc/tests/test_document_artifact_integration.py) | Measure real-large artifact size, restore time, and peak memory |
 | Content-addressed compiled payloads | **Pending** | Define immutable prototype/target/coarse/spatial/property ownership, then prove a one-discipline rebuild reproduces every clean-package byte |
@@ -120,8 +120,11 @@ a small share of the browser's working set.
 1. Establish the Phase 2 milestone, labels, issue forms, and a small reviewed
    ready queue. This tracker owns outcomes; issues own independently assignable
    work with acceptance criteria.
-2. Record sixty5 cold/warm/corrupt-cache distributions, cache footprint,
-   restore-stage timing, and peak RSS on a disclosed host.
+2. Replace the compiler's whole-document `JSON.stringify` with a streaming
+   glTF writer. Explicit IFC boundary edges push the sixty5 document past V8's
+   maximum string length, so a default-formatting import of that federation
+   fails after 376 s of completed work and `--compact-json` is currently
+   mandatory at real-large scale ([record](../artifacts/cache/sixty5/README.md)).
 3. Specify and implement content-addressed compiled prototype/chunk/property
    payloads without accepting ADR-0010 yet.
 4. Extend the reviewed package bounds (ADR-0011) with malformed-package and
@@ -173,7 +176,7 @@ debt.
 
 | Debt | Record needed | Decision or claim blocked |
 |---|---|---|
-| Real-large reopen | At least three current-toolchain cold and warm sixty5 runs on one disclosed host, with cache bytes, stage timings, peak RSS, hit/miss reason, and corruption fallback | 1–5 s unchanged real-large reopen and cache-cost claim; the historical split.1 302 s warm-OS-cache diagnostic is not this distribution |
+| Real-large reopen stage breakdown | A restore broken into its own stages — manifest read, resource verification, and file publication — rather than the single 1.37 s figure the [five-sample distribution](../artifacts/cache/sixty5/README.md) reports | Which part of a warm reopen would have to change if the 1–5 s target tightened; the distribution itself already closes the cold/warm/corrupt and cache-cost debt |
 | Real-large document-artifact reuse | Repeat cold, warm, and one-document-changed extraction with artifact bytes, restore time, peak RSS, and clean-merge equivalence on a disclosed large fixture | Cost and scalability of the already-implemented per-document reuse tier |
 | Cross-engine memory envelope | Repeat the [phase-sampled memory ledger](../artifacts/memory/sixty5-envelope/README.md) on a second engine and operating system, including whatever each reports in place of `measureUserAgentSpecificMemory` and the Windows process-tree sample | A memory claim that is not specific to one Chrome/Windows host |
 | Cross-browser localized demand | Repeated Firefox or another non-Blink real-model localized trace with request order, query p50/p95, residency, and console results | ADR-0008 acceptance |

@@ -101,6 +101,7 @@ commit과 고지를 보존해 수정 없이 MIT로 재배포합니다. Adafruit�
 | 원점에서 10,000 km 떨어진 좌표도 정밀도를 유지합니다 | 0.25 mm 판 간격이 ≤ 0.001 mm 오차로 컴파일되고 두 엔진 모두 픽셀 드리프트 0으로 렌더링 ([정밀도 기록](artifacts/precision/large-coordinates/README.md)) |
 | 가까운 geometry가 함께 전송되도록 패키지를 패킹할 수 있습니다 (opt-in) | leaf-anchor payload 정렬이 Digital Hub census에서 off-view 바이트 합계를 39.9% 절감 ([spatial demand 기록](artifacts/spatial-demand/README.md)) |
 | 컴파일은 바이트 단위로 재현 가능합니다 | 두 번의 전체 sixty5 컴파일이 바이트 동일 패키지 생성 ([컴파일 증거](artifacts/ifc/sixty5/README.md)) |
+| 변경되지 않은 대형 모델의 재열기는 분이 아니라 초 단위입니다 | 동일한 839.9 MB 페더레이션의 379.0 s 콜드 임포트 대비, 새 프로세스 5회 웜 재열기 중앙값 1.44 s(`node` 시작 시간 포함) ([캐시 분포](artifacts/cache/sixty5/README.md)) |
 | **아직 아닌 것:** 실물 대형 규모의 인터랙티브급 준비 완료와 브라우저 간 성능 주장 | 4.5초 첫 프레임은 discrete GPU 호스트 1대의 단일 Chrome 기록이며, 9.1초 ready 상태는 청크 234개 중 111개에서 안정되므로 64 MiB 예산 아래에서 연합 모델 대부분은 coarse 상태로 남습니다 ([첫 프레임 기록](artifacts/ifc/sixty5-first-frame/README.md)) |
 
 ## 어디서 시작할까요
@@ -244,7 +245,11 @@ identity로 키가 만들어지고, 손상된 엔트리는 전체 재컴파일�
 19.9초·46.3초 콜드 컴파일 대비 1.7초·0.5초의 바이트 동일 웜 복원을 보여줍니다
 ([캐시 증거](artifacts/cache/README.md),
 [ADR-0009](docs/adr/0009-persistent-compiled-cache.md),
-[import·캐시 설계](docs/IMPORT_AND_CACHE.md)).
+[import·캐시 설계](docs/IMPORT_AND_CACHE.md)). 대형 규모에서는 839.9 MB
+sixty5 federation에 대해 캐시 상태별로 새 프로세스 5회씩 샘플을 취해 콜드
+379.0초, 웜 1.37초, 손상 엔트리 폴백 87.7초의 중앙값을 기록했고, 15개 샘플
+모두 바이트 동일한 패키지를 생성했습니다
+([캐시 분포](artifacts/cache/sixty5/README.md)).
 
 ## 설계 문서부터 시작하기
 
