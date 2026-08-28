@@ -396,6 +396,13 @@ entries fail closed. Spatial partitioning and a first screen-space demand
 policy are now recorded; a view-independent demand cost and runtime cache
 tiers remain the next runtime increments.
 
+The first incremental IFC prerequisite is also implemented under proposed
+ADR-0010: each compile and whole-package cache entry carries a deterministic
+discipline dependency index, with focused changed/deleted/renamed and
+cross-document reconciliation tests. This does not yet shorten a changed-source
+compile. Per-document adapter artifacts, content-addressed payload reuse, and
+equivalence against a clean full build are the next compiler increment.
+
 In parallel, the repeated 100k record now carries GPU pass timestamps and a
 backend-owned retained-resource census on both the discrete host and an Apple
 M4 Pro integrated-GPU host. Chrome reproduces the continuation signals on the

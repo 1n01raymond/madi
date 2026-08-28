@@ -23,6 +23,7 @@ reverse. They explain context and trade-offs rather than only the final choice.
 | [0007](0007-rebrand-naru.md) | Rebrand to NARU; freeze serialized `madi.*` identifiers | Accepted |
 | [0008](0008-spatial-demand-partitioning.md) | Separate spatial demand from shared prototype payload ownership | Proposed |
 | [0009](0009-persistent-compiled-cache.md) | Key persistent compiled caches by complete import identity | Accepted |
+| [0010](0010-ifc-incremental-dependency-index.md) | Index IFC document dependencies before partial compilation | Proposed |
 
 ## Phase 0 review
 

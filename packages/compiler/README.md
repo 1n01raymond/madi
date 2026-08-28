@@ -10,6 +10,8 @@ boundary accepts a validated in-memory `EngineeringScene`. These paths emit:
 - `scene.bin`: little-endian f32/u32/u8 geometry and mapping accessors; and
 - `coarse.bin`: optional prototype AABB surfaces and edges for an early useful
   frame; and
+- `incremental-dependencies.json`: IFC-only discipline-to-semantic/prototype/
+  chunk invalidation metadata; and
 - `build-report.json`: source/compiler identity, options, hashes, counts,
   diagnostics, reuse, and known limits.
 
@@ -95,8 +97,12 @@ stable URI hint, adapter thread count, chunk budget, JSON formatting, and
 retained-intermediate policy. Recorded real-fixture cold/warm and
 corrupted-entry evidence on the pinned PyGamer STEP fixture and the
 four-document Digital Hub federation closes the ADR-0009 acceptance gate
-([record](../../artifacts/cache/README.md), `pnpm cache:check`); incremental
-federation dependencies and shared-cache authorization remain follow-up gates.
+([record](../../artifacts/cache/README.md), `pnpm cache:check`). IFC compilation
+also emits `naru.ifc-incremental-dependency-index.1`, and whole-package cache
+hits restore it byte-for-byte. That index and its changed/deleted/renamed plus
+reconciliation tests are the correctness prerequisite for partial rebuild; the
+adapter and package resources still compile as one federation, and shared-cache
+authorization remains a separate gate.
 
 ## Compile an IFC federation
 

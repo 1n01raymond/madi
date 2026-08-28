@@ -204,8 +204,9 @@ Status: Current.
   followed by dependency-safe per-discipline rebuild and authorized shared reuse
   (verified STEP/IFC whole-package storage and adapter-skipping orchestration
   implemented; pinned real-fixture cold/warm and corruption evidence recorded
-  in `artifacts/cache/`, ADR-0009 Accepted; per-discipline rebuild and shared
-  reuse pending);
+  in `artifacts/cache/`, ADR-0009 Accepted; deterministic IFC dependency index
+  and changed/deleted/renamed/reconciliation tests implemented under proposed
+  ADR-0010; independent per-discipline rebuild and shared reuse pending);
 - view-prioritized scheduling and cancellation of obsolete camera work
   (coarse-bounds fallback, optional spatial-demand policy, and an opt-in
   screen-coverage demand ordering implemented; focused browser, real-model

@@ -610,3 +610,29 @@ hit preserves the package digest and skips native extraction; IFC tests also
 prove that changing a serialized URI hint causes a miss. Real pinned-toolchain
 cold/warm evidence and per-discipline dependency indexing are intentionally
 separate gates in [the import/cache contract](IMPORT_AND_CACHE.md).
+
+### 21.4 IFC incremental dependency index
+
+Every IFC federation compile now writes `incremental-dependencies.json` with
+schema `naru.ifc-incremental-dependency-index.1`. The derived sidecar maps a
+discipline and source digest to its Scene IR document, semantic entities,
+prototypes, occurrences, current progressive target chunks, and logical
+selectors for coarse, spatial, and property invalidation. A second prototype
+table records every contributing document and current target chunk. All lists
+are sorted, and provenance comes from Scene IR source references and semantic
+ownership rather than ID parsing.
+
+Cross-document semantic relations expand to their transitive document
+component, so changing one member conservatively invalidates every reconciled
+member. The planning API distinguishes changed, deleted, added, and
+stable-content renamed/relabelled sources; ambiguous equal-digest renames are
+never guessed. The whole-package cache manifest includes and verifies the
+sidecar, and cache hits restore it without invoking the adapter.
+
+This closes only the dependency-index prerequisite in
+[ADR-0010](adr/0010-ifc-incremental-dependency-index.md). The current adapter
+still extracts the complete federation and the target/coarse/spatial/property
+files remain federation-wide. Their physical bytes cannot be reused from this
+logical index alone because packing and column offsets may change. Independent
+adapter outputs, content-addressed payload chunks, and byte-equivalence against
+a clean full build remain before per-discipline compilation is a product claim.
