@@ -49,6 +49,8 @@ export interface GltfNode {
   readonly name?: string;
   readonly children?: readonly number[];
   readonly matrix?: readonly number[];
+  /** Emitted instead of matrix when the local transform is a pure translation. */
+  readonly translation?: readonly number[];
   readonly mesh?: number;
   readonly extras?: Readonly<Record<string, unknown>>;
 }
@@ -105,6 +107,10 @@ export interface CompilerBuildReport {
     readonly jsonFormatting?: "compact";
     /** Optional size policy for non-semantic glTF resource labels. */
     readonly resourceNames?: "omitted";
+    /** Optional size policy for node identities the loader can reconstruct. */
+    readonly nodeIdentifiers?: "derived-elided";
+    /** Optional size policy for node transforms glTF already defaults. */
+    readonly nodeTransforms?: "default-omitted";
     readonly progressiveRepresentation?: "prototype-aabb-v1";
     readonly targetChunking?: "prototype-range-v1" | "coalesced-prototype-range-v1";
     /** Maximum bytes per progressive target request when coalescing is enabled. */
@@ -176,6 +182,16 @@ export interface CompileGltfOptions {
   readonly compactJson?: boolean;
   /** Omit mesh, bufferView, and accessor names while preserving semantic identity. */
   readonly omitResourceNames?: boolean;
+  /**
+   * Omit node semanticId and sourceRef wherever a document-level derivation rule
+   * reconstructs them exactly. Nodes that do not match keep both fields.
+   */
+  readonly elideDerivedIdentifiers?: boolean;
+  /**
+   * Omit identity node matrices and emit translation-only transforms as TRS.
+   * Both forms reproduce the source matrix exactly; no rotation is decomposed.
+   */
+  readonly omitDefaultNodeTransforms?: boolean;
   /**
    * Coalesce adjacent prototype ranges into deterministic HTTP Range requests.
    * Omit this to retain one target chunk per prototype for compatibility.

@@ -28,6 +28,7 @@ reverse. They explain context and trade-offs rather than only the final choice.
 | [0012](0012-mutable-public-fixture-downloads.md) | Pin mutable public-share fixtures by content identity | Proposed |
 | [0013](0013-optional-gltf-resource-name-elision.md) | Allow opt-in glTF resource-name elision | Proposed |
 | [0014](0014-parquet-cad-corpus-boundary.md) | Treat Parquet CAD corpora as bounded source containers | Proposed |
+| [0015](0015-optional-node-identity-and-transform-elision.md) | Allow opt-in node identity and transform elision | Proposed |
 
 ## Phase 0 review
 

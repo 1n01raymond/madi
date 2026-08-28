@@ -145,6 +145,11 @@ scene size.
 8. Qualify the registered CadQuarry 1k STEP corpus through a bounded Parquet
    scanner, then compile its extracted parts as a CAD breadth/control record.
    Keep that synthetic corpus separate from the real public-baseline gate.
+9. Move mesh-less hierarchy nodes out of the compiled document. The measured
+   byte split ranks them first by a wide margin — 163,665 nodes and 88,741,293 B,
+   21.88% of the engineering baseline's document, against 5.23% for the largest
+   implemented lever ([record](../artifacts/compiler/node-field-elision/README.md)) —
+   and they need a transport decision the two ADR-0015 levers did not.
 
 ### Later — expand only after the core loop is reproducible
 
@@ -170,6 +175,7 @@ debt.
 | Forced target-residency profile | Repeat a deliberately constrained geometry budget with coarse visibility, picking, interaction, decoded/GPU charges, and eviction outcomes | Target-residency portion of the Phase 2 low-memory exit |
 | Cross-browser localized demand | Repeated Firefox or another non-Blink real-model localized trace with request order, query p50/p95, residency, and console results | ADR-0008 acceptance |
 | Spatial precision cross-check | Nested-transform spatial bounds on the accepted ADR-0005 10,000 km fixture with no false negatives | ADR-0008 acceptance |
+| Node-field elision at engineering scale | Re-record `artifacts/ifc/engineering-baseline/` on the host that produced it, with `--elide-derived-identifiers` and `--omit-default-node-transforms` declared, so the option pair is proven on the same package the qualification pins; the levers are measured on this Windows host, whose IFC split differs from that record's by a few bytes | ADR-0015 acceptance |
 | Current-toolchain large packages | Re-record Digital Hub and sixty5 with the current split.4 explicit-edge toolchain and synchronize the deployed package digest | Current-schema real-model claims |
 | Renderer reference-hardware matrix | Repeat the existing harness on more disclosed discrete/integrated profiles with explicit edges and bounded residency | Hardware/browser portion of ADR-0003 acceptance or revision |
 

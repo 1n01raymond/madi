@@ -140,6 +140,20 @@ export function validateCompiledGltf(
     ) {
       add("NODE_MATRIX", `${path}.matrix`, "Node matrix must contain 16 finite values.");
     }
+    if (
+      node.translation &&
+      (node.translation.length !== 3 || node.translation.some((value) => !Number.isFinite(value)))
+    ) {
+      add(
+        "NODE_TRANSLATION",
+        `${path}.translation`,
+        "Node translation must contain 3 finite values.",
+      );
+    }
+    // glTF 2.0 lets a node carry a matrix or a TRS form, never both.
+    if (node.matrix && node.translation) {
+      add("NODE_TRANSFORM", path, "Node carries both a matrix and a translation.");
+    }
     if (node.mesh !== undefined && !document.meshes[node.mesh]) {
       add("NODE_MESH", `${path}.mesh`, "Unknown mesh.");
     }

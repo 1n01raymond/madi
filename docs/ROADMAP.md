@@ -229,6 +229,13 @@ package. It closes the source/package measurement portion of the first exit
 criterion. The package is not yet publicly hosted or smoke-tested through
 Studio, so that criterion remains partial.
 
+That package's 405,570,167-byte compiled document is now split member by member
+([record](../artifacts/compiler/node-field-elision/README.md)): its 268,002
+nodes are 36.2% of the document, and two opt-in compiler options (ADR-0015)
+remove 23,459,373 B (5.78%) of it while the runtime reconstructs every elided
+identity and transform exactly. The same measurement ranks mesh-less hierarchy
+nodes (21.88%) above both levers, so document size is measured, not solved.
+
 ### Exit criteria
 
 - one redistributable source-derived engineering package with at least 100,000

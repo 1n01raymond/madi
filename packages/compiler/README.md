@@ -146,6 +146,17 @@ material names remain available, as do all `extras` identity and source-mapping
 records. The option is part of the compiled-cache key; without it, output stays
 byte-identical to the named default package.
 
+`--elide-derived-identifiers` and `--omit-default-node-transforms` reduce the
+node array the same way: the first declares one derivation rule in the document
+and omits every `extras.madi.semanticId`/`sourceRef` that rule reconstructs, the
+second omits an identity `matrix` and writes `translation` where the transform is
+a pure translation. The runtime rebuilds both from the document it already
+parsed, so picking, the assembly tree, and property lookup are unaffected. Both
+options are part of the compiled-cache key and both leave default output
+byte-identical. See the [document byte-split
+record](../../artifacts/compiler/node-field-elision/README.md) for what they
+recover on a real federation, and ADR-0015 for the contract.
+
 The committed [engineering-scale qualification
 record](../../artifacts/ifc/engineering-baseline/README.md) uses this option
 together with compact JSON, a spatial index, and spatial-leaf payload order.

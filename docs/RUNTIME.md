@@ -434,7 +434,13 @@ occurrence tables once for the scene session. Coarse and whole-target decodes
 reuse the prepared renderable list; each target Range decode visits only its
 indexed occurrences rather than traversing the active node graph again. Result
 transforms are cloned at the Worker transfer boundary so transferring one
-decoded chunk cannot detach the prepared session state. Prototype-local surface
+decoded chunk cannot detach the prepared session state. When a document
+declares `extras.madi.nodeIdentityDerivation` (ADR-0015), the same traversal
+reconstructs every omitted `semanticId` and `sourceRef` from that rule, and a
+node carrying `translation` instead of `matrix` composes to the identical
+float64 transform; picking, the assembly tree, and property lookup see no
+difference, proven occurrence by occurrence in
+`artifacts/compiler/node-field-elision/`. Prototype-local surface
 bounds are also cached once; each occurrence transforms eight AABB corners
 instead of every vertex, conservatively matching the coarse-bounds contract. For the
 compiler's `prototype-aabb-v1` tier, it collapses prototype AABBs into one

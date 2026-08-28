@@ -11,11 +11,18 @@ Direct WebGPU rendering and the Phase 1 compiled glTF runtime boundary.
   `extras.madi.properties` pointer (the `madi.package-properties.1` sidecar,
   `docs/COMPILER.md` section 21.2) surfaces as `hierarchy.properties`
   after shape validation — the runtime does not fetch or parse the sidecar
-  itself.
+  itself. A document that declares `extras.madi.nodeIdentityDerivation`
+  (ADR-0015) has some `semanticId`/`sourceRef` members omitted; both loaders
+  reconstruct them from that rule while parsing the document they already hold,
+  without a lookup table or a second request, so hierarchy entries, pick
+  evidence, and property lookup are identical either way. A node that keeps a
+  member explicitly wins over the rule, and an explicit `null` means the
+  occurrence has no such identity.
 - `decodeCompiledGltf(value, binary, { representation })` validates the selected
   external-buffer accessor ranges,
   decodes surface and explicit-edge streams, composes node transforms, preserves
-  picking identity, and groups nodes by shared mesh.
+  picking identity, and groups nodes by shared mesh. A node may carry `matrix`
+  or `translation`; the composed transform is bit-identical either way.
 - `prepareCompiledGltfDecoder(value)` validates and traverses the active document
   once, retaining float64 world transforms plus direct target-chunk occurrence
   tables. Its `decode(binary, { targetChunkId })` path touches only the selected

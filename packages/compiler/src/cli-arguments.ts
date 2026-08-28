@@ -28,6 +28,8 @@ IFC options:
   --spatial-payload-order        Co-locate target payloads by dominant BVH leaf
   --compact-json                 Omit insignificant scene.gltf whitespace
   --omit-resource-names          Omit mesh/bufferView/accessor display names
+  --elide-derived-identifiers    Omit node identities the loader reconstructs
+  --omit-default-node-transforms Omit identity matrices; emit pure translations
   --retain-scene-ir              Keep the split intermediate pair under output
 
 General options:
@@ -62,6 +64,8 @@ export interface IfcCompileArguments {
   readonly spatialPayloadOrder: boolean;
   readonly compactJson: boolean;
   readonly omitResourceNames: boolean;
+  readonly elideDerivedIdentifiers: boolean;
+  readonly omitDefaultNodeTransforms: boolean;
   readonly retainSceneIr: boolean;
 }
 
@@ -88,6 +92,8 @@ const ifcOptions = {
   "spatial-payload-order": { type: "boolean" },
   "compact-json": { type: "boolean" },
   "omit-resource-names": { type: "boolean" },
+  "elide-derived-identifiers": { type: "boolean" },
+  "omit-default-node-transforms": { type: "boolean" },
   "retain-scene-ir": { type: "boolean" },
 } as const;
 
@@ -277,6 +283,8 @@ export function parseIfcCompileArguments(
     spatialPayloadOrder,
     compactJson: values["compact-json"] ?? false,
     omitResourceNames: values["omit-resource-names"] ?? false,
+    elideDerivedIdentifiers: values["elide-derived-identifiers"] ?? false,
+    omitDefaultNodeTransforms: values["omit-default-node-transforms"] ?? false,
     retainSceneIr: values["retain-scene-ir"] ?? false,
   };
 }
