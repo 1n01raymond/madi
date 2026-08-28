@@ -12,6 +12,13 @@ import type {
 } from "@naru3d/scene-ir";
 import type { CompiledPropertiesRef } from "@naru3d/runtime-webgpu";
 
+import {
+  fetchPackageResource,
+  resolvePackageResourceUrl,
+  resolvePackageTransferLimits,
+} from "./package-limits.js";
+import type { PackageTransferLimits } from "./package-limits.js";
+
 /**
  * Where a scene's `madi.package-properties.1` sidecar can be loaded from. URL
  * scenes resolve both sidecar resources relative to the sidecar JSON; local
@@ -23,6 +30,8 @@ export type PropertySidecarSource =
       readonly kind: "url";
       readonly ref: CompiledPropertiesRef;
       readonly jsonUrl: URL;
+      /** Resolved by the loader that fetched the glTF; defaulted when absent. */
+      readonly limits?: PackageTransferLimits;
     }
   | {
       readonly kind: "file";
@@ -62,12 +71,22 @@ export function resourceFileName(uri: string): string {
   return decodeURIComponent(new URL(uri, "https://naru.local/").pathname.split("/").pop() ?? "");
 }
 
-async function fetchBytes(url: URL): Promise<Uint8Array> {
-  const response = await fetch(url, { cache: "no-store" });
-  if (!response.ok) {
-    throw new Error(`Failed to load ${url.href} (${String(response.status)}).`);
-  }
-  return new Uint8Array(await response.arrayBuffer());
+/**
+ * Both sidecar resources declare their own byte length, so that length is the
+ * ceiling the transfer is held to; the digest check below then authenticates
+ * what arrived.
+ */
+async function fetchBytes(
+  url: URL,
+  kind: "json" | "binary",
+  declaredByteLength: number,
+  limits: PackageTransferLimits,
+): Promise<Uint8Array> {
+  return fetchPackageResource(url, {
+    kind,
+    label: url.href,
+    limitBytes: Math.min(declaredByteLength, limits.resourceBytes),
+  });
 }
 
 async function sha256(bytes: Uint8Array): Promise<string> {
@@ -126,8 +145,11 @@ export class PropertySidecarStore {
     if (ref.schemaVersion !== packagePropertiesSchema) {
       throw new TypeError(`Unsupported property sidecar schema ${ref.schemaVersion}.`);
     }
+    const limits = this.source.kind === "url"
+      ? this.source.limits ?? resolvePackageTransferLimits()
+      : resolvePackageTransferLimits();
     const jsonBytes = this.source.kind === "url"
-      ? await fetchBytes(this.source.jsonUrl)
+      ? await fetchBytes(this.source.jsonUrl, "json", ref.byteLength, limits)
       : new Uint8Array(await this.source.jsonFile.arrayBuffer());
     if (jsonBytes.byteLength !== ref.byteLength) {
       throw new RangeError(
@@ -143,7 +165,16 @@ export class PropertySidecarStore {
       JSON.parse(new TextDecoder().decode(jsonBytes)),
     );
     const columns = this.source.kind === "url"
-      ? await fetchBytes(new URL(document.columns.uri, this.source.jsonUrl))
+      ? await fetchBytes(
+          resolvePackageResourceUrl(
+            document.columns.uri,
+            this.source.jsonUrl,
+            this.source.jsonUrl.href,
+          ),
+          "binary",
+          document.columns.byteLength,
+          limits,
+        )
       : await this.readLocalColumns(document.columns.uri);
     if (columns.byteLength !== document.columns.byteLength) {
       throw new RangeError(

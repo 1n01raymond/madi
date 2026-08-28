@@ -1,8 +1,12 @@
-import { describe, expect, it } from "vitest";
+import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import type { CompiledHierarchy } from "@naru3d/runtime-webgpu";
 
 import {
+  loadSceneHierarchy,
   parseSceneUrl,
   selectLocalSceneFiles,
   validateLocalBinary,
@@ -65,5 +69,77 @@ describe("compiled scene sources", () => {
     expect(() =>
       validateLocalBinary(progressiveHierarchy, { name: "coarse.bin", size: 8 }, "coarse"),
     ).not.toThrow();
+  });
+});
+
+const fixtureUrl = new URL("https://example.com/package/scene.gltf");
+
+function stubDocument(document: unknown): void {
+  vi.stubGlobal(
+    "fetch",
+    vi.fn(
+      async () =>
+        new Response(JSON.stringify(document), {
+          headers: { "Content-Type": "model/gltf+json" },
+        }),
+    ),
+  );
+}
+
+describe("remote scene packages", () => {
+  const fixture = JSON.parse(
+    readFileSync(
+      fileURLToPath(new URL("../../../artifacts/phase1/repeated-fasteners/scene.gltf", import.meta.url)),
+      "utf8",
+    ),
+  ) as { buffers: { uri: string; byteLength: number }[] };
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it("resolves package resources against the document it loaded", async () => {
+    stubDocument(fixture);
+
+    const loaded = await loadSceneHierarchy({ kind: "url", gltfUrl: fixtureUrl });
+
+    expect(loaded.targetBinary).toEqual({
+      kind: "url",
+      href: "https://example.com/package/scene.bin",
+    });
+    expect(loaded.hierarchy.binaryByteLength).toBe(188_044);
+  });
+
+  it("refuses a package that points its buffer at another origin", async () => {
+    stubDocument({
+      ...fixture,
+      buffers: [{ ...fixture.buffers[0], uri: "https://attacker.example/scene.bin" }],
+    });
+
+    await expect(loadSceneHierarchy({ kind: "url", gltfUrl: fixtureUrl })).rejects.toThrow(
+      /must stay on https:\/\/example\.com/u,
+    );
+  });
+
+  it("refuses a package whose declared resources exceed the reviewed budget", async () => {
+    stubDocument(fixture);
+
+    await expect(
+      loadSceneHierarchy({ kind: "url", gltfUrl: fixtureUrl }, undefined, {
+        packageBytes: 60_000,
+      }),
+    ).rejects.toThrow(/more than 60000 bytes/u);
+  });
+
+  // The stub declares no Content-Length, so this exercises the streaming
+  // ceiling rather than the declared-length pre-check.
+  it("stops reading a document that runs past the reviewed limit", async () => {
+    stubDocument(fixture);
+
+    await expect(
+      loadSceneHierarchy({ kind: "url", gltfUrl: fixtureUrl }, undefined, {
+        documentBytes: 1_024,
+      }),
+    ).rejects.toThrow(/scene\.gltf is larger than 1024 bytes/u);
   });
 });

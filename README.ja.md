@@ -31,7 +31,7 @@
   — 実在する4分野のIFCフェデレーションを、素のHTTP Rangeでストリーミングします。インストール不要です。
   <br />
   <sub>実大規模スケールでの測定値: 839.9 MBの<code>sixty5</code>フェデレーションが、レンダリング
-  可能な78,173個のオカレンス全体の最初のcoarseフレームに4.3秒で到達します。target detailは
+  可能な78,173個のオカレンス全体の最初のcoarseフレームに4.5秒で到達します。target detailは
   別々の固定64 MiB decoded/GPU admission予算に従い、プロセス全体のメモリは含みません
   （<a href="artifacts/ifc/sixty5-first-frame/README.md">証拠</a>）。</sub>
 </p>
@@ -69,8 +69,8 @@
       </a>
       <br />
       <sub><strong>実物大のIFC federation。</strong> 839.9 MB・7分野の
-      <code>sixty5</code>モデル:2.4秒で階層と検索が準備完了、描画可能な
-      78,173個のoccurrence全体の初回coarse frameが4.3秒です。段階的なtarget
+      <code>sixty5</code>モデル:2.3秒で階層と検索が準備完了、描画可能な
+      78,173個のoccurrence全体の初回coarse frameが4.5秒です。段階的なtarget
       detailは別々の固定64 MiB decoded/GPU admission予算内に収まり、プロセス
       全体のメモリはこの値に含みません。選択した基礎梁は自身のIFCプロパティを
       resolveします。
@@ -94,14 +94,14 @@
 | 詳細形状はプレーンなHTTP上で漸進的にストリーミングされます | 28件の`scene.bin`リクエストがすべてHTTP 206 `bytes=` Range応答 ([sixty5ブラウザ記録](artifacts/ifc/sixty5-browser/README.md)) |
 | 段階的なtarget geometryのresidencyは宣言された予算内に収まります | promotionは234個中26番目のchunkで停止し、targetのdecoded・GPUバイトはいずれも64 MiB未満を維持します。階層、sidecar、Worker状態、プロセス全体のメモリはこの値に含みません ([sixty5ブラウザ記録](artifacts/ifc/sixty5-browser/README.md)) |
 | 選択はソースCAD/BIM識別子へ解決されます | 選択した基礎梁が6件のIFCプロパティ項目を遅延resolve ([sixty5ブラウザ記録](artifacts/ifc/sixty5-browser/README.md)) |
-| 実物大の初回フレームは分ではなく秒単位で到着します | 共有coarse Worker経路、仮想化されたアセンブリ一覧、拒否チャンクをスキップするresidency admissionがsixty5の初回coarse frameを268.0秒から中央値4.3秒へ短縮 — 62.6倍の高速化 ([初回フレーム記録](artifacts/ifc/sixty5-first-frame/README.md)) |
+| 実物大の初回フレームは分ではなく秒単位で到着します | 共有coarse Worker経路、仮想化されたアセンブリ一覧、拒否チャンクをスキップするresidency admissionがsixty5の初回coarse frameを268.0秒から中央値4.5秒へ短縮 — 59.7倍の高速化 ([初回フレーム記録](artifacts/ifc/sixty5-first-frame/README.md)) |
 | 予算に収まらないジオメトリはそもそもダウンロードしません | 要求されたsixty5チャンクはコンパイル済みドキュメントから事前に見積もられ、バイトが動く前に234個中123個がスキップされます。resident setはRange応答245回ではなく113回で完成します ([初回フレーム記録](artifacts/ifc/sixty5-first-frame/README.md)) |
 | 同じ予算でモデルをより多く保持します | プロトタイプのvertex poolをmaterialグループ間で共有し、sixty5チャンク集合をdecodedで230.7 MBから129.2 MBへ、最大チャンクを75.4 MBから1.3 MBへ削減。同じ 64 MiB予算でresidentの到達点が234個中93個から111個へ、三角形数が185万から226万へ増加します ([初回フレーム記録](artifacts/ifc/sixty5-first-frame/README.md)) |
 | カメラ移動は古いダウンロードを待たずにキャンセルします | 不要になったfastener Rangeリクエストが中断され、新たに見えるmounting-plate Rangeが先に発行 — ChromeとFirefoxで同一 ([ブラウザmatrix](artifacts/browser-matrix/README.md)) |
 | 原点から10,000 km離れた座標でも精度を維持します | 0.25 mmの板間隔が誤差0.001 mm以下でコンパイルされ、両エンジンともピクセルドリフト0で描画 ([精度記録](artifacts/precision/large-coordinates/README.md)) |
 | 近接するgeometryがまとまって転送されるようパッケージをパッキングできます (opt-in) | leaf-anchor payload順序がDigital Hub censusでoff-viewバイト合計を39.9%削減 ([spatial demand記録](artifacts/spatial-demand/README.md)) |
 | コンパイルはバイト単位で再現可能です | 2回の完全なsixty5コンパイルがバイト同一のパッケージを生成 ([コンパイル証拠](artifacts/ifc/sixty5/README.md)) |
-| **まだ達成していないこと:** 実物大スケールでのインタラクティブ級のready状態とブラウザ間性能主張 | 4.3秒の初回フレームはdiscrete GPUホスト1台での単一Chrome記録であり、8.9秒のready状態は234チャンク中111個で安定するため、64 MiB予算のもとでは連合モデルの大半がcoarseのまま残ります ([初回フレーム記録](artifacts/ifc/sixty5-first-frame/README.md)) |
+| **まだ達成していないこと:** 実物大スケールでのインタラクティブ級のready状態とブラウザ間性能主張 | 4.5秒の初回フレームはdiscrete GPUホスト1台での単一Chrome記録であり、9.1秒のready状態は234チャンク中111個で安定するため、64 MiB予算のもとでは連合モデルの大半がcoarseのまま残ります ([初回フレーム記録](artifacts/ifc/sixty5-first-frame/README.md)) |
 
 ## どこから始めるか
 

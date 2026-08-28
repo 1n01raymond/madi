@@ -9,6 +9,11 @@ import type {
 } from "@naru3d/runtime-webgpu";
 
 import { aggregateCoarseScene } from "./coarse-aggregation.js";
+import {
+  defaultPackageTransferLimits,
+  openPackageResponse,
+  readBoundedBody,
+} from "./package-limits.js";
 import { transitSceneForResponse } from "./geometry-transfer.js";
 import type { GeometryTransitScene } from "./geometry-transfer.js";
 import type { GeometryBinarySource, GeometryDocumentSource } from "./scene-source.js";
@@ -120,20 +125,26 @@ async function loadBinary(
     return binary;
   }
 
-  const range = source.byteOffset === undefined || source.byteLength === undefined
-    ? undefined
-    : `bytes=${source.byteOffset}-${source.byteOffset + source.byteLength - 1}`;
-  const response = await fetch(source.href, {
-    cache: "no-store",
+  // The scene loader already resolved this href against the glTF document and
+  // held it to the package origin; the transport policy is re-applied here
+  // because the Worker fetches on its own.
+  const ranged = source.byteOffset !== undefined && source.byteLength !== undefined;
+  const response = await openPackageResponse(new URL(source.href), {
+    kind: "binary",
+    label: source.href,
     signal,
-    ...(range ? { headers: { Range: range } } : {}),
+    ...(ranged
+      ? { range: { byteOffset: source.byteOffset as number, byteLength: source.byteLength as number } }
+      : {}),
   });
-  if (!response.ok) {
-    throw new Error(`Failed to load compiled geometry (${response.status}).`);
-  }
-  let binary = await response.arrayBuffer();
-  if (!range || source.byteOffset === undefined || source.byteLength === undefined) {
-    return binary;
+  // A served range may hold only what was asked for; a host that answers the
+  // whole buffer instead is bounded by the single-resource ceiling.
+  const limitBytes = response.status === 206 && source.byteLength !== undefined
+    ? source.byteLength
+    : defaultPackageTransferLimits.resourceBytes;
+  const bytes = await readBoundedBody(response, limitBytes, source.href);
+  if (!ranged || source.byteOffset === undefined || source.byteLength === undefined) {
+    return toArrayBuffer(bytes);
   }
   if (response.status === 206) {
     const expectedEnd = source.byteOffset + source.byteLength - 1;
@@ -142,7 +153,7 @@ async function loadBinary(
       ? /^bytes (\d+)-(\d+)\/(\d+)$/u.exec(contentRange)
       : undefined;
     if (
-      binary.byteLength !== source.byteLength ||
+      bytes.byteLength !== source.byteLength ||
       !parsedRange ||
       Number(parsedRange[1]) !== source.byteOffset ||
       Number(parsedRange[2]) !== expectedEnd ||
@@ -150,15 +161,23 @@ async function loadBinary(
     ) {
       throw new Error("Partial geometry response does not match the requested range.");
     }
-  } else if (
-    response.status === 200 &&
-    binary.byteLength >= source.byteOffset + source.byteLength
-  ) {
-    binary = binary.slice(source.byteOffset, source.byteOffset + source.byteLength);
-  } else if (binary.byteLength !== source.byteLength) {
+    return toArrayBuffer(bytes);
+  }
+  if (response.status === 200 && bytes.byteLength >= source.byteOffset + source.byteLength) {
+    return toArrayBuffer(
+      bytes.slice(source.byteOffset, source.byteOffset + source.byteLength),
+    );
+  }
+  if (bytes.byteLength !== source.byteLength) {
     throw new Error("Geometry host ignored Range without returning the complete buffer.");
   }
-  return binary;
+  return toArrayBuffer(bytes);
+}
+
+function toArrayBuffer(bytes: Uint8Array): ArrayBuffer {
+  return bytes.byteOffset === 0 && bytes.byteLength === bytes.buffer.byteLength
+    ? (bytes.buffer as ArrayBuffer)
+    : (bytes.slice().buffer as ArrayBuffer);
 }
 
 async function decode(

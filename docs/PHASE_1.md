@@ -154,10 +154,15 @@ the package is individually unadmittable any more. Under the same 64 MiB
 budget, three headed-Chrome runs settle on 111 of 234 chunks with 66,686,508
 decoded and 66,783,808 GPU bytes, retaining 2,255,235 resident triangles
 against 1,849,190 — 22% more geometry for 241,476 fewer decoded bytes — from
-111 requests, 123 skips, and 113 Range responses. First coarse frame is a
-4.283 s median (4.331, 4.283, 4.258 s; 98.40% below the baseline, 62.58×
-faster), ready an 8.943 s median, and used JS heap at ready 1.625 GB for the
-extra resident geometry.
+111 requests, 123 skips, and 113 Range responses. The record was re-recorded
+when the loader began bounding untrusted responses (ADR-0011): every counter
+above reproduced exactly across three further runs, so only its timing and heap
+figures moved.
+First coarse frame is a 4.487 s median (4.495, 4.487, 4.422 s; 98.33% below
+the baseline, 59.73× faster), ready a 9.104 s median, and used JS heap at ready
+0.843 GB against 1.625 GB before — the bounded reader fills one buffer of
+exactly the declared length instead of accumulating the 448.8 MB document, and
+the first frame pays about 200 ms for that.
 
 ### Persistent import cache
 

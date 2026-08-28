@@ -26,6 +26,15 @@ export {
   prepareCompiledGltfDecoder,
 } from "./compiled-gltf.js";
 export {
+  defaultCompiledPackageLimits,
+  resolveCompiledPackageLimits,
+} from "./package-limits.js";
+export type {
+  CompiledPackageLimitOverrides,
+  CompiledPackageLimits,
+  CompiledPackageOptions,
+} from "./package-limits.js";
+export {
   decodeSpatialDemandIndex,
   querySpatialDemandIndex,
   SpatialDemandIndexError,

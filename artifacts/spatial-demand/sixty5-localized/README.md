@@ -108,7 +108,7 @@ regressing. Across all six runs the coarse frame landed between 4.213 s and
 4.388 s, so the three-run p95 of both orders is far inside the 15-second bound
 the decision records. The committed runs report 2.293 s hierarchy / 4.319 s
 coarse frame / 7.432 s ready (compatibility) and 2.352 / 4.384 / 7.705
-(leaf-anchor), against 4.283 s for the non-spatial sixty5 package in
+(leaf-anchor), against 4.487 s for the non-spatial sixty5 package in
 `../../ifc/sixty5-first-frame/`. Adding the index and reordering the payload
 costs nothing measurable at the first frame.
 

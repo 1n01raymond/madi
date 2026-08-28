@@ -5,6 +5,8 @@ import type {
   DecodedSpatialDemandIndex,
 } from "@naru3d/runtime-webgpu";
 
+import { fetchPackageResource, resolvePackageTransferLimits } from "./package-limits.js";
+import type { PackageTransferLimits } from "./package-limits.js";
 import { resourceFileName } from "./property-sidecar.js";
 
 export type SpatialDemandSource =
@@ -12,6 +14,8 @@ export type SpatialDemandSource =
       readonly kind: "url";
       readonly ref: CompiledSpatialIndexRef;
       readonly url: URL;
+      /** Resolved by the loader that fetched the glTF; defaulted when absent. */
+      readonly limits?: PackageTransferLimits;
     }
   | {
       readonly kind: "file";
@@ -30,11 +34,15 @@ async function sha256(bytes: Uint8Array): Promise<string> {
 
 async function readBytes(source: SpatialDemandSource, signal?: AbortSignal): Promise<Uint8Array> {
   if (source.kind === "file") return new Uint8Array(await source.file.arrayBuffer());
-  const response = await fetch(source.url, { cache: "no-store", signal });
-  if (!response.ok) {
-    throw new Error(`Failed to load ${source.url.href} (${String(response.status)}).`);
-  }
-  return new Uint8Array(await response.arrayBuffer());
+  const limits = source.limits ?? resolvePackageTransferLimits();
+  // The declared length is the ceiling: a longer body is refused while it
+  // streams, and the digest below still has to match afterwards.
+  return fetchPackageResource(source.url, {
+    kind: "binary",
+    label: source.url.href,
+    limitBytes: Math.min(source.ref.byteLength, limits.resourceBytes),
+    ...(signal ? { signal } : {}),
+  });
 }
 
 /** Loads, authenticates, and decodes the optional compiler-built demand index. */

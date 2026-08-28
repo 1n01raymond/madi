@@ -31,7 +31,7 @@
   — 실제 4개 분야 IFC 연합 모델을 순수 HTTP Range로 스트리밍합니다. 설치할 것이 없습니다.
   <br />
   <sub>실대형 스케일 측정치: 839.9 MB <code>sixty5</code> 연합 모델이 렌더링 가능한 78,173개
-  occurrence 전체의 첫 coarse 프레임에 4.3초 만에 도달합니다. target detail은 별도의 고정
+  occurrence 전체의 첫 coarse 프레임에 4.5초 만에 도달합니다. target detail은 별도의 고정
   64 MiB decoded·GPU 예산에 따라 admission되며 전체 프로세스 메모리는 포함되지 않습니다
   (<a href="artifacts/ifc/sixty5-first-frame/README.md">증거</a>).</sub>
 </p>
@@ -69,8 +69,8 @@
       </a>
       <br />
       <sub><strong>실물 대형 IFC federation.</strong> 839.9 MB 7개 분야
-      <code>sixty5</code> 모델: 2.4초 만에 계층과 검색 준비, 렌더링 가능한
-      78,173개 occurrence 전체의 첫 coarse frame이 4.3초입니다. 점진적 target
+      <code>sixty5</code> 모델: 2.3초 만에 계층과 검색 준비, 렌더링 가능한
+      78,173개 occurrence 전체의 첫 coarse frame이 4.5초입니다. 점진적 target
       detail은 별도의 고정 64 MiB decoded·GPU admission 예산 안에 머물며 전체
       프로세스 메모리는 포함되지 않습니다. 선택된 기초 보는 자신의 IFC 속성을
       resolve합니다.
@@ -94,14 +94,14 @@ commit과 고지를 보존해 수정 없이 MIT로 재배포합니다. Adafruit�
 | 상세 형상은 일반 HTTP 위에서 점진적으로 스트리밍됩니다 | 28건의 `scene.bin` 요청이 전부 HTTP 206 `bytes=` Range 응답 ([sixty5 브라우저 기록](artifacts/ifc/sixty5-browser/README.md)) |
 | 점진적 target geometry residency는 선언된 예산 안에 머뭅니다 | promotion이 234개 중 26번째 chunk에서 정지하고 target decoded·GPU 바이트가 모두 64 MiB 미만을 유지합니다. 계층, sidecar, Worker 상태와 전체 프로세스 메모리는 이 수치에 포함되지 않습니다 ([sixty5 브라우저 기록](artifacts/ifc/sixty5-browser/README.md)) |
 | 선택은 원본 CAD/BIM 식별자로 이어집니다 | 선택된 기초 보가 6개 IFC 속성 항목을 지연 resolve ([sixty5 브라우저 기록](artifacts/ifc/sixty5-browser/README.md)) |
-| 실물 대형 첫 프레임이 분이 아니라 초 단위로 도착합니다 | 공유 coarse Worker 경로, 가상화된 어셈블리 목록, 거부된 청크를 건너뛰는 residency admission이 sixty5 첫 coarse frame을 268.0초에서 중앙값 4.3초로 단축 — 62.6배 개선 ([첫 프레임 기록](artifacts/ifc/sixty5-first-frame/README.md)) |
+| 실물 대형 첫 프레임이 분이 아니라 초 단위로 도착합니다 | 공유 coarse Worker 경로, 가상화된 어셈블리 목록, 거부된 청크를 건너뛰는 residency admission이 sixty5 첫 coarse frame을 268.0초에서 중앙값 4.5초로 단축 — 59.7배 개선 ([첫 프레임 기록](artifacts/ifc/sixty5-first-frame/README.md)) |
 | 예산이 담을 수 없는 지오메트리는 아예 내려받지 않습니다 | 요구된 sixty5 청크는 컴파일된 문서에서 미리 계산되어 바이트 전송 전에 거부되며, 234개 중 123개가 그렇게 되어 resident set이 Range 응답 245회 대신 113회로 완성 ([첫 프레임 기록](artifacts/ifc/sixty5-first-frame/README.md)) |
 | 같은 예산으로 모델을 더 많이 담습니다 | 프로토타입의 vertex pool을 material 그룹끼리 공유해 sixty5 청크 집합을 decoded 기준 230.7 MB에서 129.2 MB로, 최대 청크를 75.4 MB에서 1.3 MB로 줄여, 동일한 64 MiB 예산에서 resident 종단점을 234개 중 93개에서 111개로, 삼각형을 185만개에서 226만개로 확대 ([첫 프레임 기록](artifacts/ifc/sixty5-first-frame/README.md)) |
 | 카메라 이동은 오래된 다운로드를 기다리지 않고 취소합니다 | 불필요해진 fastener Range 요청이 중단되고 새로 보이는 mounting-plate Range가 먼저 발행 — Chrome과 Firefox 모두 동일 ([브라우저 matrix](artifacts/browser-matrix/README.md)) |
 | 원점에서 10,000 km 떨어진 좌표도 정밀도를 유지합니다 | 0.25 mm 판 간격이 ≤ 0.001 mm 오차로 컴파일되고 두 엔진 모두 픽셀 드리프트 0으로 렌더링 ([정밀도 기록](artifacts/precision/large-coordinates/README.md)) |
 | 가까운 geometry가 함께 전송되도록 패키지를 패킹할 수 있습니다 (opt-in) | leaf-anchor payload 정렬이 Digital Hub census에서 off-view 바이트 합계를 39.9% 절감 ([spatial demand 기록](artifacts/spatial-demand/README.md)) |
 | 컴파일은 바이트 단위로 재현 가능합니다 | 두 번의 전체 sixty5 컴파일이 바이트 동일 패키지 생성 ([컴파일 증거](artifacts/ifc/sixty5/README.md)) |
-| **아직 아닌 것:** 실물 대형 규모의 인터랙티브급 준비 완료와 브라우저 간 성능 주장 | 4.3초 첫 프레임은 discrete GPU 호스트 1대의 단일 Chrome 기록이며, 8.9초 ready 상태는 청크 234개 중 111개에서 안정되므로 64 MiB 예산 아래에서 연합 모델 대부분은 coarse 상태로 남습니다 ([첫 프레임 기록](artifacts/ifc/sixty5-first-frame/README.md)) |
+| **아직 아닌 것:** 실물 대형 규모의 인터랙티브급 준비 완료와 브라우저 간 성능 주장 | 4.5초 첫 프레임은 discrete GPU 호스트 1대의 단일 Chrome 기록이며, 9.1초 ready 상태는 청크 234개 중 111개에서 안정되므로 64 MiB 예산 아래에서 연합 모델 대부분은 coarse 상태로 남습니다 ([첫 프레임 기록](artifacts/ifc/sixty5-first-frame/README.md)) |
 
 ## 어디서 시작할까요
 

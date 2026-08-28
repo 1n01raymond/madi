@@ -149,6 +149,20 @@ Use **Open URL** for an HTTP(S) `scene.gltf`. A successful URL is retained in
 the page's `?scene=` query so the view can be reopened or shared; the remote
 host must allow cross-origin requests for both the glTF and its external binary.
 
+A remote package is untrusted input, so every fetch the Studio makes for one --
+the document, each byte range, and both sidecars -- goes through a single
+transport policy ([ADR-0011](../../docs/adr/0011-remote-package-limits.md)):
+the URL must be HTTP(S) without credentials, every resource the document
+declares must resolve to the document's own origin, redirects are not followed,
+the response must carry a package resource content type rather than a document
+type such as an error page, and the body is held to a byte ceiling while it
+streams -- a resource that declares a `Content-Length` is read into exactly
+that many bytes, and one that declares none is cut off at the limit. The
+document's declared resources are also checked against a package-wide byte and
+count budget before the first of them is requested. The defaults are far above
+the largest package this repository compiles and can be lowered by an embedding
+application.
+
 Use **Open local package** to select exactly one NARU-profile `.gltf` and all of
 its external `.bin` and `.json` resources (including the optional
 `properties.json` / `properties.bin` sidecar pair and `spatial.bin`). The browser validates each

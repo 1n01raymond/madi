@@ -36,6 +36,16 @@ Direct WebGPU rendering and the Phase 1 compiled glTF runtime boundary.
   predicted cost and the charge for the same decoded batch cannot drift apart.
   `packages/runtime-webgpu/test/compiled-gltf.test.ts` decodes a committed
   fixture and asserts the two agree for every chunk.
+- A compiled document is untrusted input, so every reader entry point accepts
+  `{ limits }` and holds the package to the ceilings in
+  `resolveCompiledPackageLimits`: node, mesh, accessor, buffer-view, and target
+  chunk counts are checked against the declaration before anything is
+  allocated, and the active-scene traversal is iterative and depth-bounded, so
+  a deep or cyclic node graph is rejected rather than overflowing the stack.
+  The defaults sit well above the largest package this repository compiles;
+  see [ADR-0011](../../docs/adr/0011-remote-package-limits.md). An embedding
+  application may pass lower limits, and `defaultCompiledPackageLimits` names
+  what it is lowering.
 - `compiledSceneTransferables(scene)` lists owned typed-array buffers for a
   zero-copy Worker-to-main-thread transfer.
 - `NaruWebGpuRenderer` uploads those batches and renders surfaces, edges, and an
