@@ -206,7 +206,9 @@ Status: Current.
   implemented; pinned real-fixture cold/warm and corruption evidence recorded
   in `artifacts/cache/`, ADR-0009 Accepted; deterministic IFC dependency index
   and changed/deleted/renamed/reconciliation tests implemented under proposed
-  ADR-0010; independent per-discipline rebuild and shared reuse pending);
+  ADR-0010; unchanged per-document IfcOpenShell extraction reuse and clean
+  adapter-merge equivalence implemented; content-addressed compiled payloads,
+  complete-package equivalence, and shared reuse pending);
 - view-prioritized scheduling and cancellation of obsolete camera work
   (coarse-bounds fallback, optional spatial-demand policy, and an opt-in
   screen-coverage demand ordering implemented; focused browser, real-model

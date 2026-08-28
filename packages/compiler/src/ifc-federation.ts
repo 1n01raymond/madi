@@ -296,6 +296,7 @@ function assertAdapterIdentity(
   const expectedSceneEncoding = new Map<string, string>([
     ["madi.ifc-adapter-report.4", "madi.ifc-scene-ir-split.3"],
     ["naru.ifc-adapter-report.5", ifcSceneSplitEncodingVersion],
+    ["naru.ifc-adapter-report.6", ifcSceneSplitEncodingVersion],
   ]).get(String(report.schemaVersion));
   if (expectedSceneEncoding === undefined) {
     throw new TypeError("IFC adapter report has an unsupported schema version.");
@@ -318,6 +319,37 @@ function assertAdapterIdentity(
       actual.path !== source.uriHint
     ) {
       throw new TypeError(`IFC adapter identity mismatch for ${source.discipline}.`);
+    }
+  }
+  if (report.schemaVersion === "naru.ifc-adapter-report.6") {
+    const cache = asRecord(
+      report.documentArtifactCache,
+      "IFC adapter document artifact cache result",
+    );
+    const hits = cache.hits;
+    const misses = cache.misses;
+    if (
+      cache.schemaVersion !== "naru.ifc-document-artifact.1" ||
+      (cache.status !== "enabled" && cache.status !== "disabled") ||
+      !Array.isArray(hits) ||
+      hits.some((discipline) => typeof discipline !== "string") ||
+      !Array.isArray(misses) ||
+      misses.some((discipline) => typeof discipline !== "string")
+    ) {
+      throw new TypeError("IFC adapter returned an invalid document artifact cache result.");
+    }
+    const covered = [...hits, ...misses].sort((left, right) =>
+      String(left).localeCompare(String(right), "en"),
+    );
+    const expected = cache.status === "enabled"
+      ? sources.map(({ discipline }) => discipline)
+      : [];
+    if (
+      covered.length !== new Set(covered).size ||
+      covered.length !== expected.length ||
+      covered.some((discipline, index) => discipline !== expected[index])
+    ) {
+      throw new TypeError("IFC adapter document artifact cache coverage is incomplete.");
     }
   }
   const federation = asRecord(report.federation, "IFC adapter federation identity");
@@ -454,6 +486,9 @@ export async function compileIfcFederation(
         propertiesPath,
         "--report",
         adapterReportPath,
+        ...(options.cacheDirectory
+          ? ["--document-cache", resolve(options.cacheDirectory, "ifc-documents")]
+          : []),
         "--threads",
         String(threads),
       ],

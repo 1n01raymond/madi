@@ -40,6 +40,11 @@ content chunks.
 - Do not claim partial compilation or byte reuse from this index alone. Reuse
   requires per-document adapter outputs, content-addressed prototype/chunk
   payloads, and reconstruction tests proving byte-identical full packages.
+- Store the first per-document adapter output as deterministic canonical JSON
+  inside deterministic gzip, keyed by discipline, source digest, URI hint,
+  thread count, and the exact adapter/toolchain fingerprint. Verify the key and
+  payload digest before loading, publish atomically, and never deserialize an
+  executable format such as pickle.
 
 ## Consequences
 
@@ -56,10 +61,14 @@ content chunks.
 
 - The index duplicates sorted IDs already present in Scene IR and adds one
   derived JSON resource to IFC outputs and cache entries.
-- Current changed-discipline imports still run the complete adapter and
-  compiler; the index is a correctness prerequisite, not the optimization.
+- Current changed-discipline imports still rebuild the federation-level
+  property/geometry package, but unchanged documents can skip IfcOpenShell
+  parsing and tessellation through their verified extraction artifacts.
 - Logical target-chunk IDs are revision-local while federation-wide packing
   remains in use, so they cannot yet authorize physical range reuse.
+- Canonical JSON/gzip is safe and dependency-free but may still be expensive to
+  parse at real-large scale. A binary or columnar document artifact requires
+  measured size, restore-time, and peak-memory evidence before replacing it.
 
 ## Alternatives considered
 
@@ -73,6 +82,9 @@ content chunks.
 Focused compiler tests construct and restore the sidecar through the IFC cache,
 check document/prototype/target/property coverage, and prove deterministic
 changed, deleted, renamed/relabelled, and cross-document reconciliation
-invalidation. Acceptance additionally requires independently cached adapter
-documents and a partial rebuild that reproduces the corresponding clean full
-build byte for byte.
+invalidation. The adapter artifact tests reject corruption and identity changes,
+preserve shared geometry aliases, and prove cold, warm, and one-document-changed
+federation structure/geometry/property bytes equal the corresponding clean
+adapter build. Acceptance still requires content-addressed compiled payloads and
+a partial compiler rebuild that reproduces the complete clean package byte for
+byte.

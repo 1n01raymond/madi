@@ -399,9 +399,10 @@ tiers remain the next runtime increments.
 The first incremental IFC prerequisite is also implemented under proposed
 ADR-0010: each compile and whole-package cache entry carries a deterministic
 discipline dependency index, with focused changed/deleted/renamed and
-cross-document reconciliation tests. This does not yet shorten a changed-source
-compile. Per-document adapter artifacts, content-addressed payload reuse, and
-equivalence against a clean full build are the next compiler increment.
+cross-document reconciliation tests. The following increment now reuses
+verified unchanged per-document adapter artifacts and proves its merged adapter
+bytes against a clean build. Federation-wide compiled payload reuse and
+complete-package equivalence are the next compiler increment.
 
 In parallel, the repeated 100k record now carries GPU pass timestamps and a
 backend-owned retained-resource census on both the discrete host and an Apple

@@ -629,10 +629,20 @@ stable-content renamed/relabelled sources; ambiguous equal-digest renames are
 never guessed. The whole-package cache manifest includes and verifies the
 sidecar, and cache hits restore it without invoking the adapter.
 
-This closes only the dependency-index prerequisite in
-[ADR-0010](adr/0010-ifc-incremental-dependency-index.md). The current adapter
-still extracts the complete federation and the target/coarse/spatial/property
-files remain federation-wide. Their physical bytes cannot be reused from this
-logical index alone because packing and column offsets may change. Independent
-adapter outputs, content-addressed payload chunks, and byte-equivalence against
-a clean full build remain before per-discipline compilation is a product claim.
+This closes the dependency-index prerequisite in
+[ADR-0010](adr/0010-ifc-incremental-dependency-index.md). When `--cache` is
+selected, the compiler also gives the adapter an `ifc-documents/` tier. The
+adapter hashes each source, then restores or atomically publishes a verified
+canonical-JSON/gzip artifact keyed by discipline, digest, URI hint, threads,
+and exact adapter/toolchain fingerprint. Report schema
+`naru.ifc-adapter-report.6` records ordered hit/miss coverage, which the compiler
+checks against every selected discipline. Corruption is a miss, and executable
+serialization such as pickle is never loaded.
+
+The actual two-discipline explicit-wall test proves cold and warm outputs plus
+a one-document-changed merge reproduce clean adapter structure, geometry, and
+property bytes exactly. Target/coarse/spatial/property package files remain
+federation-wide, so their physical bytes cannot be reused from this logical
+index alone because packing and column offsets may change. Content-addressed
+compiled payload chunks and complete-package byte-equivalence remain before
+per-discipline compilation is a complete product claim.

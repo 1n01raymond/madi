@@ -128,10 +128,13 @@ coarse-prototype, spatial-occurrence, and property-semantic selectors, and
 expands cross-document semantic relations to a transitive reconciliation set.
 Focused tests cover changed, deleted, and renamed/relabelled inputs plus
 reconciliation invalidation, and unchanged whole-package cache hits restore the
-index byte-for-byte. The adapter and federation-wide payload files are still
-rebuilt as a whole: independent adapter outputs, content-addressed payloads, and
-clean-full-build equivalence evidence remain the gate before any unchanged
-prototype or byte range is actually reused.
+index byte-for-byte. The adapter now also keeps verified per-document extraction
+artifacts under the selected cache: unchanged disciplines skip IfcOpenShell
+parsing and tessellation, while changed, renamed, or corrupt identities miss.
+An actual two-discipline fixture proves cold/warm and one-document-changed merge
+bytes equal a clean adapter build. Federation-wide target/coarse/spatial/property
+payloads are still rebuilt as a whole; content-addressed compiled payloads and
+complete-package equivalence remain before any old byte range is reused.
 
 Shared lookup reuses the same manifest and resource hashes. The resolution
 order is local verified entry, authorized shared entry, then local compilation.
@@ -156,8 +159,9 @@ profile under [ADR-0004](adr/0004-format-strategy.md).
 2. **Columnar hierarchy sidecar:** compare size, parse, hierarchy-ready time,
    peak memory, and compatibility against compact glTF JSON.
 3. **Incremental IFC compilation:** discipline dependency index plus changed,
-   deleted, renamed, and reconciliation tests implemented; independent adapter
-   documents, content-addressed payload reuse, and clean-full-build equivalence
+   deleted, renamed, and reconciliation tests implemented; verified independent
+   adapter document reuse and clean adapter-merge equivalence implemented;
+   content-addressed compiled payload reuse and complete-package equivalence
    remain.
 4. **Standards export:** retain glTF; evaluate GLB, GPU instancing, and mesh
    compression without making the cache an interchange claim.
