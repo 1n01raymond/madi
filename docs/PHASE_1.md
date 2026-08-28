@@ -205,7 +205,7 @@ direct WebGPU renderer. The Phase 0 Scene IR JSON is no longer a browser input.
 | In-flight cancellation | A second browser run cancels while range 2/3 is pending, observes `Scene load cancelled.`, and proves that range 3/3 is never requested | Passed in headed Chrome and Firefox |
 | Browser conformance | Headed Chrome/Blink and Firefox/Gecko emit no console warnings or errors | Passed by `pnpm browser:matrix` |
 | Safari capability | Real Safari 26.6.1 on macOS Sequoia loads all 87 hierarchy records under default settings, then reports that WebGPU is unavailable because `navigator.gpu` is absent; Apple enables WebGPU by default only in Safari 26 on macOS 26 (Tahoe) and newer OS releases | Graceful unsupported-browser result; rendering conformance not yet available |
-| Public review | [GitHub Pages](https://1n01raymond.github.io/naru/) serves the qualified Digital Hub package by default and PyGamer as a secondary scene; deployment verifies the package digests and smoke-checks the live app, declared resources, and HTTP Range delivery | Passed by `.github/workflows/deploy-demo.yml` and `pnpm demo:smoke` |
+| Public review | [GitHub Pages](https://1n01raymond.github.io/naru/) serves an evidence-card landing page and, under `studio/`, the Studio with the qualified Digital Hub package by default and PyGamer as a secondary scene; deployment verifies the package digests and smoke-checks the landing page, live app, declared resources, and HTTP Range delivery | Passed by `.github/workflows/deploy-demo.yml` and `pnpm demo:smoke` |
 
 ## Large-coordinate precision
 
