@@ -124,6 +124,8 @@ describe("naru compile-ifc arguments", () => {
         "256",
         "--compact-json",
         "--omit-resource-names",
+        "--elide-derived-identifiers",
+        "--omit-default-node-transforms",
         "--retain-scene-ir",
       ]),
     ).toEqual({
@@ -138,8 +140,21 @@ describe("naru compile-ifc arguments", () => {
       spatialPayloadOrder: false,
       compactJson: true,
       omitResourceNames: true,
+      elideDerivedIdentifiers: true,
+      omitDefaultNodeTransforms: true,
       retainSceneIr: true,
     });
+  });
+
+  it("leaves both node-field elision options off unless asked for", () => {
+    const parsed = parseIfcCompileArguments([
+      "--document",
+      "architecture=arch.ifc",
+      "--output",
+      "out",
+    ]);
+    expect(parsed.elideDerivedIdentifiers).toBe(false);
+    expect(parsed.omitDefaultNodeTransforms).toBe(false);
   });
 
   it("preserves the order documents were given in", () => {
