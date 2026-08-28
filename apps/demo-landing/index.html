@@ -1,0 +1,440 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>NARU — WebGPU-native engine for massive CAD and BIM</title>
+    <meta
+      name="description"
+      content="Open-source studio, compiler, and WebGPU runtime for massive CAD, BIM, and engineering scenes. Standard glTF 2.0 delivery over plain HTTP Ranges, bounded memory, and source-aware picking — every claim backed by a committed, CI-validated evidence record."
+    />
+    <link rel="icon" type="image/svg+xml" href="media/naru-favicon.svg" />
+    <style>
+      :root {
+        --bg: #0c1016;
+        --panel: #131a24;
+        --panel-edge: #1f2a3a;
+        --ink: #e8edf4;
+        --ink-dim: #96a3b5;
+        --accent: #5b8def;
+        --accent-warm: #ff6b4a;
+        --good: #20b486;
+        --radius: 12px;
+        color-scheme: dark;
+      }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+      }
+      body {
+        background: var(--bg);
+        color: var(--ink);
+        font-family:
+          ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+          "Helvetica Neue", Arial, sans-serif;
+        line-height: 1.55;
+      }
+      a {
+        color: var(--accent);
+        text-decoration: none;
+      }
+      a:hover {
+        text-decoration: underline;
+      }
+      code {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-size: 0.92em;
+        background: #1a2331;
+        border-radius: 4px;
+        padding: 0.08em 0.35em;
+      }
+      .wrap {
+        max-width: 1080px;
+        margin: 0 auto;
+        padding: 0 20px;
+      }
+      header.site {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 18px 0;
+      }
+      header.site .brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: var(--ink);
+        font-weight: 700;
+        letter-spacing: 0.02em;
+      }
+      header.site .brand img {
+        height: 26px;
+        width: auto;
+      }
+      header.site nav {
+        display: flex;
+        gap: 18px;
+        font-size: 0.95rem;
+      }
+      header.site nav a {
+        color: var(--ink-dim);
+      }
+      header.site nav a:hover {
+        color: var(--ink);
+        text-decoration: none;
+      }
+      .hero {
+        text-align: center;
+        padding: 40px 0 12px;
+      }
+      .hero img.mark {
+        width: min(680px, 92%);
+        height: auto;
+      }
+      .hero h1 {
+        font-size: clamp(1.5rem, 3.4vw, 2.2rem);
+        font-weight: 750;
+        letter-spacing: -0.015em;
+        margin-top: 26px;
+      }
+      .hero p.sub {
+        color: var(--ink-dim);
+        max-width: 46rem;
+        margin: 12px auto 0;
+        font-size: 1.06rem;
+      }
+      .cta-row {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 12px;
+        margin-top: 28px;
+      }
+      .btn {
+        display: inline-block;
+        border-radius: 10px;
+        padding: 13px 22px;
+        font-weight: 650;
+        font-size: 1rem;
+        border: 1px solid transparent;
+      }
+      .btn:hover {
+        text-decoration: none;
+        filter: brightness(1.1);
+      }
+      .btn.primary {
+        background: var(--accent);
+        color: #0b1220;
+      }
+      .btn.secondary {
+        background: transparent;
+        border-color: var(--panel-edge);
+        color: var(--ink);
+      }
+      .hero p.fine {
+        color: var(--ink-dim);
+        font-size: 0.86rem;
+        margin-top: 16px;
+      }
+      .stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+        gap: 12px;
+        margin: 44px 0 8px;
+      }
+      .stat {
+        background: var(--panel);
+        border: 1px solid var(--panel-edge);
+        border-radius: var(--radius);
+        padding: 16px 18px;
+        text-align: center;
+      }
+      .stat .n {
+        font-size: 1.45rem;
+        font-weight: 750;
+        letter-spacing: -0.01em;
+      }
+      .stat .l {
+        color: var(--ink-dim);
+        font-size: 0.88rem;
+        margin-top: 2px;
+      }
+      section.cards {
+        padding: 44px 0 8px;
+      }
+      section.cards > .wrap > h2 {
+        font-size: 1.5rem;
+        letter-spacing: -0.01em;
+      }
+      section.cards > .wrap > p.lead {
+        color: var(--ink-dim);
+        max-width: 52rem;
+        margin-top: 8px;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+        gap: 18px;
+        margin-top: 26px;
+      }
+      .card {
+        background: var(--panel);
+        border: 1px solid var(--panel-edge);
+        border-radius: var(--radius);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+      }
+      .card img {
+        width: 100%;
+        aspect-ratio: 4 / 3;
+        object-fit: cover;
+        object-position: center;
+        border-bottom: 1px solid var(--panel-edge);
+        background: #0a0e13;
+      }
+      .card .body {
+        padding: 16px 18px 18px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        flex: 1;
+      }
+      .card h3 {
+        font-size: 1.02rem;
+        letter-spacing: -0.005em;
+      }
+      .card p {
+        color: var(--ink-dim);
+        font-size: 0.92rem;
+        flex: 1;
+      }
+      .card .ev {
+        font-size: 0.85rem;
+      }
+      .method {
+        margin: 52px 0 0;
+        background: var(--panel);
+        border: 1px solid var(--panel-edge);
+        border-radius: var(--radius);
+        padding: 26px 28px;
+      }
+      .method h2 {
+        font-size: 1.25rem;
+      }
+      .method p {
+        color: var(--ink-dim);
+        margin-top: 10px;
+        max-width: 60rem;
+      }
+      footer.site {
+        margin-top: 56px;
+        border-top: 1px solid var(--panel-edge);
+        padding: 26px 0 40px;
+        color: var(--ink-dim);
+        font-size: 0.9rem;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px 26px;
+        justify-content: center;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header class="site">
+        <a class="brand" href="./">
+          <img src="media/naru-mark-inverse.svg" alt="" />
+          NARU
+        </a>
+        <nav>
+          <a href="studio/">Studio</a>
+          <a href="#evidence">Evidence</a>
+          <a href="https://github.com/1n01raymond/naru/tree/main/docs">Docs</a>
+          <a href="https://github.com/1n01raymond/naru">GitHub</a>
+        </nav>
+      </header>
+    </div>
+
+    <div class="wrap hero">
+      <img class="mark" src="media/naru-hero.svg" alt="NARU — A WebGPU-native engine for massive CAD and BIM" />
+      <h1>Engineering models on the open Web, at scale.</h1>
+      <p class="sub">
+        An open-source studio, compiler, and WebGPU runtime for massive CAD,
+        BIM, and engineering scenes. Delivery is standard glTF&nbsp;2.0 over
+        plain HTTP Ranges — this entire demo is served by GitHub Pages, with no
+        backend and nothing to install.
+      </p>
+      <div class="cta-row">
+        <a class="btn primary" href="studio/">▶&nbsp; Launch the Studio — Digital Hub IFC federation</a>
+        <a class="btn secondary" href="studio/?scene=pygamer/scene.gltf">PyGamer STEP assembly</a>
+      </div>
+      <p class="fine">
+        Requires a WebGPU-capable browser (current Chrome, Edge, or Firefox;
+        Safari from Safari&nbsp;26 on macOS&nbsp;26). You can also open your own
+        compiled <code>.gltf</code> package — it loads entirely client-side.
+      </p>
+    </div>
+
+    <div class="wrap">
+      <div class="stats">
+        <div class="stat">
+          <div class="n">78,173</div>
+          <div class="l"><a href="https://github.com/1n01raymond/naru/blob/main/artifacts/ifc/sixty5-first-frame/README.md">occurrences in one recorded federation</a></div>
+        </div>
+        <div class="stat">
+          <div class="n">4.3 s</div>
+          <div class="l"><a href="https://github.com/1n01raymond/naru/blob/main/artifacts/ifc/sixty5-first-frame/README.md">first coarse frame, 839.9 MB source</a></div>
+        </div>
+        <div class="stat">
+          <div class="n">64 MiB</div>
+          <div class="l"><a href="https://github.com/1n01raymond/naru/blob/main/artifacts/ifc/sixty5-browser/README.md">fixed decoded &amp; GPU budgets, held</a></div>
+        </div>
+        <div class="stat">
+          <div class="n">0 / 0</div>
+          <div class="l"><a href="https://github.com/1n01raymond/naru/blob/main/artifacts/phase1/README.md">Khronos glTF validator errors / warnings</a></div>
+        </div>
+      </div>
+    </div>
+
+    <section class="cards" id="evidence">
+      <div class="wrap">
+        <h2>Proven in the browser, not promised</h2>
+        <p class="lead">
+          Every card below is a committed evidence record that CI re-validates
+          on every merge. The screenshots are the exact captures those records
+          pin by digest — click through for the numbers, hardware, and the
+          commands that reproduce them.
+        </p>
+        <div class="grid">
+          <article class="card">
+            <img src="media/step-picked.png" loading="lazy" alt="Adafruit PyGamer STEP assembly rendered and picked in the NARU Studio" />
+            <div class="body">
+              <h3>A real STEP assembly, end to end</h3>
+              <p>
+                Adafruit's PyGamer board: 85 part occurrences sharing 34 meshes,
+                162,838 unique triangles, and source-aware picking — identical
+                behavior in Chrome and Firefox.
+              </p>
+              <a class="ev" href="https://github.com/1n01raymond/naru/blob/main/artifacts/browser-matrix/README.md">Browser matrix evidence →</a>
+            </div>
+          </article>
+          <article class="card">
+            <img src="media/sixty5-coarse.png" loading="lazy" alt="First coarse frame of the sixty5 IFC federation" />
+            <div class="body">
+              <h3>A real-large IFC federation in seconds</h3>
+              <p>
+                The 839.9 MB seven-discipline <code>sixty5</code> model reaches
+                a first coarse frame of all 78,173 renderable occurrences in a
+                4.3 s median — down from a 268.0 s baseline.
+              </p>
+              <a class="ev" href="https://github.com/1n01raymond/naru/blob/main/artifacts/ifc/sixty5-first-frame/README.md">First-frame evidence →</a>
+            </div>
+          </article>
+          <article class="card">
+            <img src="media/sixty5-budget.png" loading="lazy" alt="The sixty5 federation rendered under a fixed 64 MiB residency budget" />
+            <div class="body">
+              <h3>Memory stays inside a declared budget</h3>
+              <p>
+                Fixed 64 MiB decoded and GPU budgets hold at any scene size;
+                chunks the budget cannot take are priced from the compiled
+                document and never downloaded.
+              </p>
+              <a class="ev" href="https://github.com/1n01raymond/naru/blob/main/artifacts/ifc/sixty5-first-frame/README.md">Residency evidence →</a>
+            </div>
+          </article>
+          <article class="card">
+            <img src="media/sixty5-picked.png" loading="lazy" alt="A picked foundation beam resolving its IFC property sets" />
+            <div class="body">
+              <h3>Selection resolves source identity</h3>
+              <p>
+                A picked foundation beam resolves to its source IFC entity and
+                lazily fetches its property sets from the package sidecar — no
+                Scene IR intermediate in the browser.
+              </p>
+              <a class="ev" href="https://github.com/1n01raymond/naru/blob/main/artifacts/ifc/sixty5-browser/README.md">Real-large browser evidence →</a>
+            </div>
+          </article>
+          <article class="card">
+            <img src="media/step-partial.png" loading="lazy" alt="A mixed coarse and target-detail frame during progressive loading" />
+            <div class="body">
+              <h3>A useful frame before full detail</h3>
+              <p>
+                A coarse WebGPU frame renders before the first target Range
+                completes, and mixed coarse/target frames follow per completed
+                range — recorded under a delayed network.
+              </p>
+              <a class="ev" href="https://github.com/1n01raymond/naru/blob/main/artifacts/browser-matrix/README.md">Browser matrix evidence →</a>
+            </div>
+          </article>
+          <article class="card">
+            <img src="media/step-priority.png" loading="lazy" alt="View-priority scheduling cancelling an obsolete range request" />
+            <div class="body">
+              <h3>Camera moves cancel stale downloads</h3>
+              <p>
+                Panning aborts the obsolete Range request and its Worker decode,
+                and the newly hottest chunk is requested first — in Chrome and
+                Firefox.
+              </p>
+              <a class="ev" href="https://github.com/1n01raymond/naru/blob/main/artifacts/browser-matrix/README.md">Browser matrix evidence →</a>
+            </div>
+          </article>
+          <article class="card">
+            <img src="media/precision-far.png" loading="lazy" alt="A sectioned 0.25 mm plate gap rendered 10,000 km from the origin" />
+            <div class="body">
+              <h3>Precision 10,000 km from the origin</h3>
+              <p>
+                A 0.25 mm plate gap compiles with ≤ 0.001 mm error and renders
+                with zero pixel drift between near and far scenes, through
+                navigation, sectioning, and picking.
+              </p>
+              <a class="ev" href="https://github.com/1n01raymond/naru/blob/main/artifacts/precision/large-coordinates/README.md">Precision evidence →</a>
+            </div>
+          </article>
+          <article class="card">
+            <img src="media/spatial-demand.png" loading="lazy" alt="Spatial demand partitioning requesting only visible-leaf chunks" />
+            <div class="body">
+              <h3>Only the view's geometry is demanded</h3>
+              <p>
+                An opt-in compiler-built BVH lets a localized view demand 152
+                instead of 209 of 234 chunks on the same federation, cancelling
+                obsolete Ranges before their bodies arrive.
+              </p>
+              <a class="ev" href="https://github.com/1n01raymond/naru/blob/main/artifacts/spatial-demand/README.md">Spatial demand evidence →</a>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <div class="wrap">
+      <div class="method">
+        <h2>Evidence-gated by construction</h2>
+        <p>
+          Compiles are deterministic — two full runs of the same source produce
+          byte-identical JSON, binaries, and reports — and unchanged sources
+          restore from a verified persistent cache in seconds
+          (<a href="https://github.com/1n01raymond/naru/blob/main/artifacts/cache/README.md">cache evidence</a>,
+          <a href="https://github.com/1n01raymond/naru/blob/main/docs/adr/0009-persistent-compiled-cache.md">ADR-0009</a>).
+          The roadmap advances only when a capability is reproduced in this
+          repository: validators hardcode digests and counts on purpose, and
+          <code>pnpm check</code> re-runs all of them in CI. Read the
+          <a href="https://github.com/1n01raymond/naru/blob/main/docs/ROADMAP.md">roadmap</a>
+          and the
+          <a href="https://github.com/1n01raymond/naru/blob/main/docs/PHASE_1_REPORT.md">Phase 1 completion report</a>.
+        </p>
+      </div>
+    </div>
+
+    <div class="wrap">
+      <footer class="site">
+        <span>NARU is open source under <a href="https://github.com/1n01raymond/naru/blob/main/LICENSE">Apache-2.0</a></span>
+        <a href="https://github.com/1n01raymond/naru">GitHub</a>
+        <a href="https://github.com/1n01raymond/naru/blob/main/CONTRIBUTING.md">Contributing</a>
+        <a href="https://github.com/1n01raymond/naru/blob/main/docs/README.md">Design documents</a>
+        <span>PyGamer CAD © Adafruit Industries, MIT; Adafruit does not endorse NARU</span>
+      </footer>
+    </div>
+  </body>
+</html>

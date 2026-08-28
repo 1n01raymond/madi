@@ -75,8 +75,35 @@ function cacheBusted(url, attempt) {
   return result;
 }
 
-async function checkIndex(baseUrl, attempt) {
-  const indexUrl = cacheBusted(baseUrl, attempt);
+async function checkLanding(baseUrl, attempt) {
+  const landingUrl = cacheBusted(baseUrl, attempt);
+  const response = await fetchChecked(landingUrl);
+  assert(response.status === 200, `${landingUrl.href} returned HTTP ${response.status}.`);
+  assert(
+    response.headers.get("content-type")?.startsWith("text/html"),
+    `${landingUrl.href} did not return HTML.`,
+  );
+
+  const html = await response.text();
+  assert(html.includes("<title>NARU"), `${landingUrl.href} is not the NARU landing page.`);
+  assert(html.includes('href="studio/"'), `${landingUrl.href} does not link to the Studio.`);
+
+  const mediaPaths = [...html.matchAll(/(?:src|href)="(media\/[^"]+)"/gu)].map(
+    (match) => match[1],
+  );
+  assert(mediaPaths.length > 0, `${landingUrl.href} references no evidence media.`);
+
+  for (const mediaPath of new Set(mediaPaths)) {
+    const mediaUrl = cacheBusted(new URL(mediaPath, baseUrl), attempt);
+    const mediaResponse = await fetchChecked(mediaUrl, { method: "HEAD" });
+    assert(mediaResponse.status === 200, `${mediaUrl.href} returned HTTP ${mediaResponse.status}.`);
+  }
+
+  return mediaPaths.length;
+}
+
+async function checkStudioIndex(baseUrl, attempt) {
+  const indexUrl = cacheBusted(new URL("studio/", baseUrl), attempt);
   const response = await fetchChecked(indexUrl);
   assert(response.status === 200, `${indexUrl.href} returned HTTP ${response.status}.`);
   assert(
@@ -159,21 +186,23 @@ async function main() {
 
   for (let attempt = 1; attempt <= options.attempts; attempt += 1) {
     try {
-      const assetCount = await checkIndex(options.url, attempt);
+      const mediaCount = await checkLanding(options.url, attempt);
+      const assetCount = await checkStudioIndex(options.url, attempt);
       const digitalHubRanges = await checkPackage(
         options.url,
-        "",
+        "studio/",
         digitalHubResources,
         attempt,
       );
       const pyGamerRanges = await checkPackage(
         options.url,
-        "pygamer/",
+        "studio/pygamer/",
         pyGamerResources,
         attempt,
       );
       console.log(
-        `Public demo smoke check passed: ${assetCount} app assets, ` +
+        `Public demo smoke check passed: ${mediaCount} landing media references, ` +
+          `${assetCount} app assets, ` +
           `${digitalHubResources.length + pyGamerResources.length} package resources, ` +
           `${digitalHubRanges + pyGamerRanges} HTTP Range responses.`,
       );

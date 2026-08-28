@@ -1,9 +1,12 @@
 name: Deploy public demo
 
-# Publishes the Studio (apps/webgpu-spike) to GitHub Pages as a public,
-# read-only demo. Digital Hub (MIT-licensed IFC-Bench federation) is the
-# default scene; PyGamer (MIT-licensed STEP fixture, already committed under
-# artifacts/phase1/adafruit-pygamer/) is reachable as a secondary example.
+# Publishes the public demo site to GitHub Pages: a static landing page
+# (apps/demo-landing) at the site root, the read-only Studio
+# (apps/webgpu-spike) under /studio/, and committed evidence screenshots the
+# landing cards reference under /media/. Digital Hub (MIT-licensed IFC-Bench
+# federation) is the Studio's default scene; PyGamer (MIT-licensed STEP
+# fixture, already committed under artifacts/phase1/adafruit-pygamer/) is
+# reachable as a secondary example via studio/?scene=pygamer/scene.gltf.
 #
 # Digital Hub's compiled package (~63 MB) is not committed, per AGENTS.md's
 # rule against large derived geometry in git history. It is instead published
@@ -21,6 +24,7 @@ on:
     branches: [main]
     paths:
       - "apps/webgpu-spike/**"
+      - "apps/demo-landing/**"
       - "packages/runtime-webgpu/**"
       - "packages/scene-ir/**"
       - "artifacts/phase1/adafruit-pygamer/**"
@@ -87,19 +91,30 @@ jobs:
         working-directory: apps/webgpu-spike
         env:
           NARU_SCENE_DIR: ${{ github.workspace }}/demo-scene/digital-hub
-        run: pnpm exec vite build --base=/naru/
+        run: pnpm exec vite build --base=/naru/studio/
 
-      - name: Add PyGamer as a secondary demo package
+      - name: Assemble the site (landing page + Studio + evidence media)
         run: |
           set -euo pipefail
-          mkdir -p apps/webgpu-spike/dist/pygamer
-          cp artifacts/phase1/adafruit-pygamer/scene.gltf apps/webgpu-spike/dist/pygamer/
-          cp artifacts/phase1/adafruit-pygamer/scene.bin apps/webgpu-spike/dist/pygamer/
+          mkdir -p site/media site/studio/pygamer
+          cp apps/demo-landing/index.html site/
+          cp docs/media/naru-hero.svg docs/media/naru-mark-inverse.svg docs/media/naru-favicon.svg site/media/
+          cp artifacts/browser-matrix/chrome-151-macos-selected.png site/media/step-picked.png
+          cp artifacts/browser-matrix/chrome-151-macos-partial.png site/media/step-partial.png
+          cp artifacts/browser-matrix/chrome-151-macos-view-priority.png site/media/step-priority.png
+          cp artifacts/ifc/sixty5-first-frame/coarse-frame.png site/media/sixty5-coarse.png
+          cp artifacts/ifc/sixty5-first-frame/budget-limited.png site/media/sixty5-budget.png
+          cp artifacts/ifc/sixty5-first-frame/picked.png site/media/sixty5-picked.png
+          cp artifacts/precision/large-coordinates/chrome-sectioned-far.png site/media/precision-far.png
+          cp artifacts/spatial-demand/chrome-151-macos-spatial-demand.png site/media/spatial-demand.png
+          cp -R apps/webgpu-spike/dist/. site/studio/
+          cp artifacts/phase1/adafruit-pygamer/scene.gltf site/studio/pygamer/
+          cp artifacts/phase1/adafruit-pygamer/scene.bin site/studio/pygamer/
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: apps/webgpu-spike/dist
+          path: site
 
   deploy:
     name: Deploy to GitHub Pages
