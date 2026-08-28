@@ -25,6 +25,7 @@ describe("IFC federation compiler orchestration", () => {
       const outputDirectory = join(temporaryDirectory, "compiled");
       const cachedOutputDirectory = join(temporaryDirectory, "compiled-cached");
       const relabeledOutputDirectory = join(temporaryDirectory, "compiled-relabeled");
+      const unnamedOutputDirectory = join(temporaryDirectory, "compiled-unnamed");
       const cacheDirectory = join(temporaryDirectory, "cache");
       const adapterCountPath = join(temporaryDirectory, "adapter-count.txt");
       await writeFile(adapterCountPath, "0", "utf8");
@@ -299,6 +300,43 @@ await writeFile(option("--report"), JSON.stringify({
       expect(relabeled.cache.key).not.toBe(result.cache.key);
       expect(await readFile(adapterCountPath, "utf8")).toBe("2");
 
+      const unnamed = await compileIfcFederation({
+        documents: [
+          {
+            discipline: "architecture",
+            sourcePath,
+            uriHint: "projects/digital_hub/arc.ifc",
+          },
+        ],
+        outputDirectory: unnamedOutputDirectory,
+        pythonExecutable: process.execPath,
+        adapterScriptPath: adapterPath,
+        retainSceneIr: true,
+        cacheDirectory,
+        spatialIndex: true,
+        spatialLeafCapacity: 2,
+        spatialPayloadOrder: true,
+        compactJson: true,
+        omitResourceNames: true,
+      });
+      const unnamedGltf = JSON.parse(
+        await readFile(join(unnamedOutputDirectory, "scene.gltf"), "utf8"),
+      );
+      expect(unnamed.cache.status).toBe("miss");
+      expect(unnamed.cache.key).not.toBe(result.cache.key);
+      expect(unnamed.report.options.resourceNames).toBe("omitted");
+      expect(unnamedGltf.meshes.every((mesh: { name?: string }) => mesh.name === undefined))
+        .toBe(true);
+      expect(unnamedGltf.bufferViews.every(
+        (bufferView: { name?: string }) => bufferView.name === undefined,
+      )).toBe(true);
+      expect(unnamedGltf.accessors.every(
+        (accessor: { name?: string }) => accessor.name === undefined,
+      )).toBe(true);
+      expect(unnamedGltf.nodes.some((node: { name?: string }) => node.name !== undefined))
+        .toBe(true);
+      expect(await readFile(adapterCountPath, "utf8")).toBe("3");
+
       const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
       try {
         await writeFile(
@@ -328,7 +366,7 @@ await writeFile(option("--report"), JSON.stringify({
         expect(recovered.report.output.packageDigest).toBe(
           result.report.output.packageDigest,
         );
-        expect(await readFile(adapterCountPath, "utf8")).toBe("3");
+        expect(await readFile(adapterCountPath, "utf8")).toBe("4");
         expect(warnSpy).toHaveBeenCalledWith(
           expect.stringContaining("cache restore failed"),
         );

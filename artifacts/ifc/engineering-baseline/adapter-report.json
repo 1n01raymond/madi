@@ -1,0 +1,2433 @@
+{
+  "adapter": {
+    "geometryLibrary": "opencascade",
+    "name": "IfcOpenShell",
+    "version": "0.8.5"
+  },
+  "counts": {
+    "documentCount": 31,
+    "duplicateGlobalIdCount": 0,
+    "edgeSegmentCount": 5598195,
+    "geometricOccurrenceCount": 104337,
+    "geometricPrototypeCount": 66396,
+    "mappedItemCount": 39132,
+    "maxHierarchyDepth": 5,
+    "occurrenceCount": 268001,
+    "part21EntityCount": 12339886,
+    "productCount": 267970,
+    "propertyDistinctValueCount": 623153,
+    "propertyKeyCount": 35630,
+    "propertySetCount": 313,
+    "propertyValueCount": 4806296,
+    "prototypeCount": 66611,
+    "representationCount": 66396,
+    "representationMapCount": 45647,
+    "reusedGeometryOccurrenceCount": 37941,
+    "semanticEntityCount": 272085,
+    "submittedEdgeSegmentCount": 50324345,
+    "submittedTriangleCount": 46059890,
+    "triangleCount": 10394938,
+    "vertexCount": 5311895
+  },
+  "diagnostics": {
+    "codes": [
+      "IFC_DEGENERATE_PLACEMENT",
+      "IFC_EDGE_CLASSIFICATION_BOUNDARY_ONLY"
+    ],
+    "counts": {
+      "info": 1,
+      "warning": 56
+    }
+  },
+  "documentArtifactCache": {
+    "hits": [
+      "d-architecture",
+      "d-electrical",
+      "d-facade",
+      "d-kitchen",
+      "d-plumbing",
+      "d-structure",
+      "d-ventilation",
+      "e-aarts-1-6",
+      "e-aarts-13-17",
+      "e-aarts-6-8",
+      "e-aarts-9-12",
+      "e-bvt-geelen-10",
+      "e-bvt-geelen-11",
+      "e-s1-geelen-10",
+      "e-s1-geelen-12"
+    ],
+    "misses": [
+      "e-aarts-schoren",
+      "e-s1-geelen-01",
+      "e-s1-geelen-02",
+      "e-s1-geelen-03",
+      "e-s1-geelen-04",
+      "e-s1-geelen-05",
+      "e-s1-geelen-06",
+      "e-s1-geelen-07",
+      "e-s1-geelen-08",
+      "e-s1-geelen-09",
+      "e-s1-geelen-11",
+      "e-s1-geelen-13",
+      "e-s1-geelen-14",
+      "e-s1-geelen-15",
+      "e-s1-geelen-16",
+      "e-s1-geelen-17"
+    ],
+    "schemaVersion": "naru.ifc-document-artifact.1",
+    "status": "enabled"
+  },
+  "federation": {
+    "documentOrder": [
+      "d-architecture",
+      "d-electrical",
+      "d-facade",
+      "d-kitchen",
+      "d-plumbing",
+      "d-structure",
+      "d-ventilation",
+      "e-aarts-1-6",
+      "e-aarts-13-17",
+      "e-aarts-6-8",
+      "e-aarts-9-12",
+      "e-aarts-schoren",
+      "e-bvt-geelen-10",
+      "e-bvt-geelen-11",
+      "e-s1-geelen-01",
+      "e-s1-geelen-02",
+      "e-s1-geelen-03",
+      "e-s1-geelen-04",
+      "e-s1-geelen-05",
+      "e-s1-geelen-06",
+      "e-s1-geelen-07",
+      "e-s1-geelen-08",
+      "e-s1-geelen-09",
+      "e-s1-geelen-10",
+      "e-s1-geelen-11",
+      "e-s1-geelen-12",
+      "e-s1-geelen-13",
+      "e-s1-geelen-14",
+      "e-s1-geelen-15",
+      "e-s1-geelen-16",
+      "e-s1-geelen-17"
+    ],
+    "options": {
+      "edgeMode": "ifcopenshell-opencascade-face-boundaries",
+      "geometryLibrary": "opencascade",
+      "includeEdges": true,
+      "includeSurfaces": true,
+      "normalizeSceneToMeters": true,
+      "propertyMode": "indexed-column-values",
+      "useWorldCoordinates": false,
+      "weldVertices": true
+    },
+    "sourceDigest": "005cd2fe73ef75093cf5e77b4d4fc078a391eec902d31e2b7c9e2e357e689f16"
+  },
+  "limitations": [
+    "IFC edges retain tessellated OpenCascade face boundaries and source representation-item ids, but not analytic curve kinds or sharp/smooth/seam classification.",
+    "Properties are flattened for the first queryable semantic slice; keys and key-sets are interned into the scene propertyIndex and the values live in the binary property column file.",
+    "Cross-document object reconciliation is document-scoped and not inferred from names."
+  ],
+  "prototypeReuse": [
+    {
+      "edgeSegments": 36,
+      "materialGroups": 1,
+      "occurrenceCount": 261,
+      "prototypeId": "prototype:ifc:d-architecture-e91ddbbd672b:946816",
+      "triangles": 44,
+      "vertices": 24
+    },
+    {
+      "edgeSegments": 36,
+      "materialGroups": 1,
+      "occurrenceCount": 181,
+      "prototypeId": "prototype:ifc:d-architecture-e91ddbbd672b:947049",
+      "triangles": 44,
+      "vertices": 24
+    },
+    {
+      "edgeSegments": 36,
+      "materialGroups": 1,
+      "occurrenceCount": 85,
+      "prototypeId": "prototype:ifc:d-architecture-e91ddbbd672b:147930",
+      "triangles": 44,
+      "vertices": 24
+    },
+    {
+      "edgeSegments": 713,
+      "materialGroups": 2,
+      "occurrenceCount": 62,
+      "prototypeId": "prototype:ifc:d-architecture-e91ddbbd672b:50248",
+      "triangles": 720,
+      "vertices": 400
+    },
+    {
+      "edgeSegments": 713,
+      "materialGroups": 2,
+      "occurrenceCount": 59,
+      "prototypeId": "prototype:ifc:d-architecture-e91ddbbd672b:132168",
+      "triangles": 720,
+      "vertices": 400
+    },
+    {
+      "edgeSegments": 36,
+      "materialGroups": 1,
+      "occurrenceCount": 57,
+      "prototypeId": "prototype:ifc:d-architecture-e91ddbbd672b:966189",
+      "triangles": 44,
+      "vertices": 24
+    },
+    {
+      "edgeSegments": 348,
+      "materialGroups": 2,
+      "occurrenceCount": 53,
+      "prototypeId": "prototype:ifc:d-architecture-e91ddbbd672b:121548",
+      "triangles": 424,
+      "vertices": 232
+    },
+    {
+      "edgeSegments": 352,
+      "materialGroups": 5,
+      "occurrenceCount": 53,
+      "prototypeId": "prototype:ifc:d-architecture-e91ddbbd672b:133670",
+      "triangles": 414,
+      "vertices": 240
+    },
+    {
+      "edgeSegments": 348,
+      "materialGroups": 2,
+      "occurrenceCount": 52,
+      "prototypeId": "prototype:ifc:d-architecture-e91ddbbd672b:52363",
+      "triangles": 424,
+      "vertices": 232
+    },
+    {
+      "edgeSegments": 352,
+      "materialGroups": 5,
+      "occurrenceCount": 52,
+      "prototypeId": "prototype:ifc:d-architecture-e91ddbbd672b:70260",
+      "triangles": 414,
+      "vertices": 240
+    },
+    {
+      "edgeSegments": 320,
+      "materialGroups": 1,
+      "occurrenceCount": 49,
+      "prototypeId": "prototype:ifc:d-architecture-e91ddbbd672b:123070",
+      "triangles": 380,
+      "vertices": 226
+    },
+    {
+      "edgeSegments": 144,
+      "materialGroups": 3,
+      "occurrenceCount": 49,
+      "prototypeId": "prototype:ifc:d-architecture-e91ddbbd672b:450256",
+      "triangles": 152,
+      "vertices": 96
+    },
+    {
+      "edgeSegments": 144,
+      "materialGroups": 3,
+      "occurrenceCount": 49,
+      "prototypeId": "prototype:ifc:d-architecture-e91ddbbd672b:571861",
+      "triangles": 152,
+      "vertices": 96
+    },
+    {
+      "edgeSegments": 320,
+      "materialGroups": 1,
+      "occurrenceCount": 48,
+      "prototypeId": "prototype:ifc:d-architecture-e91ddbbd672b:56342",
+      "triangles": 380,
+      "vertices": 226
+    },
+    {
+      "edgeSegments": 36,
+      "materialGroups": 1,
+      "occurrenceCount": 46,
+      "prototypeId": "prototype:ifc:d-architecture-e91ddbbd672b:3431136",
+      "triangles": 44,
+      "vertices": 24
+    },
+    {
+      "edgeSegments": 36,
+      "materialGroups": 1,
+      "occurrenceCount": 40,
+      "prototypeId": "prototype:ifc:d-architecture-e91ddbbd672b:3552087",
+      "triangles": 44,
+      "vertices": 24
+    },
+    {
+      "edgeSegments": 3436,
+      "materialGroups": 4,
+      "occurrenceCount": 39,
+      "prototypeId": "prototype:ifc:d-architecture-e91ddbbd672b:187597",
+      "triangles": 3086,
+      "vertices": 2150
+    },
+    {
+      "edgeSegments": 61,
+      "materialGroups": 1,
+      "occurrenceCount": 36,
+      "prototypeId": "prototype:ifc:d-architecture-e91ddbbd672b:1008674",
+      "triangles": 72,
+      "vertices": 38
+    },
+    {
+      "edgeSegments": 61,
+      "materialGroups": 1,
+      "occurrenceCount": 35,
+      "prototypeId": "prototype:ifc:d-architecture-e91ddbbd672b:994884",
+      "triangles": 72,
+      "vertices": 38
+    },
+    {
+      "edgeSegments": 3436,
+      "materialGroups": 4,
+      "occurrenceCount": 32,
+      "prototypeId": "prototype:ifc:d-architecture-e91ddbbd672b:745625",
+      "triangles": 3086,
+      "vertices": 2150
+    },
+    {
+      "edgeSegments": 1913,
+      "materialGroups": 1,
+      "occurrenceCount": 1881,
+      "prototypeId": "prototype:ifc:d-electrical-adb8d5eda2c7:239463",
+      "triangles": 1432,
+      "vertices": 712
+    },
+    {
+      "edgeSegments": 1913,
+      "materialGroups": 1,
+      "occurrenceCount": 1033,
+      "prototypeId": "prototype:ifc:d-electrical-adb8d5eda2c7:262927",
+      "triangles": 1432,
+      "vertices": 712
+    },
+    {
+      "edgeSegments": 699,
+      "materialGroups": 1,
+      "occurrenceCount": 871,
+      "prototypeId": "prototype:ifc:d-electrical-adb8d5eda2c7:242101",
+      "triangles": 618,
+      "vertices": 309
+    },
+    {
+      "edgeSegments": 2536,
+      "materialGroups": 1,
+      "occurrenceCount": 778,
+      "prototypeId": "prototype:ifc:d-electrical-adb8d5eda2c7:86017",
+      "triangles": 2776,
+      "vertices": 1466
+    },
+    {
+      "edgeSegments": 812,
+      "materialGroups": 1,
+      "occurrenceCount": 724,
+      "prototypeId": "prototype:ifc:d-electrical-adb8d5eda2c7:231053",
+      "triangles": 704,
+      "vertices": 372
+    },
+    {
+      "edgeSegments": 699,
+      "materialGroups": 1,
+      "occurrenceCount": 471,
+      "prototypeId": "prototype:ifc:d-electrical-adb8d5eda2c7:255385",
+      "triangles": 618,
+      "vertices": 309
+    },
+    {
+      "edgeSegments": 2536,
+      "materialGroups": 1,
+      "occurrenceCount": 438,
+      "prototypeId": "prototype:ifc:d-electrical-adb8d5eda2c7:96272",
+      "triangles": 2776,
+      "vertices": 1466
+    },
+    {
+      "edgeSegments": 428,
+      "materialGroups": 1,
+      "occurrenceCount": 415,
+      "prototypeId": "prototype:ifc:d-electrical-adb8d5eda2c7:435865",
+      "triangles": 380,
+      "vertices": 200
+    },
+    {
+      "edgeSegments": 812,
+      "materialGroups": 1,
+      "occurrenceCount": 394,
+      "prototypeId": "prototype:ifc:d-electrical-adb8d5eda2c7:252492",
+      "triangles": 704,
+      "vertices": 372
+    },
+    {
+      "edgeSegments": 98,
+      "materialGroups": 1,
+      "occurrenceCount": 241,
+      "prototypeId": "prototype:ifc:d-electrical-adb8d5eda2c7:1077804",
+      "triangles": 88,
+      "vertices": 46
+    },
+    {
+      "edgeSegments": 68,
+      "materialGroups": 1,
+      "occurrenceCount": 228,
+      "prototypeId": "prototype:ifc:d-electrical-adb8d5eda2c7:440922",
+      "triangles": 80,
+      "vertices": 44
+    },
+    {
+      "edgeSegments": 428,
+      "materialGroups": 1,
+      "occurrenceCount": 223,
+      "prototypeId": "prototype:ifc:d-electrical-adb8d5eda2c7:556198",
+      "triangles": 380,
+      "vertices": 200
+    },
+    {
+      "edgeSegments": 155,
+      "materialGroups": 1,
+      "occurrenceCount": 219,
+      "prototypeId": "prototype:ifc:d-electrical-adb8d5eda2c7:231820",
+      "triangles": 196,
+      "vertices": 102
+    },
+    {
+      "edgeSegments": 92,
+      "materialGroups": 1,
+      "occurrenceCount": 154,
+      "prototypeId": "prototype:ifc:d-electrical-adb8d5eda2c7:1166658",
+      "triangles": 84,
+      "vertices": 44
+    },
+    {
+      "edgeSegments": 155,
+      "materialGroups": 1,
+      "occurrenceCount": 150,
+      "prototypeId": "prototype:ifc:d-electrical-adb8d5eda2c7:249161",
+      "triangles": 196,
+      "vertices": 102
+    },
+    {
+      "edgeSegments": 194,
+      "materialGroups": 1,
+      "occurrenceCount": 140,
+      "prototypeId": "prototype:ifc:d-electrical-adb8d5eda2c7:345895",
+      "triangles": 236,
+      "vertices": 128
+    },
+    {
+      "edgeSegments": 1015,
+      "materialGroups": 1,
+      "occurrenceCount": 140,
+      "prototypeId": "prototype:ifc:d-electrical-adb8d5eda2c7:360371",
+      "triangles": 856,
+      "vertices": 446
+    },
+    {
+      "edgeSegments": 12,
+      "materialGroups": 1,
+      "occurrenceCount": 139,
+      "prototypeId": "prototype:ifc:d-electrical-adb8d5eda2c7:1057056",
+      "triangles": 12,
+      "vertices": 8
+    },
+    {
+      "edgeSegments": 68,
+      "materialGroups": 1,
+      "occurrenceCount": 133,
+      "prototypeId": "prototype:ifc:d-electrical-adb8d5eda2c7:440560",
+      "triangles": 80,
+      "vertices": 44
+    },
+    {
+      "edgeSegments": 68,
+      "materialGroups": 1,
+      "occurrenceCount": 131,
+      "prototypeId": "prototype:ifc:d-electrical-adb8d5eda2c7:554459",
+      "triangles": 80,
+      "vertices": 44
+    },
+    {
+      "edgeSegments": 36,
+      "materialGroups": 1,
+      "occurrenceCount": 261,
+      "prototypeId": "prototype:ifc:d-facade-a9a1b20214da:9284",
+      "triangles": 44,
+      "vertices": 24
+    },
+    {
+      "edgeSegments": 36,
+      "materialGroups": 1,
+      "occurrenceCount": 181,
+      "prototypeId": "prototype:ifc:d-facade-a9a1b20214da:9519",
+      "triangles": 44,
+      "vertices": 24
+    },
+    {
+      "edgeSegments": 36,
+      "materialGroups": 1,
+      "occurrenceCount": 85,
+      "prototypeId": "prototype:ifc:d-facade-a9a1b20214da:298",
+      "triangles": 44,
+      "vertices": 24
+    },
+    {
+      "edgeSegments": 36,
+      "materialGroups": 1,
+      "occurrenceCount": 57,
+      "prototypeId": "prototype:ifc:d-facade-a9a1b20214da:21583",
+      "triangles": 44,
+      "vertices": 24
+    },
+    {
+      "edgeSegments": 36,
+      "materialGroups": 1,
+      "occurrenceCount": 46,
+      "prototypeId": "prototype:ifc:d-facade-a9a1b20214da:55973",
+      "triangles": 44,
+      "vertices": 24
+    },
+    {
+      "edgeSegments": 36,
+      "materialGroups": 1,
+      "occurrenceCount": 40,
+      "prototypeId": "prototype:ifc:d-facade-a9a1b20214da:56616",
+      "triangles": 44,
+      "vertices": 24
+    },
+    {
+      "edgeSegments": 182,
+      "materialGroups": 1,
+      "occurrenceCount": 28,
+      "prototypeId": "prototype:ifc:d-facade-a9a1b20214da:11657",
+      "triangles": 238,
+      "vertices": 121
+    },
+    {
+      "edgeSegments": 182,
+      "materialGroups": 1,
+      "occurrenceCount": 28,
+      "prototypeId": "prototype:ifc:d-facade-a9a1b20214da:16371",
+      "triangles": 238,
+      "vertices": 121
+    },
+    {
+      "edgeSegments": 187,
+      "materialGroups": 1,
+      "occurrenceCount": 24,
+      "prototypeId": "prototype:ifc:d-facade-a9a1b20214da:12351",
+      "triangles": 244,
+      "vertices": 124
+    },
+    {
+      "edgeSegments": 187,
+      "materialGroups": 1,
+      "occurrenceCount": 24,
+      "prototypeId": "prototype:ifc:d-facade-a9a1b20214da:13953",
+      "triangles": 244,
+      "vertices": 124
+    },
+    {
+      "edgeSegments": 96,
+      "materialGroups": 1,
+      "occurrenceCount": 16,
+      "prototypeId": "prototype:ifc:d-facade-a9a1b20214da:10979",
+      "triangles": 120,
+      "vertices": 62
+    },
+    {
+      "edgeSegments": 96,
+      "materialGroups": 1,
+      "occurrenceCount": 16,
+      "prototypeId": "prototype:ifc:d-facade-a9a1b20214da:16899",
+      "triangles": 120,
+      "vertices": 62
+    },
+    {
+      "edgeSegments": 36,
+      "materialGroups": 1,
+      "occurrenceCount": 16,
+      "prototypeId": "prototype:ifc:d-facade-a9a1b20214da:65576",
+      "triangles": 44,
+      "vertices": 24
+    },
+    {
+      "edgeSegments": 36,
+      "materialGroups": 1,
+      "occurrenceCount": 16,
+      "prototypeId": "prototype:ifc:d-facade-a9a1b20214da:65896",
+      "triangles": 44,
+      "vertices": 24
+    },
+    {
+      "edgeSegments": 90,
+      "materialGroups": 1,
+      "occurrenceCount": 15,
+      "prototypeId": "prototype:ifc:d-facade-a9a1b20214da:14463",
+      "triangles": 120,
+      "vertices": 62
+    },
+    {
+      "edgeSegments": 90,
+      "materialGroups": 1,
+      "occurrenceCount": 15,
+      "prototypeId": "prototype:ifc:d-facade-a9a1b20214da:15333",
+      "triangles": 120,
+      "vertices": 62
+    },
+    {
+      "edgeSegments": 136,
+      "materialGroups": 1,
+      "occurrenceCount": 15,
+      "prototypeId": "prototype:ifc:d-facade-a9a1b20214da:17440",
+      "triangles": 176,
+      "vertices": 90
+    },
+    {
+      "edgeSegments": 48,
+      "materialGroups": 1,
+      "occurrenceCount": 12,
+      "prototypeId": "prototype:ifc:d-facade-a9a1b20214da:3582",
+      "triangles": 62,
+      "vertices": 33
+    },
+    {
+      "edgeSegments": 82,
+      "materialGroups": 1,
+      "occurrenceCount": 9,
+      "prototypeId": "prototype:ifc:d-facade-a9a1b20214da:52727",
+      "triangles": 106,
+      "vertices": 55
+    },
+    {
+      "edgeSegments": 82,
+      "materialGroups": 1,
+      "occurrenceCount": 9,
+      "prototypeId": "prototype:ifc:d-facade-a9a1b20214da:54948",
+      "triangles": 106,
+      "vertices": 55
+    },
+    {
+      "edgeSegments": 12,
+      "materialGroups": 1,
+      "occurrenceCount": 54,
+      "prototypeId": "prototype:ifc:d-kitchen-1905b9920717:212383",
+      "triangles": 12,
+      "vertices": 8
+    },
+    {
+      "edgeSegments": 12,
+      "materialGroups": 1,
+      "occurrenceCount": 54,
+      "prototypeId": "prototype:ifc:d-kitchen-1905b9920717:3523",
+      "triangles": 12,
+      "vertices": 8
+    },
+    {
+      "edgeSegments": 12,
+      "materialGroups": 1,
+      "occurrenceCount": 52,
+      "prototypeId": "prototype:ifc:d-kitchen-1905b9920717:249702",
+      "triangles": 12,
+      "vertices": 8
+    },
+    {
+      "edgeSegments": 12,
+      "materialGroups": 1,
+      "occurrenceCount": 52,
+      "prototypeId": "prototype:ifc:d-kitchen-1905b9920717:396248",
+      "triangles": 12,
+      "vertices": 8
+    },
+    {
+      "edgeSegments": 40,
+      "materialGroups": 1,
+      "occurrenceCount": 36,
+      "prototypeId": "prototype:ifc:d-kitchen-1905b9920717:112262",
+      "triangles": 16,
+      "vertices": 33
+    },
+    {
+      "edgeSegments": 12,
+      "materialGroups": 1,
+      "occurrenceCount": 36,
+      "prototypeId": "prototype:ifc:d-kitchen-1905b9920717:113128",
+      "triangles": 12,
+      "vertices": 8
+    },
+    {
+      "edgeSegments": 40,
+      "materialGroups": 1,
+      "occurrenceCount": 36,
+      "prototypeId": "prototype:ifc:d-kitchen-1905b9920717:138362",
+      "triangles": 16,
+      "vertices": 33
+    },
+    {
+      "edgeSegments": 12,
+      "materialGroups": 1,
+      "occurrenceCount": 36,
+      "prototypeId": "prototype:ifc:d-kitchen-1905b9920717:26410",
+      "triangles": 12,
+      "vertices": 8
+    },
+    {
+      "edgeSegments": 12,
+      "materialGroups": 1,
+      "occurrenceCount": 36,
+      "prototypeId": "prototype:ifc:d-kitchen-1905b9920717:27338",
+      "triangles": 12,
+      "vertices": 8
+    },
+    {
+      "edgeSegments": 159,
+      "materialGroups": 1,
+      "occurrenceCount": 36,
+      "prototypeId": "prototype:ifc:d-kitchen-1905b9920717:4359",
+      "triangles": 210,
+      "vertices": 96
+    },
+    {
+      "edgeSegments": 12,
+      "materialGroups": 1,
+      "occurrenceCount": 36,
+      "prototypeId": "prototype:ifc:d-kitchen-1905b9920717:5720",
+      "triangles": 12,
+      "vertices": 8
+    },
+    {
+      "edgeSegments": 159,
+      "materialGroups": 1,
+      "occurrenceCount": 36,
+      "prototypeId": "prototype:ifc:d-kitchen-1905b9920717:66368",
+      "triangles": 210,
+      "vertices": 96
+    },
+    {
+      "edgeSegments": 12,
+      "materialGroups": 1,
+      "occurrenceCount": 27,
+      "prototypeId": "prototype:ifc:d-kitchen-1905b9920717:218889",
+      "triangles": 12,
+      "vertices": 8
+    },
+    {
+      "edgeSegments": 12,
+      "materialGroups": 1,
+      "occurrenceCount": 27,
+      "prototypeId": "prototype:ifc:d-kitchen-1905b9920717:219511",
+      "triangles": 12,
+      "vertices": 8
+    },
+    {
+      "edgeSegments": 12,
+      "materialGroups": 1,
+      "occurrenceCount": 26,
+      "prototypeId": "prototype:ifc:d-kitchen-1905b9920717:281639",
+      "triangles": 12,
+      "vertices": 8
+    },
+    {
+      "edgeSegments": 12,
+      "materialGroups": 1,
+      "occurrenceCount": 26,
+      "prototypeId": "prototype:ifc:d-kitchen-1905b9920717:394539",
+      "triangles": 12,
+      "vertices": 8
+    },
+    {
+      "edgeSegments": 40,
+      "materialGroups": 1,
+      "occurrenceCount": 21,
+      "prototypeId": "prototype:ifc:d-kitchen-1905b9920717:111425",
+      "triangles": 16,
+      "vertices": 33
+    },
+    {
+      "edgeSegments": 20,
+      "materialGroups": 1,
+      "occurrenceCount": 21,
+      "prototypeId": "prototype:ifc:d-kitchen-1905b9920717:135844",
+      "triangles": 22,
+      "vertices": 12
+    },
+    {
+      "edgeSegments": 4959,
+      "materialGroups": 1,
+      "occurrenceCount": 21,
+      "prototypeId": "prototype:ifc:d-kitchen-1905b9920717:160631",
+      "triangles": 3641,
+      "vertices": 2415
+    },
+    {
+      "edgeSegments": 4635,
+      "materialGroups": 1,
+      "occurrenceCount": 21,
+      "prototypeId": "prototype:ifc:d-kitchen-1905b9920717:198878",
+      "triangles": 3434,
+      "vertices": 2547
+    },
+    {
+      "edgeSegments": 54,
+      "materialGroups": 1,
+      "occurrenceCount": 733,
+      "prototypeId": "prototype:ifc:d-plumbing-15382b06d0a6:2797599",
+      "triangles": 56,
+      "vertices": 30
+    },
+    {
+      "edgeSegments": 30,
+      "materialGroups": 1,
+      "occurrenceCount": 464,
+      "prototypeId": "prototype:ifc:d-plumbing-15382b06d0a6:2852595",
+      "triangles": 32,
+      "vertices": 18
+    },
+    {
+      "edgeSegments": 290,
+      "materialGroups": 1,
+      "occurrenceCount": 333,
+      "prototypeId": "prototype:ifc:d-plumbing-15382b06d0a6:2817821",
+      "triangles": 264,
+      "vertices": 138
+    },
+    {
+      "edgeSegments": 54,
+      "materialGroups": 1,
+      "occurrenceCount": 330,
+      "prototypeId": "prototype:ifc:d-plumbing-15382b06d0a6:2894304",
+      "triangles": 56,
+      "vertices": 30
+    },
+    {
+      "edgeSegments": 550,
+      "materialGroups": 1,
+      "occurrenceCount": 292,
+      "prototypeId": "prototype:ifc:d-plumbing-15382b06d0a6:747314",
+      "triangles": 528,
+      "vertices": 270
+    },
+    {
+      "edgeSegments": 560,
+      "materialGroups": 1,
+      "occurrenceCount": 290,
+      "prototypeId": "prototype:ifc:d-plumbing-15382b06d0a6:817178",
+      "triangles": 540,
+      "vertices": 276
+    },
+    {
+      "edgeSegments": 290,
+      "materialGroups": 1,
+      "occurrenceCount": 234,
+      "prototypeId": "prototype:ifc:d-plumbing-15382b06d0a6:2819887",
+      "triangles": 264,
+      "vertices": 138
+    },
+    {
+      "edgeSegments": 324,
+      "materialGroups": 1,
+      "occurrenceCount": 198,
+      "prototypeId": "prototype:ifc:d-plumbing-15382b06d0a6:2846144",
+      "triangles": 336,
+      "vertices": 180
+    },
+    {
+      "edgeSegments": 66,
+      "materialGroups": 1,
+      "occurrenceCount": 197,
+      "prototypeId": "prototype:ifc:d-plumbing-15382b06d0a6:2790348",
+      "triangles": 68,
+      "vertices": 36
+    },
+    {
+      "edgeSegments": 42,
+      "materialGroups": 1,
+      "occurrenceCount": 190,
+      "prototypeId": "prototype:ifc:d-plumbing-15382b06d0a6:2861810",
+      "triangles": 44,
+      "vertices": 24
+    },
+    {
+      "edgeSegments": 550,
+      "materialGroups": 1,
+      "occurrenceCount": 167,
+      "prototypeId": "prototype:ifc:d-plumbing-15382b06d0a6:934371",
+      "triangles": 528,
+      "vertices": 270
+    },
+    {
+      "edgeSegments": 516,
+      "materialGroups": 1,
+      "occurrenceCount": 144,
+      "prototypeId": "prototype:ifc:d-plumbing-15382b06d0a6:432856",
+      "triangles": 468,
+      "vertices": 240
+    },
+    {
+      "edgeSegments": 516,
+      "materialGroups": 1,
+      "occurrenceCount": 144,
+      "prototypeId": "prototype:ifc:d-plumbing-15382b06d0a6:642066",
+      "triangles": 468,
+      "vertices": 240
+    },
+    {
+      "edgeSegments": 188,
+      "materialGroups": 1,
+      "occurrenceCount": 135,
+      "prototypeId": "prototype:ifc:d-plumbing-15382b06d0a6:1268465",
+      "triangles": 140,
+      "vertices": 72
+    },
+    {
+      "edgeSegments": 550,
+      "materialGroups": 1,
+      "occurrenceCount": 135,
+      "prototypeId": "prototype:ifc:d-plumbing-15382b06d0a6:881720",
+      "triangles": 528,
+      "vertices": 270
+    },
+    {
+      "edgeSegments": 672,
+      "materialGroups": 1,
+      "occurrenceCount": 124,
+      "prototypeId": "prototype:ifc:d-plumbing-15382b06d0a6:749944",
+      "triangles": 572,
+      "vertices": 288
+    },
+    {
+      "edgeSegments": 324,
+      "materialGroups": 1,
+      "occurrenceCount": 122,
+      "prototypeId": "prototype:ifc:d-plumbing-15382b06d0a6:2807268",
+      "triangles": 336,
+      "vertices": 180
+    },
+    {
+      "edgeSegments": 1008,
+      "materialGroups": 1,
+      "occurrenceCount": 121,
+      "prototypeId": "prototype:ifc:d-plumbing-15382b06d0a6:2805923",
+      "triangles": 812,
+      "vertices": 402
+    },
+    {
+      "edgeSegments": 324,
+      "materialGroups": 1,
+      "occurrenceCount": 118,
+      "prototypeId": "prototype:ifc:d-plumbing-15382b06d0a6:2929334",
+      "triangles": 336,
+      "vertices": 180
+    },
+    {
+      "edgeSegments": 2439,
+      "materialGroups": 1,
+      "occurrenceCount": 113,
+      "prototypeId": "prototype:ifc:d-plumbing-15382b06d0a6:873912",
+      "triangles": 1776,
+      "vertices": 894
+    },
+    {
+      "edgeSegments": 144,
+      "materialGroups": 1,
+      "occurrenceCount": 30,
+      "prototypeId": "prototype:ifc:d-structure-79f294c64343:200926",
+      "triangles": 256,
+      "vertices": 128
+    },
+    {
+      "edgeSegments": 144,
+      "materialGroups": 1,
+      "occurrenceCount": 10,
+      "prototypeId": "prototype:ifc:d-structure-79f294c64343:194749",
+      "triangles": 256,
+      "vertices": 128
+    },
+    {
+      "edgeSegments": 144,
+      "materialGroups": 1,
+      "occurrenceCount": 10,
+      "prototypeId": "prototype:ifc:d-structure-79f294c64343:195480",
+      "triangles": 256,
+      "vertices": 128
+    },
+    {
+      "edgeSegments": 144,
+      "materialGroups": 1,
+      "occurrenceCount": 10,
+      "prototypeId": "prototype:ifc:d-structure-79f294c64343:196210",
+      "triangles": 256,
+      "vertices": 128
+    },
+    {
+      "edgeSegments": 144,
+      "materialGroups": 1,
+      "occurrenceCount": 10,
+      "prototypeId": "prototype:ifc:d-structure-79f294c64343:196940",
+      "triangles": 256,
+      "vertices": 128
+    },
+    {
+      "edgeSegments": 144,
+      "materialGroups": 1,
+      "occurrenceCount": 10,
+      "prototypeId": "prototype:ifc:d-structure-79f294c64343:197670",
+      "triangles": 256,
+      "vertices": 128
+    },
+    {
+      "edgeSegments": 144,
+      "materialGroups": 1,
+      "occurrenceCount": 10,
+      "prototypeId": "prototype:ifc:d-structure-79f294c64343:198400",
+      "triangles": 256,
+      "vertices": 128
+    },
+    {
+      "edgeSegments": 144,
+      "materialGroups": 1,
+      "occurrenceCount": 10,
+      "prototypeId": "prototype:ifc:d-structure-79f294c64343:199130",
+      "triangles": 256,
+      "vertices": 128
+    },
+    {
+      "edgeSegments": 144,
+      "materialGroups": 1,
+      "occurrenceCount": 10,
+      "prototypeId": "prototype:ifc:d-structure-79f294c64343:199860",
+      "triangles": 256,
+      "vertices": 128
+    },
+    {
+      "edgeSegments": 144,
+      "materialGroups": 1,
+      "occurrenceCount": 10,
+      "prototypeId": "prototype:ifc:d-structure-79f294c64343:200532",
+      "triangles": 256,
+      "vertices": 128
+    },
+    {
+      "edgeSegments": 12,
+      "materialGroups": 1,
+      "occurrenceCount": 8,
+      "prototypeId": "prototype:ifc:d-structure-79f294c64343:10058",
+      "triangles": 12,
+      "vertices": 8
+    },
+    {
+      "edgeSegments": 12,
+      "materialGroups": 1,
+      "occurrenceCount": 8,
+      "prototypeId": "prototype:ifc:d-structure-79f294c64343:16537",
+      "triangles": 12,
+      "vertices": 8
+    },
+    {
+      "edgeSegments": 12,
+      "materialGroups": 1,
+      "occurrenceCount": 8,
+      "prototypeId": "prototype:ifc:d-structure-79f294c64343:21587",
+      "triangles": 12,
+      "vertices": 8
+    },
+    {
+      "edgeSegments": 12,
+      "materialGroups": 1,
+      "occurrenceCount": 8,
+      "prototypeId": "prototype:ifc:d-structure-79f294c64343:26657",
+      "triangles": 12,
+      "vertices": 8
+    },
+    {
+      "edgeSegments": 12,
+      "materialGroups": 1,
+      "occurrenceCount": 8,
+      "prototypeId": "prototype:ifc:d-structure-79f294c64343:31809",
+      "triangles": 12,
+      "vertices": 8
+    },
+    {
+      "edgeSegments": 12,
+      "materialGroups": 1,
+      "occurrenceCount": 8,
+      "prototypeId": "prototype:ifc:d-structure-79f294c64343:36965",
+      "triangles": 12,
+      "vertices": 8
+    },
+    {
+      "edgeSegments": 12,
+      "materialGroups": 1,
+      "occurrenceCount": 8,
+      "prototypeId": "prototype:ifc:d-structure-79f294c64343:42303",
+      "triangles": 12,
+      "vertices": 8
+    },
+    {
+      "edgeSegments": 144,
+      "materialGroups": 1,
+      "occurrenceCount": 6,
+      "prototypeId": "prototype:ifc:d-structure-79f294c64343:195202",
+      "triangles": 256,
+      "vertices": 128
+    },
+    {
+      "edgeSegments": 144,
+      "materialGroups": 1,
+      "occurrenceCount": 6,
+      "prototypeId": "prototype:ifc:d-structure-79f294c64343:195903",
+      "triangles": 256,
+      "vertices": 128
+    },
+    {
+      "edgeSegments": 144,
+      "materialGroups": 1,
+      "occurrenceCount": 6,
+      "prototypeId": "prototype:ifc:d-structure-79f294c64343:196633",
+      "triangles": 256,
+      "vertices": 128
+    },
+    {
+      "edgeSegments": 318,
+      "materialGroups": 1,
+      "occurrenceCount": 979,
+      "prototypeId": "prototype:ifc:d-ventilation-c78f6ad08596:59301",
+      "triangles": 308,
+      "vertices": 160
+    },
+    {
+      "edgeSegments": 72,
+      "materialGroups": 1,
+      "occurrenceCount": 525,
+      "prototypeId": "prototype:ifc:d-ventilation-c78f6ad08596:94680",
+      "triangles": 92,
+      "vertices": 48
+    },
+    {
+      "edgeSegments": 72,
+      "materialGroups": 1,
+      "occurrenceCount": 309,
+      "prototypeId": "prototype:ifc:d-ventilation-c78f6ad08596:59601",
+      "triangles": 92,
+      "vertices": 48
+    },
+    {
+      "edgeSegments": 306,
+      "materialGroups": 1,
+      "occurrenceCount": 218,
+      "prototypeId": "prototype:ifc:d-ventilation-c78f6ad08596:85872",
+      "triangles": 296,
+      "vertices": 154
+    },
+    {
+      "edgeSegments": 72,
+      "materialGroups": 1,
+      "occurrenceCount": 210,
+      "prototypeId": "prototype:ifc:d-ventilation-c78f6ad08596:107100",
+      "triangles": 92,
+      "vertices": 48
+    },
+    {
+      "edgeSegments": 1785,
+      "materialGroups": 2,
+      "occurrenceCount": 210,
+      "prototypeId": "prototype:ifc:d-ventilation-c78f6ad08596:93205",
+      "triangles": 1756,
+      "vertices": 902
+    },
+    {
+      "edgeSegments": 16842,
+      "materialGroups": 1,
+      "occurrenceCount": 195,
+      "prototypeId": "prototype:ifc:d-ventilation-c78f6ad08596:262373",
+      "triangles": 10475,
+      "vertices": 6200
+    },
+    {
+      "edgeSegments": 16886,
+      "materialGroups": 1,
+      "occurrenceCount": 164,
+      "prototypeId": "prototype:ifc:d-ventilation-c78f6ad08596:725697",
+      "triangles": 10497,
+      "vertices": 6222
+    },
+    {
+      "edgeSegments": 406,
+      "materialGroups": 1,
+      "occurrenceCount": 126,
+      "prototypeId": "prototype:ifc:d-ventilation-c78f6ad08596:610364",
+      "triangles": 360,
+      "vertices": 182
+    },
+    {
+      "edgeSegments": 2088,
+      "materialGroups": 1,
+      "occurrenceCount": 107,
+      "prototypeId": "prototype:ifc:d-ventilation-c78f6ad08596:15617",
+      "triangles": 1632,
+      "vertices": 816
+    },
+    {
+      "edgeSegments": 72,
+      "materialGroups": 1,
+      "occurrenceCount": 107,
+      "prototypeId": "prototype:ifc:d-ventilation-c78f6ad08596:93731",
+      "triangles": 92,
+      "vertices": 48
+    },
+    {
+      "edgeSegments": 444,
+      "materialGroups": 1,
+      "occurrenceCount": 106,
+      "prototypeId": "prototype:ifc:d-ventilation-c78f6ad08596:1370967",
+      "triangles": 480,
+      "vertices": 252
+    },
+    {
+      "edgeSegments": 3218,
+      "materialGroups": 8,
+      "occurrenceCount": 105,
+      "prototypeId": "prototype:ifc:d-ventilation-c78f6ad08596:106645",
+      "triangles": 3054,
+      "vertices": 1561
+    },
+    {
+      "edgeSegments": 1950,
+      "materialGroups": 2,
+      "occurrenceCount": 105,
+      "prototypeId": "prototype:ifc:d-ventilation-c78f6ad08596:114632",
+      "triangles": 1834,
+      "vertices": 941
+    },
+    {
+      "edgeSegments": 3174,
+      "materialGroups": 9,
+      "occurrenceCount": 105,
+      "prototypeId": "prototype:ifc:d-ventilation-c78f6ad08596:127229",
+      "triangles": 3316,
+      "vertices": 1696
+    },
+    {
+      "edgeSegments": 488,
+      "materialGroups": 1,
+      "occurrenceCount": 104,
+      "prototypeId": "prototype:ifc:d-ventilation-c78f6ad08596:1368291",
+      "triangles": 568,
+      "vertices": 296
+    },
+    {
+      "edgeSegments": 318,
+      "materialGroups": 1,
+      "occurrenceCount": 103,
+      "prototypeId": "prototype:ifc:d-ventilation-c78f6ad08596:1190550",
+      "triangles": 308,
+      "vertices": 160
+    },
+    {
+      "edgeSegments": 488,
+      "materialGroups": 1,
+      "occurrenceCount": 100,
+      "prototypeId": "prototype:ifc:d-ventilation-c78f6ad08596:84368",
+      "triangles": 568,
+      "vertices": 296
+    },
+    {
+      "edgeSegments": 490,
+      "materialGroups": 1,
+      "occurrenceCount": 97,
+      "prototypeId": "prototype:ifc:d-ventilation-c78f6ad08596:727895",
+      "triangles": 444,
+      "vertices": 224
+    },
+    {
+      "edgeSegments": 398,
+      "materialGroups": 1,
+      "occurrenceCount": 91,
+      "prototypeId": "prototype:ifc:d-ventilation-c78f6ad08596:637070",
+      "triangles": 420,
+      "vertices": 216
+    },
+    {
+      "edgeSegments": 52,
+      "materialGroups": 1,
+      "occurrenceCount": 101,
+      "prototypeId": "prototype:ifc:e-aarts-1-6-5c99a072e06e:236",
+      "triangles": 100,
+      "vertices": 52
+    },
+    {
+      "edgeSegments": 52,
+      "materialGroups": 1,
+      "occurrenceCount": 11,
+      "prototypeId": "prototype:ifc:e-aarts-1-6-5c99a072e06e:637",
+      "triangles": 100,
+      "vertices": 52
+    },
+    {
+      "edgeSegments": 52,
+      "materialGroups": 1,
+      "occurrenceCount": 10,
+      "prototypeId": "prototype:ifc:e-aarts-1-6-5c99a072e06e:662",
+      "triangles": 100,
+      "vertices": 52
+    },
+    {
+      "edgeSegments": 52,
+      "materialGroups": 1,
+      "occurrenceCount": 10,
+      "prototypeId": "prototype:ifc:e-aarts-1-6-5c99a072e06e:718",
+      "triangles": 100,
+      "vertices": 52
+    },
+    {
+      "edgeSegments": 52,
+      "materialGroups": 1,
+      "occurrenceCount": 296,
+      "prototypeId": "prototype:ifc:e-aarts-13-17-467dee4835a2:10104",
+      "triangles": 100,
+      "vertices": 52
+    },
+    {
+      "edgeSegments": 52,
+      "materialGroups": 1,
+      "occurrenceCount": 200,
+      "prototypeId": "prototype:ifc:e-aarts-13-17-467dee4835a2:2121",
+      "triangles": 100,
+      "vertices": 52
+    },
+    {
+      "edgeSegments": 52,
+      "materialGroups": 1,
+      "occurrenceCount": 146,
+      "prototypeId": "prototype:ifc:e-aarts-13-17-467dee4835a2:21323",
+      "triangles": 100,
+      "vertices": 52
+    },
+    {
+      "edgeSegments": 52,
+      "materialGroups": 1,
+      "occurrenceCount": 86,
+      "prototypeId": "prototype:ifc:e-aarts-13-17-467dee4835a2:6923",
+      "triangles": 100,
+      "vertices": 52
+    },
+    {
+      "edgeSegments": 52,
+      "materialGroups": 1,
+      "occurrenceCount": 60,
+      "prototypeId": "prototype:ifc:e-aarts-13-17-467dee4835a2:9561",
+      "triangles": 100,
+      "vertices": 52
+    },
+    {
+      "edgeSegments": 52,
+      "materialGroups": 1,
+      "occurrenceCount": 33,
+      "prototypeId": "prototype:ifc:e-aarts-13-17-467dee4835a2:5910",
+      "triangles": 100,
+      "vertices": 52
+    },
+    {
+      "edgeSegments": 52,
+      "materialGroups": 1,
+      "occurrenceCount": 8,
+      "prototypeId": "prototype:ifc:e-aarts-13-17-467dee4835a2:14783",
+      "triangles": 100,
+      "vertices": 52
+    },
+    {
+      "edgeSegments": 52,
+      "materialGroups": 1,
+      "occurrenceCount": 4,
+      "prototypeId": "prototype:ifc:e-aarts-13-17-467dee4835a2:14873",
+      "triangles": 100,
+      "vertices": 52
+    },
+    {
+      "edgeSegments": 52,
+      "materialGroups": 1,
+      "occurrenceCount": 2,
+      "prototypeId": "prototype:ifc:e-aarts-13-17-467dee4835a2:1034",
+      "triangles": 100,
+      "vertices": 52
+    },
+    {
+      "edgeSegments": 56,
+      "materialGroups": 1,
+      "occurrenceCount": 2,
+      "prototypeId": "prototype:ifc:e-aarts-13-17-467dee4835a2:15554",
+      "triangles": 108,
+      "vertices": 56
+    },
+    {
+      "edgeSegments": 52,
+      "materialGroups": 1,
+      "occurrenceCount": 2,
+      "prototypeId": "prototype:ifc:e-aarts-13-17-467dee4835a2:21266",
+      "triangles": 100,
+      "vertices": 52
+    },
+    {
+      "edgeSegments": 56,
+      "materialGroups": 1,
+      "occurrenceCount": 2,
+      "prototypeId": "prototype:ifc:e-aarts-13-17-467dee4835a2:21307",
+      "triangles": 108,
+      "vertices": 56
+    },
+    {
+      "edgeSegments": 52,
+      "materialGroups": 1,
+      "occurrenceCount": 294,
+      "prototypeId": "prototype:ifc:e-aarts-6-8-f0c0d43c1827:5232",
+      "triangles": 100,
+      "vertices": 52
+    },
+    {
+      "edgeSegments": 52,
+      "materialGroups": 1,
+      "occurrenceCount": 52,
+      "prototypeId": "prototype:ifc:e-aarts-6-8-f0c0d43c1827:4204",
+      "triangles": 100,
+      "vertices": 52
+    },
+    {
+      "edgeSegments": 52,
+      "materialGroups": 1,
+      "occurrenceCount": 44,
+      "prototypeId": "prototype:ifc:e-aarts-6-8-f0c0d43c1827:1041",
+      "triangles": 100,
+      "vertices": 52
+    },
+    {
+      "edgeSegments": 52,
+      "materialGroups": 1,
+      "occurrenceCount": 36,
+      "prototypeId": "prototype:ifc:e-aarts-6-8-f0c0d43c1827:8722",
+      "triangles": 100,
+      "vertices": 52
+    },
+    {
+      "edgeSegments": 52,
+      "materialGroups": 1,
+      "occurrenceCount": 5,
+      "prototypeId": "prototype:ifc:e-aarts-6-8-f0c0d43c1827:13316",
+      "triangles": 100,
+      "vertices": 52
+    },
+    {
+      "edgeSegments": 52,
+      "materialGroups": 1,
+      "occurrenceCount": 5,
+      "prototypeId": "prototype:ifc:e-aarts-6-8-f0c0d43c1827:13469",
+      "triangles": 100,
+      "vertices": 52
+    },
+    {
+      "edgeSegments": 52,
+      "materialGroups": 1,
+      "occurrenceCount": 4,
+      "prototypeId": "prototype:ifc:e-aarts-6-8-f0c0d43c1827:12383",
+      "triangles": 100,
+      "vertices": 52
+    },
+    {
+      "edgeSegments": 52,
+      "materialGroups": 1,
+      "occurrenceCount": 4,
+      "prototypeId": "prototype:ifc:e-aarts-6-8-f0c0d43c1827:4273",
+      "triangles": 100,
+      "vertices": 52
+    },
+    {
+      "edgeSegments": 56,
+      "materialGroups": 1,
+      "occurrenceCount": 2,
+      "prototypeId": "prototype:ifc:e-aarts-6-8-f0c0d43c1827:12948",
+      "triangles": 108,
+      "vertices": 56
+    },
+    {
+      "edgeSegments": 52,
+      "materialGroups": 1,
+      "occurrenceCount": 292,
+      "prototypeId": "prototype:ifc:e-aarts-9-12-07ac9d82f5db:19969",
+      "triangles": 100,
+      "vertices": 52
+    },
+    {
+      "edgeSegments": 52,
+      "materialGroups": 1,
+      "occurrenceCount": 292,
+      "prototypeId": "prototype:ifc:e-aarts-9-12-07ac9d82f5db:6581",
+      "triangles": 100,
+      "vertices": 52
+    },
+    {
+      "edgeSegments": 52,
+      "materialGroups": 1,
+      "occurrenceCount": 80,
+      "prototypeId": "prototype:ifc:e-aarts-9-12-07ac9d82f5db:6424",
+      "triangles": 100,
+      "vertices": 52
+    },
+    {
+      "edgeSegments": 52,
+      "materialGroups": 1,
+      "occurrenceCount": 76,
+      "prototypeId": "prototype:ifc:e-aarts-9-12-07ac9d82f5db:2956",
+      "triangles": 100,
+      "vertices": 52
+    },
+    {
+      "edgeSegments": 52,
+      "materialGroups": 1,
+      "occurrenceCount": 48,
+      "prototypeId": "prototype:ifc:e-aarts-9-12-07ac9d82f5db:5129",
+      "triangles": 100,
+      "vertices": 52
+    },
+    {
+      "edgeSegments": 52,
+      "materialGroups": 1,
+      "occurrenceCount": 8,
+      "prototypeId": "prototype:ifc:e-aarts-9-12-07ac9d82f5db:6385",
+      "triangles": 100,
+      "vertices": 52
+    },
+    {
+      "edgeSegments": 52,
+      "materialGroups": 1,
+      "occurrenceCount": 8,
+      "prototypeId": "prototype:ifc:e-aarts-9-12-07ac9d82f5db:6407",
+      "triangles": 100,
+      "vertices": 52
+    },
+    {
+      "edgeSegments": 56,
+      "materialGroups": 1,
+      "occurrenceCount": 4,
+      "prototypeId": "prototype:ifc:e-aarts-9-12-07ac9d82f5db:20314",
+      "triangles": 108,
+      "vertices": 56
+    },
+    {
+      "edgeSegments": 56,
+      "materialGroups": 1,
+      "occurrenceCount": 4,
+      "prototypeId": "prototype:ifc:e-aarts-9-12-07ac9d82f5db:5912",
+      "triangles": 108,
+      "vertices": 56
+    },
+    {
+      "edgeSegments": 52,
+      "materialGroups": 1,
+      "occurrenceCount": 4,
+      "prototypeId": "prototype:ifc:e-aarts-9-12-07ac9d82f5db:6564",
+      "triangles": 100,
+      "vertices": 52
+    },
+    {
+      "edgeSegments": 52,
+      "materialGroups": 1,
+      "occurrenceCount": 4,
+      "prototypeId": "prototype:ifc:e-aarts-schoren-c6a6b542ee77:392",
+      "triangles": 100,
+      "vertices": 52
+    }
+  ],
+  "scene": {
+    "encodingVersion": "naru.ifc-scene-ir-split.4",
+    "geometry": {
+      "byteLength": 389006624,
+      "sha256": "1d3ecb784907cbb3fa095d4af34a983390c942d5212addbc9f2a93e09d07bec8"
+    },
+    "properties": {
+      "byteLength": 37308484,
+      "sha256": "03fc3ead3b0b133bb1b6860946a21864529e7426227a17752d54d1ff42ef4747"
+    },
+    "structure": {
+      "byteLength": 544042270,
+      "sha256": "3e505f691cb577e2bb6bb678d792773e23b57ed822a94b005c10beff758e11f8"
+    }
+  },
+  "schemaVersion": "naru.ifc-adapter-report.6",
+  "sources": [
+    {
+      "byteLength": 342657851,
+      "counts": {
+        "duplicateGlobalIdCount": 0,
+        "edgeSegmentCount": 829786,
+        "geometricOccurrenceCount": 16760,
+        "geometricPrototypeCount": 14737,
+        "mappedItemCount": 3622,
+        "maxHierarchyDepth": 4,
+        "occurrenceCount": 16785,
+        "part21EntityCount": 4411807,
+        "productCount": 16784,
+        "propertyValueCount": 2839852,
+        "prototypeCount": 14743,
+        "representationCount": 14737,
+        "representationMapCount": 39720,
+        "semanticEntityCount": 17010,
+        "submittedEdgeSegmentCount": 1476167,
+        "submittedTriangleCount": 1671138,
+        "triangleCount": 973506,
+        "vertexCount": 543892
+      },
+      "discipline": "d-architecture",
+      "path": "sixty5/design/arc.ifc",
+      "schema": "IFC2X3",
+      "sha256": "e91ddbbd672bbde946af14631de4c732f0cf8a7cfae5dbbf06fbeab03b5c46df",
+      "unitScaleToMeters": 0.001
+    },
+    {
+      "byteLength": 97058912,
+      "counts": {
+        "duplicateGlobalIdCount": 0,
+        "edgeSegmentCount": 530692,
+        "geometricOccurrenceCount": 19875,
+        "geometricPrototypeCount": 7690,
+        "mappedItemCount": 12377,
+        "maxHierarchyDepth": 4,
+        "occurrenceCount": 56979,
+        "part21EntityCount": 1225411,
+        "productCount": 56978,
+        "propertyValueCount": 549531,
+        "prototypeCount": 7695,
+        "representationCount": 7690,
+        "representationMapCount": 192,
+        "semanticEntityCount": 57342,
+        "submittedEdgeSegmentCount": 13561315,
+        "submittedTriangleCount": 12413394,
+        "triangleCount": 896648,
+        "vertexCount": 465171
+      },
+      "discipline": "d-electrical",
+      "path": "sixty5/design/electrical.ifc",
+      "schema": "IFC2X3",
+      "sha256": "adb8d5eda2c706a1fded2a00bd38d845e35f513e2f6ba048fc6228274dfb3986",
+      "unitScaleToMeters": 0.001
+    },
+    {
+      "byteLength": 6067026,
+      "counts": {
+        "duplicateGlobalIdCount": 0,
+        "edgeSegmentCount": 7014,
+        "geometricOccurrenceCount": 1055,
+        "geometricPrototypeCount": 72,
+        "mappedItemCount": 1027,
+        "maxHierarchyDepth": 4,
+        "occurrenceCount": 1076,
+        "part21EntityCount": 82578,
+        "productCount": 1075,
+        "propertyValueCount": 42365,
+        "prototypeCount": 76,
+        "representationCount": 72,
+        "representationMapCount": 1129,
+        "semanticEntityCount": 1079,
+        "submittedEdgeSegmentCount": 69735,
+        "submittedTriangleCount": 88610,
+        "triangleCount": 9036,
+        "vertexCount": 4652
+      },
+      "discipline": "d-facade",
+      "path": "sixty5/design/facade.ifc",
+      "schema": "IFC2X3",
+      "sha256": "a9a1b20214da8ac1e1bea1f8670bef24f20a0d53a8ebaef4eb20b5a447640c79",
+      "unitScaleToMeters": 0.001
+    },
+    {
+      "byteLength": 49670229,
+      "counts": {
+        "duplicateGlobalIdCount": 0,
+        "edgeSegmentCount": 311990,
+        "geometricOccurrenceCount": 3099,
+        "geometricPrototypeCount": 443,
+        "mappedItemCount": 2938,
+        "maxHierarchyDepth": 4,
+        "occurrenceCount": 3118,
+        "part21EntityCount": 888615,
+        "productCount": 3117,
+        "propertyValueCount": 120928,
+        "prototypeCount": 447,
+        "representationCount": 443,
+        "representationMapCount": 3542,
+        "semanticEntityCount": 3120,
+        "submittedEdgeSegmentCount": 2043414,
+        "submittedTriangleCount": 1610390,
+        "triangleCount": 248495,
+        "vertexCount": 149596
+      },
+      "discipline": "d-kitchen",
+      "path": "sixty5/design/kitchen.ifc",
+      "schema": "IFC2X3",
+      "sha256": "1905b992071729d1c780b18f6103e4d1d08307a4707d5f33a4413216f36776ac",
+      "unitScaleToMeters": 0.001
+    },
+    {
+      "byteLength": 222099255,
+      "counts": {
+        "duplicateGlobalIdCount": 0,
+        "edgeSegmentCount": 1223938,
+        "geometricOccurrenceCount": 22703,
+        "geometricPrototypeCount": 11527,
+        "mappedItemCount": 11746,
+        "maxHierarchyDepth": 4,
+        "occurrenceCount": 70183,
+        "part21EntityCount": 2965913,
+        "productCount": 70182,
+        "propertyValueCount": 707566,
+        "prototypeCount": 11532,
+        "representationCount": 11527,
+        "representationMapCount": 570,
+        "semanticEntityCount": 72147,
+        "submittedEdgeSegmentCount": 9444526,
+        "submittedTriangleCount": 8976728,
+        "triangleCount": 1671660,
+        "vertexCount": 868476
+      },
+      "discipline": "d-plumbing",
+      "path": "sixty5/design/plumbing.ifc",
+      "schema": "IFC2X3",
+      "sha256": "15382b06d0a63464b95ba451ce7d5fa981bf6c236ebe3f4f62bb9d2b9abfd821",
+      "unitScaleToMeters": 0.001
+    },
+    {
+      "byteLength": 7422441,
+      "counts": {
+        "duplicateGlobalIdCount": 0,
+        "edgeSegmentCount": 109866,
+        "geometricOccurrenceCount": 2647,
+        "geometricPrototypeCount": 2369,
+        "mappedItemCount": 388,
+        "maxHierarchyDepth": 4,
+        "occurrenceCount": 2688,
+        "part21EntityCount": 117040,
+        "productCount": 2687,
+        "propertyValueCount": 13488,
+        "prototypeCount": 2374,
+        "representationCount": 2369,
+        "representationMapCount": 110,
+        "semanticEntityCount": 2842,
+        "submittedEdgeSegmentCount": 133134,
+        "submittedTriangleCount": 199578,
+        "triangleCount": 159398,
+        "vertexCount": 83474
+      },
+      "discipline": "d-structure",
+      "path": "sixty5/design/str.ifc",
+      "schema": "IFC2X3",
+      "sha256": "79f294c643438ac7a494e4871857244c2de0eefa536eda5977af20640a301a22",
+      "unitScaleToMeters": 0.001
+    },
+    {
+      "byteLength": 114891068,
+      "counts": {
+        "duplicateGlobalIdCount": 0,
+        "edgeSegmentCount": 758472,
+        "geometricOccurrenceCount": 12034,
+        "geometricPrototypeCount": 5597,
+        "mappedItemCount": 6714,
+        "maxHierarchyDepth": 4,
+        "occurrenceCount": 37490,
+        "part21EntityCount": 1685392,
+        "productCount": 37489,
+        "propertyValueCount": 229348,
+        "prototypeCount": 5602,
+        "representationCount": 5597,
+        "representationMapCount": 277,
+        "semanticEntityCount": 38776,
+        "submittedEdgeSegmentCount": 21655025,
+        "submittedTriangleCount": 15351122,
+        "triangleCount": 907637,
+        "vertexCount": 481002
+      },
+      "discipline": "d-ventilation",
+      "path": "sixty5/design/ventilation.ifc",
+      "schema": "IFC2X3",
+      "sha256": "c78f6ad085961500f0890bbffda9e171c1342c5865ca152f64098dd4da644cca",
+      "unitScaleToMeters": 0.001
+    },
+    {
+      "byteLength": 776211,
+      "counts": {
+        "duplicateGlobalIdCount": 0,
+        "edgeSegmentCount": 70021,
+        "geometricOccurrenceCount": 1288,
+        "geometricPrototypeCount": 1160,
+        "mappedItemCount": 30,
+        "maxHierarchyDepth": 4,
+        "occurrenceCount": 1399,
+        "part21EntityCount": 10533,
+        "productCount": 1398,
+        "propertyValueCount": 36081,
+        "prototypeCount": 1165,
+        "representationCount": 1160,
+        "representationMapCount": 8,
+        "semanticEntityCount": 1418,
+        "submittedEdgeSegmentCount": 76677,
+        "submittedTriangleCount": 125614,
+        "triangleCount": 112814,
+        "vertexCount": 58762
+      },
+      "discipline": "e-aarts-1-6",
+      "path": "sixty5/engineering/e-s1-rwb-staalconstructie-aarts-1-6.ifc",
+      "schema": "IFC2X3",
+      "sha256": "5c99a072e06e5a173b16820022c0073e547a8f7e3ef484327eb71eecdde3d289",
+      "unitScaleToMeters": 0.001
+    },
+    {
+      "byteLength": 2401371,
+      "counts": {
+        "duplicateGlobalIdCount": 0,
+        "edgeSegmentCount": 257296,
+        "geometricOccurrenceCount": 3950,
+        "geometricPrototypeCount": 3121,
+        "mappedItemCount": 157,
+        "maxHierarchyDepth": 4,
+        "occurrenceCount": 5227,
+        "part21EntityCount": 30307,
+        "productCount": 5226,
+        "propertyValueCount": 95932,
+        "prototypeCount": 3126,
+        "representationCount": 3121,
+        "representationMapCount": 54,
+        "semanticEntityCount": 5257,
+        "submittedEdgeSegmentCount": 300412,
+        "submittedTriangleCount": 547928,
+        "triangleCount": 465012,
+        "vertexCount": 244548
+      },
+      "discipline": "e-aarts-13-17",
+      "path": "sixty5/engineering/e-s1-rwb-staalconstructie-aarts-13-17.ifc",
+      "schema": "IFC2X3",
+      "sha256": "467dee4835a29bf43776bfa670990fc0982704774300bb0240c14773abdafc4b",
+      "unitScaleToMeters": 0.001
+    },
+    {
+      "byteLength": 1271440,
+      "counts": {
+        "duplicateGlobalIdCount": 0,
+        "edgeSegmentCount": 122062,
+        "geometricOccurrenceCount": 1978,
+        "geometricPrototypeCount": 1541,
+        "mappedItemCount": 60,
+        "maxHierarchyDepth": 4,
+        "occurrenceCount": 2742,
+        "part21EntityCount": 16485,
+        "productCount": 2741,
+        "propertyValueCount": 50310,
+        "prototypeCount": 1546,
+        "representationCount": 1541,
+        "representationMapCount": 21,
+        "semanticEntityCount": 2760,
+        "submittedEdgeSegmentCount": 144790,
+        "submittedTriangleCount": 260360,
+        "triangleCount": 216652,
+        "vertexCount": 114216
+      },
+      "discipline": "e-aarts-6-8",
+      "path": "sixty5/engineering/e-s1-rwb-staalconstructie-aarts-6-8.ifc",
+      "schema": "IFC2X3",
+      "sha256": "f0c0d43c1827fb568cc9e30f3294b4d8ba3e711515d06744df4ff8c36dc08d15",
+      "unitScaleToMeters": 0.001
+    },
+    {
+      "byteLength": 2152010,
+      "counts": {
+        "duplicateGlobalIdCount": 0,
+        "edgeSegmentCount": 246044,
+        "geometricOccurrenceCount": 3666,
+        "geometricPrototypeCount": 2860,
+        "mappedItemCount": 68,
+        "maxHierarchyDepth": 4,
+        "occurrenceCount": 5020,
+        "part21EntityCount": 26850,
+        "productCount": 5019,
+        "propertyValueCount": 89574,
+        "prototypeCount": 2865,
+        "representationCount": 2860,
+        "representationMapCount": 22,
+        "semanticEntityCount": 5035,
+        "submittedEdgeSegmentCount": 287980,
+        "submittedTriangleCount": 522536,
+        "triangleCount": 441888,
+        "vertexCount": 232872
+      },
+      "discipline": "e-aarts-9-12",
+      "path": "sixty5/engineering/e-s1-rwb-staalconstructie-aarts-9-12.ifc",
+      "schema": "IFC2X3",
+      "sha256": "07ac9d82f5db850984e76544574b301afd6c3aad9dcab0c77045f92e42149c5f",
+      "unitScaleToMeters": 0.001
+    },
+    {
+      "byteLength": 200914,
+      "counts": {
+        "duplicateGlobalIdCount": 0,
+        "edgeSegmentCount": 2599,
+        "geometricOccurrenceCount": 85,
+        "geometricPrototypeCount": 82,
+        "mappedItemCount": 5,
+        "maxHierarchyDepth": 5,
+        "occurrenceCount": 90,
+        "part21EntityCount": 3203,
+        "productCount": 89,
+        "propertyValueCount": 2927,
+        "prototypeCount": 87,
+        "representationCount": 82,
+        "representationMapCount": 2,
+        "semanticEntityCount": 95,
+        "submittedEdgeSegmentCount": 2755,
+        "submittedTriangleCount": 3504,
+        "triangleCount": 3204,
+        "vertexCount": 1880
+      },
+      "discipline": "e-aarts-schoren",
+      "path": "sixty5/engineering/e-s1-rwb-staalconstructie-aarts-schoren.ifc",
+      "schema": "IFC2X3",
+      "sha256": "c6a6b542ee778d0332c5370f31b7dc03879ac24098f13088ed0a4c66d335d98a",
+      "unitScaleToMeters": 0.001
+    },
+    {
+      "byteLength": 5052483,
+      "counts": {
+        "duplicateGlobalIdCount": 0,
+        "edgeSegmentCount": 627832,
+        "geometricOccurrenceCount": 6796,
+        "geometricPrototypeCount": 6796,
+        "mappedItemCount": 0,
+        "maxHierarchyDepth": 5,
+        "occurrenceCount": 6891,
+        "part21EntityCount": 82048,
+        "productCount": 6890,
+        "propertyValueCount": 1752,
+        "prototypeCount": 6802,
+        "representationCount": 6796,
+        "representationMapCount": 0,
+        "semanticEntityCount": 6891,
+        "submittedEdgeSegmentCount": 627832,
+        "submittedTriangleCount": 2912662,
+        "triangleCount": 2912662,
+        "vertexCount": 1410209
+      },
+      "discipline": "e-bvt-geelen-10",
+      "path": "sixty5/engineering/e-bvt-rwb-geelen-beton-10-10e-verdieping.ifc",
+      "schema": "IFC2X3",
+      "sha256": "7a273c3d5b5e63b5b79fbda49db31d7ff1944e1b0b06c1f13866dd9001b170cf",
+      "unitScaleToMeters": 0.001
+    },
+    {
+      "byteLength": 2378382,
+      "counts": {
+        "duplicateGlobalIdCount": 0,
+        "edgeSegmentCount": 186379,
+        "geometricOccurrenceCount": 2896,
+        "geometricPrototypeCount": 2896,
+        "mappedItemCount": 0,
+        "maxHierarchyDepth": 5,
+        "occurrenceCount": 2935,
+        "part21EntityCount": 39642,
+        "productCount": 2934,
+        "propertyValueCount": 963,
+        "prototypeCount": 2901,
+        "representationCount": 2896,
+        "representationMapCount": 0,
+        "semanticEntityCount": 2935,
+        "submittedEdgeSegmentCount": 186379,
+        "submittedTriangleCount": 599170,
+        "triangleCount": 599170,
+        "vertexCount": 275415
+      },
+      "discipline": "e-bvt-geelen-11",
+      "path": "sixty5/engineering/e-bvt-rwb-geelen-beton-11-11e-verdieping.ifc",
+      "schema": "IFC2X3",
+      "sha256": "84d514ec9a5269f736d2ab9a1121fa0328cf75dde50bfec69c6d93b3dd5213a3",
+      "unitScaleToMeters": 0.001
+    },
+    {
+      "byteLength": 3499508,
+      "counts": {
+        "duplicateGlobalIdCount": 0,
+        "edgeSegmentCount": 0,
+        "geometricOccurrenceCount": 0,
+        "geometricPrototypeCount": 0,
+        "mappedItemCount": 0,
+        "maxHierarchyDepth": 5,
+        "occurrenceCount": 4239,
+        "part21EntityCount": 58077,
+        "productCount": 4238,
+        "propertyValueCount": 2016,
+        "prototypeCount": 9,
+        "representationCount": 0,
+        "representationMapCount": 0,
+        "semanticEntityCount": 4239,
+        "submittedEdgeSegmentCount": 0,
+        "submittedTriangleCount": 0,
+        "triangleCount": 0,
+        "vertexCount": 0
+      },
+      "discipline": "e-s1-geelen-01",
+      "path": "sixty5/engineering/e-s1-rwb-geelen-beton-01-1e-verdieping.ifc",
+      "schema": "IFC2X3",
+      "sha256": "9d44a304126ea30312d98b0cf2984c26cae62cd3f04d6463dad9939236f7decf",
+      "unitScaleToMeters": 0.001
+    },
+    {
+      "byteLength": 3641377,
+      "counts": {
+        "duplicateGlobalIdCount": 0,
+        "edgeSegmentCount": 0,
+        "geometricOccurrenceCount": 0,
+        "geometricPrototypeCount": 0,
+        "mappedItemCount": 0,
+        "maxHierarchyDepth": 5,
+        "occurrenceCount": 4360,
+        "part21EntityCount": 60619,
+        "productCount": 4359,
+        "propertyValueCount": 1971,
+        "prototypeCount": 9,
+        "representationCount": 0,
+        "representationMapCount": 0,
+        "semanticEntityCount": 4360,
+        "submittedEdgeSegmentCount": 0,
+        "submittedTriangleCount": 0,
+        "triangleCount": 0,
+        "vertexCount": 0
+      },
+      "discipline": "e-s1-geelen-02",
+      "path": "sixty5/engineering/e-s1-rwb-geelen-beton-02-2e-verdieping.ifc",
+      "schema": "IFC2X3",
+      "sha256": "994e68e57f62e6f9681af941ce8d1e4ef35c6fa7f09c6ee06e3e1425abfb208a",
+      "unitScaleToMeters": 0.001
+    },
+    {
+      "byteLength": 3641611,
+      "counts": {
+        "duplicateGlobalIdCount": 0,
+        "edgeSegmentCount": 0,
+        "geometricOccurrenceCount": 0,
+        "geometricPrototypeCount": 0,
+        "mappedItemCount": 0,
+        "maxHierarchyDepth": 5,
+        "occurrenceCount": 4360,
+        "part21EntityCount": 60615,
+        "productCount": 4359,
+        "propertyValueCount": 1971,
+        "prototypeCount": 9,
+        "representationCount": 0,
+        "representationMapCount": 0,
+        "semanticEntityCount": 4360,
+        "submittedEdgeSegmentCount": 0,
+        "submittedTriangleCount": 0,
+        "triangleCount": 0,
+        "vertexCount": 0
+      },
+      "discipline": "e-s1-geelen-03",
+      "path": "sixty5/engineering/e-s1-rwb-geelen-beton-03-3e-verdieping.ifc",
+      "schema": "IFC2X3",
+      "sha256": "73f3b9c513de737ac245a779a5dc6b5f3f62e29799743aedc0549fe1ab8d26c4",
+      "unitScaleToMeters": 0.001
+    },
+    {
+      "byteLength": 3680308,
+      "counts": {
+        "duplicateGlobalIdCount": 0,
+        "edgeSegmentCount": 0,
+        "geometricOccurrenceCount": 0,
+        "geometricPrototypeCount": 0,
+        "mappedItemCount": 0,
+        "maxHierarchyDepth": 5,
+        "occurrenceCount": 4421,
+        "part21EntityCount": 61220,
+        "productCount": 4420,
+        "propertyValueCount": 1999,
+        "prototypeCount": 9,
+        "representationCount": 0,
+        "representationMapCount": 0,
+        "semanticEntityCount": 4421,
+        "submittedEdgeSegmentCount": 0,
+        "submittedTriangleCount": 0,
+        "triangleCount": 0,
+        "vertexCount": 0
+      },
+      "discipline": "e-s1-geelen-04",
+      "path": "sixty5/engineering/e-s1-rwb-geelen-beton-04-4e-verdieping.ifc",
+      "schema": "IFC2X3",
+      "sha256": "7315291424feefba8354d99056e6f7e57a8a2542987a3104345e1e9646f960d8",
+      "unitScaleToMeters": 0.001
+    },
+    {
+      "byteLength": 3528053,
+      "counts": {
+        "duplicateGlobalIdCount": 0,
+        "edgeSegmentCount": 0,
+        "geometricOccurrenceCount": 0,
+        "geometricPrototypeCount": 0,
+        "mappedItemCount": 0,
+        "maxHierarchyDepth": 5,
+        "occurrenceCount": 4270,
+        "part21EntityCount": 58593,
+        "productCount": 4269,
+        "propertyValueCount": 1999,
+        "prototypeCount": 9,
+        "representationCount": 0,
+        "representationMapCount": 0,
+        "semanticEntityCount": 4270,
+        "submittedEdgeSegmentCount": 0,
+        "submittedTriangleCount": 0,
+        "triangleCount": 0,
+        "vertexCount": 0
+      },
+      "discipline": "e-s1-geelen-05",
+      "path": "sixty5/engineering/e-s1-rwb-geelen-beton-05-5e-verdieping.ifc",
+      "schema": "IFC2X3",
+      "sha256": "6443de0f70c5cadadecf9d91abf1594b772b8a698d2f85ddc907bdfa77a811e5",
+      "unitScaleToMeters": 0.001
+    },
+    {
+      "byteLength": 3531797,
+      "counts": {
+        "duplicateGlobalIdCount": 0,
+        "edgeSegmentCount": 0,
+        "geometricOccurrenceCount": 0,
+        "geometricPrototypeCount": 0,
+        "mappedItemCount": 0,
+        "maxHierarchyDepth": 5,
+        "occurrenceCount": 4277,
+        "part21EntityCount": 58652,
+        "productCount": 4276,
+        "propertyValueCount": 1999,
+        "prototypeCount": 9,
+        "representationCount": 0,
+        "representationMapCount": 0,
+        "semanticEntityCount": 4277,
+        "submittedEdgeSegmentCount": 0,
+        "submittedTriangleCount": 0,
+        "triangleCount": 0,
+        "vertexCount": 0
+      },
+      "discipline": "e-s1-geelen-06",
+      "path": "sixty5/engineering/e-s1-rwb-geelen-beton-06-6e-verdieping.ifc",
+      "schema": "IFC2X3",
+      "sha256": "fc087293e79b41825c0ad9a37082f80c3e2305e814942ff4f21f2df80e92c7f8",
+      "unitScaleToMeters": 0.001
+    },
+    {
+      "byteLength": 3508210,
+      "counts": {
+        "duplicateGlobalIdCount": 0,
+        "edgeSegmentCount": 0,
+        "geometricOccurrenceCount": 0,
+        "geometricPrototypeCount": 0,
+        "mappedItemCount": 0,
+        "maxHierarchyDepth": 5,
+        "occurrenceCount": 4282,
+        "part21EntityCount": 58157,
+        "productCount": 4281,
+        "propertyValueCount": 2072,
+        "prototypeCount": 9,
+        "representationCount": 0,
+        "representationMapCount": 0,
+        "semanticEntityCount": 4282,
+        "submittedEdgeSegmentCount": 0,
+        "submittedTriangleCount": 0,
+        "triangleCount": 0,
+        "vertexCount": 0
+      },
+      "discipline": "e-s1-geelen-07",
+      "path": "sixty5/engineering/e-s1-rwb-geelen-beton-07-7e-verdieping.ifc",
+      "schema": "IFC2X3",
+      "sha256": "7e24d1c06ed5c5d5cedf3e3287ad1bc399cf1a590836271f64384adb02bc2419",
+      "unitScaleToMeters": 0.001
+    },
+    {
+      "byteLength": 3044851,
+      "counts": {
+        "duplicateGlobalIdCount": 0,
+        "edgeSegmentCount": 0,
+        "geometricOccurrenceCount": 0,
+        "geometricPrototypeCount": 0,
+        "mappedItemCount": 0,
+        "maxHierarchyDepth": 5,
+        "occurrenceCount": 3710,
+        "part21EntityCount": 50594,
+        "productCount": 3709,
+        "propertyValueCount": 1708,
+        "prototypeCount": 9,
+        "representationCount": 0,
+        "representationMapCount": 0,
+        "semanticEntityCount": 3710,
+        "submittedEdgeSegmentCount": 0,
+        "submittedTriangleCount": 0,
+        "triangleCount": 0,
+        "vertexCount": 0
+      },
+      "discipline": "e-s1-geelen-08",
+      "path": "sixty5/engineering/e-s1-rwb-geelen-beton-08-8e-verdieping.ifc",
+      "schema": "IFC2X3",
+      "sha256": "0f6de32467ad47edd6ba3a3103606c0669d0c2848e193f9c50cd21b9962d15a8",
+      "unitScaleToMeters": 0.001
+    },
+    {
+      "byteLength": 2945300,
+      "counts": {
+        "duplicateGlobalIdCount": 0,
+        "edgeSegmentCount": 0,
+        "geometricOccurrenceCount": 0,
+        "geometricPrototypeCount": 0,
+        "mappedItemCount": 0,
+        "maxHierarchyDepth": 5,
+        "occurrenceCount": 3549,
+        "part21EntityCount": 49018,
+        "productCount": 3548,
+        "propertyValueCount": 1708,
+        "prototypeCount": 9,
+        "representationCount": 0,
+        "representationMapCount": 0,
+        "semanticEntityCount": 3549,
+        "submittedEdgeSegmentCount": 0,
+        "submittedTriangleCount": 0,
+        "triangleCount": 0,
+        "vertexCount": 0
+      },
+      "discipline": "e-s1-geelen-09",
+      "path": "sixty5/engineering/e-s1-rwb-geelen-beton-09-9e-verdieping.ifc",
+      "schema": "IFC2X3",
+      "sha256": "3e04895df8470a60a619676caa810fc1a715f39d08898e4e475b974393560459",
+      "unitScaleToMeters": 0.001
+    },
+    {
+      "byteLength": 2548680,
+      "counts": {
+        "duplicateGlobalIdCount": 0,
+        "edgeSegmentCount": 174115,
+        "geometricOccurrenceCount": 3085,
+        "geometricPrototypeCount": 3085,
+        "mappedItemCount": 0,
+        "maxHierarchyDepth": 5,
+        "occurrenceCount": 3141,
+        "part21EntityCount": 42300,
+        "productCount": 3140,
+        "propertyValueCount": 1439,
+        "prototypeCount": 3090,
+        "representationCount": 3085,
+        "representationMapCount": 0,
+        "semanticEntityCount": 3141,
+        "submittedEdgeSegmentCount": 174115,
+        "submittedTriangleCount": 420346,
+        "triangleCount": 420346,
+        "vertexCount": 205483
+      },
+      "discipline": "e-s1-geelen-10",
+      "path": "sixty5/engineering/e-s1-rwb-geelen-beton-10-10e-verdieping.ifc",
+      "schema": "IFC2X3",
+      "sha256": "7317aec5842183a0a11507dc9c345b5653b436bada0c4a23cf943db405abdd66",
+      "unitScaleToMeters": 0.001
+    },
+    {
+      "byteLength": 2359536,
+      "counts": {
+        "duplicateGlobalIdCount": 0,
+        "edgeSegmentCount": 0,
+        "geometricOccurrenceCount": 0,
+        "geometricPrototypeCount": 0,
+        "mappedItemCount": 0,
+        "maxHierarchyDepth": 5,
+        "occurrenceCount": 2849,
+        "part21EntityCount": 39313,
+        "productCount": 2848,
+        "propertyValueCount": 1428,
+        "prototypeCount": 9,
+        "representationCount": 0,
+        "representationMapCount": 0,
+        "semanticEntityCount": 2849,
+        "submittedEdgeSegmentCount": 0,
+        "submittedTriangleCount": 0,
+        "triangleCount": 0,
+        "vertexCount": 0
+      },
+      "discipline": "e-s1-geelen-11",
+      "path": "sixty5/engineering/e-s1-rwb-geelen-beton-11-11e-verdieping.ifc",
+      "schema": "IFC2X3",
+      "sha256": "a79e7a652250a6d5db85977bd4de73bb9fcb3d2a767c0aafefb8a18ce2f24266",
+      "unitScaleToMeters": 0.001
+    },
+    {
+      "byteLength": 1968762,
+      "counts": {
+        "duplicateGlobalIdCount": 0,
+        "edgeSegmentCount": 140089,
+        "geometricOccurrenceCount": 2420,
+        "geometricPrototypeCount": 2420,
+        "mappedItemCount": 0,
+        "maxHierarchyDepth": 5,
+        "occurrenceCount": 2467,
+        "part21EntityCount": 32638,
+        "productCount": 2466,
+        "propertyValueCount": 1187,
+        "prototypeCount": 2425,
+        "representationCount": 2420,
+        "representationMapCount": 0,
+        "semanticEntityCount": 2467,
+        "submittedEdgeSegmentCount": 140089,
+        "submittedTriangleCount": 356810,
+        "triangleCount": 356810,
+        "vertexCount": 172247
+      },
+      "discipline": "e-s1-geelen-12",
+      "path": "sixty5/engineering/e-s1-rwb-geelen-beton-12-12e-verdieping.ifc",
+      "schema": "IFC2X3",
+      "sha256": "d16a5dfc6d882b333fe5b8b95b22db57986084b9be4ac2138664e73d421dd6e4",
+      "unitScaleToMeters": 0.001
+    },
+    {
+      "byteLength": 1772012,
+      "counts": {
+        "duplicateGlobalIdCount": 0,
+        "edgeSegmentCount": 0,
+        "geometricOccurrenceCount": 0,
+        "geometricPrototypeCount": 0,
+        "mappedItemCount": 0,
+        "maxHierarchyDepth": 5,
+        "occurrenceCount": 2142,
+        "part21EntityCount": 29605,
+        "productCount": 2141,
+        "propertyValueCount": 1120,
+        "prototypeCount": 9,
+        "representationCount": 0,
+        "representationMapCount": 0,
+        "semanticEntityCount": 2142,
+        "submittedEdgeSegmentCount": 0,
+        "submittedTriangleCount": 0,
+        "triangleCount": 0,
+        "vertexCount": 0
+      },
+      "discipline": "e-s1-geelen-13",
+      "path": "sixty5/engineering/e-s1-rwb-geelen-beton-13-13e-verdieping.ifc",
+      "schema": "IFC2X3",
+      "sha256": "468a4736d89be9b76538119e38b136471f880611ff8ab41b406d838cdb920c25",
+      "unitScaleToMeters": 0.001
+    },
+    {
+      "byteLength": 1632915,
+      "counts": {
+        "duplicateGlobalIdCount": 0,
+        "edgeSegmentCount": 0,
+        "geometricOccurrenceCount": 0,
+        "geometricPrototypeCount": 0,
+        "mappedItemCount": 0,
+        "maxHierarchyDepth": 5,
+        "occurrenceCount": 2040,
+        "part21EntityCount": 27225,
+        "productCount": 2039,
+        "propertyValueCount": 851,
+        "prototypeCount": 9,
+        "representationCount": 0,
+        "representationMapCount": 0,
+        "semanticEntityCount": 2040,
+        "submittedEdgeSegmentCount": 0,
+        "submittedTriangleCount": 0,
+        "triangleCount": 0,
+        "vertexCount": 0
+      },
+      "discipline": "e-s1-geelen-14",
+      "path": "sixty5/engineering/e-s1-rwb-geelen-beton-14-14e-verdieping.ifc",
+      "schema": "IFC2X3",
+      "sha256": "7ba361a086d03741947fef5e73d51ea71ce25ed1d0d919e70b6a150682cedf8a",
+      "unitScaleToMeters": 0.001
+    },
+    {
+      "byteLength": 1521448,
+      "counts": {
+        "duplicateGlobalIdCount": 0,
+        "edgeSegmentCount": 0,
+        "geometricOccurrenceCount": 0,
+        "geometricPrototypeCount": 0,
+        "mappedItemCount": 0,
+        "maxHierarchyDepth": 5,
+        "occurrenceCount": 1902,
+        "part21EntityCount": 25328,
+        "productCount": 1901,
+        "propertyValueCount": 935,
+        "prototypeCount": 9,
+        "representationCount": 0,
+        "representationMapCount": 0,
+        "semanticEntityCount": 1902,
+        "submittedEdgeSegmentCount": 0,
+        "submittedTriangleCount": 0,
+        "triangleCount": 0,
+        "vertexCount": 0
+      },
+      "discipline": "e-s1-geelen-15",
+      "path": "sixty5/engineering/e-s1-rwb-geelen-beton-15-15e-verdieping.ifc",
+      "schema": "IFC2X3",
+      "sha256": "78accbec75760ddcb96cd781298f57721df6b6f338c592a858a6ca2067a9e8b6",
+      "unitScaleToMeters": 0.001
+    },
+    {
+      "byteLength": 734375,
+      "counts": {
+        "duplicateGlobalIdCount": 0,
+        "edgeSegmentCount": 0,
+        "geometricOccurrenceCount": 0,
+        "geometricPrototypeCount": 0,
+        "mappedItemCount": 0,
+        "maxHierarchyDepth": 5,
+        "occurrenceCount": 899,
+        "part21EntityCount": 12513,
+        "productCount": 898,
+        "propertyValueCount": 420,
+        "prototypeCount": 9,
+        "representationCount": 0,
+        "representationMapCount": 0,
+        "semanticEntityCount": 899,
+        "submittedEdgeSegmentCount": 0,
+        "submittedTriangleCount": 0,
+        "triangleCount": 0,
+        "vertexCount": 0
+      },
+      "discipline": "e-s1-geelen-16",
+      "path": "sixty5/engineering/e-s1-rwb-geelen-beton-16-16e-verdieping.ifc",
+      "schema": "IFC2X3",
+      "sha256": "3a7bc8f28a08609606bbcc10aa9958fbe711a25c229bbca426980c9ddbfd8987",
+      "unitScaleToMeters": 0.001
+    },
+    {
+      "byteLength": 1808735,
+      "counts": {
+        "duplicateGlobalIdCount": 0,
+        "edgeSegmentCount": 0,
+        "geometricOccurrenceCount": 0,
+        "geometricPrototypeCount": 0,
+        "mappedItemCount": 0,
+        "maxHierarchyDepth": 5,
+        "occurrenceCount": 2470,
+        "part21EntityCount": 29595,
+        "productCount": 2469,
+        "propertyValueCount": 856,
+        "prototypeCount": 9,
+        "representationCount": 0,
+        "representationMapCount": 0,
+        "semanticEntityCount": 2470,
+        "submittedEdgeSegmentCount": 0,
+        "submittedTriangleCount": 0,
+        "triangleCount": 0,
+        "vertexCount": 0
+      },
+      "discipline": "e-s1-geelen-17",
+      "path": "sixty5/engineering/e-s1-rwb-geelen-beton-17-dakvloer.ifc",
+      "schema": "IFC2X3",
+      "sha256": "e9cf93391d1efb933c53a275cf1524606519d7d3d9c58d1f438229c731549672",
+      "unitScaleToMeters": 0.001
+    }
+  ],
+  "sceneIrValidation": {
+    "ok": true,
+    "errorCount": 0,
+    "warningCount": 0
+  }
+}

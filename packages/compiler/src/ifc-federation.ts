@@ -63,6 +63,8 @@ export interface IfcFederationCompileOptions {
   readonly spatialPayloadOrder?: boolean;
   /** Omit insignificant scene.gltf whitespace for real-large packages. */
   readonly compactJson?: boolean;
+  /** Omit non-semantic glTF mesh, bufferView, and accessor labels. */
+  readonly omitResourceNames?: boolean;
   readonly environment?: NodeJS.ProcessEnv;
 }
 
@@ -246,6 +248,7 @@ function federationCacheInput(
         : { spatialLeafCapacity: options.spatialLeafCapacity }),
       spatialPayloadOrder: options.spatialPayloadOrder === true,
       compactJson: options.compactJson === true,
+      ...(options.omitResourceNames === true ? { omitResourceNames: true } : {}),
       ...Object.fromEntries(
         sources.map(({ discipline, uriHint }) => [`uriHint.${discipline}`, uriHint]),
       ),
@@ -537,6 +540,7 @@ export async function compileIfcFederation(
         : { spatialLeafCapacity: options.spatialLeafCapacity }),
       ...(options.spatialPayloadOrder === true ? { spatialPayloadOrder: true } : {}),
       ...(options.compactJson === true ? { compactJson: true } : {}),
+      ...(options.omitResourceNames === true ? { omitResourceNames: true } : {}),
       // The package carries the adapter's value column file byte-verbatim as
       // a lazy property sidecar; the compiler still never materializes a
       // property value.

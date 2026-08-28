@@ -1,21 +1,29 @@
-import { mkdtemp, rm, writeFile } from "node:fs/promises";
+import { createHash } from "node:crypto";
+import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
 import { afterEach, describe, expect, it } from "vitest";
 
 import {
+  fetchDataset,
   inspectPart21,
+  loadExternalFixtureManifest,
   readZipMember,
+  repositoryRoot,
   resolveInside,
+  validateExternalFixtureManifest,
 } from "../../../scripts/lib/external-fixtures.mjs";
 
 const temporaryDirectories: string[] = [];
+const fixtureCacheDirectory = `output/external-fixture-provider-tests-${process.pid}`;
+const fixtureCachePath = join(repositoryRoot, fixtureCacheDirectory);
 
 afterEach(async () => {
   await Promise.all(
     temporaryDirectories.splice(0).map((path) => rm(path, { recursive: true, force: true })),
   );
+  await rm(fixtureCachePath, { recursive: true, force: true });
 });
 
 function storedZip(name: string, contents: Buffer): Buffer {
@@ -102,5 +110,360 @@ describe("Part 21 inspection", () => {
     expect(inspection.indicators.projects).toBe(1);
     expect(inspection.indicators.storeys).toBe(1);
     expect(inspection.indicators.relationships).toBe(1);
+  });
+});
+
+function sha256(contents: Buffer): string {
+  return createHash("sha256").update(contents).digest("hex");
+}
+
+function trimbleDataset() {
+  const first = Buffer.from("first IFC payload", "utf8");
+  const second = Buffer.from("second IFC payload", "utf8");
+  return {
+    contents: { first, second },
+    manifest: {
+      cacheDirectory: fixtureCacheDirectory,
+    },
+    dataset: {
+      id: "trimble-provider-test",
+      requiresAllowLarge: false,
+      expectedDownloadBytes: first.length + second.length,
+      download: {
+        provider: "trimble-connect-public-share",
+        apiBaseUrl: "https://connect.example/tc/api/2.0",
+        projectId: "project-id",
+        shareToken: "public-share-token",
+        revisionPolicy: "content-digest-only",
+      },
+      assets: [
+        {
+          id: "first",
+          role: "source",
+          format: "ifc",
+          path: "first.ifc",
+          remoteObjectId: "remote-first",
+          remoteName: "First Model.ifc",
+          byteLength: first.length,
+          sha256: sha256(first),
+        },
+        {
+          id: "second",
+          role: "source",
+          format: "ifc",
+          path: "second.ifc",
+          remoteObjectId: "remote-second",
+          remoteName: "Second Model.ifc",
+          byteLength: second.length,
+          sha256: sha256(second),
+        },
+      ],
+    },
+  };
+}
+
+function jsonResponse(value: unknown): Response {
+  return new Response(JSON.stringify(value), {
+    status: 200,
+    headers: { "content-type": "application/json" },
+  });
+}
+
+describe("external fixture manifest 1.1", () => {
+  it("accepts a dataset-level Trimble downloader without changing direct URL datasets", async () => {
+    const { manifest, sha256: manifestSha256 } = await loadExternalFixtureManifest();
+    const next = structuredClone(manifest);
+    next.schemaVersion = "1.1";
+    const sixty5 = next.datasets.find((dataset) => dataset.id === "ifc-bench-sixty5");
+    expect(sixty5).toBeDefined();
+    sixty5.download = {
+      provider: "trimble-connect-public-share",
+      apiBaseUrl: "https://connect.example/tc/api/2.0",
+      projectId: "project-id",
+      shareToken: "public-share-token",
+      revisionPolicy: "content-digest-only",
+    };
+    sixty5.assets = sixty5.assets.map((asset, index) => {
+      const { url: _url, ...unchanged } = asset;
+      return {
+        ...unchanged,
+        remoteObjectId: `remote-${index}`,
+        remoteName: `Remote ${index}.ifc`,
+      };
+    });
+
+    await expect(
+      validateExternalFixtureManifest(next, manifestSha256, { validateEvidence: false }),
+    ).resolves.toBeUndefined();
+    expect(next.datasets[0].assets[0].url).toMatch(/^https:\/\//u);
+  });
+
+  it("rejects legacy schema 1.0 manifests after the 1.1 migration", async () => {
+    const { manifest, sha256: manifestSha256 } = await loadExternalFixtureManifest();
+    const next = structuredClone(manifest);
+    next.schemaVersion = "1.0";
+
+    await expect(
+      validateExternalFixtureManifest(next, manifestSha256, { validateEvidence: false }),
+    ).rejects.toThrow(/unsupported shape/u);
+  });
+});
+
+describe("Trimble Connect public-share downloads", () => {
+  it("resolves one share, authenticates downloadurl calls, and verifies downloaded bytes", async () => {
+    const { contents, manifest, dataset } = trimbleDataset();
+    const calls: Array<{ init: RequestInit | undefined; url: string }> = [];
+    const fetchImpl = async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = String(input);
+      calls.push({ init, url });
+      if (url.includes("/shares/token/")) {
+        return jsonResponse({
+          mode: "PUBLIC",
+          permission: "DOWNLOAD",
+          projectId: "project-id",
+          accessToken: "temporary-access-token",
+          objects: dataset.assets.map((asset) => ({
+            id: asset.remoteObjectId,
+            name: asset.remoteName,
+            type: "FILE",
+            versionId: null,
+            useLatestVersion: true,
+          })),
+        });
+      }
+      const downloadUrlMatch = /\/files\/fs\/([^/]+)\/downloadurl/u.exec(url);
+      if (downloadUrlMatch) {
+        const remoteObjectId = decodeURIComponent(downloadUrlMatch[1]);
+        return jsonResponse({
+          id: remoteObjectId,
+          versionId: remoteObjectId,
+          url: `https://downloads.example/${remoteObjectId}`,
+        });
+      }
+      if (url.endsWith("/remote-first")) return new Response(contents.first);
+      if (url.endsWith("/remote-second")) return new Response(contents.second);
+      return new Response(null, { status: 404 });
+    };
+
+    const results = await fetchDataset(manifest, dataset, { fetchImpl });
+
+    expect(results.map(({ id, downloaded }) => ({ id, downloaded }))).toEqual([
+      { id: "first", downloaded: true },
+      { id: "second", downloaded: true },
+    ]);
+    expect(calls.filter(({ url }) => url.includes("/shares/token/"))).toHaveLength(1);
+    const downloadUrlCalls = calls.filter(({ url }) => url.includes("/downloadurl?"));
+    expect(downloadUrlCalls).toHaveLength(2);
+    for (const call of downloadUrlCalls) {
+      const headers = new Headers(call.init?.headers);
+      expect(headers.get("authorization")).toBe("Bearer temporary-access-token");
+      expect(headers.get("x-share-token")).toBe("public-share-token");
+      expect(call.init?.redirect).toBe("error");
+    }
+    const assetCalls = calls.filter(({ url }) => url.startsWith("https://downloads.example/"));
+    expect(assetCalls).toHaveLength(2);
+    expect(new Headers(assetCalls[0].init?.headers).get("authorization")).toBeNull();
+    expect(await readFile(join(fixtureCachePath, dataset.id, "first.ifc"))).toEqual(
+      contents.first,
+    );
+    expect(await readFile(join(fixtureCachePath, dataset.id, "second.ifc"))).toEqual(
+      contents.second,
+    );
+  });
+
+  it.each([
+    ["mode", "PROJECT_USERS"],
+    ["permission", "VIEW"],
+    ["projectId", "other-project"],
+  ])("rejects mismatched share %s", async (field, value) => {
+    const { manifest, dataset } = trimbleDataset();
+    const fetchImpl = async () =>
+      jsonResponse({
+        mode: "PUBLIC",
+        permission: "DOWNLOAD",
+        projectId: "project-id",
+        accessToken: "temporary-access-token",
+        objects: dataset.assets.map((asset) => ({
+          id: asset.remoteObjectId,
+          name: asset.remoteName,
+          type: "FILE",
+          useLatestVersion: true,
+        })),
+        [field]: value,
+      });
+
+    await expect(fetchDataset(manifest, dataset, { assetIds: ["first"], fetchImpl })).rejects.toThrow(
+      /public share/u,
+    );
+  });
+
+  it.each([
+    ["name", "Wrong.ifc"],
+    ["useLatestVersion", false],
+  ])("rejects mismatched remote object %s", async (field, value) => {
+    const { manifest, dataset } = trimbleDataset();
+    const fetchImpl = async () =>
+      jsonResponse({
+        mode: "PUBLIC",
+        permission: "DOWNLOAD",
+        projectId: "project-id",
+        accessToken: "temporary-access-token",
+        objects: dataset.assets.map((asset, index) => ({
+          id: asset.remoteObjectId,
+          name: asset.remoteName,
+          type: "FILE",
+          useLatestVersion: true,
+          ...(index === 0 ? { [field]: value } : {}),
+        })),
+      });
+
+    await expect(fetchDataset(manifest, dataset, { assetIds: ["first"], fetchImpl })).rejects.toThrow(
+      /does not match the manifest/u,
+    );
+  });
+
+  it.each([
+    ["id", "other-object"],
+    ["versionId", "other-version"],
+  ])("rejects mismatched download %s", async (field, value) => {
+    const { manifest, dataset } = trimbleDataset();
+    let requestCount = 0;
+    const fetchImpl = async () => {
+      requestCount += 1;
+      if (requestCount === 1) {
+        return jsonResponse({
+          mode: "PUBLIC",
+          permission: "DOWNLOAD",
+          projectId: "project-id",
+          accessToken: "temporary-access-token",
+          objects: dataset.assets.map((asset) => ({
+            id: asset.remoteObjectId,
+            name: asset.remoteName,
+            type: "FILE",
+            useLatestVersion: true,
+          })),
+        });
+      }
+      return jsonResponse({
+        id: "remote-first",
+        versionId: "remote-first",
+        url: "https://downloads.example/remote-first",
+        [field]: value,
+      });
+    };
+
+    await expect(fetchDataset(manifest, dataset, { assetIds: ["first"], fetchImpl })).rejects.toThrow(
+      /download identity does not match/u,
+    );
+  });
+
+  it("rejects a non-HTTPS download URL without exposing tokens", async () => {
+    const { manifest, dataset } = trimbleDataset();
+    let requestCount = 0;
+    const fetchImpl = async () => {
+      requestCount += 1;
+      if (requestCount === 1) {
+        return jsonResponse({
+          mode: "PUBLIC",
+          permission: "DOWNLOAD",
+          projectId: "project-id",
+          accessToken: "temporary-access-token",
+          objects: dataset.assets.map((asset) => ({
+            id: asset.remoteObjectId,
+            name: asset.remoteName,
+            type: "FILE",
+            useLatestVersion: true,
+          })),
+        });
+      }
+      return jsonResponse({
+        id: "remote-first",
+        versionId: "remote-first",
+        url: "http://downloads.example/remote-first?token=must-not-appear",
+      });
+    };
+
+    const error = await fetchDataset(manifest, dataset, {
+      assetIds: ["first"],
+      fetchImpl,
+    }).catch((caught: unknown) => caught);
+    expect(error).toBeInstanceOf(TypeError);
+    expect(String(error)).toMatch(/must use HTTPS/u);
+    expect(String(error)).not.toContain("temporary-access-token");
+    expect(String(error)).not.toContain("public-share-token");
+    expect(String(error)).not.toContain("must-not-appear");
+  });
+
+  it("does not cache bytes that fail the pinned content digest", async () => {
+    const { manifest, dataset } = trimbleDataset();
+    let requestCount = 0;
+    const fetchImpl = async () => {
+      requestCount += 1;
+      if (requestCount === 1) {
+        return jsonResponse({
+          mode: "PUBLIC",
+          permission: "DOWNLOAD",
+          projectId: "project-id",
+          accessToken: "temporary-access-token",
+          objects: dataset.assets.map((asset) => ({
+            id: asset.remoteObjectId,
+            name: asset.remoteName,
+            type: "FILE",
+            useLatestVersion: true,
+          })),
+        });
+      }
+      if (requestCount === 2) {
+        return jsonResponse({
+          id: "remote-first",
+          versionId: "remote-first",
+          url: "https://downloads.example/remote-first",
+        });
+      }
+      return new Response(Buffer.from("wrong IFC payload", "utf8"));
+    };
+
+    await expect(fetchDataset(manifest, dataset, { assetIds: ["first"], fetchImpl })).rejects.toThrow(
+      /failed verification/u,
+    );
+    await expect(readFile(join(fixtureCachePath, dataset.id, "first.ifc"))).rejects.toMatchObject({
+      code: "ENOENT",
+    });
+  });
+
+  it("stops an oversized response before caching it", async () => {
+    const { manifest, dataset } = trimbleDataset();
+    let requestCount = 0;
+    const fetchImpl = async () => {
+      requestCount += 1;
+      if (requestCount === 1) {
+        return jsonResponse({
+          mode: "PUBLIC",
+          permission: "DOWNLOAD",
+          projectId: "project-id",
+          accessToken: "temporary-access-token",
+          objects: dataset.assets.map((asset) => ({
+            id: asset.remoteObjectId,
+            name: asset.remoteName,
+            type: "FILE",
+            useLatestVersion: true,
+          })),
+        });
+      }
+      if (requestCount === 2) {
+        return jsonResponse({
+          id: "remote-first",
+          versionId: "remote-first",
+          url: "https://downloads.example/remote-first",
+        });
+      }
+      return new Response(Buffer.alloc(dataset.assets[0].byteLength + 1));
+    };
+
+    await expect(fetchDataset(manifest, dataset, { assetIds: ["first"], fetchImpl }))
+      .rejects.toThrow(/exceeded the pinned/u);
+    await expect(readFile(join(fixtureCachePath, dataset.id, "first.ifc"))).rejects.toMatchObject({
+      code: "ENOENT",
+    });
   });
 });

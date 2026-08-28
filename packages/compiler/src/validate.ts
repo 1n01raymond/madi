@@ -50,6 +50,15 @@ export function validateCompiledGltf(
     add("BUFFER_COUNT", "buffers", "Declared and supplied binary resource counts differ.");
   }
 
+  const positionAccessorIndexes = new Set(
+    document.meshes.flatMap((mesh) =>
+      mesh.primitives.flatMap((primitive) => {
+        const position = primitive.attributes.POSITION;
+        return position === undefined ? [] : [position];
+      }),
+    ),
+  );
+
   document.bufferViews.forEach((bufferView, index) => {
     const path = `bufferViews[${index}]`;
     const binary = resources[bufferView.buffer];
@@ -86,9 +95,7 @@ export function validateCompiledGltf(
       add("ACCESSOR_RANGE", path, "Accessor exceeds its buffer view.");
     }
     if (
-      accessor.type === "VEC3" &&
-      accessor.componentType === 5126 &&
-      accessor.name?.includes("positions") &&
+      positionAccessorIndexes.has(index) &&
       (accessor.min?.length !== 3 || accessor.max?.length !== 3)
     ) {
       add("POSITION_BOUNDS", path, "Position accessors must declare min/max bounds.");

@@ -204,6 +204,62 @@ describe("Phase 1 glTF compiler slice", () => {
     expect(pretty.report.options.jsonFormatting).toBeUndefined();
   });
 
+  it("can omit only non-semantic glTF resource names", async () => {
+    const named = await compileEvidence({ coarseBounds: true });
+    const unnamed = await compileEvidence({ coarseBounds: true, omitResourceNames: true });
+    const expectedDocument = JSON.parse(named.json) as {
+      meshes: { name?: string }[];
+      bufferViews: { name?: string }[];
+      accessors: { name?: string }[];
+    };
+
+    for (const resource of [
+      ...expectedDocument.meshes,
+      ...expectedDocument.bufferViews,
+      ...expectedDocument.accessors,
+    ]) {
+      delete resource.name;
+    }
+
+    expect(named.document.meshes.every(({ name }) => name !== undefined)).toBe(true);
+    expect(named.document.bufferViews.every(({ name }) => name !== undefined)).toBe(true);
+    expect(named.document.accessors.every(({ name }) => name !== undefined)).toBe(true);
+    expect(unnamed.document.meshes.every(({ name }) => name === undefined)).toBe(true);
+    expect(unnamed.document.bufferViews.every(({ name }) => name === undefined)).toBe(true);
+    expect(unnamed.document.accessors.every(({ name }) => name === undefined)).toBe(true);
+    expect(unnamed.document).toEqual(expectedDocument);
+    expect(unnamed.binary).toEqual(named.binary);
+    expect(unnamed.coarseBinary).toEqual(named.coarseBinary);
+    expect(unnamed.report.options.resourceNames).toBe("omitted");
+    expect(named.report.options.resourceNames).toBeUndefined();
+    expect(validateCompiledGltf(unnamed.document, [
+      unnamed.binary,
+      unnamed.coarseBinary as Uint8Array,
+    ])).toEqual({ ok: true, issues: [] });
+  });
+
+  it("validates unnamed POSITION accessor bounds from primitive references", async () => {
+    const unnamed = await compileEvidence({ omitResourceNames: true });
+    const corrupted = JSON.parse(unnamed.json) as typeof unnamed.document;
+    const positionAccessorIndex = corrupted.meshes[0]?.primitives[0]?.attributes.POSITION;
+    if (positionAccessorIndex === undefined) {
+      throw new TypeError("Compiler fixture is missing a POSITION accessor.");
+    }
+    const positionAccessor = corrupted.accessors[positionAccessorIndex] as {
+      min?: readonly number[];
+      max?: readonly number[];
+    };
+    delete positionAccessor.min;
+    delete positionAccessor.max;
+
+    const validation = validateCompiledGltf(corrupted, unnamed.binary);
+
+    expect(validation.issues).toContainEqual(expect.objectContaining({
+      code: "POSITION_BOUNDS",
+      path: `accessors[${positionAccessorIndex}]`,
+    }));
+  });
+
   it("adds a deterministic spatial sidecar without changing target or coarse geometry", async () => {
     const baseline = await compileEvidence({ coarseBounds: true });
     const first = await compileEvidence({

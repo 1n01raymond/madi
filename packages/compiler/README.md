@@ -128,6 +128,7 @@ pnpm naru compile-ifc \
   --target-chunk-kib 512 \
   --spatial-index \
   --spatial-payload-order \
+  --omit-resource-names \
   --cache output/naru-compiled-cache \
   --output output/ifc/federation
 ```
@@ -138,6 +139,22 @@ report, and deletes Scene IR unless `--retain-scene-ir` is requested. When a
 cache is selected, retained intermediates are included only when that option is
 part of the key. The qualified four-discipline result is under
 `artifacts/ifc/digital-hub/`.
+
+For very large federations, `--omit-resource-names` removes only the optional
+glTF `name` fields on meshes, buffer views, and accessors. Scene, node, and
+material names remain available, as do all `extras` identity and source-mapping
+records. The option is part of the compiled-cache key; without it, output stays
+byte-identical to the named default package.
+
+The committed [engineering-scale qualification
+record](../../artifacts/ifc/engineering-baseline/README.md) uses this option
+together with compact JSON, a spatial index, and spatial-leaf payload order.
+After explicitly fetching the two large source datasets, reproduce it with
+`pnpm ifc:engineering:compile`, record the reports with
+`pnpm ifc:engineering:evidence`, and run the strict offline gate with
+`pnpm ifc:engineering:check`. The measured 31-document package passes the Phase
+2 occurrence/triangle/prototype floors and Khronos validation; public Studio
+delivery is not part of that record.
 
 ### Split Scene IR transport
 

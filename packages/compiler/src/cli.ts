@@ -22,6 +22,7 @@ IFC options:
   --target-chunk-kib <count>     Coalesced target request budget (default: 512)
   --spatial-payload-order        Co-locate target payloads by dominant BVH leaf
   --compact-json                 Omit insignificant scene.gltf whitespace
+  --omit-resource-names          Omit mesh/bufferView/accessor display names
   --retain-scene-ir              Keep the split intermediate pair under output
 
 General options:
@@ -55,6 +56,7 @@ interface IfcCompileArguments {
   readonly spatialLeafCapacity?: number;
   readonly spatialPayloadOrder: boolean;
   readonly compactJson: boolean;
+  readonly omitResourceNames: boolean;
   readonly retainSceneIr: boolean;
 }
 
@@ -152,6 +154,7 @@ function parseIfcCompileArguments(arguments_: string[]): IfcCompileArguments {
   let spatialLeafCapacity: number | undefined;
   let spatialPayloadOrder = false;
   let compactJson = false;
+  let omitResourceNames = false;
   let retainSceneIr = false;
   for (let index = 0; index < arguments_.length; index += 1) {
     const option = arguments_[index];
@@ -201,6 +204,8 @@ function parseIfcCompileArguments(arguments_: string[]): IfcCompileArguments {
       spatialPayloadOrder = true;
     } else if (option === "--compact-json") {
       compactJson = true;
+    } else if (option === "--omit-resource-names") {
+      omitResourceNames = true;
     } else {
       throw new TypeError(`Unknown option ${String(option)}.\n\n${usage}`);
     }
@@ -233,6 +238,7 @@ function parseIfcCompileArguments(arguments_: string[]): IfcCompileArguments {
     ...(spatialLeafCapacity === undefined ? {} : { spatialLeafCapacity }),
     spatialPayloadOrder,
     compactJson,
+    omitResourceNames,
     retainSceneIr,
   };
 }
