@@ -452,6 +452,22 @@ byte-identical when the option is absent. The 31-document [engineering-scale
 qualification](../artifacts/ifc/engineering-baseline/README.md) records the
 compact/omitted combination and a Khronos-clean package.
 
+Two further opt-in options reduce the node array, which the [document byte-split
+record](../artifacts/compiler/node-field-elision/README.md) measures at 36.2% of
+the engineering baseline's 405,570,167-byte document.
+`--elide-derived-identifiers` (API: `elideDerivedIdentifiers: true`) declares one
+document-level rule at `extras.madi.nodeIdentityDerivation` and omits each
+`semanticId` or `sourceRef` that rule reconstructs; a node whose value does not
+follow the rule keeps it explicitly, and a node with no such identity serializes
+`null`. `--omit-default-node-transforms` (API: `omitDefaultNodeTransforms: true`)
+drops an identity `matrix` and writes `translation` for a translation-only one,
+never decomposing a rotation or scale. The build report records
+`nodeIdentifiers: "derived-elided"` and `nodeTransforms: "default-omitted"`, both
+options participate in compiled-cache identity, and the default output is
+byte-identical when they are absent. Measured together on the engineering
+baseline they remove 23,459,373 B (5.78%); the same record ranks mesh-less
+hierarchy nodes (21.88%) above both, which ADR-0015 leaves to its own slice.
+
 The public `naru compile` entry now accepts a local AP242 or AP214 Part 21 file,
 invokes the isolated OCCT adapter, verifies schema and source digest parity,
 and writes the compiled package plus `adapter-report.json`. The committed

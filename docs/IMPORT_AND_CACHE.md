@@ -62,7 +62,10 @@ changing output:
 - adapter name and exact version/toolchain fingerprint;
 - compiler name and cache-compatible version;
 - compile-affecting options such as tessellation, edge, coordinate, chunking,
-  property, and LOD policies; and
+  property, and LOD policies;
+- every serialized-output option, so two JSON policies over one Scene IR cannot
+  alias a single entry: compact JSON, omitted resource names (ADR-0013), and
+  the node identity/transform elision pair (ADR-0015); and
 - cache schema major version.
 
 Stable source labels such as IFC URI hints and the current STEP basename are

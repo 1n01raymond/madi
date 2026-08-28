@@ -1,0 +1,705 @@
+{
+  "schemaVersion": "naru.node-field-elision.1",
+  "recordedAt": "2026-08-28T08:34:13.651Z",
+  "mode": "compiled-document-byte-split",
+  "host": {
+    "platform": "win32",
+    "architecture": "x64",
+    "node": "22.14.0",
+    "cpuCount": 16,
+    "cpuModel": "AMD Ryzen 7 9800X3D 8-Core Processor           ",
+    "totalMemoryBytes": 33463021568
+  },
+  "method": {
+    "byteAccounting": "Compact-equivalent: whitespace outside strings is ignored, and a member's key, colon, value, and following comma are all charged to that member.",
+    "sharedOptions": "Every variant compiles with the engineering baseline's option policy (compact JSON, omitted resource names, spatial index, leaf-anchor payload order).",
+    "roundTrip": "Both documents are decoded through the runtime loader and compared occurrence by occurrence; transforms must match bit for bit."
+  },
+  "models": [
+    {
+      "label": "digital-hub",
+      "input": "output/ifc/digital-hub-split4",
+      "sourceStructure": {
+        "byteLength": 29843011,
+        "sha256": "b8ec9c532231a9e464e1ee0d27e26444df16556b11a36d81b180703bb1a214bf"
+      },
+      "counts": {
+        "prototypeCount": 3405,
+        "compiledPrototypeCount": 3383,
+        "occurrenceCount": 13681,
+        "renderableOccurrenceCount": 5152,
+        "gltfNodeCount": 13682,
+        "gltfMeshCount": 6766,
+        "materialCount": 88,
+        "triangleCount": 913520,
+        "edgeSegmentCount": 1042392,
+        "targetChunkCount": 66
+      },
+      "document": {
+        "bytes": 20562117,
+        "nodeArrayBytes": 7519193,
+        "nodeArrayPercent": 36.57,
+        "nodeCount": 13682,
+        "topLevel": [
+          {
+            "member": "nodes",
+            "bytes": 7546566
+          },
+          {
+            "member": "meshes",
+            "bytes": 6455433
+          },
+          {
+            "member": "accessors",
+            "bytes": 3971405
+          },
+          {
+            "member": "bufferViews",
+            "bytes": 2371527
+          },
+          {
+            "member": "extras",
+            "bytes": 193110
+          },
+          {
+            "member": "materials",
+            "bytes": 23798
+          },
+          {
+            "member": "buffers",
+            "bytes": 95
+          },
+          {
+            "member": "asset",
+            "bytes": 91
+          },
+          {
+            "member": "scenes",
+            "bytes": 71
+          },
+          {
+            "member": "(document)",
+            "bytes": 10
+          },
+          {
+            "member": "scene",
+            "bytes": 10
+          }
+        ],
+        "nodeFields": [
+          {
+            "field": "matrix",
+            "bytes": 1316304
+          },
+          {
+            "field": "extras.madi.semanticId",
+            "bytes": 1077581
+          },
+          {
+            "field": "extras.madi.prototypeId",
+            "bytes": 1048070
+          },
+          {
+            "field": "extras.madi.sourceRef",
+            "bytes": 1036538
+          },
+          {
+            "field": "extras.madi.occurrenceId",
+            "bytes": 843400
+          },
+          {
+            "field": "extras.madi.tags",
+            "bytes": 819026
+          },
+          {
+            "field": "name",
+            "bytes": 457457
+          },
+          {
+            "field": "extras.madi.initialVisibility",
+            "bytes": 342025
+          },
+          {
+            "field": "extras (envelope)",
+            "bytes": 273639
+          },
+          {
+            "field": "children",
+            "bytes": 120540
+          },
+          {
+            "field": "extras.madi.coarseMesh",
+            "bytes": 91965
+          },
+          {
+            "field": "mesh",
+            "bytes": 61053
+          },
+          {
+            "field": "(element punctuation)",
+            "bytes": 31494
+          },
+          {
+            "field": "extras.madi.sourceLengthUnit",
+            "bytes": 23
+          },
+          {
+            "field": "extras.madi.kind",
+            "bytes": 22
+          },
+          {
+            "field": "extras.madi.sourceUpAxis",
+            "bytes": 19
+          },
+          {
+            "field": "extras.madi.targetUpAxis",
+            "bytes": 19
+          },
+          {
+            "field": "extras.madi.scaleToMeters",
+            "bytes": 18
+          }
+        ],
+        "nodeClasses": {
+          "meshed": {
+            "count": 5152,
+            "bytes": 2883692
+          },
+          "meshless": {
+            "count": 8530,
+            "bytes": 4635501
+          }
+        },
+        "nodeFacts": {
+          "identityMatrix": 102,
+          "translationOnlyMatrix": 2753,
+          "meshless": 8530,
+          "semanticIdFromPrototypeId": 0,
+          "sourceRefFromSemanticId": 13681,
+          "sourceRefFromOccurrenceId": 0,
+          "emptyTags": 0,
+          "defaultVisibility": 13681,
+          "nameEqualsOccurrenceId": 0
+        },
+        "distinctTagSets": 65,
+        "distinctNames": 12863
+      },
+      "variants": {
+        "baseline": {
+          "options": {
+            "binaryUri": "scene.bin",
+            "coarseBinaryUri": "coarse.bin",
+            "propertiesUri": "properties.json",
+            "propertiesBinaryUri": "properties.bin",
+            "coordinateSystem": "right-handed-y-up-meters",
+            "geometryEncoding": "gltf-f32",
+            "jsonFormatting": "compact",
+            "resourceNames": "omitted",
+            "progressiveRepresentation": "prototype-aabb-v1",
+            "targetChunking": "coalesced-prototype-range-v1",
+            "targetChunkByteBudget": 524288,
+            "targetPayloadOrder": "spatial-leaf-anchor-v1"
+          },
+          "documentBytes": 20562117,
+          "packageDigest": "39063c01ed7e4d11cd85d79b58cc97eafed49d4a3baa106e4ecce0f4d7584c59",
+          "compileSeconds": 0.7
+        },
+        "identifiers": {
+          "options": {
+            "binaryUri": "scene.bin",
+            "coarseBinaryUri": "coarse.bin",
+            "propertiesUri": "properties.json",
+            "propertiesBinaryUri": "properties.bin",
+            "coordinateSystem": "right-handed-y-up-meters",
+            "geometryEncoding": "gltf-f32",
+            "jsonFormatting": "compact",
+            "resourceNames": "omitted",
+            "nodeIdentifiers": "derived-elided",
+            "progressiveRepresentation": "prototype-aabb-v1",
+            "targetChunking": "coalesced-prototype-range-v1",
+            "targetChunkByteBudget": 524288,
+            "targetPayloadOrder": "spatial-leaf-anchor-v1"
+          },
+          "documentBytes": 19525631,
+          "packageDigest": "28e8542bebc8384ef72332c7c9927b84011d7ffa7a105b60755c98f170d2ad66",
+          "compileSeconds": 0.7
+        },
+        "transforms": {
+          "options": {
+            "binaryUri": "scene.bin",
+            "coarseBinaryUri": "coarse.bin",
+            "propertiesUri": "properties.json",
+            "propertiesBinaryUri": "properties.bin",
+            "coordinateSystem": "right-handed-y-up-meters",
+            "geometryEncoding": "gltf-f32",
+            "jsonFormatting": "compact",
+            "resourceNames": "omitted",
+            "nodeTransforms": "default-omitted",
+            "progressiveRepresentation": "prototype-aabb-v1",
+            "targetChunking": "coalesced-prototype-range-v1",
+            "targetChunkByteBudget": 524288,
+            "targetPayloadOrder": "spatial-leaf-anchor-v1"
+          },
+          "documentBytes": 20499918,
+          "packageDigest": "08f8772d4fcdca68fc2961b867937483f59d182e71c0427440da01a92df9590c",
+          "compileSeconds": 0.7
+        },
+        "both": {
+          "options": {
+            "binaryUri": "scene.bin",
+            "coarseBinaryUri": "coarse.bin",
+            "propertiesUri": "properties.json",
+            "propertiesBinaryUri": "properties.bin",
+            "coordinateSystem": "right-handed-y-up-meters",
+            "geometryEncoding": "gltf-f32",
+            "jsonFormatting": "compact",
+            "resourceNames": "omitted",
+            "nodeIdentifiers": "derived-elided",
+            "nodeTransforms": "default-omitted",
+            "progressiveRepresentation": "prototype-aabb-v1",
+            "targetChunking": "coalesced-prototype-range-v1",
+            "targetChunkByteBudget": 524288,
+            "targetPayloadOrder": "spatial-leaf-anchor-v1"
+          },
+          "documentBytes": 19463432,
+          "packageDigest": "26d5465bc2cf8f0c4c9215eddf5dc866d91428b43ba2921f3c59613f6c6645f0",
+          "compileSeconds": 0.7
+        }
+      },
+      "determinism": {
+        "variant": "both",
+        "repeats": 2,
+        "packageDigests": [
+          "26d5465bc2cf8f0c4c9215eddf5dc866d91428b43ba2921f3c59613f6c6645f0",
+          "26d5465bc2cf8f0c4c9215eddf5dc866d91428b43ba2921f3c59613f6c6645f0"
+        ],
+        "documentBytes": [
+          19463432,
+          19463432
+        ],
+        "identical": true
+      },
+      "combined": {
+        "variant": "both",
+        "documentBytes": 19463432,
+        "savedBytes": 1098685,
+        "savedPercent": 5.34,
+        "additive": true
+      },
+      "pipelinePackage": {
+        "available": false,
+        "reason": "the directory's package used other options (jsonFormatting, resourceNames, targetPayloadOrder)",
+        "packageDigest": "0e2ed4547e298908744ce7d9075900b1c55a4e88f26af7a6bef2ea7ee6c6595d"
+      },
+      "ranking": [
+        {
+          "lever": "hierarchy-node-relocation",
+          "kind": "candidate-upper-bound",
+          "implemented": false,
+          "basis": "every byte of every node that carries no mesh",
+          "upperBoundBytes": 4635501,
+          "upperBoundPercent": 22.54
+        },
+        {
+          "lever": "identifiers",
+          "kind": "measured",
+          "implemented": true,
+          "documentBytes": 19525631,
+          "savedBytes": 1036486,
+          "savedPercent": 5.04
+        },
+        {
+          "lever": "tag-set-interning",
+          "kind": "candidate-upper-bound",
+          "implemented": false,
+          "basis": "extras.madi.tags across 65 distinct sets",
+          "upperBoundBytes": 819026,
+          "upperBoundPercent": 3.98
+        },
+        {
+          "lever": "node-name-elision",
+          "kind": "candidate-upper-bound",
+          "implemented": false,
+          "basis": "name across 12863 distinct names",
+          "upperBoundBytes": 457457,
+          "upperBoundPercent": 2.22
+        },
+        {
+          "lever": "default-visibility-elision",
+          "kind": "candidate-upper-bound",
+          "implemented": false,
+          "basis": "extras.madi.initialVisibility, default on 13681 nodes",
+          "upperBoundBytes": 342025,
+          "upperBoundPercent": 1.66
+        },
+        {
+          "lever": "transforms",
+          "kind": "measured",
+          "implemented": true,
+          "documentBytes": 20499918,
+          "savedBytes": 62199,
+          "savedPercent": 0.3
+        }
+      ]
+    },
+    {
+      "label": "engineering-baseline",
+      "input": "output/ifc/engineering-baseline",
+      "sourceStructure": {
+        "byteLength": 544042274,
+        "sha256": "6ea9d12a30ce3e70ff22ee31b8df84614dff792fb09b027b171bf47a0f3407b0"
+      },
+      "counts": {
+        "prototypeCount": 66611,
+        "compiledPrototypeCount": 66396,
+        "occurrenceCount": 268001,
+        "renderableOccurrenceCount": 104337,
+        "gltfNodeCount": 268002,
+        "gltfMeshCount": 132792,
+        "materialCount": 422,
+        "triangleCount": 10394944,
+        "edgeSegmentCount": 5598201,
+        "targetChunkCount": 626
+      },
+      "document": {
+        "bytes": 405570167,
+        "nodeArrayBytes": 146356009,
+        "nodeArrayPercent": 36.09,
+        "nodeCount": 268002,
+        "topLevel": [
+          {
+            "member": "nodes",
+            "bytes": 146892022
+          },
+          {
+            "member": "meshes",
+            "bytes": 127260888
+          },
+          {
+            "member": "accessors",
+            "bytes": 80000737
+          },
+          {
+            "member": "bufferViews",
+            "bytes": 47350974
+          },
+          {
+            "member": "extras",
+            "bytes": 3950321
+          },
+          {
+            "member": "materials",
+            "bytes": 114945
+          },
+          {
+            "member": "buffers",
+            "bytes": 97
+          },
+          {
+            "member": "asset",
+            "bytes": 91
+          },
+          {
+            "member": "scenes",
+            "bytes": 71
+          },
+          {
+            "member": "(document)",
+            "bytes": 10
+          },
+          {
+            "member": "scene",
+            "bytes": 10
+          }
+        ],
+        "nodeFields": [
+          {
+            "field": "extras.madi.semanticId",
+            "bytes": 22032020
+          },
+          {
+            "field": "extras.madi.prototypeId",
+            "bytes": 21322632
+          },
+          {
+            "field": "extras.madi.sourceRef",
+            "bytes": 21228017
+          },
+          {
+            "field": "matrix",
+            "bytes": 20694932
+          },
+          {
+            "field": "extras.madi.occurrenceId",
+            "bytes": 17536994
+          },
+          {
+            "field": "extras.madi.tags",
+            "bytes": 16950164
+          },
+          {
+            "field": "name",
+            "bytes": 8859672
+          },
+          {
+            "field": "extras.madi.initialVisibility",
+            "bytes": 6700025
+          },
+          {
+            "field": "extras (envelope)",
+            "bytes": 5360039
+          },
+          {
+            "field": "extras.madi.coarseMesh",
+            "bytes": 1989990
+          },
+          {
+            "field": "children",
+            "bytes": 1780178
+          },
+          {
+            "field": "mesh",
+            "bytes": 1363968
+          },
+          {
+            "field": "(element punctuation)",
+            "bytes": 537277
+          },
+          {
+            "field": "extras.madi.sourceLengthUnit",
+            "bytes": 23
+          },
+          {
+            "field": "extras.madi.kind",
+            "bytes": 22
+          },
+          {
+            "field": "extras.madi.sourceUpAxis",
+            "bytes": 19
+          },
+          {
+            "field": "extras.madi.targetUpAxis",
+            "bytes": 19
+          },
+          {
+            "field": "extras.madi.scaleToMeters",
+            "bytes": 18
+          }
+        ],
+        "nodeClasses": {
+          "meshed": {
+            "count": 104337,
+            "bytes": 57614716
+          },
+          "meshless": {
+            "count": 163665,
+            "bytes": 88741293
+          }
+        },
+        "nodeFacts": {
+          "identityMatrix": 28718,
+          "translationOnlyMatrix": 47454,
+          "meshless": 163665,
+          "semanticIdFromPrototypeId": 0,
+          "sourceRefFromSemanticId": 268001,
+          "sourceRefFromOccurrenceId": 0,
+          "emptyTags": 0,
+          "defaultVisibility": 268001,
+          "nameEqualsOccurrenceId": 748
+        },
+        "distinctTagSets": 300,
+        "distinctNames": 143256
+      },
+      "variants": {
+        "baseline": {
+          "options": {
+            "binaryUri": "scene.bin",
+            "coarseBinaryUri": "coarse.bin",
+            "propertiesUri": "properties.json",
+            "propertiesBinaryUri": "properties.bin",
+            "coordinateSystem": "right-handed-y-up-meters",
+            "geometryEncoding": "gltf-f32",
+            "jsonFormatting": "compact",
+            "resourceNames": "omitted",
+            "progressiveRepresentation": "prototype-aabb-v1",
+            "targetChunking": "coalesced-prototype-range-v1",
+            "targetChunkByteBudget": 524288,
+            "targetPayloadOrder": "spatial-leaf-anchor-v1"
+          },
+          "documentBytes": 405570167,
+          "packageDigest": "04472c9ad2929ba271d2c2c5bbcf16b6f6f7607582966ff9d86817c51f4e04d7",
+          "compileSeconds": 12.5
+        },
+        "identifiers": {
+          "options": {
+            "binaryUri": "scene.bin",
+            "coarseBinaryUri": "coarse.bin",
+            "propertiesUri": "properties.json",
+            "propertiesBinaryUri": "properties.bin",
+            "coordinateSystem": "right-handed-y-up-meters",
+            "geometryEncoding": "gltf-f32",
+            "jsonFormatting": "compact",
+            "resourceNames": "omitted",
+            "nodeIdentifiers": "derived-elided",
+            "progressiveRepresentation": "prototype-aabb-v1",
+            "targetChunking": "coalesced-prototype-range-v1",
+            "targetChunkByteBudget": 524288,
+            "targetPayloadOrder": "spatial-leaf-anchor-v1"
+          },
+          "documentBytes": 384342202,
+          "packageDigest": "e17c132d383e0f84474a1c6fe21b48591e62eda2574bd18fadabe8ed4673babe",
+          "compileSeconds": 12.2
+        },
+        "transforms": {
+          "options": {
+            "binaryUri": "scene.bin",
+            "coarseBinaryUri": "coarse.bin",
+            "propertiesUri": "properties.json",
+            "propertiesBinaryUri": "properties.bin",
+            "coordinateSystem": "right-handed-y-up-meters",
+            "geometryEncoding": "gltf-f32",
+            "jsonFormatting": "compact",
+            "resourceNames": "omitted",
+            "nodeTransforms": "default-omitted",
+            "progressiveRepresentation": "prototype-aabb-v1",
+            "targetChunking": "coalesced-prototype-range-v1",
+            "targetChunkByteBudget": 524288,
+            "targetPayloadOrder": "spatial-leaf-anchor-v1"
+          },
+          "documentBytes": 403338759,
+          "packageDigest": "ae2231ac2ea91ee55a7ea03c7baf8e654992e9292241e2419770b44b1a72eb8c",
+          "compileSeconds": 12.2
+        },
+        "both": {
+          "options": {
+            "binaryUri": "scene.bin",
+            "coarseBinaryUri": "coarse.bin",
+            "propertiesUri": "properties.json",
+            "propertiesBinaryUri": "properties.bin",
+            "coordinateSystem": "right-handed-y-up-meters",
+            "geometryEncoding": "gltf-f32",
+            "jsonFormatting": "compact",
+            "resourceNames": "omitted",
+            "nodeIdentifiers": "derived-elided",
+            "nodeTransforms": "default-omitted",
+            "progressiveRepresentation": "prototype-aabb-v1",
+            "targetChunking": "coalesced-prototype-range-v1",
+            "targetChunkByteBudget": 524288,
+            "targetPayloadOrder": "spatial-leaf-anchor-v1"
+          },
+          "documentBytes": 382110794,
+          "packageDigest": "0a9fbb2ddb8a93a040589d7cd2dea0b9b0cc1a5882daf80de52af4682014c0c9",
+          "compileSeconds": 12
+        }
+      },
+      "determinism": {
+        "variant": "both",
+        "repeats": 2,
+        "packageDigests": [
+          "0a9fbb2ddb8a93a040589d7cd2dea0b9b0cc1a5882daf80de52af4682014c0c9",
+          "0a9fbb2ddb8a93a040589d7cd2dea0b9b0cc1a5882daf80de52af4682014c0c9"
+        ],
+        "documentBytes": [
+          382110794,
+          382110794
+        ],
+        "identical": true
+      },
+      "combined": {
+        "variant": "both",
+        "documentBytes": 382110794,
+        "savedBytes": 23459373,
+        "savedPercent": 5.78,
+        "additive": true
+      },
+      "pipelinePackage": {
+        "available": true,
+        "packageDigest": "04472c9ad2929ba271d2c2c5bbcf16b6f6f7607582966ff9d86817c51f4e04d7",
+        "matchesDefaultVariant": true
+      },
+      "ranking": [
+        {
+          "lever": "hierarchy-node-relocation",
+          "kind": "candidate-upper-bound",
+          "implemented": false,
+          "basis": "every byte of every node that carries no mesh",
+          "upperBoundBytes": 88741293,
+          "upperBoundPercent": 21.88
+        },
+        {
+          "lever": "identifiers",
+          "kind": "measured",
+          "implemented": true,
+          "documentBytes": 384342202,
+          "savedBytes": 21227965,
+          "savedPercent": 5.23
+        },
+        {
+          "lever": "tag-set-interning",
+          "kind": "candidate-upper-bound",
+          "implemented": false,
+          "basis": "extras.madi.tags across 300 distinct sets",
+          "upperBoundBytes": 16950164,
+          "upperBoundPercent": 4.18
+        },
+        {
+          "lever": "node-name-elision",
+          "kind": "candidate-upper-bound",
+          "implemented": false,
+          "basis": "name across 143256 distinct names",
+          "upperBoundBytes": 8859672,
+          "upperBoundPercent": 2.18
+        },
+        {
+          "lever": "default-visibility-elision",
+          "kind": "candidate-upper-bound",
+          "implemented": false,
+          "basis": "extras.madi.initialVisibility, default on 268001 nodes",
+          "upperBoundBytes": 6700025,
+          "upperBoundPercent": 1.65
+        },
+        {
+          "lever": "transforms",
+          "kind": "measured",
+          "implemented": true,
+          "documentBytes": 403338759,
+          "savedBytes": 2231408,
+          "savedPercent": 0.55
+        }
+      ]
+    }
+  ],
+  "roundTrip": {
+    "label": "digital-hub",
+    "sourceStructure": {
+      "byteLength": 29843011,
+      "sha256": "b8ec9c532231a9e464e1ee0d27e26444df16556b11a36d81b180703bb1a214bf"
+    },
+    "occurrencesCompared": 5152,
+    "hierarchyEntriesCompared": 13681,
+    "instancesCompared": 5152,
+    "mismatchCount": 0,
+    "mismatches": [],
+    "baseline": {
+      "prototypeBatches": 3383,
+      "partOccurrences": 5152,
+      "triangles": 40596,
+      "edgeSegments": 40596,
+      "binaryBytes": 3085296,
+      "representation": "coarse",
+      "occurrences": 5152,
+      "hierarchyEntries": 13681
+    },
+    "elided": {
+      "prototypeBatches": 3383,
+      "partOccurrences": 5152,
+      "triangles": 40596,
+      "edgeSegments": 40596,
+      "binaryBytes": 3085296,
+      "representation": "coarse",
+      "occurrences": 5152,
+      "hierarchyEntries": 13681
+    },
+    "identical": true
+  }
+}
