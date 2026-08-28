@@ -5,6 +5,8 @@ import type {
   GpuScene,
   ResidencyCost,
 } from "./layout.js";
+import { resolveCompiledPackageLimits } from "./package-limits.js";
+import type { CompiledPackageLimits, CompiledPackageOptions } from "./package-limits.js";
 import { supportedSpatialDemandIndexSchema } from "./spatial-index.js";
 
 const supportedProfile = "madi.experimental.gltf.1";
@@ -277,9 +279,27 @@ function validateDocumentShape(value: unknown): asserts value is CompiledGltfDoc
   }
 }
 
-export function parseCompiledGltf(value: unknown): CompiledGltfDocument {
+/** Rejects a declared count before the structures derived from it are built. */
+function assertWithinLimit(count: number, limit: number, label: string): void {
+  if (count > limit) {
+    throw new CompiledGltfError(
+      "INVALID_GLTF",
+      `The package declares ${count} ${label}; the limit is ${limit}.`,
+    );
+  }
+}
+
+export function parseCompiledGltf(
+  value: unknown,
+  options: CompiledPackageOptions = {},
+): CompiledGltfDocument {
   validateDocumentShape(value);
   const document = value;
+  const limits = resolveCompiledPackageLimits(options.limits);
+  assertWithinLimit(document.nodes.length, limits.nodes, "nodes");
+  assertWithinLimit(document.meshes.length, limits.meshes, "meshes");
+  assertWithinLimit(document.accessors.length, limits.accessors, "accessors");
+  assertWithinLimit(document.bufferViews.length, limits.bufferViews, "buffer views");
   const rootMadi = recordAt(document.extras, "madi");
   if (rootMadi?.profile !== supportedProfile) {
     throw new CompiledGltfError(
@@ -343,14 +363,28 @@ function activeRoots(document: CompiledGltfDocument): readonly number[] {
   return document.scenes[document.scene ?? 0]?.nodes ?? [];
 }
 
+interface TraversalFrame {
+  readonly nodeIndex: number;
+  readonly children: readonly number[];
+  readonly childOccurrenceDepth: number;
+  cursor: number;
+}
+
+/**
+ * Walks the active scene with an explicit stack rather than recursion, so an
+ * untrusted package that nests deeply fails against the reviewed depth ceiling
+ * (ADR-0011) instead of exhausting the JavaScript stack.
+ */
 function traverseActiveNodes(
   document: CompiledGltfDocument,
   visit: (node: CompiledGltfNode, nodeIndex: number, occurrenceDepth: number) => void,
+  limits: CompiledPackageLimits,
 ): void {
   const visiting = new Set<number>();
   const visited = new Set<number>();
+  const stack: TraversalFrame[] = [];
 
-  const traverse = (nodeIndex: number, occurrenceDepth: number): void => {
+  const enter = (nodeIndex: number, occurrenceDepth: number): void => {
     if (visiting.has(nodeIndex)) {
       throw new CompiledGltfError("INVALID_GLTF", `Cycle detected at nodes[${nodeIndex}].`);
     }
@@ -358,6 +392,12 @@ function traverseActiveNodes(
       throw new CompiledGltfError(
         "INVALID_GLTF",
         `nodes[${nodeIndex}] has more than one active-scene parent.`,
+      );
+    }
+    if (stack.length >= limits.traversalDepth) {
+      throw new CompiledGltfError(
+        "INVALID_GLTF",
+        `The active scene nests deeper than ${limits.traversalDepth} nodes at nodes[${nodeIndex}].`,
       );
     }
     const node = document.nodes[nodeIndex];
@@ -368,18 +408,35 @@ function traverseActiveNodes(
     visited.add(nodeIndex);
     visit(node, nodeIndex, occurrenceDepth);
     const isOccurrence = typeof madiExtras(node).occurrenceId === "string";
-    const childDepth = occurrenceDepth + (isOccurrence ? 1 : 0);
-    for (const child of node.children ?? []) traverse(child, childDepth);
-    visiting.delete(nodeIndex);
+    stack.push({
+      nodeIndex,
+      children: node.children ?? [],
+      childOccurrenceDepth: occurrenceDepth + (isOccurrence ? 1 : 0),
+      cursor: 0,
+    });
   };
 
-  for (const root of activeRoots(document)) traverse(root, 0);
+  for (const root of activeRoots(document)) {
+    enter(root, 0);
+    while (stack.length > 0) {
+      const frame = stack[stack.length - 1] as TraversalFrame;
+      const child = frame.children[frame.cursor];
+      if (child === undefined) {
+        visiting.delete(frame.nodeIndex);
+        stack.pop();
+        continue;
+      }
+      frame.cursor += 1;
+      enter(child, frame.childOccurrenceDepth);
+    }
+  }
 }
 
 function targetChunksFor(
   progressive: JsonRecord | undefined,
   document: CompiledGltfDocument,
   targetBufferIndex: number,
+  limits: CompiledPackageLimits,
 ): readonly CompiledTargetChunk[] {
   if (progressive?.targetChunks === undefined) return [];
   if (!Array.isArray(progressive.targetChunks)) {
@@ -388,6 +445,7 @@ function targetChunksFor(
       "extras.madi.progressive.targetChunks must be an array.",
     );
   }
+  assertWithinLimit(progressive.targetChunks.length, limits.targetChunks, "target chunks");
   const targetBuffer = document.buffers[targetBufferIndex];
   if (!targetBuffer) throw new CompiledGltfError("INVALID_GLTF", "Missing target buffer.");
   const ids = new Set<string>();
@@ -517,11 +575,15 @@ function spatialIndexRefFor(progressive: JsonRecord | undefined): CompiledSpatia
   };
 }
 
-export function inspectCompiledHierarchy(value: unknown): {
+export function inspectCompiledHierarchy(
+  value: unknown,
+  options: CompiledPackageOptions = {},
+): {
   readonly document: CompiledGltfDocument;
   readonly hierarchy: CompiledHierarchy;
 } {
-  const document = parseCompiledGltf(value);
+  const limits = resolveCompiledPackageLimits(options.limits);
+  const document = parseCompiledGltf(value, options);
   const rootMadi = recordAt(document.extras, "madi") ?? {};
   const progressive = recordAt(rootMadi, "progressive");
   const targetBufferIndex = progressive
@@ -530,25 +592,29 @@ export function inspectCompiledHierarchy(value: unknown): {
   const coarseBufferIndex = progressive
     ? finiteInteger(progressive.coarseBuffer, "extras.madi.progressive.coarseBuffer", document.buffers.length)
     : undefined;
-  const targetChunks = targetChunksFor(progressive, document, targetBufferIndex);
+  const targetChunks = targetChunksFor(progressive, document, targetBufferIndex, limits);
   const entries: CompiledHierarchyEntry[] = [];
   const renderedMeshes = new Set<number>();
 
-  traverseActiveNodes(document, (node, nodeIndex, depth) => {
-    const madi = madiExtras(node);
-    if (typeof madi.occurrenceId !== "string") return;
-    if (node.mesh !== undefined) renderedMeshes.add(node.mesh);
-    entries.push({
-      nodeIndex,
-      name: node.name ?? madi.occurrenceId,
-      depth,
-      renderable: node.mesh !== undefined,
-      occurrenceId: madi.occurrenceId,
-      prototypeId: typeof madi.prototypeId === "string" ? madi.prototypeId : "unknown",
-      ...(typeof madi.semanticId === "string" ? { semanticId: madi.semanticId } : {}),
-      ...(typeof madi.sourceRef === "string" ? { sourceRef: madi.sourceRef } : {}),
-    });
-  });
+  traverseActiveNodes(
+    document,
+    (node, nodeIndex, depth) => {
+      const madi = madiExtras(node);
+      if (typeof madi.occurrenceId !== "string") return;
+      if (node.mesh !== undefined) renderedMeshes.add(node.mesh);
+      entries.push({
+        nodeIndex,
+        name: node.name ?? madi.occurrenceId,
+        depth,
+        renderable: node.mesh !== undefined,
+        occurrenceId: madi.occurrenceId,
+        prototypeId: typeof madi.prototypeId === "string" ? madi.prototypeId : "unknown",
+        ...(typeof madi.semanticId === "string" ? { semanticId: madi.semanticId } : {}),
+        ...(typeof madi.sourceRef === "string" ? { sourceRef: madi.sourceRef } : {}),
+      });
+    },
+    limits,
+  );
 
   const documents = Array.isArray(rootMadi.documents) ? rootMadi.documents : [];
   const source = documents.find(isRecord);
@@ -1111,8 +1177,13 @@ function decodeMesh(
   };
 }
 
-function prepareCompiledGltfState(value: unknown): PreparedCompiledGltfState {
-  const { document, hierarchy } = inspectCompiledHierarchy(value);
+function prepareCompiledGltfState(
+  value: unknown,
+  options: CompiledPackageOptions,
+): PreparedCompiledGltfState {
+  // Inspection already bounded this node graph's depth, so the transform walk
+  // below recurses over an already-limited tree.
+  const { document, hierarchy } = inspectCompiledHierarchy(value, options);
   const renderableNodes: PreparedRenderableNode[] = [];
   const renderableNodesByTargetMesh = new Map<number, PreparedRenderableNode[]>();
   let activeNodeCount = 0;
@@ -1210,8 +1281,11 @@ function prepareCompiledGltfState(value: unknown): PreparedCompiledGltfState {
  * decoding. Target-chunk decodes touch only the occurrences assigned to that
  * chunk; they do not walk the active scene graph again.
  */
-export function prepareCompiledGltfDecoder(value: unknown): PreparedCompiledGltfDecoder {
-  const state = prepareCompiledGltfState(value);
+export function prepareCompiledGltfDecoder(
+  value: unknown,
+  options: CompiledPackageOptions = {},
+): PreparedCompiledGltfDecoder {
+  const state = prepareCompiledGltfState(value, options);
   return {
     hierarchy: state.hierarchy,
     activeNodeCount: state.activeNodeCount,
@@ -1224,9 +1298,9 @@ export function prepareCompiledGltfDecoder(value: unknown): PreparedCompiledGltf
 export function decodeCompiledGltf(
   value: unknown,
   binary: ArrayBuffer,
-  options: DecodeCompiledGltfOptions = {},
+  options: DecodeCompiledGltfOptions & CompiledPackageOptions = {},
 ): DecodedCompiledScene {
-  return prepareCompiledGltfDecoder(value).decode(binary, options);
+  return prepareCompiledGltfDecoder(value, options).decode(binary, options);
 }
 
 function decodePreparedCompiledGltf(

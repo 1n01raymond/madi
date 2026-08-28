@@ -7,9 +7,11 @@ import {
   batchResidencyCost,
   compiledSceneTransferables,
   decodeCompiledGltf,
+  defaultCompiledPackageLimits,
   inspectCompiledHierarchy,
   instanceStride,
   prepareCompiledGltfDecoder,
+  resolveCompiledPackageLimits,
   validateGpuScene,
 } from "../src/index.js";
 import type {
@@ -440,6 +442,90 @@ describe("compiled glTF runtime boundary", () => {
 
     expect(() => inspectCompiledHierarchy(copy)).toThrowError(
       expect.objectContaining<Partial<CompiledGltfError>>({ code: "UNSUPPORTED_PROFILE" }),
+    );
+  });
+});
+
+describe("compiled package structural limits", () => {
+  /**
+   * The smallest document the boundary accepts: one chain of `depth` nodes,
+   * every one an occurrence, so limit behavior can be tested without a fixture.
+   */
+  function chainedPackage(depth: number): unknown {
+    const nodes = Array.from({ length: depth }, (_, index) => ({
+      name: `node-${String(index)}`,
+      extras: { madi: { occurrenceId: `occurrence-${String(index)}` } },
+      ...(index + 1 < depth ? { children: [index + 1] } : {}),
+    }));
+    return {
+      asset: { version: "2.0" },
+      extras: { madi: { profile: "madi.experimental.gltf.1", sceneId: "chain" } },
+      scene: 0,
+      scenes: [{ name: "chain", nodes: [0] }],
+      nodes,
+      meshes: [],
+      materials: [],
+      bufferViews: [],
+      accessors: [],
+      buffers: [{ uri: "scene.bin", byteLength: 64 }],
+    };
+  }
+
+  it("rejects a package that declares more nodes than the limit", async () => {
+    const { json } = await loadPackage();
+
+    expect(() => inspectCompiledHierarchy(json, { limits: { nodes: 4 } })).toThrowError(
+      /declares 13 nodes; the limit is 4/u,
+    );
+    expect(() => inspectCompiledHierarchy(json, { limits: { accessors: 8 } })).toThrowError(
+      /declares 24 accessors; the limit is 8/u,
+    );
+    expect(inspectCompiledHierarchy(json).hierarchy.nodeCount).toBe(13);
+  });
+
+  it("rejects a scene nested deeper than the traversal limit", () => {
+    expect(() => inspectCompiledHierarchy(chainedPackage(6), { limits: { traversalDepth: 4 } }))
+      .toThrowError(/nests deeper than 4 nodes at nodes\[4\]/u);
+    expect(
+      inspectCompiledHierarchy(chainedPackage(4), { limits: { traversalDepth: 4 } })
+        .hierarchy.entries,
+    ).toHaveLength(4);
+  });
+
+  it("walks a chain far deeper than the JavaScript stack without exhausting it", () => {
+    const depth = 200_000;
+
+    const { hierarchy } = inspectCompiledHierarchy(chainedPackage(depth), {
+      limits: { nodes: depth, traversalDepth: depth },
+    });
+
+    expect(hierarchy.entries).toHaveLength(depth);
+    expect(hierarchy.entries[depth - 1]?.depth).toBe(depth - 1);
+  });
+
+  it("still separates a cycle from a second parent after the stack rewrite", () => {
+    const cyclic = chainedPackage(3) as { nodes: { children?: number[] }[] };
+    cyclic.nodes[2] = { ...cyclic.nodes[2], children: [1] };
+    const shared = chainedPackage(3) as { nodes: { children?: number[] }[] };
+    shared.nodes[0] = { ...shared.nodes[0], children: [1, 2] };
+
+    expect(() => inspectCompiledHierarchy(cyclic)).toThrowError(/Cycle detected at nodes\[1\]/u);
+    expect(() => inspectCompiledHierarchy(shared)).toThrowError(
+      /nodes\[2\] has more than one active-scene parent/u,
+    );
+  });
+
+  it("resolves limit overrides over reviewed defaults and rejects unusable ones", () => {
+    expect(resolveCompiledPackageLimits()).toEqual(defaultCompiledPackageLimits);
+    expect(resolveCompiledPackageLimits({ targetChunks: 8 })).toEqual({
+      ...defaultCompiledPackageLimits,
+      targetChunks: 8,
+    });
+    expect(() => resolveCompiledPackageLimits({ nodes: 0 })).toThrowError(
+      /nodes limit must be a positive safe integer/u,
+    );
+    expect(() => resolveCompiledPackageLimits({ meshes: 1.5 })).toThrowError(
+      /meshes limit must be a positive safe integer/u,
     );
   });
 });
