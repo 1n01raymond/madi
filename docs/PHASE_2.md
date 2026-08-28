@@ -48,7 +48,7 @@ closed gate.
 |---|---|---|---|
 | Public engineering baseline: 100k+ renderable geometric occurrences, 10M+ submitted triangles, and 10k+ geometric prototypes | The qualified [31-document sixty5 Design + Engineering package](../artifacts/ifc/engineering-baseline/README.md) passes all three floors together: 104,337 renderable occurrences, 46,059,890 submitted triangles, and 66,396 geometric prototypes; it reports 10,394,938 unique triangles and Khronos validation at 0 errors / 0 warnings | Publish the digest-locked 854,446,743-byte package, open it through Studio, and add public-delivery smoke evidence; this committed record qualifies the source and package but does not measure startup, rendering, or delivery | **Partial** |
 | Cold/warm startup, frame, memory, and interaction results published | Real-large [first-frame](../artifacts/ifc/sixty5-first-frame/README.md) and [localized-demand](../artifacts/spatial-demand/sixty5-localized/README.md) records exist; mid-size STEP/IFC [cache records](../artifacts/cache/README.md) publish single cold/warm runs | One coherent real-large cold/warm matrix with repeated samples, cache size, stage timing, total client memory, and interaction results | **Partial** |
-| Forced low-memory scenario remains functional | [sixty5 browser evidence](../artifacts/ifc/sixty5-browser/README.md) retains all coarse occurrences and source-aware interaction while target geometry is admitted under separate fixed 64 MiB decoded/GPU budgets | An explicit forced-low-memory profile and total-process accounting; current residency counters do not bound hierarchy, sidecars, Worker state, JavaScript heap, or every GPU allocation | **Partial** |
+| Forced low-memory scenario remains functional | The [memory envelope](../artifacts/memory/sixty5-envelope/README.md) records three default-budget and three forced-low 8 MiB sixty5 runs: hierarchy, coarse rendering, navigation, source-aware selection, and eviction all complete in both profiles, and every reported byte names its owner, lifetime, and collection method rather than folding unmeasurable categories into zero | A repeat on a second engine and operating system, and a resident-set figure that does not depend on one browser's own estimator; GPU driver allocation stays unavailable | **Partial** |
 | Workspace reopens against unchanged source and detects changed source | [Cache tests](../packages/compiler/test/compiled-cache.test.ts) inspect source identity, and [IFC dependency tests](../packages/compiler/test/ifc-incremental-dependencies.test.ts) detect changed/deleted/renamed inputs | A persisted workspace manifest with sources, views, and reopen behavior exercised through Studio | **Pending** |
 
 No percentage-complete claim is derived from this table. The gates differ too
@@ -76,7 +76,7 @@ authorize reuse of old glTF byte ranges by themselves.
 
 | Capability | Current state | Next acceptance gate |
 |---|---|---|
-| Fixed target-geometry residency | **Recorded**: [sixty5 target promotion](../artifacts/ifc/sixty5-browser/README.md) remains inside separate 64 MiB decoded/GPU admission budgets while coarse fallback remains visible | Separate target-residency accounting from total browser/Worker/GPU memory and record a forced-low-memory profile |
+| Fixed target-geometry residency | **Recorded**: [sixty5 target promotion](../artifacts/ifc/sixty5-browser/README.md) remains inside separate 64 MiB decoded/GPU admission budgets while coarse fallback remains visible, and the [memory envelope](../artifacts/memory/sixty5-envelope/README.md) separates those budgets from observed process memory across a default and a forced-low 8 MiB profile | Repeat the ledger on a second engine and operating system, then decide whether any category it ranks is worth optimizing |
 | Spatial demand | **Recorded** on [focused Chrome/Firefox](../artifacts/spatial-demand/README.md) and [real-large Chrome](../artifacts/spatial-demand/sixty5-localized/README.md) paths under proposed [ADR-0008](adr/0008-spatial-demand-partitioning.md) | Repeat a localized real-model trace in a non-Blink engine and cross-check nested large-coordinate transforms |
 | Demand ordering | **Recorded** as opt-in: [projected-area ordering](../artifacts/spatial-demand/sixty5-demand-priority/README.md) wins one pose and loses another | Define and record a view-independent screen-space-error or blended cost before changing the default |
 | Shape-preserving LOD | **Pending** | Define geometric/screen error, identity and edge behavior, compiler representation, and reference-image gates |
@@ -85,7 +85,9 @@ authorize reuse of old glTF byte ranges by themselves.
 
 The fixed 64 MiB measurements apply to progressive target geometry admitted by
 the runtime. They are not a claim that total process memory is bounded at every
-scene size.
+scene size: the [memory envelope](../artifacts/memory/sixty5-envelope/README.md)
+measures both quantities in the same runs and reports the geometry residency as
+a small share of the browser's working set.
 
 ### C. Product and contributor platform
 
@@ -140,8 +142,9 @@ scene size.
 6. Add the first minimal workspace manifest and prove unchanged reopen plus
    changed-source detection.
 7. Close the most decision-relevant evidence debt and blockers: non-Blink
-   real-large spatial demand, nested precision, total-memory accounting, and
-   public Studio delivery of the qualified engineering-scale package.
+   real-large spatial demand, nested precision, a second-engine repeat of the
+   memory ledger, and public Studio delivery of the qualified
+   engineering-scale package.
 8. Qualify the registered CadQuarry 1k STEP corpus through a bounded Parquet
    scanner, then compile its extracted parts as a CAD breadth/control record.
    Keep that synthetic corpus separate from the real public-baseline gate.
@@ -172,7 +175,7 @@ debt.
 |---|---|---|
 | Real-large reopen | At least three current-toolchain cold and warm sixty5 runs on one disclosed host, with cache bytes, stage timings, peak RSS, hit/miss reason, and corruption fallback | 1–5 s unchanged real-large reopen and cache-cost claim; the historical split.1 302 s warm-OS-cache diagnostic is not this distribution |
 | Real-large document-artifact reuse | Repeat cold, warm, and one-document-changed extraction with artifact bytes, restore time, peak RSS, and clean-merge equivalence on a disclosed large fixture | Cost and scalability of the already-implemented per-document reuse tier |
-| Forced target-residency profile | Repeat a deliberately constrained geometry budget with coarse visibility, picking, interaction, decoded/GPU charges, and eviction outcomes | Target-residency portion of the Phase 2 low-memory exit |
+| Cross-engine memory envelope | Repeat the [phase-sampled memory ledger](../artifacts/memory/sixty5-envelope/README.md) on a second engine and operating system, including whatever each reports in place of `measureUserAgentSpecificMemory` and the Windows process-tree sample | A memory claim that is not specific to one Chrome/Windows host |
 | Cross-browser localized demand | Repeated Firefox or another non-Blink real-model localized trace with request order, query p50/p95, residency, and console results | ADR-0008 acceptance |
 | Spatial precision cross-check | Nested-transform spatial bounds on the accepted ADR-0005 10,000 km fixture with no false negatives | ADR-0008 acceptance |
 | Node-field elision at engineering scale | Re-record `artifacts/ifc/engineering-baseline/` on the host that produced it, with `--elide-derived-identifiers` and `--omit-default-node-transforms` declared, so the option pair is proven on the same package the qualification pins; the levers are measured on this Windows host, whose IFC split differs from that record's by a few bytes | ADR-0015 acceptance |
@@ -187,7 +190,6 @@ evidence debt.
 
 | Blocker | Required change or external condition | Gate blocked |
 |---|---|---|
-| Total-process memory accounting | Instrument JavaScript heap, Worker-owned arrays, hierarchy/sidecars, runtime-owned decoded/GPU geometry, and disclose GPU allocations the backend cannot enumerate | Whole-application bounded-memory claim and the complete Phase 2 low-memory exit |
 | Public engineering-package delivery | Publish the qualified [31-document package](../artifacts/ifc/engineering-baseline/README.md) at its recorded digest, open it through Studio, and smoke-check every resource and HTTP Range response; source/package qualification is already recorded | Complete Phase 2 public-scale exit and stronger ADR-0003 relevance |
 | CAD breadth corpus qualification | Implement ADR-0014's bounded Parquet scanner, inspect the pinned CadQuarry 1k STEP corpus, and measure extracted-part compile outcomes without equating rows to prototypes | STEP/OCCT diversity coverage; explicitly not the real public-baseline gate |
 | Cross-host IFC drift | Diagnose or deliberately scope the recorded 8-byte macOS/Windows Scene IR difference ([record](../artifacts/spatial-demand/digital-hub-localized/README.md)) | Cross-host cache portability claim |

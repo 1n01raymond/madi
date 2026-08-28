@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  attachmentPairByteLength,
   decodeObjectId,
   instanceStride,
   packInstanceData,
@@ -119,5 +120,21 @@ describe("WebGPU packed layouts", () => {
         sharedObjectIdsAcrossBatches: true,
       }),
     ).not.toThrow();
+  });
+});
+
+describe("attachment pair byte length", () => {
+  it("charges four bytes per pixel for each of the two attachments", () => {
+    expect(attachmentPairByteLength(1_320, 1_000)).toBe(1_320 * 1_000 * 8);
+  });
+
+  it("reports nothing before a render target has been sized", () => {
+    expect(attachmentPairByteLength(0, 0)).toBe(0);
+    expect(attachmentPairByteLength(1_320, 0)).toBe(0);
+    expect(attachmentPairByteLength(-1, 1_000)).toBe(0);
+  });
+
+  it("refuses a fractional pixel size rather than reporting a fractional byte", () => {
+    expect(() => attachmentPairByteLength(1_320.5, 1_000)).toThrow(RangeError);
   });
 });

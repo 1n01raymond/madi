@@ -1,6 +1,7 @@
 export {
   addResidencyCost,
   alignedBufferByteLength,
+  attachmentPairByteLength,
   batchResidencyCost,
   decodeObjectId,
   instanceStride,

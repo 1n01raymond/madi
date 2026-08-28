@@ -53,6 +53,25 @@ export function alignedBufferByteLength(byteLength: number): number {
 }
 
 /**
+ * Bytes a render target of this size occupies, for the two attachments the
+ * renderer always allocates together: a `depth24plus` depth buffer and an
+ * `rgba8uint` object-id buffer, both one sample and one mip.
+ *
+ * `depth24plus` is implementation-defined -- a driver may store 24 or 32 bits
+ * -- so the wider layout is charged. The result is therefore an upper bound on
+ * the attachment pair, not a driver-exact figure, and any record that reports
+ * it has to say so.
+ */
+export function attachmentPairByteLength(width: number, height: number): number {
+  if (!Number.isSafeInteger(width) || !Number.isSafeInteger(height)) {
+    throw new RangeError("Attachment size must be given in whole pixels.");
+  }
+  if (width <= 0 || height <= 0) return 0;
+  const pixels = width * height;
+  return pixels * 4 + pixels * 4;
+}
+
+/**
  * The one residency cost formula. A scheduler charges it from accessor counts
  * before a chunk is fetched and a residency set charges it from the decoded
  * arrays afterwards; the two must agree exactly, or a pre-fetch admission gate

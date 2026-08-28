@@ -104,7 +104,10 @@ rather than rescanning every vertex. IFC compilation coalesces adjacent prototyp
 into deterministic requests (512 KiB by default), while the existing
 `prototype-aabb-v1` tier is collapsed at runtime into one canonical box batch
 with contiguous occurrence transforms. The browser enforces separate 64 MiB
-decoded and GPU admission budgets. Promoted targets mask matching coarse
+decoded and GPU admission budgets. Those budgets bound admitted target
+geometry, not the browser process: the
+[memory envelope](../../artifacts/memory/sixty5-envelope/README.md) measures
+both in the same runs. Promoted targets mask matching coarse
 instances; evicting colder target groups reveals those shared fallbacks again,
 so visibility intent and stable object IDs survive every batch update. An
 admission is delta-priced end to end: residency totals update incrementally,
@@ -113,7 +116,9 @@ shared coarse mask and new batches recompute), and the renderer re-packs and
 re-uploads instance buffers for the changed batches only. Target
 promotion reuses the hierarchy's node lookup and does not rescan DOM visibility
 markers because residency changes no user visibility intent. Add
-`?residencyMiB=5` to force a small budget during local exploration. Orbit,
+`?residencyMiB=5` to force a small budget during local exploration; the same
+knob at 8 MiB is the recorded forced-low profile, where hierarchy, coarse
+rendering, navigation, selection, and eviction all still complete. Orbit,
 pan, zoom, fit, and resize rank visible retained-coarse chunk bounds by distance
 from the view center. If the hottest nonresident chunk
 changes, the scheduler aborts the obsolete HTTP Range and Worker decode before
