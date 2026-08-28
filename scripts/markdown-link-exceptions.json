@@ -1,0 +1,4 @@
+{
+  "note": "Reviewed exceptions for pnpm docs:links:check. Each entry suppresses exactly one (file, target) pair and must state why the target cannot be resolved locally. Directory-wide, file-wide, and anchor-wide exclusions are deliberately impossible. An entry that no longer matches a real finding fails the check, so stale exceptions cannot accumulate.",
+  "exceptions": []
+}
