@@ -146,6 +146,21 @@ bytes equal a clean adapter build. Federation-wide target/coarse/spatial/propert
 payloads are still rebuilt as a whole; content-addressed compiled payloads and
 complete-package equivalence remain before any old byte range is reused.
 
+The payload contract is designed but **not implemented**:
+[ADR-0018](adr/0018-content-addressed-compiled-payloads.md) content-addresses
+one unit only, the prototype payload -- the accessor bytes and placement-free
+accessor metadata `appendGeometry` produces -- and rebuilds every other package
+resource from the current scene on every compile. Byte offsets, bufferView and
+accessor indices, target-chunk membership, coarse aggregation, spatial leaves,
+interned property columns, and the relocated hierarchy are all
+federation-global, so `scene.bin` is re-laid out from restored payload bytes in
+the current prototype order rather than copied. Reuse is decided by content,
+not by the invalidation plan: the dependency index chooses which documents to
+re-extract, and a wrong plan can only cost extra extraction work, never yield a
+wrong payload. That ADR also fixes the acceptance evidence, including a
+measured packaging saving that must exceed the store's own verification cost or
+the decision is rejected.
+
 Shared lookup reuses the same manifest and resource hashes. The resolution
 order is local verified entry, authorized shared entry, then local compilation.
 Uploads occur only after local verification and explicit host policy; NARU does

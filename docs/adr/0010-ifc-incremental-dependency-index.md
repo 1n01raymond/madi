@@ -87,4 +87,6 @@ preserve shared geometry aliases, and prove cold, warm, and one-document-changed
 federation structure/geometry/property bytes equal the corresponding clean
 adapter build. Acceptance still requires content-addressed compiled payloads and
 a partial compiler rebuild that reproduces the complete clean package byte for
-byte.
+byte. [ADR-0018](0018-content-addressed-compiled-payloads.md) carries that
+payload contract and states which resources stay federation-global; both
+records remain Proposed until its evidence passes.

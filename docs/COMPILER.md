@@ -736,3 +736,13 @@ federation-wide, so their physical bytes cannot be reused from this logical
 index alone because packing and column offsets may change. Content-addressed
 compiled payload chunks and complete-package byte-equivalence remain before
 per-discipline compilation is a complete product claim.
+
+[ADR-0018](adr/0018-content-addressed-compiled-payloads.md) is the reviewed
+design for that payload tier and is not implemented. It authorizes reusing one
+unit, the prototype payload -- the accessor bytes and placement-free accessor
+metadata `appendGeometry` produces for a prototype -- and requires every other
+package resource, `scene.bin` included, to be rebuilt from the current scene.
+Payload keys carry the schema, compiler, and adapter identities, the prototype's
+Scene IR content digest, the scene unit scale, and the payload-affecting policy
+set; an option that has not been classified counts as payload-affecting, so a
+new option cold-starts the namespace instead of silently sharing it.
