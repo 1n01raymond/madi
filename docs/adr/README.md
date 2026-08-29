@@ -31,6 +31,7 @@ reverse. They explain context and trade-offs rather than only the final choice.
 | [0015](0015-optional-node-identity-and-transform-elision.md) | Allow opt-in node identity and transform elision | Proposed |
 | [0016](0016-streamed-gltf-document.md) | Serialize the compiled glTF document as a stream | Accepted |
 | [0017](0017-relocated-hierarchy-sidecar.md) | Move the assembly tree into a package sidecar | Accepted |
+| [0018](0018-content-addressed-compiled-payloads.md) | Content-address compiled prototype payloads; rebuild the federation | Proposed |
 
 ## Phase 0 review
 

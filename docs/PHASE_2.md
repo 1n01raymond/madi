@@ -122,8 +122,13 @@ a small share of the browser's working set.
 1. Establish the Phase 2 milestone, labels, issue forms, and a small reviewed
    ready queue. This tracker owns outcomes; issues own independently assignable
    work with acceptance criteria.
-2. Specify and implement content-addressed compiled prototype/chunk/property
-   payloads without accepting ADR-0010 yet.
+2. Implement the content-addressed payload store that
+   [ADR-0018](adr/0018-content-addressed-compiled-payloads.md) specifies, in the
+   storage then selection/orchestration order, without accepting ADR-0010 or
+   ADR-0018 yet. The design is reviewed and records that only the prototype
+   payload is reusable: every other package resource stays federation-global,
+   and acceptance needs clean-package resource equivalence plus a measured
+   packaging saving that beats the store's own verification cost.
 
 ### Next — finish the user-visible import loop and bounded fidelity
 
