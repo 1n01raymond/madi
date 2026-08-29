@@ -96,7 +96,7 @@ a small share of the browser's working set.
 |---|---|---|
 | Public Studio | **Recorded** in the [Phase 1 exit evidence](PHASE_1_REPORT.md#exit-decision) for the deployed Digital Hub/PyGamer paths; the [Studio guide](../apps/webgpu-spike/README.md) documents the live smoke check | Keep deployment digests and Range delivery smoke-checked as package schemas move |
 | Sidecar integrity | Spatial and property sidecar loaders verify declared byte lengths and SHA-256 values before decode; [property-sidecar tests](../apps/webgpu-spike/test/property-sidecar.test.ts) cover local and URL same-length mutations | Preserve the fail-closed checks while remote limits expand to geometry, coarse resources, and aggregate package work |
-| Untrusted package limits | **Implemented** under [ADR-0011](adr/0011-remote-package-limits.md): every Studio fetch applies one transport policy (same origin, `redirect: "error"`, content-type allowlist, byte ceilings enforced while the body streams) and the compiled-glTF reader bounds node/mesh/accessor/buffer-view/chunk counts and traversal depth; [transport tests](../apps/webgpu-spike/test/package-limits.test.ts) and [structural tests](../packages/runtime-webgpu/test/compiled-gltf.test.ts) cover each branch | Add malformed-package/fuzz coverage over compiled documents, and a check-chain regression that the recorded packages still open under the reviewed defaults |
+| Untrusted package limits | **Implemented** under [ADR-0011](adr/0011-remote-package-limits.md): every Studio fetch applies one transport policy (same origin, `redirect: "error"`, content-type allowlist, byte ceilings enforced while the body streams) and the compiled-glTF reader bounds node/mesh/accessor/buffer-view/chunk counts and traversal depth; [transport tests](../apps/webgpu-spike/test/package-limits.test.ts) and [structural tests](../packages/runtime-webgpu/test/compiled-gltf.test.ts) cover each branch. Malformed-package behavior is recorded in [`artifacts/security/package-fuzz`](../artifacts/security/package-fuzz/README.md): 120,000 seeded mutations over six reader targets, 0 uncontrolled outcomes, validated by `pnpm fuzz:check` in the check chain | Add a check-chain regression that the recorded packages still open under the reviewed defaults, and settle the embedder override surface against a second consumer |
 | Workspace | **Pending** | Persist source references, views, selection sets, and source fingerprints; reopen unchanged state and report changed sources |
 | Framework-neutral embedding | **Pending** | Publish and test one application outside the reference Studio |
 | Installable alpha release | **Pending**; workspace packages remain private pre-release packages | Define the supported public surface, compatibility policy, release notes, and installation smoke test |
@@ -123,8 +123,6 @@ a small share of the browser's working set.
    work with acceptance criteria.
 2. Specify and implement content-addressed compiled prototype/chunk/property
    payloads without accepting ADR-0010 yet.
-3. Extend the reviewed package bounds (ADR-0011) with malformed-package and
-   fuzz coverage before broad external-input testing.
 
 ### Next — finish the user-visible import loop and bounded fidelity
 

@@ -1081,17 +1081,38 @@ function selectMeshPrimitives(
     throw new CompiledGltfError("INVALID_GLTF", `meshes[${meshIndex}].primitives is missing.`);
   }
   const primitives = declaredPrimitives as readonly CompiledGltfPrimitive[];
-  const surfaces = primitives
-    .map((primitive, primitiveIndex) => ({ primitive, primitiveIndex }))
-    .filter(({ primitive }) => (primitive.mode ?? 4) === 4);
-  const edges = primitives.filter((primitive) => primitive.mode === 1);
+  for (const [primitiveIndex, primitive] of primitives.entries()) {
+    // Selection reads `mode` off every element, so each one has to be an object
+    // before the two filters below can run at all.
+    if (!isRecord(primitive)) {
+      throw new CompiledGltfError(
+        "INVALID_GLTF",
+        `meshes[${meshIndex}].primitives[${primitiveIndex}] is not an object.`,
+      );
+    }
+  }
+  const indexed = primitives.map((primitive, primitiveIndex) => ({ primitive, primitiveIndex }));
+  const surfaces = indexed.filter(({ primitive }) => (primitive.mode ?? 4) === 4);
+  const edges = indexed.filter(({ primitive }) => primitive.mode === 1);
   if (surfaces.length === 0 || edges.length > 1) {
     throw new CompiledGltfError(
       "UNSUPPORTED_GEOMETRY",
       `meshes[${meshIndex}] must contain TRIANGLES primitives and at most one LINES primitive.`,
     );
   }
-  return { surfaces, ...(edges[0] ? { edge: edges[0] } : {}) };
+  // Batch measurement and both decode paths read `attributes.POSITION` off a
+  // selected primitive without a further guard, so the shape is settled once
+  // here instead of at four call sites. A primitive neither filter selected is
+  // never dereferenced, so it is left alone rather than made a rejection.
+  for (const { primitive, primitiveIndex } of [...surfaces, ...edges]) {
+    if (!isRecord(primitive.attributes)) {
+      throw new CompiledGltfError(
+        "INVALID_GLTF",
+        `meshes[${meshIndex}].primitives[${primitiveIndex}] must declare attributes.`,
+      );
+    }
+  }
+  return { surfaces, ...(edges[0] ? { edge: edges[0].primitive } : {}) };
 }
 
 /** Element count of one accessor, without reading the bytes it describes. */

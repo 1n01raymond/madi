@@ -1,0 +1,311 @@
+{
+  "schemaVersion": "naru.package-fuzz-evidence.1",
+  "recordedAt": "2026-08-29T03:16:07.123Z",
+  "mode": "seeded-malformed-package-campaign",
+  "host": {
+    "platform": "win32",
+    "architecture": "x64",
+    "node": "22.14.0",
+    "cpuCount": 16,
+    "cpuModel": "AMD Ryzen 7 9800X3D 8-Core Processor           ",
+    "totalMemoryBytes": 33463021568
+  },
+  "contract": {
+    "controlledErrorNames": [
+      "CompiledGltfError",
+      "SpatialDemandIndexError"
+    ],
+    "statement": "A reader may accept a mutated package or refuse it through a declared error class. Any other thrown value is an uncontrolled outcome and a defect.",
+    "readers": [
+      "parseCompiledGltf",
+      "inspectCompiledHierarchy",
+      "prepareCompiledGltfDecoder",
+      "decodeCompiledGltf",
+      "decodeSpatialDemandIndex",
+      "querySpatialDemandIndex"
+    ]
+  },
+  "method": {
+    "determinism": "Each execution draws from a mulberry32 stream seeded by the campaign seed, the target label, and the iteration, so the same seed reproduces the same counts on any host.",
+    "documentMutation": "One to three operators (replace, delete, duplicate, truncate, swap, scale, retype, chain) applied to members reachable from the roots that decide what the loader allocates.",
+    "binaryMutation": "One operator (intact, truncate, flip, grow) applied to a copy of the buffer the target decodes; the committed bytes are never modified.",
+    "accounting": "An operator that finds nothing of its kind at the drawn path is counted as a no-op rather than retried, so the histogram is an honest account."
+  },
+  "corpora": [
+    {
+      "id": "explicit-edges",
+      "directory": "artifacts/ifc/explicit-edges",
+      "document": {
+        "byteLength": 15033,
+        "sha256": "bbabcfdf2108516dfcedecacea9dadb3e8d2c5beea8c14d2444a4fcf249aaa22"
+      },
+      "nodeCount": 3,
+      "meshCount": 2,
+      "accessorCount": 11,
+      "targetBuffer": {
+        "byteLength": 492,
+        "sha256": "c2e7f0e7bcd4d28eb51018f75bd20b38b9382f1760cec8c42303819796b2ff3f"
+      },
+      "coarseBuffer": {
+        "byteLength": 912,
+        "sha256": "2c00d40a25112356a88a48f357e2bb24409e1882b1da2f82b908ae15e98f6b1d"
+      }
+    },
+    {
+      "id": "repeated-fasteners",
+      "directory": "artifacts/phase1/repeated-fasteners",
+      "document": {
+        "byteLength": 53211,
+        "sha256": "ffaad9710d56f5aed13d9a9a746ad3c59f6444630334ffa947d079c3b9a45c87"
+      },
+      "nodeCount": 13,
+      "meshCount": 3,
+      "accessorCount": 24,
+      "targetBuffer": {
+        "byteLength": 188044,
+        "sha256": "3c4d9dde02c117343e4013a675d40d41a61c2f59eb5d3b1959774b434883d395"
+      }
+    },
+    {
+      "id": "repeated-fasteners-ap242",
+      "directory": "artifacts/phase1/repeated-fasteners-ap242",
+      "document": {
+        "byteLength": 65815,
+        "sha256": "e2f52189091431ce9c0ff94a939c52dee89d9b3ce2b8b9fdb41a0a21a8e1499b"
+      },
+      "nodeCount": 13,
+      "meshCount": 6,
+      "accessorCount": 39,
+      "targetBuffer": {
+        "byteLength": 188044,
+        "sha256": "3c4d9dde02c117343e4013a675d40d41a61c2f59eb5d3b1959774b434883d395"
+      },
+      "coarseBuffer": {
+        "byteLength": 2736,
+        "sha256": "d2f99f758809a85a5b6bebe0a56c277df399e33c81ffa14c66eb211c12ed214a"
+      }
+    }
+  ],
+  "spatialSeed": {
+    "source": "encodeSpatialDemandIndex over a fixed synthetic occurrence set",
+    "occurrenceCount": 128,
+    "targetChunkCount": 8,
+    "byteLength": 3832,
+    "sha256": "383fac870e811cebf207076a66842a5838177edeb3cbd5ededb189f9e804617c"
+  },
+  "elapsedSeconds": 25.5,
+  "campaign": {
+    "seed": 20260829,
+    "iterationsPerTarget": 20000,
+    "controlledErrorNames": [
+      "CompiledGltfError",
+      "SpatialDemandIndexError"
+    ],
+    "targets": [
+      {
+        "id": "explicit-edges/target",
+        "executions": 20000,
+        "accepted": 6120,
+        "rejected": 13880,
+        "uncontrolled": 0,
+        "documentOperators": {
+          "chain": 4953,
+          "delete": 5045,
+          "duplicate": 465,
+          "duplicate-noop": 4564,
+          "replace": 5080,
+          "retype": 3499,
+          "retype-noop": 1507,
+          "scale": 2278,
+          "scale-noop": 2658,
+          "swap": 284,
+          "swap-noop": 4677,
+          "truncate": 474,
+          "truncate-noop": 4501
+        },
+        "binaryOperators": {
+          "flip": 5007,
+          "grow": 4956,
+          "intact": 4975,
+          "truncate": 5062
+        },
+        "rejectionsByCode": {
+          "INVALID_BINARY": 6728,
+          "INVALID_GLTF": 5611,
+          "UNSUPPORTED_GEOMETRY": 1497,
+          "UNSUPPORTED_PROFILE": 44
+        },
+        "uncontrolledByKind": {}
+      },
+      {
+        "id": "explicit-edges/coarse",
+        "executions": 20000,
+        "accepted": 3791,
+        "rejected": 16209,
+        "uncontrolled": 0,
+        "documentOperators": {
+          "chain": 5117,
+          "chain-noop": 3,
+          "delete": 4940,
+          "duplicate": 513,
+          "duplicate-noop": 4550,
+          "replace": 4948,
+          "retype": 3494,
+          "retype-noop": 1455,
+          "scale": 2300,
+          "scale-noop": 2678,
+          "swap": 257,
+          "swap-noop": 4694,
+          "truncate": 476,
+          "truncate-noop": 4466
+        },
+        "binaryOperators": {
+          "flip": 4944,
+          "grow": 5045,
+          "intact": 5007,
+          "truncate": 5004
+        },
+        "rejectionsByCode": {
+          "INVALID_BINARY": 9232,
+          "INVALID_GLTF": 5778,
+          "UNSUPPORTED_GEOMETRY": 1137,
+          "UNSUPPORTED_PROFILE": 62
+        },
+        "uncontrolledByKind": {}
+      },
+      {
+        "id": "repeated-fasteners/target",
+        "executions": 20000,
+        "accepted": 4427,
+        "rejected": 15573,
+        "uncontrolled": 0,
+        "documentOperators": {
+          "chain": 5104,
+          "chain-noop": 1,
+          "delete": 5056,
+          "duplicate": 326,
+          "duplicate-noop": 4691,
+          "replace": 5062,
+          "retype": 3852,
+          "retype-noop": 1126,
+          "scale": 1798,
+          "scale-noop": 3163,
+          "swap": 214,
+          "swap-noop": 4768,
+          "truncate": 289,
+          "truncate-noop": 4644
+        },
+        "binaryOperators": {
+          "flip": 4807,
+          "grow": 5119,
+          "intact": 5045,
+          "truncate": 5029
+        },
+        "rejectionsByCode": {
+          "INVALID_BINARY": 9055,
+          "INVALID_GLTF": 5409,
+          "UNSUPPORTED_GEOMETRY": 1083,
+          "UNSUPPORTED_PROFILE": 26
+        },
+        "uncontrolledByKind": {}
+      },
+      {
+        "id": "repeated-fasteners-ap242/target",
+        "executions": 20000,
+        "accepted": 11866,
+        "rejected": 8134,
+        "uncontrolled": 0,
+        "documentOperators": {
+          "chain": 5036,
+          "chain-noop": 1,
+          "delete": 5031,
+          "duplicate": 326,
+          "duplicate-noop": 4673,
+          "replace": 4989,
+          "retype": 3808,
+          "retype-noop": 1214,
+          "scale": 1998,
+          "scale-noop": 2997,
+          "swap": 211,
+          "swap-noop": 4790,
+          "truncate": 333,
+          "truncate-noop": 4599
+        },
+        "binaryOperators": {
+          "flip": 5081,
+          "grow": 4841,
+          "intact": 5038,
+          "truncate": 5040
+        },
+        "rejectionsByCode": {
+          "INVALID_BINARY": 1227,
+          "INVALID_GLTF": 5220,
+          "UNSUPPORTED_GEOMETRY": 1671,
+          "UNSUPPORTED_PROFILE": 16
+        },
+        "uncontrolledByKind": {}
+      },
+      {
+        "id": "repeated-fasteners-ap242/coarse",
+        "executions": 20000,
+        "accepted": 4055,
+        "rejected": 15945,
+        "uncontrolled": 0,
+        "documentOperators": {
+          "chain": 5097,
+          "chain-noop": 1,
+          "delete": 4902,
+          "duplicate": 295,
+          "duplicate-noop": 4653,
+          "replace": 4955,
+          "retype": 3840,
+          "retype-noop": 1208,
+          "scale": 1937,
+          "scale-noop": 3023,
+          "swap": 198,
+          "swap-noop": 4822,
+          "truncate": 309,
+          "truncate-noop": 4683
+        },
+        "binaryOperators": {
+          "flip": 4967,
+          "grow": 5017,
+          "intact": 5104,
+          "truncate": 4912
+        },
+        "rejectionsByCode": {
+          "INVALID_BINARY": 9631,
+          "INVALID_GLTF": 5312,
+          "UNSUPPORTED_GEOMETRY": 984,
+          "UNSUPPORTED_PROFILE": 18
+        },
+        "uncontrolledByKind": {}
+      },
+      {
+        "id": "spatial-demand-index",
+        "executions": 20000,
+        "accepted": 5086,
+        "rejected": 14914,
+        "uncontrolled": 0,
+        "documentOperators": {},
+        "binaryOperators": {
+          "flip": 4952,
+          "grow": 5114,
+          "intact": 4989,
+          "truncate": 4945
+        },
+        "rejectionsByCode": {
+          "SpatialDemandIndexError": 14914
+        },
+        "uncontrolledByKind": {}
+      }
+    ],
+    "totals": {
+      "executions": 120000,
+      "accepted": 35345,
+      "rejected": 84655,
+      "uncontrolled": 0
+    },
+    "uncontrolledSamples": []
+  }
+}

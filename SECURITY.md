@@ -26,7 +26,10 @@ for a private reporting channel without disclosing exploit details.
 
 ## Security requirements
 
-- Fuzz parsers and binary decoders.
+- Fuzz parsers and binary decoders. A seeded campaign over the compiled-package
+  readers is recorded in
+  [`artifacts/security/package-fuzz`](artifacts/security/package-fuzz/README.md):
+  120,000 mutated packages, every refusal through a declared error class.
 - Use checked arithmetic for offsets, counts, and allocation sizes.
 - Reject recursive or cyclic structures beyond configured limits.
 - Treat decompression ratios and nested archives as resource-exhaustion risks.
