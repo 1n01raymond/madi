@@ -170,6 +170,21 @@ field for field, including both screenshots byte-identical
 (`artifacts/spatial-demand/digital-hub-localized/compatibility/`), so that
 record is unchanged.
 
+A bound is only useful if what sits behind it fails predictably, so the readers
+are also held to a stated contract: a mutated package is either accepted or
+refused through a declared error class -- `CompiledGltfError` for the compiled
+glTF loader, `SpatialDemandIndexError` for the demand sidecar -- and anything
+else escaping a reader is a defect. A seeded campaign over six reader targets
+and three committed packages,
+[`artifacts/security/package-fuzz`](../../artifacts/security/package-fuzz/README.md),
+runs 120,000 mutated packages and records 35,345 accepted, 84,655 refused, and
+0 uncontrolled outcomes. It found a real defect on its first full run: four
+call sites read `primitive.attributes.POSITION` off a mesh primitive nothing had
+established was an object, so the identical campaign against the pre-fix loader
+reports 102 uncontrolled outcomes in three kinds. `pnpm fuzz:check` re-validates
+the record and `packages/runtime-webgpu/test/package-fuzz-campaign.test.ts`
+reruns a bounded campaign inside `pnpm test`.
+
 This ADR stays Proposed until the embedder-facing override surface is settled
 against a second consumer; nothing in this repository exercises an override
 other than the tests.

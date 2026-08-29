@@ -53,6 +53,13 @@ Direct WebGPU rendering and the Phase 1 compiled glTF runtime boundary.
   see [ADR-0011](../../docs/adr/0011-remote-package-limits.md). An embedding
   application may pass lower limits, and `defaultCompiledPackageLimits` names
   what it is lowering.
+  A reader may accept a malformed package or refuse it through a declared
+  error class -- `CompiledGltfError` here, `SpatialDemandIndexError` for the
+  demand sidecar -- and nothing else may escape it. A seeded campaign of
+  120,000 mutated packages holds all six reader entry points to that contract
+  and records 0 uncontrolled outcomes
+  ([`artifacts/security/package-fuzz`](../../artifacts/security/package-fuzz/README.md));
+  `package-fuzz-campaign.test.ts` reruns a bounded slice of it in `pnpm test`.
 - `compiledSceneTransferables(scene)` lists owned typed-array buffers for a
   zero-copy Worker-to-main-thread transfer.
 - `NaruWebGpuRenderer` uploads those batches and renders surfaces, edges, and an

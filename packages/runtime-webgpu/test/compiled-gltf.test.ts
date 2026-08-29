@@ -682,3 +682,69 @@ describe("elided node identities and default transforms", () => {
     }
   });
 });
+
+/**
+ * A seeded malformed-package campaign (artifacts/security/package-fuzz) escaped
+ * raw TypeErrors from these shapes: every decode path dereferences a selected
+ * primitive and its attributes, so both are now settled once during selection
+ * rather than at each of the four call sites that read them.
+ */
+describe("malformed mesh primitives", () => {
+  it("refuses a mesh whose primitive list is not an array", async () => {
+    const { json, binary } = await loadPackage();
+    const copy = structuredClone(json) as { meshes: { primitives: unknown }[] };
+    copy.meshes[0]!.primitives = { 0: {} };
+
+    expect(() => decodeCompiledGltf(copy, binary)).toThrowError(
+      expect.objectContaining<Partial<CompiledGltfError>>({ code: "INVALID_GLTF" }),
+    );
+  });
+
+  it("refuses a null mesh primitive before its mode is read", async () => {
+    const { json, binary } = await loadPackage();
+    const copy = structuredClone(json) as { meshes: { primitives: unknown[] }[] };
+    copy.meshes[0]!.primitives.push(null);
+
+    expect(() => decodeCompiledGltf(copy, binary)).toThrowError(
+      expect.objectContaining<Partial<CompiledGltfError>>({ code: "INVALID_GLTF" }),
+    );
+  });
+
+  it("refuses a selected primitive that declares no attributes object", async () => {
+    const { json, binary } = await loadPackage();
+    for (const attributes of [undefined, null, false, 4]) {
+      const copy = structuredClone(json) as {
+        meshes: { primitives: { attributes?: unknown }[] }[];
+      };
+      const primitive = copy.meshes[0]!.primitives[0]!;
+      if (attributes === undefined) delete primitive.attributes;
+      else primitive.attributes = attributes;
+
+      expect(() => decodeCompiledGltf(copy, binary)).toThrowError(
+        expect.objectContaining<Partial<CompiledGltfError>>({ code: "INVALID_GLTF" }),
+      );
+    }
+  });
+
+  // Measurement reads POSITION off surfaces alone, so an edge primitive with a
+  // non-object `attributes` used to pass preparation and fail only once a
+  // client happened to request the chunk holding that mesh. Whether a package
+  // is accepted must not depend on which range was asked for.
+  it("refuses a malformed edge primitive before any range is decoded", async () => {
+    const json = JSON.parse(
+      await readFile(new URL("scene.gltf", progressiveUrl), "utf8"),
+    ) as unknown;
+    const copy = structuredClone(json) as {
+      meshes: { primitives: { mode?: number; attributes?: unknown }[] }[];
+    };
+    const edge = copy.meshes
+      .flatMap((mesh) => mesh.primitives)
+      .find((primitive) => primitive.mode === 1);
+    expect(edge).toBeDefined();
+    edge!.attributes = false;
+
+    expect(() => prepareCompiledGltfDecoder(copy)).toThrowError(
+      expect.objectContaining<Partial<CompiledGltfError>>({ code: "INVALID_GLTF" }),
+    );
+  });
+});
