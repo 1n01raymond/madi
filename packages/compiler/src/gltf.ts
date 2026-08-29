@@ -25,6 +25,8 @@ import {
   scaledPositionBounds,
 } from "./binary.js";
 import { measureJsonDocument } from "./json-document.js";
+import { buildHierarchySidecar, packageHierarchySchema } from "./hierarchy-sidecar.js";
+import type { HierarchySidecarEntry } from "./hierarchy-sidecar.js";
 import {
   compilerEvidenceSchema,
   experimentalGltfProfile,
@@ -288,7 +290,10 @@ export function nodeIdentityDerivationFor(
  * always means "the declared rule reconstructs this" and never "there was
  * nothing here".
  */
-function elidableIdentity(value: string | undefined, derived: string | undefined): unknown {
+function elidableIdentity(
+  value: string | undefined,
+  derived: string | undefined,
+): string | null | undefined {
   if (value === undefined) return null;
   return value === derived ? undefined : value;
 }
@@ -921,6 +926,28 @@ export function compileSceneToGltf(
       throw new TypeError("Property sidecar resources must use distinct URIs.");
     }
   }
+  const hierarchyUri = options.hierarchyUri ?? "hierarchy.json";
+  const hierarchyBinaryUri = options.hierarchyBinaryUri ?? "hierarchy.bin";
+  if (options.relocateHierarchyNodes === true) {
+    const uris = new Set([
+      binaryUri,
+      ...(coarseBounds ? [coarseBinaryUri] : []),
+      ...(options.spatialIndex === true ? [spatialBinaryUri] : []),
+      ...(propertySidecar ? [propertiesUri, propertiesBinaryUri] : []),
+      "scene.gltf",
+    ]);
+    if (
+      hierarchyUri === hierarchyBinaryUri ||
+      uris.has(hierarchyUri) ||
+      uris.has(hierarchyBinaryUri)
+    ) {
+      throw new TypeError("Hierarchy sidecar resources must use distinct URIs.");
+    }
+  } else if (options.hierarchyUri !== undefined || options.hierarchyBinaryUri !== undefined) {
+    throw new TypeError(
+      "hierarchyUri and hierarchyBinaryUri require relocateHierarchyNodes.",
+    );
+  }
   const generator = options.generator ?? "MADI compiler 0.0.0 / experimental glTF profile 1";
   const scaleToMeters = scene.units.scaleToMeters;
   const bufferViews: GltfBufferView[] = [];
@@ -1156,9 +1183,31 @@ export function compileSceneToGltf(
       (occurrenceCounts.get(occurrence.prototypeId) ?? 0) + 1,
     );
   }
-  const occurrenceIndexes = new Map(
-    occurrences.map((occurrence, index) => [occurrence.id, index + 1]),
-  );
+  const relocateHierarchy = options.relocateHierarchyNodes === true;
+  const isRenderable = (occurrence: Occurrence): boolean =>
+    geometryByPrototype.has(occurrence.prototypeId);
+  // Relocation numbers only the nodes that stay, so the document's node array
+  // and its scene roots are the renderable occurrences in occurrence order.
+  const occurrenceIndexes = new Map<string, number>();
+  if (relocateHierarchy) {
+    let nextNodeIndex = 1;
+    for (const occurrence of occurrences) {
+      if (!isRenderable(occurrence)) {
+        if (coarseGeometryByPrototype.has(occurrence.prototypeId)) {
+          throw new TypeError(
+            `Occurrence ${occurrence.id} carries coarse geometry without target geometry; relocating it would drop a drawable node.`,
+          );
+        }
+        continue;
+      }
+      occurrenceIndexes.set(occurrence.id, nextNodeIndex);
+      nextNodeIndex += 1;
+    }
+  } else {
+    occurrences.forEach((occurrence, index) => {
+      occurrenceIndexes.set(occurrence.id, index + 1);
+    });
+  }
   const children = new Map<string, Occurrence[]>();
   for (const occurrence of occurrences) {
     if (!occurrence.parentId) continue;
@@ -1177,11 +1226,25 @@ export function compileSceneToGltf(
   const declaresDerivation =
     derivation.semanticId !== undefined || derivation.sourceRef !== undefined;
 
+  const sourceFrameMatrix = sourceToGltfMatrix(scene.rootFrame.upAxis);
+  // Relocation bakes the composed transform onto the node that stays. Seeding
+  // the composition through the identity repeats the runtime's own first step,
+  // so a baked matrix is bit-identical -- signed zeros included -- to the one
+  // the renderer would have composed from the retained node chain.
+  const relocatedWorldMatrices = relocateHierarchy
+    ? occurrenceWorldMatrices(
+        occurrences,
+        multiplyMatrices(identityMatrix, sourceFrameMatrix),
+        scaleToMeters,
+      )
+    : undefined;
   const nodes: GltfNode[] = [
     {
       name: "MADI source frame",
-      children: rootOccurrences.map(({ id }) => occurrenceIndexes.get(id) ?? 0),
-      matrix: sourceToGltfMatrix(scene.rootFrame.upAxis),
+      ...(relocateHierarchy
+        ? {}
+        : { children: rootOccurrences.map(({ id }) => occurrenceIndexes.get(id) ?? 0) }),
+      matrix: sourceFrameMatrix,
       extras: {
         madi: {
           kind: "source-frame",
@@ -1194,20 +1257,12 @@ export function compileSceneToGltf(
     },
   ];
 
-  for (const occurrence of occurrences) {
-    const prototype = prototypeById.get(occurrence.prototypeId);
-    if (!prototype) throw new TypeError(`Missing prototype ${occurrence.prototypeId}.`);
-    const geometry = geometryByPrototype.get(prototype.id);
-    const coarseGeometry = coarseGeometryByPrototype.get(prototype.id);
-    const childIndexes = (children.get(occurrence.id) ?? []).map(
-      ({ id }) => occurrenceIndexes.get(id) ?? 0,
-    );
-    const mesh = geometry === undefined
-      ? undefined
-      : meshFor(geometry, occurrence.materialOverrideId);
-    const coarseMesh = coarseGeometry === undefined
-      ? undefined
-      : coarseMeshFor(coarseGeometry, occurrence.materialOverrideId);
+  // Mirrors what the document node would have carried: a string, an explicit
+  // null for an occurrence with no identity, or undefined where the package's
+  // derivation rule reconstructs it.
+  const nodeIdentityFor = (
+    occurrence: Occurrence,
+  ): { readonly semanticId?: string | null; readonly sourceRef?: string | null } => {
     const semanticId = declaresDerivation && derivation.semanticId !== undefined
       ? elidableIdentity(occurrence.semanticId, derivedSemanticId(occurrence.prototypeId))
       : occurrence.semanticId;
@@ -1220,11 +1275,38 @@ export function compileSceneToGltf(
           sourceRefBase === undefined ? undefined : derivedSourceRef(sourceRefBase),
         )
       : occurrence.sourceRef;
+    return { semanticId, sourceRef };
+  };
+
+  for (const occurrence of occurrences) {
+    const prototype = prototypeById.get(occurrence.prototypeId);
+    if (!prototype) throw new TypeError(`Missing prototype ${occurrence.prototypeId}.`);
+    const geometry = geometryByPrototype.get(prototype.id);
+    // A relocated occurrence draws nothing, so the document keeps no node for
+    // it; the sidecar loop below carries it instead.
+    if (relocateHierarchy && geometry === undefined) continue;
+    const coarseGeometry = coarseGeometryByPrototype.get(prototype.id);
+    const childIndexes = relocateHierarchy
+      ? []
+      : (children.get(occurrence.id) ?? []).map(({ id }) => occurrenceIndexes.get(id) ?? 0);
+    const mesh = geometry === undefined
+      ? undefined
+      : meshFor(geometry, occurrence.materialOverrideId);
+    const coarseMesh = coarseGeometry === undefined
+      ? undefined
+      : coarseMeshFor(coarseGeometry, occurrence.materialOverrideId);
+    const { semanticId, sourceRef } = nodeIdentityFor(occurrence);
+    const worldMatrix = relocatedWorldMatrices?.get(occurrence.id);
+    if (relocateHierarchy && worldMatrix === undefined) {
+      throw new TypeError(`Missing composed transform for occurrence ${occurrence.id}.`);
+    }
     nodes.push({
       name: occurrence.name ?? occurrence.id,
       ...(childIndexes.length === 0 ? {} : { children: childIndexes }),
       ...nodeTransform(
-        scaledOccurrenceMatrix(occurrence.localTransform, scaleToMeters),
+        worldMatrix === undefined
+          ? scaledOccurrenceMatrix(occurrence.localTransform, scaleToMeters)
+          : Array.from(worldMatrix),
         omitDefaultTransforms,
       ),
       ...(mesh === undefined ? {} : { mesh }),
@@ -1241,6 +1323,58 @@ export function compileSceneToGltf(
       },
     });
   }
+
+  // The sidecar replays the traversal order the document would have produced,
+  // so a reader rebuilds one entry list from two node kinds without sorting:
+  // retained entries name a document node, relocated ones carry their own row.
+  const hierarchyEntries: HierarchySidecarEntry[] = [];
+  if (relocateHierarchy) {
+    const stack = rootOccurrences
+      .map((occurrence) => ({ occurrence, depth: 0 }))
+      .reverse();
+    for (let frame = stack.pop(); frame !== undefined; frame = stack.pop()) {
+      const { occurrence, depth } = frame;
+      const nodeIndex = occurrenceIndexes.get(occurrence.id);
+      if (nodeIndex === undefined) {
+        const { semanticId, sourceRef } = nodeIdentityFor(occurrence);
+        hierarchyEntries.push({
+          depth,
+          relocated: {
+            name: occurrence.name ?? occurrence.id,
+            occurrenceId: occurrence.id,
+            prototypeId: occurrence.prototypeId,
+            ...(semanticId === undefined ? {} : { semanticId }),
+            ...(sourceRef === undefined ? {} : { sourceRef }),
+            initialVisibility: occurrence.initialVisibility,
+            tags: [...occurrence.tags],
+            localTransform: scaledOccurrenceMatrix(occurrence.localTransform, scaleToMeters),
+          },
+        });
+      } else {
+        hierarchyEntries.push({ nodeIndex, depth });
+      }
+      const childEntries = children.get(occurrence.id) ?? [];
+      for (let at = childEntries.length - 1; at >= 0; at -= 1) {
+        const child = childEntries[at];
+        if (child) stack.push({ occurrence: child, depth: depth + 1 });
+      }
+    }
+    if (hierarchyEntries.length !== occurrences.length) {
+      throw new TypeError(
+        "The occurrence tree does not reach every occurrence from a root.",
+      );
+    }
+  }
+  const hierarchySidecar = relocateHierarchy
+    ? buildHierarchySidecar({
+        sceneId: scene.sceneId,
+        revisionId: scene.revision.id,
+        sourceDigest: scene.revision.sourceDigest,
+        documentNodeCount: nodes.length,
+        columnsUri: hierarchyBinaryUri,
+        entries: hierarchyEntries,
+      })
+    : undefined;
 
   const binary = builder.finish();
   const coarseBinary = coarseBuilder?.finish();
@@ -1321,7 +1455,14 @@ export function compileSceneToGltf(
   const document: GltfDocument = {
     asset: { version: "2.0", generator },
     scene: 0,
-    scenes: [{ name: scene.sceneId, nodes: [0] }],
+    scenes: [
+      {
+        name: scene.sceneId,
+        // Relocation removes every parent link, so each retained node is a
+        // scene root next to the source-frame node the renderer reads for units.
+        nodes: relocateHierarchy ? nodes.map((_node, index) => index) : [0],
+      },
+    ],
     nodes,
     meshes,
     materials,
@@ -1373,6 +1514,18 @@ export function compileSceneToGltf(
               },
             }
           : {}),
+        ...(hierarchySidecar
+          ? {
+              hierarchy: {
+                schemaVersion: packageHierarchySchema,
+                uri: hierarchyUri,
+                byteLength: hierarchySidecar.jsonBytes.byteLength,
+                sha256: hierarchySidecar.jsonDigest,
+                entryCount: hierarchySidecar.document.entryCount,
+                relocatedCount: hierarchySidecar.document.relocatedCount,
+              },
+            }
+          : {}),
         documents: [...scene.documents]
           .sort(compareId)
           .map(({ id, displayName, format, formatVersion, sourceDigest }) => ({
@@ -1413,6 +1566,9 @@ export function compileSceneToGltf(
   if (propertySidecar) {
     packageHash.update(propertySidecar.jsonBytes).update(propertySidecar.binary);
   }
+  if (hierarchySidecar) {
+    packageHash.update(hierarchySidecar.jsonBytes).update(hierarchySidecar.binary);
+  }
   const packageDigest = packageHash.digest("hex");
   const diagnosticCounts = { info: 0, warning: 0, error: 0 };
   for (const diagnostic of diagnostics) diagnosticCounts[diagnostic.severity] += 1;
@@ -1431,12 +1587,14 @@ export function compileSceneToGltf(
       binaryUri,
       ...(coarseBinary ? { coarseBinaryUri } : {}),
       ...(propertySidecar ? { propertiesUri, propertiesBinaryUri } : {}),
+      ...(hierarchySidecar ? { hierarchyUri, hierarchyBinaryUri } : {}),
       coordinateSystem: "right-handed-y-up-meters",
       geometryEncoding: "gltf-f32",
       ...(options.compactJson === true ? { jsonFormatting: "compact" as const } : {}),
       ...(options.omitResourceNames === true ? { resourceNames: "omitted" as const } : {}),
       ...(declaresDerivation ? { nodeIdentifiers: "derived-elided" as const } : {}),
       ...(omitDefaultTransforms ? { nodeTransforms: "default-omitted" as const } : {}),
+      ...(hierarchySidecar ? { hierarchyNodes: "relocated" as const } : {}),
       ...(coarseBinary ? { progressiveRepresentation: "prototype-aabb-v1" as const } : {}),
       ...(coarseBinary
         ? {
@@ -1510,6 +1668,22 @@ export function compileSceneToGltf(
               },
             ]
           : []),
+        ...(hierarchySidecar
+          ? [
+              {
+                path: hierarchyUri,
+                mediaType: "application/json",
+                bytes: hierarchySidecar.jsonBytes.byteLength,
+                sha256: hierarchySidecar.jsonDigest,
+              },
+              {
+                path: hierarchyBinaryUri,
+                mediaType: "application/octet-stream",
+                bytes: hierarchySidecar.binary.byteLength,
+                sha256: hierarchySidecar.binaryDigest,
+              },
+            ]
+          : []),
       ],
     },
     counts: {
@@ -1564,6 +1738,12 @@ export function compileSceneToGltf(
       ? {
           propertiesJson: propertySidecar.json,
           propertiesBinary: propertySidecar.binary,
+        }
+      : {}),
+    ...(hierarchySidecar
+      ? {
+          hierarchyJson: hierarchySidecar.json,
+          hierarchyBinary: hierarchySidecar.binary,
         }
       : {}),
     report,

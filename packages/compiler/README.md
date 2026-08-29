@@ -166,6 +166,18 @@ byte-identical. See the [document byte-split
 record](../../artifacts/compiler/node-field-elision/README.md) for what they
 recover on a real federation, and ADR-0015 for the contract.
 
+That record also measured the larger lever those two options leave alone: the
+mesh-less hierarchy nodes are 21.88% of the engineering-baseline document.
+`--relocate-hierarchy-nodes` (API: `relocateHierarchyNodes: true`,
+[ADR-0017](../../docs/adr/0017-relocated-hierarchy-sidecar.md)) moves them into
+a package sidecar and flattens what remains, so the document holds the drawing
+nodes with composed world matrices and no `children`. On the engineering
+baseline the document falls 405,570,167 to 317,466,183 B (-21.72%) and the
+package falls 2.72% after the 64,825,238 B sidecar is charged — the tree is
+carried, not deleted. The option is off by default, is part of the
+compiled-cache key, and changes the package digest when it is on. See the
+[relocation record](../../artifacts/compiler/hierarchy-relocation/README.md).
+
 The committed [engineering-scale qualification
 record](../../artifacts/ifc/engineering-baseline/README.md) uses this option
 together with compact JSON, a spatial index, and spatial-leaf payload order.
@@ -226,6 +238,18 @@ sidecar through `extras.madi.properties`, both resources join
 column-bag scene without `options.propertyColumns` (and the reverse). Inline
 `PropertyBag` scenes — the STEP path — emit no sidecar and are byte-identical
 to before; the glTF profile and report schema are unchanged.
+
+### Package hierarchy sidecar
+
+`--relocate-hierarchy-nodes` republishes the assembly tree as two further
+resources (`docs/COMPILER.md` section 21.3): `hierarchy.bin`, the entries as
+columns, and `hierarchy.json`, a `naru.package-hierarchy.1` header holding the
+scene identity, the section table, the interned tag sets, and the entry and
+relocated counts. `scene.gltf` points at it through `extras.madi.hierarchy`,
+both resources join `output.resources` and the package digest after the
+property sidecar, and both participate in compiled-cache identity. Reading the
+tree back then requires the sidecar; `@naru3d/runtime-webgpu` fails closed
+rather than mistaking the drawing nodes for the whole assembly.
 
 ## Current limits
 

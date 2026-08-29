@@ -5,6 +5,9 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import type { CompiledHierarchy } from "@naru3d/runtime-webgpu";
 
+import { compileSceneToGltf } from "../../../packages/compiler/src/index.js";
+import { hydratePhase0Evidence } from "../../../packages/compiler/src/evidence-input.js";
+
 import {
   loadSceneHierarchy,
   parseSceneUrl,
@@ -141,5 +144,81 @@ describe("remote scene packages", () => {
         documentBytes: 1_024,
       }),
     ).rejects.toThrow(/scene\.gltf is larger than 1024 bytes/u);
+  });
+});
+
+describe("relocated hierarchy packages", () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  async function compileRelocated() {
+    const scene = hydratePhase0Evidence(
+      JSON.parse(
+        readFileSync(
+          fileURLToPath(
+            new URL("../../../artifacts/occt/repeated-fasteners.scene.json", import.meta.url),
+          ),
+          "utf8",
+        ),
+      ) as unknown,
+    );
+    return compileSceneToGltf(scene, { relocateHierarchyNodes: true });
+  }
+
+  function stubPackage(
+    compiled: Awaited<ReturnType<typeof compileRelocated>>,
+    overrides: Readonly<Record<string, Uint8Array>> = {},
+  ): void {
+    const encoder = new TextEncoder();
+    const resources = new Map<string, [Uint8Array, string]>([
+      ["scene.gltf", [encoder.encode(compiled.json.text()), "model/gltf+json"]],
+      ["hierarchy.json", [encoder.encode(compiled.hierarchyJson), "application/json"]],
+      [
+        "hierarchy.bin",
+        [compiled.hierarchyBinary as Uint8Array, "application/octet-stream"],
+      ],
+    ]);
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: URL | string) => {
+        const name = (input instanceof URL ? input : new URL(input)).pathname.split("/").pop();
+        const served = name === undefined ? undefined : overrides[name] ?? resources.get(name)?.[0];
+        if (!served) return new Response(null, { status: 404 });
+        const copy = new Uint8Array(served.byteLength);
+        copy.set(served);
+        return new Response(copy.buffer, {
+          headers: {
+            "Content-Type": resources.get(name as string)?.[1] ?? "application/octet-stream",
+          },
+        });
+      }),
+    );
+  }
+
+  it("rebuilds the whole assembly tree from the sidecar beside the document", async () => {
+    const compiled = await compileRelocated();
+    stubPackage(compiled);
+
+    const loaded = await loadSceneHierarchy({ kind: "url", gltfUrl: fixtureUrl });
+
+    expect(compiled.document.nodes).toHaveLength(11);
+    expect(loaded.hierarchy.relocatedHierarchy?.relocatedCount).toBe(2);
+    expect(loaded.hierarchy.entries).toHaveLength(compiled.report.counts.occurrenceCount);
+    expect(loaded.hierarchy.entries.filter((entry) => entry.renderable)).toHaveLength(
+      compiled.report.counts.renderableOccurrenceCount,
+    );
+  });
+
+  it("refuses a sidecar whose bytes do not match the digest the package declares", async () => {
+    const compiled = await compileRelocated();
+    const corrupted = new Uint8Array(compiled.hierarchyBinary as Uint8Array);
+    const last = corrupted.byteLength - 1;
+    corrupted[last] = (corrupted[last] ?? 0) ^ 0xff;
+    stubPackage(compiled, { "hierarchy.bin": corrupted });
+
+    await expect(loadSceneHierarchy({ kind: "url", gltfUrl: fixtureUrl })).rejects.toThrow(
+      /digest mismatch/u,
+    );
   });
 });

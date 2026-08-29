@@ -98,7 +98,13 @@ renderable occurrences; transferred results clone only their occurrence
 transforms so the prepared state remains attached. Chunk decode responses omit
 the document hierarchy — it crosses the Worker boundary once and the decoder
 reattaches its cached copy, so per-admission messages carry only the chunk's
-own batches. Prototype-local surface
+own batches. A package compiled with `--relocate-hierarchy-nodes` (ADR-0017)
+carries its assembly tree in a sidecar rather than the document: both load
+paths fetch or require `hierarchy.json` before the tree is read — the URL path
+holds each of its two resources to the single-resource ceiling and the local
+path names the missing file — and the Worker declines the tree outright with
+the `"geometry-only"` option, because it decodes on a thread that never renders
+the panel. Prototype-local surface
 bounds are cached once and only eight corners are transformed per occurrence,
 rather than rescanning every vertex. IFC compilation coalesces adjacent prototype ranges
 into deterministic requests (512 KiB by default), while the existing

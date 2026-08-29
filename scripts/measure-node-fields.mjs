@@ -75,7 +75,10 @@ const result = compileSceneToGltf(hydrateIfcSceneSplit(structure.value, geometry
   ...NODE_FIELD_VARIANTS[variant],
 });
 const compileSeconds = seconds(compiledAt);
-const measurement = await measureGltfNodeBytesInString(result.json);
+// The compiled document is a streaming recipe, not a string (ADR-0016);
+// the scanner reads a string, and every document measured here is below
+// the runtime's maximum string length.
+const measurement = await measureGltfNodeBytesInString(result.json.text());
 console.log(
   `[node-fields] ${label}/${variant}: document ${measurement.rawBytes} B, ` +
     `${measurement.elementCount} nodes, digest ` +

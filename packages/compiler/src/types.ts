@@ -103,6 +103,8 @@ export interface CompilerBuildReport {
     readonly coarseBinaryUri?: string;
     readonly propertiesUri?: string;
     readonly propertiesBinaryUri?: string;
+    readonly hierarchyUri?: string;
+    readonly hierarchyBinaryUri?: string;
     readonly coordinateSystem: "right-handed-y-up-meters";
     readonly geometryEncoding: "gltf-f32";
     /** JSON whitespace policy. Omitted for the historical pretty-printed default. */
@@ -113,6 +115,8 @@ export interface CompilerBuildReport {
     readonly nodeIdentifiers?: "derived-elided";
     /** Optional size policy for node transforms glTF already defaults. */
     readonly nodeTransforms?: "default-omitted";
+    /** Optional size policy that moves mesh-less nodes into a sidecar. */
+    readonly hierarchyNodes?: "relocated";
     readonly progressiveRepresentation?: "prototype-aabb-v1";
     readonly targetChunking?: "prototype-range-v1" | "coalesced-prototype-range-v1";
     /** Maximum bytes per progressive target request when coalescing is enabled. */
@@ -171,6 +175,10 @@ export interface CompiledGltfPackage {
   readonly propertiesJson?: string;
   /** Byte-verbatim `madi.property-columns.1` column file, when emitted. */
   readonly propertiesBinary?: Uint8Array;
+  /** Compact-JSON hierarchy sidecar (`naru.package-hierarchy.1`), when emitted. */
+  readonly hierarchyJson?: string;
+  /** Columnar hierarchy payload paired with `hierarchyJson`. */
+  readonly hierarchyBinary?: Uint8Array;
   readonly report: CompilerBuildReport;
   /**
    * The Scene IR validation the compiler already ran on its input. Exposed so
@@ -223,6 +231,16 @@ export interface CompileGltfOptions {
   readonly propertyColumns?: Uint8Array;
   readonly propertiesUri?: string;
   readonly propertiesBinaryUri?: string;
+  /**
+   * Keep only mesh-bearing occurrences in the glTF document and move the
+   * assembly structure into a `naru.package-hierarchy.1` sidecar. Surviving
+   * nodes carry the world transform the runtime would have composed, so the
+   * rendered scene is unchanged; a viewer that wants the tree loads the
+   * sidecar.
+   */
+  readonly relocateHierarchyNodes?: boolean;
+  readonly hierarchyUri?: string;
+  readonly hierarchyBinaryUri?: string;
 }
 
 export interface PackageValidationIssue {

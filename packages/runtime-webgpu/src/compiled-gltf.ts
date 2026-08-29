@@ -7,6 +7,12 @@ import type {
 } from "./layout.js";
 import { resolveCompiledPackageLimits } from "./package-limits.js";
 import type { CompiledPackageLimits, CompiledPackageOptions } from "./package-limits.js";
+import {
+  decodePackageHierarchy,
+  PackageHierarchyError,
+  supportedPackageHierarchySchema,
+} from "./package-hierarchy.js";
+import type { DecodedPackageHierarchy } from "./package-hierarchy.js";
 import { supportedSpatialDemandIndexSchema } from "./spatial-index.js";
 
 const supportedProfile = "madi.experimental.gltf.1";
@@ -98,6 +104,20 @@ export interface CompiledPropertiesRef {
   readonly sha256: string;
 }
 
+/**
+ * Pointer to the hierarchy sidecar that carries the occurrences whose nodes
+ * left the document. Present only when the package was compiled with
+ * `--relocate-hierarchy-nodes`.
+ */
+export interface CompiledHierarchyRef {
+  readonly schemaVersion: typeof supportedPackageHierarchySchema;
+  readonly uri: string;
+  readonly byteLength: number;
+  readonly sha256: string;
+  readonly entryCount: number;
+  readonly relocatedCount: number;
+}
+
 /** Pointer to the optional occurrence-to-target-chunk spatial demand index. */
 export interface CompiledSpatialIndexRef {
   readonly schemaVersion: typeof supportedSpatialDemandIndexSchema;
@@ -130,6 +150,7 @@ export interface CompiledHierarchy {
   readonly coarseBinaryUri?: string;
   readonly coarseBinaryByteLength?: number;
   readonly properties?: CompiledPropertiesRef;
+  readonly relocatedHierarchy?: CompiledHierarchyRef;
   readonly spatialIndex?: CompiledSpatialIndexRef;
   readonly targetChunks: readonly CompiledTargetChunk[];
   readonly entries: readonly CompiledHierarchyEntry[];
@@ -693,6 +714,130 @@ function spatialIndexRefFor(progressive: JsonRecord | undefined): CompiledSpatia
   };
 }
 
+/**
+ * Reads the relocated-hierarchy pointer without building the assembly tree.
+ *
+ * A loader has to fetch the sidecar before it can ask for the tree, and the
+ * tree API refuses to answer without it -- so the pointer is readable on its
+ * own. Only the pointer is validated here; the document itself is validated
+ * when the tree is read.
+ */
+export function readCompiledHierarchyRef(value: unknown): CompiledHierarchyRef | undefined {
+  const extras = recordAt(value, "extras");
+  const rootMadi = recordAt(extras, "madi");
+  return rootMadi ? hierarchyRefFor(rootMadi) : undefined;
+}
+
+function hierarchyRefFor(rootMadi: JsonRecord): CompiledHierarchyRef | undefined {
+  if (rootMadi.hierarchy === undefined) return undefined;
+  const hierarchy = recordAt(rootMadi, "hierarchy");
+  if (
+    !hierarchy ||
+    hierarchy.schemaVersion !== supportedPackageHierarchySchema ||
+    typeof hierarchy.uri !== "string" ||
+    hierarchy.uri.trim() === "" ||
+    !Number.isInteger(hierarchy.byteLength) ||
+    (hierarchy.byteLength as number) <= 0 ||
+    typeof hierarchy.sha256 !== "string" ||
+    !/^[0-9a-f]{64}$/u.test(hierarchy.sha256) ||
+    !Number.isInteger(hierarchy.entryCount) ||
+    (hierarchy.entryCount as number) < 0 ||
+    !Number.isInteger(hierarchy.relocatedCount) ||
+    (hierarchy.relocatedCount as number) < 0
+  ) {
+    throw new CompiledGltfError(
+      "INVALID_GLTF",
+      `extras.madi.hierarchy must use ${supportedPackageHierarchySchema} and carry uri, byteLength, sha256, entryCount, and relocatedCount.`,
+    );
+  }
+  return {
+    schemaVersion: supportedPackageHierarchySchema,
+    uri: hierarchy.uri,
+    byteLength: hierarchy.byteLength as number,
+    sha256: hierarchy.sha256,
+    entryCount: hierarchy.entryCount as number,
+    relocatedCount: hierarchy.relocatedCount as number,
+  };
+}
+
+/**
+ * Rebuilds the assembly tree a relocated package cannot express on its own.
+ *
+ * The document keeps only the nodes that draw something, and relocation
+ * flattens those to scene roots, so document traversal reports depth 0 for
+ * every one of them. The sidecar therefore owns both the order and the depth
+ * of every entry, and the document contributes what only it knows: whether a
+ * node draws, and the name and identity it serialized.
+ */
+function mergedHierarchyEntries(
+  document: CompiledGltfDocument,
+  documentEntries: readonly CompiledHierarchyEntry[],
+  ref: CompiledHierarchyRef,
+  sidecar: DecodedPackageHierarchy,
+  derivation: NodeIdentityDerivation,
+): readonly CompiledHierarchyEntry[] {
+  if (sidecar.documentNodeCount !== document.nodes.length) {
+    throw new PackageHierarchyError(
+      "INVALID_HIERARCHY",
+      "The hierarchy sidecar was built for a document with a different node count.",
+    );
+  }
+  if (sidecar.entries.length !== ref.entryCount || sidecar.relocatedCount !== ref.relocatedCount) {
+    throw new PackageHierarchyError(
+      "INVALID_HIERARCHY",
+      "The hierarchy sidecar does not hold the entries the document declares.",
+    );
+  }
+  const byNodeIndex = new Map(documentEntries.map((entry) => [entry.nodeIndex, entry]));
+  const entries: CompiledHierarchyEntry[] = [];
+  // Relocated entries have no node, but the Studio keys rows, selection, and
+  // search by `nodeIndex`; indexes past the document keep that key unique
+  // without pretending the entry can be looked up in the node array.
+  let syntheticNodeIndex = document.nodes.length;
+  const seen = new Set<number>();
+  for (const entry of sidecar.entries) {
+    if (entry.relocated) {
+      const { relocated } = entry;
+      const identity = resolveNodeIdentity(
+        {
+          occurrenceId: relocated.occurrenceId,
+          prototypeId: relocated.prototypeId,
+          ...("semanticId" in relocated ? { semanticId: relocated.semanticId } : {}),
+          ...("sourceRef" in relocated ? { sourceRef: relocated.sourceRef } : {}),
+        },
+        derivation,
+      );
+      entries.push({
+        nodeIndex: syntheticNodeIndex,
+        name: relocated.name,
+        depth: entry.depth,
+        renderable: false,
+        occurrenceId: relocated.occurrenceId,
+        prototypeId: relocated.prototypeId,
+        ...identity,
+      });
+      syntheticNodeIndex += 1;
+      continue;
+    }
+    const retained = entry.nodeIndex === undefined ? undefined : byNodeIndex.get(entry.nodeIndex);
+    if (!retained || seen.has(retained.nodeIndex)) {
+      throw new PackageHierarchyError(
+        "INVALID_HIERARCHY",
+        "The hierarchy sidecar names a document node the active scene does not carry.",
+      );
+    }
+    seen.add(retained.nodeIndex);
+    entries.push({ ...retained, depth: entry.depth });
+  }
+  if (seen.size !== documentEntries.length) {
+    throw new PackageHierarchyError(
+      "INVALID_HIERARCHY",
+      "The hierarchy sidecar leaves document occurrences out of the assembly tree.",
+    );
+  }
+  return entries;
+}
+
 export function inspectCompiledHierarchy(
   value: unknown,
   options: CompiledPackageOptions = {},
@@ -712,7 +857,8 @@ export function inspectCompiledHierarchy(
     : undefined;
   const targetChunks = targetChunksFor(progressive, document, targetBufferIndex, limits);
   const derivation = nodeIdentityDerivationFrom(rootMadi);
-  const entries: CompiledHierarchyEntry[] = [];
+  const relocatedHierarchy = hierarchyRefFor(rootMadi);
+  const documentEntries: CompiledHierarchyEntry[] = [];
   const renderedMeshes = new Set<number>();
 
   traverseActiveNodes(
@@ -722,7 +868,7 @@ export function inspectCompiledHierarchy(
       if (typeof madi.occurrenceId !== "string") return;
       const identity = resolveNodeIdentity(madi, derivation);
       if (node.mesh !== undefined) renderedMeshes.add(node.mesh);
-      entries.push({
+      documentEntries.push({
         nodeIndex,
         name: node.name ?? madi.occurrenceId,
         depth,
@@ -734,6 +880,29 @@ export function inspectCompiledHierarchy(
     },
     limits,
   );
+
+  // Fail closed: a package that declares a sidecar has no complete tree in the
+  // document, so reporting the nodes that stayed behind would silently answer a
+  // different question than the caller asked. A caller that says it is decoding
+  // geometry only gets no tree at all instead, which cannot be misread.
+  const sidecar = options.hierarchy === "geometry-only" ? undefined : options.hierarchy;
+  if (relocatedHierarchy && !sidecar && options.hierarchy !== "geometry-only") {
+    throw new PackageHierarchyError(
+      "INVALID_HIERARCHY",
+      "The package declares a relocated hierarchy; its sidecar must be supplied to read the assembly tree.",
+    );
+  }
+  const entries = !relocatedHierarchy
+    ? documentEntries
+    : sidecar
+      ? mergedHierarchyEntries(
+          document,
+          documentEntries,
+          relocatedHierarchy,
+          decodePackageHierarchy(sidecar.json, sidecar.columns, { maxEntries: limits.nodes }),
+          derivation,
+        )
+      : [];
 
   const documents = Array.isArray(rootMadi.documents) ? rootMadi.documents : [];
   const source = documents.find(isRecord);
@@ -778,10 +947,14 @@ export function inspectCompiledHierarchy(
           }
         : {}),
       ...(properties ? { properties } : {}),
+      ...(relocatedHierarchy ? { relocatedHierarchy } : {}),
       ...(spatialIndex ? { spatialIndex } : {}),
       targetChunks,
       entries,
-      renderableOccurrences: entries.filter(({ renderable }) => renderable).length,
+      // Relocation moves only the nodes that draw nothing, so the document
+      // always holds every renderable occurrence -- including when the tree
+      // above was left empty on purpose.
+      renderableOccurrences: documentEntries.filter(({ renderable }) => renderable).length,
       sharedMeshes: renderedMeshes.size,
     },
   };

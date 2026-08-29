@@ -35,9 +35,33 @@ export const defaultCompiledPackageLimits: CompiledPackageLimits = {
 
 export type CompiledPackageLimitOverrides = Partial<CompiledPackageLimits>;
 
+/**
+ * The `naru.package-hierarchy.1` sidecar bytes, when the package declares one.
+ *
+ * A package that relocated its mesh-less nodes cannot describe its own
+ * assembly tree, so the caller fetches the sidecar and hands it over here.
+ * Reading the tree without it fails closed rather than reporting a truncated
+ * hierarchy as the whole one.
+ */
+export interface CompiledHierarchySidecar {
+  /** Parsed or unparsed `hierarchy.json`. */
+  readonly json: unknown;
+  readonly columns: ArrayBuffer | Uint8Array;
+}
+
 export interface CompiledPackageOptions {
   /** Raises or lowers individual ceilings; omitted keys keep their default. */
   readonly limits?: CompiledPackageLimitOverrides;
+  /**
+   * Required exactly when the document declares `extras.madi.hierarchy`.
+   *
+   * `"geometry-only"` is the declaration a caller makes when it decodes
+   * geometry and never reads the assembly tree -- the Worker that decodes
+   * ranges, for instance. The tree then comes back empty rather than holding
+   * the retained nodes, because a partial tree presented as a whole one is the
+   * failure this option exists to keep visible.
+   */
+  readonly hierarchy?: CompiledHierarchySidecar | "geometry-only";
 }
 
 /**

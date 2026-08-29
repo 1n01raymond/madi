@@ -87,7 +87,11 @@ async function handleRequest(
       const text = request.source.kind === "bytes"
         ? new TextDecoder().decode(request.source.bytes)
         : await request.source.file.text();
-      compiledDecoder = prepareCompiledGltfDecoder(JSON.parse(text) as unknown);
+      // The Worker decodes geometry; the assembly tree is read on the main
+      // thread, which is where a relocated package's sidecar is fetched.
+      compiledDecoder = prepareCompiledGltfDecoder(JSON.parse(text) as unknown, {
+        hierarchy: "geometry-only",
+      });
       worker.postMessage({
         type: "initialized",
         requestId: request.requestId,

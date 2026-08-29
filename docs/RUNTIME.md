@@ -96,6 +96,31 @@ created
 Applications receive progress by meaningful stage and byte/residency estimates,
 not a misleading single percentage when total demand is view-dependent.
 
+### Reading the assembly tree
+
+`hierarchy-ready` is reached from the glTF document alone for a package the
+compiler wrote with its nodes in place. A package compiled with
+`--relocate-hierarchy-nodes` ([ADR-0017](adr/0017-relocated-hierarchy-sidecar.md))
+keeps only the drawing nodes in the document and carries the tree in a
+`naru.package-hierarchy.1` sidecar, so `hierarchy-ready` then also waits on
+`hierarchy.json` and `hierarchy.bin`.
+
+The reader never guesses which of the two it is holding. A document that
+declares `extras.madi.hierarchy` and is asked for its tree without the sidecar
+fails closed with `PackageHierarchyError("INVALID_HIERARCHY", ...)` rather than
+returning the drawing nodes as if they were the whole assembly -- silently
+short trees are the failure this option would otherwise introduce. Callers
+supply the sidecar through `CompiledPackageOptions.hierarchy`.
+
+A caller that wants geometry and no tree at all says so explicitly, by passing
+the `"geometry-only"` sentinel in the same field. The Studio's geometry Worker
+does exactly that: it decodes on a thread that never renders the tree, so it
+declines the tree instead of fetching a sidecar it would discard. The tree is
+read once, on the main thread that owns the panel.
+
+Relocation moves only mesh-less nodes, so a document's renderable occurrence
+count is still derivable from the document itself either way.
+
 ## 5. Threading model
 
 ### Main thread

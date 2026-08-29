@@ -23,6 +23,7 @@ export {
   compiledSceneTransferables,
   decodeCompiledGltf,
   inspectCompiledHierarchy,
+  readCompiledHierarchyRef,
   parseCompiledGltf,
   prepareCompiledGltfDecoder,
 } from "./compiled-gltf.js";
@@ -31,6 +32,7 @@ export {
   resolveCompiledPackageLimits,
 } from "./package-limits.js";
 export type {
+  CompiledHierarchySidecar,
   CompiledPackageLimitOverrides,
   CompiledPackageLimits,
   CompiledPackageOptions,
@@ -41,6 +43,18 @@ export {
   SpatialDemandIndexError,
   supportedSpatialDemandIndexSchema,
 } from "./spatial-index.js";
+export {
+  decodePackageHierarchy,
+  PackageHierarchyError,
+  supportedPackageHierarchySchema,
+} from "./package-hierarchy.js";
+export type {
+  DecodedPackageHierarchy,
+  DecodePackageHierarchyOptions,
+  PackageHierarchyEntry,
+  PackageHierarchyErrorCode,
+  RelocatedHierarchyNode,
+} from "./package-hierarchy.js";
 export type {
   DecodedSpatialDemandIndex,
   DecodeSpatialDemandIndexOptions,
@@ -58,6 +72,7 @@ export type {
   CompiledHierarchy,
   CompiledHierarchyEntry,
   CompiledObjectEvidence,
+  CompiledHierarchyRef,
   CompiledPropertiesRef,
   CompiledSpatialIndexRef,
   CompiledTargetChunk,
