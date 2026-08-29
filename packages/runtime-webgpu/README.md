@@ -71,6 +71,17 @@ Direct WebGPU rendering and the Phase 1 compiled glTF runtime boundary.
   and records 0 uncontrolled outcomes
   ([`artifacts/security/package-fuzz`](../../artifacts/security/package-fuzz/README.md));
   `package-fuzz-campaign.test.ts` reruns a bounded slice of it in `pnpm test`.
+- `openPackageTransport(documentUrl, policy?)` settles the transfer half of the
+  same policy: an HTTP(S) document URL without credentials, resources held to
+  the document's own origin, `redirect: "error"`, a package resource content
+  type, and byte ceilings applied while the body streams. An embedder chooses
+  its own `limits`, announces further `additionalOrigins` for a package split
+  across hosts, or supplies the `fetch` itself; `defaultPackageTransferLimits`
+  names what it is changing. `transport.describe()` and
+  `PackageTransport.fromDescriptor()` carry a policy of resolved values across
+  a Worker boundary, so a Worker inherits a policy and cannot widen one. A
+  consumer outside the Studio exercises every axis in
+  [`artifacts/security/embedder-overrides`](../../artifacts/security/embedder-overrides/README.md).
 - `compiledSceneTransferables(scene)` lists owned typed-array buffers for a
   zero-copy Worker-to-main-thread transfer.
 - `NaruWebGpuRenderer` uploads those batches and renders surfaces, edges, and an

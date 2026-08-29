@@ -1,0 +1,24 @@
+{
+  "name": "@naru3d/package-embedder",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Headless embedder that opens a compiled NARU package over HTTP under its own transfer policy.",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@naru3d/runtime-webgpu": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "22.20.1"
+  }
+}

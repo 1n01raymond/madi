@@ -1,19 +1,17 @@
 import {
   compiledSceneTransferables,
+  openPackageTransport,
+  PackageTransport,
   prepareCompiledGltfDecoder,
 } from "@naru3d/runtime-webgpu";
 import type {
   GeometryRepresentation,
+  PackageTransportDescriptor,
   PreparedCompiledGltfDecoder,
   ResidencyCost,
 } from "@naru3d/runtime-webgpu";
 
 import { aggregateCoarseScene } from "./coarse-aggregation.js";
-import {
-  defaultPackageTransferLimits,
-  openPackageResponse,
-  readBoundedBody,
-} from "./package-limits.js";
 import { transitSceneForResponse } from "./geometry-transfer.js";
 import type { GeometryTransitScene } from "./geometry-transfer.js";
 import type { GeometryBinarySource, GeometryDocumentSource } from "./scene-source.js";
@@ -23,6 +21,8 @@ export type GeometryWorkerRequest =
       readonly type: "initialize";
       readonly requestId: number;
       readonly source: GeometryDocumentSource;
+      /** Transfer policy the scene loader settled; defaults are used without it. */
+      readonly transport?: PackageTransportDescriptor;
     }
   | {
       readonly type: "decode";
@@ -69,6 +69,7 @@ interface WorkerHost {
 
 const worker = globalThis as unknown as WorkerHost;
 let compiledDecoder: PreparedCompiledGltfDecoder | undefined;
+let packageTransport: PackageTransport | undefined;
 const activeDecodes = new Map<number, AbortController>();
 
 worker.addEventListener("message", (event) => {
@@ -84,6 +85,9 @@ async function handleRequest(
 ): Promise<void> {
   try {
     if (request.type === "initialize") {
+      packageTransport = request.transport
+        ? PackageTransport.fromDescriptor(request.transport)
+        : undefined;
       const text = request.source.kind === "bytes"
         ? new TextDecoder().decode(request.source.bytes)
         : await request.source.file.text();
@@ -130,10 +134,13 @@ async function loadBinary(
   }
 
   // The scene loader already resolved this href against the glTF document and
-  // held it to the package origin; the transport policy is re-applied here
-  // because the Worker fetches on its own.
+  // held it to the package origins; the same policy is re-applied here because
+  // the Worker fetches on its own. Without one -- a local file scene, or a
+  // caller that sent no descriptor -- the reviewed defaults apply.
+  const url = new URL(source.href);
+  const transport = packageTransport ?? openPackageTransport(url);
   const ranged = source.byteOffset !== undefined && source.byteLength !== undefined;
-  const response = await openPackageResponse(new URL(source.href), {
+  const response = await transport.open(url, {
     kind: "binary",
     label: source.href,
     signal,
@@ -145,8 +152,8 @@ async function loadBinary(
   // whole buffer instead is bounded by the single-resource ceiling.
   const limitBytes = response.status === 206 && source.byteLength !== undefined
     ? source.byteLength
-    : defaultPackageTransferLimits.resourceBytes;
-  const bytes = await readBoundedBody(response, limitBytes, source.href);
+    : transport.limits.resourceBytes;
+  const bytes = await transport.read(response, limitBytes, source.href);
   if (!ranged || source.byteOffset === undefined || source.byteLength === undefined) {
     return toArrayBuffer(bytes);
   }

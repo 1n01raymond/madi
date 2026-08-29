@@ -314,7 +314,11 @@ async function loadScene(source: SceneSource): Promise<boolean> {
     document.documentElement.dataset.sceneSource = source.kind;
     const interactions = cancellation;
     pendingCleanup = () => interactions.abort();
-    const geometryDecoder = new GeometryDecoder(loaded.documentSource, interactions.signal);
+    const geometryDecoder = new GeometryDecoder(
+      loaded.documentSource,
+      interactions.signal,
+      loaded.transport,
+    );
     const listenerOptions = { signal: interactions.signal };
     const hierarchyView = new HierarchyListView(hierarchyList, hierarchy.entries, {
       signal: interactions.signal,

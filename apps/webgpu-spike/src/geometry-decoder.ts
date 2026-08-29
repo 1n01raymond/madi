@@ -2,6 +2,7 @@ import type {
   CompiledHierarchy,
   DecodedCompiledScene,
   GeometryRepresentation,
+  PackageTransportDescriptor,
   ResidencyCost,
 } from "@naru3d/runtime-webgpu";
 
@@ -39,7 +40,11 @@ export class GeometryDecoder {
   private hierarchy: CompiledHierarchy | undefined;
   private chunkCosts: ReadonlyMap<string, ResidencyCost> = new Map();
 
-  constructor(source: GeometryDocumentSource, signal: AbortSignal) {
+  constructor(
+    source: GeometryDocumentSource,
+    signal: AbortSignal,
+    transport?: PackageTransportDescriptor,
+  ) {
     this.signal = signal;
     this.worker.addEventListener("message", this.receive);
     this.worker.addEventListener("error", this.failWorker);
@@ -53,7 +58,14 @@ export class GeometryDecoder {
     }
     const transfer = source.kind === "bytes" ? [source.bytes] : [];
     this.initialized = this.request(
-      { type: "initialize", requestId: this.requestId(), source },
+      {
+        type: "initialize",
+        requestId: this.requestId(),
+        source,
+        // The policy the scene loader settled travels with the document, so the
+        // ranges this Worker fetches are held to the same ceilings and origins.
+        ...(transport ? { transport } : {}),
+      },
       transfer,
     ).then((response) => {
       if (response.type !== "initialized") {

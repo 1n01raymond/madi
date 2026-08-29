@@ -174,8 +174,13 @@ streams -- a resource that declares a `Content-Length` is read into exactly
 that many bytes, and one that declares none is cut off at the limit. The
 document's declared resources are also checked against a package-wide byte and
 count budget before the first of them is requested. The defaults are far above
-the largest package this repository compiles and can be lowered by an embedding
-application.
+the largest package this repository compiles. The Studio takes them unchanged:
+it settles one `PackageTransport` per load and carries it through the document,
+both sidecars, the demand index, and every geometry range the Worker fetches,
+passing no overrides of its own. An embedding application chooses its own
+ceilings, announces a second host, or supplies the transfer -- exercised by a
+consumer outside this app in
+[`artifacts/security/embedder-overrides`](../../artifacts/security/embedder-overrides/README.md).
 
 Use **Open local package** to select exactly one NARU-profile `.gltf` and all of
 its external `.bin` and `.json` resources (including the optional

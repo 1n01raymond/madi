@@ -1,6 +1,7 @@
 # ADR-0011: Bound remote compiled packages before parsing or allocating
 
-Status: Proposed
+Status: Accepted
+Accepted: 2026-08-29
 
 ## Context
 
@@ -122,8 +123,10 @@ the declaration rather than an allocation bound, and is set accordingly.
 
 - A host that redirects (for example `http:` to `https:`, or a bucket that
   normalizes a path) stops working until the embedder passes the final URL.
-- Packages split across a CDN origin and a document origin are unsupported
-  until a reviewed allowlist exists; no such package exists in this repository.
+- Packages split across a CDN origin and a document origin are refused by
+  default. An embedder that hosts one announces the second origin through
+  `additionalOrigins`, which is a decision the host states rather than a rule
+  the package can bend; no such package exists in this repository.
 - Ceilings expressed in absolute bytes will need a deliberate revision the
   first time a package legitimately exceeds them, and that revision is a policy
   change requiring evidence, not a silent constant edit.
@@ -151,7 +154,7 @@ the declaration rather than an allocation bound, and is set accordingly.
 
 Focused Vitest coverage over stubbed `fetch` and malformed documents, covering
 each ceiling, each policy branch, and each cleanup path:
-`apps/webgpu-spike/test/package-limits.test.ts` for the transport half (URL
+`packages/runtime-webgpu/test/package-transport.test.ts` for the transport half (URL
 policy, budget arithmetic, request shape, the content-type allowlist, and the
 bounded body reader on its declared-length, dishonest-length, truncated, and
 undeclared-length paths) and `apps/webgpu-spike/test/scene-source.test.ts` for
@@ -185,6 +188,29 @@ reports 102 uncontrolled outcomes in three kinds. `pnpm fuzz:check` re-validates
 the record and `packages/runtime-webgpu/test/package-fuzz-campaign.test.ts`
 reruns a bounded campaign inside `pnpm test`.
 
-This ADR stays Proposed until the embedder-facing override surface is settled
-against a second consumer; nothing in this repository exercises an override
-other than the tests.
+The override surface is now settled against a consumer other than the Studio.
+The transport half moved out of the app and into the published runtime package
+as `PackageTransport` (`packages/runtime-webgpu/src/package-transport.ts`), which
+an embedder opens with three axes -- `limits`, `additionalOrigins`, and a `fetch`
+it performs itself -- and which crosses a Worker boundary as a descriptor of
+resolved values, so a Worker can inherit a policy but never widen one. The
+Studio settles exactly one transport per load and carries it through the
+document, both sidecars, the demand index, and every geometry range; it passes
+no overrides, so every committed record and digest is unchanged.
+
+[`artifacts/security/embedder-overrides`](../../artifacts/security/embedder-overrides/README.md)
+records a second consumer, `tools/package-embedder`, driving that surface over
+real HTTP from two origins: five committed packages open on the reviewed
+defaults -- the regression this ADR needed -- and ten scenarios exercise the
+axes, each refusal carrying the message that names the ceiling responsible.
+Two of them answer questions this ADR left open: a split-host package is
+refused by default and admitted once the embedder announces the second origin,
+and an injected transfer opens a package without a single request reaching
+either server while the ceilings still refuse an oversized declaration.
+`pnpm embedder:check` re-validates the record in the check chain.
+
+That consumer is first-party and was written alongside the surface it
+exercises. It settles the question this gate asked -- whether the policy is
+reachable and sufficient from outside the Studio -- and it does not stand in
+for adoption by an unrelated application, which is the separate
+framework-neutral embedding gate in `docs/PHASE_2.md`.

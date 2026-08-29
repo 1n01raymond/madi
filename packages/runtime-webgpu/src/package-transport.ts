@@ -3,10 +3,15 @@
  *
  * A remote package is untrusted input (SECURITY.md, ADR-0011): its glTF
  * document, its byte-range buffers, and its sidecars all arrive before
- * anything about them has been verified. Every fetch in the Studio goes
- * through this module so one reviewed policy -- same origin, no redirects, an
- * allowed content type, and a byte ceiling enforced while the body streams --
- * decides what the rest of the app is allowed to see.
+ * anything about them has been verified. Every fetch of a package goes through
+ * this module so one reviewed policy -- same origin, no redirects, an allowed
+ * content type, and a byte ceiling enforced while the body streams -- decides
+ * what the rest of the application is allowed to see.
+ *
+ * The policy is loader policy, not package policy, so it ships with the
+ * runtime rather than with any one application: `PackageTransport` is the
+ * surface an embedder configures, and `openPackageTransport` binds one to the
+ * document whose origin its resources are held to.
  */
 
 /** Byte and count ceilings a remote package may not exceed. */
@@ -76,11 +81,20 @@ const allowedContentTypes: Readonly<Record<PackageResourceKind, readonly string[
 };
 
 /**
- * Accepts only an absolute HTTP(S) URL on the document's own origin and
- * without embedded credentials, so a package cannot direct the loader at
- * another host, at a non-HTTP scheme, or at an authenticated endpoint.
+ * Accepts only an absolute HTTP(S) URL on an allowed origin and without
+ * embedded credentials, so a package cannot direct the loader at an
+ * unannounced host, at a non-HTTP scheme, or at an authenticated endpoint.
+ *
+ * `allowedOrigins` defaults to the base URL's own origin. An embedder that
+ * serves one package from more than one host widens it deliberately; the
+ * package itself never gets a say, which is what makes this loader policy.
  */
-export function resolvePackageResourceUrl(uri: string, documentUrl: URL, label: string): URL {
+export function resolvePackageResourceUrl(
+  uri: string,
+  documentUrl: URL,
+  label: string,
+  allowedOrigins?: readonly string[],
+): URL {
   let resolved: URL;
   try {
     resolved = new URL(uri, documentUrl);
@@ -88,12 +102,20 @@ export function resolvePackageResourceUrl(uri: string, documentUrl: URL, label: 
     throw new TypeError(`${label} declares an unusable resource URI.`);
   }
   assertPackageUrl(resolved, label);
-  if (resolved.origin !== documentUrl.origin) {
-    throw new TypeError(
-      `${label} points at ${resolved.origin}; package resources must stay on ${documentUrl.origin}.`,
-    );
-  }
+  assertPackageOrigin(resolved, allowedOrigins ?? [documentUrl.origin], label);
   return resolved;
+}
+
+/** Holds a resolved URL to the origins the embedder announced. */
+export function assertPackageOrigin(
+  url: URL,
+  allowedOrigins: readonly string[],
+  label: string,
+): void {
+  if (allowedOrigins.includes(url.origin)) return;
+  throw new TypeError(
+    `${label} points at ${url.origin}; package resources must stay on ${allowedOrigins.join(", ")}.`,
+  );
 }
 
 export function assertPackageUrl(url: URL, label: string): void {
@@ -156,6 +178,14 @@ function assertDeclaredLength(value: number, label: string): number {
   return value;
 }
 
+/**
+ * The fetch a transport issues. An embedder replaces it to add its own
+ * credentials, to route through a proxy, or to serve a package from a local
+ * store; the policy below still applies to whatever it returns, so a
+ * replacement can narrow what is reachable but never widen what is accepted.
+ */
+export type PackageFetch = (url: URL, init: RequestInit) => Promise<Response>;
+
 export interface PackageResponseRequest {
   readonly kind: PackageResourceKind;
   /** Names the resource in every diagnostic this module raises. */
@@ -163,6 +193,10 @@ export interface PackageResponseRequest {
   readonly signal?: AbortSignal;
   /** Requests exactly this range; the caller validates the Content-Range. */
   readonly range?: { readonly byteOffset: number; readonly byteLength: number };
+  /** Origins the URL may be on. Defaults to the URL's own, i.e. no check. */
+  readonly allowedOrigins?: readonly string[];
+  /** Replaces the global fetch for this request. */
+  readonly fetch?: PackageFetch;
 }
 
 /**
@@ -176,7 +210,11 @@ export async function openPackageResponse(
   request: PackageResponseRequest,
 ): Promise<Response> {
   assertPackageUrl(url, request.label);
-  const response = await fetch(url, {
+  if (request.allowedOrigins) {
+    assertPackageOrigin(url, request.allowedOrigins, request.label);
+  }
+  const transfer = request.fetch ?? ((target, init) => fetch(target, init));
+  const response = await transfer(url, {
     cache: "no-store",
     redirect: "error",
     ...(request.signal ? { signal: request.signal } : {}),
@@ -328,4 +366,145 @@ export async function packageResourceDigest(bytes: Uint8Array): Promise<string> 
   return [...new Uint8Array(digest)]
     .map((value) => value.toString(16).padStart(2, "0"))
     .join("");
+}
+
+/**
+ * Everything an embedder may change about how one package is transferred.
+ *
+ * Each field widens or narrows a decision the loader would otherwise make
+ * alone, and none of them can be set by the package: limits are ceilings,
+ * `additionalOrigins` is the announcement that a package is split across
+ * hosts, and `fetch` is the transfer itself. The reviewed defaults apply to
+ * every field left out.
+ */
+export interface PackageTransportPolicy {
+  readonly limits?: PackageTransferLimitOverrides;
+  /**
+   * Origins besides the document's own that its resources may be served from.
+   * Compiled packages are written with relative URIs, so this matters only for
+   * an embedder that republishes one resource elsewhere -- a CDN for the
+   * geometry buffer, for instance -- and it is stated by the embedder rather
+   * than discovered from the document.
+   */
+  readonly additionalOrigins?: readonly string[];
+  readonly fetch?: PackageFetch;
+}
+
+/**
+ * A resolved policy in structured-cloneable form.
+ *
+ * A Worker that fetches ranges on its own needs the same ceilings and the same
+ * origin set as the thread that opened the package; a function cannot cross
+ * that boundary, so the origins are resolved here and the replacement fetch is
+ * re-supplied on the other side. Sending resolved values rather than overrides
+ * means a Worker can only inherit a policy, never widen one.
+ */
+export interface PackageTransportDescriptor {
+  readonly documentUrl: string;
+  readonly limits: PackageTransferLimits;
+  readonly origins: readonly string[];
+}
+
+/**
+ * One package's transfer policy, bound to the document its resources are
+ * resolved against.
+ *
+ * Every method is the corresponding free function with this policy applied, so
+ * an embedder configures the transport once and hands it to whatever loads the
+ * package instead of repeating the policy at each call site.
+ */
+export class PackageTransport {
+  readonly documentUrl: URL;
+  readonly limits: PackageTransferLimits;
+  /** Every origin this package's resources may be fetched from. */
+  readonly origins: readonly string[];
+  readonly #fetch: PackageFetch | undefined;
+
+  constructor(documentUrl: URL | string, policy: PackageTransportPolicy = {}) {
+    const url = documentUrl instanceof URL ? documentUrl : new URL(documentUrl);
+    assertPackageUrl(url, "The compiled package document URL");
+    this.documentUrl = url;
+    this.limits = resolvePackageTransferLimits(policy.limits);
+    this.origins = Object.freeze([
+      url.origin,
+      ...(policy.additionalOrigins ?? []).filter((origin) => origin !== url.origin),
+    ]);
+    this.#fetch = policy.fetch;
+  }
+
+  /** Rebuilds a transport on the far side of a Worker boundary. */
+  static fromDescriptor(
+    descriptor: PackageTransportDescriptor,
+    policy: Pick<PackageTransportPolicy, "fetch"> = {},
+  ): PackageTransport {
+    return new PackageTransport(descriptor.documentUrl, {
+      limits: descriptor.limits,
+      additionalOrigins: descriptor.origins,
+      ...(policy.fetch ? { fetch: policy.fetch } : {}),
+    });
+  }
+
+  describe(): PackageTransportDescriptor {
+    return {
+      documentUrl: this.documentUrl.href,
+      limits: this.limits,
+      origins: [...this.origins],
+    };
+  }
+
+  /** Resolves a declared URI against the document and holds it to the policy. */
+  resolveResourceUrl(uri: string, baseUrl: URL = this.documentUrl, label = uri): URL {
+    return resolvePackageResourceUrl(uri, baseUrl, label, this.origins);
+  }
+
+  assertBudget(
+    documentByteLength: number,
+    resources: readonly DeclaredPackageResource[],
+  ): void {
+    assertPackageBudget(documentByteLength, resources, this.limits);
+  }
+
+  /**
+   * The ceiling one resource is read against: its own declared length when the
+   * package states one, so a resource is never allowed to grow past what it
+   * promised, and the single-resource ceiling otherwise.
+   */
+  resourceLimit(declaredByteLength?: number): number {
+    return declaredByteLength === undefined
+      ? this.limits.resourceBytes
+      : Math.min(declaredByteLength, this.limits.resourceBytes);
+  }
+
+  open(url: URL, request: PackageResponseRequest): Promise<Response> {
+    return openPackageResponse(url, this.#applied(request));
+  }
+
+  read(response: Response, limitBytes: number, label: string): Promise<Uint8Array> {
+    return readBoundedBody(response, limitBytes, label);
+  }
+
+  fetchResource(
+    url: URL,
+    request: PackageResponseRequest & { readonly limitBytes: number },
+  ): Promise<Uint8Array> {
+    return fetchPackageResource(url, { ...this.#applied(request), limitBytes: request.limitBytes });
+  }
+
+  /** A caller may narrow a request, so an explicit field wins over the policy. */
+  #applied(request: PackageResponseRequest): PackageResponseRequest {
+    const transfer = request.fetch ?? this.#fetch;
+    return {
+      ...request,
+      allowedOrigins: request.allowedOrigins ?? this.origins,
+      ...(transfer ? { fetch: transfer } : {}),
+    };
+  }
+}
+
+/** Opens a transfer policy for the package the given document belongs to. */
+export function openPackageTransport(
+  documentUrl: URL | string,
+  policy?: PackageTransportPolicy,
+): PackageTransport {
+  return new PackageTransport(documentUrl, policy);
 }
