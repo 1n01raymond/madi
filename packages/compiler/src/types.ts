@@ -1,5 +1,8 @@
 import type { ValidationResult } from "@naru3d/scene-ir";
 
+// Type-only, so the payload modules that import this one keep no runtime cycle.
+import type { CompiledPayloadCacheReport } from "./compiled-payload-cache.js";
+import type { CompiledPayloadSource } from "./compiled-payload.js";
 import type { StreamedJsonDocument } from "./json-document.js";
 
 export const experimentalGltfProfile = "madi.experimental.gltf.1";
@@ -151,6 +154,13 @@ export interface CompilerBuildReport {
     readonly prototypeId: string;
     readonly occurrenceCount: number;
   }[];
+  /**
+   * Execution-path telemetry, emitted only when a payload source was supplied.
+   * It says what the store did, not what the package contains, so comparing two
+   * packages for output identity excludes it by name -- the same exclusion the
+   * adapter report's `documentArtifactCache` block carries.
+   */
+  readonly compiledPayloadCache?: CompiledPayloadCacheReport;
   readonly diagnostics: {
     readonly counts: Readonly<Record<"info" | "warning" | "error", number>>;
     readonly codes: readonly string[];
@@ -241,6 +251,11 @@ export interface CompileGltfOptions {
   readonly relocateHierarchyNodes?: boolean;
   readonly hierarchyUri?: string;
   readonly hierarchyBinaryUri?: string;
+  /**
+   * Where prototype payloads come from. Without one the packager encodes every
+   * prototype itself; a content-addressed store is supplied here.
+   */
+  readonly payloadSource?: CompiledPayloadSource;
 }
 
 export interface PackageValidationIssue {

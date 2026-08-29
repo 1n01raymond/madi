@@ -1,6 +1,9 @@
 import { createHash } from "node:crypto";
 
-import type { MaterialId, Representation } from "@naru3d/scene-ir";
+import type { MaterialId, PrototypeId, Representation } from "@naru3d/scene-ir";
+
+// Type-only: the cache imports this module, so no runtime cycle is created.
+import type { CompiledPayloadCacheReport } from "./compiled-payload-cache.js";
 
 import { encodeFloat32, encodeUint32, encodeUint8, scaledPositionBounds } from "./binary.js";
 import type { GltfBinaryBuilder } from "./binary.js";
@@ -48,6 +51,24 @@ export interface CompiledPayload {
   readonly shape: CompiledPayloadShape;
   readonly triangles: number;
   readonly edges: number;
+}
+
+/**
+ * Where the packager gets a prototype's payload.
+ *
+ * Without a source the packager calls `buildCompiledPayload` itself; a source
+ * may hand back a stored payload instead. The prototype id travels with the
+ * request so a source can report per prototype -- the only identifier a cache
+ * report is allowed to name, never a source path or a property value.
+ */
+export interface CompiledPayloadSource {
+  payloadFor(
+    prototypeId: PrototypeId,
+    representation: Representation,
+    scaleToMeters: number,
+  ): CompiledPayload;
+  /** Optional execution-path telemetry, embedded in the build report. */
+  report?(): CompiledPayloadCacheReport;
 }
 
 export interface PlacedPayloadSurfaceGroup {

@@ -65,7 +65,7 @@ much in risk and effort for a raw item count to be meaningful.
 | Per-document IFC extraction reuse | **Implemented** with [deterministic verified-artifact tests](../native/adapter-ifc/tests/test_document_artifact_cache.py) and [clean adapter-merge equivalence](../native/adapter-ifc/tests/test_document_artifact_integration.py) | Measure real-large artifact size, restore time, and peak memory |
 | Real-large document serialization | **Recorded** under accepted [ADR-0016](adr/0016-streamed-gltf-document.md): the compiler emits `scene.gltf` as a stream of bounded chunks instead of building it as one string, so the [sixty5 record](../artifacts/cache/sixty5/README.md) now compiles the default pretty-printed federation document at 545,470,166 B - 8,599,278 B past the runtime's 536,870,888-byte maximum string length - while the compact package stays byte-identical over fifteen samples; [differential tests](../packages/compiler/test/json-stream.test.ts) compare every chunk against `JSON.stringify` | Give the report, property, and dependency documents the same bounded treatment before any of them approaches the same limit |
 | Assembly-tree transport | **Recorded** under accepted [ADR-0017](adr/0017-relocated-hierarchy-sidecar.md): `--relocate-hierarchy-nodes` moves mesh-less nodes into a `naru.package-hierarchy.1` sidecar, taking the engineering baseline's document from 405,570,167 to 317,466,183 B (-21.72%) and the whole package down 2.72% once the 64,825,238 B sidecar is charged against it ([record](../artifacts/compiler/hierarchy-relocation/README.md)); a Digital Hub round trip returns 13,681 entries and 5,152 world transforms with 0 mismatches. Paired sixty5 packages in a headed browser then measured what the smaller document buys: first coarse frame 4,408 -> 3,703 ms (-15.99%), peak JS heap -20.30%, sidecar fetched once per run ahead of the coarse payload, identical endpoint over 17 counters ([record](../artifacts/ifc/relocated-hierarchy-browser/README.md)) | Flip the default in its own slice, together with promoting `naru.package-hierarchy.1` out of `experimental-not-interchange` and the package re-digests that forces |
-| Content-addressed compiled payloads | **Pending** | Define immutable prototype/target/coarse/spatial/property ownership, then prove a one-discipline rebuild reproduces every clean-package byte |
+| Content-addressed compiled payloads | **Implemented, off by default** under proposed [ADR-0018](adr/0018-content-addressed-compiled-payloads.md): `--payload-cache <directory>` restores or builds one prototype payload at a time, publishes what it built, warns and rebuilds on a corrupt entry, and reports hits, misses, and degraded prototypes in `build-report.json`; [storage](../packages/compiler/test/compiled-payload-store.test.ts) and [orchestration tests](../packages/compiler/test/compiled-payload-cache.test.ts) pin identical package bytes across cold, warm, layout-changed, and corrupt-entry compiles | Record the acceptance evidence: a one-discipline rebuild that reproduces every clean-package byte, and a measured packaging saving that beats the store's own verification cost |
 | Import lifecycle | **Pending** | A typed progress/cancellation contract must stop child processes, clean unpublished output, and retain prior valid cache entries |
 | Progressive cold-import preview | **Pending** | Publish hierarchy/search and a recognizable coarse package within 5–15 s while the full import continues |
 | Shared compiled cache | **Pending** and intentionally later | Require verified local immutable payloads plus authorization, tenant isolation, provenance, quota, and observability contracts first |
@@ -122,20 +122,23 @@ a small share of the browser's working set.
 1. Establish the Phase 2 milestone, labels, issue forms, and a small reviewed
    ready queue. This tracker owns outcomes; issues own independently assignable
    work with acceptance criteria.
-2. Finish the content-addressed payload store that
-   [ADR-0018](adr/0018-content-addressed-compiled-payloads.md) specifies,
-   without accepting ADR-0010 or ADR-0018 yet. The storage half has landed:
+2. Record the acceptance evidence
+   [ADR-0018](adr/0018-content-addressed-compiled-payloads.md) demands, so it
+   and [ADR-0010](adr/0010-ifc-incremental-dependency-index.md) can leave
+   Proposed. The store itself is complete and off by default:
    `buildCompiledPayload` is the compiler's only geometry encoder,
    `appendGeometry` is that build followed by `appendCompiledPayload` (Digital
-   Hub still reproduces its recorded package digest), and
+   Hub still reproduces its recorded package digest),
    `naru.compiled-payload-entry.1` entries publish atomically and restore only
-   after the key is reproduced from the manifest and every byte verified. No
-   compile path calls the store yet. What remains is selection and
-   orchestration -- deciding per prototype whether to restore or build,
-   publishing what was built, warning and rebuilding on a corrupt entry, and
-   reporting hits, misses, and rebuild reasons -- together with the acceptance
-   evidence: clean-package resource equivalence plus a measured packaging
-   saving that beats the store's own verification cost.
+   after the key is reproduced from the manifest and every byte verified, and
+   `--payload-cache <directory>` on both compilers decides per prototype
+   whether to restore or build, publishes what it built, warns and rebuilds on
+   a corrupt entry, and reports hits, misses, publications, and degraded
+   prototypes in `build-report.json`. Unit-scale byte identity across cold,
+   warm, and corrupt-entry compiles is covered by tests. What remains is the
+   record: clean-package resource equivalence with a changed discipline, and a
+   measured packaging saving that beats the store's own verification cost at
+   real-large scale without raising peak memory above a clean build's.
 
 ### Next — finish the user-visible import loop and bounded fidelity
 
@@ -194,6 +197,7 @@ debt.
 | Cross-browser localized demand | Repeated Firefox or another non-Blink real-model localized trace with request order, query p50/p95, residency, and console results | ADR-0008 acceptance |
 | Spatial precision cross-check | Nested-transform spatial bounds on the accepted ADR-0005 10,000 km fixture with no false negatives | ADR-0008 acceptance |
 | Node-field elision at engineering scale | Re-record `artifacts/ifc/engineering-baseline/` on the host that produced it, with `--elide-derived-identifiers` and `--omit-default-node-transforms` declared, so the option pair is proven on the same package the qualification pins; the levers are measured on this Windows host, whose IFC split differs from that record's by a few bytes | ADR-0015 acceptance |
+| Content-addressed payload reuse at scale | A changed-discipline rebuild whose every package resource matches a clean compile byte for byte, plus cold and warm packaging time, store footprint, and peak memory on Digital Hub and one real-large model | ADR-0010 and ADR-0018 acceptance; the store is implemented and tested at unit scale, but no record measures whether reuse beats its own verification cost |
 | Current-toolchain large packages | Re-record Digital Hub and sixty5 with the current split.4 explicit-edge toolchain and synchronize the deployed package digest | Current-schema real-model claims |
 | Renderer reference-hardware matrix | Repeat the existing harness on more disclosed discrete/integrated profiles with explicit edges and bounded residency | Hardware/browser portion of ADR-0003 acceptance or revision |
 

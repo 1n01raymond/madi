@@ -33,6 +33,7 @@ IFC options:
   --retain-scene-ir              Keep the split intermediate pair under output
 
 General options:
+  --payload-cache <directory>    Reuse verified per-prototype geometry payloads
   --spatial-index                Emit the optional occurrence demand BVH
   --spatial-leaf-capacity <n>    Maximum occurrences per BVH leaf (default: 64)
   --relocate-hierarchy-nodes     Move mesh-less nodes into a hierarchy sidecar
@@ -45,6 +46,7 @@ export interface CompileArguments {
   readonly linearTolerance?: number;
   readonly angularTolerance?: number;
   readonly cacheDirectory?: string;
+  readonly payloadCacheDirectory?: string;
   readonly spatialIndex: boolean;
   readonly spatialLeafCapacity?: number;
   readonly relocateHierarchyNodes: boolean;
@@ -61,6 +63,7 @@ export interface IfcCompileArguments {
   readonly threads?: number;
   readonly targetChunkByteBudget?: number;
   readonly cacheDirectory?: string;
+  readonly payloadCacheDirectory?: string;
   readonly spatialIndex: boolean;
   readonly spatialLeafCapacity?: number;
   readonly spatialPayloadOrder: boolean;
@@ -76,6 +79,7 @@ const sharedOptions = {
   output: { type: "string" },
   python: { type: "string" },
   cache: { type: "string" },
+  "payload-cache": { type: "string" },
   "spatial-index": { type: "boolean" },
   "spatial-leaf-capacity": { type: "string" },
   "relocate-hierarchy-nodes": { type: "boolean" },
@@ -202,6 +206,7 @@ export function parseCompileArguments(argumentList: readonly string[]): CompileA
 
   const pythonExecutable = requireValue(values.python, "python");
   const cacheDirectory = requireValue(values.cache, "cache");
+  const payloadCacheDirectory = requireValue(values["payload-cache"], "payload-cache");
   const linearTolerance = numericOption(values["linear-tolerance"], "linear-tolerance");
   const angularTolerance = numericOption(values["angular-tolerance"], "angular-tolerance");
   const spatialIndex = values["spatial-index"] ?? false;
@@ -218,6 +223,7 @@ export function parseCompileArguments(argumentList: readonly string[]): CompileA
     ...(linearTolerance === undefined ? {} : { linearTolerance }),
     ...(angularTolerance === undefined ? {} : { angularTolerance }),
     ...(cacheDirectory ? { cacheDirectory } : {}),
+    ...(payloadCacheDirectory ? { payloadCacheDirectory } : {}),
     spatialIndex,
     ...(spatialLeafCapacity === undefined ? {} : { spatialLeafCapacity }),
     relocateHierarchyNodes: values["relocate-hierarchy-nodes"] ?? false,
@@ -259,6 +265,7 @@ export function parseIfcCompileArguments(
 
   const pythonExecutable = requireValue(values.python, "python");
   const cacheDirectory = requireValue(values.cache, "cache");
+  const payloadCacheDirectory = requireValue(values["payload-cache"], "payload-cache");
   const threads = integerOption(values.threads, "threads");
   const targetChunkKib = integerOption(values["target-chunk-kib"], "target-chunk-kib");
   const spatialIndex = values["spatial-index"] ?? false;
@@ -283,6 +290,7 @@ export function parseIfcCompileArguments(
     ...(threads === undefined ? {} : { threads }),
     ...(targetChunkKib === undefined ? {} : { targetChunkByteBudget: targetChunkKib * 1024 }),
     ...(cacheDirectory ? { cacheDirectory } : {}),
+    ...(payloadCacheDirectory ? { payloadCacheDirectory } : {}),
     spatialIndex,
     ...(spatialLeafCapacity === undefined ? {} : { spatialLeafCapacity }),
     spatialPayloadOrder,

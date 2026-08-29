@@ -143,11 +143,11 @@ artifacts under the selected cache: unchanged disciplines skip IfcOpenShell
 parsing and tessellation, while changed, renamed, or corrupt identities miss.
 An actual two-discipline fixture proves cold/warm and one-document-changed merge
 bytes equal a clean adapter build. Federation-wide target/coarse/spatial/property
-payloads are still rebuilt as a whole; content-addressed compiled payloads and
-complete-package equivalence remain before any old byte range is reused.
+payloads are still laid out as a whole; the payload tier below reuses encoded
+prototype bytes, not byte ranges, so complete-package equivalence remains before
+any old range is reused.
 
-The payload contract's **storage half is implemented; no compile reads or
-writes it yet**.
+The payload contract is **implemented, off by default**.
 [ADR-0018](adr/0018-content-addressed-compiled-payloads.md) content-addresses
 one unit only, the prototype payload -- the accessor bytes and placement-free
 accessor metadata `appendGeometry` produces -- and rebuilds every other package
@@ -181,15 +181,46 @@ manifest's own input record, recomputes each accessor's byte length from its
 element type and count, requires the accessors to cover `payload.bin` exactly,
 and verifies the byte count and SHA-256 before returning anything. The storage
 primitive throws on any mismatch, exactly as the whole-package cache does; the
-warn-and-rebuild fallback belongs to the compile paths that will call it.
+warn-and-rebuild fallback belongs to the compile paths that call it.
 Digital Hub still compiles to the `digital-hub` baseline digest recorded in
 [artifacts/compiler/node-field-elision](../artifacts/compiler/node-field-elision/README.md),
 so the encoder split moved no bytes.
 
-Selection and orchestration -- deciding per prototype whether to restore or
-build, publishing what was built, and reporting hits, misses, and rebuild
-reasons -- are the next increment, and ADR-0018's acceptance evidence belongs
-with it. ADR-0010 and ADR-0018 both stay Proposed until it passes.
+Selection sits on top of that store. `naru compile` and `naru compile-ifc` take
+`--payload-cache <directory>`; without it nothing is read or written, which is
+why no committed package digest moved when the tier landed. With it,
+`CompiledPayloadCache` decides one prototype at a time inside the packaging
+loop: derive the key, restore a verified payload if the store holds one,
+otherwise build the payload and publish it. The read is synchronous so exactly
+one payload is live at a time -- an asynchronous pre-pass would hold them all,
+and ADR-0018 requires peak memory no higher than a clean build's.
+
+This tier is orthogonal to the whole-package cache. A payload hit still runs the
+adapter and still re-lays out every federation-global resource; only the encoded
+prototype bytes are reused. That is deliberate, and a compiler test pins it by
+counting adapter invocations across a two-run compile.
+
+Both degradations keep the compile working. A stored entry that fails
+verification is a miss: the compiler warns, rebuilds that payload, and finishes
+the package with identical bytes. A publish that fails -- a read-only store, a
+full disk, an entry already corrupt under the same key -- warns and keeps the
+compiled output, because a store that cannot be written to must not turn a
+successful compile into an error. Republishing over a corrupt entry is refused
+rather than papered over, so the entry stays visibly broken.
+
+`build-report.json` gains a `compiledPayloadCache` block whenever the store is
+in use: schema, prototype count, hits, misses, publications, a count per
+outcome, publish failures, and up to sixteen named degraded prototypes. It names
+prototype ids only -- a source path or property value would put engineering data
+in a build report -- and it is execution-path telemetry, so comparing two
+packages for output identity excludes it by name, as
+`adapter-report.json:documentArtifactCache` already is. The CLI prints the same
+summary beside the package-cache line.
+
+What ADR-0018 still owes is acceptance evidence: clean-package resource
+equivalence across a changed discipline, and a measured packaging saving that
+beats the store's own verification cost at real-large scale. ADR-0010 and
+ADR-0018 both stay Proposed until that record exists.
 
 Shared lookup reuses the same manifest and resource hashes. The resolution
 order is local verified entry, authorized shared entry, then local compilation.

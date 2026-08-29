@@ -11,6 +11,59 @@ const sceneTemplatePath = fileURLToPath(
   new URL("../../../artifacts/occt/repeated-fasteners.scene.json", import.meta.url),
 );
 
+/**
+ * A stand-in adapter that counts its own invocations, so a test can tell a
+ * restored package from a re-extracted one.
+ */
+async function writeCountingAdapter(
+  adapterPath: string,
+  counterPath: string,
+): Promise<void> {
+  await writeFile(
+    adapterPath,
+        `import { createHash } from "node:crypto";
+import { basename } from "node:path";
+import { readFile, writeFile } from "node:fs/promises";
+const args = process.argv.slice(2);
+if (args.includes("--identity")) {
+  console.log(JSON.stringify({
+    schemaVersion: "naru.occt-adapter-identity.1",
+    name: "test-occt-adapter",
+    version: "1.0.0",
+    fingerprint: "1".repeat(64),
+  }));
+  process.exit(0);
+}
+const sourcePath = args[0];
+const option = (name) => args[args.indexOf(name) + 1];
+const count = Number(await readFile(${JSON.stringify(counterPath)}, "utf8"));
+await writeFile(${JSON.stringify(counterPath)}, String(count + 1));
+const source = await readFile(sourcePath);
+const digest = createHash("sha256").update(source).digest("hex");
+const scene = JSON.parse(await readFile(${JSON.stringify(sceneTemplatePath)}, "utf8"));
+scene.revision.sourceDigest = "sha256:" + digest;
+scene.documents = scene.documents.map((document) => ({
+  ...document,
+  uriHint: option("--uri-hint"),
+  displayName: basename(sourcePath),
+  formatVersion: "AP242",
+  sourceDigest: "sha256:" + digest,
+}));
+await writeFile(option("--scene"), JSON.stringify(scene));
+await writeFile(option("--report"), JSON.stringify({
+  schemaVersion: "test-adapter.1",
+  source: {
+    path: option("--uri-hint"),
+    sha256: digest,
+    format: "STEP AP242",
+    schemaIdentifiers: ["AP242_MANAGED_MODEL_BASED_3D_ENGINEERING_MIM_LF"],
+  },
+}));
+`,
+    "utf8",
+  );
+}
+
 describe("direct STEP compiler orchestration", () => {
   it("passes a local AP242 file through an adapter and writes a validated package", async () => {
     const temporaryDirectory = await mkdtemp(join(tmpdir(), "naru-step-test-"));
@@ -160,49 +213,7 @@ await writeFile(option("--report"), JSON.stringify({
         "utf8",
       );
       await writeFile(counterPath, "0", "utf8");
-      await writeFile(
-        adapterPath,
-        `import { createHash } from "node:crypto";
-import { basename } from "node:path";
-import { readFile, writeFile } from "node:fs/promises";
-const args = process.argv.slice(2);
-if (args.includes("--identity")) {
-  console.log(JSON.stringify({
-    schemaVersion: "naru.occt-adapter-identity.1",
-    name: "test-occt-adapter",
-    version: "1.0.0",
-    fingerprint: "1".repeat(64),
-  }));
-  process.exit(0);
-}
-const sourcePath = args[0];
-const option = (name) => args[args.indexOf(name) + 1];
-const count = Number(await readFile(${JSON.stringify(counterPath)}, "utf8"));
-await writeFile(${JSON.stringify(counterPath)}, String(count + 1));
-const source = await readFile(sourcePath);
-const digest = createHash("sha256").update(source).digest("hex");
-const scene = JSON.parse(await readFile(${JSON.stringify(sceneTemplatePath)}, "utf8"));
-scene.revision.sourceDigest = "sha256:" + digest;
-scene.documents = scene.documents.map((document) => ({
-  ...document,
-  uriHint: option("--uri-hint"),
-  displayName: basename(sourcePath),
-  formatVersion: "AP242",
-  sourceDigest: "sha256:" + digest,
-}));
-await writeFile(option("--scene"), JSON.stringify(scene));
-await writeFile(option("--report"), JSON.stringify({
-  schemaVersion: "test-adapter.1",
-  source: {
-    path: option("--uri-hint"),
-    sha256: digest,
-    format: "STEP AP242",
-    schemaIdentifiers: ["AP242_MANAGED_MODEL_BASED_3D_ENGINEERING_MIM_LF"],
-  },
-}));
-`,
-        "utf8",
-      );
+      await writeCountingAdapter(adapterPath, counterPath);
 
       const first = await compileStepFile({
         sourcePath,
@@ -258,6 +269,51 @@ await writeFile(option("--report"), JSON.stringify({
       } finally {
         warnSpy.mockRestore();
       }
+    } finally {
+      await rm(temporaryDirectory, { recursive: true, force: true });
+    }
+  });
+  it("reuses prototype payloads across a compile that still re-extracts", async () => {
+    const temporaryDirectory = await mkdtemp(join(tmpdir(), "naru-step-payload-test-"));
+    try {
+      const sourcePath = join(temporaryDirectory, "assembly.step");
+      const adapterPath = join(temporaryDirectory, "payload-adapter.mjs");
+      const counterPath = join(temporaryDirectory, "adapter-count.txt");
+      const payloadCacheDirectory = join(temporaryDirectory, "payloads");
+      await writeFile(
+        sourcePath,
+        "ISO-10303-21;\nHEADER;\nFILE_SCHEMA(('AP242_MANAGED_MODEL_BASED_3D_ENGINEERING_MIM_LF'));\nENDSEC;\nDATA;\nENDSEC;\nEND-ISO-10303-21;\n",
+        "utf8",
+      );
+      await writeFile(counterPath, "0", "utf8");
+      await writeCountingAdapter(adapterPath, counterPath);
+
+      const compile = (outputDirectory: string) =>
+        compileStepFile({
+          sourcePath,
+          outputDirectory,
+          payloadCacheDirectory,
+          pythonExecutable: process.execPath,
+          adapterScriptPath: adapterPath,
+        });
+      const cold = await compile(join(temporaryDirectory, "compiled-cold"));
+      const warm = await compile(join(temporaryDirectory, "compiled-warm"));
+
+      // The payload store is not the package cache: extraction still runs, and
+      // only the per-prototype geometry encoding is reused.
+      expect(await readFile(counterPath, "utf8")).toBe("2");
+      expect(cold.cache).toEqual({ status: "disabled" });
+      const prototypes = cold.report.counts.compiledPrototypeCount;
+      expect(cold.report.compiledPayloadCache).toMatchObject({
+        prototypes,
+        hits: 0,
+        published: prototypes,
+      });
+      expect(warm.report.compiledPayloadCache).toMatchObject({ prototypes, hits: prototypes });
+      expect(warm.report.output.packageDigest).toBe(cold.report.output.packageDigest);
+      await expect(
+        readFile(join(temporaryDirectory, "compiled-warm", "scene.bin")),
+      ).resolves.toEqual(await readFile(join(temporaryDirectory, "compiled-cold", "scene.bin")));
     } finally {
       await rm(temporaryDirectory, { recursive: true, force: true });
     }
