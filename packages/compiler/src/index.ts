@@ -1,4 +1,8 @@
 export { compileSceneToGltf } from "./gltf.js";
+export { measureJsonDocument } from "./json-document.js";
+export type { JsonByteSink, StreamedJsonDocument } from "./json-document.js";
+export { streamJsonInto, streamJsonToString } from "./json-stream.js";
+export type { JsonChunkSink, StreamJsonOptions } from "./json-stream.js";
 export {
   compiledCacheEntrySchema,
   createCompiledCacheKey,

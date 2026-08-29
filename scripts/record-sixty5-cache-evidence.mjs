@@ -10,6 +10,7 @@
  * decision below is fixed here, before any timing is read, so that a slow run
  * cannot be reinterpreted after the fact.
  */
+import { constants } from "node:buffer";
 import { createHash } from "node:crypto";
 import { mkdir, readFile, readdir, rm, writeFile } from "node:fs/promises";
 import { availableParallelism, cpus, totalmem } from "node:os";
@@ -85,7 +86,7 @@ const protocol = {
     "The sampler itself runs one PowerShell process for the whole session and is not excluded from the host's load.",
   ],
   gltfFormatting:
-    "Every sample compiles with compactJson: true. The compiler's default pretty-printed document exceeds V8's maximum string length for this federation now that explicit boundary edges are always emitted, so the default cannot produce a package here at all; defaultFormattingProbe records that failure from a run taken before the samples.",
+    "Every sample compiles with compactJson: true, which is what the committed sixty5 packages were compiled with, so the digests here stay comparable to them. The default pretty-printed document for this federation is larger than the runtime's maximum string length, which is why the compiler writes it as a stream instead of building it as one string (ADR-0016); defaultFormattingProbe compiles that default once, before the samples, and reports what it produced.",
   unchangedReopenTargetMs: { minimum: 1_000, maximum: 5_000 },
   reportComparison: {
     byteIdenticalResources: "Every file a sample writes except adapter-report.json.",
@@ -285,8 +286,9 @@ async function takeSample(phase, index, prepare) {
   throw new TypeError(`${phase} sample ${index} never produced a valid run.`);
 }
 
-// Taken first, from an empty cache, so the record states in measured terms why
-// the samples do not use the compiler's default glTF formatting.
+// Taken first, from an empty cache, so the record states in measured terms how
+// the compiler's default glTF formatting behaves on a document larger than the
+// runtime's maximum string length.
 await rm(cacheDirectory, { recursive: true, force: true });
 const probe = await runSample("default-formatting-probe", 1, ["--pretty"]);
 const defaultFormattingProbe = {
@@ -295,8 +297,13 @@ const defaultFormattingProbe = {
   compileMilliseconds: probe.compileMilliseconds,
   processMilliseconds: probe.processMilliseconds,
   peakWorkingSetBytes: probe.memory.peakWorkingSetBytes,
+  // The point of the probe: a pretty-printed document this size cannot exist
+  // as one JavaScript string, so both numbers are recorded side by side.
+  documentBytes: probe.resources?.find(({ path }) => path === "scene.gltf")?.bytes ?? null,
+  maximumStringLength: constants.MAX_STRING_LENGTH,
+  packageDigest: probe.report?.output?.packageDigest ?? null,
   failure: probe.failure ?? null,
-  note: "One run of the same federation with the compiler's default pretty-printed glTF document, taken before the samples. It is reported as measured; a host where it compiles would record outcome: compiled.",
+  note: "One run of the same federation with the compiler's default pretty-printed glTF document, taken before the samples. The document is written as a stream rather than built as one string (ADR-0016), so a result larger than the runtime's maximum string length is expected to compile; a host where it still fails would record outcome: failed with the RangeError.",
 };
 
 let cacheKey;

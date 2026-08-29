@@ -257,16 +257,26 @@ assert(
   "The recorded unchanged reopen no longer meets the 1-5 s target; report the miss, do not weaken this check.",
 );
 
-// A default-formatting compile of this federation cannot produce a package on
-// Node: JSON.stringify exceeds V8's maximum string length. A streaming document
-// writer would make this "compiled" and requires a re-record, not a looser pin.
+// The default-formatting compile taken before the samples. Its pretty-printed
+// document is larger than the runtime's maximum string length, so a package
+// exists here only because the compiler streams the document instead of
+// building it as one string (ADR-0016). A host where this fails again records
+// outcome "failed" with the RangeError and needs a re-record, not a looser pin.
 const probe = evidence.defaultFormattingProbe;
 assert(
-  probe.compactJson === false &&
-    probe.outcome === "failed" &&
-    probe.failure?.name === "RangeError" &&
-    probe.failure.message === "Invalid string length",
+  probe.compactJson === false && probe.outcome === "compiled" && probe.failure === null,
   "The default-formatting probe result changed; re-record rather than restate it.",
+);
+assert(
+  probe.maximumStringLength === 536_870_888 &&
+    probe.documentBytes === 545_470_166 &&
+    probe.documentBytes > probe.maximumStringLength,
+  "The probe no longer demonstrates a document past the maximum string length.",
+);
+assert(
+  probe.packageDigest ===
+    "67675e2aead37e90e1cfb06a1fbc2aea8fb0049bf53ea8d434efe52d54979d55",
+  "The default-formatting package digest changed.",
 );
 
 // This host compiles current main, which emits explicit IFC boundary edges; the
@@ -286,6 +296,10 @@ console.log(
     `-> warm ${seconds(evidence.states.warm.compileMilliseconds.median)} s ` +
     `-> corrupt-entry ${seconds(evidence.states["corrupt-entry"].compileMilliseconds.median)} s ` +
     "(medians of five fresh-process samples each)",
+);
+console.log(
+  `[sixty5-cache] default formatting compiled a ${probe.documentBytes} B document, ` +
+    `${probe.documentBytes - probe.maximumStringLength} B past the maximum string length`,
 );
 console.log(
   `[sixty5-cache] unchanged reopen ${reopen.wholeProcessMedianMs.toFixed(0)} ms whole process ` +

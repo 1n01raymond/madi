@@ -433,13 +433,15 @@ byte-identical. Digital Hub and sixty5 now reproduce lower leaf requested and
 off-view bytes; localized headed traces and shape-preserving LOD remain
 pending.
 
-Pretty-printed `scene.gltf` remains the deterministic default. IFC compilation
-may explicitly pass `--compact-json` (API: `compactJson: true`) when a
-real-large document would exceed V8's single-string limit with insignificant
-whitespace. The build report records `jsonFormatting: "compact"`; parsed glTF
-values, buffer bytes, and accessor semantics are unchanged. The current
-explicit-edge sixty5 record uses this path, while historical package digests
-remain unchanged when the option is absent.
+Pretty-printed `scene.gltf` remains the deterministic default, at every size:
+the compiler writes the document as a stream, so the default formatting is no
+longer bounded by the runtime's maximum string length (see below). IFC
+compilation may still pass `--compact-json` (API: `compactJson: true`) to drop
+insignificant whitespace from a real-large document. The build report records
+`jsonFormatting: "compact"`; parsed glTF values, buffer bytes, and accessor
+semantics are unchanged. The committed explicit-edge sixty5 record uses this
+path so that its digests stay comparable to the packages already recorded,
+while historical package digests remain unchanged when the option is absent.
 
 Large packages may also pass `--omit-resource-names` (API:
 `omitResourceNames: true`) to remove optional diagnostic `name` strings from
@@ -540,6 +542,23 @@ as a compile boundary; only the largest single record must fit one string.
 Chunk-boundary, malformed-record, and error-reporting behavior is unit-checked
 in `packages/compiler/test/ifc-structure-stream.test.ts`, and the reader
 reproduces the Digital Hub package digest byte for byte.
+
+The output document is not held as one string either. `compileSceneToGltf`
+returns `scene.gltf` as a streamed document (`packages/compiler/src/json-stream.ts`
+and `json-document.ts`): the value is walked once to produce the digest and byte
+length the build report declares, feeding the package hash in the same pass, and
+walked again when the packager writes the file, so no step allocates the whole
+document. The chunks concatenate to exactly what `JSON.stringify(document, null,
+indent)` produced before, because strings are escaped by `JSON.stringify` itself,
+finite numbers are formatted with `String`, and keys come from `Object.keys`;
+`packages/compiler/test/json-stream.test.ts` compares the two over compiled
+document shapes, every number form, escape and key-order edge cases, and a
+300-document randomized corpus. The measured effect is that the sixty5
+federation's default pretty-printed document reaches 545,470,166 bytes against
+the runtime's 536,870,888-byte maximum string length and compiles (accepted
+[ADR-0016](adr/0016-streamed-gltf-document.md), recorded in
+`artifacts/cache/sixty5/`), while its compact package stays byte-identical to
+the digest recorded before the change.
 
 The qualified Digital Hub result combines four IFC4 documents into 13,681
 occurrences, including 5,152 renderable products. It preserves 3,383 unique

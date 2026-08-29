@@ -24,6 +24,7 @@ import {
   GltfBinaryBuilder,
   scaledPositionBounds,
 } from "./binary.js";
+import { measureJsonDocument } from "./json-document.js";
 import {
   compilerEvidenceSchema,
   experimentalGltfProfile,
@@ -1394,11 +1395,19 @@ export function compileSceneToGltf(
       },
     },
   };
-  const json = `${JSON.stringify(document, null, options.compactJson === true ? undefined : 2)}\n`;
-  const jsonDigest = sha256(json);
+  const packageHash = createHash("sha256");
+  // Measured and folded into the package digest in the same pass, so the
+  // document is serialized once here and once when the packager writes it,
+  // and is never resident as a whole.
+  const json = measureJsonDocument(
+    document,
+    options.compactJson === true ? 0 : 2,
+    (chunk) => packageHash.update(chunk),
+  );
+  const jsonDigest = json.sha256;
   const binaryDigest = sha256(binary);
   const coarseBinaryDigest = coarseBinary ? sha256(coarseBinary) : undefined;
-  const packageHash = createHash("sha256").update(json).update(binary);
+  packageHash.update(binary);
   if (coarseBinary) packageHash.update(coarseBinary);
   if (spatialIndex) packageHash.update(spatialIndex.bytes);
   if (propertySidecar) {
@@ -1456,7 +1465,7 @@ export function compileSceneToGltf(
         {
           path: "scene.gltf",
           mediaType: "model/gltf+json",
-          bytes: new TextEncoder().encode(json).byteLength,
+          bytes: json.bytes,
           sha256: jsonDigest,
         },
         {
