@@ -104,7 +104,10 @@ paths fetch or require `hierarchy.json` before the tree is read — the URL path
 holds each of its two resources to the single-resource ceiling and the local
 path names the missing file — and the Worker declines the tree outright with
 the `"geometry-only"` option, because it decodes on a thread that never renders
-the panel. Prototype-local surface
+the panel. Reading the tree that way costs one 46 MB fetch and 29 ms of
+hierarchy-ready on the sixty5 federation, and buys a 15.99% faster first frame
+against a 100 MB smaller document
+([record](../../artifacts/ifc/relocated-hierarchy-browser/README.md)). Prototype-local surface
 bounds are cached once and only eight corners are transformed per occurrence,
 rather than rescanning every vertex. IFC compilation coalesces adjacent prototype ranges
 into deterministic requests (512 KiB by default), while the existing

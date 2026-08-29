@@ -177,6 +177,12 @@ package falls 2.72% after the 64,825,238 B sidecar is charged — the tree is
 carried, not deleted. The option is off by default, is part of the
 compiled-cache key, and changes the package digest when it is on. See the
 [relocation record](../../artifacts/compiler/hierarchy-relocation/README.md).
+What the smaller document is worth to a viewer was then measured on paired
+sixty5 packages in a headed browser: first coarse frame 4,408 -> 3,703 ms
+(-15.99%) and peak JS heap -20.30%, with the sidecar fetched once per session
+([browser record](../../artifacts/ifc/relocated-hierarchy-browser/README.md)).
+It stays off by default until `naru.package-hierarchy.1` leaves
+`experimental-not-interchange`.
 
 The committed [engineering-scale qualification
 record](../../artifacts/ifc/engineering-baseline/README.md) uses this option

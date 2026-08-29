@@ -3,10 +3,13 @@
  *
  * `record-spatial-ifc-packing-evidence.mjs` compiles every payload order in a
  * single process, which a federation the size of sixty5 cannot afford: one
- * compile alone peaks near 3 GB. This helper compiles exactly one order per
+ * compile alone peaks near 3 GB. This helper compiles exactly one package per
  * process so a memory-bounded host can still reproduce the packages the
  * localized-trace records were recorded against. It mirrors the options
- * `ifc-federation.ts` uses, plus the ADR-0008 spatial index.
+ * `ifc-federation.ts` uses, plus the ADR-0008 spatial index by default.
+ *
+ * `--no-spatial-index` drops that default, which is what the browser records
+ * compile against, and `--relocate-hierarchy-nodes` adds the ADR-0017 sidecar.
  */
 import { readFile } from "node:fs/promises";
 import { isAbsolute, relative, resolve, sep } from "node:path";
@@ -45,6 +48,13 @@ const payloadOrder = argument("--payload-order", "compatibility");
 if (payloadOrder !== "compatibility" && payloadOrder !== "spatial-leaf-anchor") {
   throw new TypeError("--payload-order must be compatibility or spatial-leaf-anchor.");
 }
+const spatialIndex = !process.argv.includes("--no-spatial-index");
+if (!spatialIndex && payloadOrder !== "compatibility") {
+  throw new TypeError("--payload-order requires the spatial index it orders payloads by.");
+}
+const relocateHierarchyNodes = process.argv.includes("--relocate-hierarchy-nodes");
+const label = `${payloadOrder}${spatialIndex ? "" : " (no spatial index)"}` +
+  `${relocateHierarchyNodes ? " (relocated hierarchy)" : ""}`;
 const targetChunkByteBudget = Number(argument("--target-chunk-bytes", String(512 * 1024)));
 if (!Number.isSafeInteger(targetChunkByteBudget) || targetChunkByteBudget < 4) {
   throw new TypeError("--target-chunk-bytes must be an integer of at least four bytes.");
@@ -63,7 +73,7 @@ const [structure, geometry, properties] = await Promise.all([
   readFile(resolve(inputDirectory, "scene-ir-properties.bin")),
 ]);
 console.log(
-  `[spatial-package] ${payloadOrder}: structure ${structure.byteLength} B ` +
+  `[spatial-package] ${label}: structure ${structure.byteLength} B ` +
     `${structure.sha256.slice(0, 8)}, geometry ${geometry.byteLength} B, ` +
     `properties ${properties.byteLength} B (${seconds(startedAt)} s)`,
 );
@@ -74,19 +84,23 @@ const result = compileSceneToGltf(hydrateIfcSceneSplit(structure.value, geometry
   generator: "MADI compiler 0.0.0 / IfcOpenShell federation slice",
   propertyColumns: properties,
   targetChunkByteBudget,
-  spatialIndex: true,
-  spatialLeafCapacity: leafCapacity,
+  ...(spatialIndex ? { spatialIndex: true, spatialLeafCapacity: leafCapacity } : {}),
   ...(payloadOrder === "spatial-leaf-anchor" ? { spatialPayloadOrder: true } : {}),
+  ...(relocateHierarchyNodes ? { relocateHierarchyNodes: true } : {}),
 });
 console.log(
-  `[spatial-package] ${payloadOrder}: compiled in ${seconds(compiledAt)} s, ` +
-    `${result.report.counts.targetChunkCount} chunks, ` +
-    `spatial.bin ${result.spatialBinary.byteLength} B, ` +
+  `[spatial-package] ${label}: compiled in ${seconds(compiledAt)} s, ` +
+    `${result.report.counts.targetChunkCount} chunks, document ` +
+    `${result.json.bytes} B, ` +
+    (result.spatialBinary ? `spatial.bin ${result.spatialBinary.byteLength} B, ` : "") +
+    (result.hierarchyBinary
+      ? `hierarchy.bin ${result.hierarchyBinary.byteLength} B, `
+      : "") +
     `digest ${result.report.output.packageDigest.slice(0, 12)}`,
 );
 
 await writeCompiledPackage(result, outputDirectory);
 console.log(
-  `[spatial-package] ${payloadOrder}: wrote ${outputDirectory} in ${seconds(startedAt)} s, ` +
+  `[spatial-package] ${label}: wrote ${outputDirectory} in ${seconds(startedAt)} s, ` +
     `peak heap ${getHeapStatistics().peak_malloced_memory} B, rss ${process.memoryUsage().rss} B`,
 );

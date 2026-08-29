@@ -1,0 +1,623 @@
+{
+  "schemaVersion": "naru.relocated-hierarchy-browser.1",
+  "status": "experimental-not-interchange",
+  "mode": "headed-paired-package-first-frame",
+  "recordedAt": "2026-08-29T05:44:42.596Z",
+  "question": "What does moving a federation's assembly tree out of the compiled glTF document (ADR-0017) do to hierarchy-ready, first frame, and peak heap at real-large scale, and what does the sidecar cost to fetch?",
+  "method": {
+    "runsPerArm": 3,
+    "interleaved": true,
+    "freshProcessPerSample": true,
+    "recorder": "scripts/record-ifc-browser-evidence.mjs",
+    "browser": {
+      "id": "chrome",
+      "engine": "Blink",
+      "version": "151.0.7922.139",
+      "headless": false,
+      "viewport": {
+        "width": 1320,
+        "height": 1000
+      }
+    },
+    "host": {
+      "platform": "win32",
+      "architecture": "x64"
+    },
+    "onlyVariable": "scene.bin, coarse.bin, properties.json, and properties.bin are byte-identical between the arms; the arms differ in scene.gltf and the hierarchy sidecar alone."
+  },
+  "arms": [
+    {
+      "id": "in-place",
+      "summary": "assembly tree serialized in scene.gltf, as every committed package is",
+      "sceneDirectory": "output/ifc/sixty5-prb",
+      "buildReport": "artifacts/ifc/sixty5/build-report.json",
+      "samples": [
+        {
+          "runDirectory": "output/relocated-hierarchy-browser/in-place-1",
+          "hierarchyReadyMs": 2254,
+          "coarseFrameMs": 4408,
+          "readyMs": 9774,
+          "usedJsHeapBytes": 831931177,
+          "decodeTime": "1021.8 ms",
+          "status": "Residency budget reached · 24326 surface batches retained · 78173 renderable occurrences",
+          "targetChunksReady": "111",
+          "targetSchedulerRequests": "111",
+          "targetSchedulerSkips": "123",
+          "residentDecodedBytes": "66686508",
+          "residentGpuBytes": "66783808",
+          "triangleCount": "2,255,235",
+          "occurrenceName": "Selected 16_SFO_AT_balk vierkant beton:fundbalk 1000x600 (C30/37):975347",
+          "nodeSuffix": "148735 · ID 148736 · 0 CAD edge refs",
+          "responses": 117,
+          "sidecarResponseIndex": -1,
+          "coarseResponseIndex": 2,
+          "requestLedger": [
+            {
+              "resource": "(page)",
+              "status": 200,
+              "count": 1
+            },
+            {
+              "resource": "coarse.bin",
+              "status": 200,
+              "count": 1
+            },
+            {
+              "resource": "properties.bin",
+              "status": 200,
+              "count": 1
+            },
+            {
+              "resource": "scene.bin",
+              "status": 206,
+              "count": 113
+            },
+            {
+              "resource": "scene.gltf",
+              "status": 200,
+              "count": 1
+            }
+          ],
+          "consoleIssues": 0,
+          "budgetLimitedScreenshotSha256": "641495e34bb2cf851f164b9992bc0724ac9c828009c5622d8a7949ba0c0426e2"
+        },
+        {
+          "runDirectory": "output/relocated-hierarchy-browser/in-place-2",
+          "hierarchyReadyMs": 2220,
+          "coarseFrameMs": 4431,
+          "readyMs": 9621,
+          "usedJsHeapBytes": 839951881,
+          "decodeTime": "1019.5 ms",
+          "status": "Residency budget reached · 24326 surface batches retained · 78173 renderable occurrences",
+          "targetChunksReady": "111",
+          "targetSchedulerRequests": "111",
+          "targetSchedulerSkips": "123",
+          "residentDecodedBytes": "66686508",
+          "residentGpuBytes": "66783808",
+          "triangleCount": "2,255,235",
+          "occurrenceName": "Selected 16_SFO_AT_balk vierkant beton:fundbalk 1000x600 (C30/37):975347",
+          "nodeSuffix": "148735 · ID 148736 · 0 CAD edge refs",
+          "responses": 117,
+          "sidecarResponseIndex": -1,
+          "coarseResponseIndex": 2,
+          "requestLedger": [
+            {
+              "resource": "(page)",
+              "status": 200,
+              "count": 1
+            },
+            {
+              "resource": "coarse.bin",
+              "status": 200,
+              "count": 1
+            },
+            {
+              "resource": "properties.bin",
+              "status": 200,
+              "count": 1
+            },
+            {
+              "resource": "scene.bin",
+              "status": 206,
+              "count": 113
+            },
+            {
+              "resource": "scene.gltf",
+              "status": 200,
+              "count": 1
+            }
+          ],
+          "consoleIssues": 0,
+          "budgetLimitedScreenshotSha256": "641495e34bb2cf851f164b9992bc0724ac9c828009c5622d8a7949ba0c0426e2"
+        },
+        {
+          "runDirectory": "output/relocated-hierarchy-browser/in-place-3",
+          "hierarchyReadyMs": 2182,
+          "coarseFrameMs": 4369,
+          "readyMs": 9687,
+          "usedJsHeapBytes": 839726321,
+          "decodeTime": "1027.7 ms",
+          "status": "Residency budget reached · 24326 surface batches retained · 78173 renderable occurrences",
+          "targetChunksReady": "111",
+          "targetSchedulerRequests": "111",
+          "targetSchedulerSkips": "123",
+          "residentDecodedBytes": "66686508",
+          "residentGpuBytes": "66783808",
+          "triangleCount": "2,255,235",
+          "occurrenceName": "Selected 16_SFO_AT_balk vierkant beton:fundbalk 1000x600 (C30/37):975347",
+          "nodeSuffix": "148735 · ID 148736 · 0 CAD edge refs",
+          "responses": 117,
+          "sidecarResponseIndex": -1,
+          "coarseResponseIndex": 2,
+          "requestLedger": [
+            {
+              "resource": "(page)",
+              "status": 200,
+              "count": 1
+            },
+            {
+              "resource": "coarse.bin",
+              "status": 200,
+              "count": 1
+            },
+            {
+              "resource": "properties.bin",
+              "status": 200,
+              "count": 1
+            },
+            {
+              "resource": "scene.bin",
+              "status": 206,
+              "count": 113
+            },
+            {
+              "resource": "scene.gltf",
+              "status": 200,
+              "count": 1
+            }
+          ],
+          "consoleIssues": 0,
+          "budgetLimitedScreenshotSha256": "641495e34bb2cf851f164b9992bc0724ac9c828009c5622d8a7949ba0c0426e2"
+        }
+      ],
+      "medians": {
+        "hierarchyReadyMs": 2220,
+        "coarseFrameMs": 4408,
+        "readyMs": 9687,
+        "usedJsHeapBytes": 839726321
+      }
+    },
+    {
+      "id": "relocated",
+      "summary": "compiled with --relocate-hierarchy-nodes; tree in the package sidecar",
+      "sceneDirectory": "output/ifc/sixty5-relocated",
+      "buildReport": "output/ifc/sixty5-relocated/build-report.json",
+      "samples": [
+        {
+          "runDirectory": "output/relocated-hierarchy-browser/relocated-1",
+          "hierarchyReadyMs": 2198,
+          "coarseFrameMs": 3703,
+          "readyMs": 8511,
+          "usedJsHeapBytes": 663802987,
+          "decodeTime": "991.3 ms",
+          "status": "Residency budget reached · 24326 surface batches retained · 78173 renderable occurrences",
+          "targetChunksReady": "111",
+          "targetSchedulerRequests": "111",
+          "targetSchedulerSkips": "123",
+          "residentDecodedBytes": "66686508",
+          "residentGpuBytes": "66783808",
+          "triangleCount": "2,255,235",
+          "occurrenceName": "Selected 16_SFO_AT_balk vierkant beton:fundbalk 1000x600 (C30/37):975347",
+          "nodeSuffix": "64079 · ID 64080 · 0 CAD edge refs",
+          "responses": 118,
+          "sidecarResponseIndex": 2,
+          "coarseResponseIndex": 3,
+          "requestLedger": [
+            {
+              "resource": "(page)",
+              "status": 200,
+              "count": 1
+            },
+            {
+              "resource": "coarse.bin",
+              "status": 200,
+              "count": 1
+            },
+            {
+              "resource": "hierarchy.bin",
+              "status": 200,
+              "count": 1
+            },
+            {
+              "resource": "properties.bin",
+              "status": 200,
+              "count": 1
+            },
+            {
+              "resource": "scene.bin",
+              "status": 206,
+              "count": 113
+            },
+            {
+              "resource": "scene.gltf",
+              "status": 200,
+              "count": 1
+            }
+          ],
+          "consoleIssues": 0,
+          "budgetLimitedScreenshotSha256": "af8dedb4fe9e20ef3428dd9568cd15d105812928171c1dc5624c419d3184df98"
+        },
+        {
+          "runDirectory": "output/relocated-hierarchy-browser/relocated-2",
+          "hierarchyReadyMs": 2168,
+          "coarseFrameMs": 3695,
+          "readyMs": 8987,
+          "usedJsHeapBytes": 669299303,
+          "decodeTime": "1051.6 ms",
+          "status": "Residency budget reached · 24326 surface batches retained · 78173 renderable occurrences",
+          "targetChunksReady": "111",
+          "targetSchedulerRequests": "111",
+          "targetSchedulerSkips": "123",
+          "residentDecodedBytes": "66686508",
+          "residentGpuBytes": "66783808",
+          "triangleCount": "2,255,235",
+          "occurrenceName": "Selected 16_SFO_AT_balk vierkant beton:fundbalk 1000x600 (C30/37):975347",
+          "nodeSuffix": "64079 · ID 64080 · 0 CAD edge refs",
+          "responses": 118,
+          "sidecarResponseIndex": 2,
+          "coarseResponseIndex": 3,
+          "requestLedger": [
+            {
+              "resource": "(page)",
+              "status": 200,
+              "count": 1
+            },
+            {
+              "resource": "coarse.bin",
+              "status": 200,
+              "count": 1
+            },
+            {
+              "resource": "hierarchy.bin",
+              "status": 200,
+              "count": 1
+            },
+            {
+              "resource": "properties.bin",
+              "status": 200,
+              "count": 1
+            },
+            {
+              "resource": "scene.bin",
+              "status": 206,
+              "count": 113
+            },
+            {
+              "resource": "scene.gltf",
+              "status": 200,
+              "count": 1
+            }
+          ],
+          "consoleIssues": 0,
+          "budgetLimitedScreenshotSha256": "af8dedb4fe9e20ef3428dd9568cd15d105812928171c1dc5624c419d3184df98"
+        },
+        {
+          "runDirectory": "output/relocated-hierarchy-browser/relocated-3",
+          "hierarchyReadyMs": 2191,
+          "coarseFrameMs": 3790,
+          "readyMs": 9086,
+          "usedJsHeapBytes": 672546343,
+          "decodeTime": "1100.3 ms",
+          "status": "Residency budget reached · 24326 surface batches retained · 78173 renderable occurrences",
+          "targetChunksReady": "111",
+          "targetSchedulerRequests": "111",
+          "targetSchedulerSkips": "123",
+          "residentDecodedBytes": "66686508",
+          "residentGpuBytes": "66783808",
+          "triangleCount": "2,255,235",
+          "occurrenceName": "Selected 16_SFO_AT_balk vierkant beton:fundbalk 1000x600 (C30/37):975347",
+          "nodeSuffix": "64079 · ID 64080 · 0 CAD edge refs",
+          "responses": 118,
+          "sidecarResponseIndex": 2,
+          "coarseResponseIndex": 3,
+          "requestLedger": [
+            {
+              "resource": "(page)",
+              "status": 200,
+              "count": 1
+            },
+            {
+              "resource": "coarse.bin",
+              "status": 200,
+              "count": 1
+            },
+            {
+              "resource": "hierarchy.bin",
+              "status": 200,
+              "count": 1
+            },
+            {
+              "resource": "properties.bin",
+              "status": 200,
+              "count": 1
+            },
+            {
+              "resource": "scene.bin",
+              "status": 206,
+              "count": 113
+            },
+            {
+              "resource": "scene.gltf",
+              "status": 200,
+              "count": 1
+            }
+          ],
+          "consoleIssues": 0,
+          "budgetLimitedScreenshotSha256": "af8dedb4fe9e20ef3428dd9568cd15d105812928171c1dc5624c419d3184df98"
+        }
+      ],
+      "medians": {
+        "hierarchyReadyMs": 2191,
+        "coarseFrameMs": 3703,
+        "readyMs": 8987,
+        "usedJsHeapBytes": 669299303
+      }
+    }
+  ],
+  "comparison": {
+    "hierarchyReadyMs": {
+      "inPlace": 2220,
+      "relocated": 2191,
+      "delta": -29,
+      "percent": -1.31
+    },
+    "coarseFrameMs": {
+      "inPlace": 4408,
+      "relocated": 3703,
+      "delta": -705,
+      "percent": -15.99
+    },
+    "readyMs": {
+      "inPlace": 9687,
+      "relocated": 8987,
+      "delta": -700,
+      "percent": -7.23
+    },
+    "usedJsHeapBytes": {
+      "inPlace": 839726321,
+      "relocated": 669299303,
+      "delta": -170427018,
+      "percent": -20.3
+    }
+  },
+  "transfer": {
+    "inPlace": {
+      "packageDigest": "a2d6c72a6e936ac3ea2a183a1028cc4a06b20985c6d90b16058954323b7c3347",
+      "packageBytes": 657116508,
+      "documentBytes": 448823852,
+      "hierarchySidecarBytes": 0,
+      "hierarchyNodes": "in-place",
+      "resources": [
+        {
+          "path": "scene.gltf",
+          "bytes": 448823852,
+          "sha256": "a35b01a5eef5b3492e3a68072ede9cdff53dce8032c7b68f719154651fc54709"
+        },
+        {
+          "path": "scene.bin",
+          "bytes": 120707064,
+          "sha256": "7a04489cfadb39706b7b8c3832402991e8d6f1e15983547d71939cc924fad913"
+        },
+        {
+          "path": "coarse.bin",
+          "bytes": 38700720,
+          "sha256": "258e085d4f3d0b380bb89c3596b2e3bfc4a43177afe9fc7e92d6e1046db9031b"
+        },
+        {
+          "path": "properties.json",
+          "bytes": 17705010,
+          "sha256": "dc3394714b73d322dcfe6bad7ce780dbdd18cb547e5eaf45a26c9e66de932312"
+        },
+        {
+          "path": "properties.bin",
+          "bytes": 31179862,
+          "sha256": "dad8d98909c738df930569c4b907c29e64cda2b65d84917936c1c4d86d3dd8c4"
+        }
+      ]
+    },
+    "relocated": {
+      "packageDigest": "b821e4316a5b59d9119bb1731cb6223952cf18c10d872485462b8a3d078d13f9",
+      "packageBytes": 602277504,
+      "documentBytes": 347731160,
+      "hierarchySidecarBytes": 46253688,
+      "hierarchyNodes": "relocated",
+      "resources": [
+        {
+          "path": "scene.gltf",
+          "bytes": 347731160,
+          "sha256": "16fec808d073b63778ecf5505f4057ef870bcae923f79e9b6f1f594fd832903e"
+        },
+        {
+          "path": "scene.bin",
+          "bytes": 120707064,
+          "sha256": "7a04489cfadb39706b7b8c3832402991e8d6f1e15983547d71939cc924fad913"
+        },
+        {
+          "path": "coarse.bin",
+          "bytes": 38700720,
+          "sha256": "258e085d4f3d0b380bb89c3596b2e3bfc4a43177afe9fc7e92d6e1046db9031b"
+        },
+        {
+          "path": "properties.json",
+          "bytes": 17705010,
+          "sha256": "dc3394714b73d322dcfe6bad7ce780dbdd18cb547e5eaf45a26c9e66de932312"
+        },
+        {
+          "path": "properties.bin",
+          "bytes": 31179862,
+          "sha256": "dad8d98909c738df930569c4b907c29e64cda2b65d84917936c1c4d86d3dd8c4"
+        },
+        {
+          "path": "hierarchy.json",
+          "bytes": 3192,
+          "sha256": "cb37493da3c69dc82f587887ca564358ed1664c5db7a43664b7cf3ed355a41ac"
+        },
+        {
+          "path": "hierarchy.bin",
+          "bytes": 46250496,
+          "sha256": "271f68407128ac25a78fa27bbf97dd909528a5c2cd3b514e612253909d7a849b"
+        }
+      ]
+    },
+    "documentDeltaBytes": -101092692,
+    "packageDeltaBytes": -54839004,
+    "sidecarBytes": 46253688,
+    "byteIdenticalResources": [
+      "scene.bin",
+      "coarse.bin",
+      "properties.json",
+      "properties.bin"
+    ]
+  },
+  "sidecarFetch": {
+    "resource": "hierarchy.bin",
+    "bytes": 46250496,
+    "requestsPerRun": [
+      1,
+      1,
+      1
+    ],
+    "responseIndexPerRun": [
+      2,
+      2,
+      2
+    ],
+    "precedesCoarsePayload": true,
+    "absentFromInPlaceArm": true
+  },
+  "endpoint": {
+    "holdsAcrossEveryRun": true,
+    "note": "The picked node index deliberately differs between the arms: a relocated document keeps only the nodes that draw, so they are renumbered. The picked occurrence, its property entries, and every residency counter do not.",
+    "nodeSuffixes": {
+      "in-place": "148735 · ID 148736 · 0 CAD edge refs",
+      "relocated": "64079 · ID 64080 · 0 CAD edge refs"
+    },
+    "counters": [
+      {
+        "key": "snapshot.status",
+        "value": "Residency budget reached · 24326 surface batches retained · 78173 renderable occurrences",
+        "matchedInEveryRun": true
+      },
+      {
+        "key": "snapshot.prototypeCount",
+        "value": "42435",
+        "matchedInEveryRun": true
+      },
+      {
+        "key": "snapshot.occurrenceCount",
+        "value": "78173",
+        "matchedInEveryRun": true
+      },
+      {
+        "key": "snapshot.triangleCount",
+        "value": "2,255,235",
+        "matchedInEveryRun": true
+      },
+      {
+        "key": "snapshot.edgeCount",
+        "value": "12",
+        "matchedInEveryRun": true
+      },
+      {
+        "key": "snapshot.binarySize",
+        "value": "117,878.0 KiB",
+        "matchedInEveryRun": true
+      },
+      {
+        "key": "snapshot.geometryResult",
+        "value": "65,123.5 KiB CPU / 65,218.6 KiB GPU resident (budget 65,536.0 KiB)",
+        "matchedInEveryRun": true
+      },
+      {
+        "key": "snapshot.dataset.targetChunksTotal",
+        "value": "234",
+        "matchedInEveryRun": true
+      },
+      {
+        "key": "snapshot.dataset.targetChunksReady",
+        "value": "111",
+        "matchedInEveryRun": true
+      },
+      {
+        "key": "snapshot.dataset.residentDecodedBytes",
+        "value": "66686508",
+        "matchedInEveryRun": true
+      },
+      {
+        "key": "snapshot.dataset.residentGpuBytes",
+        "value": "66783808",
+        "matchedInEveryRun": true
+      },
+      {
+        "key": "snapshot.dataset.residencyBudgetBytes",
+        "value": "67108864",
+        "matchedInEveryRun": true
+      },
+      {
+        "key": "snapshot.dataset.targetSchedulerRequests",
+        "value": "111",
+        "matchedInEveryRun": true
+      },
+      {
+        "key": "snapshot.dataset.targetSchedulerSkips",
+        "value": "123",
+        "matchedInEveryRun": true
+      },
+      {
+        "key": "snapshot.dataset.visibleOccurrences",
+        "value": "78173",
+        "matchedInEveryRun": true
+      },
+      {
+        "key": "picking.occurrenceName",
+        "value": "Selected 16_SFO_AT_balk vierkant beton:fundbalk 1000x600 (C30/37):975347",
+        "matchedInEveryRun": true
+      },
+      {
+        "key": "semanticProperties.entryCount",
+        "value": 6,
+        "matchedInEveryRun": true
+      }
+    ]
+  },
+  "publishedRun": {
+    "arm": "relocated",
+    "index": 1,
+    "reason": "median first frame of its arm"
+  },
+  "screenshots": {
+    "coarse": {
+      "path": "coarse-frame.png",
+      "bytes": 240073,
+      "sha256": "641371e242bf9b8ce702c9094d4f07cd11260f145574c60035926ae2b1da4228"
+    },
+    "budgetLimited": {
+      "path": "budget-limited.png",
+      "bytes": 254268,
+      "sha256": "af8dedb4fe9e20ef3428dd9568cd15d105812928171c1dc5624c419d3184df98"
+    },
+    "picked": {
+      "path": "picked.png",
+      "bytes": 256158,
+      "sha256": "55d71b36f4e3d990bea0749fde36977939434ea62546c3555dd7ba38b594b156"
+    }
+  },
+  "consoleIssues": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+  ]
+}
