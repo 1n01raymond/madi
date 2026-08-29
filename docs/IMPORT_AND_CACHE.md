@@ -146,7 +146,8 @@ bytes equal a clean adapter build. Federation-wide target/coarse/spatial/propert
 payloads are still rebuilt as a whole; content-addressed compiled payloads and
 complete-package equivalence remain before any old byte range is reused.
 
-The payload contract is designed but **not implemented**:
+The payload contract's **storage half is implemented; no compile reads or
+writes it yet**.
 [ADR-0018](adr/0018-content-addressed-compiled-payloads.md) content-addresses
 one unit only, the prototype payload -- the accessor bytes and placement-free
 accessor metadata `appendGeometry` produces -- and rebuilds every other package
@@ -160,6 +161,35 @@ re-extract, and a wrong plan can only cost extra extraction work, never yield a
 wrong payload. That ADR also fixes the acceptance evidence, including a
 measured packaging saving that must exceed the store's own verification cost or
 the decision is rejected.
+
+What the compiler carries today is the encoder split plus the store itself.
+`buildCompiledPayload` is now the only geometry encoder, and `appendGeometry` is
+that build followed by `appendCompiledPayload`, so a restored payload and a
+freshly built one reach `scene.bin` through the identical append path and one
+place decides offsets and padding. `compiledPayloadContentDigest` hashes
+representation content -- including the element type of every array and whether
+the edge positions alias the surface ones -- so a payload-affecting difference
+can cost a rebuild but never yield the wrong bytes. Entries are filed under
+`naru.compiled-payload-entry.1`, in a directory named for that schema so a bump
+opens a cold namespace instead of migrating entries, and keyed by compiler
+identity, adapter identity, the content digest, the unit scale, and the
+payload-affecting option set. Publication stages in a `mkdtemp` sibling and
+renames into place; losing that race reads the published entry back, verifies
+it, and refuses only a genuine disagreement (`AMBIGUOUS_PAYLOAD`), so one key
+can never describe two byte sequences. A restore reproduces the key from the
+manifest's own input record, recomputes each accessor's byte length from its
+element type and count, requires the accessors to cover `payload.bin` exactly,
+and verifies the byte count and SHA-256 before returning anything. The storage
+primitive throws on any mismatch, exactly as the whole-package cache does; the
+warn-and-rebuild fallback belongs to the compile paths that will call it.
+Digital Hub still compiles to the `digital-hub` baseline digest recorded in
+[artifacts/compiler/node-field-elision](../artifacts/compiler/node-field-elision/README.md),
+so the encoder split moved no bytes.
+
+Selection and orchestration -- deciding per prototype whether to restore or
+build, publishing what was built, and reporting hits, misses, and rebuild
+reasons -- are the next increment, and ADR-0018's acceptance evidence belongs
+with it. ADR-0010 and ADR-0018 both stay Proposed until it passes.
 
 Shared lookup reuses the same manifest and resource hashes. The resolution
 order is local verified entry, authorized shared entry, then local compilation.

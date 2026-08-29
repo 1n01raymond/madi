@@ -203,5 +203,21 @@ measurement gate fails:
    verification, this decision is rejected rather than accepted.
 5. `pnpm adr:check` and `pnpm check` pass without loosening any validator.
 
-Only after this design is reviewed does implementation begin, in the storage
-and selection/orchestration order the tracking issue sets.
+Implementation follows the storage then selection/orchestration order the
+tracking issue sets.
+
+**Status of that order.** The storage half has landed:
+`packages/compiler/src/compiled-payload.ts` splits encoding from placement and
+supplies `compiledPayloadContentDigest`, and
+`packages/compiler/src/compiled-payload-store.ts` publishes and restores
+`naru.compiled-payload-entry.1` entries under the guards listed above, sharing
+them with the whole-package cache through `cache-primitives.ts`. Digital Hub
+still compiles to the package digest already recorded in
+[artifacts/compiler/node-field-elision](../../artifacts/compiler/node-field-elision/README.md),
+so the encoder split moved no bytes. No compile path reads or writes the store
+yet, so gate 3 is met only for storage -- idempotent publication,
+one-key-one-byte-sequence refusal, corruption as a verified miss, key and path
+refusal, and symlink refusal on any host that permits creating one -- while
+gates 1, 2, 4, and the invalidation-table rows belong to
+the selection/orchestration increment. This ADR stays Proposed until they
+pass.

@@ -122,13 +122,20 @@ a small share of the browser's working set.
 1. Establish the Phase 2 milestone, labels, issue forms, and a small reviewed
    ready queue. This tracker owns outcomes; issues own independently assignable
    work with acceptance criteria.
-2. Implement the content-addressed payload store that
-   [ADR-0018](adr/0018-content-addressed-compiled-payloads.md) specifies, in the
-   storage then selection/orchestration order, without accepting ADR-0010 or
-   ADR-0018 yet. The design is reviewed and records that only the prototype
-   payload is reusable: every other package resource stays federation-global,
-   and acceptance needs clean-package resource equivalence plus a measured
-   packaging saving that beats the store's own verification cost.
+2. Finish the content-addressed payload store that
+   [ADR-0018](adr/0018-content-addressed-compiled-payloads.md) specifies,
+   without accepting ADR-0010 or ADR-0018 yet. The storage half has landed:
+   `buildCompiledPayload` is the compiler's only geometry encoder,
+   `appendGeometry` is that build followed by `appendCompiledPayload` (Digital
+   Hub still reproduces its recorded package digest), and
+   `naru.compiled-payload-entry.1` entries publish atomically and restore only
+   after the key is reproduced from the manifest and every byte verified. No
+   compile path calls the store yet. What remains is selection and
+   orchestration -- deciding per prototype whether to restore or build,
+   publishing what was built, warning and rebuilding on a corrupt entry, and
+   reporting hits, misses, and rebuild reasons -- together with the acceptance
+   evidence: clean-package resource equivalence plus a measured packaging
+   saving that beats the store's own verification cost.
 
 ### Next — finish the user-visible import loop and bounded fidelity
 

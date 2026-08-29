@@ -738,7 +738,8 @@ compiled payload chunks and complete-package byte-equivalence remain before
 per-discipline compilation is a complete product claim.
 
 [ADR-0018](adr/0018-content-addressed-compiled-payloads.md) is the reviewed
-design for that payload tier and is not implemented. It authorizes reusing one
+design for that payload tier; its storage half is implemented in 21.6 below and
+no compile reads or writes it yet. It authorizes reusing one
 unit, the prototype payload -- the accessor bytes and placement-free accessor
 metadata `appendGeometry` produces for a prototype -- and requires every other
 package resource, `scene.bin` included, to be rebuilt from the current scene.
@@ -746,3 +747,61 @@ Payload keys carry the schema, compiler, and adapter identities, the prototype's
 Scene IR content digest, the scene unit scale, and the payload-affecting policy
 set; an option that has not been classified counts as payload-affecting, so a
 new option cold-starts the namespace instead of silently sharing it.
+
+### 21.6 Content-addressed payload store
+
+The storage half of [ADR-0018](adr/0018-content-addressed-compiled-payloads.md)
+is implemented. No compile path calls it yet: selecting per prototype between a
+restore and a build, publishing what was built, and reporting hits and misses
+are the next increment, and the ADR's acceptance evidence belongs with them.
+
+Encoding and placement are now separate functions.
+`buildCompiledPayload(representation, scaleToMeters)` produces the payload --
+the ordered accessor byte blobs plus the accessor metadata that does not depend
+on placement -- and `appendCompiledPayload(builder, payload)` places it into
+`scene.bin`. `appendGeometry` is exactly those two calls, so a restored payload
+and a freshly built one travel the same append path and byte offsets, padding,
+and bufferView and accessor indices are decided in one place rather than two.
+Compiling Digital Hub after the split reproduces the `digital-hub` baseline
+package digest recorded in
+[artifacts/compiler/node-field-elision](../artifacts/compiler/node-field-elision/README.md).
+
+`compiledPayloadContentDigest(representation)` addresses a prototype by content.
+It hashes the representation ID -- which names every accessor -- the surface
+positions, normals, indices, face source IDs, and material groups, the edge
+positions, segments, classes, and source IDs, and whether the edge positions
+alias the surface ones, since that aliasing removes an accessor from the
+payload. Each array is hashed together with its element type, so a `Float64`
+and a `Float32` array holding equal numbers do not collide. The digest is
+deliberately conservative: an irrelevant difference can cost a rebuild, but no
+difference that changes a payload byte can be missed.
+
+Entries carry schema `naru.compiled-payload-entry.1` and live in a directory
+named for that schema, so a schema bump opens a cold namespace beside the old
+one instead of migrating entries in place. The key is a SHA-256 over the schema
+ID, the compiler identity, the adapter identity, the content digest, the scene
+unit scale, and the payload-affecting option set, with option keys sorted so
+declaration order cannot fork the namespace. One entry is two files: a
+`payload.json` manifest and the concatenated accessor bytes in `payload.bin`.
+
+The safety rules are the ones the whole-package cache already ships, kept in a
+shared `cache-primitives.ts` module so a hardening fix cannot land in one store
+and be forgotten in the other: a key that is not 64 hex characters is refused
+before it can reach the filesystem, resource paths match one portable file-name
+pattern, `lstat` refuses a symlink instead of following it out of the store, and
+publication stages in a `mkdtemp` sibling and renames into place. Windows
+reports a rename onto an existing directory as `EPERM` rather than `EEXIST`, so
+all three codes mean the same thing: another compilation published first. Losing
+that race is not an error -- the published entry is read back and verified, and
+only a genuine disagreement, the same key describing different bytes, is refused
+as `AMBIGUOUS_PAYLOAD`, because that would mean the key is missing an input.
+
+Reading is verified before anything is handed back. The key is reproduced from
+the manifest's own input record and compared with the directory it was found
+in; each accessor's byte length is recomputed from its component type, element
+type, and count rather than trusted; the accessors must be contiguous and cover
+`payload.bin` exactly; and the binary's byte count and SHA-256 must match the
+manifest. Any mismatch throws `INVALID_PAYLOAD_ENTRY`. The storage primitive
+stays strict on purpose, exactly as `compiled-cache.ts` does: the warn-and-
+rebuild fallback that makes a corrupt entry a miss belongs to the compile paths
+that will call it, so no single bad file can break a compile.

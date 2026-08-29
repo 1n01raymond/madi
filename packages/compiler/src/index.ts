@@ -21,6 +21,31 @@ export type {
   PublishCompiledCacheEntryOptions,
   RestoreCompiledCacheEntryOptions,
 } from "./compiled-cache.js";
+export type { CacheOptionValue, CacheToolInput } from "./cache-primitives.js";
+export { appendCompiledPayload, buildCompiledPayload, compiledPayloadContentDigest } from "./compiled-payload.js";
+export type {
+  CompiledPayload,
+  CompiledPayloadAccessor,
+  CompiledPayloadShape,
+  CompiledPayloadSurfaceGroup,
+  PlacedPayload,
+  PlacedPayloadSurfaceGroup,
+} from "./compiled-payload.js";
+export {
+  compiledPayloadEntrySchema,
+  CompiledPayloadStoreError,
+  createCompiledPayloadKey,
+  publishCompiledPayload,
+  readCompiledPayloadEntry,
+  restoreCompiledPayload,
+} from "./compiled-payload-store.js";
+export type {
+  CompiledPayloadEntry,
+  CompiledPayloadEntryAccessor,
+  CompiledPayloadKeyInput,
+  PublishCompiledPayloadOptions,
+  RestoreCompiledPayloadOptions,
+} from "./compiled-payload-store.js";
 export {
   defaultSpatialLeafCapacity,
   encodeSpatialDemandIndex,

@@ -116,6 +116,29 @@ IfcOpenShell parsing and tessellation before the deterministic federation merge.
 The package resources still compile as one federation, and shared-cache
 authorization remains a separate gate.
 
+`src/compiled-payload-store.ts` adds the storage half of
+[ADR-0018](../../docs/adr/0018-content-addressed-compiled-payloads.md); no
+compile path calls it yet. Encoding and placement are now separate:
+`buildCompiledPayload` produces one prototype's accessor bytes and
+placement-free metadata, `appendCompiledPayload` places them into `scene.bin`,
+and `appendGeometry` is exactly those two calls, so a restored payload and a
+freshly built one decide offsets and padding in one place. Compiling Digital Hub
+after that split reproduces the baseline package digest recorded in
+[artifacts/compiler/node-field-elision](../../artifacts/compiler/node-field-elision/README.md).
+`compiledPayloadContentDigest` addresses a prototype by its representation
+content -- array bytes hashed with their element type, plus whether the edge
+positions alias the surface ones -- so it can cost a rebuild but cannot miss a
+payload-affecting difference. Entries carry schema
+`naru.compiled-payload-entry.1` in a directory named for that schema, are keyed
+by compiler and adapter identity, the content digest, the unit scale, and the
+payload-affecting options, and share `src/cache-primitives.ts` with the
+whole-package cache: refused key and path shapes, an `lstat` symlink check,
+staged `mkdtemp` publication with an idempotent rename, `AMBIGUOUS_PAYLOAD` when
+one key would describe two byte sequences, and a restore that reproduces the key
+from the manifest, recomputes every accessor byte length, and verifies the
+binary before returning it. Selection, orchestration, and the ADR's acceptance
+evidence are the next increment.
+
 ## Compile an IFC federation
 
 Install the separate pinned adapter environment, then repeat `--document` for
