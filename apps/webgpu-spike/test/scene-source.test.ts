@@ -124,12 +124,37 @@ describe("remote scene packages", () => {
     );
   });
 
+  it("accepts a split-host package only when the embedder announces the host", async () => {
+    const split = {
+      ...fixture,
+      buffers: [{ ...fixture.buffers[0], uri: "https://cdn.example/scene.bin" }],
+    };
+    stubDocument(split);
+    await expect(loadSceneHierarchy({ kind: "url", gltfUrl: fixtureUrl })).rejects.toThrow(
+      /must stay on https:\/\/example\.com/u,
+    );
+
+    stubDocument(split);
+    const loaded = await loadSceneHierarchy({ kind: "url", gltfUrl: fixtureUrl }, undefined, {
+      additionalOrigins: ["https://cdn.example"],
+    });
+    expect(loaded.targetBinary).toEqual({
+      kind: "url",
+      href: "https://cdn.example/scene.bin",
+    });
+    // The policy travels with the load, so the Worker fetches under it too.
+    expect(loaded.transport?.origins).toEqual([
+      "https://example.com",
+      "https://cdn.example",
+    ]);
+  });
+
   it("refuses a package whose declared resources exceed the reviewed budget", async () => {
     stubDocument(fixture);
 
     await expect(
       loadSceneHierarchy({ kind: "url", gltfUrl: fixtureUrl }, undefined, {
-        packageBytes: 60_000,
+        limits: { packageBytes: 60_000 },
       }),
     ).rejects.toThrow(/more than 60000 bytes/u);
   });
@@ -141,7 +166,7 @@ describe("remote scene packages", () => {
 
     await expect(
       loadSceneHierarchy({ kind: "url", gltfUrl: fixtureUrl }, undefined, {
-        documentBytes: 1_024,
+        limits: { documentBytes: 1_024 },
       }),
     ).rejects.toThrow(/scene\.gltf is larger than 1024 bytes/u);
   });

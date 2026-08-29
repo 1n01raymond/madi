@@ -2,14 +2,17 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import {
   assertPackageBudget,
+  assertPackageOrigin,
   assertPackageUrl,
+  openPackageTransport,
+  PackageTransport,
   defaultPackageTransferLimits,
   fetchPackageResource,
   openPackageResponse,
   readBoundedBody,
   resolvePackageResourceUrl,
   resolvePackageTransferLimits,
-} from "../src/package-limits.js";
+} from "../src/package-transport.js";
 
 const documentUrl = new URL("https://example.com/package/scene.gltf");
 
@@ -229,5 +232,114 @@ describe("bounded response bodies", () => {
     await expect(
       fetchPackageResource(documentUrl, { kind: "binary", label: "scene.bin", limitBytes: 3 }),
     ).resolves.toEqual(new Uint8Array([7, 7, 7]));
+  });
+});
+
+describe("embedder transport policy", () => {
+  it("holds resources to the document origin unless the embedder announces another", () => {
+    const strict = openPackageTransport(documentUrl);
+    expect(() => strict.resolveResourceUrl("https://cdn.example/scene.bin")).toThrow(
+      /must stay on https:\/\/example\.com/u,
+    );
+
+    const split = openPackageTransport(documentUrl, {
+      additionalOrigins: ["https://cdn.example"],
+    });
+    expect(split.resolveResourceUrl("https://cdn.example/scene.bin").href).toBe(
+      "https://cdn.example/scene.bin",
+    );
+    // The document origin stays first, and is never announced twice.
+    expect(split.origins).toEqual(["https://example.com", "https://cdn.example"]);
+    expect(
+      openPackageTransport(documentUrl, { additionalOrigins: ["https://example.com"] }).origins,
+    ).toEqual(["https://example.com"]);
+    expect(() =>
+      assertPackageOrigin(new URL("https://other.example/x.bin"), split.origins, "scene.gltf"),
+    ).toThrow(/must stay on https:\/\/example\.com, https:\/\/cdn\.example/u);
+  });
+
+  it("applies the embedder's ceilings to the budget and to a single resource", () => {
+    const lowered = openPackageTransport(documentUrl, {
+      limits: { documentBytes: 1_000, resourceBytes: 500 },
+    });
+    expect(lowered.limits.documentBytes).toBe(1_000);
+    // Unstated ceilings keep the reviewed default.
+    expect(lowered.limits.packageBytes).toBe(defaultPackageTransferLimits.packageBytes);
+    expect(() => lowered.assertBudget(1_001, [])).toThrow(
+      /The glTF document declares 1001 bytes; the limit is 1000\./u,
+    );
+    expect(lowered.resourceLimit(200)).toBe(200);
+    // A resource may declare more than the policy allows; the policy wins.
+    expect(lowered.resourceLimit(5_000)).toBe(500);
+    expect(lowered.resourceLimit()).toBe(500);
+  });
+
+  it("fetches through an injected transfer, still under the policy", async () => {
+    const global = vi.fn(async () => new Response(new Uint8Array(4)));
+    vi.stubGlobal("fetch", global);
+    const injected = vi.fn(
+      async (_url: URL, _init: RequestInit) =>
+        new Response(new Uint8Array([1, 2, 3, 4]), {
+          headers: { "Content-Length": "4", "Content-Type": "application/octet-stream" },
+        }),
+    );
+    const transport = openPackageTransport(documentUrl, {
+      limits: { resourceBytes: 2 },
+      fetch: injected,
+    });
+
+    // The lowered ceiling refuses this body on its declared length alone, and
+    // the injected transfer is what delivered it.
+    await expect(
+      transport.fetchResource(new URL("https://example.com/package/a.bin"), {
+        kind: "binary",
+        label: "a.bin",
+        limitBytes: transport.resourceLimit(4),
+      }),
+    ).rejects.toThrow(/a\.bin declares 4 bytes; the limit is 2\./u);
+    expect(injected).toHaveBeenCalledTimes(1);
+    expect(global).not.toHaveBeenCalled();
+
+    const wide = openPackageTransport(documentUrl, { fetch: injected });
+    const bytes = await wide.fetchResource(new URL("https://example.com/package/a.bin"), {
+      kind: "binary",
+      label: "a.bin",
+      limitBytes: wide.resourceLimit(4),
+    });
+    expect(Array.from(bytes)).toEqual([1, 2, 3, 4]);
+    expect(injected).toHaveBeenCalledTimes(2);
+
+    await expect(
+      transport.fetchResource(new URL("https://attacker.example/a.bin"), {
+        kind: "binary",
+        label: "a.bin",
+        limitBytes: 4,
+      }),
+    ).rejects.toThrow(/must stay on https:\/\/example\.com/u);
+  });
+
+  it("carries a resolved policy across a Worker boundary without widening it", () => {
+    const transport = openPackageTransport(documentUrl, {
+      limits: { resourceBytes: 512 },
+      additionalOrigins: ["https://cdn.example"],
+      fetch: async () => new Response(null),
+    });
+    const descriptor = transport.describe();
+    expect(descriptor).toEqual({
+      documentUrl: documentUrl.href,
+      limits: transport.limits,
+      origins: ["https://example.com", "https://cdn.example"],
+    });
+    expect(structuredClone(descriptor)).toEqual(descriptor);
+
+    const rebuilt = PackageTransport.fromDescriptor(descriptor);
+    expect(rebuilt.limits).toEqual(transport.limits);
+    expect(rebuilt.origins).toEqual(transport.origins);
+    expect(rebuilt.resolveResourceUrl("https://cdn.example/x.bin").href).toBe(
+      "https://cdn.example/x.bin",
+    );
+    expect(() => rebuilt.resolveResourceUrl("https://other.example/x.bin")).toThrow(
+      /must stay on/u,
+    );
   });
 });

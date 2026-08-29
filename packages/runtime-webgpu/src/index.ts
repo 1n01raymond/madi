@@ -38,6 +38,30 @@ export type {
   CompiledPackageOptions,
 } from "./package-limits.js";
 export {
+  assertPackageBudget,
+  assertPackageOrigin,
+  assertPackageUrl,
+  defaultPackageTransferLimits,
+  fetchPackageResource,
+  openPackageResponse,
+  openPackageTransport,
+  PackageTransport,
+  packageResourceDigest,
+  readBoundedBody,
+  resolvePackageResourceUrl,
+  resolvePackageTransferLimits,
+} from "./package-transport.js";
+export type {
+  DeclaredPackageResource,
+  PackageFetch,
+  PackageResourceKind,
+  PackageResponseRequest,
+  PackageTransferLimitOverrides,
+  PackageTransferLimits,
+  PackageTransportDescriptor,
+  PackageTransportPolicy,
+} from "./package-transport.js";
+export {
   decodeSpatialDemandIndex,
   querySpatialDemandIndex,
   SpatialDemandIndexError,

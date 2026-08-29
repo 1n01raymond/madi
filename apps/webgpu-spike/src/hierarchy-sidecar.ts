@@ -1,12 +1,10 @@
-import type { CompiledHierarchyRef, CompiledHierarchySidecar } from "@naru3d/runtime-webgpu";
+import { openPackageTransport, packageResourceDigest } from "@naru3d/runtime-webgpu";
+import type {
+  CompiledHierarchyRef,
+  CompiledHierarchySidecar,
+  PackageTransport,
+} from "@naru3d/runtime-webgpu";
 
-import {
-  fetchPackageResource,
-  packageResourceDigest,
-  resolvePackageResourceUrl,
-  resolvePackageTransferLimits,
-} from "./package-limits.js";
-import type { PackageTransferLimits } from "./package-limits.js";
 import { resourceFileName } from "./property-sidecar.js";
 
 /**
@@ -19,7 +17,7 @@ export type HierarchySidecarSource =
       readonly kind: "url";
       readonly ref: CompiledHierarchyRef;
       readonly jsonUrl: URL;
-      readonly limits?: PackageTransferLimits;
+      readonly transport?: PackageTransport;
     }
   | {
       readonly kind: "file";
@@ -27,6 +25,41 @@ export type HierarchySidecarSource =
       readonly jsonFile: File;
       readonly resourceFiles: readonly File[];
     };
+
+/**
+ * The transfer policy a URL sidecar is read under. The scene loader settles one
+ * policy for the whole package and passes it here; a caller that opens a
+ * sidecar on its own gets the reviewed defaults for that resource's origin.
+ */
+function transportOf(
+  source: Extract<HierarchySidecarSource, { readonly kind: "url" }>,
+): PackageTransport {
+  return source.transport ?? openPackageTransport(source.jsonUrl);
+}
+
+/**
+ * Reads one sidecar resource under that policy. A string resource is a URI the
+ * header declared, so it is resolved -- and held to the package origins -- by
+ * the same transport that fetches it. The declared length is the ceiling.
+ */
+async function fetchSidecarResource(
+  source: Extract<HierarchySidecarSource, { readonly kind: "url" }>,
+  resource: URL | string,
+  kind: "json" | "binary",
+  byteLength: number,
+  signal?: AbortSignal,
+): Promise<Uint8Array> {
+  const transport = transportOf(source);
+  const url = typeof resource === "string"
+    ? transport.resolveResourceUrl(resource, source.jsonUrl, source.jsonUrl.href)
+    : resource;
+  return transport.fetchResource(url, {
+    kind,
+    label: typeof resource === "string" ? resource : url.href,
+    limitBytes: transport.resourceLimit(byteLength),
+    ...(signal ? { signal } : {}),
+  });
+}
 
 interface SidecarColumns {
   readonly uri: string;
@@ -82,30 +115,14 @@ export async function loadHierarchySidecar(
   signal?: AbortSignal,
 ): Promise<CompiledHierarchySidecar> {
   const { ref } = source;
-  const limits = source.kind === "url"
-    ? source.limits ?? resolvePackageTransferLimits()
-    : resolvePackageTransferLimits();
   const jsonBytes = source.kind === "url"
-    ? await fetchPackageResource(source.jsonUrl, {
-        kind: "json",
-        label: source.jsonUrl.href,
-        limitBytes: Math.min(ref.byteLength, limits.resourceBytes),
-        ...(signal ? { signal } : {}),
-      })
+    ? await fetchSidecarResource(source, source.jsonUrl, "json", ref.byteLength, signal)
     : new Uint8Array(await source.jsonFile.arrayBuffer());
   await verify(jsonBytes, ref.uri, ref.byteLength, ref.sha256);
   const json = JSON.parse(new TextDecoder().decode(jsonBytes)) as unknown;
   const columns = columnsOf(json, ref.uri);
   const columnBytes = source.kind === "url"
-    ? await fetchPackageResource(
-        resolvePackageResourceUrl(columns.uri, source.jsonUrl, source.jsonUrl.href),
-        {
-          kind: "binary",
-          label: columns.uri,
-          limitBytes: Math.min(columns.byteLength, limits.resourceBytes),
-          ...(signal ? { signal } : {}),
-        },
-      )
+    ? await fetchSidecarResource(source, columns.uri, "binary", columns.byteLength, signal)
     : await readLocalColumns(source.resourceFiles, columns.uri);
   await verify(columnBytes, columns.uri, columns.byteLength, columns.sha256);
   return { json, columns: columnBytes };

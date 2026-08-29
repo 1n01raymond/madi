@@ -1,0 +1,491 @@
+{
+  "schemaVersion": "naru.embedder-override-evidence.1",
+  "recordedAt": "2026-08-29T06:23:54.147Z",
+  "mode": "second-consumer-transfer-policy-matrix",
+  "host": {
+    "platform": "win32",
+    "architecture": "x64",
+    "node": "v22.14.0",
+    "cpuCount": 16
+  },
+  "contract": {
+    "gate": "ADR-0011 stays Proposed until the embedder-facing override surface is settled against a second consumer.",
+    "consumer": "tools/package-embedder, a headless Node host that imports only the published @naru3d/runtime-webgpu entry point.",
+    "independence": "First-party and written alongside the surface it exercises; it is a second consumer, not an independent adopter, and it shares no code with the Studio.",
+    "axes": [
+      "limits: the transfer ceilings a host raises or lowers",
+      "additionalOrigins: hosts a package may be split across",
+      "fetch: a transfer the embedder performs itself",
+      "packageLimits: the structural ceilings the document is parsed under"
+    ],
+    "regression": "Every committed package opens under the reviewed defaults through this consumer, which is the check-chain regression docs/PHASE_2.md asks for."
+  },
+  "method": {
+    "transport": "Two local HTTP servers on distinct loopback origins serve the committed packages; ports vary per run, so origins are recorded as origin-a and origin-b.",
+    "corpora": "Committed packages only. No package is split across hosts, so the cross-origin scenarios serve a synthesized document: the same corpus with its buffer URIs rewritten to origin-b. Those rows carry synthesized: true.",
+    "outcomes": "Each scenario reports opened with what the policy admitted, or refused with the error name and message a host would see. servedRequests counts HTTP requests the two servers answered during the scenario, so an injected transfer proves it never reached them."
+  },
+  "defaults": {
+    "transfer": {
+      "documentBytes": 1073741824,
+      "resourceBytes": 2147483648,
+      "packageBytes": 8589934592,
+      "resourceCount": 256
+    },
+    "structural": {
+      "nodes": 2000000,
+      "meshes": 1000000,
+      "accessors": 4000000,
+      "bufferViews": 4000000,
+      "targetChunks": 65536,
+      "traversalDepth": 64
+    }
+  },
+  "corpora": [
+    {
+      "id": "ifc-explicit-edges",
+      "directory": "artifacts/ifc/explicit-edges",
+      "documentByteLength": 15033,
+      "documentSha256": "bbabcfdf2108516dfcedecacea9dadb3e8d2c5beea8c14d2444a4fcf249aaa22",
+      "resources": [
+        {
+          "uri": "scene.bin",
+          "byteLength": 492,
+          "sha256": "c2e7f0e7bcd4d28eb51018f75bd20b38b9382f1760cec8c42303819796b2ff3f"
+        },
+        {
+          "uri": "coarse.bin",
+          "byteLength": 912,
+          "sha256": "2c00d40a25112356a88a48f357e2bb24409e1882b1da2f82b908ae15e98f6b1d"
+        },
+        {
+          "uri": "properties.json",
+          "byteLength": 1108,
+          "sha256": "b93430de0dfd89379725913f265b54955a7bc34b1d48ddf7a80575c931695841"
+        }
+      ]
+    },
+    {
+      "id": "step-repeated-fasteners",
+      "directory": "artifacts/phase1/repeated-fasteners",
+      "documentByteLength": 53211,
+      "documentSha256": "ffaad9710d56f5aed13d9a9a746ad3c59f6444630334ffa947d079c3b9a45c87",
+      "resources": [
+        {
+          "uri": "scene.bin",
+          "byteLength": 188044,
+          "sha256": "3c4d9dde02c117343e4013a675d40d41a61c2f59eb5d3b1959774b434883d395"
+        }
+      ]
+    },
+    {
+      "id": "step-repeated-fasteners-ap242",
+      "directory": "artifacts/phase1/repeated-fasteners-ap242",
+      "documentByteLength": 65815,
+      "documentSha256": "e2f52189091431ce9c0ff94a939c52dee89d9b3ce2b8b9fdb41a0a21a8e1499b",
+      "resources": [
+        {
+          "uri": "scene.bin",
+          "byteLength": 188044,
+          "sha256": "3c4d9dde02c117343e4013a675d40d41a61c2f59eb5d3b1959774b434883d395"
+        },
+        {
+          "uri": "coarse.bin",
+          "byteLength": 2736,
+          "sha256": "d2f99f758809a85a5b6bebe0a56c277df399e33c81ffa14c66eb211c12ed214a"
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "scenarios": 15,
+    "opened": 7,
+    "refused": 8,
+    "defaultOpens": 5
+  },
+  "scenarios": [
+    {
+      "id": "defaults-ifc-explicit-edges",
+      "corpus": "ifc-explicit-edges",
+      "axis": "reviewed-defaults",
+      "representation": "target",
+      "outcome": "opened",
+      "documentByteLength": 15033,
+      "transferLimits": {
+        "documentBytes": 1073741824,
+        "resourceBytes": 2147483648,
+        "packageBytes": 8589934592,
+        "resourceCount": 256
+      },
+      "origins": [
+        "http://origin-a"
+      ],
+      "resources": [
+        {
+          "uri": "scene.bin",
+          "origin": "http://origin-a",
+          "byteLength": 492
+        },
+        {
+          "uri": "coarse.bin",
+          "origin": "http://origin-a",
+          "byteLength": 912
+        },
+        {
+          "uri": "properties.json",
+          "origin": "http://origin-a",
+          "byteLength": 1108
+        }
+      ],
+      "prototypeBatches": 1,
+      "partOccurrences": 1,
+      "triangles": 12,
+      "edgeSegments": 12,
+      "binaryByteLength": 492,
+      "transfers": [
+        "http://origin-a/ifc-explicit-edges/scene.gltf",
+        "http://origin-a/ifc-explicit-edges/scene.bin"
+      ],
+      "servedRequests": 2
+    },
+    {
+      "id": "defaults-coarse-ifc-explicit-edges",
+      "corpus": "ifc-explicit-edges",
+      "axis": "reviewed-defaults",
+      "representation": "coarse",
+      "outcome": "opened",
+      "documentByteLength": 15033,
+      "transferLimits": {
+        "documentBytes": 1073741824,
+        "resourceBytes": 2147483648,
+        "packageBytes": 8589934592,
+        "resourceCount": 256
+      },
+      "origins": [
+        "http://origin-a"
+      ],
+      "resources": [
+        {
+          "uri": "scene.bin",
+          "origin": "http://origin-a",
+          "byteLength": 492
+        },
+        {
+          "uri": "coarse.bin",
+          "origin": "http://origin-a",
+          "byteLength": 912
+        },
+        {
+          "uri": "properties.json",
+          "origin": "http://origin-a",
+          "byteLength": 1108
+        }
+      ],
+      "prototypeBatches": 1,
+      "partOccurrences": 1,
+      "triangles": 12,
+      "edgeSegments": 12,
+      "binaryByteLength": 912,
+      "transfers": [
+        "http://origin-a/ifc-explicit-edges/scene.gltf",
+        "http://origin-a/ifc-explicit-edges/coarse.bin"
+      ],
+      "servedRequests": 2
+    },
+    {
+      "id": "defaults-step-repeated-fasteners",
+      "corpus": "step-repeated-fasteners",
+      "axis": "reviewed-defaults",
+      "representation": "target",
+      "outcome": "opened",
+      "documentByteLength": 53211,
+      "transferLimits": {
+        "documentBytes": 1073741824,
+        "resourceBytes": 2147483648,
+        "packageBytes": 8589934592,
+        "resourceCount": 256
+      },
+      "origins": [
+        "http://origin-a"
+      ],
+      "resources": [
+        {
+          "uri": "scene.bin",
+          "origin": "http://origin-a",
+          "byteLength": 188044
+        }
+      ],
+      "prototypeBatches": 3,
+      "partOccurrences": 10,
+      "triangles": 2076,
+      "edgeSegments": 181,
+      "binaryByteLength": 188044,
+      "transfers": [
+        "http://origin-a/step-repeated-fasteners/scene.gltf",
+        "http://origin-a/step-repeated-fasteners/scene.bin"
+      ],
+      "servedRequests": 2
+    },
+    {
+      "id": "defaults-step-repeated-fasteners-ap242",
+      "corpus": "step-repeated-fasteners-ap242",
+      "axis": "reviewed-defaults",
+      "representation": "target",
+      "outcome": "opened",
+      "documentByteLength": 65815,
+      "transferLimits": {
+        "documentBytes": 1073741824,
+        "resourceBytes": 2147483648,
+        "packageBytes": 8589934592,
+        "resourceCount": 256
+      },
+      "origins": [
+        "http://origin-a"
+      ],
+      "resources": [
+        {
+          "uri": "scene.bin",
+          "origin": "http://origin-a",
+          "byteLength": 188044
+        },
+        {
+          "uri": "coarse.bin",
+          "origin": "http://origin-a",
+          "byteLength": 2736
+        }
+      ],
+      "prototypeBatches": 3,
+      "partOccurrences": 10,
+      "triangles": 2076,
+      "edgeSegments": 181,
+      "binaryByteLength": 188044,
+      "transfers": [
+        "http://origin-a/step-repeated-fasteners-ap242/scene.gltf",
+        "http://origin-a/step-repeated-fasteners-ap242/scene.bin"
+      ],
+      "servedRequests": 2
+    },
+    {
+      "id": "defaults-coarse-step-repeated-fasteners-ap242",
+      "corpus": "step-repeated-fasteners-ap242",
+      "axis": "reviewed-defaults",
+      "representation": "coarse",
+      "outcome": "opened",
+      "documentByteLength": 65815,
+      "transferLimits": {
+        "documentBytes": 1073741824,
+        "resourceBytes": 2147483648,
+        "packageBytes": 8589934592,
+        "resourceCount": 256
+      },
+      "origins": [
+        "http://origin-a"
+      ],
+      "resources": [
+        {
+          "uri": "scene.bin",
+          "origin": "http://origin-a",
+          "byteLength": 188044
+        },
+        {
+          "uri": "coarse.bin",
+          "origin": "http://origin-a",
+          "byteLength": 2736
+        }
+      ],
+      "prototypeBatches": 3,
+      "partOccurrences": 10,
+      "triangles": 36,
+      "edgeSegments": 36,
+      "binaryByteLength": 2736,
+      "transfers": [
+        "http://origin-a/step-repeated-fasteners-ap242/scene.gltf",
+        "http://origin-a/step-repeated-fasteners-ap242/coarse.bin"
+      ],
+      "servedRequests": 2
+    },
+    {
+      "id": "document-ceiling",
+      "corpus": "step-repeated-fasteners-ap242",
+      "axis": "transfer-limits",
+      "override": {
+        "documentBytes": 65814
+      },
+      "outcome": "refused",
+      "errorName": "RangeError",
+      "errorMessage": "http://origin-a/step-repeated-fasteners-ap242/scene.gltf declares 65815 bytes; the limit is 65814.",
+      "servedRequests": 1
+    },
+    {
+      "id": "resource-ceiling",
+      "corpus": "step-repeated-fasteners-ap242",
+      "axis": "transfer-limits",
+      "override": {
+        "resourceBytes": 188043
+      },
+      "outcome": "refused",
+      "errorName": "RangeError",
+      "errorMessage": "scene.bin declares 188044 bytes; the limit is 188043.",
+      "servedRequests": 1
+    },
+    {
+      "id": "package-ceiling",
+      "corpus": "step-repeated-fasteners-ap242",
+      "axis": "transfer-limits",
+      "override": {
+        "packageBytes": 4096
+      },
+      "outcome": "refused",
+      "errorName": "RangeError",
+      "errorMessage": "The package declares more than 4096 bytes across its resources.",
+      "servedRequests": 1
+    },
+    {
+      "id": "resource-count-ceiling",
+      "corpus": "ifc-explicit-edges",
+      "axis": "transfer-limits",
+      "override": {
+        "resourceCount": 1
+      },
+      "outcome": "refused",
+      "errorName": "RangeError",
+      "errorMessage": "The package declares 3 external resources; the limit is 1.",
+      "servedRequests": 1
+    },
+    {
+      "id": "structural-node-ceiling",
+      "corpus": "step-repeated-fasteners-ap242",
+      "axis": "structural-limits",
+      "override": {
+        "nodes": 2
+      },
+      "outcome": "refused",
+      "errorName": "CompiledGltfError",
+      "errorMessage": "The package declares 13 nodes; the limit is 2.",
+      "servedRequests": 1
+    },
+    {
+      "id": "structural-depth-ceiling",
+      "corpus": "step-repeated-fasteners-ap242",
+      "axis": "structural-limits",
+      "override": {
+        "traversalDepth": 1
+      },
+      "outcome": "refused",
+      "errorName": "CompiledGltfError",
+      "errorMessage": "The active scene nests deeper than 1 nodes at nodes[1].",
+      "servedRequests": 1
+    },
+    {
+      "id": "split-host-default",
+      "corpus": "step-repeated-fasteners-ap242",
+      "axis": "origins",
+      "synthesized": true,
+      "outcome": "refused",
+      "errorName": "TypeError",
+      "errorMessage": "http://origin-b/step-repeated-fasteners-ap242/scene.bin points at http://origin-b; package resources must stay on http://origin-a.",
+      "servedRequests": 1
+    },
+    {
+      "id": "split-host-announced",
+      "corpus": "step-repeated-fasteners-ap242",
+      "axis": "origins",
+      "synthesized": true,
+      "override": {
+        "additionalOrigins": [
+          "http://origin-b"
+        ]
+      },
+      "outcome": "opened",
+      "representation": "target",
+      "documentByteLength": 65921,
+      "transferLimits": {
+        "documentBytes": 1073741824,
+        "resourceBytes": 2147483648,
+        "packageBytes": 8589934592,
+        "resourceCount": 256
+      },
+      "origins": [
+        "http://origin-a",
+        "http://origin-b"
+      ],
+      "resources": [
+        {
+          "uri": "http://origin-b/step-repeated-fasteners-ap242/scene.bin",
+          "origin": "http://origin-b",
+          "byteLength": 188044
+        },
+        {
+          "uri": "http://origin-b/step-repeated-fasteners-ap242/coarse.bin",
+          "origin": "http://origin-b",
+          "byteLength": 2736
+        }
+      ],
+      "prototypeBatches": 3,
+      "partOccurrences": 10,
+      "triangles": 2076,
+      "edgeSegments": 181,
+      "binaryByteLength": 188044,
+      "transfers": [
+        "http://origin-a/step-repeated-fasteners-ap242-split/scene.gltf",
+        "http://origin-b/step-repeated-fasteners-ap242/scene.bin"
+      ],
+      "servedRequests": 2
+    },
+    {
+      "id": "injected-transfer",
+      "corpus": "step-repeated-fasteners-ap242",
+      "axis": "transfer",
+      "override": {
+        "fetch": "embedder-supplied"
+      },
+      "outcome": "opened",
+      "representation": "target",
+      "documentByteLength": 65815,
+      "transferLimits": {
+        "documentBytes": 1073741824,
+        "resourceBytes": 2147483648,
+        "packageBytes": 8589934592,
+        "resourceCount": 256
+      },
+      "origins": [
+        "http://origin-a"
+      ],
+      "resources": [
+        {
+          "uri": "scene.bin",
+          "origin": "http://origin-a",
+          "byteLength": 188044
+        },
+        {
+          "uri": "coarse.bin",
+          "origin": "http://origin-a",
+          "byteLength": 2736
+        }
+      ],
+      "prototypeBatches": 3,
+      "partOccurrences": 10,
+      "triangles": 2076,
+      "edgeSegments": 181,
+      "binaryByteLength": 188044,
+      "transfers": [
+        "http://origin-a/step-repeated-fasteners-ap242/scene.gltf",
+        "http://origin-a/step-repeated-fasteners-ap242/scene.bin"
+      ],
+      "servedRequests": 0
+    },
+    {
+      "id": "injected-transfer-bounded",
+      "corpus": "step-repeated-fasteners-ap242",
+      "axis": "transfer",
+      "override": {
+        "fetch": "embedder-supplied",
+        "resourceBytes": 4096
+      },
+      "outcome": "refused",
+      "errorName": "RangeError",
+      "errorMessage": "scene.bin declares 188044 bytes; the limit is 4096.",
+      "servedRequests": 0
+    }
+  ]
+}

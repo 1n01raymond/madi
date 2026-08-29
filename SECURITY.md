@@ -20,7 +20,12 @@ for a private reporting channel without disclosing exploit details.
 - Network loaders enforce origin, redirect, size, checksum, and content-type
   policy. The reviewed ceilings and the fetch policy that applies them are
   recorded in [ADR-0011](docs/adr/0011-remote-package-limits.md); an embedding
-  application may lower them, never silently raise them.
+  application may lower them, never silently raise them. A consumer outside
+  the Studio drives that surface in
+  [`artifacts/security/embedder-overrides`](artifacts/security/embedder-overrides/README.md):
+  the recorded packages open on the reviewed defaults, and each override axis
+  -- ceilings, announced origins, an embedder-supplied transfer -- is exercised
+  against a package served over real HTTP.
 - No document metadata is uploaded unless an embedding application explicitly
   configures a remote service.
 

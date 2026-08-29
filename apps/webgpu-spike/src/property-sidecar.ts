@@ -10,15 +10,11 @@ import type {
   PropertyValue,
   PropertyValueColumnReader,
 } from "@naru3d/scene-ir";
-import type { CompiledPropertiesRef } from "@naru3d/runtime-webgpu";
-
 import {
-  fetchPackageResource,
+  openPackageTransport,
   packageResourceDigest as sha256,
-  resolvePackageResourceUrl,
-  resolvePackageTransferLimits,
-} from "./package-limits.js";
-import type { PackageTransferLimits } from "./package-limits.js";
+} from "@naru3d/runtime-webgpu";
+import type { CompiledPropertiesRef, PackageTransport } from "@naru3d/runtime-webgpu";
 
 /**
  * Where a scene's `madi.package-properties.1` sidecar can be loaded from. URL
@@ -31,8 +27,8 @@ export type PropertySidecarSource =
       readonly kind: "url";
       readonly ref: CompiledPropertiesRef;
       readonly jsonUrl: URL;
-      /** Resolved by the loader that fetched the glTF; defaulted when absent. */
-      readonly limits?: PackageTransferLimits;
+      /** Settled by the loader that fetched the glTF; defaulted when absent. */
+      readonly transport?: PackageTransport;
     }
   | {
       readonly kind: "file";
@@ -73,20 +69,37 @@ export function resourceFileName(uri: string): string {
 }
 
 /**
+ * The transfer policy a URL sidecar is read under. The scene loader settles one
+ * policy for the whole package and passes it here; a caller that opens a
+ * sidecar on its own gets the reviewed defaults for that resource's origin.
+ */
+function transportOf(
+  source: Extract<PropertySidecarSource, { readonly kind: "url" }>,
+): PackageTransport {
+  return source.transport ?? openPackageTransport(source.jsonUrl);
+}
+
+/**
  * Both sidecar resources declare their own byte length, so that length is the
  * ceiling the transfer is held to; the digest check below then authenticates
  * what arrived.
  */
 async function fetchBytes(
-  url: URL,
+  source: Extract<PropertySidecarSource, { readonly kind: "url" }>,
+  resource: URL | string,
   kind: "json" | "binary",
   declaredByteLength: number,
-  limits: PackageTransferLimits,
 ): Promise<Uint8Array> {
-  return fetchPackageResource(url, {
+  const transport = transportOf(source);
+  // A string resource is a URI the header declared, so the same transport that
+  // fetches it resolves it and holds it to the package origins.
+  const url = typeof resource === "string"
+    ? transport.resolveResourceUrl(resource, source.jsonUrl, source.jsonUrl.href)
+    : resource;
+  return transport.fetchResource(url, {
     kind,
-    label: url.href,
-    limitBytes: Math.min(declaredByteLength, limits.resourceBytes),
+    label: typeof resource === "string" ? resource : url.href,
+    limitBytes: transport.resourceLimit(declaredByteLength),
   });
 }
 
@@ -137,12 +150,10 @@ export class PropertySidecarStore {
     if (ref.schemaVersion !== packagePropertiesSchema) {
       throw new TypeError(`Unsupported property sidecar schema ${ref.schemaVersion}.`);
     }
-    const limits = this.source.kind === "url"
-      ? this.source.limits ?? resolvePackageTransferLimits()
-      : resolvePackageTransferLimits();
-    const jsonBytes = this.source.kind === "url"
-      ? await fetchBytes(this.source.jsonUrl, "json", ref.byteLength, limits)
-      : new Uint8Array(await this.source.jsonFile.arrayBuffer());
+    const source = this.source;
+    const jsonBytes = source.kind === "url"
+      ? await fetchBytes(source, source.jsonUrl, "json", ref.byteLength)
+      : new Uint8Array(await source.jsonFile.arrayBuffer());
     if (jsonBytes.byteLength !== ref.byteLength) {
       throw new RangeError(
         `${ref.uri} must be ${String(ref.byteLength)} bytes; ` +
@@ -156,17 +167,8 @@ export class PropertySidecarStore {
     const document = parsePackageProperties(
       JSON.parse(new TextDecoder().decode(jsonBytes)),
     );
-    const columns = this.source.kind === "url"
-      ? await fetchBytes(
-          resolvePackageResourceUrl(
-            document.columns.uri,
-            this.source.jsonUrl,
-            this.source.jsonUrl.href,
-          ),
-          "binary",
-          document.columns.byteLength,
-          limits,
-        )
+    const columns = source.kind === "url"
+      ? await fetchBytes(source, document.columns.uri, "binary", document.columns.byteLength)
       : await this.readLocalColumns(document.columns.uri);
     if (columns.byteLength !== document.columns.byteLength) {
       throw new RangeError(

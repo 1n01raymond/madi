@@ -1,14 +1,16 @@
-import { inspectCompiledHierarchy, readCompiledHierarchyRef } from "@naru3d/runtime-webgpu";
-import type { CompiledHierarchy } from "@naru3d/runtime-webgpu";
-
 import {
-  assertPackageBudget,
   assertPackageUrl,
-  fetchPackageResource,
-  resolvePackageResourceUrl,
-  resolvePackageTransferLimits,
-} from "./package-limits.js";
-import type { DeclaredPackageResource, PackageTransferLimitOverrides } from "./package-limits.js";
+  inspectCompiledHierarchy,
+  openPackageTransport,
+  readCompiledHierarchyRef,
+} from "@naru3d/runtime-webgpu";
+import type {
+  CompiledHierarchy,
+  DeclaredPackageResource,
+  PackageTransportDescriptor,
+  PackageTransportPolicy,
+} from "@naru3d/runtime-webgpu";
+
 import { loadHierarchySidecar } from "./hierarchy-sidecar.js";
 import { resourceFileName } from "./property-sidecar.js";
 import type { PropertySidecarSource } from "./property-sidecar.js";
@@ -56,6 +58,11 @@ export interface LoadedSceneHierarchy {
    */
   readonly documentByteLength: number;
   readonly hierarchy: CompiledHierarchy;
+  /**
+   * The transfer policy this package was opened under, for the Worker that
+   * fetches its ranges. Absent for local files, which are never transferred.
+   */
+  readonly transport?: PackageTransportDescriptor;
   readonly targetBinary: GeometryBinarySource;
   readonly coarseBinary?: GeometryBinarySource;
   readonly properties?: PropertySidecarSource;
@@ -160,21 +167,24 @@ function bufferOf(bytes: Uint8Array): ArrayBuffer {
 export async function loadSceneHierarchy(
   source: SceneSource,
   signal?: AbortSignal,
-  limitOverrides?: PackageTransferLimitOverrides,
+  policy?: PackageTransportPolicy,
 ): Promise<LoadedSceneHierarchy> {
   if (source.kind === "url") {
-    const limits = resolvePackageTransferLimits(limitOverrides);
-    const documentBytes = await fetchPackageResource(source.gltfUrl, {
+    // One policy is settled here and then carried: every resource below, the
+    // sidecars, and the Worker that fetches ranges all read it from this
+    // object instead of reaching for the defaults on their own.
+    const transport = openPackageTransport(source.gltfUrl, policy);
+    const documentBytes = await transport.fetchResource(source.gltfUrl, {
       kind: "gltf",
       label: source.gltfUrl.href,
-      limitBytes: limits.documentBytes,
+      limitBytes: transport.limits.documentBytes,
       ...(signal ? { signal } : {}),
     });
     const document = parseJson(new TextDecoder().decode(documentBytes), source.gltfUrl.href);
     // Every resource is resolved against the document URL and held to the
     // package budget before one of them is requested.
     const resourceUrl = (uri: string): URL =>
-      resolvePackageResourceUrl(uri, source.gltfUrl, source.gltfUrl.href);
+      transport.resolveResourceUrl(uri, source.gltfUrl, source.gltfUrl.href);
     // A relocated hierarchy lives beside the document, so its sidecar is
     // fetched before the tree is read rather than on demand.
     const hierarchyRef = readCompiledHierarchyRef(document);
@@ -184,7 +194,7 @@ export async function loadSceneHierarchy(
             kind: "url",
             ref: hierarchyRef,
             jsonUrl: resourceUrl(hierarchyRef.uri),
-            limits,
+            transport,
           },
           signal,
         )
@@ -207,11 +217,12 @@ export async function loadSceneHierarchy(
     // assembly tree cannot be read without it; each of its two resources is
     // held to the single-resource ceiling on its own. Nothing else is
     // requested until the whole package fits its budget.
-    assertPackageBudget(documentBytes.byteLength, declaredResources(hierarchy), limits);
+    transport.assertBudget(documentBytes.byteLength, declaredResources(hierarchy));
     return {
       documentSource: { kind: "bytes", bytes: bufferOf(documentBytes) },
       documentByteLength: documentBytes.byteLength,
       hierarchy,
+      transport: transport.describe(),
       targetBinary: { kind: "url", href: targetUrl.href },
       ...(coarseUrl ? { coarseBinary: { kind: "url" as const, href: coarseUrl.href } } : {}),
       ...(hierarchy.properties && propertiesUrl
@@ -220,7 +231,7 @@ export async function loadSceneHierarchy(
               kind: "url" as const,
               ref: hierarchy.properties,
               jsonUrl: propertiesUrl,
-              limits,
+              transport,
             },
           }
         : {}),
@@ -230,7 +241,7 @@ export async function loadSceneHierarchy(
               kind: "url" as const,
               ref: hierarchy.spatialIndex,
               url: spatialUrl,
-              limits,
+              transport,
             },
           }
         : {}),

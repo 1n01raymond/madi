@@ -144,6 +144,19 @@ count is still derivable from the document itself either way.
 Transferable buffers avoid copies. SharedArrayBuffer is optional because it
 requires deployment headers; the baseline works without it.
 
+### One transfer policy per opened package
+
+A remote package is untrusted input, so a host settles a single
+`PackageTransport` when it opens the document and every later fetch reads that
+object: the resources the document declares, both sidecars, the demand index,
+and the byte ranges a Worker requests on its own. The policy names the ceilings,
+the origins a package may span, and optionally the transfer itself; it crosses
+the Worker boundary as a descriptor of already-resolved values, so a Worker
+inherits a policy and cannot widen one. Defaults and the reasoning behind them
+are [ADR-0011](adr/0011-remote-package-limits.md); a consumer outside the Studio
+exercises the override axes in
+[`artifacts/security/embedder-overrides`](../artifacts/security/embedder-overrides/README.md).
+
 ## 6. Streaming scheduler
 
 The scheduler combines demand signals:

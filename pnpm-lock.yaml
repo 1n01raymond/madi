@@ -114,6 +114,16 @@ importers:
         specifier: 22.20.1
         version: 22.20.1
 
+  tools/package-embedder:
+    dependencies:
+      '@naru3d/runtime-webgpu':
+        specifier: workspace:*
+        version: link:../../packages/runtime-webgpu
+    devDependencies:
+      '@types/node':
+        specifier: 22.20.1
+        version: 22.20.1
+
 packages:
 
   '@dimforge/rapier3d-compat@0.12.0':
