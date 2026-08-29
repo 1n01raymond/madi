@@ -116,9 +116,10 @@ IfcOpenShell parsing and tessellation before the deterministic federation merge.
 The package resources still compile as one federation, and shared-cache
 authorization remains a separate gate.
 
-`src/compiled-payload-store.ts` adds the storage half of
-[ADR-0018](../../docs/adr/0018-content-addressed-compiled-payloads.md); no
-compile path calls it yet. Encoding and placement are now separate:
+`src/compiled-payload-store.ts` and `src/compiled-payload-cache.ts` implement
+[ADR-0018](../../docs/adr/0018-content-addressed-compiled-payloads.md), reached
+through `--payload-cache <directory>` on both commands and off by default.
+Encoding and placement are separate:
 `buildCompiledPayload` produces one prototype's accessor bytes and
 placement-free metadata, `appendCompiledPayload` places them into `scene.bin`,
 and `appendGeometry` is exactly those two calls, so a restored payload and a
@@ -136,8 +137,27 @@ whole-package cache: refused key and path shapes, an `lstat` symlink check,
 staged `mkdtemp` publication with an idempotent rename, `AMBIGUOUS_PAYLOAD` when
 one key would describe two byte sequences, and a restore that reproduces the key
 from the manifest, recomputes every accessor byte length, and verifies the
-binary before returning it. Selection, orchestration, and the ADR's acceptance
-evidence are the next increment.
+binary before returning it.
+
+Selection is one decision per prototype, taken inside the packaging loop:
+restore a verified payload, or build it and publish it. The store is read
+synchronously so exactly one payload is live at a time, which is what keeps
+peak memory at a clean build's. Both degradations keep the compile working --
+an entry that fails verification is a miss that warns and rebuilds, and a
+publish that fails warns and keeps the compiled output -- so the package bytes
+are the same whether the store was cold, warm, corrupt, or unwritable. This tier
+is not the whole-package cache: a payload hit still runs the adapter and still
+re-lays out every federation-global resource.
+
+With a payload cache selected, `build-report.json` gains a
+`compiledPayloadCache` block -- schema, prototype count, hits, misses,
+publications, a count per outcome, publish failures, and up to sixteen named
+degraded prototypes -- and the CLI prints the same summary beside the
+package-cache line. It names prototype ids only, and like
+`adapter-report.json:documentArtifactCache` it is execution-path telemetry that
+an output-identity comparison excludes by name. The ADR's acceptance evidence,
+a changed-discipline equivalence record and a measured saving at real-large
+scale, is the next increment.
 
 ## Compile an IFC federation
 

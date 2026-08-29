@@ -62,18 +62,21 @@ three were read out of the code rather than assumed:
   digest, taken over representation content rather than over its position in
   the geometry buffer; the scene unit scale applied by `appendGeometry`; and
   the payload-affecting compile policy set.
-- Classify every compile option explicitly. Payload-affecting options enter the
-  key. Today there is exactly one: resource-name elision, which drops accessor
-  and bufferView names in `GltfBinaryBuilder`. Whether a prototype carries edge
-  accessors is not a compiler option -- it comes from the prototype's Scene IR
-  representation, which the content digest already covers. Layout-affecting
-  options are excluded by name with a stated reason (target chunk byte budget,
-  spatial index and leaf capacity, spatial payload order, compact JSON, node
-  identity and transform elision, hierarchy relocation, thread count, URI hints
-  -- none of which change a single payload byte). **An option that is not
-  classified is
-  payload-affecting.** Adding an unclassified option therefore invalidates the
-  namespace rather than silently sharing it.
+- Classify every compile option explicitly. Layout-affecting options are
+  excluded by name with a stated reason (target chunk byte budget, spatial index
+  and leaf capacity, spatial payload order, compact JSON, node identity and
+  transform elision, hierarchy relocation, resource-name elision -- none of
+  which change a single payload byte); everything else enters the key. Today the
+  keyed set is empty, because the encode/place split put every layout decision
+  after `buildCompiledPayload`. Resource-name elision belongs on the excluded
+  side for that reason: `GltfBinaryBuilder.append` drops the names while placing
+  a payload, so the option changes the document and never the payload. Whether a
+  prototype carries edge accessors is not a compiler option -- it comes from the
+  prototype's Scene IR representation, which the content digest already covers.
+  **An option that is not classified is payload-affecting.** Adding an
+  unclassified option therefore invalidates the namespace rather than silently
+  sharing it, and an option whose value cannot be described in a key at all
+  fails the compile instead of being dropped from it.
 - Derive the reuse decision from content, not from the invalidation plan. The
   [ADR-0010](0010-ifc-incremental-dependency-index.md) index governs which
   documents must be re-extracted by the adapter; the payload store governs
@@ -206,18 +209,26 @@ measurement gate fails:
 Implementation follows the storage then selection/orchestration order the
 tracking issue sets.
 
-**Status of that order.** The storage half has landed:
+**Status of that order.** Storage and orchestration have both landed.
 `packages/compiler/src/compiled-payload.ts` splits encoding from placement and
-supplies `compiledPayloadContentDigest`, and
+supplies `compiledPayloadContentDigest`;
 `packages/compiler/src/compiled-payload-store.ts` publishes and restores
 `naru.compiled-payload-entry.1` entries under the guards listed above, sharing
-them with the whole-package cache through `cache-primitives.ts`. Digital Hub
-still compiles to the package digest already recorded in
-[artifacts/compiler/node-field-elision](../../artifacts/compiler/node-field-elision/README.md),
-so the encoder split moved no bytes. No compile path reads or writes the store
-yet, so gate 3 is met only for storage -- idempotent publication,
-one-key-one-byte-sequence refusal, corruption as a verified miss, key and path
-refusal, and symlink refusal on any host that permits creating one -- while
-gates 1, 2, 4, and the invalidation-table rows belong to
-the selection/orchestration increment. This ADR stays Proposed until they
-pass.
+them with the whole-package cache through `cache-primitives.ts`; and
+`packages/compiler/src/compiled-payload-cache.ts` decides per prototype whether
+to restore or build, publishes what it built, warns and rebuilds on a corrupt
+entry, and reports hits, misses, and rebuild reasons into
+`build-report.json:compiledPayloadCache`. Both compilers accept
+`--payload-cache <directory>`, off by default, so no committed package or digest
+moved. Digital Hub still compiles to the package digest already recorded in
+[artifacts/compiler/node-field-elision](../../artifacts/compiler/node-field-elision/README.md).
+
+Gate 3 is met: the storage guards listed above, plus the invalidation-table rows
+that do not need Python (content change, stable-content relabelling, corrupt
+entry, unclassified option), the classification rule itself, and a unit-scale
+proof that a store-warm compile publishes the same `scene.bin`, document digest,
+and package digest as a compile with the store disabled. Gates 1, 2, and 4 --
+the changed-discipline Digital Hub resource equivalence, the closed report
+exclusion list, and a measured saving that beats verification at real-large
+scale with no higher peak memory -- belong to the acceptance-evidence increment.
+This ADR stays Proposed until they pass.

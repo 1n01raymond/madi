@@ -24,6 +24,7 @@ import {
   scaledPositionBounds,
 } from "./binary.js";
 import { appendCompiledPayload, buildCompiledPayload } from "./compiled-payload.js";
+import type { CompiledPayloadSource } from "./compiled-payload.js";
 import type { PlacedPayload } from "./compiled-payload.js";
 import { measureJsonDocument } from "./json-document.js";
 import { buildHierarchySidecar, packageHierarchySchema } from "./hierarchy-sidecar.js";
@@ -498,11 +499,14 @@ function appendGeometry(
   prototype: Prototype,
   representation: Representation,
   scaleToMeters: number,
+  source?: CompiledPayloadSource,
 ): { readonly resource: GeometryResource; readonly triangles: number; readonly edges: number } {
-  // Encoding and placement are separate on purpose: the payload built here is
-  // the same value a content-addressed store would hand back, so both paths
-  // reach `scene.bin` through one `appendCompiledPayload`.
-  const payload = buildCompiledPayload(representation, scaleToMeters);
+  // Encoding and placement are separate on purpose: a payload a store hands
+  // back is the same value the encoder would have built, so both paths reach
+  // `scene.bin` through one `appendCompiledPayload` and place identical bytes.
+  const payload = source
+    ? source.payloadFor(prototype.id, representation, scaleToMeters)
+    : buildCompiledPayload(representation, scaleToMeters);
   return {
     resource: { prototype, representation, ...appendCompiledPayload(builder, payload) },
     triangles: payload.triangles,
@@ -847,7 +851,13 @@ export function compileSceneToGltf(
     const representation = representationFor(prototype, representations);
     if (!representation) continue;
     const byteOffset = builder.byteLength;
-    const compiled = appendGeometry(builder, prototype, representation, scaleToMeters);
+    const compiled = appendGeometry(
+      builder,
+      prototype,
+      representation,
+      scaleToMeters,
+      options.payloadSource,
+    );
     geometryByPrototype.set(prototype.id, compiled.resource);
     targetRangesByPrototype.set(prototype.id, {
       prototypeId: prototype.id,
@@ -1429,6 +1439,7 @@ export function compileSceneToGltf(
   const packageDigest = packageHash.digest("hex");
   const diagnosticCounts = { info: 0, warning: 0, error: 0 };
   for (const diagnostic of diagnostics) diagnosticCounts[diagnostic.severity] += 1;
+  const payloadCacheReport = options.payloadSource?.report?.();
   const report: CompilerBuildReport = {
     schemaVersion: compilerEvidenceSchema,
     profile: experimentalGltfProfile,
@@ -1561,6 +1572,7 @@ export function compileSceneToGltf(
       .filter(([, count]) => count > 1)
       .sort(([left], [right]) => left.localeCompare(right, "en"))
       .map(([prototypeId, occurrenceCount]) => ({ prototypeId, occurrenceCount })),
+    ...(payloadCacheReport ? { compiledPayloadCache: payloadCacheReport } : {}),
     diagnostics: {
       counts: diagnosticCounts,
       codes: [...new Set(diagnostics.map(({ code }) => code))].sort(),

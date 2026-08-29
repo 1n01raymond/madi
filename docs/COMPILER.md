@@ -738,11 +738,11 @@ compiled payload chunks and complete-package byte-equivalence remain before
 per-discipline compilation is a complete product claim.
 
 [ADR-0018](adr/0018-content-addressed-compiled-payloads.md) is the reviewed
-design for that payload tier; its storage half is implemented in 21.6 below and
-no compile reads or writes it yet. It authorizes reusing one
-unit, the prototype payload -- the accessor bytes and placement-free accessor
-metadata `appendGeometry` produces for a prototype -- and requires every other
-package resource, `scene.bin` included, to be rebuilt from the current scene.
+design for that payload tier; it is implemented in 21.6 below, behind the
+`--payload-cache` flag. It authorizes reusing one unit, the prototype payload --
+the accessor bytes and placement-free accessor metadata `appendGeometry`
+produces for a prototype -- and requires every other package resource,
+`scene.bin` included, to be rebuilt from the current scene.
 Payload keys carry the schema, compiler, and adapter identities, the prototype's
 Scene IR content digest, the scene unit scale, and the payload-affecting policy
 set; an option that has not been classified counts as payload-affecting, so a
@@ -750,10 +750,12 @@ new option cold-starts the namespace instead of silently sharing it.
 
 ### 21.6 Content-addressed payload store
 
-The storage half of [ADR-0018](adr/0018-content-addressed-compiled-payloads.md)
-is implemented. No compile path calls it yet: selecting per prototype between a
-restore and a build, publishing what was built, and reporting hits and misses
-are the next increment, and the ADR's acceptance evidence belongs with them.
+[ADR-0018](adr/0018-content-addressed-compiled-payloads.md) is implemented:
+storage, and the selection that uses it. `naru compile` and `naru compile-ifc`
+take `--payload-cache <directory>`, off by default, so a compile that does not
+ask for the store behaves exactly as before. What the ADR still owes is its
+acceptance evidence -- a changed-discipline resource equivalence record and a
+measured saving at real-large scale -- so it stays Proposed.
 
 Encoding and placement are now separate functions.
 `buildCompiledPayload(representation, scaleToMeters)` produces the payload --
@@ -805,3 +807,38 @@ manifest. Any mismatch throws `INVALID_PAYLOAD_ENTRY`. The storage primitive
 stays strict on purpose, exactly as `compiled-cache.ts` does: the warn-and-
 rebuild fallback that makes a corrupt entry a miss belongs to the compile paths
 that will call it, so no single bad file can break a compile.
+Selection is one decision per prototype, made inside the packaging loop.
+`CompiledPayloadCache` (`packages/compiler/src/compiled-payload-cache.ts`)
+implements the `CompiledPayloadSource` interface `appendGeometry` asks for: it
+derives the key, restores the payload if the store holds a verified one, and
+otherwise builds the payload and publishes it. The store is read synchronously
+for a reason the ADR's fourth gate makes binding -- an asynchronous pre-pass
+would have to hold every payload at once, where restoring inside the loop keeps
+exactly one live and peak memory at the clean build's.
+
+Both degradations are fail-open-to-work. A stored entry that fails any check is
+a miss: the compiler warns, rebuilds the payload, and finishes the package. A
+publish that fails -- a read-only store, a full disk, an entry already corrupt
+under the same key -- warns and keeps the compiled output, because a store that
+cannot be written to must not turn a successful compile into an error.
+
+Which options enter the key is a closed table with a reason per row. Every
+option the packager accepts is named there as layout-affecting, and today the
+keyed set is therefore empty: the encode/place split put every layout decision
+after `buildCompiledPayload`. Resource-name elision is on that list for a
+concrete reason -- `GltfBinaryBuilder.append` drops the names while placing a
+payload, so the option changes the document and never the payload bytes. An
+option that is not in the table is payload-affecting and enters the key as
+`unclassified:<name>`, so forgetting to classify one costs a rebuild rather
+than serving a payload compiled under different rules; an option whose value
+cannot be described in a key at all fails the compile instead.
+
+`build-report.json` gains a `compiledPayloadCache` block whenever a payload
+source was supplied: the store schema, the prototype count, hits, misses,
+publications, a count per outcome, publish failures, and up to sixteen named
+degraded prototypes. It names prototype ids and nothing else -- a source path or
+a property value would put engineering data in a build report -- and it is
+execution-path telemetry, so comparing two packages for output identity excludes
+it by name, exactly as `adapter-report.json:documentArtifactCache` is excluded.
+The CLI prints the same summary beside the package-cache line.
+

@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { lstatSync, readFileSync } from "node:fs";
 import { lstat, readFile } from "node:fs/promises";
 
 /**
@@ -67,6 +68,10 @@ export function normalizeCacheOptions(
   );
 }
 
+export function digestBytes(bytes: Uint8Array): string {
+  return createHash("sha256").update(bytes).digest("hex");
+}
+
 export async function identifyFile(
   path: string,
 ): Promise<{ readonly bytes: number; readonly sha256: string }> {
@@ -74,10 +79,24 @@ export async function identifyFile(
   // rather than followed out of it.
   const [bytes, metadata] = await Promise.all([readFile(path), lstat(path)]);
   if (!metadata.isFile()) throw new TypeError(`Cache resource ${path} must be a file.`);
-  return {
-    bytes: bytes.byteLength,
-    sha256: createHash("sha256").update(bytes).digest("hex"),
-  };
+  return { bytes: bytes.byteLength, sha256: digestBytes(bytes) };
+}
+
+/**
+ * The same check, synchronously, returning the bytes it already hashed.
+ *
+ * The packager's geometry loop is synchronous, so the payload store reads
+ * through this: restoring one payload at a time inside that loop keeps peak
+ * memory at the clean build's, where an asynchronous pre-pass would have to
+ * hold every payload at once. Handing the bytes back also spares the caller a
+ * second read of a file this function has just read in full.
+ */
+export function identifyFileSync(
+  path: string,
+): { readonly bytes: Uint8Array; readonly sha256: string } {
+  if (!lstatSync(path).isFile()) throw new TypeError(`Cache resource ${path} must be a file.`);
+  const bytes = new Uint8Array(readFileSync(path));
+  return { bytes, sha256: digestBytes(bytes) };
 }
 
 export function errorCode(error: unknown): string | undefined {

@@ -5,6 +5,7 @@ import { copyFile, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { basename, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { CompiledPayloadCache } from "./compiled-payload-cache.js";
 import { compileSceneToGltf } from "./gltf.js";
 import { hydrateIfcSceneSplit, ifcSceneSplitEncodingVersion } from "./ifc-scene.js";
 import { readIfcStructure } from "./ifc-structure-stream.js";
@@ -18,7 +19,7 @@ import {
 } from "./ifc-incremental-dependencies.js";
 import type { IfcIncrementalDependencyIndex } from "./ifc-incremental-dependencies.js";
 import { writeCompiledPackage } from "./package-output.js";
-import type { CompilerBuildReport } from "./types.js";
+import type { CompileGltfOptions, CompilerBuildReport } from "./types.js";
 import { validateCompiledGltf } from "./validate.js";
 import {
   createCompiledCacheKey,
@@ -58,6 +59,12 @@ export interface IfcFederationCompileOptions {
   readonly targetChunkByteBudget?: number;
   /** Optional persistent package cache keyed by the complete federation/toolchain identity. */
   readonly cacheDirectory?: string;
+  /**
+   * Optional persistent per-prototype payload store. Independent of the package
+   * cache: a federation whose one changed discipline misses the package cache
+   * still restores every prototype the change did not touch.
+   */
+  readonly payloadCacheDirectory?: string;
   readonly spatialIndex?: boolean;
   readonly spatialLeafCapacity?: number;
   readonly spatialPayloadOrder?: boolean;
@@ -415,16 +422,16 @@ export async function compileIfcFederation(
   const environment = options.environment ?? process.env;
   let cacheKeyInput: CompiledCacheKeyInput | undefined;
   let cacheKey: string | undefined;
-  if (options.cacheDirectory) {
-    const adapterIdentity = await inspectAdapterToolchain(
-      pythonExecutable,
-      adapterScriptPath,
-      environment,
-    );
-    const compiler = await currentCompilerCacheIdentity();
+  // Both stores are keyed by the same two identities, so they are inspected
+  // once for whichever of them is enabled.
+  const adapterToolchain = options.cacheDirectory || options.payloadCacheDirectory
+    ? await inspectAdapterToolchain(pythonExecutable, adapterScriptPath, environment)
+    : undefined;
+  const compiler = adapterToolchain ? await currentCompilerCacheIdentity() : undefined;
+  if (options.cacheDirectory && adapterToolchain && compiler) {
     cacheKeyInput = federationCacheInput(
       sources,
-      adapterIdentity,
+      adapterToolchain,
       compiler,
       threads,
       targetChunkByteBudget,
@@ -539,7 +546,7 @@ export async function compileIfcFederation(
       }
     }
 
-    const compiled = compileSceneToGltf(scene, {
+    const compileOptions: CompileGltfOptions = {
       coarseBounds: true,
       generator: "MADI compiler 0.0.0 / IfcOpenShell federation slice",
       targetChunkByteBudget,
@@ -559,7 +566,22 @@ export async function compileIfcFederation(
       // a lazy property sidecar; the compiler still never materializes a
       // property value.
       propertyColumns: properties,
-    });
+    };
+    const payloadSource = options.payloadCacheDirectory && adapterToolchain && compiler
+      ? new CompiledPayloadCache({
+          storeDirectory: options.payloadCacheDirectory,
+          compiler,
+          adapter: {
+            name: adapterToolchain.name,
+            version: `${adapterToolchain.version}+${adapterToolchain.fingerprint}`,
+          },
+          compileOptions,
+        })
+      : undefined;
+    const compiled = compileSceneToGltf(
+      scene,
+      payloadSource ? { ...compileOptions, payloadSource } : compileOptions,
+    );
     const validation = validateCompiledGltf(
       compiled.document,
       compiled.coarseBinary

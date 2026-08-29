@@ -4,12 +4,13 @@ import { tmpdir } from "node:os";
 import { basename, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { CompiledPayloadCache } from "./compiled-payload-cache.js";
 import { hydratePhase0Evidence } from "./evidence-input.js";
 import { compileSceneToGltf } from "./gltf.js";
 import { writeCompiledPackage } from "./package-output.js";
 import { inspectStepFile } from "./step-source.js";
 import type { StepSourceInspection } from "./step-source.js";
-import type { CompilerBuildReport } from "./types.js";
+import type { CompileGltfOptions, CompilerBuildReport } from "./types.js";
 import { validateCompiledGltf } from "./validate.js";
 import {
   createCompiledCacheKey,
@@ -36,6 +37,12 @@ export interface StepCompileOptions {
   readonly angularTolerance?: number;
   /** Optional persistent package cache. Existing output is reused only after full verification. */
   readonly cacheDirectory?: string;
+  /**
+   * Optional persistent per-prototype payload store. Independent of the package
+   * cache: it helps a compile whose source changed, where the whole package is
+   * a miss but most prototypes are unchanged.
+   */
+  readonly payloadCacheDirectory?: string;
   readonly spatialIndex?: boolean;
   readonly spatialLeafCapacity?: number;
   readonly relocateHierarchyNodes?: boolean;
@@ -239,13 +246,13 @@ export async function compileStepFile(
   const environment = options.environment ?? process.env;
   let cacheKeyInput: CompiledCacheKeyInput | undefined;
   let cacheKey: string | undefined;
-  if (options.cacheDirectory) {
-    const identity = await inspectAdapterIdentity(
-      pythonExecutable,
-      adapterScriptPath,
-      environment,
-    );
-    const compiler = await currentCompilerCacheIdentity();
+  // Both stores are keyed by the same two identities, so they are inspected
+  // once for whichever of them is enabled.
+  const identity = options.cacheDirectory || options.payloadCacheDirectory
+    ? await inspectAdapterIdentity(pythonExecutable, adapterScriptPath, environment)
+    : undefined;
+  const compiler = identity ? await currentCompilerCacheIdentity() : undefined;
+  if (options.cacheDirectory && identity && compiler) {
     cacheKeyInput = cacheInput(
       inspection,
       identity,
@@ -319,14 +326,29 @@ export async function compileStepFile(
     if (scene.revision.sourceDigest !== `sha256:${inspection.sha256}`) {
       throw new TypeError("OCCT Scene IR source digest does not match the STEP input.");
     }
-    const compiled = compileSceneToGltf(scene, {
+    const compileOptions: CompileGltfOptions = {
       coarseBounds: true,
       ...(options.spatialIndex === true ? { spatialIndex: true } : {}),
       ...(options.spatialLeafCapacity === undefined
         ? {}
         : { spatialLeafCapacity: options.spatialLeafCapacity }),
       ...(options.relocateHierarchyNodes === true ? { relocateHierarchyNodes: true } : {}),
-    });
+    };
+    const payloadSource = options.payloadCacheDirectory && identity && compiler
+      ? new CompiledPayloadCache({
+          storeDirectory: options.payloadCacheDirectory,
+          compiler,
+          adapter: {
+            name: identity.name,
+            version: `${identity.version}+${identity.fingerprint}`,
+          },
+          compileOptions,
+        })
+      : undefined;
+    const compiled = compileSceneToGltf(
+      scene,
+      payloadSource ? { ...compileOptions, payloadSource } : compileOptions,
+    );
     const validation = validateCompiledGltf(
       compiled.document,
       compiled.coarseBinary

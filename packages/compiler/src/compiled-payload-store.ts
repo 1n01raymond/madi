@@ -1,4 +1,12 @@
 import { createHash } from "node:crypto";
+import {
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  renameSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
 import { mkdir, mkdtemp, readFile, rename, rm, writeFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
 
@@ -6,9 +14,11 @@ import { ids } from "@naru3d/scene-ir";
 
 import {
   canonicalJson,
+  digestBytes,
   errorCode,
   idempotentPublishCodes,
   identifyFile,
+  identifyFileSync,
   normalizeCacheOptions,
   requireSha256,
   requireTool,
@@ -295,6 +305,19 @@ export async function readCompiledPayloadEntry(
   }
 }
 
+export function readCompiledPayloadEntrySync(
+  storeDirectory: string,
+  key: string,
+): CompiledPayloadEntry | undefined {
+  const directory = entryDirectory(storeDirectory, key);
+  try {
+    return parseEntry(readFileSync(join(directory, manifestResourcePath), "utf8"), key);
+  } catch (error) {
+    if (errorCode(error) === "ENOENT") return undefined;
+    throw error;
+  }
+}
+
 function describeEntry(
   key: string,
   input: CompiledPayloadKeyInput,
@@ -336,66 +359,155 @@ export interface PublishCompiledPayloadOptions {
   readonly payload: CompiledPayload;
 }
 
+interface Publication {
+  readonly storeDirectory: string;
+  readonly namespace: string;
+  readonly directory: string;
+  readonly key: string;
+  readonly entry: CompiledPayloadEntry;
+  readonly joined: Uint8Array;
+  readonly manifest: string;
+}
+
 /**
- * Publishes a payload under its content key.
- *
- * The entry is staged in a sibling directory and renamed into place, so a
- * concurrent compilation either sees no entry or a complete one. Losing that
- * race is not an error: the published entry is read back and compared, and only
- * a genuine disagreement -- the same key describing different bytes -- is
- * refused, because that would mean the key is missing an input.
+ * Everything a publish decides before it touches the filesystem, so the
+ * asynchronous and synchronous publishes below file byte-identical entries and
+ * only their I/O differs.
  */
-export async function publishCompiledPayload(
-  options: PublishCompiledPayloadOptions,
-): Promise<CompiledPayloadEntry> {
+function preparePublication(options: PublishCompiledPayloadOptions): Publication {
   const input = normalizeInput(options.input);
   const key = createCompiledPayloadKey(input);
   const joined = concatenatePayload(options.payload);
   const entry = describeEntry(key, input, options.payload, {
     bytes: joined.byteLength,
-    sha256: createHash("sha256").update(joined).digest("hex"),
+    sha256: digestBytes(joined),
   });
   const storeDirectory = resolve(options.storeDirectory);
-  const directory = entryDirectory(storeDirectory, key);
-  const namespace = namespaceDirectory(storeDirectory);
-  await mkdir(namespace, { recursive: true });
-  const staging = await mkdtemp(join(namespace, ".publish-"));
-  try {
-    await writeFile(join(staging, binaryResourcePath), joined);
-    await writeFile(
-      join(staging, manifestResourcePath),
-      `${JSON.stringify(entry, null, 2)}\n`,
-      "utf8",
+  return {
+    storeDirectory,
+    namespace: namespaceDirectory(storeDirectory),
+    directory: entryDirectory(storeDirectory, key),
+    key,
+    entry,
+    joined,
+    manifest: `${JSON.stringify(entry, null, 2)}\n`,
+  };
+}
+
+/**
+ * Settles a lost publish race. The entry already in place is read back and
+ * compared, and only a genuine disagreement -- the same key describing
+ * different bytes -- is refused, because that would mean the key is missing an
+ * input.
+ */
+function reconcilePublished(
+  published: CompiledPayloadEntry | undefined,
+  publication: Publication,
+  cause: unknown,
+): CompiledPayloadEntry {
+  if (!published) throw cause;
+  if (canonicalJson(published) !== canonicalJson(publication.entry)) {
+    throw new CompiledPayloadStoreError(
+      "AMBIGUOUS_PAYLOAD",
+      `Compiled payload key ${publication.key} already describes different bytes; the key is missing an input.`,
+      { cause },
     );
+  }
+  return published;
+}
+
+/**
+ * Publishes a payload under its content key.
+ *
+ * The entry is staged in a sibling directory and renamed into place, so a
+ * concurrent compilation either sees no entry or a complete one.
+ */
+export async function publishCompiledPayload(
+  options: PublishCompiledPayloadOptions,
+): Promise<CompiledPayloadEntry> {
+  const publication = preparePublication(options);
+  await mkdir(publication.namespace, { recursive: true });
+  const staging = await mkdtemp(join(publication.namespace, ".publish-"));
+  try {
+    await writeFile(join(staging, binaryResourcePath), publication.joined);
+    await writeFile(join(staging, manifestResourcePath), publication.manifest, "utf8");
     try {
-      await rename(staging, directory);
+      await rename(staging, publication.directory);
     } catch (error) {
       if (!idempotentPublishCodes.has(errorCode(error) ?? "")) throw error;
-      const existing = await readCompiledPayloadEntry(storeDirectory, key);
-      if (!existing) throw error;
-      await verifyBinary(directory, existing);
-      if (canonicalJson(existing) !== canonicalJson(entry)) {
-        throw new CompiledPayloadStoreError(
-          "AMBIGUOUS_PAYLOAD",
-          `Compiled payload key ${key} already describes different bytes; the key is missing an input.`,
-          { cause: error },
-        );
-      }
-      return existing;
+      const published = await readCompiledPayloadEntry(publication.storeDirectory, publication.key);
+      if (published) await verifyBinary(publication.directory, published);
+      return reconcilePublished(published, publication, error);
     }
-    return entry;
+    return publication.entry;
   } finally {
     await rm(staging, { recursive: true, force: true });
+  }
+}
+
+/**
+ * The same publish, synchronously, for the packaging loop: see
+ * `restoreCompiledPayloadSync` for why that loop cannot await.
+ */
+export function publishCompiledPayloadSync(
+  options: PublishCompiledPayloadOptions,
+): CompiledPayloadEntry {
+  const publication = preparePublication(options);
+  mkdirSync(publication.namespace, { recursive: true });
+  const staging = mkdtempSync(join(publication.namespace, ".publish-"));
+  try {
+    writeFileSync(join(staging, binaryResourcePath), publication.joined);
+    writeFileSync(join(staging, manifestResourcePath), publication.manifest, "utf8");
+    try {
+      renameSync(staging, publication.directory);
+    } catch (error) {
+      if (!idempotentPublishCodes.has(errorCode(error) ?? "")) throw error;
+      const published = readCompiledPayloadEntrySync(publication.storeDirectory, publication.key);
+      if (published) verifyBinarySync(publication.directory, published);
+      return reconcilePublished(published, publication, error);
+    }
+    return publication.entry;
+  } finally {
+    rmSync(staging, { recursive: true, force: true });
+  }
+}
+
+function requireVerified(
+  entry: CompiledPayloadEntry,
+  identity: { readonly bytes: number; readonly sha256: string },
+): void {
+  if (identity.bytes !== entry.binary.bytes || identity.sha256 !== entry.binary.sha256) {
+    throw invalid("Compiled payload binary failed integrity verification.");
   }
 }
 
 async function verifyBinary(directory: string, entry: CompiledPayloadEntry): Promise<Uint8Array> {
   const path = join(directory, entry.binary.path);
   const identity = await identifyFile(path);
-  if (identity.bytes !== entry.binary.bytes || identity.sha256 !== entry.binary.sha256) {
-    throw invalid("Compiled payload binary failed integrity verification.");
-  }
+  requireVerified(entry, identity);
   return new Uint8Array(await readFile(path));
+}
+
+function verifyBinarySync(directory: string, entry: CompiledPayloadEntry): Uint8Array {
+  const identity = identifyFileSync(join(directory, entry.binary.path));
+  requireVerified(entry, { bytes: identity.bytes.byteLength, sha256: identity.sha256 });
+  return identity.bytes;
+}
+
+/** Carves the verified binary into the accessors the manifest describes. */
+function hydratePayload(entry: CompiledPayloadEntry, joined: Uint8Array): CompiledPayload {
+  const accessors: CompiledPayloadAccessor[] = entry.accessors.map(
+    ({ byteOffset, byteLength, ...meta }) => ({
+      bytes: joined.subarray(byteOffset, byteOffset + byteLength),
+      ...meta,
+    }),
+  );
+  return {
+    accessors,
+    shape: entry.shape,
+    triangles: entry.triangles,
+    edges: entry.edges,
+  };
 }
 
 export interface RestoreCompiledPayloadOptions {
@@ -414,17 +526,23 @@ export async function restoreCompiledPayload(
   const storeDirectory = resolve(options.storeDirectory);
   const entry = await readCompiledPayloadEntry(storeDirectory, options.key);
   if (!entry) return undefined;
-  const joined = await verifyBinary(entryDirectory(storeDirectory, options.key), entry);
-  const accessors: CompiledPayloadAccessor[] = entry.accessors.map(
-    ({ byteOffset, byteLength, ...meta }) => ({
-      bytes: joined.subarray(byteOffset, byteOffset + byteLength),
-      ...meta,
-    }),
-  );
-  return {
-    accessors,
-    shape: entry.shape,
-    triangles: entry.triangles,
-    edges: entry.edges,
-  };
+  return hydratePayload(entry, await verifyBinary(entryDirectory(storeDirectory, options.key), entry));
+}
+
+/**
+ * The same restore, synchronously.
+ *
+ * `compileSceneToGltf` is synchronous and its geometry loop places one payload
+ * at a time; restoring inside that loop keeps exactly one payload live, where
+ * an asynchronous pre-pass would have to hold every payload of the model at
+ * once. On the largest recorded federation that difference is the whole
+ * geometry buffer, so the store reads through this path.
+ */
+export function restoreCompiledPayloadSync(
+  options: RestoreCompiledPayloadOptions,
+): CompiledPayload | undefined {
+  const storeDirectory = resolve(options.storeDirectory);
+  const entry = readCompiledPayloadEntrySync(storeDirectory, options.key);
+  if (!entry) return undefined;
+  return hydratePayload(entry, verifyBinarySync(entryDirectory(storeDirectory, options.key), entry));
 }
