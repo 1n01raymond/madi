@@ -1,6 +1,7 @@
 # ADR-0017: Move the assembly tree into a package sidecar
 
-Status: Proposed
+Status: Accepted
+Accepted: 2026-08-29
 
 ## Context
 
@@ -110,10 +111,13 @@ but it welds two independently useful things together: a viewer that shows a
 tree and no properties would fetch both, and the property columns' schema
 would have to carry structure it has no other reason to model.
 
-**Make relocation the default.** Rejected for this slice. It changes every
-package digest and every consumer's fetch pattern; the option earns that after
-a browser record shows what the smaller document does to time-to-first-frame
-at federation scale.
+**Make relocation the default.** Still rejected, but no longer for want of
+evidence. The browser record below shows the smaller document is worth having,
+so the remaining objection is only about when: flipping the default re-digests
+every committed package and the deployed demo's release asset, and
+`naru.package-hierarchy.1` is still `status: experimental-not-interchange`.
+The default moves in its own slice, together with that schema's promotion and
+the re-records it forces, not as a side effect of this one.
 
 ## Validation
 
@@ -135,8 +139,30 @@ Met by the record:
   0 mismatches, identical decoded geometry;
 - byte-identical repeat compiles for both models.
 
-Open, and why this ADR stays **Proposed**: no browser record yet measures what
-the smaller document does to hierarchy-ready and first-frame time at
-federation scale. The sixty5 first-frame record is the natural place, and it
-needs a relocated sixty5 package to be compiled first. Until that exists, the
-document saving is measured and its user-visible consequence is not.
+Second gate, which closed this ADR: `pnpm hierarchy:browser:check` over
+`artifacts/ifc/relocated-hierarchy-browser/relocated-hierarchy-browser.json`
+(`naru.relocated-hierarchy-browser.1`), also wired into `pnpm check`. Two
+sixty5 packages compiled from the same split, differing only in where the
+mesh-less nodes live -- `scene.bin`, `coarse.bin`, `properties.json`, and
+`properties.bin` byte-identical between them -- run three times each,
+interleaved, in fresh headed Chrome processes:
+
+- first coarse frame 4,408 -> 3,703 ms (-15.99%), peak JS heap 839,726,321 ->
+  669,299,303 B (-20.30%), budget-limited ready 9,687 -> 8,987 ms; the arms'
+  spreads do not overlap on either headline;
+- hierarchy-ready 2,220 -> 2,191 ms: reading the tree from a fetched sidecar
+  costs about what reading it from the document did, which is the honest
+  reading of a -1.31% move;
+- `hierarchy.bin` fetched exactly once per run, as response 3 of 118, ahead of
+  `coarse.bin`, and never fetched by the in-place arm -- both derived per run
+  from the response stream;
+- the same endpoint over 17 counters in all six runs (111 of 234 chunks,
+  66,686,508 decoded / 66,783,808 GPU bytes, 2,255,235 triangles, the same
+  picked occurrence and its six property entries), 0 console issues.
+
+The one deliberate difference is the picked node index (148735 -> 64079): a
+relocated document keeps only the nodes that draw, so they are renumbered.
+
+Both records' digests are host-local to this Windows host, as their validators
+state. What remains open is not this decision but the default question above,
+which is a separate slice.

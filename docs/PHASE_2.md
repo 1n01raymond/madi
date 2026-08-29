@@ -64,7 +64,7 @@ much in risk and effort for a raw item count to be meaningful.
 | IFC dependency ownership | **Implemented** under proposed [ADR-0010](adr/0010-ifc-incremental-dependency-index.md), including [changed/deleted/renamed/reconciliation tests](../packages/compiler/test/ifc-incremental-dependencies.test.ts) | Keep the index conservative while physical payload ownership is introduced |
 | Per-document IFC extraction reuse | **Implemented** with [deterministic verified-artifact tests](../native/adapter-ifc/tests/test_document_artifact_cache.py) and [clean adapter-merge equivalence](../native/adapter-ifc/tests/test_document_artifact_integration.py) | Measure real-large artifact size, restore time, and peak memory |
 | Real-large document serialization | **Recorded** under accepted [ADR-0016](adr/0016-streamed-gltf-document.md): the compiler emits `scene.gltf` as a stream of bounded chunks instead of building it as one string, so the [sixty5 record](../artifacts/cache/sixty5/README.md) now compiles the default pretty-printed federation document at 545,470,166 B - 8,599,278 B past the runtime's 536,870,888-byte maximum string length - while the compact package stays byte-identical over fifteen samples; [differential tests](../packages/compiler/test/json-stream.test.ts) compare every chunk against `JSON.stringify` | Give the report, property, and dependency documents the same bounded treatment before any of them approaches the same limit |
-| Assembly-tree transport | **Recorded** under proposed [ADR-0017](adr/0017-relocated-hierarchy-sidecar.md): `--relocate-hierarchy-nodes` moves mesh-less nodes into a `naru.package-hierarchy.1` sidecar, taking the engineering baseline's document from 405,570,167 to 317,466,183 B (-21.72%) and the whole package down 2.72% once the 64,825,238 B sidecar is charged against it ([record](../artifacts/compiler/hierarchy-relocation/README.md)); a Digital Hub round trip returns 13,681 entries and 5,152 world transforms with 0 mismatches | Measure the smaller document at the first frame on a real federation, then decide whether the option becomes the default |
+| Assembly-tree transport | **Recorded** under accepted [ADR-0017](adr/0017-relocated-hierarchy-sidecar.md): `--relocate-hierarchy-nodes` moves mesh-less nodes into a `naru.package-hierarchy.1` sidecar, taking the engineering baseline's document from 405,570,167 to 317,466,183 B (-21.72%) and the whole package down 2.72% once the 64,825,238 B sidecar is charged against it ([record](../artifacts/compiler/hierarchy-relocation/README.md)); a Digital Hub round trip returns 13,681 entries and 5,152 world transforms with 0 mismatches. Paired sixty5 packages in a headed browser then measured what the smaller document buys: first coarse frame 4,408 -> 3,703 ms (-15.99%), peak JS heap -20.30%, sidecar fetched once per run ahead of the coarse payload, identical endpoint over 17 counters ([record](../artifacts/ifc/relocated-hierarchy-browser/README.md)) | Flip the default in its own slice, together with promoting `naru.package-hierarchy.1` out of `experimental-not-interchange` and the package re-digests that forces |
 | Content-addressed compiled payloads | **Pending** | Define immutable prototype/target/coarse/spatial/property ownership, then prove a one-discipline rebuild reproduces every clean-package byte |
 | Import lifecycle | **Pending** | A typed progress/cancellation contract must stop child processes, clean unpublished output, and retain prior valid cache entries |
 | Progressive cold-import preview | **Pending** | Publish hierarchy/search and a recognizable coarse package within 5–15 s while the full import continues |
@@ -146,14 +146,16 @@ a small share of the browser's working set.
 8. Qualify the registered CadQuarry 1k STEP corpus through a bounded Parquet
    scanner, then compile its extracted parts as a CAD breadth/control record.
    Keep that synthetic corpus separate from the real public-baseline gate.
-9. Record what the relocated assembly tree does to a real browser session, then
-   decide whether relocation becomes the default. The compiler side is done and
-   measured — the engineering baseline's document drops 21.72% and the whole
-   package 2.72%
-   ([record](../artifacts/compiler/hierarchy-relocation/README.md), proposed
-   [ADR-0017](adr/0017-relocated-hierarchy-sidecar.md)) — but no record yet shows
-   what parsing 317 MB instead of 405 MB is worth at the first frame. That needs a
-   relocated sixty5 package compiled first.
+9. Make relocation the compiler default. Both halves of
+   [ADR-0017](adr/0017-relocated-hierarchy-sidecar.md) are now measured — the
+   document drops 21.72% offline
+   ([record](../artifacts/compiler/hierarchy-relocation/README.md)) and a paired
+   browser record puts that at -15.99% on first frame and -20.30% on peak heap
+   ([record](../artifacts/ifc/relocated-hierarchy-browser/README.md)) — so what
+   is left is the cost of flipping it: `naru.package-hierarchy.1` has to leave
+   `experimental-not-interchange`, and every committed package digest, the
+   deployed demo release asset, and the records that pin them have to be
+   re-recorded together.
 
 ### Later — expand only after the core loop is reproducible
 
@@ -179,7 +181,6 @@ debt.
 | Cross-engine memory envelope | Repeat the [phase-sampled memory ledger](../artifacts/memory/sixty5-envelope/README.md) on a second engine and operating system, including whatever each reports in place of `measureUserAgentSpecificMemory` and the Windows process-tree sample | A memory claim that is not specific to one Chrome/Windows host |
 | Cross-browser localized demand | Repeated Firefox or another non-Blink real-model localized trace with request order, query p50/p95, residency, and console results | ADR-0008 acceptance |
 | Spatial precision cross-check | Nested-transform spatial bounds on the accepted ADR-0005 10,000 km fixture with no false negatives | ADR-0008 acceptance |
-| Relocated hierarchy in a browser | A headed real-model record of a package compiled with `--relocate-hierarchy-nodes`: hierarchy-ready, first-frame, and peak-heap figures against the [current sixty5 record](../artifacts/ifc/sixty5-first-frame/README.md), plus the cost of fetching the sidecar when the tree is first read | ADR-0017 acceptance, and whether relocation becomes the compiler default |
 | Node-field elision at engineering scale | Re-record `artifacts/ifc/engineering-baseline/` on the host that produced it, with `--elide-derived-identifiers` and `--omit-default-node-transforms` declared, so the option pair is proven on the same package the qualification pins; the levers are measured on this Windows host, whose IFC split differs from that record's by a few bytes | ADR-0015 acceptance |
 | Current-toolchain large packages | Re-record Digital Hub and sixty5 with the current split.4 explicit-edge toolchain and synchronize the deployed package digest | Current-schema real-model claims |
 | Renderer reference-hardware matrix | Repeat the existing harness on more disclosed discrete/integrated profiles with explicit edges and bounded residency | Hardware/browser portion of ADR-0003 acceptance or revision |
