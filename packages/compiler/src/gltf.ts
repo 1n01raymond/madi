@@ -20,10 +20,11 @@ import type {
 import {
   encodeFloat32,
   encodeUint32,
-  encodeUint8,
   GltfBinaryBuilder,
   scaledPositionBounds,
 } from "./binary.js";
+import { appendCompiledPayload, buildCompiledPayload } from "./compiled-payload.js";
+import type { PlacedPayload } from "./compiled-payload.js";
 import { measureJsonDocument } from "./json-document.js";
 import { buildHierarchySidecar, packageHierarchySchema } from "./hierarchy-sidecar.js";
 import type { HierarchySidecarEntry } from "./hierarchy-sidecar.js";
@@ -56,24 +57,10 @@ import type {
 const identityBasis = [1, 0, 0, 0, 1, 0, 0, 0, 1];
 const zeroOrigin = [0, 0, 0];
 
-interface SurfaceGroupResource {
-  readonly indexAccessor: number;
-  readonly materialId?: MaterialId;
-  readonly firstIndex: number;
-  readonly indexCount: number;
-}
-
-interface GeometryResource {
+/** A placed payload, plus the prototype the placement belongs to. */
+interface GeometryResource extends PlacedPayload {
   readonly prototype: Prototype;
   readonly representation: Representation;
-  readonly positionAccessor?: number;
-  readonly normalAccessor?: number;
-  readonly surfaceGroups: readonly SurfaceGroupResource[];
-  readonly faceSourceAccessor?: number;
-  readonly edgePositionAccessor?: number;
-  readonly edgeIndexAccessor?: number;
-  readonly edgeClassAccessor?: number;
-  readonly edgeSourceAccessor?: number;
 }
 
 interface CoarseGeometryResource {
@@ -506,150 +493,20 @@ function representationFor(
   return candidates[0];
 }
 
-function sharesTypedArrayStorage(
-  left: ArrayBufferView,
-  right: ArrayBufferView,
-): boolean {
-  return (
-    left.buffer === right.buffer &&
-    left.byteOffset === right.byteOffset &&
-    left.byteLength === right.byteLength
-  );
-}
-
 function appendGeometry(
   builder: GltfBinaryBuilder,
   prototype: Prototype,
   representation: Representation,
   scaleToMeters: number,
 ): { readonly resource: GeometryResource; readonly triangles: number; readonly edges: number } {
-  const surface = representation.surface;
-  const edges = representation.edges;
-  let positionAccessor: number | undefined;
-  let normalAccessor: number | undefined;
-  let faceSourceAccessor: number | undefined;
-  const surfaceGroups: SurfaceGroupResource[] = [];
-  let triangleCount = 0;
-
-  if (surface && surface.positions.length > 0 && surface.indices.length > 0) {
-    const bounds = scaledPositionBounds(surface.positions, scaleToMeters);
-    positionAccessor = builder.append(encodeFloat32(surface.positions, scaleToMeters), {
-      componentType: 5126,
-      count: surface.positions.length / 3,
-      type: "VEC3",
-      target: 34962,
-      name: `${representation.id} surface positions`,
-      ...bounds,
-    });
-    if (surface.normals) {
-      normalAccessor = builder.append(encodeFloat32(surface.normals), {
-        componentType: 5126,
-        count: surface.normals.length / 3,
-        type: "VEC3",
-        target: 34962,
-        name: `${representation.id} surface normals`,
-      });
-    }
-    if (surface.faceSourceIds) {
-      faceSourceAccessor = builder.append(encodeUint32(surface.faceSourceIds), {
-        componentType: 5125,
-        count: surface.faceSourceIds.length,
-        type: "SCALAR",
-        name: `${representation.id} face source IDs`,
-      });
-    }
-
-    const groups = surface.materialGroups?.length
-      ? [...surface.materialGroups]
-      : [{ firstIndex: 0, indexCount: surface.indices.length, materialId: undefined }];
-    groups.sort((left, right) => left.firstIndex - right.firstIndex);
-    for (const [groupIndex, group] of groups.entries()) {
-      const lastIndex = group.firstIndex + group.indexCount;
-      if (lastIndex > surface.indices.length || group.indexCount % 3 !== 0) {
-        throw new RangeError(`Invalid material group ${groupIndex} in ${representation.id}.`);
-      }
-      const indices = surface.indices.slice(group.firstIndex, lastIndex);
-      const indexAccessor = builder.append(encodeUint32(indices), {
-        componentType: 5125,
-        count: indices.length,
-        type: "SCALAR",
-        target: 34963,
-        name: `${representation.id} surface indices ${groupIndex}`,
-        min: [indices.reduce((minimum, value) => Math.min(minimum, value), Infinity)],
-        max: [indices.reduce((maximum, value) => Math.max(maximum, value), -Infinity)],
-      });
-      surfaceGroups.push({
-        indexAccessor,
-        ...(group.materialId === undefined ? {} : { materialId: group.materialId }),
-        firstIndex: group.firstIndex,
-        indexCount: group.indexCount,
-      });
-      triangleCount += group.indexCount / 3;
-    }
-  }
-
-  let edgePositionAccessor: number | undefined;
-  let edgeIndexAccessor: number | undefined;
-  let edgeClassAccessor: number | undefined;
-  let edgeSourceAccessor: number | undefined;
-  if (edges && edges.positions.length > 0 && edges.segments.length > 0) {
-    if (
-      positionAccessor !== undefined &&
-      surface !== undefined &&
-      sharesTypedArrayStorage(edges.positions, surface.positions)
-    ) {
-      edgePositionAccessor = positionAccessor;
-    } else {
-      const bounds = scaledPositionBounds(edges.positions, scaleToMeters);
-      edgePositionAccessor = builder.append(encodeFloat32(edges.positions, scaleToMeters), {
-        componentType: 5126,
-        count: edges.positions.length / 3,
-        type: "VEC3",
-        target: 34962,
-        name: `${representation.id} edge positions`,
-        ...bounds,
-      });
-    }
-    edgeIndexAccessor = builder.append(encodeUint32(edges.segments), {
-      componentType: 5125,
-      count: edges.segments.length,
-      type: "SCALAR",
-      target: 34963,
-      name: `${representation.id} edge indices`,
-      min: [edges.segments.reduce((minimum, value) => Math.min(minimum, value), Infinity)],
-      max: [edges.segments.reduce((maximum, value) => Math.max(maximum, value), -Infinity)],
-    });
-    edgeClassAccessor = builder.append(encodeUint8(edges.classes), {
-      componentType: 5121,
-      count: edges.classes.length,
-      type: "SCALAR",
-      name: `${representation.id} edge classes`,
-    });
-    if (edges.sourceIds) {
-      edgeSourceAccessor = builder.append(encodeUint32(edges.sourceIds), {
-        componentType: 5125,
-        count: edges.sourceIds.length,
-        type: "SCALAR",
-        name: `${representation.id} edge source IDs`,
-      });
-    }
-  }
-
+  // Encoding and placement are separate on purpose: the payload built here is
+  // the same value a content-addressed store would hand back, so both paths
+  // reach `scene.bin` through one `appendCompiledPayload`.
+  const payload = buildCompiledPayload(representation, scaleToMeters);
   return {
-    resource: {
-      prototype,
-      representation,
-      ...(positionAccessor === undefined ? {} : { positionAccessor }),
-      ...(normalAccessor === undefined ? {} : { normalAccessor }),
-      surfaceGroups,
-      ...(faceSourceAccessor === undefined ? {} : { faceSourceAccessor }),
-      ...(edgePositionAccessor === undefined ? {} : { edgePositionAccessor }),
-      ...(edgeIndexAccessor === undefined ? {} : { edgeIndexAccessor }),
-      ...(edgeClassAccessor === undefined ? {} : { edgeClassAccessor }),
-      ...(edgeSourceAccessor === undefined ? {} : { edgeSourceAccessor }),
-    },
-    triangles: triangleCount,
-    edges: edges?.segments.length ? edges.segments.length / 2 : 0,
+    resource: { prototype, representation, ...appendCompiledPayload(builder, payload) },
+    triangles: payload.triangles,
+    edges: payload.edges,
   };
 }
 

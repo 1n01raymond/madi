@@ -13,6 +13,18 @@ import {
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import {
+  errorCode,
+  idempotentPublishCodes,
+  identifyFile,
+  normalizeCacheOptions,
+  requireResourcePath,
+  requireSha256,
+  requireText,
+  requireTool,
+} from "./cache-primitives.js";
+import type { CacheToolInput } from "./cache-primitives.js";
+
 export const compiledCacheEntrySchema = "naru.compiled-cache-entry.1" as const;
 
 export interface CompiledCacheSourceInput {
@@ -20,10 +32,7 @@ export interface CompiledCacheSourceInput {
   readonly sha256: string;
 }
 
-export interface CompiledCacheToolInput {
-  readonly name: string;
-  readonly version: string;
-}
+export type CompiledCacheToolInput = CacheToolInput;
 
 export interface CompiledCacheKeyInput {
   readonly sources: readonly CompiledCacheSourceInput[];
@@ -106,24 +115,6 @@ export interface RestoreCompiledCacheEntryOptions {
   readonly outputDirectory: string;
 }
 
-const sha256Pattern = /^[a-f0-9]{64}$/u;
-const resourcePathPattern = /^[A-Za-z0-9][A-Za-z0-9._-]*$/u;
-
-function requireText(value: string, label: string): string {
-  if (value.trim() === "") throw new TypeError(`${label} must not be empty.`);
-  return value;
-}
-
-// Both validators accept `unknown` because their hottest caller parses an
-// on-disk manifest: the field may be absent or the wrong type, and saying so in
-// the signature keeps that check inside the function instead of at each site.
-function requireSha256(value: unknown, label: string): string {
-  if (typeof value !== "string" || !sha256Pattern.test(value)) {
-    throw new TypeError(`${label} must be a lowercase SHA-256.`);
-  }
-  return value;
-}
-
 function normalizeInput(input: CompiledCacheKeyInput): CompiledCacheKeyInput {
   if (input.sources.length === 0) {
     throw new TypeError("A compiled cache key requires at least one source.");
@@ -137,28 +128,11 @@ function normalizeInput(input: CompiledCacheKeyInput): CompiledCacheKeyInput {
   if (new Set(sources.map(({ scope }) => scope)).size !== sources.length) {
     throw new TypeError("Compiled cache source scopes must be unique.");
   }
-  const options = Object.fromEntries(
-    Object.entries(input.options)
-      .map(([key, value]) => {
-        requireText(key, "Cache option name");
-        if (typeof value === "number" && !Number.isFinite(value)) {
-          throw new TypeError(`Cache option ${key} must be finite.`);
-        }
-        return [key, value] as const;
-      })
-      .sort(([left], [right]) => left.localeCompare(right, "en")),
-  );
   return {
     sources,
-    adapter: {
-      name: requireText(input.adapter.name, "Cache adapter name"),
-      version: requireText(input.adapter.version, "Cache adapter version"),
-    },
-    compiler: {
-      name: requireText(input.compiler.name, "Cache compiler name"),
-      version: requireText(input.compiler.version, "Cache compiler version"),
-    },
-    options,
+    adapter: requireTool(input.adapter, "Cache adapter"),
+    compiler: requireTool(input.compiler, "Cache compiler"),
+    options: normalizeCacheOptions(input.options),
   };
 }
 
@@ -167,28 +141,6 @@ export function createCompiledCacheKey(input: CompiledCacheKeyInput): string {
   return createHash("sha256")
     .update(JSON.stringify({ schemaVersion: compiledCacheEntrySchema, input: normalized }))
     .digest("hex");
-}
-
-function requireResourcePath(path: unknown): string {
-  if (typeof path !== "string" || !resourcePathPattern.test(path)) {
-    throw new TypeError(`Cache resource path ${String(path)} must be one portable file name.`);
-  }
-  return path;
-}
-
-async function identifyFile(path: string): Promise<{ readonly bytes: number; readonly sha256: string }> {
-  const [bytes, metadata] = await Promise.all([readFile(path), lstat(path)]);
-  if (!metadata.isFile()) throw new TypeError(`Cache resource ${path} must be a file.`);
-  return {
-    bytes: bytes.byteLength,
-    sha256: createHash("sha256").update(bytes).digest("hex"),
-  };
-}
-
-function errorCode(error: unknown): string | undefined {
-  return typeof error === "object" && error !== null && "code" in error
-    ? String((error as { readonly code?: unknown }).code)
-    : undefined;
 }
 
 function cacheEntryDirectory(cacheDirectory: string, key: string): string {
@@ -302,9 +254,9 @@ export async function publishCompiledCacheEntry(
     try {
       await rename(stagingDirectory, entryDirectory);
     } catch (error) {
-      // Windows reports a rename onto an existing directory as EPERM; the
-      // read-back below still rethrows the original error when no entry exists.
-      if (!new Set(["EEXIST", "ENOTEMPTY", "EPERM"]).has(errorCode(error) ?? "")) throw error;
+      // The read-back below still rethrows the original error when no entry
+      // exists, so a genuine permission failure is never mistaken for a race.
+      if (!idempotentPublishCodes.has(errorCode(error) ?? "")) throw error;
       const existing = await readCompiledCacheEntry(cacheDirectory, key);
       if (!existing) throw error;
       await verifyResources(entryDirectory, existing.resources);
