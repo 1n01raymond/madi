@@ -35,6 +35,7 @@ IFC options:
 General options:
   --spatial-index                Emit the optional occurrence demand BVH
   --spatial-leaf-capacity <n>    Maximum occurrences per BVH leaf (default: 64)
+  --relocate-hierarchy-nodes     Move mesh-less nodes into a hierarchy sidecar
   --help                         Show this help`;
 
 export interface CompileArguments {
@@ -46,6 +47,7 @@ export interface CompileArguments {
   readonly cacheDirectory?: string;
   readonly spatialIndex: boolean;
   readonly spatialLeafCapacity?: number;
+  readonly relocateHierarchyNodes: boolean;
 }
 
 export interface IfcCompileArguments {
@@ -66,6 +68,7 @@ export interface IfcCompileArguments {
   readonly omitResourceNames: boolean;
   readonly elideDerivedIdentifiers: boolean;
   readonly omitDefaultNodeTransforms: boolean;
+  readonly relocateHierarchyNodes: boolean;
   readonly retainSceneIr: boolean;
 }
 
@@ -75,6 +78,7 @@ const sharedOptions = {
   cache: { type: "string" },
   "spatial-index": { type: "boolean" },
   "spatial-leaf-capacity": { type: "string" },
+  "relocate-hierarchy-nodes": { type: "boolean" },
 } as const;
 
 const stepOptions = {
@@ -216,6 +220,7 @@ export function parseCompileArguments(argumentList: readonly string[]): CompileA
     ...(cacheDirectory ? { cacheDirectory } : {}),
     spatialIndex,
     ...(spatialLeafCapacity === undefined ? {} : { spatialLeafCapacity }),
+    relocateHierarchyNodes: values["relocate-hierarchy-nodes"] ?? false,
   };
 }
 
@@ -285,6 +290,7 @@ export function parseIfcCompileArguments(
     omitResourceNames: values["omit-resource-names"] ?? false,
     elideDerivedIdentifiers: values["elide-derived-identifiers"] ?? false,
     omitDefaultNodeTransforms: values["omit-default-node-transforms"] ?? false,
+    relocateHierarchyNodes: values["relocate-hierarchy-nodes"] ?? false,
     retainSceneIr: values["retain-scene-ir"] ?? false,
   };
 }

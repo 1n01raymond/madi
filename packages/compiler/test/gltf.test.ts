@@ -23,6 +23,7 @@ import {
   validateCompiledGltf,
 } from "../src/index.js";
 import { hydratePhase0Evidence } from "../src/evidence-input.js";
+import { packageHierarchySchema } from "../src/hierarchy-sidecar.js";
 
 const evidenceUrl = new URL(
   "../../../artifacts/occt/repeated-fasteners.scene.json",
@@ -904,5 +905,131 @@ describe("optional node size policies", () => {
       semanticId: "semantic:bespoke-brace",
       sourceRef: "source:brace-weldment",
     });
+  });
+});
+
+/** Column-major product, in the order the compiler and the runtime both use. */
+function multiply(a: readonly number[], b: readonly number[]): number[] {
+  const result = new Array<number>(16).fill(0);
+  for (let column = 0; column < 4; column += 1) {
+    for (let row = 0; row < 4; row += 1) {
+      let value = 0;
+      for (let index = 0; index < 4; index += 1) {
+        value += (a[index * 4 + row] ?? 0) * (b[column * 4 + index] ?? 0);
+      }
+      result[column * 4 + row] = value;
+    }
+  }
+  return result;
+}
+
+/**
+ * World matrix per occurrence, composed the way the runtime composes it: down
+ * the node graph the document declares, seeded through the identity so the
+ * first product is the one relocation replaces.
+ */
+function composedWorldMatrices(document: {
+  readonly nodes: readonly {
+    readonly matrix?: readonly number[];
+    readonly children?: readonly number[];
+    readonly extras?: Readonly<Record<string, unknown>>;
+  }[];
+  readonly scenes: readonly { readonly nodes: readonly number[] }[];
+}): Map<string, readonly number[]> {
+  const identity = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
+  const world = new Map<string, readonly number[]>();
+  const visit = (nodeIndex: number, parent: readonly number[]): void => {
+    const node = document.nodes[nodeIndex];
+    if (!node) return;
+    const composed = multiply(parent, node.matrix ?? identity);
+    const occurrenceId = madiExtras(node)?.occurrenceId;
+    if (typeof occurrenceId === "string") world.set(occurrenceId, composed);
+    for (const child of node.children ?? []) visit(child, composed);
+  };
+  for (const root of document.scenes[0]?.nodes ?? []) visit(root, identity);
+  return world;
+}
+
+describe("relocated hierarchy nodes", () => {
+  it("keeps only the nodes that draw and flattens what remains", async () => {
+    const kept = await compileEvidence();
+    const relocated = await compileEvidence({ relocateHierarchyNodes: true });
+    const sidecarBytes = new TextEncoder().encode(relocated.hierarchyJson);
+    const sidecar = JSON.parse(relocated.hierarchyJson as string) as Record<string, unknown>;
+
+    expect(kept.report.counts.gltfNodeCount).toBe(13);
+    expect(relocated.report.counts.gltfNodeCount).toBe(11);
+    expect(relocated.document.nodes.every((node) => node.children === undefined)).toBe(true);
+    expect(relocated.document.scenes[0]?.nodes).toEqual([...Array(11).keys()]);
+    expect(relocated.report.options.hierarchyNodes).toBe("relocated");
+    expect(relocated.json.bytes).toBeLessThan(kept.json.bytes);
+    expect(relocated.binary).toEqual(kept.binary);
+    expect(sidecar).toMatchObject({
+      schemaVersion: packageHierarchySchema,
+      entryCount: kept.report.counts.occurrenceCount,
+      relocatedCount: 2,
+      documentNodeCount: 11,
+    });
+    expect((relocated.document.extras.madi as { hierarchy: unknown }).hierarchy).toEqual({
+      schemaVersion: packageHierarchySchema,
+      uri: "hierarchy.json",
+      byteLength: sidecarBytes.byteLength,
+      sha256: createHash("sha256").update(sidecarBytes).digest("hex"),
+      entryCount: kept.report.counts.occurrenceCount,
+      relocatedCount: 2,
+    });
+    expect(relocated.report.output.resources).toContainEqual({
+      path: "hierarchy.bin",
+      mediaType: "application/octet-stream",
+      bytes: (relocated.hierarchyBinary as Uint8Array).byteLength,
+      sha256: createHash("sha256").update(relocated.hierarchyBinary as Uint8Array).digest("hex"),
+    });
+  });
+
+  it("bakes the composed world transform onto every node it keeps", async () => {
+    const kept = await compileEvidence();
+    const relocated = await compileEvidence({ relocateHierarchyNodes: true });
+    const composed = composedWorldMatrices(kept.document);
+    const baked = occurrenceNodes(relocated.document);
+
+    expect(baked.size).toBe(kept.report.counts.renderableOccurrenceCount);
+    for (const [occurrenceId, node] of baked) {
+      const expected = composed.get(occurrenceId);
+      expect(expected).toBeDefined();
+      // Bit-exact, signed zeros included: a renderer must not see the model
+      // move because the compiler composed the chain instead of the runtime.
+      expect(node.matrix).toHaveLength(16);
+      for (const [index, value] of (node.matrix ?? []).entries()) {
+        expect(Object.is(value, expected?.[index])).toBe(true);
+      }
+    }
+  });
+
+  it("refuses sidecar URIs that collide with the resources already emitted", async () => {
+    await expect(
+      compileEvidence({ relocateHierarchyNodes: true, hierarchyUri: "scene.bin" }),
+    ).rejects.toThrow(/distinct URIs/);
+    await expect(
+      compileEvidence({
+        relocateHierarchyNodes: true,
+        hierarchyUri: "shared",
+        hierarchyBinaryUri: "shared",
+      }),
+    ).rejects.toThrow(/distinct URIs/);
+  });
+
+  it("refuses sidecar URIs without the relocation they name", async () => {
+    await expect(compileEvidence({ hierarchyUri: "hierarchy.json" })).rejects.toThrow(
+      /require relocateHierarchyNodes/,
+    );
+  });
+
+  it("compiles the same package twice", async () => {
+    const first = await compileEvidence({ relocateHierarchyNodes: true });
+    const second = await compileEvidence({ relocateHierarchyNodes: true });
+
+    expect(second.json.sha256).toBe(first.json.sha256);
+    expect(second.hierarchyJson).toBe(first.hierarchyJson);
+    expect(second.hierarchyBinary).toEqual(first.hierarchyBinary);
   });
 });

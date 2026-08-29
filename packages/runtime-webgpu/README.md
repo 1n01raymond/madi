@@ -18,6 +18,17 @@ Direct WebGPU rendering and the Phase 1 compiled glTF runtime boundary.
   evidence, and property lookup are identical either way. A node that keeps a
   member explicitly wins over the rule, and an explicit `null` means the
   occurrence has no such identity.
+- A document that declares `extras.madi.hierarchy` (ADR-0017) carries its
+  mesh-less nodes in a `naru.package-hierarchy.1` sidecar instead of the
+  document. `inspectCompiledHierarchy(value, { hierarchy })` takes the parsed
+  sidecar and returns the same tree as an unrelocated package; called without
+  one it throws `PackageHierarchyError("INVALID_HIERARCHY", ...)` rather than
+  returning the drawing nodes as though they were the whole assembly. A caller
+  that wants geometry and no tree passes the `"geometry-only"` sentinel in the
+  same field and gets an empty tree — the Studio's geometry Worker does this,
+  because the tree is read on the main thread that owns the panel. Relocation
+  moves only mesh-less nodes, so renderable occurrences stay derivable from the
+  document either way.
 - `decodeCompiledGltf(value, binary, { representation })` validates the selected
   external-buffer accessor ranges,
   decodes surface and explicit-edge streams, composes node transforms, preserves

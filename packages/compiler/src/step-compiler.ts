@@ -38,6 +38,7 @@ export interface StepCompileOptions {
   readonly cacheDirectory?: string;
   readonly spatialIndex?: boolean;
   readonly spatialLeafCapacity?: number;
+  readonly relocateHierarchyNodes?: boolean;
   readonly environment?: NodeJS.ProcessEnv;
 }
 
@@ -163,6 +164,7 @@ function cacheInput(
       ...(options.spatialLeafCapacity === undefined
         ? {}
         : { spatialLeafCapacity: options.spatialLeafCapacity }),
+      ...(options.relocateHierarchyNodes === true ? { relocateHierarchyNodes: true } : {}),
     },
   };
 }
@@ -323,6 +325,7 @@ export async function compileStepFile(
       ...(options.spatialLeafCapacity === undefined
         ? {}
         : { spatialLeafCapacity: options.spatialLeafCapacity }),
+      ...(options.relocateHierarchyNodes === true ? { relocateHierarchyNodes: true } : {}),
     });
     const validation = validateCompiledGltf(
       compiled.document,

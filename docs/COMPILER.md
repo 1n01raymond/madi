@@ -470,6 +470,21 @@ byte-identical when they are absent. Measured together on the engineering
 baseline they remove 23,459,373 B (5.78%); the same record ranks mesh-less
 hierarchy nodes (21.88%) above both, which ADR-0015 leaves to its own slice.
 
+That slice is `--relocate-hierarchy-nodes` (API:
+`relocateHierarchyNodes: true`), under proposed
+[ADR-0017](adr/0017-relocated-hierarchy-sidecar.md). It writes the mesh-less
+nodes to a package sidecar instead of the document (section 21.3), keeps only
+the nodes that draw — each carrying its composed world matrix, with `children`
+gone and every retained node a scene root — and records
+`hierarchyNodes: "relocated"` in the build report beside `hierarchyUri` and
+`hierarchyBinaryUri`. The option participates in compiled-cache identity and is
+off by default, so existing package digests are unchanged. Measured in the
+[relocation record](../artifacts/compiler/hierarchy-relocation/README.md), it
+takes the engineering baseline's document from 405,570,167 to 317,466,183 B
+(−21.72%, 163,664 of 268,002 nodes) while the whole package falls 2.72%,
+because the sidecar that now carries the tree costs 64,825,238 B. The document
+is the resource a client must parse in full before drawing; the package is not.
+
 The public `naru compile` entry now accepts a local AP242 or AP214 Part 21 file,
 invokes the isolated OCCT adapter, verifies schema and source digest parity,
 and writes the compiled package plus `adapter-report.json`. The committed
@@ -640,7 +655,36 @@ unchanged — the sidecar is additive, and the occurrence nodes' existing
 does not index property values in Phase 1; the Studio resolves properties
 lazily for the selected occurrence only.
 
-### 21.3 Persistent source-package cache
+### 21.3 Package hierarchy sidecar
+
+`--relocate-hierarchy-nodes` republishes the assembly tree as two further
+optional resources. `hierarchy.json` is a `naru.package-hierarchy.1` document —
+compact single-line JSON carrying the scene/revision/source identity, the
+document node count it was built against, the column file reference, and the
+entry and relocated counts, plus a section table and the interned tag sets —
+and `hierarchy.bin` holds the entries as columns: node indexes, depths, flags
+(renderable, initial visibility, and which identities were omitted), tag-set
+references, interned local transforms, and five string columns (`name`,
+`occurrenceId`, `prototypeId`, `semanticId`, `sourceRef`), each an offset
+table over its own heap. `scene.gltf` points at the header
+through `extras.madi.hierarchy = {schemaVersion, uri, byteLength, sha256,
+entryCount, relocatedCount}`, both resources join `output.resources` and the
+package digest after the property sidecar, and both participate in
+compiled-cache identity.
+
+What stays in the document is exactly the nodes that draw. Each carries its
+composed world matrix, so no ancestor is needed to place it; `children` is
+gone, and every retained node is listed in the scene. Reading the tree back
+therefore requires the sidecar, and the runtime says so rather than guessing
+(`docs/RUNTIME.md`, "Reading the assembly tree").
+
+The option is off by default and changes the package digest when it is on, so
+every committed package stays byte-identical without it. The
+[relocation record](../artifacts/compiler/hierarchy-relocation/README.md)
+measures both sides on two federations and proves a Digital Hub round trip:
+13,681 entries and 5,152 occurrence world transforms return identical.
+
+### 21.4 Persistent source-package cache
 
 `naru compile` and `naru compile-ifc` can opt into a content-addressed cache
 with `--cache <directory>`. The `naru.compiled-cache-entry.1` key covers source
@@ -657,7 +701,7 @@ prove that changing a serialized URI hint causes a miss. Real pinned-toolchain
 cold/warm evidence and per-discipline dependency indexing are intentionally
 separate gates in [the import/cache contract](IMPORT_AND_CACHE.md).
 
-### 21.4 IFC incremental dependency index
+### 21.5 IFC incremental dependency index
 
 Every IFC federation compile now writes `incremental-dependencies.json` with
 schema `naru.ifc-incremental-dependency-index.1`. The derived sidecar maps a

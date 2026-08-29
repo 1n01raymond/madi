@@ -315,3 +315,17 @@ export async function fetchPackageResource(
   const response = await openPackageResponse(url, request);
   return readBoundedBody(response, request.limitBytes, request.label);
 }
+
+/**
+ * Hex SHA-256 of a transferred resource, for the digest its package declares.
+ * The bytes are copied because a bounded read hands back a view into a larger
+ * buffer, and `digest` would hash that whole buffer.
+ */
+export async function packageResourceDigest(bytes: Uint8Array): Promise<string> {
+  const copy = new Uint8Array(bytes.byteLength);
+  copy.set(bytes);
+  const digest = await crypto.subtle.digest("SHA-256", copy.buffer);
+  return [...new Uint8Array(digest)]
+    .map((value) => value.toString(16).padStart(2, "0"))
+    .join("");
+}

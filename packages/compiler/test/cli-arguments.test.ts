@@ -23,6 +23,7 @@ describe("naru compile arguments", () => {
         "--spatial-index",
         "--spatial-leaf-capacity",
         "32",
+        "--relocate-hierarchy-nodes",
       ]),
     ).toEqual({
       sourcePath: "model.step",
@@ -33,6 +34,7 @@ describe("naru compile arguments", () => {
       angularTolerance: 0.2,
       spatialIndex: true,
       spatialLeafCapacity: 32,
+      relocateHierarchyNodes: true,
     });
   });
 
@@ -41,6 +43,7 @@ describe("naru compile arguments", () => {
       sourcePath: "model.step",
       outputDirectory: "out",
       spatialIndex: false,
+      relocateHierarchyNodes: false,
     });
   });
 
@@ -48,6 +51,7 @@ describe("naru compile arguments", () => {
     const parsed = parseCompileArguments(["model.step", "--output", "out"]);
     expect(Object.keys(parsed).sort()).toEqual([
       "outputDirectory",
+      "relocateHierarchyNodes",
       "sourcePath",
       "spatialIndex",
     ]);
@@ -126,6 +130,7 @@ describe("naru compile-ifc arguments", () => {
         "--omit-resource-names",
         "--elide-derived-identifiers",
         "--omit-default-node-transforms",
+        "--relocate-hierarchy-nodes",
         "--retain-scene-ir",
       ]),
     ).toEqual({
@@ -142,11 +147,12 @@ describe("naru compile-ifc arguments", () => {
       omitResourceNames: true,
       elideDerivedIdentifiers: true,
       omitDefaultNodeTransforms: true,
+      relocateHierarchyNodes: true,
       retainSceneIr: true,
     });
   });
 
-  it("leaves both node-field elision options off unless asked for", () => {
+  it("leaves every document-shrinking option off unless asked for", () => {
     const parsed = parseIfcCompileArguments([
       "--document",
       "architecture=arch.ifc",
@@ -155,6 +161,7 @@ describe("naru compile-ifc arguments", () => {
     ]);
     expect(parsed.elideDerivedIdentifiers).toBe(false);
     expect(parsed.omitDefaultNodeTransforms).toBe(false);
+    expect(parsed.relocateHierarchyNodes).toBe(false);
   });
 
   it("preserves the order documents were given in", () => {

@@ -67,6 +67,16 @@ export async function writeCompiledPackage(
       writeFile(resolve(outputDirectory, propertiesBinaryUri), compiled.propertiesBinary),
     );
   }
+  if (compiled.hierarchyJson !== undefined && compiled.hierarchyBinary !== undefined) {
+    const { hierarchyUri, hierarchyBinaryUri } = compiled.report.options;
+    if (!hierarchyUri || !hierarchyBinaryUri) {
+      throw new TypeError("Hierarchy sidecar package is missing its resource URIs.");
+    }
+    writes.push(
+      writeFile(resolve(outputDirectory, hierarchyUri), compiled.hierarchyJson, "utf8"),
+      writeFile(resolve(outputDirectory, hierarchyBinaryUri), compiled.hierarchyBinary),
+    );
+  }
   if (adapterReport !== undefined) {
     writes.push(
       writeFile(

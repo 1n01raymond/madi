@@ -1,17 +1,19 @@
 /**
- * Proves that eliding derived identifiers and default transforms changes what
- * the document says, not what the runtime loads.
+ * Proves that relocating mesh-less hierarchy nodes changes where the assembly
+ * tree is stored, not what it says.
  *
  * The same scene is compiled twice -- once with today's default options, once
- * with both size levers on -- and both packages are then decoded through the
- * runtime loader. Every occurrence must come back with the same identity and
- * the same world transform, bit for bit: a translation-only node is re-emitted
- * as TRS precisely because that form recomposes its matrix exactly.
+ * with the nodes relocated to the sidecar -- and both packages are decoded
+ * through the runtime loader. The tree has to come back entry for entry in the
+ * same order, with the same names, depths, and identities, and every occurrence
+ * has to keep its world transform bit for bit: relocation bakes composed
+ * transforms onto the nodes it keeps, so a rounding difference there would be a
+ * silently moved model.
  *
- * Both documents are held at once, so this runs on a model small enough to
+ * Both packages are held at once, so this runs on a model small enough to
  * afford it. Federation-scale documents are measured, not round-tripped.
  */
-import { readFile, mkdir, writeFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, isAbsolute, relative, resolve, sep } from "node:path";
 
 import { compileSceneToGltf } from "../packages/compiler/dist/index.js";
@@ -19,10 +21,8 @@ import { hydrateIfcSceneSplit } from "../packages/compiler/dist/ifc-scene.js";
 import { readIfcStructure } from "../packages/compiler/dist/ifc-structure-stream.js";
 import { decodeCompiledGltf } from "../packages/runtime-webgpu/dist/index.js";
 
-import {
-  NODE_FIELD_COMPILE_OPTIONS,
-  NODE_FIELD_VARIANTS,
-} from "./lib/node-field-variants.mjs";
+import { HIERARCHY_RELOCATION_VARIANTS } from "./lib/hierarchy-relocation-variants.mjs";
+import { NODE_FIELD_COMPILE_OPTIONS } from "./lib/node-field-variants.mjs";
 
 const repositoryRoot = resolve(import.meta.dirname, "..");
 const argument = (name, fallback) => {
@@ -58,7 +58,7 @@ const scene = hydrateIfcSceneSplit(structure.value, geometry, properties);
 const compile = (variant) => compileSceneToGltf(scene, {
   ...NODE_FIELD_COMPILE_OPTIONS,
   propertyColumns: properties,
-  ...NODE_FIELD_VARIANTS[variant],
+  ...HIERARCHY_RELOCATION_VARIANTS[variant],
 });
 
 const toArrayBuffer = (bytes) => bytes.buffer.slice(
@@ -69,62 +69,64 @@ const toArrayBuffer = (bytes) => bytes.buffer.slice(
 function loaded(result) {
   const coarse = result.coarseBinary;
   if (!coarse) throw new Error("The compile produced no coarse binary to decode.");
+  const sidecar = result.hierarchyJson && result.hierarchyBinary
+    ? { hierarchy: { json: result.hierarchyJson, columns: result.hierarchyBinary } }
+    : {};
   const decoded = decodeCompiledGltf(JSON.parse(result.json.text()), toArrayBuffer(coarse), {
     representation: "coarse",
+    ...sidecar,
   });
-  const identities = new Map();
-  for (const object of decoded.objectEvidence) {
-    identities.set(object.occurrenceId, {
-      objectId: object.objectId,
-      semanticId: object.semanticId ?? null,
-      sourceRef: object.sourceRef ?? null,
-    });
-  }
+  // Node indexes are the one field relocation is allowed to change: the
+  // document renumbers when nodes leave it, and relocated entries are keyed
+  // past the end of the node array.
+  const tree = decoded.hierarchy.entries.map((entry) => [
+    entry.name,
+    entry.depth,
+    entry.renderable,
+    entry.occurrenceId,
+    entry.prototypeId,
+    entry.semanticId ?? null,
+    entry.sourceRef ?? null,
+  ].join("\u0000"));
+  const occurrenceById = new Map(
+    decoded.objectEvidence.map((object) => [object.objectId, object.occurrenceId]),
+  );
   const transforms = new Map();
   for (const batch of decoded.gpuScene.batches) {
     for (const instance of batch.instances) {
-      transforms.set(instance.objectId, [...instance.transform]);
+      const occurrenceId = occurrenceById.get(instance.objectId);
+      if (occurrenceId !== undefined) transforms.set(occurrenceId, [...instance.transform]);
     }
   }
-  const hierarchy = new Map();
-  for (const entry of decoded.hierarchy.entries) {
-    hierarchy.set(entry.nodeIndex, [entry.occurrenceId, entry.semanticId ?? null, entry.sourceRef ?? null].join("\u0000"));
-  }
-  return { decoded, identities, transforms, hierarchy };
+  return { decoded, tree, transforms };
 }
 
 const baseline = loaded(compile("baseline"));
-const elided = loaded(compile("both"));
+const relocated = loaded(compile("relocated"));
 
 const mismatches = [];
 const note = (kind, key, expected, actual) => {
   if (mismatches.length < 10) mismatches.push({ kind, key, expected, actual });
 };
 
-for (const [occurrenceId, expected] of baseline.identities) {
-  const actual = elided.identities.get(occurrenceId);
-  if (!actual) note("missing-occurrence", occurrenceId, expected, null);
-  else if (
-    actual.semanticId !== expected.semanticId ||
-    actual.sourceRef !== expected.sourceRef ||
-    actual.objectId !== expected.objectId
-  ) note("identity", occurrenceId, expected, actual);
+if (baseline.tree.length !== relocated.tree.length) {
+  note("tree-length", "entries", baseline.tree.length, relocated.tree.length);
 }
-for (const [nodeIndex, expected] of baseline.hierarchy) {
-  const actual = elided.hierarchy.get(nodeIndex);
-  if (actual !== expected) note("hierarchy", String(nodeIndex), expected, actual ?? null);
+for (const [position, expected] of baseline.tree.entries()) {
+  const actual = relocated.tree[position];
+  if (actual !== expected) note("tree-entry", String(position), expected, actual ?? null);
 }
 let instancesCompared = 0;
-for (const [objectId, expected] of baseline.transforms) {
-  const actual = elided.transforms.get(objectId);
+for (const [occurrenceId, expected] of baseline.transforms) {
+  const actual = relocated.transforms.get(occurrenceId);
   instancesCompared += 1;
   if (!actual || actual.length !== expected.length) {
-    note("missing-instance", String(objectId), expected.length, actual?.length ?? null);
+    note("missing-instance", occurrenceId, expected.length, actual?.length ?? null);
     continue;
   }
   const element = expected.findIndex((value, at) => !Object.is(value, actual[at]));
   if (element !== -1) {
-    note("transform", `${objectId}[${element}]`, expected[element], actual[element]);
+    note("transform", `${occurrenceId}[${element}]`, expected[element], actual[element]);
   }
 }
 
@@ -132,23 +134,25 @@ const summaryOf = ({ decoded }) => ({
   ...decoded.summary,
   occurrences: decoded.objectEvidence.length,
   hierarchyEntries: decoded.hierarchy.entries.length,
+  documentNodes: decoded.hierarchy.nodeCount,
+  renderableOccurrences: decoded.hierarchy.renderableOccurrences,
 });
 const record = {
   label,
   sourceStructure: { byteLength: structure.byteLength, sha256: structure.sha256 },
-  occurrencesCompared: baseline.identities.size,
-  hierarchyEntriesCompared: baseline.hierarchy.size,
+  hierarchyEntriesCompared: baseline.tree.length,
   instancesCompared,
+  relocatedCount: relocated.decoded.hierarchy.relocatedHierarchy?.relocatedCount ?? 0,
   mismatchCount: mismatches.length,
   mismatches,
   baseline: summaryOf(baseline),
-  elided: summaryOf(elided),
+  relocated: summaryOf(relocated),
   identical: mismatches.length === 0,
 };
 await mkdir(dirname(outputPath), { recursive: true });
 await writeFile(outputPath, `${JSON.stringify(record, undefined, 2)}\n`, "utf8");
 console.log(
-  `[round-trip] ${label}: ${record.occurrencesCompared} occurrences, ` +
+  `[round-trip] ${label}: ${record.hierarchyEntriesCompared} entries, ` +
     `${record.instancesCompared} instances, ${record.mismatchCount} mismatches`,
 );
 if (!record.identical) process.exitCode = 1;

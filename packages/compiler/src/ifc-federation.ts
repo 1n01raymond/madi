@@ -67,6 +67,7 @@ export interface IfcFederationCompileOptions {
   readonly omitResourceNames?: boolean;
   readonly elideDerivedIdentifiers?: boolean;
   readonly omitDefaultNodeTransforms?: boolean;
+  readonly relocateHierarchyNodes?: boolean;
   readonly environment?: NodeJS.ProcessEnv;
 }
 
@@ -255,6 +256,7 @@ function federationCacheInput(
       ...(options.omitDefaultNodeTransforms === true
         ? { omitDefaultNodeTransforms: true }
         : {}),
+      ...(options.relocateHierarchyNodes === true ? { relocateHierarchyNodes: true } : {}),
       ...Object.fromEntries(
         sources.map(({ discipline, uriHint }) => [`uriHint.${discipline}`, uriHint]),
       ),
@@ -552,6 +554,7 @@ export async function compileIfcFederation(
       ...(options.omitDefaultNodeTransforms === true
         ? { omitDefaultNodeTransforms: true }
         : {}),
+      ...(options.relocateHierarchyNodes === true ? { relocateHierarchyNodes: true } : {}),
       // The package carries the adapter's value column file byte-verbatim as
       // a lazy property sidecar; the compiler still never materializes a
       // property value.
