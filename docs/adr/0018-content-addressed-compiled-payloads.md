@@ -1,6 +1,6 @@
 # ADR-0018: Content-address compiled prototype payloads, rebuild the federation
 
-Status: Proposed
+Status: Rejected
 
 ## Context
 
@@ -227,8 +227,33 @@ Gate 3 is met: the storage guards listed above, plus the invalidation-table rows
 that do not need Python (content change, stable-content relabelling, corrupt
 entry, unclassified option), the classification rule itself, and a unit-scale
 proof that a store-warm compile publishes the same `scene.bin`, document digest,
-and package digest as a compile with the store disabled. Gates 1, 2, and 4 --
-the changed-discipline Digital Hub resource equivalence, the closed report
-exclusion list, and a measured saving that beats verification at real-large
-scale with no higher peak memory -- belong to the acceptance-evidence increment.
-This ADR stays Proposed until they pass.
+and package digest as a compile with the store disabled. Gates 1 and 2 are met on
+both models: [artifacts/cache/payload-reuse](../../artifacts/cache/payload-reuse/README.md) records a
+changed-discipline rebuild of Digital Hub (10 scenarios, 16 comparisons) and of
+sixty5 (6 scenarios, 10 comparisons) whose every package resource is
+byte-identical to a clean compile, with the two-field report exclusion list
+closed and every store decision exact (Digital Hub 2,664 of 3,383 payloads
+restored, sixty5 40,066 of 42,435).
+
+**Gate 4 failed on both models, so this ADR is Rejected (2026-09-02) by its own
+rule.** The changed-discipline packaging stage took a median 3,184.9 ms clean
+against 7,585.0 ms store-warm on Digital Hub (0.42x) and 35,202.0 ms against
+77,713.5 ms on sixty5 (0.453x); peak process-tree memory was 1.6 MB higher on
+Digital Hub and 76.6 MB lower on sixty5. Restoring a payload -- reading its
+manifest and binary and verifying every byte -- costs more than re-encoding it
+from the parsed Scene IR, because the expensive tessellation already sits in
+the adapter's document-artifact cache and encoding is a typed-array copy.
+Exploratory probes in the record rule out publication timing and store
+location. The record also shows the edited document reuses nothing by
+construction: prototype ids embed the document token and the payload digest
+hashes the representation id, so one edit renames every prototype of that
+document.
+
+What survives: the storage guards, the encoder/placement split, and
+`--payload-cache` itself stay in the compiler, off by default, as the measured
+experiment; removing them is a separate decision. What does not: this reuse
+unit is not the partial-rebuild strategy. A successor ADR must pick a unit whose
+restore is cheaper than re-encoding -- laid-out byte ranges above the encoder,
+which this ADR excluded, or content-derived prototype ids -- and
+[ADR-0010](0010-ifc-incremental-dependency-index.md) stays Proposed until one
+does.

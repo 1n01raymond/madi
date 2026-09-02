@@ -85,8 +85,12 @@ changed, deleted, renamed/relabelled, and cross-document reconciliation
 invalidation. The adapter artifact tests reject corruption and identity changes,
 preserve shared geometry aliases, and prove cold, warm, and one-document-changed
 federation structure/geometry/property bytes equal the corresponding clean
-adapter build. Acceptance still requires content-addressed compiled payloads and
-a partial compiler rebuild that reproduces the complete clean package byte for
-byte. [ADR-0018](0018-content-addressed-compiled-payloads.md) carries that
-payload contract and states which resources stay federation-global; both
-records remain Proposed until its evidence passes.
+adapter build. Acceptance still requires a partial compiler rebuild that is measurably
+cheaper than a clean one while reproducing the complete clean package byte for
+byte. The byte-for-byte half is recorded: a changed-discipline rebuild of
+Digital Hub and sixty5 through the content-addressed payload store reproduced
+every clean package resource ([artifacts/cache/payload-reuse](../../artifacts/cache/payload-reuse/README.md)).
+The cheaper half is not: that store restored payloads slower than the compiler
+re-encodes them, so [ADR-0018](0018-content-addressed-compiled-payloads.md) is
+Rejected by its own gate and this ADR remains Proposed until a successor reuse
+unit passes the same measurement.

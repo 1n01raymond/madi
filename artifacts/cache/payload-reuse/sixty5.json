@@ -1,0 +1,1736 @@
+{
+  "schemaVersion": "naru.payload-reuse-evidence.1",
+  "mode": "fresh-process-changed-discipline-rebuild",
+  "recordedAt": "2026-09-02T16:39:16.456Z",
+  "model": "sixty5",
+  "host": {
+    "platform": "win32",
+    "architecture": "x64",
+    "node": "22.14.0",
+    "cpuCount": 16,
+    "cpuModel": "AMD Ryzen 7 9800X3D 8-Core Processor           ",
+    "totalMemoryBytes": 33463021568
+  },
+  "commit": {
+    "head": "60d32426d49c11512aea31db64e37095b084e9d6",
+    "describe": "docs: sync the Phase 2 tracker with the merged ADR-0018 halves and issue workflow",
+    "workingTreeClean": false
+  },
+  "fixture": {
+    "datasetId": "ifc-bench-sixty5",
+    "manifest": {
+      "path": "fixtures/external/manifest.json",
+      "sha256": "77d7d587d6b32938a371325e281a4584e10c2ff3118a59f300a9da097eb2f478"
+    },
+    "documents": [
+      {
+        "discipline": "architecture",
+        "uriHint": "projects/sixty5/arc.ifc",
+        "bytes": 342657851,
+        "sha256": "e91ddbbd672bbde946af14631de4c732f0cf8a7cfae5dbbf06fbeab03b5c46df"
+      },
+      {
+        "discipline": "electrical",
+        "uriHint": "projects/sixty5/electrical.ifc",
+        "bytes": 97058912,
+        "sha256": "adb8d5eda2c706a1fded2a00bd38d845e35f513e2f6ba048fc6228274dfb3986"
+      },
+      {
+        "discipline": "facade",
+        "uriHint": "projects/sixty5/facade.ifc",
+        "bytes": 6067026,
+        "sha256": "a9a1b20214da8ac1e1bea1f8670bef24f20a0d53a8ebaef4eb20b5a447640c79"
+      },
+      {
+        "discipline": "kitchen",
+        "uriHint": "projects/sixty5/kitchen.ifc",
+        "bytes": 49670229,
+        "sha256": "1905b992071729d1c780b18f6103e4d1d08307a4707d5f33a4413216f36776ac"
+      },
+      {
+        "discipline": "plumbing",
+        "uriHint": "projects/sixty5/plumbing.ifc",
+        "bytes": 222099255,
+        "sha256": "15382b06d0a63464b95ba451ce7d5fa981bf6c236ebe3f4f62bb9d2b9abfd821"
+      },
+      {
+        "discipline": "structure",
+        "uriHint": "projects/sixty5/str.ifc",
+        "bytes": 7422441,
+        "sha256": "79f294c643438ac7a494e4871857244c2de0eefa536eda5977af20640a301a22"
+      },
+      {
+        "discipline": "ventilation",
+        "uriHint": "projects/sixty5/ventilation.ifc",
+        "bytes": 114891068,
+        "sha256": "c78f6ad085961500f0890bbffda9e171c1342c5865ca152f64098dd4da644cca"
+      }
+    ]
+  },
+  "changedDocument": {
+    "discipline": "structure",
+    "fileName": "str.ifc",
+    "uriHint": "projects/sixty5/str.ifc",
+    "edit": {
+      "discipline": "structure",
+      "entity": "#890= IFCEXTRUDEDAREASOLID(#886,#889,#19,250.);",
+      "replacement": "#890= IFCEXTRUDEDAREASOLID(#886,#889,#19,350.);",
+      "description": "Extrusion depth 250 -> 350 of #890, referenced only by #891 (IfcShapeRepresentation 'Body')."
+    },
+    "originalBytes": 7422441,
+    "originalSha256": "79f294c643438ac7a494e4871857244c2de0eefa536eda5977af20640a301a22",
+    "changedBytes": 7422441,
+    "changedSha256": "4bda52a8e603838981e80b86ced91b8c13770847c17c8f58d2c6f622c11c19d6"
+  },
+  "changeEffect": {
+    "sceneBinDiffers": true,
+    "packageDigestDiffers": true,
+    "resourcesDiffering": [
+      "adapter-report.json",
+      "build-report.json",
+      "coarse.bin",
+      "hierarchy.bin",
+      "hierarchy.json",
+      "incremental-dependencies.json",
+      "properties.json",
+      "scene.bin",
+      "scene.gltf"
+    ]
+  },
+  "adapter": {
+    "fingerprint": "cbdac37456c929716533ce1b026c0feaf1e823f25f2bf49bee508331c9a7d093",
+    "name": "IfcOpenShell",
+    "schemaVersion": "naru.ifc-adapter-identity.1",
+    "toolchain": {
+      "architecture": "AMD64",
+      "ifcOpenShell": "0.8.5",
+      "numpy": "2.5.2",
+      "platform": "win32",
+      "python": "3.13.2"
+    },
+    "version": "0.8.5"
+  },
+  "compileOptions": {
+    "threads": 6,
+    "compactJson": true,
+    "spatialIndex": true,
+    "relocateHierarchyNodes": true,
+    "cacheDirectory": "output/payload-reuse/sixty5/cache",
+    "payloadCacheDirectory": "output/payload-reuse/sixty5/store",
+    "payloadEntrySchema": "naru.compiled-payload-entry.1",
+    "pythonExecutable": "output/venv-ifc/Scripts/python.exe"
+  },
+  "protocol": {
+    "processIsolation": "One fresh node process per sample; the recorder never compiles in-process.",
+    "cacheState": "The compiled-package cache and the adapter document artifact cache share the --cache directory. Before every store-enabled scenario the recorder removes the compiled-package entry for that document set, so extraction stays warm while packaging has to run; a compile that hit the package cache would skip packaging entirely and is rejected.",
+    "changedDocument": "The edited discipline is compiled from a copy under output/ whose bytes differ from the fixture only in the edited entity; its document artifact misses once and is then cached like the others.",
+    "timingState": "Before every timing sample the changed document's artifact, the changed package entry, and the store entries the changed rebuild published are removed, so clean, store-warm, and extraction-only samples all start from exactly one document to extract, a whole package to write, and a store that holds the unchanged documents' payloads only. Samples interleave clean, warm, extraction per iteration.",
+    "corruptEntry": "The first byte of payload.bin in the entry the changed rebuild published is flipped; the intact bytes are written back after the scenario.",
+    "outputHandling": "Every sample compiles into its own output directory, which is hashed in full and then deleted.",
+    "failedSampleHandling": "A timing sample whose process fails, whose cache state is not the one the protocol requires, whose output differs from the oracle, or whose payload decisions differ from the pinned scenario is recorded in discardedSamples and re-run, at most three attempts. Scenario samples are never re-run: a mismatch is a gate failure and is recorded as such.",
+    "statistics": {
+      "median": "The middle value of the sorted retained samples; the mean of the two middle values when the count is even.",
+      "p95": "Nearest-rank observed p95: the ceil(0.95 * n)-th sorted value, an order statistic of the samples taken."
+    },
+    "peakProcessMemory": {
+      "method": "os-sampled-win32-process-tree",
+      "intervalMilliseconds": 500,
+      "note": "Win32_Process WorkingSetSize summed over the tree rooted at the sample process, so the native adapter is included; the summed per-process PeakWorkingSetSize is reported beside it as an upper bound."
+    },
+    "reportComparison": {
+      "byteIdenticalResources": "Every file a sample writes except adapter-report.json and build-report.json, which are compared as JSON with exactly the excluded fields removed.",
+      "semanticExclusions": [
+        "adapter-report.json:documentArtifactCache",
+        "build-report.json:compiledPayloadCache"
+      ]
+    },
+    "uncontrolled": [
+      "The operating system file cache is not cleared between samples.",
+      "The sampler runs one PowerShell process for the whole session and is not excluded from the host's load."
+    ]
+  },
+  "scenarios": [
+    {
+      "name": "clean-original",
+      "documents": [
+        {
+          "discipline": "architecture",
+          "uriHint": "projects/sixty5/arc.ifc",
+          "source": "original"
+        },
+        {
+          "discipline": "electrical",
+          "uriHint": "projects/sixty5/electrical.ifc",
+          "source": "original"
+        },
+        {
+          "discipline": "facade",
+          "uriHint": "projects/sixty5/facade.ifc",
+          "source": "original"
+        },
+        {
+          "discipline": "kitchen",
+          "uriHint": "projects/sixty5/kitchen.ifc",
+          "source": "original"
+        },
+        {
+          "discipline": "plumbing",
+          "uriHint": "projects/sixty5/plumbing.ifc",
+          "source": "original"
+        },
+        {
+          "discipline": "structure",
+          "uriHint": "projects/sixty5/str.ifc",
+          "source": "original"
+        },
+        {
+          "discipline": "ventilation",
+          "uriHint": "projects/sixty5/ventilation.ifc",
+          "source": "original"
+        }
+      ],
+      "payloadStore": false,
+      "oracle": null,
+      "packageCacheKey": "bdb4a74dc2213ec16f0db74dd4f2776542dd25b9f3a7087e33eba174247e0882",
+      "packageCacheStatus": "miss",
+      "documentArtifactCache": {
+        "hits": [],
+        "misses": [
+          "architecture",
+          "electrical",
+          "facade",
+          "kitchen",
+          "plumbing",
+          "structure",
+          "ventilation"
+        ],
+        "schemaVersion": "naru.ifc-document-artifact.1",
+        "status": "enabled"
+      },
+      "payloadCache": null,
+      "warnings": [],
+      "compileMilliseconds": 419899.7,
+      "processMilliseconds": 420123.5,
+      "peakWorkingSetBytes": 5091184640,
+      "packageDigest": "dd6fa9a1715e8451ca802554c9cf47b20e1e774d69169c6bf8ef16f6f10fb4c9",
+      "resources": [
+        {
+          "path": "adapter-report.json",
+          "bytes": 39022,
+          "sha256": "cbfa5985404883c9472c80641bb9901cf78c21fb832cf4e4bc080bce3130bab7"
+        },
+        {
+          "path": "build-report.json",
+          "bytes": 142297,
+          "sha256": "6e491edad12f8ec23f74bcdf56dc7116cdb0aa9c505d6cee5e3fef5707795ee5"
+        },
+        {
+          "path": "coarse.bin",
+          "bytes": 38700720,
+          "sha256": "258e085d4f3d0b380bb89c3596b2e3bfc4a43177afe9fc7e92d6e1046db9031b"
+        },
+        {
+          "path": "hierarchy.bin",
+          "bytes": 46250496,
+          "sha256": "271f68407128ac25a78fa27bbf97dd909528a5c2cd3b514e612253909d7a849b"
+        },
+        {
+          "path": "hierarchy.json",
+          "bytes": 3192,
+          "sha256": "cb37493da3c69dc82f587887ca564358ed1664c5db7a43664b7cf3ed355a41ac"
+        },
+        {
+          "path": "incremental-dependencies.json",
+          "bytes": 38342167,
+          "sha256": "d57de4b3669ee16d3d3d0e2b0f5faf5b6caa1590c53cbe6f357a0b30c141c9f7"
+        },
+        {
+          "path": "properties.bin",
+          "bytes": 31179862,
+          "sha256": "dad8d98909c738df930569c4b907c29e64cda2b65d84917936c1c4d86d3dd8c4"
+        },
+        {
+          "path": "properties.json",
+          "bytes": 17705010,
+          "sha256": "dc3394714b73d322dcfe6bad7ce780dbdd18cb547e5eaf45a26c9e66de932312"
+        },
+        {
+          "path": "scene.bin",
+          "bytes": 169752328,
+          "sha256": "8860f0f545e6d5ca1f8d225a339fca107389fbdba4069b930850625e7c0f60d1"
+        },
+        {
+          "path": "scene.gltf",
+          "bytes": 299336880,
+          "sha256": "5c2d238a7a70a7f8411afdaf866a78a8b1eb62d4a2a83a497627ebab90cb2146"
+        },
+        {
+          "path": "spatial.bin",
+          "bytes": 1056956,
+          "sha256": "04930d10190a6a9663d74cac775cca43447d50af1f3ac661793bfd96bd9be514"
+        }
+      ],
+      "failures": [],
+      "met": true
+    },
+    {
+      "name": "store-cold-original",
+      "documents": [
+        {
+          "discipline": "architecture",
+          "uriHint": "projects/sixty5/arc.ifc",
+          "source": "original"
+        },
+        {
+          "discipline": "electrical",
+          "uriHint": "projects/sixty5/electrical.ifc",
+          "source": "original"
+        },
+        {
+          "discipline": "facade",
+          "uriHint": "projects/sixty5/facade.ifc",
+          "source": "original"
+        },
+        {
+          "discipline": "kitchen",
+          "uriHint": "projects/sixty5/kitchen.ifc",
+          "source": "original"
+        },
+        {
+          "discipline": "plumbing",
+          "uriHint": "projects/sixty5/plumbing.ifc",
+          "source": "original"
+        },
+        {
+          "discipline": "structure",
+          "uriHint": "projects/sixty5/str.ifc",
+          "source": "original"
+        },
+        {
+          "discipline": "ventilation",
+          "uriHint": "projects/sixty5/ventilation.ifc",
+          "source": "original"
+        }
+      ],
+      "payloadStore": true,
+      "oracle": "clean-original",
+      "packageCacheKey": "bdb4a74dc2213ec16f0db74dd4f2776542dd25b9f3a7087e33eba174247e0882",
+      "packageCacheStatus": "miss",
+      "documentArtifactCache": {
+        "hits": [
+          "architecture",
+          "electrical",
+          "facade",
+          "kitchen",
+          "plumbing",
+          "structure",
+          "ventilation"
+        ],
+        "misses": [],
+        "schemaVersion": "naru.ifc-document-artifact.1",
+        "status": "enabled"
+      },
+      "payloadCache": {
+        "store": "naru.compiled-payload-entry.1",
+        "prototypes": 42435,
+        "hits": 0,
+        "misses": 42435,
+        "published": 42435,
+        "outcomes": {
+          "hit": 0,
+          "absent": 42435,
+          "corrupt-entry": 0,
+          "restore-failed": 0
+        },
+        "publishFailures": 0,
+        "degraded": []
+      },
+      "warnings": [],
+      "compileMilliseconds": 207205,
+      "processMilliseconds": 207435.3,
+      "peakWorkingSetBytes": 3278503936,
+      "packageDigest": "dd6fa9a1715e8451ca802554c9cf47b20e1e774d69169c6bf8ef16f6f10fb4c9",
+      "resources": [
+        {
+          "path": "adapter-report.json",
+          "bytes": 39022,
+          "sha256": "8cab771e85d112a5c5077b0f57960a0ae951d619f8ba276f96442984cb3d14a6"
+        },
+        {
+          "path": "build-report.json",
+          "bytes": 142622,
+          "sha256": "e6f36f29ee5d0c8aa61f28a59cbd5b9f7cb0b7c5c9ab056f8a56e906eeb6c50a"
+        },
+        {
+          "path": "coarse.bin",
+          "bytes": 38700720,
+          "sha256": "258e085d4f3d0b380bb89c3596b2e3bfc4a43177afe9fc7e92d6e1046db9031b"
+        },
+        {
+          "path": "hierarchy.bin",
+          "bytes": 46250496,
+          "sha256": "271f68407128ac25a78fa27bbf97dd909528a5c2cd3b514e612253909d7a849b"
+        },
+        {
+          "path": "hierarchy.json",
+          "bytes": 3192,
+          "sha256": "cb37493da3c69dc82f587887ca564358ed1664c5db7a43664b7cf3ed355a41ac"
+        },
+        {
+          "path": "incremental-dependencies.json",
+          "bytes": 38342167,
+          "sha256": "d57de4b3669ee16d3d3d0e2b0f5faf5b6caa1590c53cbe6f357a0b30c141c9f7"
+        },
+        {
+          "path": "properties.bin",
+          "bytes": 31179862,
+          "sha256": "dad8d98909c738df930569c4b907c29e64cda2b65d84917936c1c4d86d3dd8c4"
+        },
+        {
+          "path": "properties.json",
+          "bytes": 17705010,
+          "sha256": "dc3394714b73d322dcfe6bad7ce780dbdd18cb547e5eaf45a26c9e66de932312"
+        },
+        {
+          "path": "scene.bin",
+          "bytes": 169752328,
+          "sha256": "8860f0f545e6d5ca1f8d225a339fca107389fbdba4069b930850625e7c0f60d1"
+        },
+        {
+          "path": "scene.gltf",
+          "bytes": 299336880,
+          "sha256": "5c2d238a7a70a7f8411afdaf866a78a8b1eb62d4a2a83a497627ebab90cb2146"
+        },
+        {
+          "path": "spatial.bin",
+          "bytes": 1056956,
+          "sha256": "04930d10190a6a9663d74cac775cca43447d50af1f3ac661793bfd96bd9be514"
+        }
+      ],
+      "failures": [],
+      "met": true
+    },
+    {
+      "name": "store-warm-original",
+      "documents": [
+        {
+          "discipline": "architecture",
+          "uriHint": "projects/sixty5/arc.ifc",
+          "source": "original"
+        },
+        {
+          "discipline": "electrical",
+          "uriHint": "projects/sixty5/electrical.ifc",
+          "source": "original"
+        },
+        {
+          "discipline": "facade",
+          "uriHint": "projects/sixty5/facade.ifc",
+          "source": "original"
+        },
+        {
+          "discipline": "kitchen",
+          "uriHint": "projects/sixty5/kitchen.ifc",
+          "source": "original"
+        },
+        {
+          "discipline": "plumbing",
+          "uriHint": "projects/sixty5/plumbing.ifc",
+          "source": "original"
+        },
+        {
+          "discipline": "structure",
+          "uriHint": "projects/sixty5/str.ifc",
+          "source": "original"
+        },
+        {
+          "discipline": "ventilation",
+          "uriHint": "projects/sixty5/ventilation.ifc",
+          "source": "original"
+        }
+      ],
+      "payloadStore": true,
+      "oracle": "clean-original",
+      "packageCacheKey": "bdb4a74dc2213ec16f0db74dd4f2776542dd25b9f3a7087e33eba174247e0882",
+      "packageCacheStatus": "miss",
+      "documentArtifactCache": {
+        "hits": [
+          "architecture",
+          "electrical",
+          "facade",
+          "kitchen",
+          "plumbing",
+          "structure",
+          "ventilation"
+        ],
+        "misses": [],
+        "schemaVersion": "naru.ifc-document-artifact.1",
+        "status": "enabled"
+      },
+      "payloadCache": {
+        "store": "naru.compiled-payload-entry.1",
+        "prototypes": 42435,
+        "hits": 42435,
+        "misses": 0,
+        "published": 0,
+        "outcomes": {
+          "hit": 42435,
+          "absent": 0,
+          "corrupt-entry": 0,
+          "restore-failed": 0
+        },
+        "publishFailures": 0,
+        "degraded": []
+      },
+      "warnings": [],
+      "compileMilliseconds": 133787.1,
+      "processMilliseconds": 133999.5,
+      "peakWorkingSetBytes": 3301384192,
+      "packageDigest": "dd6fa9a1715e8451ca802554c9cf47b20e1e774d69169c6bf8ef16f6f10fb4c9",
+      "resources": [
+        {
+          "path": "adapter-report.json",
+          "bytes": 39022,
+          "sha256": "8cab771e85d112a5c5077b0f57960a0ae951d619f8ba276f96442984cb3d14a6"
+        },
+        {
+          "path": "build-report.json",
+          "bytes": 142618,
+          "sha256": "9549c859e7e5decce0257c0a5270a93e1f9d65169d3ab8bbd2637c363c6b6401"
+        },
+        {
+          "path": "coarse.bin",
+          "bytes": 38700720,
+          "sha256": "258e085d4f3d0b380bb89c3596b2e3bfc4a43177afe9fc7e92d6e1046db9031b"
+        },
+        {
+          "path": "hierarchy.bin",
+          "bytes": 46250496,
+          "sha256": "271f68407128ac25a78fa27bbf97dd909528a5c2cd3b514e612253909d7a849b"
+        },
+        {
+          "path": "hierarchy.json",
+          "bytes": 3192,
+          "sha256": "cb37493da3c69dc82f587887ca564358ed1664c5db7a43664b7cf3ed355a41ac"
+        },
+        {
+          "path": "incremental-dependencies.json",
+          "bytes": 38342167,
+          "sha256": "d57de4b3669ee16d3d3d0e2b0f5faf5b6caa1590c53cbe6f357a0b30c141c9f7"
+        },
+        {
+          "path": "properties.bin",
+          "bytes": 31179862,
+          "sha256": "dad8d98909c738df930569c4b907c29e64cda2b65d84917936c1c4d86d3dd8c4"
+        },
+        {
+          "path": "properties.json",
+          "bytes": 17705010,
+          "sha256": "dc3394714b73d322dcfe6bad7ce780dbdd18cb547e5eaf45a26c9e66de932312"
+        },
+        {
+          "path": "scene.bin",
+          "bytes": 169752328,
+          "sha256": "8860f0f545e6d5ca1f8d225a339fca107389fbdba4069b930850625e7c0f60d1"
+        },
+        {
+          "path": "scene.gltf",
+          "bytes": 299336880,
+          "sha256": "5c2d238a7a70a7f8411afdaf866a78a8b1eb62d4a2a83a497627ebab90cb2146"
+        },
+        {
+          "path": "spatial.bin",
+          "bytes": 1056956,
+          "sha256": "04930d10190a6a9663d74cac775cca43447d50af1f3ac661793bfd96bd9be514"
+        }
+      ],
+      "failures": [],
+      "met": true
+    },
+    {
+      "name": "clean-changed",
+      "documents": [
+        {
+          "discipline": "architecture",
+          "uriHint": "projects/sixty5/arc.ifc",
+          "source": "original"
+        },
+        {
+          "discipline": "electrical",
+          "uriHint": "projects/sixty5/electrical.ifc",
+          "source": "original"
+        },
+        {
+          "discipline": "facade",
+          "uriHint": "projects/sixty5/facade.ifc",
+          "source": "original"
+        },
+        {
+          "discipline": "kitchen",
+          "uriHint": "projects/sixty5/kitchen.ifc",
+          "source": "original"
+        },
+        {
+          "discipline": "plumbing",
+          "uriHint": "projects/sixty5/plumbing.ifc",
+          "source": "original"
+        },
+        {
+          "discipline": "structure",
+          "uriHint": "projects/sixty5/str.ifc",
+          "source": "changed"
+        },
+        {
+          "discipline": "ventilation",
+          "uriHint": "projects/sixty5/ventilation.ifc",
+          "source": "original"
+        }
+      ],
+      "payloadStore": false,
+      "oracle": null,
+      "packageCacheKey": "993e10fb0643ad6a77af348950b359eb4c44599ca4f0b1af0f6e7463d0eb2f60",
+      "packageCacheStatus": "miss",
+      "documentArtifactCache": {
+        "hits": [
+          "architecture",
+          "electrical",
+          "facade",
+          "kitchen",
+          "plumbing",
+          "ventilation"
+        ],
+        "misses": [
+          "structure"
+        ],
+        "schemaVersion": "naru.ifc-document-artifact.1",
+        "status": "enabled"
+      },
+      "payloadCache": null,
+      "warnings": [],
+      "compileMilliseconds": 97306.7,
+      "processMilliseconds": 97529.2,
+      "peakWorkingSetBytes": 3307008000,
+      "packageDigest": "05707534c73ce126da401a79481d0fd6c892bc308a451d6aa2a4b1691bc2439e",
+      "resources": [
+        {
+          "path": "adapter-report.json",
+          "bytes": 39026,
+          "sha256": "5c9a6a030e59a0f04fdfc3ed3c77c0992c6cf6218dbf78cb3b1209796eb24f52"
+        },
+        {
+          "path": "build-report.json",
+          "bytes": 142297,
+          "sha256": "d7d47aedcc0c7507d0ef616c5f5877d3b67a015ba46a276fcf9eda5c368fb228"
+        },
+        {
+          "path": "coarse.bin",
+          "bytes": 38700720,
+          "sha256": "39f4db859996d62a8f1427a89a7923434bcf873927c4e5551dafe6961564a9e6"
+        },
+        {
+          "path": "hierarchy.bin",
+          "bytes": 46250496,
+          "sha256": "e9d24b360b570022124bbc31bff001434ee57b49b4fe6ad8992002e05751a63e"
+        },
+        {
+          "path": "hierarchy.json",
+          "bytes": 3192,
+          "sha256": "2038ad90d33a4c3083ad0702c129da1cef228a91b0d0aa653a9c75b724a2b7d4"
+        },
+        {
+          "path": "incremental-dependencies.json",
+          "bytes": 38342167,
+          "sha256": "8dd77321e69a6fc400b8c6b30d581f810289bf6e61b44459a7dd641686cd8be4"
+        },
+        {
+          "path": "properties.bin",
+          "bytes": 31179862,
+          "sha256": "dad8d98909c738df930569c4b907c29e64cda2b65d84917936c1c4d86d3dd8c4"
+        },
+        {
+          "path": "properties.json",
+          "bytes": 17705010,
+          "sha256": "6b632040996161969c60deb308db4a069bd22d71de8ff0010b880f226b56f4a6"
+        },
+        {
+          "path": "scene.bin",
+          "bytes": 169752328,
+          "sha256": "27f324f2ebbac5d1f1ecbe3fc78fb36600dd5ea1a88a58b475924cdc67dd358c"
+        },
+        {
+          "path": "scene.gltf",
+          "bytes": 299336922,
+          "sha256": "e3d8f3de93259864a01cb4cad6daa07e768f2f2966fb0b7d1e02f724db6a4357"
+        },
+        {
+          "path": "spatial.bin",
+          "bytes": 1056956,
+          "sha256": "04930d10190a6a9663d74cac775cca43447d50af1f3ac661793bfd96bd9be514"
+        }
+      ],
+      "failures": [],
+      "met": true
+    },
+    {
+      "name": "store-warm-changed",
+      "documents": [
+        {
+          "discipline": "architecture",
+          "uriHint": "projects/sixty5/arc.ifc",
+          "source": "original"
+        },
+        {
+          "discipline": "electrical",
+          "uriHint": "projects/sixty5/electrical.ifc",
+          "source": "original"
+        },
+        {
+          "discipline": "facade",
+          "uriHint": "projects/sixty5/facade.ifc",
+          "source": "original"
+        },
+        {
+          "discipline": "kitchen",
+          "uriHint": "projects/sixty5/kitchen.ifc",
+          "source": "original"
+        },
+        {
+          "discipline": "plumbing",
+          "uriHint": "projects/sixty5/plumbing.ifc",
+          "source": "original"
+        },
+        {
+          "discipline": "structure",
+          "uriHint": "projects/sixty5/str.ifc",
+          "source": "changed"
+        },
+        {
+          "discipline": "ventilation",
+          "uriHint": "projects/sixty5/ventilation.ifc",
+          "source": "original"
+        }
+      ],
+      "payloadStore": true,
+      "oracle": "clean-changed",
+      "packageCacheKey": "993e10fb0643ad6a77af348950b359eb4c44599ca4f0b1af0f6e7463d0eb2f60",
+      "packageCacheStatus": "miss",
+      "documentArtifactCache": {
+        "hits": [
+          "architecture",
+          "electrical",
+          "facade",
+          "kitchen",
+          "plumbing",
+          "structure",
+          "ventilation"
+        ],
+        "misses": [],
+        "schemaVersion": "naru.ifc-document-artifact.1",
+        "status": "enabled"
+      },
+      "payloadCache": {
+        "store": "naru.compiled-payload-entry.1",
+        "prototypes": 42435,
+        "hits": 40066,
+        "misses": 2369,
+        "published": 2369,
+        "outcomes": {
+          "hit": 40066,
+          "absent": 2369,
+          "corrupt-entry": 0,
+          "restore-failed": 0
+        },
+        "publishFailures": 0,
+        "degraded": []
+      },
+      "warnings": [],
+      "compileMilliseconds": 132294.4,
+      "processMilliseconds": 132503.7,
+      "peakWorkingSetBytes": 3292008448,
+      "packageDigest": "05707534c73ce126da401a79481d0fd6c892bc308a451d6aa2a4b1691bc2439e",
+      "resources": [
+        {
+          "path": "adapter-report.json",
+          "bytes": 39022,
+          "sha256": "b98d38015d1a1e9a7b9315d9ad0bfe8f6c6980d6b00024fdcd216581791f77b9"
+        },
+        {
+          "path": "build-report.json",
+          "bytes": 142627,
+          "sha256": "508305aef0a6f3738bdcd91cb40c064690b6da5e50acee0c86efe8f4c54c85e8"
+        },
+        {
+          "path": "coarse.bin",
+          "bytes": 38700720,
+          "sha256": "39f4db859996d62a8f1427a89a7923434bcf873927c4e5551dafe6961564a9e6"
+        },
+        {
+          "path": "hierarchy.bin",
+          "bytes": 46250496,
+          "sha256": "e9d24b360b570022124bbc31bff001434ee57b49b4fe6ad8992002e05751a63e"
+        },
+        {
+          "path": "hierarchy.json",
+          "bytes": 3192,
+          "sha256": "2038ad90d33a4c3083ad0702c129da1cef228a91b0d0aa653a9c75b724a2b7d4"
+        },
+        {
+          "path": "incremental-dependencies.json",
+          "bytes": 38342167,
+          "sha256": "8dd77321e69a6fc400b8c6b30d581f810289bf6e61b44459a7dd641686cd8be4"
+        },
+        {
+          "path": "properties.bin",
+          "bytes": 31179862,
+          "sha256": "dad8d98909c738df930569c4b907c29e64cda2b65d84917936c1c4d86d3dd8c4"
+        },
+        {
+          "path": "properties.json",
+          "bytes": 17705010,
+          "sha256": "6b632040996161969c60deb308db4a069bd22d71de8ff0010b880f226b56f4a6"
+        },
+        {
+          "path": "scene.bin",
+          "bytes": 169752328,
+          "sha256": "27f324f2ebbac5d1f1ecbe3fc78fb36600dd5ea1a88a58b475924cdc67dd358c"
+        },
+        {
+          "path": "scene.gltf",
+          "bytes": 299336922,
+          "sha256": "e3d8f3de93259864a01cb4cad6daa07e768f2f2966fb0b7d1e02f724db6a4357"
+        },
+        {
+          "path": "spatial.bin",
+          "bytes": 1056956,
+          "sha256": "04930d10190a6a9663d74cac775cca43447d50af1f3ac661793bfd96bd9be514"
+        }
+      ],
+      "failures": [],
+      "met": true
+    },
+    {
+      "name": "store-corrupt-entry-changed",
+      "documents": [
+        {
+          "discipline": "architecture",
+          "uriHint": "projects/sixty5/arc.ifc",
+          "source": "original"
+        },
+        {
+          "discipline": "electrical",
+          "uriHint": "projects/sixty5/electrical.ifc",
+          "source": "original"
+        },
+        {
+          "discipline": "facade",
+          "uriHint": "projects/sixty5/facade.ifc",
+          "source": "original"
+        },
+        {
+          "discipline": "kitchen",
+          "uriHint": "projects/sixty5/kitchen.ifc",
+          "source": "original"
+        },
+        {
+          "discipline": "plumbing",
+          "uriHint": "projects/sixty5/plumbing.ifc",
+          "source": "original"
+        },
+        {
+          "discipline": "structure",
+          "uriHint": "projects/sixty5/str.ifc",
+          "source": "changed"
+        },
+        {
+          "discipline": "ventilation",
+          "uriHint": "projects/sixty5/ventilation.ifc",
+          "source": "original"
+        }
+      ],
+      "payloadStore": true,
+      "oracle": "clean-changed",
+      "packageCacheKey": "993e10fb0643ad6a77af348950b359eb4c44599ca4f0b1af0f6e7463d0eb2f60",
+      "packageCacheStatus": "miss",
+      "documentArtifactCache": {
+        "hits": [
+          "architecture",
+          "electrical",
+          "facade",
+          "kitchen",
+          "plumbing",
+          "structure",
+          "ventilation"
+        ],
+        "misses": [],
+        "schemaVersion": "naru.ifc-document-artifact.1",
+        "status": "enabled"
+      },
+      "payloadCache": {
+        "store": "naru.compiled-payload-entry.1",
+        "prototypes": 42435,
+        "hits": 42434,
+        "misses": 1,
+        "published": 0,
+        "outcomes": {
+          "hit": 42434,
+          "absent": 0,
+          "corrupt-entry": 1,
+          "restore-failed": 0
+        },
+        "publishFailures": 1,
+        "degraded": [
+          {
+            "prototypeId": "prototype:ifc:structure-4bda52a8e603:151193-openings-151217-151248-151276-151303",
+            "outcome": "corrupt-entry"
+          },
+          {
+            "prototypeId": "prototype:ifc:structure-4bda52a8e603:151193-openings-151217-151248-151276-151303",
+            "outcome": "publish-failed"
+          }
+        ]
+      },
+      "warnings": [
+        "[naru] payload cache restore failed for prototype:ifc:structure-4bda52a8e603:151193-openings-151217-151248-151276-151303 (Compiled payload binary failed integrity verification.); rebuilding.",
+        "[naru] payload cache publish failed for prototype:ifc:structure-4bda52a8e603:151193-openings-151217-151248-151276-151303 (Compiled payload binary failed integrity verification.); compiled output kept without an entry."
+      ],
+      "compileMilliseconds": 130384.1,
+      "processMilliseconds": 130567.1,
+      "peakWorkingSetBytes": 3278471168,
+      "packageDigest": "05707534c73ce126da401a79481d0fd6c892bc308a451d6aa2a4b1691bc2439e",
+      "resources": [
+        {
+          "path": "adapter-report.json",
+          "bytes": 39022,
+          "sha256": "b98d38015d1a1e9a7b9315d9ad0bfe8f6c6980d6b00024fdcd216581791f77b9"
+        },
+        {
+          "path": "build-report.json",
+          "bytes": 142941,
+          "sha256": "9ef7b3433358d92a543383be770deacd1e8044ea2a8ce4114808283e33dce1b1"
+        },
+        {
+          "path": "coarse.bin",
+          "bytes": 38700720,
+          "sha256": "39f4db859996d62a8f1427a89a7923434bcf873927c4e5551dafe6961564a9e6"
+        },
+        {
+          "path": "hierarchy.bin",
+          "bytes": 46250496,
+          "sha256": "e9d24b360b570022124bbc31bff001434ee57b49b4fe6ad8992002e05751a63e"
+        },
+        {
+          "path": "hierarchy.json",
+          "bytes": 3192,
+          "sha256": "2038ad90d33a4c3083ad0702c129da1cef228a91b0d0aa653a9c75b724a2b7d4"
+        },
+        {
+          "path": "incremental-dependencies.json",
+          "bytes": 38342167,
+          "sha256": "8dd77321e69a6fc400b8c6b30d581f810289bf6e61b44459a7dd641686cd8be4"
+        },
+        {
+          "path": "properties.bin",
+          "bytes": 31179862,
+          "sha256": "dad8d98909c738df930569c4b907c29e64cda2b65d84917936c1c4d86d3dd8c4"
+        },
+        {
+          "path": "properties.json",
+          "bytes": 17705010,
+          "sha256": "6b632040996161969c60deb308db4a069bd22d71de8ff0010b880f226b56f4a6"
+        },
+        {
+          "path": "scene.bin",
+          "bytes": 169752328,
+          "sha256": "27f324f2ebbac5d1f1ecbe3fc78fb36600dd5ea1a88a58b475924cdc67dd358c"
+        },
+        {
+          "path": "scene.gltf",
+          "bytes": 299336922,
+          "sha256": "e3d8f3de93259864a01cb4cad6daa07e768f2f2966fb0b7d1e02f724db6a4357"
+        },
+        {
+          "path": "spatial.bin",
+          "bytes": 1056956,
+          "sha256": "04930d10190a6a9663d74cac775cca43447d50af1f3ac661793bfd96bd9be514"
+        }
+      ],
+      "failures": [],
+      "met": true
+    }
+  ],
+  "oracles": {
+    "clean-original": {
+      "packageDigest": "dd6fa9a1715e8451ca802554c9cf47b20e1e774d69169c6bf8ef16f6f10fb4c9",
+      "resources": [
+        {
+          "path": "adapter-report.json",
+          "bytes": 39022,
+          "sha256": "cbfa5985404883c9472c80641bb9901cf78c21fb832cf4e4bc080bce3130bab7"
+        },
+        {
+          "path": "build-report.json",
+          "bytes": 142297,
+          "sha256": "6e491edad12f8ec23f74bcdf56dc7116cdb0aa9c505d6cee5e3fef5707795ee5"
+        },
+        {
+          "path": "coarse.bin",
+          "bytes": 38700720,
+          "sha256": "258e085d4f3d0b380bb89c3596b2e3bfc4a43177afe9fc7e92d6e1046db9031b"
+        },
+        {
+          "path": "hierarchy.bin",
+          "bytes": 46250496,
+          "sha256": "271f68407128ac25a78fa27bbf97dd909528a5c2cd3b514e612253909d7a849b"
+        },
+        {
+          "path": "hierarchy.json",
+          "bytes": 3192,
+          "sha256": "cb37493da3c69dc82f587887ca564358ed1664c5db7a43664b7cf3ed355a41ac"
+        },
+        {
+          "path": "incremental-dependencies.json",
+          "bytes": 38342167,
+          "sha256": "d57de4b3669ee16d3d3d0e2b0f5faf5b6caa1590c53cbe6f357a0b30c141c9f7"
+        },
+        {
+          "path": "properties.bin",
+          "bytes": 31179862,
+          "sha256": "dad8d98909c738df930569c4b907c29e64cda2b65d84917936c1c4d86d3dd8c4"
+        },
+        {
+          "path": "properties.json",
+          "bytes": 17705010,
+          "sha256": "dc3394714b73d322dcfe6bad7ce780dbdd18cb547e5eaf45a26c9e66de932312"
+        },
+        {
+          "path": "scene.bin",
+          "bytes": 169752328,
+          "sha256": "8860f0f545e6d5ca1f8d225a339fca107389fbdba4069b930850625e7c0f60d1"
+        },
+        {
+          "path": "scene.gltf",
+          "bytes": 299336880,
+          "sha256": "5c2d238a7a70a7f8411afdaf866a78a8b1eb62d4a2a83a497627ebab90cb2146"
+        },
+        {
+          "path": "spatial.bin",
+          "bytes": 1056956,
+          "sha256": "04930d10190a6a9663d74cac775cca43447d50af1f3ac661793bfd96bd9be514"
+        }
+      ],
+      "buildReportResources": [
+        {
+          "path": "scene.gltf",
+          "mediaType": "model/gltf+json",
+          "bytes": 299336880,
+          "sha256": "5c2d238a7a70a7f8411afdaf866a78a8b1eb62d4a2a83a497627ebab90cb2146"
+        },
+        {
+          "path": "scene.bin",
+          "mediaType": "application/octet-stream",
+          "bytes": 169752328,
+          "sha256": "8860f0f545e6d5ca1f8d225a339fca107389fbdba4069b930850625e7c0f60d1"
+        },
+        {
+          "path": "coarse.bin",
+          "mediaType": "application/octet-stream",
+          "bytes": 38700720,
+          "sha256": "258e085d4f3d0b380bb89c3596b2e3bfc4a43177afe9fc7e92d6e1046db9031b"
+        },
+        {
+          "path": "spatial.bin",
+          "mediaType": "application/octet-stream",
+          "bytes": 1056956,
+          "sha256": "04930d10190a6a9663d74cac775cca43447d50af1f3ac661793bfd96bd9be514"
+        },
+        {
+          "path": "properties.json",
+          "mediaType": "application/json",
+          "bytes": 17705010,
+          "sha256": "dc3394714b73d322dcfe6bad7ce780dbdd18cb547e5eaf45a26c9e66de932312"
+        },
+        {
+          "path": "properties.bin",
+          "mediaType": "application/octet-stream",
+          "bytes": 31179862,
+          "sha256": "dad8d98909c738df930569c4b907c29e64cda2b65d84917936c1c4d86d3dd8c4"
+        },
+        {
+          "path": "hierarchy.json",
+          "mediaType": "application/json",
+          "bytes": 3192,
+          "sha256": "cb37493da3c69dc82f587887ca564358ed1664c5db7a43664b7cf3ed355a41ac"
+        },
+        {
+          "path": "hierarchy.bin",
+          "mediaType": "application/octet-stream",
+          "bytes": 46250496,
+          "sha256": "271f68407128ac25a78fa27bbf97dd909528a5c2cd3b514e612253909d7a849b"
+        }
+      ]
+    },
+    "clean-changed": {
+      "packageDigest": "05707534c73ce126da401a79481d0fd6c892bc308a451d6aa2a4b1691bc2439e",
+      "resources": [
+        {
+          "path": "adapter-report.json",
+          "bytes": 39026,
+          "sha256": "5c9a6a030e59a0f04fdfc3ed3c77c0992c6cf6218dbf78cb3b1209796eb24f52"
+        },
+        {
+          "path": "build-report.json",
+          "bytes": 142297,
+          "sha256": "d7d47aedcc0c7507d0ef616c5f5877d3b67a015ba46a276fcf9eda5c368fb228"
+        },
+        {
+          "path": "coarse.bin",
+          "bytes": 38700720,
+          "sha256": "39f4db859996d62a8f1427a89a7923434bcf873927c4e5551dafe6961564a9e6"
+        },
+        {
+          "path": "hierarchy.bin",
+          "bytes": 46250496,
+          "sha256": "e9d24b360b570022124bbc31bff001434ee57b49b4fe6ad8992002e05751a63e"
+        },
+        {
+          "path": "hierarchy.json",
+          "bytes": 3192,
+          "sha256": "2038ad90d33a4c3083ad0702c129da1cef228a91b0d0aa653a9c75b724a2b7d4"
+        },
+        {
+          "path": "incremental-dependencies.json",
+          "bytes": 38342167,
+          "sha256": "8dd77321e69a6fc400b8c6b30d581f810289bf6e61b44459a7dd641686cd8be4"
+        },
+        {
+          "path": "properties.bin",
+          "bytes": 31179862,
+          "sha256": "dad8d98909c738df930569c4b907c29e64cda2b65d84917936c1c4d86d3dd8c4"
+        },
+        {
+          "path": "properties.json",
+          "bytes": 17705010,
+          "sha256": "6b632040996161969c60deb308db4a069bd22d71de8ff0010b880f226b56f4a6"
+        },
+        {
+          "path": "scene.bin",
+          "bytes": 169752328,
+          "sha256": "27f324f2ebbac5d1f1ecbe3fc78fb36600dd5ea1a88a58b475924cdc67dd358c"
+        },
+        {
+          "path": "scene.gltf",
+          "bytes": 299336922,
+          "sha256": "e3d8f3de93259864a01cb4cad6daa07e768f2f2966fb0b7d1e02f724db6a4357"
+        },
+        {
+          "path": "spatial.bin",
+          "bytes": 1056956,
+          "sha256": "04930d10190a6a9663d74cac775cca43447d50af1f3ac661793bfd96bd9be514"
+        }
+      ],
+      "buildReportResources": [
+        {
+          "path": "scene.gltf",
+          "mediaType": "model/gltf+json",
+          "bytes": 299336922,
+          "sha256": "e3d8f3de93259864a01cb4cad6daa07e768f2f2966fb0b7d1e02f724db6a4357"
+        },
+        {
+          "path": "scene.bin",
+          "mediaType": "application/octet-stream",
+          "bytes": 169752328,
+          "sha256": "27f324f2ebbac5d1f1ecbe3fc78fb36600dd5ea1a88a58b475924cdc67dd358c"
+        },
+        {
+          "path": "coarse.bin",
+          "mediaType": "application/octet-stream",
+          "bytes": 38700720,
+          "sha256": "39f4db859996d62a8f1427a89a7923434bcf873927c4e5551dafe6961564a9e6"
+        },
+        {
+          "path": "spatial.bin",
+          "mediaType": "application/octet-stream",
+          "bytes": 1056956,
+          "sha256": "04930d10190a6a9663d74cac775cca43447d50af1f3ac661793bfd96bd9be514"
+        },
+        {
+          "path": "properties.json",
+          "mediaType": "application/json",
+          "bytes": 17705010,
+          "sha256": "6b632040996161969c60deb308db4a069bd22d71de8ff0010b880f226b56f4a6"
+        },
+        {
+          "path": "properties.bin",
+          "mediaType": "application/octet-stream",
+          "bytes": 31179862,
+          "sha256": "dad8d98909c738df930569c4b907c29e64cda2b65d84917936c1c4d86d3dd8c4"
+        },
+        {
+          "path": "hierarchy.json",
+          "mediaType": "application/json",
+          "bytes": 3192,
+          "sha256": "2038ad90d33a4c3083ad0702c129da1cef228a91b0d0aa653a9c75b724a2b7d4"
+        },
+        {
+          "path": "hierarchy.bin",
+          "mediaType": "application/octet-stream",
+          "bytes": 46250496,
+          "sha256": "e9d24b360b570022124bbc31bff001434ee57b49b4fe6ad8992002e05751a63e"
+        }
+      ]
+    }
+  },
+  "comparisons": [
+    {
+      "scenario": "store-cold-original",
+      "oracle": "clean-original",
+      "failures": []
+    },
+    {
+      "scenario": "store-warm-original",
+      "oracle": "clean-original",
+      "failures": []
+    },
+    {
+      "scenario": "store-warm-changed",
+      "oracle": "clean-changed",
+      "failures": []
+    },
+    {
+      "scenario": "store-corrupt-entry-changed",
+      "oracle": "clean-changed",
+      "failures": []
+    },
+    {
+      "scenario": "clean-changed#1",
+      "oracle": "clean-changed",
+      "failures": []
+    },
+    {
+      "scenario": "store-warm-changed#1",
+      "oracle": "clean-changed",
+      "failures": []
+    },
+    {
+      "scenario": "clean-changed#2",
+      "oracle": "clean-changed",
+      "failures": []
+    },
+    {
+      "scenario": "store-warm-changed#2",
+      "oracle": "clean-changed",
+      "failures": []
+    },
+    {
+      "scenario": "clean-changed#3",
+      "oracle": "clean-changed",
+      "failures": []
+    },
+    {
+      "scenario": "store-warm-changed#3",
+      "oracle": "clean-changed",
+      "failures": []
+    }
+  ],
+  "storeFootprint": {
+    "afterOriginal": {
+      "entries": 42435,
+      "bytes": 295516576
+    },
+    "afterChanged": {
+      "entries": 44804,
+      "bytes": 307750238
+    },
+    "corruptedEntry": {
+      "entry": "00155c84c82410a6e759702ab10ae021ef6431c902e09e194a68a2b6fa548a13",
+      "flippedByte": 0,
+      "restoredAfterwards": true
+    }
+  },
+  "extraction": {
+    "samples": 3,
+    "adapterMilliseconds": {
+      "values": [
+        59882.4,
+        59924.1,
+        59926.3
+      ],
+      "median": 59924.1,
+      "p95": 59926.3,
+      "minimum": 59882.4,
+      "maximum": 59926.3
+    },
+    "peakWorkingSetBytes": {
+      "values": [
+        3276357632,
+        3284443136,
+        3238969344
+      ],
+      "median": 3276357632,
+      "p95": 3284443136,
+      "minimum": 3238969344,
+      "maximum": 3284443136
+    },
+    "runs": [
+      {
+        "index": 1,
+        "adapterMilliseconds": 59882.4,
+        "peakWorkingSetBytes": 3276357632,
+        "documentArtifactCache": {
+          "hits": [
+            "architecture",
+            "electrical",
+            "facade",
+            "kitchen",
+            "plumbing",
+            "ventilation"
+          ],
+          "misses": [
+            "structure"
+          ],
+          "schemaVersion": "naru.ifc-document-artifact.1",
+          "status": "enabled"
+        }
+      },
+      {
+        "index": 2,
+        "adapterMilliseconds": 59924.1,
+        "peakWorkingSetBytes": 3284443136,
+        "documentArtifactCache": {
+          "hits": [
+            "architecture",
+            "electrical",
+            "facade",
+            "kitchen",
+            "plumbing",
+            "ventilation"
+          ],
+          "misses": [
+            "structure"
+          ],
+          "schemaVersion": "naru.ifc-document-artifact.1",
+          "status": "enabled"
+        }
+      },
+      {
+        "index": 3,
+        "adapterMilliseconds": 59926.3,
+        "peakWorkingSetBytes": 3238969344,
+        "documentArtifactCache": {
+          "hits": [
+            "architecture",
+            "electrical",
+            "facade",
+            "kitchen",
+            "plumbing",
+            "ventilation"
+          ],
+          "misses": [
+            "structure"
+          ],
+          "schemaVersion": "naru.ifc-document-artifact.1",
+          "status": "enabled"
+        }
+      }
+    ]
+  },
+  "cleanRebuild": {
+    "samples": 3,
+    "compileMilliseconds": {
+      "values": [
+        95301.4,
+        94972.1,
+        95126.1
+      ],
+      "median": 95126.1,
+      "p95": 95301.4,
+      "minimum": 94972.1,
+      "maximum": 95301.4
+    },
+    "processMilliseconds": {
+      "values": [
+        95510.7,
+        95185.9,
+        95308.7
+      ],
+      "median": 95308.7,
+      "p95": 95510.7,
+      "minimum": 95185.9,
+      "maximum": 95510.7
+    },
+    "packagingMilliseconds": {
+      "values": [
+        35377.3,
+        35048,
+        35202
+      ],
+      "median": 35202,
+      "p95": 35377.3,
+      "minimum": 35048,
+      "maximum": 35377.3
+    },
+    "peakProcessTreeWorkingSetBytes": {
+      "values": [
+        3386155008,
+        3314106368,
+        3346001920
+      ],
+      "median": 3346001920,
+      "p95": 3386155008,
+      "minimum": 3314106368,
+      "maximum": 3386155008
+    },
+    "summedPeakWorkingSetUpperBoundBytes": {
+      "values": [
+        4232744960,
+        4235612160,
+        4234371072
+      ],
+      "median": 4234371072,
+      "p95": 4235612160,
+      "minimum": 4232744960,
+      "maximum": 4235612160
+    },
+    "runs": [
+      {
+        "index": 1,
+        "compileMilliseconds": 95301.4,
+        "processMilliseconds": 95510.7,
+        "peakWorkingSetBytes": 3386155008,
+        "peakPrivateBytes": 3900456960,
+        "osPeakWorkingSetBytes": 4232744960,
+        "memorySamples": 160,
+        "maxProcessCount": 4,
+        "packageDigest": "05707534c73ce126da401a79481d0fd6c892bc308a451d6aa2a4b1691bc2439e",
+        "documentArtifactCache": {
+          "hits": [
+            "architecture",
+            "electrical",
+            "facade",
+            "kitchen",
+            "plumbing",
+            "ventilation"
+          ],
+          "misses": [
+            "structure"
+          ],
+          "schemaVersion": "naru.ifc-document-artifact.1",
+          "status": "enabled"
+        },
+        "payloadCache": null,
+        "warnings": []
+      },
+      {
+        "index": 2,
+        "compileMilliseconds": 94972.1,
+        "processMilliseconds": 95185.9,
+        "peakWorkingSetBytes": 3314106368,
+        "peakPrivateBytes": 3830890496,
+        "osPeakWorkingSetBytes": 4235612160,
+        "memorySamples": 160,
+        "maxProcessCount": 4,
+        "packageDigest": "05707534c73ce126da401a79481d0fd6c892bc308a451d6aa2a4b1691bc2439e",
+        "documentArtifactCache": {
+          "hits": [
+            "architecture",
+            "electrical",
+            "facade",
+            "kitchen",
+            "plumbing",
+            "ventilation"
+          ],
+          "misses": [
+            "structure"
+          ],
+          "schemaVersion": "naru.ifc-document-artifact.1",
+          "status": "enabled"
+        },
+        "payloadCache": null,
+        "warnings": []
+      },
+      {
+        "index": 3,
+        "compileMilliseconds": 95126.1,
+        "processMilliseconds": 95308.7,
+        "peakWorkingSetBytes": 3346001920,
+        "peakPrivateBytes": 3861020672,
+        "osPeakWorkingSetBytes": 4234371072,
+        "memorySamples": 160,
+        "maxProcessCount": 4,
+        "packageDigest": "05707534c73ce126da401a79481d0fd6c892bc308a451d6aa2a4b1691bc2439e",
+        "documentArtifactCache": {
+          "hits": [
+            "architecture",
+            "electrical",
+            "facade",
+            "kitchen",
+            "plumbing",
+            "ventilation"
+          ],
+          "misses": [
+            "structure"
+          ],
+          "schemaVersion": "naru.ifc-document-artifact.1",
+          "status": "enabled"
+        },
+        "payloadCache": null,
+        "warnings": []
+      }
+    ]
+  },
+  "warmRebuild": {
+    "samples": 3,
+    "compileMilliseconds": {
+      "values": [
+        137870.1,
+        137637.6,
+        137386.5
+      ],
+      "median": 137637.6,
+      "p95": 137870.1,
+      "minimum": 137386.5,
+      "maximum": 137870.1
+    },
+    "processMilliseconds": {
+      "values": [
+        138080.8,
+        137856.7,
+        137603.6
+      ],
+      "median": 137856.7,
+      "p95": 138080.8,
+      "minimum": 137603.6,
+      "maximum": 138080.8
+    },
+    "packagingMilliseconds": {
+      "values": [
+        77946,
+        77713.5,
+        77462.4
+      ],
+      "median": 77713.5,
+      "p95": 77946,
+      "minimum": 77462.4,
+      "maximum": 77946
+    },
+    "peakProcessTreeWorkingSetBytes": {
+      "values": [
+        3269361664,
+        3252609024,
+        3294683136
+      ],
+      "median": 3269361664,
+      "p95": 3294683136,
+      "minimum": 3252609024,
+      "maximum": 3294683136
+    },
+    "summedPeakWorkingSetUpperBoundBytes": {
+      "values": [
+        4236079104,
+        4235808768,
+        4235653120
+      ],
+      "median": 4235808768,
+      "p95": 4236079104,
+      "minimum": 4235653120,
+      "maximum": 4236079104
+    },
+    "runs": [
+      {
+        "index": 1,
+        "compileMilliseconds": 137870.1,
+        "processMilliseconds": 138080.8,
+        "peakWorkingSetBytes": 3269361664,
+        "peakPrivateBytes": 3781951488,
+        "osPeakWorkingSetBytes": 4236079104,
+        "memorySamples": 232,
+        "maxProcessCount": 4,
+        "packageDigest": "05707534c73ce126da401a79481d0fd6c892bc308a451d6aa2a4b1691bc2439e",
+        "documentArtifactCache": {
+          "hits": [
+            "architecture",
+            "electrical",
+            "facade",
+            "kitchen",
+            "plumbing",
+            "ventilation"
+          ],
+          "misses": [
+            "structure"
+          ],
+          "schemaVersion": "naru.ifc-document-artifact.1",
+          "status": "enabled"
+        },
+        "payloadCache": {
+          "store": "naru.compiled-payload-entry.1",
+          "prototypes": 42435,
+          "hits": 40066,
+          "misses": 2369,
+          "published": 2369,
+          "outcomes": {
+            "hit": 40066,
+            "absent": 2369,
+            "corrupt-entry": 0,
+            "restore-failed": 0
+          },
+          "publishFailures": 0,
+          "degraded": []
+        },
+        "warnings": []
+      },
+      {
+        "index": 2,
+        "compileMilliseconds": 137637.6,
+        "processMilliseconds": 137856.7,
+        "peakWorkingSetBytes": 3252609024,
+        "peakPrivateBytes": 3764490240,
+        "osPeakWorkingSetBytes": 4235808768,
+        "memorySamples": 232,
+        "maxProcessCount": 4,
+        "packageDigest": "05707534c73ce126da401a79481d0fd6c892bc308a451d6aa2a4b1691bc2439e",
+        "documentArtifactCache": {
+          "hits": [
+            "architecture",
+            "electrical",
+            "facade",
+            "kitchen",
+            "plumbing",
+            "ventilation"
+          ],
+          "misses": [
+            "structure"
+          ],
+          "schemaVersion": "naru.ifc-document-artifact.1",
+          "status": "enabled"
+        },
+        "payloadCache": {
+          "store": "naru.compiled-payload-entry.1",
+          "prototypes": 42435,
+          "hits": 40066,
+          "misses": 2369,
+          "published": 2369,
+          "outcomes": {
+            "hit": 40066,
+            "absent": 2369,
+            "corrupt-entry": 0,
+            "restore-failed": 0
+          },
+          "publishFailures": 0,
+          "degraded": []
+        },
+        "warnings": []
+      },
+      {
+        "index": 3,
+        "compileMilliseconds": 137386.5,
+        "processMilliseconds": 137603.6,
+        "peakWorkingSetBytes": 3294683136,
+        "peakPrivateBytes": 3813793792,
+        "osPeakWorkingSetBytes": 4235653120,
+        "memorySamples": 231,
+        "maxProcessCount": 4,
+        "packageDigest": "05707534c73ce126da401a79481d0fd6c892bc308a451d6aa2a4b1691bc2439e",
+        "documentArtifactCache": {
+          "hits": [
+            "architecture",
+            "electrical",
+            "facade",
+            "kitchen",
+            "plumbing",
+            "ventilation"
+          ],
+          "misses": [
+            "structure"
+          ],
+          "schemaVersion": "naru.ifc-document-artifact.1",
+          "status": "enabled"
+        },
+        "payloadCache": {
+          "store": "naru.compiled-payload-entry.1",
+          "prototypes": 42435,
+          "hits": 40066,
+          "misses": 2369,
+          "published": 2369,
+          "outcomes": {
+            "hit": 40066,
+            "absent": 2369,
+            "corrupt-entry": 0,
+            "restore-failed": 0
+          },
+          "publishFailures": 0,
+          "degraded": []
+        },
+        "warnings": []
+      }
+    ]
+  },
+  "gates": {
+    "cleanPackageResourceEquivalence": {
+      "comparisons": 10,
+      "identical": true,
+      "resources": [
+        "adapter-report.json",
+        "build-report.json",
+        "coarse.bin",
+        "hierarchy.bin",
+        "hierarchy.json",
+        "incremental-dependencies.json",
+        "properties.bin",
+        "properties.json",
+        "scene.bin",
+        "scene.gltf",
+        "spatial.bin"
+      ]
+    },
+    "semanticReportComparison": {
+      "exclusions": [
+        "adapter-report.json:documentArtifactCache",
+        "build-report.json:compiledPayloadCache"
+      ],
+      "met": true
+    },
+    "ownershipDecisions": {
+      "met": true,
+      "changedRebuild": {
+        "hits": 40066,
+        "misses": 2369,
+        "published": 2369,
+        "outcomes": {
+          "hit": 40066,
+          "absent": 2369,
+          "corrupt-entry": 0,
+          "restore-failed": 0
+        }
+      },
+      "ownership": {
+        "prototypes": 42469,
+        "changedDocumentPrototypes": 2374,
+        "changedDocumentPrototypesSharedWithOtherDocuments": 0,
+        "prototypeIdsOnlyInChangedIndex": 2374,
+        "prototypeIdsOnlyInOriginalIndex": 2374,
+        "reconciledDocumentPairs": 0,
+        "changedDocumentPrototypeIdsRetainedFromOriginal": 0,
+        "changedDocumentReuse": "none by construction: the IFC adapter derives every prototype id from the document token `<discipline>-<sourceDigest[:12]>`, and the payload content digest hashes the representation id because the accessor names it restores embed that id. Editing one entity therefore renames every prototype of that document, so the changed document's untouched geometry is rebuilt and republished while only the other documents' payloads are restored."
+      }
+    },
+    "measuredSavingExceedsCost": {
+      "method": "packagingMilliseconds = compileMilliseconds - median adapterMilliseconds of the extraction-only samples taken in the same cache state (the compiler reports no stage timing, so packaging is derived by difference). The store-warm sample pays its own restore and publish inside that time, so a lower median already nets the store's cost.",
+      "criteria": {
+        "packagingFaster": "median store-warm packagingMilliseconds < median clean packagingMilliseconds",
+        "peakMemoryNoHigher": "median store-warm peakProcessTreeWorkingSetBytes <= median clean peakProcessTreeWorkingSetBytes"
+      },
+      "extractionMedianMs": 59924.1,
+      "cleanPackagingMedianMs": 35202,
+      "warmPackagingMedianMs": 77713.5,
+      "savingMs": -42511.5,
+      "savingRatio": 0.453,
+      "cleanPeakWorkingSetMedianBytes": 3346001920,
+      "warmPeakWorkingSetMedianBytes": 3269361664,
+      "packagingFaster": false,
+      "peakMemoryNoHigher": true,
+      "met": false
+    },
+    "allMet": false
+  },
+  "discardedSamples": []
+}

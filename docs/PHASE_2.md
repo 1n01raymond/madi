@@ -30,7 +30,7 @@ or localized follow-up work proportional to what changed.
 | First real-large source import | Minutes are allowed | Five fresh-process cold sixty5 imports median 381.4 s, observed p95 385.3 s, peaking at a 5.08 GB process tree ([record](../artifacts/cache/sixty5/README.md)); their medians decompose it into 292.4 s of adapter extraction and 89.0 s of packaging | The cold cost is **Recorded**; progress, cancellation, background execution, and durable completion are **Pending** |
 | Hierarchy and coarse preview during first import | 5–15 s | An already compiled sixty5 package reaches hierarchy/search in 2.3 s and its first coarse frame in a 4.487 s three-run median ([record](../artifacts/ifc/sixty5-first-frame/README.md)) | The compiled-package path is **Recorded**; publishing that preview while source import continues is **Pending** |
 | Reopen unchanged inputs | 1–5 s | Five fresh-process warm sixty5 reopens median 1.36 s of compiler time and 1.43 s including `node` startup, 281× faster than the cold import that published the entry ([record](../artifacts/cache/sixty5/README.md)); mid-size single runs are 1.7 s for PyGamer STEP and 0.5 s for Digital Hub IFC ([record](../artifacts/cache/README.md)) | **Recorded** at real-large scale on one disclosed host |
-| Change one IFC discipline | Work proportional to the affected dependency set | Unchanged document extraction can skip IfcOpenShell; federation-wide compiled resources are still rebuilt ([integration test](../native/adapter-ifc/tests/test_document_artifact_integration.py), [ADR-0010](adr/0010-ifc-incremental-dependency-index.md)) | Adapter reuse is **Implemented**; partial compiled-payload reuse is **Pending** |
+| Change one IFC discipline | Work proportional to the affected dependency set | Unchanged document extraction can skip IfcOpenShell; federation-wide compiled resources are still rebuilt ([integration test](../native/adapter-ifc/tests/test_document_artifact_integration.py), [ADR-0010](adr/0010-ifc-incremental-dependency-index.md)) | Adapter reuse is **Implemented**; the content-addressed payload tier is **Measured and rejected** ([record](../artifacts/cache/payload-reuse/README.md): byte-identical rebuilds, but restore 2.2–2.4× slower than re-encoding); a reuse unit that pays off is **Pending** |
 | Reuse within a team | Avoid duplicate local import when policy permits | A local verified [whole-package cache](../artifacts/cache/README.md) and [document-artifact cache](../native/adapter-ifc/tests/test_document_artifact_cache.py) exist | Authorized shared lookup/publication is **Pending** |
 
 The 4.487 s browser result above starts from an existing compiled package. It
@@ -65,13 +65,14 @@ much in risk and effort for a raw item count to be meaningful.
 | Per-document IFC extraction reuse | **Implemented** with [deterministic verified-artifact tests](../native/adapter-ifc/tests/test_document_artifact_cache.py) and [clean adapter-merge equivalence](../native/adapter-ifc/tests/test_document_artifact_integration.py) | Measure real-large artifact size, restore time, and peak memory |
 | Real-large document serialization | **Recorded** under accepted [ADR-0016](adr/0016-streamed-gltf-document.md): the compiler emits `scene.gltf` as a stream of bounded chunks instead of building it as one string, so the [sixty5 record](../artifacts/cache/sixty5/README.md) now compiles the default pretty-printed federation document at 545,470,166 B - 8,599,278 B past the runtime's 536,870,888-byte maximum string length - while the compact package stays byte-identical over fifteen samples; [differential tests](../packages/compiler/test/json-stream.test.ts) compare every chunk against `JSON.stringify` | Give the report, property, and dependency documents the same bounded treatment before any of them approaches the same limit |
 | Assembly-tree transport | **Recorded** under accepted [ADR-0017](adr/0017-relocated-hierarchy-sidecar.md): `--relocate-hierarchy-nodes` moves mesh-less nodes into a `naru.package-hierarchy.1` sidecar, taking the engineering baseline's document from 405,570,167 to 317,466,183 B (-21.72%) and the whole package down 2.72% once the 64,825,238 B sidecar is charged against it ([record](../artifacts/compiler/hierarchy-relocation/README.md)); a Digital Hub round trip returns 13,681 entries and 5,152 world transforms with 0 mismatches. Paired sixty5 packages in a headed browser then measured what the smaller document buys: first coarse frame 4,408 -> 3,703 ms (-15.99%), peak JS heap -20.30%, sidecar fetched once per run ahead of the coarse payload, identical endpoint over 17 counters ([record](../artifacts/ifc/relocated-hierarchy-browser/README.md)) | Flip the default in its own slice, together with promoting `naru.package-hierarchy.1` out of `experimental-not-interchange` and the package re-digests that forces |
-| Content-addressed compiled payloads | **Implemented, off by default** under proposed [ADR-0018](adr/0018-content-addressed-compiled-payloads.md): `--payload-cache <directory>` restores or builds one prototype payload at a time, publishes what it built, warns and rebuilds on a corrupt entry, and reports hits, misses, and degraded prototypes in `build-report.json`; [storage](../packages/compiler/test/compiled-payload-store.test.ts) and [orchestration tests](../packages/compiler/test/compiled-payload-cache.test.ts) pin identical package bytes across cold, warm, layout-changed, and corrupt-entry compiles | Record the acceptance evidence: a one-discipline rebuild that reproduces every clean-package byte, and a measured packaging saving that beats the store's own verification cost |
+| Content-addressed compiled payloads | **Recorded and rejected** under [ADR-0018](adr/0018-content-addressed-compiled-payloads.md): changed-discipline rebuilds of Digital Hub (2,664 of 3,383 payloads restored) and sixty5 (40,066 of 42,435) reproduced every clean-package byte over 26 comparisons with exact store decisions, but packaging took 3,184.9 ms clean vs 7,585.0 ms store-warm on Digital Hub and 35,202.0 vs 77,713.5 ms on sixty5 ([record](../artifacts/cache/payload-reuse/README.md)) — verifying a stored payload costs more than re-encoding it from the parsed scene, so the ADR's own gate 4 rejects it; `--payload-cache` stays in the compiler, off by default, with its [storage](../packages/compiler/test/compiled-payload-store.test.ts) and [orchestration tests](../packages/compiler/test/compiled-payload-cache.test.ts) | Choose a successor reuse unit whose restore beats re-encoding (laid-out byte ranges above the encoder, or content-derived prototype ids so an edited document keeps its untouched payloads) as its own ADR |
 | Import lifecycle | **Pending** | A typed progress/cancellation contract must stop child processes, clean unpublished output, and retain prior valid cache entries |
 | Progressive cold-import preview | **Pending** | Publish hierarchy/search and a recognizable coarse package within 5–15 s while the full import continues |
 | Shared compiled cache | **Pending** and intentionally later | Require verified local immutable payloads plus authorization, tenant isolation, provenance, quota, and observability contracts first |
 
-ADR-0010 remains Proposed until physical compiled-payload reuse and complete
-clean-package byte equivalence pass. Its logical index and document cache do not
+ADR-0010 remains Proposed: complete clean-package byte equivalence under a
+changed discipline is recorded, but the payload tier that was to make the
+rebuild cheaper was rejected on cost, so a successor reuse unit is still owed. Its logical index and document cache do not
 authorize reuse of old glTF byte ranges by themselves.
 
 ### B. Bounded large-scene fidelity
@@ -108,7 +109,7 @@ a small share of the browser's working set.
 
 | Outcome | Required predecessors | Why the order matters |
 |---|---|---|
-| Partial IFC package rebuild | Dependency index and per-document artifacts (**Implemented**) → content-addressed compiled payloads (**Implemented**, off by default) → conservative invalidation/reconstruction → clean-package equivalence | Logical provenance cannot prove that revision-local byte ranges are reusable |
+| Partial IFC package rebuild | Dependency index and per-document artifacts (**Implemented**) → a compiled reuse unit (content-addressed payloads **Measured and rejected**; successor **Pending**) → conservative invalidation/reconstruction → clean-package equivalence (**Recorded** for the rejected unit) | Logical provenance cannot prove that revision-local byte ranges are reusable |
 | Preview during cold import | Import lifecycle contract → cancellable background adapter → stable hierarchy/coarse publication point → Studio progress UI | Publishing partial output without lifecycle and cleanup rules can expose incomplete or stale cache entries |
 | Shape-preserving LOD | Error/identity contract → compiler representation → scheduler admission → visual and interaction evidence | An ordering heuristic is not an LOD representation and cannot establish fidelity |
 | Persistent browser cache | Package integrity verification and resource limits → quota/version policy → cache-aware scheduler | Persisting unbounded or integrity-unverified remote resources enlarges the trust boundary |
@@ -120,28 +121,23 @@ a small share of the browser's working set.
 
 ### Now — close correctness and make the next performance claim measurable
 
-1. Record the acceptance evidence
-   [ADR-0018](adr/0018-content-addressed-compiled-payloads.md) demands, so it
-   and [ADR-0010](adr/0010-ifc-incremental-dependency-index.md) can leave
-   Proposed. The store itself is complete and off by default:
-   `buildCompiledPayload` is the compiler's only geometry encoder,
-   `appendGeometry` is that build followed by `appendCompiledPayload` (Digital
-   Hub still reproduces its recorded package digest),
-   `naru.compiled-payload-entry.1` entries publish atomically and restore only
-   after the key is reproduced from the manifest and every byte verified, and
-   `--payload-cache <directory>` on both compilers decides per prototype
-   whether to restore or build, publishes what it built, warns and rebuilds on
-   a corrupt entry, and reports hits, misses, publications, and degraded
-   prototypes in `build-report.json`. Unit-scale byte identity across cold,
-   warm, and corrupt-entry compiles is covered by tests. What remains is the
-   record: clean-package resource equivalence with a changed discipline, and a
-   measured packaging saving that beats the store's own verification cost at
-   real-large scale without raising peak memory above a clean build's.
+1. Design the successor to the rejected payload tier. The
+   [ADR-0018 record](../artifacts/cache/payload-reuse/README.md) settles two
+   things: a changed-discipline rebuild can reproduce the clean package byte
+   for byte, and verifying a stored prototype payload costs more than
+   re-encoding it once the adapter's document-artifact cache has removed
+   tessellation from the path. The successor must therefore reuse something
+   cheaper to restore than to rebuild — laid-out byte ranges above the encoder,
+   which ADR-0018 excluded — or make the edited document keep its untouched
+   payloads (content-derived prototype ids; today one edit renames every
+   prototype of the document). It is an ADR with the same predeclared gate 4,
+   not a code change, and decides whether `--payload-cache` is removed.
 
 ### Next — finish the user-visible import loop and bounded fidelity
 
-1. Rebuild one changed IFC discipline from reusable payloads and prove every
-   resulting package resource byte-identical to a clean full compile.
+1. Rebuild one changed IFC discipline measurably cheaper than a clean
+   compile; byte identity of every resulting package resource is already
+   recorded for the rejected payload tier and is the bar any successor keeps.
 2. Define progress, cancellation, retry, cleanup, and durable-completion events;
    run import in a cancellable background process.
 3. Publish hierarchy/search and coarse preview during that cold import inside
@@ -195,7 +191,7 @@ debt.
 | Cross-browser localized demand | Repeated Firefox or another non-Blink real-model localized trace with request order, query p50/p95, residency, and console results | ADR-0008 acceptance |
 | Spatial precision cross-check | Nested-transform spatial bounds on the accepted ADR-0005 10,000 km fixture with no false negatives | ADR-0008 acceptance |
 | Node-field elision at engineering scale | Re-record `artifacts/ifc/engineering-baseline/` on the host that produced it, with `--elide-derived-identifiers` and `--omit-default-node-transforms` declared, so the option pair is proven on the same package the qualification pins; the levers are measured on this Windows host, whose IFC split differs from that record's by a few bytes | ADR-0015 acceptance |
-| Content-addressed payload reuse at scale | A changed-discipline rebuild whose every package resource matches a clean compile byte for byte, plus cold and warm packaging time, store footprint, and peak memory on Digital Hub and one real-large model | ADR-0010 and ADR-0018 acceptance; the store is implemented and tested at unit scale, but no record measures whether reuse beats its own verification cost |
+| Partial-rebuild saving | A changed-discipline rebuild measurably faster than clean packaging with no higher peak memory, under a reuse unit that survives the verification-cost finding of the [payload-reuse record](../artifacts/cache/payload-reuse/README.md) (byte identity, footprint, and peak memory are recorded for the rejected unit on Digital Hub and sixty5) | ADR-0010 acceptance |
 | Current-toolchain large packages | Re-record Digital Hub and sixty5 with the current split.4 explicit-edge toolchain and synchronize the deployed package digest | Current-schema real-model claims |
 | Renderer reference-hardware matrix | Repeat the existing harness on more disclosed discrete/integrated profiles with explicit edges and bounded residency | Hardware/browser portion of ADR-0003 acceptance or revision |
 

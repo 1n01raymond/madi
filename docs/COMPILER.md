@@ -733,13 +733,15 @@ The actual two-discipline explicit-wall test proves cold and warm outputs plus
 a one-document-changed merge reproduce clean adapter structure, geometry, and
 property bytes exactly. Target/coarse/spatial/property package files remain
 federation-wide, so their physical bytes cannot be reused from this logical
-index alone because packing and column offsets may change. Content-addressed
-compiled payload chunks and complete-package byte-equivalence remain before
-per-discipline compilation is a complete product claim.
+index alone because packing and column offsets may change. Complete-package
+byte-equivalence under a changed discipline is recorded
+([record](../artifacts/cache/payload-reuse/README.md)); a compiled reuse unit
+that is cheaper to restore than to rebuild remains before per-discipline
+compilation is a complete product claim.
 
 [ADR-0018](adr/0018-content-addressed-compiled-payloads.md) is the reviewed
-design for that payload tier; it is implemented in 21.6 below, behind the
-`--payload-cache` flag. It authorizes reusing one unit, the prototype payload --
+design for that payload tier, implemented in 21.6 below behind the
+`--payload-cache` flag and rejected by its own measurement gate. It authorizes reusing one unit, the prototype payload --
 the accessor bytes and placement-free accessor metadata `appendGeometry`
 produces for a prototype -- and requires every other package resource,
 `scene.bin` included, to be rebuilt from the current scene.
@@ -753,9 +755,12 @@ new option cold-starts the namespace instead of silently sharing it.
 [ADR-0018](adr/0018-content-addressed-compiled-payloads.md) is implemented:
 storage, and the selection that uses it. `naru compile` and `naru compile-ifc`
 take `--payload-cache <directory>`, off by default, so a compile that does not
-ask for the store behaves exactly as before. What the ADR still owes is its
-acceptance evidence -- a changed-discipline resource equivalence record and a
-measured saving at real-large scale -- so it stays Proposed.
+ask for the store behaves exactly as before. Its acceptance record
+([artifacts/cache/payload-reuse](../artifacts/cache/payload-reuse/README.md))
+proved the equivalence half -- every clean-package byte reproduced on Digital
+Hub and sixty5 -- and failed the saving half: restoring verified payloads took
+2.2-2.4x the packaging time of re-encoding them, so the ADR is Rejected and the
+flag remains an off-by-default experiment.
 
 Encoding and placement are now separate functions.
 `buildCompiledPayload(representation, scaleToMeters)` produces the payload --

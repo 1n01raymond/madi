@@ -1,0 +1,2457 @@
+{
+  "schemaVersion": "naru.payload-reuse-evidence.1",
+  "mode": "fresh-process-changed-discipline-rebuild",
+  "recordedAt": "2026-09-02T16:05:17.407Z",
+  "model": "digital-hub",
+  "host": {
+    "platform": "win32",
+    "architecture": "x64",
+    "node": "22.14.0",
+    "cpuCount": 16,
+    "cpuModel": "AMD Ryzen 7 9800X3D 8-Core Processor           ",
+    "totalMemoryBytes": 33463021568
+  },
+  "commit": {
+    "head": "60d32426d49c11512aea31db64e37095b084e9d6",
+    "describe": "docs: sync the Phase 2 tracker with the merged ADR-0018 halves and issue workflow",
+    "workingTreeClean": false
+  },
+  "fixture": {
+    "datasetId": "ifc-bench-digital-hub",
+    "manifest": {
+      "path": "fixtures/external/manifest.json",
+      "sha256": "77d7d587d6b32938a371325e281a4584e10c2ff3118a59f300a9da097eb2f478"
+    },
+    "documents": [
+      {
+        "discipline": "architecture",
+        "uriHint": "projects/digital_hub/arc.ifc",
+        "bytes": 9022255,
+        "sha256": "19d7d02d53c2b88e86890ee236297b12bbb0f7748030cd32ff6a22762e9966bb"
+      },
+      {
+        "discipline": "heating",
+        "uriHint": "projects/digital_hub/heating.ifc",
+        "bytes": 20890415,
+        "sha256": "a5603e8f6aa4cbf63aece92f92f503e9a578702d8fe96a6d4661490f1843710d"
+      },
+      {
+        "discipline": "plumbing",
+        "uriHint": "projects/digital_hub/plumbing.ifc",
+        "bytes": 25178864,
+        "sha256": "0b1d6b0abd8d4cc3f5f798c7581bed2b39b40110ba6348d5470bbef646cfed79"
+      },
+      {
+        "discipline": "ventilation",
+        "uriHint": "projects/digital_hub/ventilation.ifc",
+        "bytes": 12737833,
+        "sha256": "c0a1807875957c4154d45d14a3b5ed480dd3178a5bdc3262302a7eccf76d5cb1"
+      }
+    ]
+  },
+  "changedDocument": {
+    "discipline": "architecture",
+    "fileName": "arc.ifc",
+    "uriHint": "projects/digital_hub/arc.ifc",
+    "edit": {
+      "discipline": "architecture",
+      "entity": "#823= IFCEXTRUDEDAREASOLID(#817,#822,#20,7.77);",
+      "replacement": "#823= IFCEXTRUDEDAREASOLID(#817,#822,#20,9.77);",
+      "description": "Extrusion depth 7.77 -> 9.77 of #823, referenced only by #824 (IfcShapeRepresentation 'Body')."
+    },
+    "originalBytes": 9022255,
+    "originalSha256": "19d7d02d53c2b88e86890ee236297b12bbb0f7748030cd32ff6a22762e9966bb",
+    "changedBytes": 9022255,
+    "changedSha256": "b428d64184f73a8ef5250efc64b3f9d2a9186cb3bca35296705023284dcd932c"
+  },
+  "changeEffect": {
+    "sceneBinDiffers": true,
+    "packageDigestDiffers": true,
+    "resourcesDiffering": [
+      "adapter-report.json",
+      "build-report.json",
+      "coarse.bin",
+      "hierarchy.bin",
+      "hierarchy.json",
+      "incremental-dependencies.json",
+      "properties.json",
+      "scene.bin",
+      "scene.gltf",
+      "spatial.bin"
+    ]
+  },
+  "adapter": {
+    "fingerprint": "cbdac37456c929716533ce1b026c0feaf1e823f25f2bf49bee508331c9a7d093",
+    "name": "IfcOpenShell",
+    "schemaVersion": "naru.ifc-adapter-identity.1",
+    "toolchain": {
+      "architecture": "AMD64",
+      "ifcOpenShell": "0.8.5",
+      "numpy": "2.5.2",
+      "platform": "win32",
+      "python": "3.13.2"
+    },
+    "version": "0.8.5"
+  },
+  "compileOptions": {
+    "threads": 6,
+    "compactJson": false,
+    "spatialIndex": true,
+    "relocateHierarchyNodes": true,
+    "cacheDirectory": "output/payload-reuse/digital-hub/cache",
+    "payloadCacheDirectory": "output/payload-reuse/digital-hub/store",
+    "payloadEntrySchema": "naru.compiled-payload-entry.1",
+    "pythonExecutable": "output/venv-ifc/Scripts/python.exe"
+  },
+  "protocol": {
+    "processIsolation": "One fresh node process per sample; the recorder never compiles in-process.",
+    "cacheState": "The compiled-package cache and the adapter document artifact cache share the --cache directory. Before every store-enabled scenario the recorder removes the compiled-package entry for that document set, so extraction stays warm while packaging has to run; a compile that hit the package cache would skip packaging entirely and is rejected.",
+    "changedDocument": "The edited discipline is compiled from a copy under output/ whose bytes differ from the fixture only in the edited entity; its document artifact misses once and is then cached like the others.",
+    "timingState": "Before every timing sample the changed document's artifact, the changed package entry, and the store entries the changed rebuild published are removed, so clean, store-warm, and extraction-only samples all start from exactly one document to extract, a whole package to write, and a store that holds the unchanged documents' payloads only. Samples interleave clean, warm, extraction per iteration.",
+    "corruptEntry": "The first byte of payload.bin in the entry the changed rebuild published is flipped; the intact bytes are written back after the scenario.",
+    "outputHandling": "Every sample compiles into its own output directory, which is hashed in full and then deleted.",
+    "failedSampleHandling": "A timing sample whose process fails, whose cache state is not the one the protocol requires, whose output differs from the oracle, or whose payload decisions differ from the pinned scenario is recorded in discardedSamples and re-run, at most three attempts. Scenario samples are never re-run: a mismatch is a gate failure and is recorded as such.",
+    "statistics": {
+      "median": "The middle value of the sorted retained samples; the mean of the two middle values when the count is even.",
+      "p95": "Nearest-rank observed p95: the ceil(0.95 * n)-th sorted value, an order statistic of the samples taken."
+    },
+    "peakProcessMemory": {
+      "method": "os-sampled-win32-process-tree",
+      "intervalMilliseconds": 500,
+      "note": "Win32_Process WorkingSetSize summed over the tree rooted at the sample process, so the native adapter is included; the summed per-process PeakWorkingSetSize is reported beside it as an upper bound."
+    },
+    "reportComparison": {
+      "byteIdenticalResources": "Every file a sample writes except adapter-report.json and build-report.json, which are compared as JSON with exactly the excluded fields removed.",
+      "semanticExclusions": [
+        "adapter-report.json:documentArtifactCache",
+        "build-report.json:compiledPayloadCache"
+      ]
+    },
+    "uncontrolled": [
+      "The operating system file cache is not cleared between samples.",
+      "The sampler runs one PowerShell process for the whole session and is not excluded from the host's load."
+    ]
+  },
+  "scenarios": [
+    {
+      "name": "clean-original",
+      "documents": [
+        {
+          "discipline": "architecture",
+          "uriHint": "projects/digital_hub/arc.ifc",
+          "source": "original"
+        },
+        {
+          "discipline": "heating",
+          "uriHint": "projects/digital_hub/heating.ifc",
+          "source": "original"
+        },
+        {
+          "discipline": "plumbing",
+          "uriHint": "projects/digital_hub/plumbing.ifc",
+          "source": "original"
+        },
+        {
+          "discipline": "ventilation",
+          "uriHint": "projects/digital_hub/ventilation.ifc",
+          "source": "original"
+        }
+      ],
+      "payloadStore": false,
+      "oracle": null,
+      "packageCacheKey": "6528c7a6511c99d21d6a934f0bcedbfa8e9147044c9ed5dc1f260d157f44be7d",
+      "packageCacheStatus": "miss",
+      "documentArtifactCache": {
+        "hits": [],
+        "misses": [
+          "architecture",
+          "heating",
+          "plumbing",
+          "ventilation"
+        ],
+        "schemaVersion": "naru.ifc-document-artifact.1",
+        "status": "enabled"
+      },
+      "payloadCache": null,
+      "warnings": [],
+      "compileMilliseconds": 65706.1,
+      "processMilliseconds": 65800.6,
+      "peakWorkingSetBytes": 1857417216,
+      "packageDigest": "ef31b9c6175ba83b338a2965c91ae5cb3cda0d500252face3804d97bb29d0ba5",
+      "resources": [
+        {
+          "path": "adapter-report.json",
+          "bytes": 23453,
+          "sha256": "de8a8ad79bdff5108fa0a3a7bcce1ea838d15182b83fae50fab51ab95af2f0b7"
+        },
+        {
+          "path": "build-report.json",
+          "bytes": 35237,
+          "sha256": "d43edd5540f4939ed867fd9d21100258d2b5d5213b178ba1ea767ab613f27734"
+        },
+        {
+          "path": "coarse.bin",
+          "bytes": 3085296,
+          "sha256": "5e4fb16db1660f3278a3761f9699c4eb7f003220006d9c082106935e72770284"
+        },
+        {
+          "path": "hierarchy.bin",
+          "bytes": 3018752,
+          "sha256": "ec57d0ea57f0e85b418113bd522c12c83bce15793b1a5d3aa9a45404c1f70861"
+        },
+        {
+          "path": "hierarchy.json",
+          "bytes": 2547,
+          "sha256": "d557c9f456a69fbb9a3c43a01f6cb0423e8d1451b3f0f0941bc2696f4be93071"
+        },
+        {
+          "path": "incremental-dependencies.json",
+          "bytes": 2883479,
+          "sha256": "63e0ae42316dbcaa8362562a3221ad878e3736ff45a621578798abf2570d530b"
+        },
+        {
+          "path": "properties.bin",
+          "bytes": 2260991,
+          "sha256": "712fea65ca4b9de75683a01ee79f4fff5ae6f89b0c29cbd0b38a83bb586d07c1"
+        },
+        {
+          "path": "properties.json",
+          "bytes": 1246277,
+          "sha256": "10b1f579eda1c085fdd115031ea416edf14e82b5a2b7b4e1ac0ec80f7af70675"
+        },
+        {
+          "path": "scene.bin",
+          "bytes": 35962344,
+          "sha256": "e6cb5f6943f03a14ccccc7be950646dac84ad22536891ad5423e48e5113747f7"
+        },
+        {
+          "path": "scene.gltf",
+          "bytes": 34123775,
+          "sha256": "b150372ae9d21dd5547c3827158ae041cf7beda2341db1db186fcd0926275578"
+        },
+        {
+          "path": "spatial.bin",
+          "bytes": 65472,
+          "sha256": "0ecb6514fcdeecc8954285b26c644dfecd67816ca5bc58fbfbe7b6b660a6e06c"
+        }
+      ],
+      "failures": [],
+      "met": true
+    },
+    {
+      "name": "store-cold-original",
+      "documents": [
+        {
+          "discipline": "architecture",
+          "uriHint": "projects/digital_hub/arc.ifc",
+          "source": "original"
+        },
+        {
+          "discipline": "heating",
+          "uriHint": "projects/digital_hub/heating.ifc",
+          "source": "original"
+        },
+        {
+          "discipline": "plumbing",
+          "uriHint": "projects/digital_hub/plumbing.ifc",
+          "source": "original"
+        },
+        {
+          "discipline": "ventilation",
+          "uriHint": "projects/digital_hub/ventilation.ifc",
+          "source": "original"
+        }
+      ],
+      "payloadStore": true,
+      "oracle": "clean-original",
+      "packageCacheKey": "6528c7a6511c99d21d6a934f0bcedbfa8e9147044c9ed5dc1f260d157f44be7d",
+      "packageCacheStatus": "miss",
+      "documentArtifactCache": {
+        "hits": [
+          "architecture",
+          "heating",
+          "plumbing",
+          "ventilation"
+        ],
+        "misses": [],
+        "schemaVersion": "naru.ifc-document-artifact.1",
+        "status": "enabled"
+      },
+      "payloadCache": {
+        "store": "naru.compiled-payload-entry.1",
+        "prototypes": 3383,
+        "hits": 0,
+        "misses": 3383,
+        "published": 3383,
+        "outcomes": {
+          "hit": 0,
+          "absent": 3383,
+          "corrupt-entry": 0,
+          "restore-failed": 0
+        },
+        "publishFailures": 0,
+        "degraded": []
+      },
+      "warnings": [],
+      "compileMilliseconds": 18554.5,
+      "processMilliseconds": 18649.3,
+      "peakWorkingSetBytes": 609394688,
+      "packageDigest": "ef31b9c6175ba83b338a2965c91ae5cb3cda0d500252face3804d97bb29d0ba5",
+      "resources": [
+        {
+          "path": "adapter-report.json",
+          "bytes": 23453,
+          "sha256": "fc39aa0b277c56e269334f4564d3144f579bed96d1665fd5d7fca0d00d22a8ff"
+        },
+        {
+          "path": "build-report.json",
+          "bytes": 35558,
+          "sha256": "2a08b58a780131fcf78ceda3af604bb2e0b33281a0b689ecabbed4e326eddd2b"
+        },
+        {
+          "path": "coarse.bin",
+          "bytes": 3085296,
+          "sha256": "5e4fb16db1660f3278a3761f9699c4eb7f003220006d9c082106935e72770284"
+        },
+        {
+          "path": "hierarchy.bin",
+          "bytes": 3018752,
+          "sha256": "ec57d0ea57f0e85b418113bd522c12c83bce15793b1a5d3aa9a45404c1f70861"
+        },
+        {
+          "path": "hierarchy.json",
+          "bytes": 2547,
+          "sha256": "d557c9f456a69fbb9a3c43a01f6cb0423e8d1451b3f0f0941bc2696f4be93071"
+        },
+        {
+          "path": "incremental-dependencies.json",
+          "bytes": 2883479,
+          "sha256": "63e0ae42316dbcaa8362562a3221ad878e3736ff45a621578798abf2570d530b"
+        },
+        {
+          "path": "properties.bin",
+          "bytes": 2260991,
+          "sha256": "712fea65ca4b9de75683a01ee79f4fff5ae6f89b0c29cbd0b38a83bb586d07c1"
+        },
+        {
+          "path": "properties.json",
+          "bytes": 1246277,
+          "sha256": "10b1f579eda1c085fdd115031ea416edf14e82b5a2b7b4e1ac0ec80f7af70675"
+        },
+        {
+          "path": "scene.bin",
+          "bytes": 35962344,
+          "sha256": "e6cb5f6943f03a14ccccc7be950646dac84ad22536891ad5423e48e5113747f7"
+        },
+        {
+          "path": "scene.gltf",
+          "bytes": 34123775,
+          "sha256": "b150372ae9d21dd5547c3827158ae041cf7beda2341db1db186fcd0926275578"
+        },
+        {
+          "path": "spatial.bin",
+          "bytes": 65472,
+          "sha256": "0ecb6514fcdeecc8954285b26c644dfecd67816ca5bc58fbfbe7b6b660a6e06c"
+        }
+      ],
+      "failures": [],
+      "met": true
+    },
+    {
+      "name": "store-warm-original",
+      "documents": [
+        {
+          "discipline": "architecture",
+          "uriHint": "projects/digital_hub/arc.ifc",
+          "source": "original"
+        },
+        {
+          "discipline": "heating",
+          "uriHint": "projects/digital_hub/heating.ifc",
+          "source": "original"
+        },
+        {
+          "discipline": "plumbing",
+          "uriHint": "projects/digital_hub/plumbing.ifc",
+          "source": "original"
+        },
+        {
+          "discipline": "ventilation",
+          "uriHint": "projects/digital_hub/ventilation.ifc",
+          "source": "original"
+        }
+      ],
+      "payloadStore": true,
+      "oracle": "clean-original",
+      "packageCacheKey": "6528c7a6511c99d21d6a934f0bcedbfa8e9147044c9ed5dc1f260d157f44be7d",
+      "packageCacheStatus": "miss",
+      "documentArtifactCache": {
+        "hits": [
+          "architecture",
+          "heating",
+          "plumbing",
+          "ventilation"
+        ],
+        "misses": [],
+        "schemaVersion": "naru.ifc-document-artifact.1",
+        "status": "enabled"
+      },
+      "payloadCache": {
+        "store": "naru.compiled-payload-entry.1",
+        "prototypes": 3383,
+        "hits": 3383,
+        "misses": 0,
+        "published": 0,
+        "outcomes": {
+          "hit": 3383,
+          "absent": 0,
+          "corrupt-entry": 0,
+          "restore-failed": 0
+        },
+        "publishFailures": 0,
+        "degraded": []
+      },
+      "warnings": [],
+      "compileMilliseconds": 14607.1,
+      "processMilliseconds": 14698.5,
+      "peakWorkingSetBytes": 610566144,
+      "packageDigest": "ef31b9c6175ba83b338a2965c91ae5cb3cda0d500252face3804d97bb29d0ba5",
+      "resources": [
+        {
+          "path": "adapter-report.json",
+          "bytes": 23453,
+          "sha256": "fc39aa0b277c56e269334f4564d3144f579bed96d1665fd5d7fca0d00d22a8ff"
+        },
+        {
+          "path": "build-report.json",
+          "bytes": 35555,
+          "sha256": "4123366557ec307984d933d391ca8f5d2824cb00b69b1c20af11407dd0082241"
+        },
+        {
+          "path": "coarse.bin",
+          "bytes": 3085296,
+          "sha256": "5e4fb16db1660f3278a3761f9699c4eb7f003220006d9c082106935e72770284"
+        },
+        {
+          "path": "hierarchy.bin",
+          "bytes": 3018752,
+          "sha256": "ec57d0ea57f0e85b418113bd522c12c83bce15793b1a5d3aa9a45404c1f70861"
+        },
+        {
+          "path": "hierarchy.json",
+          "bytes": 2547,
+          "sha256": "d557c9f456a69fbb9a3c43a01f6cb0423e8d1451b3f0f0941bc2696f4be93071"
+        },
+        {
+          "path": "incremental-dependencies.json",
+          "bytes": 2883479,
+          "sha256": "63e0ae42316dbcaa8362562a3221ad878e3736ff45a621578798abf2570d530b"
+        },
+        {
+          "path": "properties.bin",
+          "bytes": 2260991,
+          "sha256": "712fea65ca4b9de75683a01ee79f4fff5ae6f89b0c29cbd0b38a83bb586d07c1"
+        },
+        {
+          "path": "properties.json",
+          "bytes": 1246277,
+          "sha256": "10b1f579eda1c085fdd115031ea416edf14e82b5a2b7b4e1ac0ec80f7af70675"
+        },
+        {
+          "path": "scene.bin",
+          "bytes": 35962344,
+          "sha256": "e6cb5f6943f03a14ccccc7be950646dac84ad22536891ad5423e48e5113747f7"
+        },
+        {
+          "path": "scene.gltf",
+          "bytes": 34123775,
+          "sha256": "b150372ae9d21dd5547c3827158ae041cf7beda2341db1db186fcd0926275578"
+        },
+        {
+          "path": "spatial.bin",
+          "bytes": 65472,
+          "sha256": "0ecb6514fcdeecc8954285b26c644dfecd67816ca5bc58fbfbe7b6b660a6e06c"
+        }
+      ],
+      "failures": [],
+      "met": true
+    },
+    {
+      "name": "clean-changed",
+      "documents": [
+        {
+          "discipline": "architecture",
+          "uriHint": "projects/digital_hub/arc.ifc",
+          "source": "changed"
+        },
+        {
+          "discipline": "heating",
+          "uriHint": "projects/digital_hub/heating.ifc",
+          "source": "original"
+        },
+        {
+          "discipline": "plumbing",
+          "uriHint": "projects/digital_hub/plumbing.ifc",
+          "source": "original"
+        },
+        {
+          "discipline": "ventilation",
+          "uriHint": "projects/digital_hub/ventilation.ifc",
+          "source": "original"
+        }
+      ],
+      "payloadStore": false,
+      "oracle": null,
+      "packageCacheKey": "10a12fd437b1d429ade24978295ddb1fe365938ef849227e2a454d40bf307e01",
+      "packageCacheStatus": "miss",
+      "documentArtifactCache": {
+        "hits": [
+          "heating",
+          "plumbing",
+          "ventilation"
+        ],
+        "misses": [
+          "architecture"
+        ],
+        "schemaVersion": "naru.ifc-document-artifact.1",
+        "status": "enabled"
+      },
+      "payloadCache": null,
+      "warnings": [],
+      "compileMilliseconds": 17135.1,
+      "processMilliseconds": 17228.5,
+      "peakWorkingSetBytes": 559296512,
+      "packageDigest": "c4b151e5f5d762e4f431c5f647aaec8a53a43d7bbf9737917e4874a1f022b3bb",
+      "resources": [
+        {
+          "path": "adapter-report.json",
+          "bytes": 23457,
+          "sha256": "08f19a9fa5593b203d6b99b0c2d1c9bbdbfaf77547363a94558ec2dbeb9cef76"
+        },
+        {
+          "path": "build-report.json",
+          "bytes": 35237,
+          "sha256": "af3c10d9fc09195c55c24950e99129dc008a296c454ce6d291a89fd3736c03a9"
+        },
+        {
+          "path": "coarse.bin",
+          "bytes": 3085296,
+          "sha256": "99b6cefdd4fbdcf4fbe39213eb89063e3152514b172647c263e0f351fc64d627"
+        },
+        {
+          "path": "hierarchy.bin",
+          "bytes": 3018752,
+          "sha256": "1e01d1eaff6842a6108f9b871c0cdcf1f79161a123e2b411e868b7add187a2ad"
+        },
+        {
+          "path": "hierarchy.json",
+          "bytes": 2547,
+          "sha256": "08ba4b5ff009a717683d6eaa1d857fbab720a8c768cd19d507c0800d35476b25"
+        },
+        {
+          "path": "incremental-dependencies.json",
+          "bytes": 2883479,
+          "sha256": "b96de1a4055dc47092a4c6eb03a5daca49258eb96745ecc15fbbcc7a2c328f2f"
+        },
+        {
+          "path": "properties.bin",
+          "bytes": 2260991,
+          "sha256": "712fea65ca4b9de75683a01ee79f4fff5ae6f89b0c29cbd0b38a83bb586d07c1"
+        },
+        {
+          "path": "properties.json",
+          "bytes": 1246277,
+          "sha256": "6a7f88cc3d0122ebd33e74cb014f95e064ba2cd048ec177cdcc759004322a8c3"
+        },
+        {
+          "path": "scene.bin",
+          "bytes": 35962344,
+          "sha256": "bb871ed8738e82594a9ec5d51e198f5cceb9e36b727441eb43fbd76c95a1b4e6"
+        },
+        {
+          "path": "scene.gltf",
+          "bytes": 34123775,
+          "sha256": "4bcab6f383b0c14f24c500a39ee0d670d70734e9797cef7d687997effc17896e"
+        },
+        {
+          "path": "spatial.bin",
+          "bytes": 65484,
+          "sha256": "9be840533501963cfda03a52ab2d7f595df650aeb95fbd99e8fd4bf4be7f0cd6"
+        }
+      ],
+      "failures": [],
+      "met": true
+    },
+    {
+      "name": "store-warm-changed",
+      "documents": [
+        {
+          "discipline": "architecture",
+          "uriHint": "projects/digital_hub/arc.ifc",
+          "source": "changed"
+        },
+        {
+          "discipline": "heating",
+          "uriHint": "projects/digital_hub/heating.ifc",
+          "source": "original"
+        },
+        {
+          "discipline": "plumbing",
+          "uriHint": "projects/digital_hub/plumbing.ifc",
+          "source": "original"
+        },
+        {
+          "discipline": "ventilation",
+          "uriHint": "projects/digital_hub/ventilation.ifc",
+          "source": "original"
+        }
+      ],
+      "payloadStore": true,
+      "oracle": "clean-changed",
+      "packageCacheKey": "10a12fd437b1d429ade24978295ddb1fe365938ef849227e2a454d40bf307e01",
+      "packageCacheStatus": "miss",
+      "documentArtifactCache": {
+        "hits": [
+          "architecture",
+          "heating",
+          "plumbing",
+          "ventilation"
+        ],
+        "misses": [],
+        "schemaVersion": "naru.ifc-document-artifact.1",
+        "status": "enabled"
+      },
+      "payloadCache": {
+        "store": "naru.compiled-payload-entry.1",
+        "prototypes": 3383,
+        "hits": 2664,
+        "misses": 719,
+        "published": 719,
+        "outcomes": {
+          "hit": 2664,
+          "absent": 719,
+          "corrupt-entry": 0,
+          "restore-failed": 0
+        },
+        "publishFailures": 0,
+        "degraded": []
+      },
+      "warnings": [],
+      "compileMilliseconds": 15444.1,
+      "processMilliseconds": 15536,
+      "peakWorkingSetBytes": 609918976,
+      "packageDigest": "c4b151e5f5d762e4f431c5f647aaec8a53a43d7bbf9737917e4874a1f022b3bb",
+      "resources": [
+        {
+          "path": "adapter-report.json",
+          "bytes": 23453,
+          "sha256": "a29b8a06094bc9187d30cfa496cb50543fc356e46ed6016d6dc665c002dfe712"
+        },
+        {
+          "path": "build-report.json",
+          "bytes": 35561,
+          "sha256": "4c07ac2ec929a12c51967a30d30d7d50cd4f9e10b7d4ed1c13089780cb944064"
+        },
+        {
+          "path": "coarse.bin",
+          "bytes": 3085296,
+          "sha256": "99b6cefdd4fbdcf4fbe39213eb89063e3152514b172647c263e0f351fc64d627"
+        },
+        {
+          "path": "hierarchy.bin",
+          "bytes": 3018752,
+          "sha256": "1e01d1eaff6842a6108f9b871c0cdcf1f79161a123e2b411e868b7add187a2ad"
+        },
+        {
+          "path": "hierarchy.json",
+          "bytes": 2547,
+          "sha256": "08ba4b5ff009a717683d6eaa1d857fbab720a8c768cd19d507c0800d35476b25"
+        },
+        {
+          "path": "incremental-dependencies.json",
+          "bytes": 2883479,
+          "sha256": "b96de1a4055dc47092a4c6eb03a5daca49258eb96745ecc15fbbcc7a2c328f2f"
+        },
+        {
+          "path": "properties.bin",
+          "bytes": 2260991,
+          "sha256": "712fea65ca4b9de75683a01ee79f4fff5ae6f89b0c29cbd0b38a83bb586d07c1"
+        },
+        {
+          "path": "properties.json",
+          "bytes": 1246277,
+          "sha256": "6a7f88cc3d0122ebd33e74cb014f95e064ba2cd048ec177cdcc759004322a8c3"
+        },
+        {
+          "path": "scene.bin",
+          "bytes": 35962344,
+          "sha256": "bb871ed8738e82594a9ec5d51e198f5cceb9e36b727441eb43fbd76c95a1b4e6"
+        },
+        {
+          "path": "scene.gltf",
+          "bytes": 34123775,
+          "sha256": "4bcab6f383b0c14f24c500a39ee0d670d70734e9797cef7d687997effc17896e"
+        },
+        {
+          "path": "spatial.bin",
+          "bytes": 65484,
+          "sha256": "9be840533501963cfda03a52ab2d7f595df650aeb95fbd99e8fd4bf4be7f0cd6"
+        }
+      ],
+      "failures": [],
+      "met": true
+    },
+    {
+      "name": "store-corrupt-entry-changed",
+      "documents": [
+        {
+          "discipline": "architecture",
+          "uriHint": "projects/digital_hub/arc.ifc",
+          "source": "changed"
+        },
+        {
+          "discipline": "heating",
+          "uriHint": "projects/digital_hub/heating.ifc",
+          "source": "original"
+        },
+        {
+          "discipline": "plumbing",
+          "uriHint": "projects/digital_hub/plumbing.ifc",
+          "source": "original"
+        },
+        {
+          "discipline": "ventilation",
+          "uriHint": "projects/digital_hub/ventilation.ifc",
+          "source": "original"
+        }
+      ],
+      "payloadStore": true,
+      "oracle": "clean-changed",
+      "packageCacheKey": "10a12fd437b1d429ade24978295ddb1fe365938ef849227e2a454d40bf307e01",
+      "packageCacheStatus": "miss",
+      "documentArtifactCache": {
+        "hits": [
+          "architecture",
+          "heating",
+          "plumbing",
+          "ventilation"
+        ],
+        "misses": [],
+        "schemaVersion": "naru.ifc-document-artifact.1",
+        "status": "enabled"
+      },
+      "payloadCache": {
+        "store": "naru.compiled-payload-entry.1",
+        "prototypes": 3383,
+        "hits": 3382,
+        "misses": 1,
+        "published": 0,
+        "outcomes": {
+          "hit": 3382,
+          "absent": 0,
+          "corrupt-entry": 1,
+          "restore-failed": 0
+        },
+        "publishFailures": 1,
+        "degraded": [
+          {
+            "prototypeId": "prototype:ifc:architecture-b428d64184f7:19090",
+            "outcome": "corrupt-entry"
+          },
+          {
+            "prototypeId": "prototype:ifc:architecture-b428d64184f7:19090",
+            "outcome": "publish-failed"
+          }
+        ]
+      },
+      "warnings": [
+        "[naru] payload cache restore failed for prototype:ifc:architecture-b428d64184f7:19090 (Compiled payload binary failed integrity verification.); rebuilding.",
+        "[naru] payload cache publish failed for prototype:ifc:architecture-b428d64184f7:19090 (Compiled payload binary failed integrity verification.); compiled output kept without an entry."
+      ],
+      "compileMilliseconds": 14530.2,
+      "processMilliseconds": 14622.5,
+      "peakWorkingSetBytes": 610127872,
+      "packageDigest": "c4b151e5f5d762e4f431c5f647aaec8a53a43d7bbf9737917e4874a1f022b3bb",
+      "resources": [
+        {
+          "path": "adapter-report.json",
+          "bytes": 23453,
+          "sha256": "a29b8a06094bc9187d30cfa496cb50543fc356e46ed6016d6dc665c002dfe712"
+        },
+        {
+          "path": "build-report.json",
+          "bytes": 35808,
+          "sha256": "99fbbcc3128813891acef2c6b2cff72a8064fc980d543dd06be0f2e670a71d1b"
+        },
+        {
+          "path": "coarse.bin",
+          "bytes": 3085296,
+          "sha256": "99b6cefdd4fbdcf4fbe39213eb89063e3152514b172647c263e0f351fc64d627"
+        },
+        {
+          "path": "hierarchy.bin",
+          "bytes": 3018752,
+          "sha256": "1e01d1eaff6842a6108f9b871c0cdcf1f79161a123e2b411e868b7add187a2ad"
+        },
+        {
+          "path": "hierarchy.json",
+          "bytes": 2547,
+          "sha256": "08ba4b5ff009a717683d6eaa1d857fbab720a8c768cd19d507c0800d35476b25"
+        },
+        {
+          "path": "incremental-dependencies.json",
+          "bytes": 2883479,
+          "sha256": "b96de1a4055dc47092a4c6eb03a5daca49258eb96745ecc15fbbcc7a2c328f2f"
+        },
+        {
+          "path": "properties.bin",
+          "bytes": 2260991,
+          "sha256": "712fea65ca4b9de75683a01ee79f4fff5ae6f89b0c29cbd0b38a83bb586d07c1"
+        },
+        {
+          "path": "properties.json",
+          "bytes": 1246277,
+          "sha256": "6a7f88cc3d0122ebd33e74cb014f95e064ba2cd048ec177cdcc759004322a8c3"
+        },
+        {
+          "path": "scene.bin",
+          "bytes": 35962344,
+          "sha256": "bb871ed8738e82594a9ec5d51e198f5cceb9e36b727441eb43fbd76c95a1b4e6"
+        },
+        {
+          "path": "scene.gltf",
+          "bytes": 34123775,
+          "sha256": "4bcab6f383b0c14f24c500a39ee0d670d70734e9797cef7d687997effc17896e"
+        },
+        {
+          "path": "spatial.bin",
+          "bytes": 65484,
+          "sha256": "9be840533501963cfda03a52ab2d7f595df650aeb95fbd99e8fd4bf4be7f0cd6"
+        }
+      ],
+      "failures": [],
+      "met": true
+    },
+    {
+      "name": "clean-relabelled",
+      "documents": [
+        {
+          "discipline": "architecture",
+          "uriHint": "projects/digital_hub/relabelled/arc.ifc",
+          "source": "original"
+        },
+        {
+          "discipline": "heating",
+          "uriHint": "projects/digital_hub/heating.ifc",
+          "source": "original"
+        },
+        {
+          "discipline": "plumbing",
+          "uriHint": "projects/digital_hub/plumbing.ifc",
+          "source": "original"
+        },
+        {
+          "discipline": "ventilation",
+          "uriHint": "projects/digital_hub/ventilation.ifc",
+          "source": "original"
+        }
+      ],
+      "payloadStore": false,
+      "oracle": null,
+      "packageCacheKey": "91791181808bcb3710b942d359e2deab61ddd30477c058d06c40c2ad99673cca",
+      "packageCacheStatus": "miss",
+      "documentArtifactCache": {
+        "hits": [
+          "heating",
+          "plumbing",
+          "ventilation"
+        ],
+        "misses": [
+          "architecture"
+        ],
+        "schemaVersion": "naru.ifc-document-artifact.1",
+        "status": "enabled"
+      },
+      "payloadCache": null,
+      "warnings": [],
+      "compileMilliseconds": 15748.4,
+      "processMilliseconds": 15840.8,
+      "peakWorkingSetBytes": 575356928,
+      "packageDigest": "ef31b9c6175ba83b338a2965c91ae5cb3cda0d500252face3804d97bb29d0ba5",
+      "resources": [
+        {
+          "path": "adapter-report.json",
+          "bytes": 23468,
+          "sha256": "15b14df05d021dd705b1fec88008926c8fb6319e95603dfdd41e914d390487c6"
+        },
+        {
+          "path": "build-report.json",
+          "bytes": 35237,
+          "sha256": "d43edd5540f4939ed867fd9d21100258d2b5d5213b178ba1ea767ab613f27734"
+        },
+        {
+          "path": "coarse.bin",
+          "bytes": 3085296,
+          "sha256": "5e4fb16db1660f3278a3761f9699c4eb7f003220006d9c082106935e72770284"
+        },
+        {
+          "path": "hierarchy.bin",
+          "bytes": 3018752,
+          "sha256": "ec57d0ea57f0e85b418113bd522c12c83bce15793b1a5d3aa9a45404c1f70861"
+        },
+        {
+          "path": "hierarchy.json",
+          "bytes": 2547,
+          "sha256": "d557c9f456a69fbb9a3c43a01f6cb0423e8d1451b3f0f0941bc2696f4be93071"
+        },
+        {
+          "path": "incremental-dependencies.json",
+          "bytes": 2883490,
+          "sha256": "36e90427e96ade0eb8d05f8ae89e213743e63ad978fc9d19020677ffc11300b2"
+        },
+        {
+          "path": "properties.bin",
+          "bytes": 2260991,
+          "sha256": "712fea65ca4b9de75683a01ee79f4fff5ae6f89b0c29cbd0b38a83bb586d07c1"
+        },
+        {
+          "path": "properties.json",
+          "bytes": 1246277,
+          "sha256": "10b1f579eda1c085fdd115031ea416edf14e82b5a2b7b4e1ac0ec80f7af70675"
+        },
+        {
+          "path": "scene.bin",
+          "bytes": 35962344,
+          "sha256": "e6cb5f6943f03a14ccccc7be950646dac84ad22536891ad5423e48e5113747f7"
+        },
+        {
+          "path": "scene.gltf",
+          "bytes": 34123775,
+          "sha256": "b150372ae9d21dd5547c3827158ae041cf7beda2341db1db186fcd0926275578"
+        },
+        {
+          "path": "spatial.bin",
+          "bytes": 65472,
+          "sha256": "0ecb6514fcdeecc8954285b26c644dfecd67816ca5bc58fbfbe7b6b660a6e06c"
+        }
+      ],
+      "failures": [],
+      "met": true
+    },
+    {
+      "name": "store-warm-relabelled",
+      "documents": [
+        {
+          "discipline": "architecture",
+          "uriHint": "projects/digital_hub/relabelled/arc.ifc",
+          "source": "original"
+        },
+        {
+          "discipline": "heating",
+          "uriHint": "projects/digital_hub/heating.ifc",
+          "source": "original"
+        },
+        {
+          "discipline": "plumbing",
+          "uriHint": "projects/digital_hub/plumbing.ifc",
+          "source": "original"
+        },
+        {
+          "discipline": "ventilation",
+          "uriHint": "projects/digital_hub/ventilation.ifc",
+          "source": "original"
+        }
+      ],
+      "payloadStore": true,
+      "oracle": "clean-relabelled",
+      "packageCacheKey": "91791181808bcb3710b942d359e2deab61ddd30477c058d06c40c2ad99673cca",
+      "packageCacheStatus": "miss",
+      "documentArtifactCache": {
+        "hits": [
+          "architecture",
+          "heating",
+          "plumbing",
+          "ventilation"
+        ],
+        "misses": [],
+        "schemaVersion": "naru.ifc-document-artifact.1",
+        "status": "enabled"
+      },
+      "payloadCache": {
+        "store": "naru.compiled-payload-entry.1",
+        "prototypes": 3383,
+        "hits": 3383,
+        "misses": 0,
+        "published": 0,
+        "outcomes": {
+          "hit": 3383,
+          "absent": 0,
+          "corrupt-entry": 0,
+          "restore-failed": 0
+        },
+        "publishFailures": 0,
+        "degraded": []
+      },
+      "warnings": [],
+      "compileMilliseconds": 14887.8,
+      "processMilliseconds": 14983.2,
+      "peakWorkingSetBytes": 610185216,
+      "packageDigest": "ef31b9c6175ba83b338a2965c91ae5cb3cda0d500252face3804d97bb29d0ba5",
+      "resources": [
+        {
+          "path": "adapter-report.json",
+          "bytes": 23464,
+          "sha256": "2b522866c9a63210b8e56c38e1dbd87f482502a409fd0c6d8d191d529ddab9c8"
+        },
+        {
+          "path": "build-report.json",
+          "bytes": 35555,
+          "sha256": "4123366557ec307984d933d391ca8f5d2824cb00b69b1c20af11407dd0082241"
+        },
+        {
+          "path": "coarse.bin",
+          "bytes": 3085296,
+          "sha256": "5e4fb16db1660f3278a3761f9699c4eb7f003220006d9c082106935e72770284"
+        },
+        {
+          "path": "hierarchy.bin",
+          "bytes": 3018752,
+          "sha256": "ec57d0ea57f0e85b418113bd522c12c83bce15793b1a5d3aa9a45404c1f70861"
+        },
+        {
+          "path": "hierarchy.json",
+          "bytes": 2547,
+          "sha256": "d557c9f456a69fbb9a3c43a01f6cb0423e8d1451b3f0f0941bc2696f4be93071"
+        },
+        {
+          "path": "incremental-dependencies.json",
+          "bytes": 2883490,
+          "sha256": "36e90427e96ade0eb8d05f8ae89e213743e63ad978fc9d19020677ffc11300b2"
+        },
+        {
+          "path": "properties.bin",
+          "bytes": 2260991,
+          "sha256": "712fea65ca4b9de75683a01ee79f4fff5ae6f89b0c29cbd0b38a83bb586d07c1"
+        },
+        {
+          "path": "properties.json",
+          "bytes": 1246277,
+          "sha256": "10b1f579eda1c085fdd115031ea416edf14e82b5a2b7b4e1ac0ec80f7af70675"
+        },
+        {
+          "path": "scene.bin",
+          "bytes": 35962344,
+          "sha256": "e6cb5f6943f03a14ccccc7be950646dac84ad22536891ad5423e48e5113747f7"
+        },
+        {
+          "path": "scene.gltf",
+          "bytes": 34123775,
+          "sha256": "b150372ae9d21dd5547c3827158ae041cf7beda2341db1db186fcd0926275578"
+        },
+        {
+          "path": "spatial.bin",
+          "bytes": 65472,
+          "sha256": "0ecb6514fcdeecc8954285b26c644dfecd67816ca5bc58fbfbe7b6b660a6e06c"
+        }
+      ],
+      "failures": [],
+      "met": true
+    },
+    {
+      "name": "clean-deleted",
+      "documents": [
+        {
+          "discipline": "architecture",
+          "uriHint": "projects/digital_hub/arc.ifc",
+          "source": "original"
+        },
+        {
+          "discipline": "heating",
+          "uriHint": "projects/digital_hub/heating.ifc",
+          "source": "original"
+        },
+        {
+          "discipline": "plumbing",
+          "uriHint": "projects/digital_hub/plumbing.ifc",
+          "source": "original"
+        }
+      ],
+      "payloadStore": false,
+      "oracle": null,
+      "packageCacheKey": "e519cfc8d1967f6ff56808972a76f7bf320d76778d29afa1a3b685982c8a70d1",
+      "packageCacheStatus": "miss",
+      "documentArtifactCache": {
+        "hits": [
+          "architecture",
+          "heating",
+          "plumbing"
+        ],
+        "misses": [],
+        "schemaVersion": "naru.ifc-document-artifact.1",
+        "status": "enabled"
+      },
+      "payloadCache": null,
+      "warnings": [],
+      "compileMilliseconds": 9175.3,
+      "processMilliseconds": 9270.5,
+      "peakWorkingSetBytes": 499908608,
+      "packageDigest": "c9b15c51a6ad2096491403eb9acc31f7a770e152460a9bc3b56d556b6ede4812",
+      "resources": [
+        {
+          "path": "adapter-report.json",
+          "bytes": 18269,
+          "sha256": "dd8a32ac3617274234673eb149d25350b8c229f1e270cf8e5436a9223431b0a9"
+        },
+        {
+          "path": "build-report.json",
+          "bytes": 25982,
+          "sha256": "652ca1f0ccd0c8cab3bd624bbacc247c0b098dbf48652a75d96118bc8f8f9f00"
+        },
+        {
+          "path": "coarse.bin",
+          "bytes": 2286384,
+          "sha256": "27cb3dba55b34eaa6b439686d8463756f60d5bd49778b7fab804f1212e579ef6"
+        },
+        {
+          "path": "hierarchy.bin",
+          "bytes": 2053808,
+          "sha256": "13888402889867921436432150e2ec47275c52b52fc2650f140e407ed09eb6da"
+        },
+        {
+          "path": "hierarchy.json",
+          "bytes": 2272,
+          "sha256": "4d6298695aa408a6043593394c8edff47c7ed53bd3ead215b492c2fd56c0564c"
+        },
+        {
+          "path": "incremental-dependencies.json",
+          "bytes": 2059505,
+          "sha256": "fc8d1a8f20fe9b41a2280d6c9febd417134c0c356fc7e83592196bb1d121b48f"
+        },
+        {
+          "path": "properties.bin",
+          "bytes": 1594361,
+          "sha256": "b7c82acc51d6dea33cb9b5b4be2fb621b4221fb97570ea3ddf9330aa8d30d389"
+        },
+        {
+          "path": "properties.json",
+          "bytes": 885794,
+          "sha256": "ded146dd49831ed98775c7f3be801e981312d78bb09e0d1d003c6cbd64e72427"
+        },
+        {
+          "path": "scene.bin",
+          "bytes": 33012792,
+          "sha256": "60362b0daa50fc6d8a6bc1f77562343ca5d2572394ababa30d08a4285e9a188d"
+        },
+        {
+          "path": "scene.gltf",
+          "bytes": 25458583,
+          "sha256": "4d7027c7c79d4997b6909b875c83b103c8ffbed8e65eea8cf6dd6ca6ffedb951"
+        },
+        {
+          "path": "spatial.bin",
+          "bytes": 43488,
+          "sha256": "39056d1e82432b4064146b5184ea0b020bfe2881af592ad77f152090fb0b774b"
+        }
+      ],
+      "failures": [],
+      "met": true
+    },
+    {
+      "name": "store-warm-deleted",
+      "documents": [
+        {
+          "discipline": "architecture",
+          "uriHint": "projects/digital_hub/arc.ifc",
+          "source": "original"
+        },
+        {
+          "discipline": "heating",
+          "uriHint": "projects/digital_hub/heating.ifc",
+          "source": "original"
+        },
+        {
+          "discipline": "plumbing",
+          "uriHint": "projects/digital_hub/plumbing.ifc",
+          "source": "original"
+        }
+      ],
+      "payloadStore": true,
+      "oracle": "clean-deleted",
+      "packageCacheKey": "e519cfc8d1967f6ff56808972a76f7bf320d76778d29afa1a3b685982c8a70d1",
+      "packageCacheStatus": "miss",
+      "documentArtifactCache": {
+        "hits": [
+          "architecture",
+          "heating",
+          "plumbing"
+        ],
+        "misses": [],
+        "schemaVersion": "naru.ifc-document-artifact.1",
+        "status": "enabled"
+      },
+      "payloadCache": {
+        "store": "naru.compiled-payload-entry.1",
+        "prototypes": 2507,
+        "hits": 2507,
+        "misses": 0,
+        "published": 0,
+        "outcomes": {
+          "hit": 2507,
+          "absent": 0,
+          "corrupt-entry": 0,
+          "restore-failed": 0
+        },
+        "publishFailures": 0,
+        "degraded": []
+      },
+      "warnings": [],
+      "compileMilliseconds": 11373.4,
+      "processMilliseconds": 11463,
+      "peakWorkingSetBytes": 500043776,
+      "packageDigest": "c9b15c51a6ad2096491403eb9acc31f7a770e152460a9bc3b56d556b6ede4812",
+      "resources": [
+        {
+          "path": "adapter-report.json",
+          "bytes": 18269,
+          "sha256": "dd8a32ac3617274234673eb149d25350b8c229f1e270cf8e5436a9223431b0a9"
+        },
+        {
+          "path": "build-report.json",
+          "bytes": 26300,
+          "sha256": "2122296b6b8fc9715a8533f8a504a81809cddb74de782ba0fa3d42b4b4425235"
+        },
+        {
+          "path": "coarse.bin",
+          "bytes": 2286384,
+          "sha256": "27cb3dba55b34eaa6b439686d8463756f60d5bd49778b7fab804f1212e579ef6"
+        },
+        {
+          "path": "hierarchy.bin",
+          "bytes": 2053808,
+          "sha256": "13888402889867921436432150e2ec47275c52b52fc2650f140e407ed09eb6da"
+        },
+        {
+          "path": "hierarchy.json",
+          "bytes": 2272,
+          "sha256": "4d6298695aa408a6043593394c8edff47c7ed53bd3ead215b492c2fd56c0564c"
+        },
+        {
+          "path": "incremental-dependencies.json",
+          "bytes": 2059505,
+          "sha256": "fc8d1a8f20fe9b41a2280d6c9febd417134c0c356fc7e83592196bb1d121b48f"
+        },
+        {
+          "path": "properties.bin",
+          "bytes": 1594361,
+          "sha256": "b7c82acc51d6dea33cb9b5b4be2fb621b4221fb97570ea3ddf9330aa8d30d389"
+        },
+        {
+          "path": "properties.json",
+          "bytes": 885794,
+          "sha256": "ded146dd49831ed98775c7f3be801e981312d78bb09e0d1d003c6cbd64e72427"
+        },
+        {
+          "path": "scene.bin",
+          "bytes": 33012792,
+          "sha256": "60362b0daa50fc6d8a6bc1f77562343ca5d2572394ababa30d08a4285e9a188d"
+        },
+        {
+          "path": "scene.gltf",
+          "bytes": 25458583,
+          "sha256": "4d7027c7c79d4997b6909b875c83b103c8ffbed8e65eea8cf6dd6ca6ffedb951"
+        },
+        {
+          "path": "spatial.bin",
+          "bytes": 43488,
+          "sha256": "39056d1e82432b4064146b5184ea0b020bfe2881af592ad77f152090fb0b774b"
+        }
+      ],
+      "failures": [],
+      "met": true
+    }
+  ],
+  "oracles": {
+    "clean-original": {
+      "packageDigest": "ef31b9c6175ba83b338a2965c91ae5cb3cda0d500252face3804d97bb29d0ba5",
+      "resources": [
+        {
+          "path": "adapter-report.json",
+          "bytes": 23453,
+          "sha256": "de8a8ad79bdff5108fa0a3a7bcce1ea838d15182b83fae50fab51ab95af2f0b7"
+        },
+        {
+          "path": "build-report.json",
+          "bytes": 35237,
+          "sha256": "d43edd5540f4939ed867fd9d21100258d2b5d5213b178ba1ea767ab613f27734"
+        },
+        {
+          "path": "coarse.bin",
+          "bytes": 3085296,
+          "sha256": "5e4fb16db1660f3278a3761f9699c4eb7f003220006d9c082106935e72770284"
+        },
+        {
+          "path": "hierarchy.bin",
+          "bytes": 3018752,
+          "sha256": "ec57d0ea57f0e85b418113bd522c12c83bce15793b1a5d3aa9a45404c1f70861"
+        },
+        {
+          "path": "hierarchy.json",
+          "bytes": 2547,
+          "sha256": "d557c9f456a69fbb9a3c43a01f6cb0423e8d1451b3f0f0941bc2696f4be93071"
+        },
+        {
+          "path": "incremental-dependencies.json",
+          "bytes": 2883479,
+          "sha256": "63e0ae42316dbcaa8362562a3221ad878e3736ff45a621578798abf2570d530b"
+        },
+        {
+          "path": "properties.bin",
+          "bytes": 2260991,
+          "sha256": "712fea65ca4b9de75683a01ee79f4fff5ae6f89b0c29cbd0b38a83bb586d07c1"
+        },
+        {
+          "path": "properties.json",
+          "bytes": 1246277,
+          "sha256": "10b1f579eda1c085fdd115031ea416edf14e82b5a2b7b4e1ac0ec80f7af70675"
+        },
+        {
+          "path": "scene.bin",
+          "bytes": 35962344,
+          "sha256": "e6cb5f6943f03a14ccccc7be950646dac84ad22536891ad5423e48e5113747f7"
+        },
+        {
+          "path": "scene.gltf",
+          "bytes": 34123775,
+          "sha256": "b150372ae9d21dd5547c3827158ae041cf7beda2341db1db186fcd0926275578"
+        },
+        {
+          "path": "spatial.bin",
+          "bytes": 65472,
+          "sha256": "0ecb6514fcdeecc8954285b26c644dfecd67816ca5bc58fbfbe7b6b660a6e06c"
+        }
+      ],
+      "buildReportResources": [
+        {
+          "path": "scene.gltf",
+          "mediaType": "model/gltf+json",
+          "bytes": 34123775,
+          "sha256": "b150372ae9d21dd5547c3827158ae041cf7beda2341db1db186fcd0926275578"
+        },
+        {
+          "path": "scene.bin",
+          "mediaType": "application/octet-stream",
+          "bytes": 35962344,
+          "sha256": "e6cb5f6943f03a14ccccc7be950646dac84ad22536891ad5423e48e5113747f7"
+        },
+        {
+          "path": "coarse.bin",
+          "mediaType": "application/octet-stream",
+          "bytes": 3085296,
+          "sha256": "5e4fb16db1660f3278a3761f9699c4eb7f003220006d9c082106935e72770284"
+        },
+        {
+          "path": "spatial.bin",
+          "mediaType": "application/octet-stream",
+          "bytes": 65472,
+          "sha256": "0ecb6514fcdeecc8954285b26c644dfecd67816ca5bc58fbfbe7b6b660a6e06c"
+        },
+        {
+          "path": "properties.json",
+          "mediaType": "application/json",
+          "bytes": 1246277,
+          "sha256": "10b1f579eda1c085fdd115031ea416edf14e82b5a2b7b4e1ac0ec80f7af70675"
+        },
+        {
+          "path": "properties.bin",
+          "mediaType": "application/octet-stream",
+          "bytes": 2260991,
+          "sha256": "712fea65ca4b9de75683a01ee79f4fff5ae6f89b0c29cbd0b38a83bb586d07c1"
+        },
+        {
+          "path": "hierarchy.json",
+          "mediaType": "application/json",
+          "bytes": 2547,
+          "sha256": "d557c9f456a69fbb9a3c43a01f6cb0423e8d1451b3f0f0941bc2696f4be93071"
+        },
+        {
+          "path": "hierarchy.bin",
+          "mediaType": "application/octet-stream",
+          "bytes": 3018752,
+          "sha256": "ec57d0ea57f0e85b418113bd522c12c83bce15793b1a5d3aa9a45404c1f70861"
+        }
+      ]
+    },
+    "clean-changed": {
+      "packageDigest": "c4b151e5f5d762e4f431c5f647aaec8a53a43d7bbf9737917e4874a1f022b3bb",
+      "resources": [
+        {
+          "path": "adapter-report.json",
+          "bytes": 23457,
+          "sha256": "08f19a9fa5593b203d6b99b0c2d1c9bbdbfaf77547363a94558ec2dbeb9cef76"
+        },
+        {
+          "path": "build-report.json",
+          "bytes": 35237,
+          "sha256": "af3c10d9fc09195c55c24950e99129dc008a296c454ce6d291a89fd3736c03a9"
+        },
+        {
+          "path": "coarse.bin",
+          "bytes": 3085296,
+          "sha256": "99b6cefdd4fbdcf4fbe39213eb89063e3152514b172647c263e0f351fc64d627"
+        },
+        {
+          "path": "hierarchy.bin",
+          "bytes": 3018752,
+          "sha256": "1e01d1eaff6842a6108f9b871c0cdcf1f79161a123e2b411e868b7add187a2ad"
+        },
+        {
+          "path": "hierarchy.json",
+          "bytes": 2547,
+          "sha256": "08ba4b5ff009a717683d6eaa1d857fbab720a8c768cd19d507c0800d35476b25"
+        },
+        {
+          "path": "incremental-dependencies.json",
+          "bytes": 2883479,
+          "sha256": "b96de1a4055dc47092a4c6eb03a5daca49258eb96745ecc15fbbcc7a2c328f2f"
+        },
+        {
+          "path": "properties.bin",
+          "bytes": 2260991,
+          "sha256": "712fea65ca4b9de75683a01ee79f4fff5ae6f89b0c29cbd0b38a83bb586d07c1"
+        },
+        {
+          "path": "properties.json",
+          "bytes": 1246277,
+          "sha256": "6a7f88cc3d0122ebd33e74cb014f95e064ba2cd048ec177cdcc759004322a8c3"
+        },
+        {
+          "path": "scene.bin",
+          "bytes": 35962344,
+          "sha256": "bb871ed8738e82594a9ec5d51e198f5cceb9e36b727441eb43fbd76c95a1b4e6"
+        },
+        {
+          "path": "scene.gltf",
+          "bytes": 34123775,
+          "sha256": "4bcab6f383b0c14f24c500a39ee0d670d70734e9797cef7d687997effc17896e"
+        },
+        {
+          "path": "spatial.bin",
+          "bytes": 65484,
+          "sha256": "9be840533501963cfda03a52ab2d7f595df650aeb95fbd99e8fd4bf4be7f0cd6"
+        }
+      ],
+      "buildReportResources": [
+        {
+          "path": "scene.gltf",
+          "mediaType": "model/gltf+json",
+          "bytes": 34123775,
+          "sha256": "4bcab6f383b0c14f24c500a39ee0d670d70734e9797cef7d687997effc17896e"
+        },
+        {
+          "path": "scene.bin",
+          "mediaType": "application/octet-stream",
+          "bytes": 35962344,
+          "sha256": "bb871ed8738e82594a9ec5d51e198f5cceb9e36b727441eb43fbd76c95a1b4e6"
+        },
+        {
+          "path": "coarse.bin",
+          "mediaType": "application/octet-stream",
+          "bytes": 3085296,
+          "sha256": "99b6cefdd4fbdcf4fbe39213eb89063e3152514b172647c263e0f351fc64d627"
+        },
+        {
+          "path": "spatial.bin",
+          "mediaType": "application/octet-stream",
+          "bytes": 65484,
+          "sha256": "9be840533501963cfda03a52ab2d7f595df650aeb95fbd99e8fd4bf4be7f0cd6"
+        },
+        {
+          "path": "properties.json",
+          "mediaType": "application/json",
+          "bytes": 1246277,
+          "sha256": "6a7f88cc3d0122ebd33e74cb014f95e064ba2cd048ec177cdcc759004322a8c3"
+        },
+        {
+          "path": "properties.bin",
+          "mediaType": "application/octet-stream",
+          "bytes": 2260991,
+          "sha256": "712fea65ca4b9de75683a01ee79f4fff5ae6f89b0c29cbd0b38a83bb586d07c1"
+        },
+        {
+          "path": "hierarchy.json",
+          "mediaType": "application/json",
+          "bytes": 2547,
+          "sha256": "08ba4b5ff009a717683d6eaa1d857fbab720a8c768cd19d507c0800d35476b25"
+        },
+        {
+          "path": "hierarchy.bin",
+          "mediaType": "application/octet-stream",
+          "bytes": 3018752,
+          "sha256": "1e01d1eaff6842a6108f9b871c0cdcf1f79161a123e2b411e868b7add187a2ad"
+        }
+      ]
+    },
+    "clean-relabelled": {
+      "packageDigest": "ef31b9c6175ba83b338a2965c91ae5cb3cda0d500252face3804d97bb29d0ba5",
+      "resources": [
+        {
+          "path": "adapter-report.json",
+          "bytes": 23468,
+          "sha256": "15b14df05d021dd705b1fec88008926c8fb6319e95603dfdd41e914d390487c6"
+        },
+        {
+          "path": "build-report.json",
+          "bytes": 35237,
+          "sha256": "d43edd5540f4939ed867fd9d21100258d2b5d5213b178ba1ea767ab613f27734"
+        },
+        {
+          "path": "coarse.bin",
+          "bytes": 3085296,
+          "sha256": "5e4fb16db1660f3278a3761f9699c4eb7f003220006d9c082106935e72770284"
+        },
+        {
+          "path": "hierarchy.bin",
+          "bytes": 3018752,
+          "sha256": "ec57d0ea57f0e85b418113bd522c12c83bce15793b1a5d3aa9a45404c1f70861"
+        },
+        {
+          "path": "hierarchy.json",
+          "bytes": 2547,
+          "sha256": "d557c9f456a69fbb9a3c43a01f6cb0423e8d1451b3f0f0941bc2696f4be93071"
+        },
+        {
+          "path": "incremental-dependencies.json",
+          "bytes": 2883490,
+          "sha256": "36e90427e96ade0eb8d05f8ae89e213743e63ad978fc9d19020677ffc11300b2"
+        },
+        {
+          "path": "properties.bin",
+          "bytes": 2260991,
+          "sha256": "712fea65ca4b9de75683a01ee79f4fff5ae6f89b0c29cbd0b38a83bb586d07c1"
+        },
+        {
+          "path": "properties.json",
+          "bytes": 1246277,
+          "sha256": "10b1f579eda1c085fdd115031ea416edf14e82b5a2b7b4e1ac0ec80f7af70675"
+        },
+        {
+          "path": "scene.bin",
+          "bytes": 35962344,
+          "sha256": "e6cb5f6943f03a14ccccc7be950646dac84ad22536891ad5423e48e5113747f7"
+        },
+        {
+          "path": "scene.gltf",
+          "bytes": 34123775,
+          "sha256": "b150372ae9d21dd5547c3827158ae041cf7beda2341db1db186fcd0926275578"
+        },
+        {
+          "path": "spatial.bin",
+          "bytes": 65472,
+          "sha256": "0ecb6514fcdeecc8954285b26c644dfecd67816ca5bc58fbfbe7b6b660a6e06c"
+        }
+      ],
+      "buildReportResources": [
+        {
+          "path": "scene.gltf",
+          "mediaType": "model/gltf+json",
+          "bytes": 34123775,
+          "sha256": "b150372ae9d21dd5547c3827158ae041cf7beda2341db1db186fcd0926275578"
+        },
+        {
+          "path": "scene.bin",
+          "mediaType": "application/octet-stream",
+          "bytes": 35962344,
+          "sha256": "e6cb5f6943f03a14ccccc7be950646dac84ad22536891ad5423e48e5113747f7"
+        },
+        {
+          "path": "coarse.bin",
+          "mediaType": "application/octet-stream",
+          "bytes": 3085296,
+          "sha256": "5e4fb16db1660f3278a3761f9699c4eb7f003220006d9c082106935e72770284"
+        },
+        {
+          "path": "spatial.bin",
+          "mediaType": "application/octet-stream",
+          "bytes": 65472,
+          "sha256": "0ecb6514fcdeecc8954285b26c644dfecd67816ca5bc58fbfbe7b6b660a6e06c"
+        },
+        {
+          "path": "properties.json",
+          "mediaType": "application/json",
+          "bytes": 1246277,
+          "sha256": "10b1f579eda1c085fdd115031ea416edf14e82b5a2b7b4e1ac0ec80f7af70675"
+        },
+        {
+          "path": "properties.bin",
+          "mediaType": "application/octet-stream",
+          "bytes": 2260991,
+          "sha256": "712fea65ca4b9de75683a01ee79f4fff5ae6f89b0c29cbd0b38a83bb586d07c1"
+        },
+        {
+          "path": "hierarchy.json",
+          "mediaType": "application/json",
+          "bytes": 2547,
+          "sha256": "d557c9f456a69fbb9a3c43a01f6cb0423e8d1451b3f0f0941bc2696f4be93071"
+        },
+        {
+          "path": "hierarchy.bin",
+          "mediaType": "application/octet-stream",
+          "bytes": 3018752,
+          "sha256": "ec57d0ea57f0e85b418113bd522c12c83bce15793b1a5d3aa9a45404c1f70861"
+        }
+      ]
+    },
+    "clean-deleted": {
+      "packageDigest": "c9b15c51a6ad2096491403eb9acc31f7a770e152460a9bc3b56d556b6ede4812",
+      "resources": [
+        {
+          "path": "adapter-report.json",
+          "bytes": 18269,
+          "sha256": "dd8a32ac3617274234673eb149d25350b8c229f1e270cf8e5436a9223431b0a9"
+        },
+        {
+          "path": "build-report.json",
+          "bytes": 25982,
+          "sha256": "652ca1f0ccd0c8cab3bd624bbacc247c0b098dbf48652a75d96118bc8f8f9f00"
+        },
+        {
+          "path": "coarse.bin",
+          "bytes": 2286384,
+          "sha256": "27cb3dba55b34eaa6b439686d8463756f60d5bd49778b7fab804f1212e579ef6"
+        },
+        {
+          "path": "hierarchy.bin",
+          "bytes": 2053808,
+          "sha256": "13888402889867921436432150e2ec47275c52b52fc2650f140e407ed09eb6da"
+        },
+        {
+          "path": "hierarchy.json",
+          "bytes": 2272,
+          "sha256": "4d6298695aa408a6043593394c8edff47c7ed53bd3ead215b492c2fd56c0564c"
+        },
+        {
+          "path": "incremental-dependencies.json",
+          "bytes": 2059505,
+          "sha256": "fc8d1a8f20fe9b41a2280d6c9febd417134c0c356fc7e83592196bb1d121b48f"
+        },
+        {
+          "path": "properties.bin",
+          "bytes": 1594361,
+          "sha256": "b7c82acc51d6dea33cb9b5b4be2fb621b4221fb97570ea3ddf9330aa8d30d389"
+        },
+        {
+          "path": "properties.json",
+          "bytes": 885794,
+          "sha256": "ded146dd49831ed98775c7f3be801e981312d78bb09e0d1d003c6cbd64e72427"
+        },
+        {
+          "path": "scene.bin",
+          "bytes": 33012792,
+          "sha256": "60362b0daa50fc6d8a6bc1f77562343ca5d2572394ababa30d08a4285e9a188d"
+        },
+        {
+          "path": "scene.gltf",
+          "bytes": 25458583,
+          "sha256": "4d7027c7c79d4997b6909b875c83b103c8ffbed8e65eea8cf6dd6ca6ffedb951"
+        },
+        {
+          "path": "spatial.bin",
+          "bytes": 43488,
+          "sha256": "39056d1e82432b4064146b5184ea0b020bfe2881af592ad77f152090fb0b774b"
+        }
+      ],
+      "buildReportResources": [
+        {
+          "path": "scene.gltf",
+          "mediaType": "model/gltf+json",
+          "bytes": 25458583,
+          "sha256": "4d7027c7c79d4997b6909b875c83b103c8ffbed8e65eea8cf6dd6ca6ffedb951"
+        },
+        {
+          "path": "scene.bin",
+          "mediaType": "application/octet-stream",
+          "bytes": 33012792,
+          "sha256": "60362b0daa50fc6d8a6bc1f77562343ca5d2572394ababa30d08a4285e9a188d"
+        },
+        {
+          "path": "coarse.bin",
+          "mediaType": "application/octet-stream",
+          "bytes": 2286384,
+          "sha256": "27cb3dba55b34eaa6b439686d8463756f60d5bd49778b7fab804f1212e579ef6"
+        },
+        {
+          "path": "spatial.bin",
+          "mediaType": "application/octet-stream",
+          "bytes": 43488,
+          "sha256": "39056d1e82432b4064146b5184ea0b020bfe2881af592ad77f152090fb0b774b"
+        },
+        {
+          "path": "properties.json",
+          "mediaType": "application/json",
+          "bytes": 885794,
+          "sha256": "ded146dd49831ed98775c7f3be801e981312d78bb09e0d1d003c6cbd64e72427"
+        },
+        {
+          "path": "properties.bin",
+          "mediaType": "application/octet-stream",
+          "bytes": 1594361,
+          "sha256": "b7c82acc51d6dea33cb9b5b4be2fb621b4221fb97570ea3ddf9330aa8d30d389"
+        },
+        {
+          "path": "hierarchy.json",
+          "mediaType": "application/json",
+          "bytes": 2272,
+          "sha256": "4d6298695aa408a6043593394c8edff47c7ed53bd3ead215b492c2fd56c0564c"
+        },
+        {
+          "path": "hierarchy.bin",
+          "mediaType": "application/octet-stream",
+          "bytes": 2053808,
+          "sha256": "13888402889867921436432150e2ec47275c52b52fc2650f140e407ed09eb6da"
+        }
+      ]
+    }
+  },
+  "comparisons": [
+    {
+      "scenario": "store-cold-original",
+      "oracle": "clean-original",
+      "failures": []
+    },
+    {
+      "scenario": "store-warm-original",
+      "oracle": "clean-original",
+      "failures": []
+    },
+    {
+      "scenario": "store-warm-changed",
+      "oracle": "clean-changed",
+      "failures": []
+    },
+    {
+      "scenario": "store-corrupt-entry-changed",
+      "oracle": "clean-changed",
+      "failures": []
+    },
+    {
+      "scenario": "clean-changed#1",
+      "oracle": "clean-changed",
+      "failures": []
+    },
+    {
+      "scenario": "store-warm-changed#1",
+      "oracle": "clean-changed",
+      "failures": []
+    },
+    {
+      "scenario": "clean-changed#2",
+      "oracle": "clean-changed",
+      "failures": []
+    },
+    {
+      "scenario": "store-warm-changed#2",
+      "oracle": "clean-changed",
+      "failures": []
+    },
+    {
+      "scenario": "clean-changed#3",
+      "oracle": "clean-changed",
+      "failures": []
+    },
+    {
+      "scenario": "store-warm-changed#3",
+      "oracle": "clean-changed",
+      "failures": []
+    },
+    {
+      "scenario": "clean-changed#4",
+      "oracle": "clean-changed",
+      "failures": []
+    },
+    {
+      "scenario": "store-warm-changed#4",
+      "oracle": "clean-changed",
+      "failures": []
+    },
+    {
+      "scenario": "clean-changed#5",
+      "oracle": "clean-changed",
+      "failures": []
+    },
+    {
+      "scenario": "store-warm-changed#5",
+      "oracle": "clean-changed",
+      "failures": []
+    },
+    {
+      "scenario": "store-warm-relabelled",
+      "oracle": "clean-relabelled",
+      "failures": []
+    },
+    {
+      "scenario": "store-warm-deleted",
+      "oracle": "clean-deleted",
+      "failures": []
+    }
+  ],
+  "storeFootprint": {
+    "afterOriginal": {
+      "entries": 3383,
+      "bytes": 45901669
+    },
+    "afterChanged": {
+      "entries": 4102,
+      "bytes": 51776549
+    },
+    "corruptedEntry": {
+      "entry": "003f8f674fb6d2631a517245e598a7a8f02092fadda671932bb7bfb60ea6e49e",
+      "flippedByte": 0,
+      "restoredAfterwards": true
+    }
+  },
+  "extraction": {
+    "samples": 5,
+    "adapterMilliseconds": {
+      "values": [
+        12919.4,
+        12568,
+        12346.2,
+        12063.6,
+        12488.6
+      ],
+      "median": 12488.6,
+      "p95": 12919.4,
+      "minimum": 12063.6,
+      "maximum": 12919.4
+    },
+    "peakWorkingSetBytes": {
+      "values": [
+        551837696,
+        546258944,
+        547192832,
+        547282944,
+        546066432
+      ],
+      "median": 547192832,
+      "p95": 551837696,
+      "minimum": 546066432,
+      "maximum": 551837696
+    },
+    "runs": [
+      {
+        "index": 1,
+        "adapterMilliseconds": 12919.4,
+        "peakWorkingSetBytes": 551837696,
+        "documentArtifactCache": {
+          "hits": [
+            "heating",
+            "plumbing",
+            "ventilation"
+          ],
+          "misses": [
+            "architecture"
+          ],
+          "schemaVersion": "naru.ifc-document-artifact.1",
+          "status": "enabled"
+        }
+      },
+      {
+        "index": 2,
+        "adapterMilliseconds": 12568,
+        "peakWorkingSetBytes": 546258944,
+        "documentArtifactCache": {
+          "hits": [
+            "heating",
+            "plumbing",
+            "ventilation"
+          ],
+          "misses": [
+            "architecture"
+          ],
+          "schemaVersion": "naru.ifc-document-artifact.1",
+          "status": "enabled"
+        }
+      },
+      {
+        "index": 3,
+        "adapterMilliseconds": 12346.2,
+        "peakWorkingSetBytes": 547192832,
+        "documentArtifactCache": {
+          "hits": [
+            "heating",
+            "plumbing",
+            "ventilation"
+          ],
+          "misses": [
+            "architecture"
+          ],
+          "schemaVersion": "naru.ifc-document-artifact.1",
+          "status": "enabled"
+        }
+      },
+      {
+        "index": 4,
+        "adapterMilliseconds": 12063.6,
+        "peakWorkingSetBytes": 547282944,
+        "documentArtifactCache": {
+          "hits": [
+            "heating",
+            "plumbing",
+            "ventilation"
+          ],
+          "misses": [
+            "architecture"
+          ],
+          "schemaVersion": "naru.ifc-document-artifact.1",
+          "status": "enabled"
+        }
+      },
+      {
+        "index": 5,
+        "adapterMilliseconds": 12488.6,
+        "peakWorkingSetBytes": 546066432,
+        "documentArtifactCache": {
+          "hits": [
+            "heating",
+            "plumbing",
+            "ventilation"
+          ],
+          "misses": [
+            "architecture"
+          ],
+          "schemaVersion": "naru.ifc-document-artifact.1",
+          "status": "enabled"
+        }
+      }
+    ]
+  },
+  "cleanRebuild": {
+    "samples": 5,
+    "compileMilliseconds": {
+      "values": [
+        17561.4,
+        15975.3,
+        15411.1,
+        15532.5,
+        15673.5
+      ],
+      "median": 15673.5,
+      "p95": 17561.4,
+      "minimum": 15411.1,
+      "maximum": 17561.4
+    },
+    "processMilliseconds": {
+      "values": [
+        17650.5,
+        16060.9,
+        15501,
+        15619,
+        15763.4
+      ],
+      "median": 15763.4,
+      "p95": 17650.5,
+      "minimum": 15501,
+      "maximum": 17650.5
+    },
+    "packagingMilliseconds": {
+      "values": [
+        5072.8,
+        3486.7,
+        2922.5,
+        3043.9,
+        3184.9
+      ],
+      "median": 3184.9,
+      "p95": 5072.8,
+      "minimum": 2922.5,
+      "maximum": 5072.8
+    },
+    "peakProcessTreeWorkingSetBytes": {
+      "values": [
+        560238592,
+        559427584,
+        558891008,
+        558686208,
+        565403648
+      ],
+      "median": 559427584,
+      "p95": 565403648,
+      "minimum": 558686208,
+      "maximum": 565403648
+    },
+    "summedPeakWorkingSetUpperBoundBytes": {
+      "values": [
+        656203776,
+        661102592,
+        660692992,
+        662167552,
+        655904768
+      ],
+      "median": 660692992,
+      "p95": 662167552,
+      "minimum": 655904768,
+      "maximum": 662167552
+    },
+    "runs": [
+      {
+        "index": 1,
+        "compileMilliseconds": 17561.4,
+        "processMilliseconds": 17650.5,
+        "peakWorkingSetBytes": 560238592,
+        "peakPrivateBytes": 1061842944,
+        "osPeakWorkingSetBytes": 656203776,
+        "memorySamples": 30,
+        "maxProcessCount": 4,
+        "packageDigest": "c4b151e5f5d762e4f431c5f647aaec8a53a43d7bbf9737917e4874a1f022b3bb",
+        "documentArtifactCache": {
+          "hits": [
+            "heating",
+            "plumbing",
+            "ventilation"
+          ],
+          "misses": [
+            "architecture"
+          ],
+          "schemaVersion": "naru.ifc-document-artifact.1",
+          "status": "enabled"
+        },
+        "payloadCache": null,
+        "warnings": []
+      },
+      {
+        "index": 2,
+        "compileMilliseconds": 15975.3,
+        "processMilliseconds": 16060.9,
+        "peakWorkingSetBytes": 559427584,
+        "peakPrivateBytes": 1060605952,
+        "osPeakWorkingSetBytes": 661102592,
+        "memorySamples": 27,
+        "maxProcessCount": 4,
+        "packageDigest": "c4b151e5f5d762e4f431c5f647aaec8a53a43d7bbf9737917e4874a1f022b3bb",
+        "documentArtifactCache": {
+          "hits": [
+            "heating",
+            "plumbing",
+            "ventilation"
+          ],
+          "misses": [
+            "architecture"
+          ],
+          "schemaVersion": "naru.ifc-document-artifact.1",
+          "status": "enabled"
+        },
+        "payloadCache": null,
+        "warnings": []
+      },
+      {
+        "index": 3,
+        "compileMilliseconds": 15411.1,
+        "processMilliseconds": 15501,
+        "peakWorkingSetBytes": 558891008,
+        "peakPrivateBytes": 1059278848,
+        "osPeakWorkingSetBytes": 660692992,
+        "memorySamples": 26,
+        "maxProcessCount": 4,
+        "packageDigest": "c4b151e5f5d762e4f431c5f647aaec8a53a43d7bbf9737917e4874a1f022b3bb",
+        "documentArtifactCache": {
+          "hits": [
+            "heating",
+            "plumbing",
+            "ventilation"
+          ],
+          "misses": [
+            "architecture"
+          ],
+          "schemaVersion": "naru.ifc-document-artifact.1",
+          "status": "enabled"
+        },
+        "payloadCache": null,
+        "warnings": []
+      },
+      {
+        "index": 4,
+        "compileMilliseconds": 15532.5,
+        "processMilliseconds": 15619,
+        "peakWorkingSetBytes": 558686208,
+        "peakPrivateBytes": 1059696640,
+        "osPeakWorkingSetBytes": 662167552,
+        "memorySamples": 26,
+        "maxProcessCount": 4,
+        "packageDigest": "c4b151e5f5d762e4f431c5f647aaec8a53a43d7bbf9737917e4874a1f022b3bb",
+        "documentArtifactCache": {
+          "hits": [
+            "heating",
+            "plumbing",
+            "ventilation"
+          ],
+          "misses": [
+            "architecture"
+          ],
+          "schemaVersion": "naru.ifc-document-artifact.1",
+          "status": "enabled"
+        },
+        "payloadCache": null,
+        "warnings": []
+      },
+      {
+        "index": 5,
+        "compileMilliseconds": 15673.5,
+        "processMilliseconds": 15763.4,
+        "peakWorkingSetBytes": 565403648,
+        "peakPrivateBytes": 1067438080,
+        "osPeakWorkingSetBytes": 655904768,
+        "memorySamples": 26,
+        "maxProcessCount": 4,
+        "packageDigest": "c4b151e5f5d762e4f431c5f647aaec8a53a43d7bbf9737917e4874a1f022b3bb",
+        "documentArtifactCache": {
+          "hits": [
+            "heating",
+            "plumbing",
+            "ventilation"
+          ],
+          "misses": [
+            "architecture"
+          ],
+          "schemaVersion": "naru.ifc-document-artifact.1",
+          "status": "enabled"
+        },
+        "payloadCache": null,
+        "warnings": []
+      }
+    ]
+  },
+  "warmRebuild": {
+    "samples": 5,
+    "compileMilliseconds": {
+      "values": [
+        22101.2,
+        20112.9,
+        20073.6,
+        19671.7,
+        19999.7
+      ],
+      "median": 20073.6,
+      "p95": 22101.2,
+      "minimum": 19671.7,
+      "maximum": 22101.2
+    },
+    "processMilliseconds": {
+      "values": [
+        22191.6,
+        20205.4,
+        20165,
+        19762.8,
+        20090.9
+      ],
+      "median": 20165,
+      "p95": 22191.6,
+      "minimum": 19762.8,
+      "maximum": 22191.6
+    },
+    "packagingMilliseconds": {
+      "values": [
+        9612.6,
+        7624.3,
+        7585,
+        7183.1,
+        7511.1
+      ],
+      "median": 7585,
+      "p95": 9612.6,
+      "minimum": 7183.1,
+      "maximum": 9612.6
+    },
+    "peakProcessTreeWorkingSetBytes": {
+      "values": [
+        569913344,
+        578138112,
+        559382528,
+        561070080,
+        560066560
+      ],
+      "median": 561070080,
+      "p95": 578138112,
+      "minimum": 559382528,
+      "maximum": 578138112
+    },
+    "summedPeakWorkingSetUpperBoundBytes": {
+      "values": [
+        662245376,
+        661377024,
+        657428480,
+        660455424,
+        657969152
+      ],
+      "median": 660455424,
+      "p95": 662245376,
+      "minimum": 657428480,
+      "maximum": 662245376
+    },
+    "runs": [
+      {
+        "index": 1,
+        "compileMilliseconds": 22101.2,
+        "processMilliseconds": 22191.6,
+        "peakWorkingSetBytes": 569913344,
+        "peakPrivateBytes": 1072152576,
+        "osPeakWorkingSetBytes": 662245376,
+        "memorySamples": 37,
+        "maxProcessCount": 4,
+        "packageDigest": "c4b151e5f5d762e4f431c5f647aaec8a53a43d7bbf9737917e4874a1f022b3bb",
+        "documentArtifactCache": {
+          "hits": [
+            "heating",
+            "plumbing",
+            "ventilation"
+          ],
+          "misses": [
+            "architecture"
+          ],
+          "schemaVersion": "naru.ifc-document-artifact.1",
+          "status": "enabled"
+        },
+        "payloadCache": {
+          "store": "naru.compiled-payload-entry.1",
+          "prototypes": 3383,
+          "hits": 2664,
+          "misses": 719,
+          "published": 719,
+          "outcomes": {
+            "hit": 2664,
+            "absent": 719,
+            "corrupt-entry": 0,
+            "restore-failed": 0
+          },
+          "publishFailures": 0,
+          "degraded": []
+        },
+        "warnings": []
+      },
+      {
+        "index": 2,
+        "compileMilliseconds": 20112.9,
+        "processMilliseconds": 20205.4,
+        "peakWorkingSetBytes": 578138112,
+        "peakPrivateBytes": 1079234560,
+        "osPeakWorkingSetBytes": 661377024,
+        "memorySamples": 34,
+        "maxProcessCount": 4,
+        "packageDigest": "c4b151e5f5d762e4f431c5f647aaec8a53a43d7bbf9737917e4874a1f022b3bb",
+        "documentArtifactCache": {
+          "hits": [
+            "heating",
+            "plumbing",
+            "ventilation"
+          ],
+          "misses": [
+            "architecture"
+          ],
+          "schemaVersion": "naru.ifc-document-artifact.1",
+          "status": "enabled"
+        },
+        "payloadCache": {
+          "store": "naru.compiled-payload-entry.1",
+          "prototypes": 3383,
+          "hits": 2664,
+          "misses": 719,
+          "published": 719,
+          "outcomes": {
+            "hit": 2664,
+            "absent": 719,
+            "corrupt-entry": 0,
+            "restore-failed": 0
+          },
+          "publishFailures": 0,
+          "degraded": []
+        },
+        "warnings": []
+      },
+      {
+        "index": 3,
+        "compileMilliseconds": 20073.6,
+        "processMilliseconds": 20165,
+        "peakWorkingSetBytes": 559382528,
+        "peakPrivateBytes": 1060036608,
+        "osPeakWorkingSetBytes": 657428480,
+        "memorySamples": 34,
+        "maxProcessCount": 4,
+        "packageDigest": "c4b151e5f5d762e4f431c5f647aaec8a53a43d7bbf9737917e4874a1f022b3bb",
+        "documentArtifactCache": {
+          "hits": [
+            "heating",
+            "plumbing",
+            "ventilation"
+          ],
+          "misses": [
+            "architecture"
+          ],
+          "schemaVersion": "naru.ifc-document-artifact.1",
+          "status": "enabled"
+        },
+        "payloadCache": {
+          "store": "naru.compiled-payload-entry.1",
+          "prototypes": 3383,
+          "hits": 2664,
+          "misses": 719,
+          "published": 719,
+          "outcomes": {
+            "hit": 2664,
+            "absent": 719,
+            "corrupt-entry": 0,
+            "restore-failed": 0
+          },
+          "publishFailures": 0,
+          "degraded": []
+        },
+        "warnings": []
+      },
+      {
+        "index": 4,
+        "compileMilliseconds": 19671.7,
+        "processMilliseconds": 19762.8,
+        "peakWorkingSetBytes": 561070080,
+        "peakPrivateBytes": 1061781504,
+        "osPeakWorkingSetBytes": 660455424,
+        "memorySamples": 34,
+        "maxProcessCount": 4,
+        "packageDigest": "c4b151e5f5d762e4f431c5f647aaec8a53a43d7bbf9737917e4874a1f022b3bb",
+        "documentArtifactCache": {
+          "hits": [
+            "heating",
+            "plumbing",
+            "ventilation"
+          ],
+          "misses": [
+            "architecture"
+          ],
+          "schemaVersion": "naru.ifc-document-artifact.1",
+          "status": "enabled"
+        },
+        "payloadCache": {
+          "store": "naru.compiled-payload-entry.1",
+          "prototypes": 3383,
+          "hits": 2664,
+          "misses": 719,
+          "published": 719,
+          "outcomes": {
+            "hit": 2664,
+            "absent": 719,
+            "corrupt-entry": 0,
+            "restore-failed": 0
+          },
+          "publishFailures": 0,
+          "degraded": []
+        },
+        "warnings": []
+      },
+      {
+        "index": 5,
+        "compileMilliseconds": 19999.7,
+        "processMilliseconds": 20090.9,
+        "peakWorkingSetBytes": 560066560,
+        "peakPrivateBytes": 1061326848,
+        "osPeakWorkingSetBytes": 657969152,
+        "memorySamples": 33,
+        "maxProcessCount": 4,
+        "packageDigest": "c4b151e5f5d762e4f431c5f647aaec8a53a43d7bbf9737917e4874a1f022b3bb",
+        "documentArtifactCache": {
+          "hits": [
+            "heating",
+            "plumbing",
+            "ventilation"
+          ],
+          "misses": [
+            "architecture"
+          ],
+          "schemaVersion": "naru.ifc-document-artifact.1",
+          "status": "enabled"
+        },
+        "payloadCache": {
+          "store": "naru.compiled-payload-entry.1",
+          "prototypes": 3383,
+          "hits": 2664,
+          "misses": 719,
+          "published": 719,
+          "outcomes": {
+            "hit": 2664,
+            "absent": 719,
+            "corrupt-entry": 0,
+            "restore-failed": 0
+          },
+          "publishFailures": 0,
+          "degraded": []
+        },
+        "warnings": []
+      }
+    ]
+  },
+  "gates": {
+    "cleanPackageResourceEquivalence": {
+      "comparisons": 16,
+      "identical": true,
+      "resources": [
+        "adapter-report.json",
+        "build-report.json",
+        "coarse.bin",
+        "hierarchy.bin",
+        "hierarchy.json",
+        "incremental-dependencies.json",
+        "properties.bin",
+        "properties.json",
+        "scene.bin",
+        "scene.gltf",
+        "spatial.bin"
+      ]
+    },
+    "semanticReportComparison": {
+      "exclusions": [
+        "adapter-report.json:documentArtifactCache",
+        "build-report.json:compiledPayloadCache"
+      ],
+      "met": true
+    },
+    "ownershipDecisions": {
+      "met": true,
+      "changedRebuild": {
+        "hits": 2664,
+        "misses": 719,
+        "published": 719,
+        "outcomes": {
+          "hit": 2664,
+          "absent": 719,
+          "corrupt-entry": 0,
+          "restore-failed": 0
+        }
+      },
+      "ownership": {
+        "prototypes": 3405,
+        "changedDocumentPrototypes": 726,
+        "changedDocumentPrototypesSharedWithOtherDocuments": 0,
+        "prototypeIdsOnlyInChangedIndex": 726,
+        "prototypeIdsOnlyInOriginalIndex": 726,
+        "reconciledDocumentPairs": 0,
+        "changedDocumentPrototypeIdsRetainedFromOriginal": 0,
+        "changedDocumentReuse": "none by construction: the IFC adapter derives every prototype id from the document token `<discipline>-<sourceDigest[:12]>`, and the payload content digest hashes the representation id because the accessor names it restores embed that id. Editing one entity therefore renames every prototype of that document, so the changed document's untouched geometry is rebuilt and republished while only the other documents' payloads are restored."
+      }
+    },
+    "measuredSavingExceedsCost": {
+      "method": "packagingMilliseconds = compileMilliseconds - median adapterMilliseconds of the extraction-only samples taken in the same cache state (the compiler reports no stage timing, so packaging is derived by difference). The store-warm sample pays its own restore and publish inside that time, so a lower median already nets the store's cost.",
+      "criteria": {
+        "packagingFaster": "median store-warm packagingMilliseconds < median clean packagingMilliseconds",
+        "peakMemoryNoHigher": "median store-warm peakProcessTreeWorkingSetBytes <= median clean peakProcessTreeWorkingSetBytes"
+      },
+      "extractionMedianMs": 12488.6,
+      "cleanPackagingMedianMs": 3184.9,
+      "warmPackagingMedianMs": 7585,
+      "savingMs": -4400.1,
+      "savingRatio": 0.42,
+      "cleanPeakWorkingSetMedianBytes": 559427584,
+      "warmPeakWorkingSetMedianBytes": 561070080,
+      "packagingFaster": false,
+      "peakMemoryNoHigher": false,
+      "met": false
+    },
+    "allMet": false
+  },
+  "discardedSamples": []
+}
