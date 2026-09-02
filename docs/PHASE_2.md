@@ -101,13 +101,14 @@ a small share of the browser's working set.
 | Workspace | **Pending** | Persist source references, views, selection sets, and source fingerprints; reopen unchanged state and report changed sources |
 | Framework-neutral embedding | **Pending** | Publish and test one application outside the reference Studio |
 | Installable alpha release | **Pending**; workspace packages remain private pre-release packages | Define the supported public surface, compatibility policy, release notes, and installation smoke test |
+| Contributor issue workflow | **Established**: the `Phase 2 — Large-scene alpha (0.2.x)` milestone, the `area:`/`priority:`/`status:` label taxonomy, the issue forms under [`.github/ISSUE_TEMPLATE`](../.github/ISSUE_TEMPLATE), and a reviewed `status:ready` queue exist; this tracker owns outcomes, issues own independently assignable work with acceptance criteria | Keep each open issue's status label and each epic checklist in step with merged work, so the queue never lists a blocker that has already landed |
 | Documentation link integrity | **Recorded**: `pnpm docs:links:check` resolves every repository-local Markdown link and heading anchor against Git's tracked paths, offline, and `pnpm check` runs it; [focused tests](../tools/markdown-links/test/markdown-links.test.ts) cover fences, percent encoding, duplicate headings, Unicode anchors, and repository escapes | Extend the same portable gate to any generated documentation the repository starts publishing |
 
 ## Dependency order
 
 | Outcome | Required predecessors | Why the order matters |
 |---|---|---|
-| Partial IFC package rebuild | Dependency index and per-document artifacts (**Implemented**) → compiled payload ownership (**Pending**) → conservative invalidation/reconstruction → clean-package equivalence | Logical provenance cannot prove that revision-local byte ranges are reusable |
+| Partial IFC package rebuild | Dependency index and per-document artifacts (**Implemented**) → content-addressed compiled payloads (**Implemented**, off by default) → conservative invalidation/reconstruction → clean-package equivalence | Logical provenance cannot prove that revision-local byte ranges are reusable |
 | Preview during cold import | Import lifecycle contract → cancellable background adapter → stable hierarchy/coarse publication point → Studio progress UI | Publishing partial output without lifecycle and cleanup rules can expose incomplete or stale cache entries |
 | Shape-preserving LOD | Error/identity contract → compiler representation → scheduler admission → visual and interaction evidence | An ordering heuristic is not an LOD representation and cannot establish fidelity |
 | Persistent browser cache | Package integrity verification and resource limits → quota/version policy → cache-aware scheduler | Persisting unbounded or integrity-unverified remote resources enlarges the trust boundary |
@@ -119,10 +120,7 @@ a small share of the browser's working set.
 
 ### Now — close correctness and make the next performance claim measurable
 
-1. Establish the Phase 2 milestone, labels, issue forms, and a small reviewed
-   ready queue. This tracker owns outcomes; issues own independently assignable
-   work with acceptance criteria.
-2. Record the acceptance evidence
+1. Record the acceptance evidence
    [ADR-0018](adr/0018-content-addressed-compiled-payloads.md) demands, so it
    and [ADR-0010](adr/0010-ifc-incremental-dependency-index.md) can leave
    Proposed. The store itself is complete and off by default:
