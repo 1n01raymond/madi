@@ -256,4 +256,8 @@ unit is not the partial-rebuild strategy. A successor ADR must pick a unit whose
 restore is cheaper than re-encoding -- laid-out byte ranges above the encoder,
 which this ADR excluded, or content-derived prototype ids -- and
 [ADR-0010](0010-ifc-incremental-dependency-index.md) stays Proposed until one
-does.
+does. That successor is
+[ADR-0019](0019-document-artifact-transport.md): its exploratory decomposition
+puts the encoder at 1-3 percent of a rebuild, so neither candidate named here
+can pass gate 4; the reuse unit moves to the verified per-document Scene IR
+artifact, and `--payload-cache` is removed.

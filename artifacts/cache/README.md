@@ -48,7 +48,8 @@ make a one-document rebuild cheaper — is answered in
 store-enabled rebuild reproduced the clean package byte for byte, but restoring
 verified payloads took 2.2–2.4× the packaging time of re-encoding them, so
 ADR-0018 is rejected by its own gate and the flag stays an off-by-default
-experiment.
+experiment until [ADR-0019](../../docs/adr/0019-document-artifact-transport.md),
+which decides its removal and names the successor reuse unit, lands.
 
 Adapter identities are embedded in the record (`naru.occt-adapter-identity.1`:
 cadquery 2.8.0 / OCP 7.9.3.1; `naru.ifc-adapter-identity.1`: IfcOpenShell

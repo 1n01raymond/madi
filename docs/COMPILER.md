@@ -737,7 +737,10 @@ index alone because packing and column offsets may change. Complete-package
 byte-equivalence under a changed discipline is recorded
 ([record](../artifacts/cache/payload-reuse/README.md)); a compiled reuse unit
 that is cheaper to restore than to rebuild remains before per-discipline
-compilation is a complete product claim.
+compilation is a complete product claim;
+[ADR-0019](adr/0019-document-artifact-transport.md) names that unit -- the
+verified per-document Scene IR artifact, restored across the adapter-compiler
+transport -- and the gates it must pass.
 
 [ADR-0018](adr/0018-content-addressed-compiled-payloads.md) is the reviewed
 design for that payload tier, implemented in 21.6 below behind the
@@ -760,7 +763,9 @@ ask for the store behaves exactly as before. Its acceptance record
 proved the equivalence half -- every clean-package byte reproduced on Digital
 Hub and sixty5 -- and failed the saving half: restoring verified payloads took
 2.2-2.4x the packaging time of re-encoding them, so the ADR is Rejected and the
-flag remains an off-by-default experiment.
+flag remains an off-by-default experiment until
+[ADR-0019](adr/0019-document-artifact-transport.md), which decides its removal,
+lands that slice. The encoder/placement split below stays.
 
 Encoding and placement are now separate functions.
 `buildCompiledPayload(representation, scaleToMeters)` produces the payload --
