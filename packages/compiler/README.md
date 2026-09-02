@@ -118,7 +118,12 @@ authorization remains a separate gate.
 
 `src/compiled-payload-store.ts` and `src/compiled-payload-cache.ts` implement
 [ADR-0018](../../docs/adr/0018-content-addressed-compiled-payloads.md), reached
-through `--payload-cache <directory>` on both commands and off by default.
+through `--payload-cache <directory>` on both commands and off by default. The
+ADR is rejected by its own gate -- the
+[acceptance record](../../artifacts/cache/payload-reuse/README.md) reproduced
+every clean-package byte on a changed-discipline rebuild of Digital Hub and
+sixty5 but restored payloads 2.2-2.4x slower than re-encoding them -- so the
+flag is a measured experiment, not a recommendation.
 Encoding and placement are separate:
 `buildCompiledPayload` produces one prototype's accessor bytes and
 placement-free metadata, `appendCompiledPayload` places them into `scene.bin`,

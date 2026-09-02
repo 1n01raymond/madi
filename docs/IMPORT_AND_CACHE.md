@@ -147,7 +147,8 @@ payloads are still laid out as a whole; the payload tier below reuses encoded
 prototype bytes, not byte ranges, so complete-package equivalence remains before
 any old range is reused.
 
-The payload contract is **implemented, off by default**.
+The payload contract is **implemented, off by default, and rejected as the
+reuse unit** by its own measurement (see the end of this section).
 [ADR-0018](adr/0018-content-addressed-compiled-payloads.md) content-addresses
 one unit only, the prototype payload -- the accessor bytes and placement-free
 accessor metadata `appendGeometry` produces -- and rebuilds every other package
@@ -158,9 +159,16 @@ federation-global, so `scene.bin` is re-laid out from restored payload bytes in
 the current prototype order rather than copied. Reuse is decided by content,
 not by the invalidation plan: the dependency index chooses which documents to
 re-extract, and a wrong plan can only cost extra extraction work, never yield a
-wrong payload. That ADR also fixes the acceptance evidence, including a
-measured packaging saving that must exceed the store's own verification cost or
-the decision is rejected.
+wrong payload. That ADR also fixed the acceptance evidence, including a
+measured packaging saving that had to exceed the store's own verification cost
+or the decision is rejected -- and it did not
+([record](../artifacts/cache/payload-reuse/README.md)): changed-discipline
+rebuilds of Digital Hub and sixty5 reproduced every clean package byte, with
+2,664 of 3,383 and 40,066 of 42,435 payloads restored, but packaging took
+2.2-2.4x as long as re-encoding from the parsed scene. Once the adapter's
+document-artifact cache has removed tessellation from the rebuild path,
+encoding a payload is a typed-array copy while restoring one reads and hashes
+every byte. ADR-0018 is Rejected; the flag stays as the measured experiment.
 
 What the compiler carries today is the encoder split plus the store itself.
 `buildCompiledPayload` is now the only geometry encoder, and `appendGeometry` is
@@ -247,8 +255,9 @@ profile under [ADR-0004](adr/0004-format-strategy.md).
 3. **Incremental IFC compilation:** discipline dependency index plus changed,
    deleted, renamed, and reconciliation tests implemented; verified independent
    adapter document reuse and clean adapter-merge equivalence implemented;
-   content-addressed compiled payload reuse and complete-package equivalence
-   remain.
+   complete-package equivalence under a changed discipline is recorded for the
+   content-addressed payload tier, which was then rejected on cost; a reuse
+   unit that is cheaper to restore than to rebuild remains.
 4. **Standards export:** retain glTF; evaluate GLB, GPU instancing, and mesh
    compression without making the cache an interchange claim.
 5. **Shared cache:** authenticated lookup/publication, tenant isolation,

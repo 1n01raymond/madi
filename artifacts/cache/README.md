@@ -42,6 +42,14 @@ the seven-document, 839.9 MB sixty5 federation — cold median 381.4 s, warm
 median 1.36 s, corrupt-entry median 89.0 s — with cache footprint,
 process-tree peak memory, and the 1–5 s unchanged-reopen verdict.
 
+The changed-discipline question — does the content-addressed payload store
+make a one-document rebuild cheaper — is answered in
+[`payload-reuse/`](payload-reuse/README.md): on Digital Hub and sixty5 every
+store-enabled rebuild reproduced the clean package byte for byte, but restoring
+verified payloads took 2.2–2.4× the packaging time of re-encoding them, so
+ADR-0018 is rejected by its own gate and the flag stays an off-by-default
+experiment.
+
 Adapter identities are embedded in the record (`naru.occt-adapter-identity.1`:
 cadquery 2.8.0 / OCP 7.9.3.1; `naru.ifc-adapter-identity.1`: IfcOpenShell
 0.8.5), and the compiler contributes its content-hashed identity to each cache
