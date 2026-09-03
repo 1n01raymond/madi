@@ -384,6 +384,15 @@ Partial scene failure should preserve usable content and surface affected
 objects/chunks. Retries use backoff and are cancellable. Device loss rebuilds
 pipelines and resident resources without requiring a full source recompile.
 
+Compiler-side cancellation is implemented rather than proposed. An aborted
+import terminates the native adapter and every process it started, removes the
+temporary Scene IR directory it was extracting into, and never removes a
+previously verified cache entry. Package publication is the one section that
+runs to completion regardless, because the package writer is not atomic and a
+cancel observed midway would leave a directory that looks like a package and is
+not one; the cancellation event says so instead of hiding it
+([ADR-0020](adr/0020-cancellable-import-jobs.md)).
+
 ## 13. Security architecture
 
 ```mermaid
@@ -424,6 +433,15 @@ The runtime publishes structured, opt-in local statistics:
 - frame CPU encode and GPU timing where available;
 - pick and query latency; and
 - device loss/recovery events.
+
+The compiler publishes a separate, versioned stream for one import:
+`naru.import-job-event.1`. It reports lifecycle states in a fixed order with a
+gapless sequence, monotonic elapsed milliseconds, and progress counted in
+lifecycle steps rather than estimated from source size. Every field is scrubbed
+of filesystem paths, and sources appear as digest and byte length rather than
+name, so an event can cross a trust boundary the source document never should.
+`naru compile` and `naru compile-ifc` emit it as newline-delimited JSON under
+`--json-events` ([ADR-0020](adr/0020-cancellable-import-jobs.md)).
 
 These stats power the built-in inspector and reproducible benchmarks. They are
 not sent anywhere by the core runtime.

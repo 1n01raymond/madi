@@ -33,6 +33,7 @@ reverse. They explain context and trade-offs rather than only the final choice.
 | [0017](0017-relocated-hierarchy-sidecar.md) | Move the assembly tree into a package sidecar | Accepted |
 | [0018](0018-content-addressed-compiled-payloads.md) | Content-address compiled prototype payloads; rebuild the federation | Rejected |
 | [0019](0019-document-artifact-transport.md) | Reuse verified per-document Scene IR artifacts across the transport; retire the payload tier | Proposed |
+| [0020](0020-cancellable-import-jobs.md) | Report imports as a versioned lifecycle; cancellation stops the adapter tree | Proposed |
 
 ## Phase 0 review
 

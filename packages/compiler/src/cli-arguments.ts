@@ -36,6 +36,7 @@ General options:
   --spatial-index                Emit the optional occurrence demand BVH
   --spatial-leaf-capacity <n>    Maximum occurrences per BVH leaf (default: 64)
   --relocate-hierarchy-nodes     Move mesh-less nodes into a hierarchy sidecar
+  --json-events                  Write import lifecycle events to stdout as NDJSON
   --help                         Show this help`;
 
 export interface CompileArguments {
@@ -48,6 +49,7 @@ export interface CompileArguments {
   readonly spatialIndex: boolean;
   readonly spatialLeafCapacity?: number;
   readonly relocateHierarchyNodes: boolean;
+  readonly jsonEvents: boolean;
 }
 
 export interface IfcCompileArguments {
@@ -70,6 +72,7 @@ export interface IfcCompileArguments {
   readonly omitDefaultNodeTransforms: boolean;
   readonly relocateHierarchyNodes: boolean;
   readonly retainSceneIr: boolean;
+  readonly jsonEvents: boolean;
 }
 
 const sharedOptions = {
@@ -79,6 +82,7 @@ const sharedOptions = {
   "spatial-index": { type: "boolean" },
   "spatial-leaf-capacity": { type: "string" },
   "relocate-hierarchy-nodes": { type: "boolean" },
+  "json-events": { type: "boolean" },
 } as const;
 
 const stepOptions = {
@@ -221,6 +225,7 @@ export function parseCompileArguments(argumentList: readonly string[]): CompileA
     spatialIndex,
     ...(spatialLeafCapacity === undefined ? {} : { spatialLeafCapacity }),
     relocateHierarchyNodes: values["relocate-hierarchy-nodes"] ?? false,
+    jsonEvents: values["json-events"] ?? false,
   };
 }
 
@@ -292,5 +297,6 @@ export function parseIfcCompileArguments(
     omitDefaultNodeTransforms: values["omit-default-node-transforms"] ?? false,
     relocateHierarchyNodes: values["relocate-hierarchy-nodes"] ?? false,
     retainSceneIr: values["retain-scene-ir"] ?? false,
+    jsonEvents: values["json-events"] ?? false,
   };
 }

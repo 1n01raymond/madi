@@ -1,4 +1,3 @@
-import { spawn } from "node:child_process";
 import { availableParallelism, tmpdir } from "node:os";
 import { performance } from "node:perf_hooks";
 import { createHash } from "node:crypto";
@@ -6,6 +5,17 @@ import { copyFile, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { basename, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { runAdapterProcess } from "./adapter-process.js";
+import {
+  createImportJobReporter,
+  ImportJobCancelledError,
+  settleImportJobFailure,
+} from "./import-job.js";
+import type {
+  ImportJobCompletion,
+  ImportJobOptions,
+  ImportJobReporter,
+} from "./import-job.js";
 import { compileSceneToGltf } from "./gltf.js";
 import type { CompileStage } from "./gltf.js";
 import { hydrateIfcSceneSplit, ifcSceneSplitEncodingVersion } from "./ifc-scene.js";
@@ -78,6 +88,8 @@ export interface IfcFederationCompileOptions {
    */
   readonly stageTiming?: boolean;
   readonly environment?: NodeJS.ProcessEnv;
+  /** Lifecycle events and cancellation for this compile. */
+  readonly job?: ImportJobOptions;
 }
 
 export type IfcFederationStageName =
@@ -209,50 +221,21 @@ async function runAdapter(
   executable: string,
   arguments_: readonly string[],
   environment: NodeJS.ProcessEnv,
+  signal?: AbortSignal,
 ): Promise<AdapterRun> {
-  return await new Promise<AdapterRun>((resolvePromise, reject) => {
-    const spawnedAtMs = Date.now();
-    const child = spawn(executable, arguments_, {
-      env: environment,
-      shell: false,
-      windowsHide: true,
-      stdio: ["ignore", "pipe", "pipe"],
-    });
-    let stdout = "";
-    let stderr = "";
-    child.stdout.setEncoding("utf8");
-    child.stderr.setEncoding("utf8");
-    child.stdout.on("data", (chunk: string) => {
-      stdout = `${stdout}${chunk}`.slice(-16_384);
-    });
-    child.stderr.on("data", (chunk: string) => {
-      stderr = `${stderr}${chunk}`.slice(-16_384);
-    });
-    child.once("error", (error) => {
-      reject(
-        new TypeError(
-          `Could not start the IFC adapter with ${executable}: ${error.message}`,
-          { cause: error },
-        ),
-      );
-    });
-    child.once("close", (code) => {
-      if (code === 0) {
-        resolvePromise({ stdout, spawnedAtMs, closedAtMs: Date.now() });
-        return;
-      }
-      const details = stderr.trim() || stdout.trim() || `exit code ${String(code)}`;
-      if (/ModuleNotFoundError.*ifcopenshell/su.test(details)) {
-        reject(
-          new TypeError(
-            "The selected Python environment does not provide IfcOpenShell. " +
-              "Install native/adapter-ifc/tools/requirements-evidence.txt in that environment.",
-          ),
-        );
-        return;
-      }
-      reject(new TypeError(`IFC federation adapter failed: ${details}.`));
-    });
+  return await runAdapterProcess({
+    executable,
+    arguments: arguments_,
+    environment,
+    label: "IFC federation adapter",
+    startLabel: "IFC adapter",
+    missingModule: {
+      pattern: /ModuleNotFoundError.*ifcopenshell/su,
+      message:
+        "The selected Python environment does not provide IfcOpenShell. " +
+        "Install native/adapter-ifc/tools/requirements-evidence.txt in that environment.",
+    },
+    ...(signal === undefined ? {} : { signal }),
   });
 }
 
@@ -267,11 +250,13 @@ async function inspectAdapterToolchain(
   executable: string,
   adapterScriptPath: string,
   environment: NodeJS.ProcessEnv,
+  signal?: AbortSignal,
 ): Promise<IfcAdapterIdentity> {
   const { stdout: serialized } = await runAdapter(
     executable,
     [adapterScriptPath, "--identity"],
     environment,
+    signal,
   );
   const value = parseJson(serialized.trim(), "IFC adapter identity");
   if (typeof value !== "object" || value === null) {
@@ -597,12 +582,131 @@ async function readAdapterTiming(path: string, run: AdapterRun): Promise<IfcAdap
   };
 }
 
+interface RestoredFederationPackage {
+  readonly report: CompilerBuildReport;
+  readonly adapterReport: unknown;
+  readonly dependencyIndex: IfcIncrementalDependencyIndex;
+}
+
+/**
+ * Restores a cache entry and cross-checks it, or returns undefined so the
+ * caller rebuilds. Verification lives here, ahead of any lifecycle event, so a
+ * rejected entry costs the host a warning rather than a state it cannot leave.
+ */
+async function restoreVerifiedFederationPackage(request: {
+  readonly cacheDirectory: string;
+  readonly key: string;
+  readonly outputDirectory: string;
+  readonly ledger: StageLedger | undefined;
+}): Promise<RestoredFederationPackage | undefined> {
+  try {
+    const restored = await stage(request.ledger, "cacheLookup", () =>
+      restoreCompiledCacheEntry({
+        cacheDirectory: request.cacheDirectory,
+        key: request.key,
+        outputDirectory: request.outputDirectory,
+      }),
+    );
+    if (!restored) return undefined;
+    const [serializedBuildReport, serializedAdapterReport, serializedDependencyIndex] =
+      await Promise.all([
+        readFile(resolve(request.outputDirectory, "build-report.json"), "utf8"),
+        readFile(resolve(request.outputDirectory, "adapter-report.json"), "utf8"),
+        readFile(
+          resolve(request.outputDirectory, incrementalDependencyIndexFilename),
+          "utf8",
+        ),
+      ]);
+    const report = requireCachedBuildReport(
+      parseJson(serializedBuildReport, "Cached IFC build report"),
+      restored.packageDigest,
+    );
+    return {
+      report,
+      adapterReport: parseJson(serializedAdapterReport, "Cached IFC adapter report"),
+      dependencyIndex: requireCachedDependencyIndex(
+        parseJson(serializedDependencyIndex, "Cached IFC incremental dependency index"),
+        report.output.packageDigest,
+      ),
+    };
+  } catch (error) {
+    console.warn(
+      `[naru] cache restore failed (${cacheFailureDetails(error)}); recompiling.`,
+    );
+    return undefined;
+  }
+}
+
+function completionOf(report: CompilerBuildReport, cache: string): ImportJobCompletion {
+  return {
+    packageDigest: report.output.packageDigest,
+    cache,
+    prototypeCount: report.counts.prototypeCount,
+    renderableOccurrenceCount: report.counts.renderableOccurrenceCount,
+    triangleCount: report.counts.triangleCount,
+  };
+}
+
+/**
+ * Compiles an IFC federation into a package directory.
+ *
+ * The lifecycle a caller can observe is described by `options.job`. Nothing
+ * about the compiled result depends on it: a job with no listener and no signal
+ * behaves exactly as this function did before it had one.
+ */
 export async function compileIfcFederation(
   options: IfcFederationCompileOptions,
 ): Promise<IfcFederationCompilationResult> {
+  const reporter = createImportJobReporter(
+    {
+      kind: "ifc-federation",
+      sources: options.documents.map(({ sourcePath }) => sourcePath),
+      outputDirectory: options.outputDirectory,
+      options: {
+        threads: options.threads,
+        targetChunkByteBudget: options.targetChunkByteBudget,
+        retainSceneIr: options.retainSceneIr,
+        spatialIndex: options.spatialIndex,
+        spatialLeafCapacity: options.spatialLeafCapacity,
+        spatialPayloadOrder: options.spatialPayloadOrder,
+        compactJson: options.compactJson,
+        omitResourceNames: options.omitResourceNames,
+        elideDerivedIdentifiers: options.elideDerivedIdentifiers,
+        omitDefaultNodeTransforms: options.omitDefaultNodeTransforms,
+        relocateHierarchyNodes: options.relocateHierarchyNodes,
+      },
+    },
+    options.job,
+    options.cacheDirectory === undefined ? [] : [options.cacheDirectory],
+  );
+  try {
+    return await runIfcFederationCompile(options, reporter);
+  } catch (error) {
+    throw await settleImportJobFailure(reporter, error, [
+      ...options.documents.map(({ sourcePath }) => sourcePath),
+      options.outputDirectory,
+      ...(options.cacheDirectory === undefined ? [] : [options.cacheDirectory]),
+    ]);
+  }
+}
+
+async function runIfcFederationCompile(
+  options: IfcFederationCompileOptions,
+  reporter: ImportJobReporter,
+): Promise<IfcFederationCompilationResult> {
+  const signal = options.job?.signal;
   const ledger = options.stageTiming === true ? new StageLedger() : undefined;
+  reporter.enter("queued");
+  reporter.enter("inspecting");
   const sources = await stage(ledger, "inspectSources", () =>
     inspectDocuments(options.documents),
+  );
+  reporter.describeDocuments(
+    sources.map((source) => ({
+      discipline: source.discipline,
+      sha256: source.sha256,
+      byteLength: source.byteLength,
+    })),
   );
   const threads = positiveThreads(options.threads);
   const outputDirectory = resolve(options.outputDirectory);
@@ -620,7 +724,12 @@ export async function compileIfcFederation(
   let cacheKey: string | undefined;
   const { adapterToolchain, compiler } = await stage(ledger, "toolchainIdentity", async () => {
     const toolchain = options.cacheDirectory
-      ? await inspectAdapterToolchain(pythonExecutable, adapterScriptPath, environment)
+      ? await inspectAdapterToolchain(
+          pythonExecutable,
+          adapterScriptPath,
+          environment,
+          signal,
+        )
       : undefined;
     return {
       adapterToolchain: toolchain,
@@ -638,51 +747,37 @@ export async function compileIfcFederation(
       options,
     );
     cacheKey = createCompiledCacheKey(cacheKeyInput);
-    try {
-      const restored = await stage(ledger, "cacheLookup", () =>
-        restoreCompiledCacheEntry({
-          cacheDirectory: options.cacheDirectory as string,
-          key: cacheKey as string,
-          outputDirectory,
-        }),
-      );
-      if (restored) {
-        const [
-          serializedBuildReport,
-          serializedAdapterReport,
-          serializedDependencyIndex,
-        ] = await Promise.all([
-          readFile(resolve(outputDirectory, "build-report.json"), "utf8"),
-          readFile(resolve(outputDirectory, "adapter-report.json"), "utf8"),
-          readFile(resolve(outputDirectory, incrementalDependencyIndexFilename), "utf8"),
-        ]);
-        const report = requireCachedBuildReport(
-          parseJson(serializedBuildReport, "Cached IFC build report"),
-          restored.packageDigest,
-        );
-        return {
-          sources,
-          outputDirectory,
-          report,
-          dependencyIndex: requireCachedDependencyIndex(
-            parseJson(
-              serializedDependencyIndex,
-              "Cached IFC incremental dependency index",
-            ),
-            report.output.packageDigest,
-          ),
-          adapterReport: parseJson(serializedAdapterReport, "Cached IFC adapter report"),
-          cache: { status: "hit", key: cacheKey },
-          ...(ledger ? { stages: ledger.finish() } : {}),
-        };
+    const restored = await restoreVerifiedFederationPackage({
+      cacheDirectory: options.cacheDirectory,
+      key: cacheKey,
+      outputDirectory,
+      ledger,
+    });
+    if (restored) {
+      reporter.notePublishedResult();
+      // The restore plan announces `verifying` once the entry has been verified
+      // rather than before, because a verification that fails becomes a rebuild
+      // and a host must never observe a state the job then abandons.
+      reporter.settlePlan("restore");
+      reporter.enter("verifying");
+      if (reporter.cancellationRequested) {
+        throw new ImportJobCancelledError(reporter.state);
       }
-    } catch (error) {
-      console.warn(
-        `[naru] cache restore failed (${cacheFailureDetails(error)}); recompiling.`,
-      );
+      reporter.completed(completionOf(restored.report, "hit"));
+      return {
+        sources,
+        outputDirectory,
+        report: restored.report,
+        dependencyIndex: restored.dependencyIndex,
+        adapterReport: restored.adapterReport,
+        cache: { status: "hit", key: cacheKey },
+        ...(ledger ? { stages: ledger.finish() } : {}),
+      };
     }
   }
+  reporter.settlePlan("rebuild");
   const temporaryDirectory = await mkdtemp(join(tmpdir(), "naru-ifc-"));
+  reporter.registerTemporaryDirectory(temporaryDirectory);
   const scenePath = join(temporaryDirectory, "scene-ir.json");
   const geometryPath = join(temporaryDirectory, "scene-ir-geometry.bin");
   const propertiesPath = join(temporaryDirectory, "scene-ir-properties.bin");
@@ -695,6 +790,7 @@ export async function compileIfcFederation(
       "--uri-hint",
       `${source.discipline}=${source.uriHint}`,
     ]);
+    reporter.enter("extracting");
     const adapterRun = await stage(ledger, "adapter", () =>
       runAdapter(
         pythonExecutable,
@@ -717,9 +813,11 @@ export async function compileIfcFederation(
           ...(ledger ? ["--stage-timing", stageTimingPath] : []),
         ],
         environment,
+        signal,
       ),
     );
     if (ledger) ledger.adapter = await readAdapterTiming(stageTimingPath, adapterRun);
+    reporter.enter("compiling");
     // The structure document is never read or parsed as one string: the
     // streaming reader parses it record by record and hashes it on the way
     // through. Before property indexing (`madi.ifc-scene-ir-split.2`) a
@@ -801,6 +899,7 @@ export async function compileIfcFederation(
           : undefined,
       ),
     );
+    reporter.enter("verifying");
     const validation = stageSync(ledger, "validateCompiled", () =>
       validateCompiledGltf(
         compiled.document,
@@ -839,6 +938,10 @@ export async function compileIfcFederation(
         compiled.report.output.packageDigest,
       ),
     );
+    // Publication is uninterruptible: everything from here writes the durable
+    // result, and a cancel observed midway is the one way to leave a partly
+    // written package behind.
+    reporter.enter("publishing");
     await stage(ledger, "writePackage", () =>
       writeCompiledPackage(compiled, outputDirectory, adapterReport),
     );
@@ -885,6 +988,12 @@ export async function compileIfcFederation(
         );
       }
     }
+    if (reporter.cancellationRequested) {
+      throw new ImportJobCancelledError(reporter.state);
+    }
+    reporter.completed(
+      completionOf(compiled.report, cacheKey ? "miss" : "disabled"),
+    );
     return {
       sources,
       outputDirectory,

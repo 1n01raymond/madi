@@ -1,10 +1,20 @@
-import { spawn } from "node:child_process";
 import { mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { basename, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { runAdapterProcess } from "./adapter-process.js";
 import { hydratePhase0Evidence } from "./evidence-input.js";
+import {
+  createImportJobReporter,
+  ImportJobCancelledError,
+  settleImportJobFailure,
+} from "./import-job.js";
+import type {
+  ImportJobCompletion,
+  ImportJobOptions,
+  ImportJobReporter,
+} from "./import-job.js";
 import { compileSceneToGltf } from "./gltf.js";
 import { writeCompiledPackage } from "./package-output.js";
 import { inspectStepFile } from "./step-source.js";
@@ -40,6 +50,8 @@ export interface StepCompileOptions {
   readonly spatialLeafCapacity?: number;
   readonly relocateHierarchyNodes?: boolean;
   readonly environment?: NodeJS.ProcessEnv;
+  /** Lifecycle events and cancellation for this compile. */
+  readonly job?: ImportJobOptions;
 }
 
 export interface StepCompilationResult {
@@ -62,50 +74,23 @@ async function runAdapter(
   executable: string,
   arguments_: readonly string[],
   environment: NodeJS.ProcessEnv,
+  signal?: AbortSignal,
 ): Promise<string> {
-  return await new Promise<string>((resolvePromise, reject) => {
-    const child = spawn(executable, arguments_, {
-      env: environment,
-      shell: false,
-      windowsHide: true,
-      stdio: ["ignore", "pipe", "pipe"],
-    });
-    let stdout = "";
-    let stderr = "";
-    child.stdout.setEncoding("utf8");
-    child.stderr.setEncoding("utf8");
-    child.stdout.on("data", (chunk: string) => {
-      stdout = `${stdout}${chunk}`.slice(-16_384);
-    });
-    child.stderr.on("data", (chunk: string) => {
-      stderr = `${stderr}${chunk}`.slice(-16_384);
-    });
-    child.once("error", (error) => {
-      reject(
-        new TypeError(
-          `Could not start the OCCT adapter with ${executable}: ${error.message}`,
-          { cause: error },
-        ),
-      );
-    });
-    child.once("close", (code) => {
-      if (code === 0) {
-        resolvePromise(stdout);
-        return;
-      }
-      const details = stderr.trim() || stdout.trim() || `exit code ${String(code)}`;
-      if (/ModuleNotFoundError.*(?:cadquery|OCP)/su.test(details)) {
-        reject(
-          new TypeError(
-            "The selected Python environment does not provide CadQuery/OCP. " +
-              "Install native/adapter-occt/tools/requirements-evidence.txt in that environment.",
-          ),
-        );
-        return;
-      }
-      reject(new TypeError(`OCCT STEP adapter failed: ${details}.`));
-    });
+  const run = await runAdapterProcess({
+    executable,
+    arguments: arguments_,
+    environment,
+    label: "OCCT STEP adapter",
+    startLabel: "OCCT adapter",
+    missingModule: {
+      pattern: /ModuleNotFoundError.*(?:cadquery|OCP)/su,
+      message:
+        "The selected Python environment does not provide CadQuery/OCP. " +
+        "Install native/adapter-occt/tools/requirements-evidence.txt in that environment.",
+    },
+    ...(signal === undefined ? {} : { signal }),
   });
+  return run.stdout;
 }
 
 interface OcctAdapterIdentity {
@@ -119,8 +104,14 @@ async function inspectAdapterIdentity(
   executable: string,
   adapterScriptPath: string,
   environment: NodeJS.ProcessEnv,
+  signal?: AbortSignal,
 ): Promise<OcctAdapterIdentity> {
-  const serialized = await runAdapter(executable, [adapterScriptPath, "--identity"], environment);
+  const serialized = await runAdapter(
+    executable,
+    [adapterScriptPath, "--identity"],
+    environment,
+    signal,
+  );
   const value = parseJson(serialized.trim(), "OCCT adapter identity");
   if (typeof value !== "object" || value === null) {
     throw new TypeError("OCCT adapter identity must be an object.");
@@ -215,10 +206,54 @@ function assertAdapterIdentity(
   }
 }
 
+/**
+ * Compiles one STEP file into a package directory.
+ *
+ * The lifecycle a caller can observe is described by `options.job`. Nothing
+ * about the compiled result depends on it: a job with no listener and no signal
+ * behaves exactly as this function did before it had one.
+ */
 export async function compileStepFile(
   options: StepCompileOptions,
 ): Promise<StepCompilationResult> {
+  const reporter = createImportJobReporter(
+    {
+      kind: "step",
+      sources: [options.sourcePath],
+      outputDirectory: options.outputDirectory,
+      options: {
+        linearTolerance: options.linearTolerance,
+        angularTolerance: options.angularTolerance,
+        spatialIndex: options.spatialIndex,
+        spatialLeafCapacity: options.spatialLeafCapacity,
+        relocateHierarchyNodes: options.relocateHierarchyNodes,
+      },
+    },
+    options.job,
+    options.cacheDirectory === undefined ? [] : [options.cacheDirectory],
+  );
+  try {
+    return await runStepCompile(options, reporter);
+  } catch (error) {
+    throw await settleImportJobFailure(reporter, error, [
+      options.sourcePath,
+      options.outputDirectory,
+      ...(options.cacheDirectory === undefined ? [] : [options.cacheDirectory]),
+    ]);
+  }
+}
+
+async function runStepCompile(
+  options: StepCompileOptions,
+  reporter: ImportJobReporter,
+): Promise<StepCompilationResult> {
+  const signal = options.job?.signal;
+  reporter.enter("queued");
+  reporter.enter("inspecting");
   const inspection = await inspectStepFile(options.sourcePath);
+  reporter.describeDocuments([
+    { sha256: inspection.sha256, byteLength: inspection.byteLength },
+  ]);
   const sourcePath = inspection.sourcePath;
   const outputDirectory = resolve(options.outputDirectory);
   const linearTolerance = positiveTolerance(
@@ -240,7 +275,7 @@ export async function compileStepFile(
   let cacheKeyInput: CompiledCacheKeyInput | undefined;
   let cacheKey: string | undefined;
   const identity = options.cacheDirectory
-    ? await inspectAdapterIdentity(pythonExecutable, adapterScriptPath, environment)
+    ? await inspectAdapterIdentity(pythonExecutable, adapterScriptPath, environment, signal)
     : undefined;
   const compiler = identity ? await currentCompilerCacheIdentity() : undefined;
   if (options.cacheDirectory && identity && compiler) {
@@ -253,42 +288,39 @@ export async function compileStepFile(
       options,
     );
     cacheKey = createCompiledCacheKey(cacheKeyInput);
-    try {
-      const restored = await restoreCompiledCacheEntry({
-        cacheDirectory: options.cacheDirectory,
-        key: cacheKey,
-        outputDirectory,
-      });
-      if (restored) {
-        const [serializedBuildReport, serializedAdapterReport] = await Promise.all([
-          readFile(resolve(outputDirectory, "build-report.json"), "utf8"),
-          readFile(resolve(outputDirectory, "adapter-report.json"), "utf8"),
-        ]);
-        const report = requireBuildReport(
-          parseJson(serializedBuildReport, "Cached build report"),
-          inspection.sha256,
-        );
-        if (report.output.packageDigest !== restored.packageDigest) {
-          throw new TypeError("Cached package digest does not match its manifest.");
-        }
-        return {
-          source: inspection,
-          outputDirectory,
-          report,
-          adapterReport: parseJson(serializedAdapterReport, "Cached adapter report"),
-          cache: { status: "hit", key: cacheKey },
-        };
+    const restored = await restoreVerifiedPackage({
+      cacheDirectory: options.cacheDirectory,
+      key: cacheKey,
+      outputDirectory,
+      sourceDigest: inspection.sha256,
+    });
+    if (restored) {
+      reporter.notePublishedResult();
+      // The restore plan announces `verifying` once the entry has been verified
+      // rather than before, because a verification that fails becomes a rebuild
+      // and a host must never observe a state the job then abandons.
+      reporter.settlePlan("restore");
+      reporter.enter("verifying");
+      if (reporter.cancellationRequested) {
+        throw new ImportJobCancelledError(reporter.state);
       }
-    } catch (error) {
-      console.warn(
-        `[naru] cache restore failed (${cacheFailureDetails(error)}); recompiling.`,
-      );
+      reporter.completed(completionOf(restored.report, "hit"));
+      return {
+        source: inspection,
+        outputDirectory,
+        report: restored.report,
+        adapterReport: restored.adapterReport,
+        cache: { status: "hit", key: cacheKey },
+      };
     }
   }
+  reporter.settlePlan("rebuild");
   const temporaryDirectory = await mkdtemp(join(tmpdir(), "naru-step-"));
+  reporter.registerTemporaryDirectory(temporaryDirectory);
   const scenePath = join(temporaryDirectory, "scene-ir.json");
   const adapterReportPath = join(temporaryDirectory, "adapter-report.json");
   try {
+    reporter.enter("extracting");
     await runAdapter(
       pythonExecutable,
       [
@@ -306,7 +338,9 @@ export async function compileStepFile(
         basename(sourcePath),
       ],
       environment,
+      signal,
     );
+    reporter.enter("compiling");
     const [serializedScene, serializedAdapterReport] = await Promise.all([
       readFile(scenePath, "utf8"),
       readFile(adapterReportPath, "utf8"),
@@ -326,6 +360,7 @@ export async function compileStepFile(
       ...(options.relocateHierarchyNodes === true ? { relocateHierarchyNodes: true } : {}),
     };
     const compiled = compileSceneToGltf(scene, compileOptions);
+    reporter.enter("verifying");
     const validation = validateCompiledGltf(
       compiled.document,
       compiled.coarseBinary
@@ -340,6 +375,10 @@ export async function compileStepFile(
           .join(", ")}`,
       );
     }
+    // Publication is uninterruptible: everything from here writes the durable
+    // result, and a cancel observed midway is the one way to leave a partly
+    // written package behind.
+    reporter.enter("publishing");
     await writeCompiledPackage(compiled, outputDirectory, adapterReport);
     if (cacheKeyInput && cacheKey) {
       try {
@@ -361,6 +400,10 @@ export async function compileStepFile(
         );
       }
     }
+    if (reporter.cancellationRequested) {
+      throw new ImportJobCancelledError(reporter.state);
+    }
+    reporter.completed(completionOf(compiled.report, cacheKey ? "miss" : "disabled"));
     return {
       source: inspection,
       outputDirectory,
@@ -371,4 +414,60 @@ export async function compileStepFile(
   } finally {
     await rm(temporaryDirectory, { recursive: true, force: true });
   }
+}
+
+interface RestoredPackage {
+  readonly report: CompilerBuildReport;
+  readonly adapterReport: unknown;
+}
+
+/**
+ * Restores a cache entry and cross-checks it, or returns undefined so the
+ * caller rebuilds. Verification lives here, ahead of any lifecycle event, so a
+ * rejected entry costs the host a warning rather than a state it cannot leave.
+ */
+async function restoreVerifiedPackage(request: {
+  readonly cacheDirectory: string;
+  readonly key: string;
+  readonly outputDirectory: string;
+  readonly sourceDigest: string;
+}): Promise<RestoredPackage | undefined> {
+  try {
+    const restored = await restoreCompiledCacheEntry({
+      cacheDirectory: request.cacheDirectory,
+      key: request.key,
+      outputDirectory: request.outputDirectory,
+    });
+    if (!restored) return undefined;
+    const [serializedBuildReport, serializedAdapterReport] = await Promise.all([
+      readFile(resolve(request.outputDirectory, "build-report.json"), "utf8"),
+      readFile(resolve(request.outputDirectory, "adapter-report.json"), "utf8"),
+    ]);
+    const report = requireBuildReport(
+      parseJson(serializedBuildReport, "Cached build report"),
+      request.sourceDigest,
+    );
+    if (report.output.packageDigest !== restored.packageDigest) {
+      throw new TypeError("Cached package digest does not match its manifest.");
+    }
+    return {
+      report,
+      adapterReport: parseJson(serializedAdapterReport, "Cached adapter report"),
+    };
+  } catch (error) {
+    console.warn(
+      `[naru] cache restore failed (${cacheFailureDetails(error)}); recompiling.`,
+    );
+    return undefined;
+  }
+}
+
+function completionOf(report: CompilerBuildReport, cache: string): ImportJobCompletion {
+  return {
+    packageDigest: report.output.packageDigest,
+    cache,
+    prototypeCount: report.counts.prototypeCount,
+    renderableOccurrenceCount: report.counts.renderableOccurrenceCount,
+    triangleCount: report.counts.triangleCount,
+  };
 }

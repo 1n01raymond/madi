@@ -294,6 +294,65 @@ property sidecar, and both participate in compiled-cache identity. Reading the
 tree back then requires the sidecar; `@naru3d/runtime-webgpu` fails closed
 rather than mistaking the drawing nodes for the whole assembly.
 
+## Watch and cancel an import
+
+Both compile commands accept a lifecycle observer, and both emit the same
+versioned event stream, `naru.import-job-event.1`
+([ADR-0020](../../docs/adr/0020-cancellable-import-jobs.md), Proposed):
+
+```ts
+import { compileIfcFederation, isImportJobCancellation } from "@naru3d/compiler";
+
+const controller = new AbortController();
+try {
+  await compileIfcFederation({
+    documents,
+    outputDirectory,
+    job: { signal: controller.signal, onEvent: (event) => console.log(event.state) },
+  });
+} catch (error) {
+  if (isImportJobCancellation(error)) {
+    // error.cancelledDuring names the state the job stopped in.
+  }
+}
+```
+
+Nine states run in one order — `queued`, `inspecting`, `extracting`,
+`compiling`, `verifying`, `publishing`, then exactly one of `completed`,
+`cancelled`, `failed`. A job announces a state when it begins it, may skip
+states, and never revisits one; a cache restore skips `extracting`,
+`compiling`, and `publishing`, because restoring an entry verifies every
+resource and places the directory in one atomic primitive. Every event carries
+a gapless zero-based `sequence`, monotonic `elapsedMs`, and a `progress` pair
+whose `total` is `null` until the cache decision settles and then counts
+lifecycle steps: six on a rebuild, three on a restore. It is a step count, never
+an estimate from source size, because nothing here measures how long
+tessellating an unseen document takes.
+
+Events name their sources by digest and byte length rather than by path, and
+every string leaving the module — failure messages included — is scrubbed of
+filesystem paths and marked `redaction: "no-filesystem-paths"`, so an event may
+cross a trust boundary the source document never should.
+
+`--json-events` writes that stream to stdout as newline-delimited JSON and moves
+every human line to stderr, so a caller can pipe one and read the other:
+
+```bash
+pnpm naru compile-ifc --document architecture=a.ifc --output out --json-events 2>/dev/null
+```
+
+The first `SIGINT` or `SIGTERM` cancels the job instead of killing the process,
+which is what lets the compiler stop the adapter it started; a second is not
+intercepted. A cancelled run exits 130.
+
+Cancelling terminates the adapter and every process it started, removes the
+temporary Scene IR directory the job was extracting into, and never removes a
+previously verified cache entry. Publication is the one section that is not
+interruptible: the package writer is not atomic, so a cancel observed midway
+would leave a directory that looks like a package and is not one. That section
+runs to the end and the cancellation event reports
+`publishedBeforeCancellation: true`.
+
 ## Current limits
 
 - The direct STEP command currently depends on the pinned CadQuery/OCP Python
