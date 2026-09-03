@@ -23,7 +23,7 @@ import sys
 from collections import Counter, defaultdict
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Iterable, Sequence
+from typing import Any, Callable, Iterable, Sequence
 
 import ifcopenshell
 import ifcopenshell.geom
@@ -50,6 +50,7 @@ from placement_math import (
 )
 from property_columns import encode_property_value_columns
 from property_index import index_property_bags
+from structure_preview import StructurePreviewPublisher, build_structure_preview
 
 
 ROOT_FRAME = {
@@ -433,6 +434,7 @@ def inspect_document(
     document: DocumentInput,
     threads: int,
     source_bytes: bytes | None = None,
+    on_structure: Callable[[dict[str, Any]], None] | None = None,
 ) -> dict[str, Any]:
     source_bytes = (
         source_bytes if source_bytes is not None else document.path.read_bytes()
@@ -466,6 +468,56 @@ def inspect_document(
     world_by_entity: dict[int, np.ndarray[Any, Any]] = {}
     geometry_occurrences: Counter[str] = Counter()
     geometry_metrics: dict[str, dict[str, int]] = {}
+
+    # The assembly tree is resolved before anything is tessellated, so a staged
+    # preview can be published while geometry is still hours of work away
+    # (ADR-0021). Nothing below reads geometry: `direct_parent` walks inverse
+    # attributes only. The resolved lists are reused by the occurrence loop, so
+    # hoisting them adds no work when no preview is requested.
+    occurrence_entities = sorted(
+        {
+            entity_id(entity): entity
+            for entity in [*model.by_type("IfcProduct"), *model.by_type("IfcProject")]
+        }.values(),
+        key=entity_id,
+    )
+    occurrence_entity_ids = {entity_id(entity) for entity in occurrence_entities}
+    occurrence_parent_entities: dict[int, Any | None] = {}
+    for entity in occurrence_entities:
+        parent = direct_parent(entity)
+        occurrence_parent_entities[entity_id(entity)] = (
+            parent
+            if parent is not None and entity_id(parent) in occurrence_entity_ids
+            else None
+        )
+    if on_structure is not None:
+        preview_nodes: list[tuple[str, str, str | None, str | None]] = []
+        for entity in occurrence_entities:
+            step_id = entity_id(entity)
+            parent = occurrence_parent_entities[step_id]
+            preview_nodes.append(
+                (
+                    f"occurrence:ifc:{document_token}:{step_id}",
+                    entity.is_a(),
+                    entity_name(entity),
+                    (
+                        f"occurrence:ifc:{document_token}:{entity_id(parent)}"
+                        if parent is not None
+                        else None
+                    ),
+                )
+            )
+        on_structure(
+            build_structure_preview(
+                discipline=document.discipline,
+                uri_hint=document.uri_hint,
+                document_id=document_id,
+                source_digest=source_digest,
+                source_bytes=len(source_bytes),
+                schema=model.schema,
+                nodes=preview_nodes,
+            )
+        )
 
     settings = ifcopenshell.geom.settings()
     settings.set("use-world-coords", False)
@@ -655,14 +707,6 @@ def inspect_document(
             semantic["classification"] = classifications
         semantics.append(semantic)
 
-    occurrence_entities = sorted(
-        {
-            entity_id(entity): entity
-            for entity in [*model.by_type("IfcProduct"), *model.by_type("IfcProject")]
-        }.values(),
-        key=entity_id,
-    )
-    occurrence_entity_ids = {entity_id(entity) for entity in occurrence_entities}
     occurrences: list[dict[str, Any]] = []
     parent_occurrence_by_id: dict[str, str | None] = {}
 
@@ -724,11 +768,11 @@ def inspect_document(
             )
 
         occurrence_id = f"occurrence:ifc:{document_token}:{step_id}"
-        parent = direct_parent(entity)
+        parent = occurrence_parent_entities[step_id]
         parent_step_id = entity_id(parent) if parent is not None else None
         parent_occurrence_id = (
             f"occurrence:ifc:{document_token}:{parent_step_id}"
-            if parent_step_id in occurrence_entity_ids
+            if parent_step_id is not None
             else None
         )
         world = world_by_entity[step_id]
@@ -983,11 +1027,59 @@ class StageTiming:
         }
 
 
+def structure_emission_order(documents: Sequence[DocumentInput]) -> list[str]:
+    """Disciplines in the order ADR-0021 stages them: smallest source first.
+
+    Emission order decides only what a consumer sees early. Assembly order
+    stays the discipline sort `parse_inputs` returns, so no output byte
+    depends on this.
+    """
+
+    return [
+        document.discipline
+        for document in sorted(
+            documents, key=lambda item: (item.path.stat().st_size, item.discipline)
+        )
+    ]
+
+
+def structure_preview_from_document(
+    item: dict[str, Any], source_bytes: int
+) -> dict[str, Any]:
+    """Rebuild a staged tree from an already-inspected document.
+
+    A restored document never runs the extraction path, so its preview comes
+    from the occurrences its artifact carries. Occurrences are stored in the
+    order they were produced, so this is the same tree, in the same order,
+    that extraction would have published.
+    """
+
+    document = item["document"]
+    return build_structure_preview(
+        discipline=item["input"].discipline,
+        uri_hint=document["uriHint"],
+        document_id=document["id"],
+        source_digest=item["sourceDigest"],
+        source_bytes=source_bytes,
+        schema=document["formatVersion"],
+        nodes=[
+            (
+                occurrence["id"],
+                occurrence["metadata"]["entries"]["ifcClass"],
+                occurrence.get("name"),
+                occurrence.get("parentId"),
+            )
+            for occurrence in item["occurrences"]
+        ],
+    )
+
+
 def inspect_documents(
     documents: Sequence[DocumentInput],
     threads: int,
     document_cache_directory: Path | None,
     timing: StageTiming | None = None,
+    preview_publisher: StructurePreviewPublisher | None = None,
 ) -> tuple[list[dict[str, Any]], dict[str, Any]]:
     extracted: list[dict[str, Any]] = []
     hits: list[str] = []
@@ -997,9 +1089,30 @@ def inspect_documents(
         if document_cache_directory is not None
         else None
     )
-    for document in documents:
+    order = list(documents)
+    if preview_publisher is not None:
+        rank = {
+            discipline: index
+            for index, discipline in enumerate(preview_publisher.emission_order)
+        }
+        order = sorted(documents, key=lambda item: rank[item.discipline])
+    for document in order:
         stages = timing.document(document.discipline) if timing else None
         started = StageTiming.now()
+        document_started = started
+
+        def publish_structure(preview: dict[str, Any]) -> None:
+            assert preview_publisher is not None
+            begin = StageTiming.now()
+            descriptor = preview_publisher.publish(preview)
+            if stages is not None:
+                stages["structureNodeCount"] = descriptor["nodeCount"]
+                stages["structurePublishMilliseconds"] = StageTiming.now() - begin
+                stages["structureReadyMilliseconds"] = (
+                    StageTiming.now() - document_started
+                )
+                stages["structurePublishedAtMs"] = time.time() * 1000.0
+
         source_bytes = document.path.read_bytes()
         source_digest = sha256_bytes(source_bytes)
         if stages is not None:
@@ -1024,10 +1137,19 @@ def inspect_documents(
             if stages is not None:
                 stages["outcome"] = "restored"
                 stages["restoreMilliseconds"] = StageTiming.now() - started
+            if preview_publisher is not None:
+                publish_structure(
+                    structure_preview_from_document(item, len(source_bytes))
+                )
             hits.append(document.discipline)
         else:
             started = StageTiming.now()
-            item = inspect_document(document, threads, source_bytes)
+            item = inspect_document(
+                document,
+                threads,
+                source_bytes,
+                publish_structure if preview_publisher is not None else None,
+            )
             if stages is not None:
                 stages["outcome"] = "extracted"
                 stages["extractMilliseconds"] = StageTiming.now() - started
@@ -1046,6 +1168,12 @@ def inspect_documents(
                 f"IFC document artifact digest mismatch for {document.discipline}."
             )
         extracted.append(item)
+    # Inspection order is a scheduling decision; assembly order is not. Sorting
+    # every list this function returns makes them independent of the order the
+    # loop ran in, so a staged run and an unstaged run write the same bytes.
+    extracted.sort(key=lambda item: item["input"].discipline)
+    hits.sort()
+    misses.sort()
     return extracted, {
         "schemaVersion": DOCUMENT_ARTIFACT_SCHEMA,
         "status": "enabled" if document_cache_directory is not None else "disabled",
@@ -1059,12 +1187,14 @@ def extract_federation(
     threads: int,
     document_cache_directory: Path | None = None,
     timing: StageTiming | None = None,
+    preview_publisher: StructurePreviewPublisher | None = None,
 ) -> tuple[dict[str, Any], dict[str, Any]]:
     extracted, document_artifact_cache = inspect_documents(
         documents,
         threads,
         document_cache_directory,
         timing,
+        preview_publisher,
     )
     merge_started = StageTiming.now()
     digest_input = [
@@ -1447,6 +1577,16 @@ def main() -> None:
         default=max(1, min(8, os.cpu_count() or 1)),
     )
     parser.add_argument(
+        "--structure-preview",
+        type=Path,
+        help=(
+            "Optional directory for staged per-document assembly trees "
+            "(naru.ifc-structure-preview.1). Each document's tree is published "
+            "before that document is tessellated, smallest source first; the "
+            "compiled output is unaffected."
+        ),
+    )
+    parser.add_argument(
         "--stage-timing",
         type=Path,
         help=(
@@ -1475,11 +1615,21 @@ def main() -> None:
 
     timing = StageTiming() if arguments.stage_timing is not None else None
     documents = parse_inputs(arguments.document, arguments.uri_hint)
+    preview_publisher = (
+        StructurePreviewPublisher(
+            arguments.structure_preview,
+            disciplines=[document.discipline for document in documents],
+            emission_order=structure_emission_order(documents),
+        )
+        if arguments.structure_preview is not None
+        else None
+    )
     scene, report = extract_federation(
         documents,
         arguments.threads,
         arguments.document_cache,
         timing,
+        preview_publisher,
     )
     report["scene"] = write_scene(
         arguments.scene, arguments.geometry, arguments.properties, scene, timing
@@ -1503,6 +1653,12 @@ def main() -> None:
             "[ifc] document artifacts: "
             f"{len(document_cache['hits'])} hit(s), "
             f"{len(document_cache['misses'])} miss(es)"
+        )
+    if preview_publisher is not None:
+        print(
+            "[ifc] staged structure: "
+            f"{len(preview_publisher.documents)} document(s) in "
+            f"{arguments.structure_preview}"
         )
     print(f"[ifc] scene: {arguments.scene}")
     print(f"[ifc] report: {arguments.report}")
