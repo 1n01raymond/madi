@@ -93,4 +93,7 @@ every clean package resource ([artifacts/cache/payload-reuse](../../artifacts/ca
 The cheaper half is not: that store restored payloads slower than the compiler
 re-encodes them, so [ADR-0018](0018-content-addressed-compiled-payloads.md) is
 Rejected by its own gate and this ADR remains Proposed until a successor reuse
-unit passes the same measurement.
+unit passes the same measurement. The successor is
+[ADR-0019](0019-document-artifact-transport.md), which makes the per-document
+Scene IR artifact -- the unit this index already owns -- the thing restored,
+and whose gate 4 record moves both ADRs together.

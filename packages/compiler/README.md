@@ -118,7 +118,9 @@ authorization remains a separate gate.
 
 `src/compiled-payload-store.ts` and `src/compiled-payload-cache.ts` implement
 [ADR-0018](../../docs/adr/0018-content-addressed-compiled-payloads.md), reached
-through `--payload-cache <directory>` on both commands and off by default. The
+through `--payload-cache <directory>` on both commands and off by default;
+[ADR-0019](../../docs/adr/0019-document-artifact-transport.md) decides that the
+flag is removed in a coming slice. The
 ADR is rejected by its own gate -- the
 [acceptance record](../../artifacts/cache/payload-reuse/README.md) reproduced
 every clean-package byte on a changed-discipline rebuild of Digital Hub and

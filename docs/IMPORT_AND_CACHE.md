@@ -168,7 +168,13 @@ rebuilds of Digital Hub and sixty5 reproduced every clean package byte, with
 2.2-2.4x as long as re-encoding from the parsed scene. Once the adapter's
 document-artifact cache has removed tessellation from the rebuild path,
 encoding a payload is a typed-array copy while restoring one reads and hashes
-every byte. ADR-0018 is Rejected; the flag stays as the measured experiment.
+every byte. ADR-0018 is Rejected. Its successor,
+[ADR-0019](adr/0019-document-artifact-transport.md), sizes the levers from an
+exploratory rebuild decomposition -- the encoder is 1-3 percent of a rebuild,
+the adapter-compiler transport of unchanged documents is the bulk of it -- and
+decides to reuse the verified per-document Scene IR artifact instead and to
+remove `--payload-cache`; until that removal lands, the flag is the measured
+experiment described below.
 
 What the compiler carries today is the encoder split plus the store itself.
 `buildCompiledPayload` is now the only geometry encoder, and `appendGeometry` is
@@ -225,10 +231,13 @@ packages for output identity excludes it by name, as
 `adapter-report.json:documentArtifactCache` already is. The CLI prints the same
 summary beside the package-cache line.
 
-What ADR-0018 still owes is acceptance evidence: clean-package resource
-equivalence across a changed discipline, and a measured packaging saving that
-beats the store's own verification cost at real-large scale. ADR-0010 and
-ADR-0018 both stay Proposed until that record exists.
+That acceptance record exists and rejected the tier; what remains is the
+successor's evidence. [ADR-0019](adr/0019-document-artifact-transport.md)
+predeclares it: a committed stage decomposition of a changed-discipline rebuild
+first (gate 0), then byte identity, exact per-document restore decisions, a
+restore bounded by one read and one hash of the stored artifact, and the same
+gate 4 -- a lower whole-process rebuild median on Digital Hub and sixty5 with
+peak memory no higher. ADR-0010 stays Proposed until that record exists.
 
 Shared lookup reuses the same manifest and resource hashes. The resolution
 order is local verified entry, authorized shared entry, then local compilation.
