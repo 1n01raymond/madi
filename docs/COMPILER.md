@@ -742,113 +742,52 @@ compilation is a complete product claim;
 verified per-document Scene IR artifact, restored across the adapter-compiler
 transport -- and the gates it must pass.
 
-[ADR-0018](adr/0018-content-addressed-compiled-payloads.md) is the reviewed
-design for that payload tier, implemented in 21.6 below behind the
-`--payload-cache` flag and rejected by its own measurement gate. It authorizes reusing one unit, the prototype payload --
-the accessor bytes and placement-free accessor metadata `appendGeometry`
-produces for a prototype -- and requires every other package resource,
-`scene.bin` included, to be rebuilt from the current scene.
-Payload keys carry the schema, compiler, and adapter identities, the prototype's
-Scene IR content digest, the scene unit scale, and the payload-affecting policy
-set; an option that has not been classified counts as payload-affecting, so a
-new option cold-starts the namespace instead of silently sharing it.
+[ADR-0018](adr/0018-content-addressed-compiled-payloads.md) was the reviewed
+design for that payload tier: reuse one unit, the prototype payload -- the
+accessor bytes and placement-free accessor metadata `appendGeometry` produces
+for a prototype -- and rebuild every other package resource, `scene.bin`
+included, from the current scene. It was implemented behind `--payload-cache`,
+measured, and rejected by its own gate, and ADR-0019 removed the flag with its
+store, selection logic, and recorder; 21.6 below describes what the compiler
+kept from it.
 
-### 21.6 Content-addressed payload store
+### 21.6 What the payload tier left behind
 
-[ADR-0018](adr/0018-content-addressed-compiled-payloads.md) is implemented:
-storage, and the selection that uses it. `naru compile` and `naru compile-ifc`
-take `--payload-cache <directory>`, off by default, so a compile that does not
-ask for the store behaves exactly as before. Its acceptance record
+[ADR-0018](adr/0018-content-addressed-compiled-payloads.md) was implemented in
+full -- a content-addressed store, per-prototype selection inside the
+packaging loop, and `--payload-cache <directory>` on both commands -- and its
+acceptance record
 ([artifacts/cache/payload-reuse](../artifacts/cache/payload-reuse/README.md))
-proved the equivalence half -- every clean-package byte reproduced on Digital
-Hub and sixty5 -- and failed the saving half: restoring verified payloads took
-2.2-2.4x the packaging time of re-encoding them, so the ADR is Rejected and the
-flag remains an off-by-default experiment until
-[ADR-0019](adr/0019-document-artifact-transport.md), which decides its removal,
-lands that slice. The encoder/placement split below stays.
+proved the equivalence half, every clean-package byte reproduced on Digital
+Hub and sixty5, and failed the saving half: restoring verified payloads took
+2.2-2.4x the packaging time of re-encoding them. The ADR is Rejected, and
+[ADR-0019](adr/0019-document-artifact-transport.md) removed the flag, the
+store (`naru.compiled-payload-entry.1`), the selection logic, the
+`build-report.json:compiledPayloadCache` block, their tests, and the record's
+recorder (2026-09-03). The record stays committed as the measurement that
+closed the tier and `pnpm cache:payload:check` keeps validating it; it can no
+longer be re-recorded.
 
-Encoding and placement are now separate functions.
-`buildCompiledPayload(representation, scaleToMeters)` produces the payload --
-the ordered accessor byte blobs plus the accessor metadata that does not depend
-on placement -- and `appendCompiledPayload(builder, payload)` places it into
-`scene.bin`. `appendGeometry` is exactly those two calls, so a restored payload
-and a freshly built one travel the same append path and byte offsets, padding,
-and bufferView and accessor indices are decided in one place rather than two.
-Compiling Digital Hub after the split reproduces the `digital-hub` baseline
-package digest recorded in
+Two things stayed because they moved no bytes. Encoding and placement remain
+separate functions: `buildCompiledPayload(representation, scaleToMeters)`
+produces the payload -- the ordered accessor byte blobs plus the accessor
+metadata that does not depend on placement -- and
+`appendCompiledPayload(builder, payload)` places it into `scene.bin`.
+`appendGeometry` is exactly those two calls, so byte offsets, padding, and
+bufferView and accessor indices are decided in one place. Compiling Digital
+Hub through the split reproduces the `digital-hub` baseline package digest
+recorded in
 [artifacts/compiler/node-field-elision](../artifacts/compiler/node-field-elision/README.md).
+`compiledPayloadContentDigest(representation)`, the store's content key, is
+kept as a tested pure function: it hashes the representation ID, every surface
+and edge array together with its element type, and whether the edge positions
+alias the surface ones, so equal numbers in a `Float64` and a `Float32` array
+do not collide.
 
-`compiledPayloadContentDigest(representation)` addresses a prototype by content.
-It hashes the representation ID -- which names every accessor -- the surface
-positions, normals, indices, face source IDs, and material groups, the edge
-positions, segments, classes, and source IDs, and whether the edge positions
-alias the surface ones, since that aliasing removes an accessor from the
-payload. Each array is hashed together with its element type, so a `Float64`
-and a `Float32` array holding equal numbers do not collide. The digest is
-deliberately conservative: an irrelevant difference can cost a rebuild, but no
-difference that changes a payload byte can be missed.
-
-Entries carry schema `naru.compiled-payload-entry.1` and live in a directory
-named for that schema, so a schema bump opens a cold namespace beside the old
-one instead of migrating entries in place. The key is a SHA-256 over the schema
-ID, the compiler identity, the adapter identity, the content digest, the scene
-unit scale, and the payload-affecting option set, with option keys sorted so
-declaration order cannot fork the namespace. One entry is two files: a
-`payload.json` manifest and the concatenated accessor bytes in `payload.bin`.
-
-The safety rules are the ones the whole-package cache already ships, kept in a
-shared `cache-primitives.ts` module so a hardening fix cannot land in one store
-and be forgotten in the other: a key that is not 64 hex characters is refused
-before it can reach the filesystem, resource paths match one portable file-name
-pattern, `lstat` refuses a symlink instead of following it out of the store, and
-publication stages in a `mkdtemp` sibling and renames into place. Windows
-reports a rename onto an existing directory as `EPERM` rather than `EEXIST`, so
-all three codes mean the same thing: another compilation published first. Losing
-that race is not an error -- the published entry is read back and verified, and
-only a genuine disagreement, the same key describing different bytes, is refused
-as `AMBIGUOUS_PAYLOAD`, because that would mean the key is missing an input.
-
-Reading is verified before anything is handed back. The key is reproduced from
-the manifest's own input record and compared with the directory it was found
-in; each accessor's byte length is recomputed from its component type, element
-type, and count rather than trusted; the accessors must be contiguous and cover
-`payload.bin` exactly; and the binary's byte count and SHA-256 must match the
-manifest. Any mismatch throws `INVALID_PAYLOAD_ENTRY`. The storage primitive
-stays strict on purpose, exactly as `compiled-cache.ts` does: the warn-and-
-rebuild fallback that makes a corrupt entry a miss belongs to the compile paths
-that will call it, so no single bad file can break a compile.
-Selection is one decision per prototype, made inside the packaging loop.
-`CompiledPayloadCache` (`packages/compiler/src/compiled-payload-cache.ts`)
-implements the `CompiledPayloadSource` interface `appendGeometry` asks for: it
-derives the key, restores the payload if the store holds a verified one, and
-otherwise builds the payload and publishes it. The store is read synchronously
-for a reason the ADR's fourth gate makes binding -- an asynchronous pre-pass
-would have to hold every payload at once, where restoring inside the loop keeps
-exactly one live and peak memory at the clean build's.
-
-Both degradations are fail-open-to-work. A stored entry that fails any check is
-a miss: the compiler warns, rebuilds the payload, and finishes the package. A
-publish that fails -- a read-only store, a full disk, an entry already corrupt
-under the same key -- warns and keeps the compiled output, because a store that
-cannot be written to must not turn a successful compile into an error.
-
-Which options enter the key is a closed table with a reason per row. Every
-option the packager accepts is named there as layout-affecting, and today the
-keyed set is therefore empty: the encode/place split put every layout decision
-after `buildCompiledPayload`. Resource-name elision is on that list for a
-concrete reason -- `GltfBinaryBuilder.append` drops the names while placing a
-payload, so the option changes the document and never the payload bytes. An
-option that is not in the table is payload-affecting and enters the key as
-`unclassified:<name>`, so forgetting to classify one costs a rebuild rather
-than serving a payload compiled under different rules; an option whose value
-cannot be described in a key at all fails the compile instead.
-
-`build-report.json` gains a `compiledPayloadCache` block whenever a payload
-source was supplied: the store schema, the prototype count, hits, misses,
-publications, a count per outcome, publish failures, and up to sixteen named
-degraded prototypes. It names prototype ids and nothing else -- a source path or
-a property value would put engineering data in a build report -- and it is
-execution-path telemetry, so comparing two packages for output identity excludes
-it by name, exactly as `adapter-report.json:documentArtifactCache` is excluded.
-The CLI prints the same summary beside the package-cache line.
-
+The safety rules the store shared with the whole-package cache stay in
+`cache-primitives.ts`, which now serves that cache alone: a key that is not 64
+hex characters is refused before it can reach the filesystem, resource paths
+match one portable file-name pattern, `lstat` refuses a symlink instead of
+following it out of the store, publication stages in a `mkdtemp` sibling and
+renames into place, and Windows `EPERM` on a rename onto an existing directory
+is read as the same lost race as `EEXIST` and `ENOTEMPTY`.

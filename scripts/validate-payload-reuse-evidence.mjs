@@ -3,6 +3,10 @@
  * one record per model, each a fresh-process changed-discipline rebuild with
  * the content-addressed payload store disabled (oracle) and enabled.
  *
+ * The recorder was retired together with `--payload-cache` (ADR-0019); this
+ * validator checks the committed record only, and the record cannot be
+ * re-recorded from the current tree.
+ *
  * Digests below are HOST-LOCAL: the IFC adapter's split Scene IR differs by a
  * few bytes across hosts (see artifacts/spatial-demand), so a re-record on
  * another machine must be reviewed and re-pinned deliberately, never silently

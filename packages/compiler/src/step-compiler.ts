@@ -4,7 +4,6 @@ import { tmpdir } from "node:os";
 import { basename, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { CompiledPayloadCache } from "./compiled-payload-cache.js";
 import { hydratePhase0Evidence } from "./evidence-input.js";
 import { compileSceneToGltf } from "./gltf.js";
 import { writeCompiledPackage } from "./package-output.js";
@@ -37,12 +36,6 @@ export interface StepCompileOptions {
   readonly angularTolerance?: number;
   /** Optional persistent package cache. Existing output is reused only after full verification. */
   readonly cacheDirectory?: string;
-  /**
-   * Optional persistent per-prototype payload store. Independent of the package
-   * cache: it helps a compile whose source changed, where the whole package is
-   * a miss but most prototypes are unchanged.
-   */
-  readonly payloadCacheDirectory?: string;
   readonly spatialIndex?: boolean;
   readonly spatialLeafCapacity?: number;
   readonly relocateHierarchyNodes?: boolean;
@@ -246,9 +239,7 @@ export async function compileStepFile(
   const environment = options.environment ?? process.env;
   let cacheKeyInput: CompiledCacheKeyInput | undefined;
   let cacheKey: string | undefined;
-  // Both stores are keyed by the same two identities, so they are inspected
-  // once for whichever of them is enabled.
-  const identity = options.cacheDirectory || options.payloadCacheDirectory
+  const identity = options.cacheDirectory
     ? await inspectAdapterIdentity(pythonExecutable, adapterScriptPath, environment)
     : undefined;
   const compiler = identity ? await currentCompilerCacheIdentity() : undefined;
@@ -334,21 +325,7 @@ export async function compileStepFile(
         : { spatialLeafCapacity: options.spatialLeafCapacity }),
       ...(options.relocateHierarchyNodes === true ? { relocateHierarchyNodes: true } : {}),
     };
-    const payloadSource = options.payloadCacheDirectory && identity && compiler
-      ? new CompiledPayloadCache({
-          storeDirectory: options.payloadCacheDirectory,
-          compiler,
-          adapter: {
-            name: identity.name,
-            version: `${identity.version}+${identity.fingerprint}`,
-          },
-          compileOptions,
-        })
-      : undefined;
-    const compiled = compileSceneToGltf(
-      scene,
-      payloadSource ? { ...compileOptions, payloadSource } : compileOptions,
-    );
+    const compiled = compileSceneToGltf(scene, compileOptions);
     const validation = validateCompiledGltf(
       compiled.document,
       compiled.coarseBinary

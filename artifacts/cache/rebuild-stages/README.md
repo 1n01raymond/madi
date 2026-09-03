@@ -41,8 +41,8 @@ about two minutes).
 **One fresh `node scripts/lib/ifc-cache-sample.mjs` process per sample**, and a
 fresh Python adapter process inside it. Compile options are the ADR-0018
 record's: `--cache`, `--spatial-index`, `--relocate-hierarchy-nodes`,
-`--threads 6`, and `--compact-json` on sixty5 only. `--payload-cache` is not
-used.
+`--threads 6`, and `--compact-json` on sixty5 only. `--payload-cache` was not
+used (the flag has since been removed).
 
 **Cache state.** A warm-up extracts the *original* federation once, adapter
 only, so every document artifact is warm; the record asserts that warm-up saw

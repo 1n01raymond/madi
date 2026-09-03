@@ -303,4 +303,8 @@ rejects this ADR the way it rejected ADR-0018; no gate may be loosened to pass.
 
 The removal of `--payload-cache` is its own slice and needs no gate beyond
 `pnpm check`: the ADR-0018 record's validator keeps validating the committed
-record, and the record README states that the recorder is retired.
+record, and the record README states that the recorder is retired. That
+slice landed on 2026-09-03: `--payload-cache` is gone from both commands, the
+store, the selection logic, the `compiledPayloadCache` report block, their
+tests, and `scripts/record-payload-reuse-evidence.mjs` are deleted, and
+`pnpm cache:payload:check` still validates the committed record.

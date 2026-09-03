@@ -130,9 +130,6 @@ async function compileSample() {
       documents,
       outputDirectory,
       ...(cacheDirectory ? { cacheDirectory } : {}),
-      ...(config.payloadCacheDirectory
-        ? { payloadCacheDirectory: resolve(repositoryRoot, config.payloadCacheDirectory) }
-        : {}),
       threads: config.threads,
       ...(compactJson ? { compactJson: true } : {}),
       ...(config.spatialIndex ? { spatialIndex: true } : {}),

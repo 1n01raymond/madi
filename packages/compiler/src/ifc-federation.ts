@@ -6,7 +6,6 @@ import { copyFile, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { basename, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { CompiledPayloadCache } from "./compiled-payload-cache.js";
 import { compileSceneToGltf } from "./gltf.js";
 import type { CompileStage } from "./gltf.js";
 import { hydrateIfcSceneSplit, ifcSceneSplitEncodingVersion } from "./ifc-scene.js";
@@ -61,12 +60,6 @@ export interface IfcFederationCompileOptions {
   readonly targetChunkByteBudget?: number;
   /** Optional persistent package cache keyed by the complete federation/toolchain identity. */
   readonly cacheDirectory?: string;
-  /**
-   * Optional persistent per-prototype payload store. Independent of the package
-   * cache: a federation whose one changed discipline misses the package cache
-   * still restores every prototype the change did not touch.
-   */
-  readonly payloadCacheDirectory?: string;
   readonly spatialIndex?: boolean;
   readonly spatialLeafCapacity?: number;
   readonly spatialPayloadOrder?: boolean;
@@ -625,10 +618,8 @@ export async function compileIfcFederation(
   const environment = options.environment ?? process.env;
   let cacheKeyInput: CompiledCacheKeyInput | undefined;
   let cacheKey: string | undefined;
-  // Both stores are keyed by the same two identities, so they are inspected
-  // once for whichever of them is enabled.
   const { adapterToolchain, compiler } = await stage(ledger, "toolchainIdentity", async () => {
-    const toolchain = options.cacheDirectory || options.payloadCacheDirectory
+    const toolchain = options.cacheDirectory
       ? await inspectAdapterToolchain(pythonExecutable, adapterScriptPath, environment)
       : undefined;
     return {
@@ -799,21 +790,10 @@ export async function compileIfcFederation(
       // property value.
       propertyColumns: properties,
     };
-    const payloadSource = options.payloadCacheDirectory && adapterToolchain && compiler
-      ? new CompiledPayloadCache({
-          storeDirectory: options.payloadCacheDirectory,
-          compiler,
-          adapter: {
-            name: adapterToolchain.name,
-            version: `${adapterToolchain.version}+${adapterToolchain.fingerprint}`,
-          },
-          compileOptions,
-        })
-      : undefined;
     const compiled = stageSync(ledger, "compile", () =>
       compileSceneToGltf(
         scene,
-        payloadSource ? { ...compileOptions, payloadSource } : compileOptions,
+        compileOptions,
         ledger
           ? (compileStage, milliseconds) => {
               ledger.compileStages[compileStage] += milliseconds;

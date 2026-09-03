@@ -273,49 +273,4 @@ await writeFile(option("--report"), JSON.stringify({
       await rm(temporaryDirectory, { recursive: true, force: true });
     }
   });
-  it("reuses prototype payloads across a compile that still re-extracts", async () => {
-    const temporaryDirectory = await mkdtemp(join(tmpdir(), "naru-step-payload-test-"));
-    try {
-      const sourcePath = join(temporaryDirectory, "assembly.step");
-      const adapterPath = join(temporaryDirectory, "payload-adapter.mjs");
-      const counterPath = join(temporaryDirectory, "adapter-count.txt");
-      const payloadCacheDirectory = join(temporaryDirectory, "payloads");
-      await writeFile(
-        sourcePath,
-        "ISO-10303-21;\nHEADER;\nFILE_SCHEMA(('AP242_MANAGED_MODEL_BASED_3D_ENGINEERING_MIM_LF'));\nENDSEC;\nDATA;\nENDSEC;\nEND-ISO-10303-21;\n",
-        "utf8",
-      );
-      await writeFile(counterPath, "0", "utf8");
-      await writeCountingAdapter(adapterPath, counterPath);
-
-      const compile = (outputDirectory: string) =>
-        compileStepFile({
-          sourcePath,
-          outputDirectory,
-          payloadCacheDirectory,
-          pythonExecutable: process.execPath,
-          adapterScriptPath: adapterPath,
-        });
-      const cold = await compile(join(temporaryDirectory, "compiled-cold"));
-      const warm = await compile(join(temporaryDirectory, "compiled-warm"));
-
-      // The payload store is not the package cache: extraction still runs, and
-      // only the per-prototype geometry encoding is reused.
-      expect(await readFile(counterPath, "utf8")).toBe("2");
-      expect(cold.cache).toEqual({ status: "disabled" });
-      const prototypes = cold.report.counts.compiledPrototypeCount;
-      expect(cold.report.compiledPayloadCache).toMatchObject({
-        prototypes,
-        hits: 0,
-        published: prototypes,
-      });
-      expect(warm.report.compiledPayloadCache).toMatchObject({ prototypes, hits: prototypes });
-      expect(warm.report.output.packageDigest).toBe(cold.report.output.packageDigest);
-      await expect(
-        readFile(join(temporaryDirectory, "compiled-warm", "scene.bin")),
-      ).resolves.toEqual(await readFile(join(temporaryDirectory, "compiled-cold", "scene.bin")));
-    } finally {
-      await rm(temporaryDirectory, { recursive: true, force: true });
-    }
-  });
 });
