@@ -408,7 +408,7 @@ function assertAdapterIdentity(
     const hits = cache.hits;
     const misses = cache.misses;
     if (
-      cache.schemaVersion !== "naru.ifc-document-artifact.1" ||
+      cache.schemaVersion !== "naru.ifc-document-artifact.2" ||
       (cache.status !== "enabled" && cache.status !== "disabled") ||
       !Array.isArray(hits) ||
       hits.some((discipline) => typeof discipline !== "string") ||

@@ -77,21 +77,35 @@ unknown or malformed identity fails closed rather than reusing output.
 
 `--stage-timing <path>` writes a separate `naru.ifc-adapter-stage-timing.1`
 ledger: interpreter start and import time, and per document the source read,
-artifact load and verification (`artifactState`, `artifactBytes`), restore or
-extraction, and publication; then the federation merge, property indexing, and
-each Scene IR write. It never enters the adapter report, the Scene IR, or a
-cache key, so an instrumented run produces byte-identical output
+artifact load (read plus gunzip plus header), verification (header checks
+plus one SHA-256 of the stored payload bytes), parse, restore or extraction,
+and publication (`artifactState`, `artifactBytes`, `artifactPayloadBytes`,
+`artifactLoadMilliseconds`, `artifactVerifyMilliseconds`,
+`artifactParseMilliseconds`, and `artifactInvalidReason` when a stored entry
+was refused); then the federation merge, property indexing, and each Scene IR
+write. It never enters the adapter report, the Scene IR, or a cache key, so an
+instrumented run produces byte-identical output
 ([integration test](tests/test_document_artifact_integration.py)). The
 compiler consumes it through `stageTiming: true` for the
-[ADR-0019 gate 0 record](../../artifacts/cache/rebuild-stages/README.md).
+[ADR-0019 rebuild-stage record](../../artifacts/cache/rebuild-stages/README.md).
 
 On a whole-package miss, `naru compile-ifc --cache <directory>` also supplies
 `<directory>/ifc-documents` to the adapter. Each
-`naru.ifc-document-artifact.1` entry contains the pre-federation extraction for
-one discipline as canonical JSON in deterministic gzip, keyed by discipline,
-source digest, URI hint, thread count, and the exact adapter fingerprint. The
-loader verifies the key and payload SHA-256, treats corruption as a miss, and
-never loads executable serialization such as pickle. Publication is atomic.
+`naru.ifc-document-artifact.2` entry contains the pre-federation extraction for
+one discipline as canonical JSON in one deterministic gzip, keyed by
+discipline, source digest, URI hint, thread count, and the exact adapter
+fingerprint. The gzip holds a one-line canonical-JSON header (schema, key,
+key input, payload byte length, payload SHA-256) followed by exactly that
+many payload bytes. The loader verifies the stored bytes -- header fields,
+declared length, and one SHA-256 over the payload bytes as read -- and parses
+the payload only after that check passes; it never re-serializes the parsed
+value to verify it ([ADR-0019](../../docs/adr/0019-document-artifact-transport.md)
+slice 1, [tests](tests/test_document_artifact_cache.py)). A stored entry
+that fails any check is reported as invalid with its reason, treated as a
+miss, and re-extracted; the loader never loads executable serialization such
+as pickle. Publication is atomic. The key input is unchanged from the
+previous format, so an entry the `.1` writer left at the same path is refused
+by its schema line, re-extracted, and republished -- never silently reused.
 
 Adapter report `naru.ifc-adapter-report.6` records ordered per-document hits and
 misses. The compiler requires those lists to cover every selected discipline.

@@ -139,8 +139,11 @@ expands cross-document semantic relations to a transitive reconciliation set.
 Focused tests cover changed, deleted, and renamed/relabelled inputs plus
 reconciliation invalidation, and unchanged whole-package cache hits restore the
 index byte-for-byte. The adapter now also keeps verified per-document extraction
-artifacts under the selected cache: unchanged disciplines skip IfcOpenShell
-parsing and tessellation, while changed, renamed, or corrupt identities miss.
+artifacts under the selected cache (`naru.ifc-document-artifact.2`, verified by
+header checks and one SHA-256 over the stored payload bytes before any parse;
+[ADR-0019](adr/0019-document-artifact-transport.md) slice 1): unchanged
+disciplines skip IfcOpenShell parsing and tessellation, while changed,
+renamed, or corrupt identities miss.
 An actual two-discipline fixture proves cold/warm and one-document-changed merge
 bytes equal a clean adapter build. Federation-wide target/coarse/spatial/property
 payloads are still laid out as a whole; the rejected payload tier reused encoded
@@ -198,17 +201,21 @@ telemetry block, their unit tests, and the recorder behind the acceptance
 record. The record itself stays committed and validated
 (`pnpm cache:payload:check`); it cannot be re-recorded.
 
-That acceptance record exists and rejected the tier; what remains is the
-successor's evidence. [ADR-0019](adr/0019-document-artifact-transport.md)
-predeclares it: the committed stage decomposition of a changed-discipline
-rebuild is recorded ([gate 0](../artifacts/cache/rebuild-stages/README.md):
-artifact verification 4,434.2 ms on Digital Hub and 34,204.2 ms on sixty5,
-29 and 44 percent of the adapter's main), and what remains is byte identity,
-exact per-document restore decisions, a restore bounded by one read and one
-hash of the stored artifact, and the same gate 4 -- a lower whole-process
-rebuild median on Digital Hub and sixty5 with peak memory no higher, against
-a clean rebuild recorded in the same session. ADR-0010 stays Proposed until
-that record exists.
+That acceptance record exists and rejected the tier; the successor is
+[ADR-0019](adr/0019-document-artifact-transport.md), landed in slices. Its
+gate 0 stage decomposition put artifact verification at 4,434.2 ms on Digital
+Hub and 34,204.2 ms on sixty5 (29 and 44 percent of the adapter's main) under
+the `.1` artifact format, which re-serialized the parsed object to verify it.
+Slice 1 (`naru.ifc-document-artifact.2`, verification of the stored bytes
+before any parse) is recorded in the
+[rebuild record](../artifacts/cache/rebuild-stages/README.md): verification
+34.1 ms on Digital Hub and 353.0 ms on sixty5, byte-identical
+packages against a same-session clean rebuild (no cache directory), exact
+per-document restore decisions, and a whole-process rebuild of 11,102.2 ms
+against 50,028.4 ms clean on Digital Hub and 72,993.4 against
+320,064.2 ms on sixty5 with lower peak memory. Slices 2 (column-form
+structure) and 3 (in-compiler federation assembly) follow under the same
+gate 4; ADR-0010 stays Proposed until the record that closes slice 3.
 
 Shared lookup reuses the same manifest and resource hashes. The resolution
 order is local verified entry, authorized shared entry, then local compilation.

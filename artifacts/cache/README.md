@@ -53,15 +53,19 @@ successor reuse unit and removed the flag together with this record's recorder
 (2026-09-03), so the record is historical: its validator still checks it, but
 it cannot be re-recorded from the current tree.
 
-`rebuild-stages/` is ADR-0019's gate 0: the same changed-discipline rebuild
-decomposed into adapter stages (interpreter start, changed-document
-extraction, per-document artifact load and verification, merge, property
-index, Scene IR writes) and compiler stages (structure read, hydration,
-encoding, document streaming, package write) over five fresh-process samples
-per model with the sampled process tree, validated by
-`scripts/validate-rebuild-stage-evidence.mjs`. It also records that the
-exploratory probe the ADR was written from did not reproduce within the
-record's spread, which the ADR's Context now states.
+`rebuild-stages/` is ADR-0019's gate record (`naru.rebuild-stage-evidence.2`):
+the same changed-discipline rebuild compiled through restored
+`naru.ifc-document-artifact.2` artifacts and, interleaved in the same
+session, with no cache directory at all, five fresh-process samples per arm
+per model, each decomposed into adapter stages (interpreter start,
+changed-document extraction, per-document artifact load, verification, and
+parse, merge, property index, Scene IR writes) and compiler stages (structure
+read, hydration, encoding, document streaming, package write) with the
+sampled process tree. It carries the ADR's gates 1-4 as pinned verdicts,
+validated by `scripts/validate-rebuild-stage-evidence.mjs`. Its `.1`
+predecessor (commit `69d67e5`) was the ADR's gate 0 decomposition and
+recorded that the exploratory probe the ADR was written from did not
+reproduce within the record's spread, which the ADR's Context states.
 
 Adapter identities are embedded in the record (`naru.occt-adapter-identity.1`:
 cadquery 2.8.0 / OCP 7.9.3.1; `naru.ifc-adapter-identity.1`: IfcOpenShell

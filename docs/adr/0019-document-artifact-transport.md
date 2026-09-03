@@ -137,12 +137,19 @@ The decision has three parts, landed as separate slices in this order, each
 measured against gate 0 before the next begins:
 
 1. **Verify stored bytes, never a re-serialization.** The artifact schema
-   moves to `naru.ifc-document-artifact.2`, a cold namespace: the envelope
-   records the SHA-256 of the canonical payload bytes as written, and a read
-   hashes the gunzipped stream it is parsing instead of dumping the parsed
-   object again. The key-input comparison and the schema check stay. This
-   slice touches the adapter only and is expected to remove most of the
-   adapter's warm-path time on real-large federations.
+   moves to `naru.ifc-document-artifact.2`: one gzip stream holding a
+   canonical-JSON header line (key, key input, payload length, payload
+   SHA-256, schema) followed by exactly that many payload bytes, and a read
+   verifies the header and hashes the stored bytes before anything is parsed,
+   instead of dumping the parsed object again. The key-input comparison and
+   the schema check stay; the key input itself is unchanged, so a `.1` file at
+   the same path is refused by its schema line, re-extracted, and republished.
+   **Landed 2026-09-03** (adapter only;
+   [tests](../../native/adapter-ifc/tests/test_document_artifact_cache.py),
+   compiler pin in `ifc-federation.ts`): unchanged-document verification on
+   Digital Hub went from 4,434.2 ms in the gate 0 record to 34.1 ms, and on
+   sixty5 from 34,204.2 ms to 353.0 ms
+   ([record](../../artifacts/cache/rebuild-stages/README.md)).
 2. **Column-form structure so hydration is a view, not a parse.** The
    artifact's structure-bearing records (prototypes, occurrences, semantics,
    representations, document metadata) are stored the way the property
@@ -194,7 +201,7 @@ that tier; its README will note that the recorder is retired with the flag.
 |---|---|
 | Source bytes of one document | That document misses; the others restore by digest. |
 | Adapter fingerprint, thread count, or extraction options | Every document misses (the key changes). |
-| Artifact schema bump | Cold namespace; every document misses once. |
+| Artifact schema bump | Every document misses once: the schema line is checked before the key, so a previous-format file at the same path is refused and republished. |
 | Corrupt or truncated artifact | Digest mismatch, warning, re-extraction of that document. |
 | Cross-document semantic relation touching an unchanged document | The document artifact is unaffected; the compiler's merge and ADR-0010's reconciliation set decide the package-level consequences, exactly as they do for a monolithic scene. |
 | Compiler identity or compile options | No artifact effect; the whole-package cache misses and the compiler re-lays out the package from restored artifacts. |
@@ -207,8 +214,10 @@ that tier; its README will note that the recorder is retired with the flag.
   document. No second identity scheme, no content digest over geometry, no
   store of thousands of small files.
 - Restore is bounded by one sequential read and one SHA-256 of the stored
-  bytes, which the probes above put at 1.5 s for the whole sixty5 artifact
-  cache against 27.3 s of re-serialization today.
+  bytes. Measured after slice 1 (gate 3): Digital Hub load + verify of the
+  three unchanged artifacts 201.6 ms against a 143.8 ms read + gunzip + hash
+  of the same files in the recorder process (1.402x); sixty5 1,665.1 [1,662.0, 1,707.5] ms
+  against 1,256.0 [1,203.2, 1,318.4] ms (1.326x).
 - The compiler stops scanning unchanged documents' structure JSON, the single
   largest in-process cost of a rebuild, and the adapter stops re-writing the
   federation it did not change.
@@ -285,21 +294,43 @@ rejects this ADR the way it rejected ADR-0018; no gate may be loosened to pass.
   both models, with the ADR-0018 record's closed report-exclusion list and no
   additions to it. Slice 3 additionally proves the compiler-side merge equals
   the adapter's on a federation with cross-document relations, shared
-  materials, and interned property keys.
+  materials, and interned property keys. **Slice 1: met 2026-09-03** on both
+  models -- every package file byte-identical across five interleaved
+  transport/clean pairs, `adapter-report.json` identical outside the one
+  excluded key, Digital Hub package digest `c4b151e5...` (the gate 0 record's
+  digest, so the format change moved no byte), sixty5 `05707534...` (likewise its gate 0 digest).
 - **Gate 2, exact decisions:** the adapter report names every document's
   restore or extraction and its reason; a corrupt artifact warns and
-  re-extracts; a wrong key never restores.
+  re-extracts; a wrong key never restores. **Slice 1: met 2026-09-03** -- the
+  record pins hits/misses and per-document ledger states (`verified` /
+  `absent`) identical across samples on both models; the refusal reasons for
+  corrupt, truncated, tampered, wrong-key, and previous-schema artifacts are
+  unit-tested.
 - **Gate 3, restore cost:** the verification stage of an unchanged document,
   measured in the gate 0 decomposition, is bounded by one read and one hash
   of its stored bytes -- no stage re-serializes, re-parses for verification,
-  or opens more than one file per document.
+  or opens more than one file per document. Operationalized in the record as
+  a same-session ratio: adapter load + verify against the recorder's own
+  read + gunzip + hash of the same files, met at 2x or better, with the parse
+  ledgered apart so nothing hides inside it. **Slice 1: met 2026-09-03** --
+  Digital Hub 1.402x, sixty5 1.326x.
 - **Gate 4, the same rule as ADR-0018:** after each slice, the whole-process
   median of a changed-discipline rebuild is lower than the clean rebuild
   median on Digital Hub and on sixty5, by more than three times the clean
   samples' own spread (maximum minus minimum), with peak process-tree memory
   no higher. The record that closes slice 3 moves this ADR and
   [ADR-0010](0010-ifc-incremental-dependency-index.md) to Accepted; a failure
-  at any slice records the measurement and marks this ADR Rejected.
+  at any slice records the measurement and marks this ADR Rejected. The
+  clean arm is a compile with no cache directory -- neither the document
+  artifact tier under test nor the whole-package cache -- the analogue of the
+  ADR-0018 record's no-store arm. **Slice 1: met
+  2026-09-03** -- Digital Hub 11,102.2 ms against 50,028.4 ms (saving
+  38,926.2 ms, three clean spreads 11,122.8 ms; peak working set 0.64 GB
+  against 1.83 GB); sixty5 72,993.4 ms against 320,064.2 ms (saving
+  247,070.8 ms, three spreads 26,603.7 ms; peak 4.15 GB
+  against 5.08 GB). The gate 0 record had no clean arm, so whether
+  slice 1 alone changed this verdict is not recorded; slice 1's own effect is
+  gate 3's verification column.
 
 The removal of `--payload-cache` is its own slice and needs no gate beyond
 `pnpm check`: the ADR-0018 record's validator keeps validating the committed
