@@ -81,6 +81,28 @@ not one. That section runs to the end and the cancellation event reports
 `publishedBeforeCancellation`. Contract and gates:
 [ADR-0020](adr/0020-cancellable-import-jobs.md), still Proposed.
 
+What that lifecycle does not yet do is show anything while it runs. The shape of
+the missing half is now measured rather than assumed: producing an assembly tree
+from an IFC document is parsing it, at 98.46 percent (Digital Hub) and 98.60
+percent (sixty5) of the time to a serialized tree, with the containment walk at
+1.3 percent and serialization at 0.1
+([record](../artifacts/import/structure-readiness/README.md), five fresh-process
+samples per model). So the whole sixty5 federation needs 40,474.9 ms of adapter
+time before its complete tree exists, and threads cannot rescue it — the
+estimated six-thread makespan, 15,030.3 ms, is exactly the time of the single
+largest document. One document's tree, by contrast, is ready in 278.5 ms.
+
+[ADR-0021](adr/0021-staged-hierarchy-first-import.md) (Proposed) therefore makes
+the unit of early publication one document rather than the federation: the
+adapter emits a document's structure before tessellating anything, smallest
+source first, and each tree is published as a `naru.package-hierarchy.1` pair
+(ADR-0017's sidecar, reused rather than reinvented) written atomically and
+verified by digest before use. A staged preview is never a compiled package and
+never a cache tier — a cancelled import removes it, a completed one supersedes
+it — and the final package must stay byte-identical to a compile that never
+staged anything. Nothing of it is implemented yet; coarse geometry preview is
+explicitly unmeasured and carries its own gate.
+
 ## 3. Cache identity and invalidation
 
 A hit is valid only when the deterministic key includes every input capable of
@@ -274,7 +296,11 @@ profile under [ADR-0004](adr/0004-format-strategy.md).
    cancel that stops the adapter tree implemented and unit-proved
    ([ADR-0020](adr/0020-cancellable-import-jobs.md)); a second consumer and a
    real-large cancellation record remain.
-6. **Shared cache:** authenticated lookup/publication, tenant isolation,
+6. **Staged hierarchy-first preview:** designed and measured only as far as
+   the adapter ([ADR-0021](adr/0021-staged-hierarchy-first-import.md),
+   [record](../artifacts/import/structure-readiness/README.md)); structure-first
+   emission, the staged package, and the Studio background import remain.
+7. **Shared cache:** authenticated lookup/publication, tenant isolation,
    provenance, quotas, eviction, and observability.
 
 Focused tests already prove an unchanged STEP and single-document IFC input

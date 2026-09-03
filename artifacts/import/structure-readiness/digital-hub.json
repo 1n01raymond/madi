@@ -1,0 +1,1059 @@
+{
+  "schemaVersion": "naru.structure-readiness.1",
+  "mode": "fresh-process-structure-only-federation-read",
+  "recordedAt": "2026-09-03T15:29:33.217Z",
+  "model": "digital-hub",
+  "host": {
+    "platform": "win32",
+    "architecture": "x64",
+    "node": "22.14.0",
+    "cpuCount": 16,
+    "cpuModel": "AMD Ryzen 7 9800X3D 8-Core Processor           ",
+    "totalMemoryBytes": 33463021568
+  },
+  "commit": {
+    "head": "a8f14576d50d5577eb3562793f2eb54de72559bb",
+    "describe": "feat: report imports as a versioned lifecycle and cancel the adapter tree (#105)",
+    "workingTreeClean": false
+  },
+  "fixture": {
+    "datasetId": "ifc-bench-digital-hub",
+    "manifest": {
+      "path": "fixtures/external/manifest.json",
+      "sha256": "77d7d587d6b32938a371325e281a4584e10c2ff3118a59f300a9da097eb2f478"
+    },
+    "documents": [
+      {
+        "discipline": "architecture",
+        "uriHint": "projects/digital_hub/arc.ifc",
+        "bytes": 9022255,
+        "sha256": "19d7d02d53c2b88e86890ee236297b12bbb0f7748030cd32ff6a22762e9966bb"
+      },
+      {
+        "discipline": "heating",
+        "uriHint": "projects/digital_hub/heating.ifc",
+        "bytes": 20890415,
+        "sha256": "a5603e8f6aa4cbf63aece92f92f503e9a578702d8fe96a6d4661490f1843710d"
+      },
+      {
+        "discipline": "plumbing",
+        "uriHint": "projects/digital_hub/plumbing.ifc",
+        "bytes": 25178864,
+        "sha256": "0b1d6b0abd8d4cc3f5f798c7581bed2b39b40110ba6348d5470bbef646cfed79"
+      },
+      {
+        "discipline": "ventilation",
+        "uriHint": "projects/digital_hub/ventilation.ifc",
+        "bytes": 12737833,
+        "sha256": "c0a1807875957c4154d45d14a3b5ed480dd3178a5bdc3262302a7eccf76d5cb1"
+      }
+    ]
+  },
+  "adapter": {
+    "fingerprint": "fc2aa5371729a3f5588d34b471f713cfd88758fae8e271f22f295c6c4a553277",
+    "name": "IfcOpenShell",
+    "schemaVersion": "naru.ifc-adapter-identity.1",
+    "toolchain": {
+      "architecture": "AMD64",
+      "ifcOpenShell": "0.8.5",
+      "numpy": "2.5.2",
+      "platform": "win32",
+      "python": "3.13.2"
+    },
+    "version": "0.8.5"
+  },
+  "tool": {
+    "path": "native/adapter-ifc/tools/measure_structure_readiness.py",
+    "schemaVersion": "naru.ifc-structure-readiness.1",
+    "ifcopenshellVersion": "0.8.5",
+    "pythonVersion": "3.13.2",
+    "pythonExecutable": "output/venv-ifc/Scripts/python.exe"
+  },
+  "protocol": {
+    "sampleCount": 5,
+    "discardedSamples": 0,
+    "warmUpRuns": 1,
+    "rule": "One warm-up run, then every subsequent run recorded. Each sample is a fresh Python process reading every document in its own pass. No sample is discarded for its timing; a non-zero exit aborts the recording.",
+    "covers": "Raw byte scan, IfcOpenShell parse, spatial containment walk, and JSON serialization of the resulting entry list. Property and classification association is excluded (the cold adapter spends a separate propertyIndex stage on it), and no representation is evaluated, so nothing here tessellates.",
+    "caveats": [
+      "The OS page cache is not dropped between samples, matching the protocol of artifacts/cache/sixty5.",
+      "Threaded makespan is arithmetic over the measured per-document durations, not a measured parallel run.",
+      "Time to a viewer is not measured: this is the adapter-side path to a serialized tree only."
+    ]
+  },
+  "memory": {
+    "method": "os-sampled-win32-process-tree",
+    "peakWorkingSetBytes": {
+      "values": [
+        167366656,
+        241164288,
+        200937472,
+        174825472,
+        220573696
+      ],
+      "median": 200937472,
+      "p95": 241164288,
+      "minimum": 167366656,
+      "maximum": 241164288
+    }
+  },
+  "structure": [
+    {
+      "discipline": "architecture",
+      "uriHint": "projects/digital_hub/arc.ifc",
+      "schema": "IFC4",
+      "sourceBytes": 9022255,
+      "structureEntries": 783,
+      "structureRoots": 1,
+      "aggregateRelations": 14,
+      "containmentRelations": 3,
+      "structurePayloadBytes": 95294,
+      "scanKeywordCounts": {
+        "IFCRELAGGREGATES": 14,
+        "IFCRELCONTAINEDINSPATIALSTRUCTURE": 3,
+        "IFCBUILDINGSTOREY": 3
+      },
+      "milliseconds": {
+        "scan": {
+          "values": [
+            7.4,
+            7.4,
+            7.3,
+            8,
+            7.3
+          ],
+          "median": 7.4,
+          "p95": 8,
+          "minimum": 7.3,
+          "maximum": 8
+        },
+        "open": {
+          "values": [
+            313.3,
+            309.2,
+            312.5,
+            310,
+            310.1
+          ],
+          "median": 310.1,
+          "p95": 313.3,
+          "minimum": 309.2,
+          "maximum": 313.3
+        },
+        "walk": {
+          "values": [
+            4.7,
+            4.5,
+            5.7,
+            4.6,
+            4.5
+          ],
+          "median": 4.6,
+          "p95": 5.7,
+          "minimum": 4.5,
+          "maximum": 5.7
+        },
+        "serialize": {
+          "values": [
+            0.3,
+            0.3,
+            0.3,
+            0.3,
+            0.3
+          ],
+          "median": 0.3,
+          "p95": 0.3,
+          "minimum": 0.3,
+          "maximum": 0.3
+        },
+        "ready": {
+          "values": [
+            318.3,
+            314.1,
+            318.6,
+            314.9,
+            315
+          ],
+          "median": 315,
+          "p95": 318.6,
+          "minimum": 314.1,
+          "maximum": 318.6
+        }
+      }
+    },
+    {
+      "discipline": "heating",
+      "uriHint": "projects/digital_hub/heating.ifc",
+      "schema": "IFC4",
+      "sourceBytes": 20890415,
+      "structureEntries": 1801,
+      "structureRoots": 1,
+      "aggregateRelations": 3,
+      "containmentRelations": 3,
+      "structurePayloadBytes": 218151,
+      "scanKeywordCounts": {
+        "IFCRELAGGREGATES": 3,
+        "IFCRELCONTAINEDINSPATIALSTRUCTURE": 3,
+        "IFCBUILDINGSTOREY": 3
+      },
+      "milliseconds": {
+        "scan": {
+          "values": [
+            15.1,
+            14.4,
+            15.1,
+            15.2,
+            15.1
+          ],
+          "median": 15.1,
+          "p95": 15.2,
+          "minimum": 14.4,
+          "maximum": 15.2
+        },
+        "open": {
+          "values": [
+            794.1,
+            789.1,
+            788.7,
+            794.2,
+            785.5
+          ],
+          "median": 789.1,
+          "p95": 794.2,
+          "minimum": 785.5,
+          "maximum": 794.2
+        },
+        "walk": {
+          "values": [
+            11.4,
+            11.5,
+            11.6,
+            12,
+            11.8
+          ],
+          "median": 11.6,
+          "p95": 12,
+          "minimum": 11.4,
+          "maximum": 12
+        },
+        "serialize": {
+          "values": [
+            0.6,
+            0.6,
+            0.6,
+            0.6,
+            0.6
+          ],
+          "median": 0.6,
+          "p95": 0.6,
+          "minimum": 0.6,
+          "maximum": 0.6
+        },
+        "ready": {
+          "values": [
+            806.1,
+            801.2,
+            801,
+            806.8,
+            797.9
+          ],
+          "median": 801.2,
+          "p95": 806.8,
+          "minimum": 797.9,
+          "maximum": 806.8
+        }
+      }
+    },
+    {
+      "discipline": "plumbing",
+      "uriHint": "projects/digital_hub/plumbing.ifc",
+      "schema": "IFC4",
+      "sourceBytes": 25178864,
+      "structureEntries": 1016,
+      "structureRoots": 1,
+      "aggregateRelations": 3,
+      "containmentRelations": 3,
+      "structurePayloadBytes": 123951,
+      "scanKeywordCounts": {
+        "IFCRELAGGREGATES": 3,
+        "IFCRELCONTAINEDINSPATIALSTRUCTURE": 3,
+        "IFCBUILDINGSTOREY": 3
+      },
+      "milliseconds": {
+        "scan": {
+          "values": [
+            17,
+            16.9,
+            16.6,
+            17,
+            17.1
+          ],
+          "median": 17,
+          "p95": 17.1,
+          "minimum": 16.6,
+          "maximum": 17.1
+        },
+        "open": {
+          "values": [
+            792.3,
+            788.9,
+            798.5,
+            787.2,
+            796.7
+          ],
+          "median": 792.3,
+          "p95": 798.5,
+          "minimum": 787.2,
+          "maximum": 798.5
+        },
+        "walk": {
+          "values": [
+            6.3,
+            6.4,
+            6.4,
+            6.4,
+            6.7
+          ],
+          "median": 6.4,
+          "p95": 6.7,
+          "minimum": 6.3,
+          "maximum": 6.7
+        },
+        "serialize": {
+          "values": [
+            0.4,
+            0.4,
+            0.5,
+            0.4,
+            0.4
+          ],
+          "median": 0.4,
+          "p95": 0.5,
+          "minimum": 0.4,
+          "maximum": 0.5
+        },
+        "ready": {
+          "values": [
+            799.1,
+            795.7,
+            805.4,
+            794,
+            803.9
+          ],
+          "median": 799.1,
+          "p95": 805.4,
+          "minimum": 794,
+          "maximum": 805.4
+        }
+      }
+    },
+    {
+      "discipline": "ventilation",
+      "uriHint": "projects/digital_hub/ventilation.ifc",
+      "schema": "IFC4",
+      "sourceBytes": 12737833,
+      "structureEntries": 1316,
+      "structureRoots": 1,
+      "aggregateRelations": 3,
+      "containmentRelations": 3,
+      "structurePayloadBytes": 160944,
+      "scanKeywordCounts": {
+        "IFCRELAGGREGATES": 3,
+        "IFCRELCONTAINEDINSPATIALSTRUCTURE": 3,
+        "IFCBUILDINGSTOREY": 3
+      },
+      "milliseconds": {
+        "scan": {
+          "values": [
+            9.8,
+            9.8,
+            9.8,
+            9.9,
+            9.8
+          ],
+          "median": 9.8,
+          "p95": 9.9,
+          "minimum": 9.8,
+          "maximum": 9.9
+        },
+        "open": {
+          "values": [
+            526,
+            536.3,
+            541.1,
+            526.5,
+            521.9
+          ],
+          "median": 526.5,
+          "p95": 541.1,
+          "minimum": 521.9,
+          "maximum": 541.1
+        },
+        "walk": {
+          "values": [
+            8.4,
+            8.1,
+            12,
+            8.5,
+            8.2
+          ],
+          "median": 8.4,
+          "p95": 12,
+          "minimum": 8.1,
+          "maximum": 12
+        },
+        "serialize": {
+          "values": [
+            0.6,
+            0.5,
+            0.9,
+            0.5,
+            0.6
+          ],
+          "median": 0.6,
+          "p95": 0.9,
+          "minimum": 0.5,
+          "maximum": 0.9
+        },
+        "ready": {
+          "values": [
+            534.9,
+            544.9,
+            554,
+            535.6,
+            530.8
+          ],
+          "median": 535.6,
+          "p95": 554,
+          "minimum": 530.8,
+          "maximum": 554
+        }
+      }
+    }
+  ],
+  "federation": {
+    "documentCount": 4,
+    "sourceBytes": 67829367,
+    "structureEntries": 4916,
+    "structurePayloadBytes": 598340,
+    "threads": 6,
+    "milliseconds": {
+      "scan": {
+        "values": [
+          49.3,
+          48.5,
+          48.8,
+          50.1,
+          49.3
+        ],
+        "median": 49.3,
+        "p95": 50.1,
+        "minimum": 48.5,
+        "maximum": 50.1
+      },
+      "sequentialReady": {
+        "values": [
+          2458.4,
+          2455.9,
+          2479,
+          2451.3,
+          2447.6
+        ],
+        "median": 2455.9,
+        "p95": 2479,
+        "minimum": 2447.6,
+        "maximum": 2479
+      },
+      "firstDocumentReady": {
+        "values": [
+          318.3,
+          314.1,
+          318.6,
+          314.9,
+          315
+        ],
+        "median": 315,
+        "p95": 318.6,
+        "minimum": 314.1,
+        "maximum": 318.6
+      },
+      "slowestDocumentReady": {
+        "values": [
+          806.1,
+          801.2,
+          805.4,
+          806.8,
+          803.9
+        ],
+        "median": 805.4,
+        "p95": 806.8,
+        "minimum": 801.2,
+        "maximum": 806.8
+      },
+      "estimatedThreadedMakespan": {
+        "values": [
+          806.1,
+          801.2,
+          805.4,
+          806.8,
+          803.9
+        ],
+        "median": 805.4,
+        "p95": 806.8,
+        "minimum": 801.2,
+        "maximum": 806.8
+      }
+    },
+    "makespanMethod": "longest-processing-time-first-schedule-of-measured-durations",
+    "process": {
+      "values": [
+        3134.3,
+        3140.2,
+        3216.9,
+        3146.5,
+        3148.1
+      ],
+      "median": 3146.5,
+      "p95": 3216.9,
+      "minimum": 3134.3,
+      "maximum": 3216.9
+    }
+  },
+  "samples": [
+    {
+      "index": 1,
+      "processMilliseconds": 3134.3,
+      "peakWorkingSetBytes": 167366656,
+      "peakPrivateBytes": 642289664,
+      "federation": {
+        "documentCount": 4,
+        "sourceBytes": 67829367,
+        "structureEntries": 4916,
+        "structurePayloadBytes": 598340,
+        "scanMilliseconds": 49.3,
+        "sequentialReadyMilliseconds": 2458.4,
+        "firstDocumentReadyMilliseconds": 318.3,
+        "slowestDocumentReadyMilliseconds": 806.1,
+        "estimatedThreadedMakespanMilliseconds": 806.1,
+        "makespanMethod": "longest-processing-time-first-schedule-of-measured-durations"
+      },
+      "documents": [
+        {
+          "discipline": "architecture",
+          "schema": "IFC4",
+          "sourceBytes": 9022255,
+          "scanMilliseconds": 7.4,
+          "openMilliseconds": 313.3,
+          "walkMilliseconds": 4.7,
+          "serializeMilliseconds": 0.3,
+          "readyMilliseconds": 318.3,
+          "structureEntries": 783,
+          "structureRoots": 1,
+          "aggregateRelations": 14,
+          "containmentRelations": 3,
+          "structurePayloadBytes": 95294,
+          "scanKeywordCounts": {
+            "IFCRELAGGREGATES": 14,
+            "IFCRELCONTAINEDINSPATIALSTRUCTURE": 3,
+            "IFCBUILDINGSTOREY": 3
+          }
+        },
+        {
+          "discipline": "heating",
+          "schema": "IFC4",
+          "sourceBytes": 20890415,
+          "scanMilliseconds": 15.1,
+          "openMilliseconds": 794.1,
+          "walkMilliseconds": 11.4,
+          "serializeMilliseconds": 0.6,
+          "readyMilliseconds": 806.1,
+          "structureEntries": 1801,
+          "structureRoots": 1,
+          "aggregateRelations": 3,
+          "containmentRelations": 3,
+          "structurePayloadBytes": 218151,
+          "scanKeywordCounts": {
+            "IFCRELAGGREGATES": 3,
+            "IFCRELCONTAINEDINSPATIALSTRUCTURE": 3,
+            "IFCBUILDINGSTOREY": 3
+          }
+        },
+        {
+          "discipline": "plumbing",
+          "schema": "IFC4",
+          "sourceBytes": 25178864,
+          "scanMilliseconds": 17,
+          "openMilliseconds": 792.3,
+          "walkMilliseconds": 6.3,
+          "serializeMilliseconds": 0.4,
+          "readyMilliseconds": 799.1,
+          "structureEntries": 1016,
+          "structureRoots": 1,
+          "aggregateRelations": 3,
+          "containmentRelations": 3,
+          "structurePayloadBytes": 123951,
+          "scanKeywordCounts": {
+            "IFCRELAGGREGATES": 3,
+            "IFCRELCONTAINEDINSPATIALSTRUCTURE": 3,
+            "IFCBUILDINGSTOREY": 3
+          }
+        },
+        {
+          "discipline": "ventilation",
+          "schema": "IFC4",
+          "sourceBytes": 12737833,
+          "scanMilliseconds": 9.8,
+          "openMilliseconds": 526,
+          "walkMilliseconds": 8.4,
+          "serializeMilliseconds": 0.6,
+          "readyMilliseconds": 534.9,
+          "structureEntries": 1316,
+          "structureRoots": 1,
+          "aggregateRelations": 3,
+          "containmentRelations": 3,
+          "structurePayloadBytes": 160944,
+          "scanKeywordCounts": {
+            "IFCRELAGGREGATES": 3,
+            "IFCRELCONTAINEDINSPATIALSTRUCTURE": 3,
+            "IFCBUILDINGSTOREY": 3
+          }
+        }
+      ]
+    },
+    {
+      "index": 2,
+      "processMilliseconds": 3140.2,
+      "peakWorkingSetBytes": 241164288,
+      "peakPrivateBytes": 720883712,
+      "federation": {
+        "documentCount": 4,
+        "sourceBytes": 67829367,
+        "structureEntries": 4916,
+        "structurePayloadBytes": 598340,
+        "scanMilliseconds": 48.5,
+        "sequentialReadyMilliseconds": 2455.9,
+        "firstDocumentReadyMilliseconds": 314.1,
+        "slowestDocumentReadyMilliseconds": 801.2,
+        "estimatedThreadedMakespanMilliseconds": 801.2,
+        "makespanMethod": "longest-processing-time-first-schedule-of-measured-durations"
+      },
+      "documents": [
+        {
+          "discipline": "architecture",
+          "schema": "IFC4",
+          "sourceBytes": 9022255,
+          "scanMilliseconds": 7.4,
+          "openMilliseconds": 309.2,
+          "walkMilliseconds": 4.5,
+          "serializeMilliseconds": 0.3,
+          "readyMilliseconds": 314.1,
+          "structureEntries": 783,
+          "structureRoots": 1,
+          "aggregateRelations": 14,
+          "containmentRelations": 3,
+          "structurePayloadBytes": 95294,
+          "scanKeywordCounts": {
+            "IFCRELAGGREGATES": 14,
+            "IFCRELCONTAINEDINSPATIALSTRUCTURE": 3,
+            "IFCBUILDINGSTOREY": 3
+          }
+        },
+        {
+          "discipline": "heating",
+          "schema": "IFC4",
+          "sourceBytes": 20890415,
+          "scanMilliseconds": 14.4,
+          "openMilliseconds": 789.1,
+          "walkMilliseconds": 11.5,
+          "serializeMilliseconds": 0.6,
+          "readyMilliseconds": 801.2,
+          "structureEntries": 1801,
+          "structureRoots": 1,
+          "aggregateRelations": 3,
+          "containmentRelations": 3,
+          "structurePayloadBytes": 218151,
+          "scanKeywordCounts": {
+            "IFCRELAGGREGATES": 3,
+            "IFCRELCONTAINEDINSPATIALSTRUCTURE": 3,
+            "IFCBUILDINGSTOREY": 3
+          }
+        },
+        {
+          "discipline": "plumbing",
+          "schema": "IFC4",
+          "sourceBytes": 25178864,
+          "scanMilliseconds": 16.9,
+          "openMilliseconds": 788.9,
+          "walkMilliseconds": 6.4,
+          "serializeMilliseconds": 0.4,
+          "readyMilliseconds": 795.7,
+          "structureEntries": 1016,
+          "structureRoots": 1,
+          "aggregateRelations": 3,
+          "containmentRelations": 3,
+          "structurePayloadBytes": 123951,
+          "scanKeywordCounts": {
+            "IFCRELAGGREGATES": 3,
+            "IFCRELCONTAINEDINSPATIALSTRUCTURE": 3,
+            "IFCBUILDINGSTOREY": 3
+          }
+        },
+        {
+          "discipline": "ventilation",
+          "schema": "IFC4",
+          "sourceBytes": 12737833,
+          "scanMilliseconds": 9.8,
+          "openMilliseconds": 536.3,
+          "walkMilliseconds": 8.1,
+          "serializeMilliseconds": 0.5,
+          "readyMilliseconds": 544.9,
+          "structureEntries": 1316,
+          "structureRoots": 1,
+          "aggregateRelations": 3,
+          "containmentRelations": 3,
+          "structurePayloadBytes": 160944,
+          "scanKeywordCounts": {
+            "IFCRELAGGREGATES": 3,
+            "IFCRELCONTAINEDINSPATIALSTRUCTURE": 3,
+            "IFCBUILDINGSTOREY": 3
+          }
+        }
+      ]
+    },
+    {
+      "index": 3,
+      "processMilliseconds": 3216.9,
+      "peakWorkingSetBytes": 200937472,
+      "peakPrivateBytes": 678182912,
+      "federation": {
+        "documentCount": 4,
+        "sourceBytes": 67829367,
+        "structureEntries": 4916,
+        "structurePayloadBytes": 598340,
+        "scanMilliseconds": 48.8,
+        "sequentialReadyMilliseconds": 2479,
+        "firstDocumentReadyMilliseconds": 318.6,
+        "slowestDocumentReadyMilliseconds": 805.4,
+        "estimatedThreadedMakespanMilliseconds": 805.4,
+        "makespanMethod": "longest-processing-time-first-schedule-of-measured-durations"
+      },
+      "documents": [
+        {
+          "discipline": "architecture",
+          "schema": "IFC4",
+          "sourceBytes": 9022255,
+          "scanMilliseconds": 7.3,
+          "openMilliseconds": 312.5,
+          "walkMilliseconds": 5.7,
+          "serializeMilliseconds": 0.3,
+          "readyMilliseconds": 318.6,
+          "structureEntries": 783,
+          "structureRoots": 1,
+          "aggregateRelations": 14,
+          "containmentRelations": 3,
+          "structurePayloadBytes": 95294,
+          "scanKeywordCounts": {
+            "IFCRELAGGREGATES": 14,
+            "IFCRELCONTAINEDINSPATIALSTRUCTURE": 3,
+            "IFCBUILDINGSTOREY": 3
+          }
+        },
+        {
+          "discipline": "heating",
+          "schema": "IFC4",
+          "sourceBytes": 20890415,
+          "scanMilliseconds": 15.1,
+          "openMilliseconds": 788.7,
+          "walkMilliseconds": 11.6,
+          "serializeMilliseconds": 0.6,
+          "readyMilliseconds": 801,
+          "structureEntries": 1801,
+          "structureRoots": 1,
+          "aggregateRelations": 3,
+          "containmentRelations": 3,
+          "structurePayloadBytes": 218151,
+          "scanKeywordCounts": {
+            "IFCRELAGGREGATES": 3,
+            "IFCRELCONTAINEDINSPATIALSTRUCTURE": 3,
+            "IFCBUILDINGSTOREY": 3
+          }
+        },
+        {
+          "discipline": "plumbing",
+          "schema": "IFC4",
+          "sourceBytes": 25178864,
+          "scanMilliseconds": 16.6,
+          "openMilliseconds": 798.5,
+          "walkMilliseconds": 6.4,
+          "serializeMilliseconds": 0.5,
+          "readyMilliseconds": 805.4,
+          "structureEntries": 1016,
+          "structureRoots": 1,
+          "aggregateRelations": 3,
+          "containmentRelations": 3,
+          "structurePayloadBytes": 123951,
+          "scanKeywordCounts": {
+            "IFCRELAGGREGATES": 3,
+            "IFCRELCONTAINEDINSPATIALSTRUCTURE": 3,
+            "IFCBUILDINGSTOREY": 3
+          }
+        },
+        {
+          "discipline": "ventilation",
+          "schema": "IFC4",
+          "sourceBytes": 12737833,
+          "scanMilliseconds": 9.8,
+          "openMilliseconds": 541.1,
+          "walkMilliseconds": 12,
+          "serializeMilliseconds": 0.9,
+          "readyMilliseconds": 554,
+          "structureEntries": 1316,
+          "structureRoots": 1,
+          "aggregateRelations": 3,
+          "containmentRelations": 3,
+          "structurePayloadBytes": 160944,
+          "scanKeywordCounts": {
+            "IFCRELAGGREGATES": 3,
+            "IFCRELCONTAINEDINSPATIALSTRUCTURE": 3,
+            "IFCBUILDINGSTOREY": 3
+          }
+        }
+      ]
+    },
+    {
+      "index": 4,
+      "processMilliseconds": 3146.5,
+      "peakWorkingSetBytes": 174825472,
+      "peakPrivateBytes": 649883648,
+      "federation": {
+        "documentCount": 4,
+        "sourceBytes": 67829367,
+        "structureEntries": 4916,
+        "structurePayloadBytes": 598340,
+        "scanMilliseconds": 50.1,
+        "sequentialReadyMilliseconds": 2451.3,
+        "firstDocumentReadyMilliseconds": 314.9,
+        "slowestDocumentReadyMilliseconds": 806.8,
+        "estimatedThreadedMakespanMilliseconds": 806.8,
+        "makespanMethod": "longest-processing-time-first-schedule-of-measured-durations"
+      },
+      "documents": [
+        {
+          "discipline": "architecture",
+          "schema": "IFC4",
+          "sourceBytes": 9022255,
+          "scanMilliseconds": 8,
+          "openMilliseconds": 310,
+          "walkMilliseconds": 4.6,
+          "serializeMilliseconds": 0.3,
+          "readyMilliseconds": 314.9,
+          "structureEntries": 783,
+          "structureRoots": 1,
+          "aggregateRelations": 14,
+          "containmentRelations": 3,
+          "structurePayloadBytes": 95294,
+          "scanKeywordCounts": {
+            "IFCRELAGGREGATES": 14,
+            "IFCRELCONTAINEDINSPATIALSTRUCTURE": 3,
+            "IFCBUILDINGSTOREY": 3
+          }
+        },
+        {
+          "discipline": "heating",
+          "schema": "IFC4",
+          "sourceBytes": 20890415,
+          "scanMilliseconds": 15.2,
+          "openMilliseconds": 794.2,
+          "walkMilliseconds": 12,
+          "serializeMilliseconds": 0.6,
+          "readyMilliseconds": 806.8,
+          "structureEntries": 1801,
+          "structureRoots": 1,
+          "aggregateRelations": 3,
+          "containmentRelations": 3,
+          "structurePayloadBytes": 218151,
+          "scanKeywordCounts": {
+            "IFCRELAGGREGATES": 3,
+            "IFCRELCONTAINEDINSPATIALSTRUCTURE": 3,
+            "IFCBUILDINGSTOREY": 3
+          }
+        },
+        {
+          "discipline": "plumbing",
+          "schema": "IFC4",
+          "sourceBytes": 25178864,
+          "scanMilliseconds": 17,
+          "openMilliseconds": 787.2,
+          "walkMilliseconds": 6.4,
+          "serializeMilliseconds": 0.4,
+          "readyMilliseconds": 794,
+          "structureEntries": 1016,
+          "structureRoots": 1,
+          "aggregateRelations": 3,
+          "containmentRelations": 3,
+          "structurePayloadBytes": 123951,
+          "scanKeywordCounts": {
+            "IFCRELAGGREGATES": 3,
+            "IFCRELCONTAINEDINSPATIALSTRUCTURE": 3,
+            "IFCBUILDINGSTOREY": 3
+          }
+        },
+        {
+          "discipline": "ventilation",
+          "schema": "IFC4",
+          "sourceBytes": 12737833,
+          "scanMilliseconds": 9.9,
+          "openMilliseconds": 526.5,
+          "walkMilliseconds": 8.5,
+          "serializeMilliseconds": 0.5,
+          "readyMilliseconds": 535.6,
+          "structureEntries": 1316,
+          "structureRoots": 1,
+          "aggregateRelations": 3,
+          "containmentRelations": 3,
+          "structurePayloadBytes": 160944,
+          "scanKeywordCounts": {
+            "IFCRELAGGREGATES": 3,
+            "IFCRELCONTAINEDINSPATIALSTRUCTURE": 3,
+            "IFCBUILDINGSTOREY": 3
+          }
+        }
+      ]
+    },
+    {
+      "index": 5,
+      "processMilliseconds": 3148.1,
+      "peakWorkingSetBytes": 220573696,
+      "peakPrivateBytes": 699457536,
+      "federation": {
+        "documentCount": 4,
+        "sourceBytes": 67829367,
+        "structureEntries": 4916,
+        "structurePayloadBytes": 598340,
+        "scanMilliseconds": 49.3,
+        "sequentialReadyMilliseconds": 2447.6,
+        "firstDocumentReadyMilliseconds": 315,
+        "slowestDocumentReadyMilliseconds": 803.9,
+        "estimatedThreadedMakespanMilliseconds": 803.9,
+        "makespanMethod": "longest-processing-time-first-schedule-of-measured-durations"
+      },
+      "documents": [
+        {
+          "discipline": "architecture",
+          "schema": "IFC4",
+          "sourceBytes": 9022255,
+          "scanMilliseconds": 7.3,
+          "openMilliseconds": 310.1,
+          "walkMilliseconds": 4.5,
+          "serializeMilliseconds": 0.3,
+          "readyMilliseconds": 315,
+          "structureEntries": 783,
+          "structureRoots": 1,
+          "aggregateRelations": 14,
+          "containmentRelations": 3,
+          "structurePayloadBytes": 95294,
+          "scanKeywordCounts": {
+            "IFCRELAGGREGATES": 14,
+            "IFCRELCONTAINEDINSPATIALSTRUCTURE": 3,
+            "IFCBUILDINGSTOREY": 3
+          }
+        },
+        {
+          "discipline": "heating",
+          "schema": "IFC4",
+          "sourceBytes": 20890415,
+          "scanMilliseconds": 15.1,
+          "openMilliseconds": 785.5,
+          "walkMilliseconds": 11.8,
+          "serializeMilliseconds": 0.6,
+          "readyMilliseconds": 797.9,
+          "structureEntries": 1801,
+          "structureRoots": 1,
+          "aggregateRelations": 3,
+          "containmentRelations": 3,
+          "structurePayloadBytes": 218151,
+          "scanKeywordCounts": {
+            "IFCRELAGGREGATES": 3,
+            "IFCRELCONTAINEDINSPATIALSTRUCTURE": 3,
+            "IFCBUILDINGSTOREY": 3
+          }
+        },
+        {
+          "discipline": "plumbing",
+          "schema": "IFC4",
+          "sourceBytes": 25178864,
+          "scanMilliseconds": 17.1,
+          "openMilliseconds": 796.7,
+          "walkMilliseconds": 6.7,
+          "serializeMilliseconds": 0.4,
+          "readyMilliseconds": 803.9,
+          "structureEntries": 1016,
+          "structureRoots": 1,
+          "aggregateRelations": 3,
+          "containmentRelations": 3,
+          "structurePayloadBytes": 123951,
+          "scanKeywordCounts": {
+            "IFCRELAGGREGATES": 3,
+            "IFCRELCONTAINEDINSPATIALSTRUCTURE": 3,
+            "IFCBUILDINGSTOREY": 3
+          }
+        },
+        {
+          "discipline": "ventilation",
+          "schema": "IFC4",
+          "sourceBytes": 12737833,
+          "scanMilliseconds": 9.8,
+          "openMilliseconds": 521.9,
+          "walkMilliseconds": 8.2,
+          "serializeMilliseconds": 0.6,
+          "readyMilliseconds": 530.8,
+          "structureEntries": 1316,
+          "structureRoots": 1,
+          "aggregateRelations": 3,
+          "containmentRelations": 3,
+          "structurePayloadBytes": 160944,
+          "scanKeywordCounts": {
+            "IFCRELAGGREGATES": 3,
+            "IFCRELCONTAINEDINSPATIALSTRUCTURE": 3,
+            "IFCBUILDINGSTOREY": 3
+          }
+        }
+      ]
+    }
+  ],
+  "findings": {
+    "parsingDominates": {
+      "parseMilliseconds": 2418,
+      "walkMilliseconds": 31,
+      "serializeMilliseconds": 1.9,
+      "parseShareOfReady": 0.9846,
+      "walkShareOfReady": 0.0126
+    },
+    "structureShareOfColdAdapter": 0.0546,
+    "coldReference": {
+      "record": "artifacts/cache/rebuild-stages/digital-hub.json",
+      "cleanProcessMilliseconds": 50028.4,
+      "cleanAdapterMilliseconds": 44980.5
+    },
+    "criticalPath": {
+      "slowestDiscipline": "heating",
+      "slowestReadySeconds": 0.801,
+      "fastestDiscipline": "architecture",
+      "fastestReadySeconds": 0.315
+    },
+    "productTarget": {
+      "source": "issue #73 acceptance criterion 8",
+      "lowerSeconds": 5,
+      "upperSeconds": 15,
+      "measures": "adapter-side time to a serialized assembly tree, excluding transport to a viewer"
+    },
+    "againstProductTarget": {
+      "sequentialWholeFederationSeconds": 2.456,
+      "sequentialWithinUpperBound": true,
+      "estimatedThreadedSeconds": 0.805,
+      "estimatedThreadedWithinUpperBound": true,
+      "firstDocumentSeconds": 0.315,
+      "firstDocumentWithinUpperBound": true
+    }
+  }
+}
