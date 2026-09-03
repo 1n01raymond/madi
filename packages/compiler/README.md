@@ -126,6 +126,18 @@ ADR is rejected by its own gate -- the
 every clean-package byte on a changed-discipline rebuild of Digital Hub and
 sixty5 but restored payloads 2.2-2.4x slower than re-encoding them -- so the
 flag is a measured experiment, not a recommendation.
+
+`compileIfcFederation(..., { stageTiming: true })` returns a
+`naru.ifc-federation-stage-timing.1` ledger beside the result -- the thirteen
+compiler stages from source inspection to cache publication, the compile
+sub-stages (`validateScene`, `encodeGeometry`, `measureDocument`), the
+structure stream read, and the adapter process parts with the adapter's own
+`--stage-timing` ledger. `compileSceneToGltf` takes the stage observer as a
+third argument, outside `CompileGltfOptions`, so no timing reaches a package
+byte, a build report, or a cache key
+([test](test/ifc-federation.test.ts)). The
+[rebuild-stages record](../../artifacts/cache/rebuild-stages/README.md) is
+its consumer.
 Encoding and placement are separate:
 `buildCompiledPayload` produces one prototype's accessor bytes and
 placement-free metadata, `appendCompiledPayload` places them into `scene.bin`,

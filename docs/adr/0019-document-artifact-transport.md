@@ -15,10 +15,46 @@ named two candidates: laid-out byte ranges above the encoder, or
 content-derived prototype ids so an edited document keeps its untouched
 payloads.
 
-Before choosing, the warm changed-discipline rebuild was decomposed. These are
-**exploratory, single-run probes on this Windows host**, not a committed
-record; the committed stage breakdown is this ADR's gate 0. Their purpose is to
-size the levers, and the sizes are unambiguous.
+Before choosing, the warm changed-discipline rebuild was decomposed twice:
+first by exploratory single-run probes on this Windows host, then by this
+ADR's gate 0 record
+([artifacts/cache/rebuild-stages](../../artifacts/cache/rebuild-stages/README.md)),
+five fresh-process samples per model with adapter and compiler stage ledgers
+that close to the wall clock. The record's medians are the numbers this ADR's
+sizing rests on. The probe tables are kept below, labelled superseded,
+because gate 0 required stating whether they reproduced: they did not -- nine
+of nine comparable rows fall outside the record's own spread on both models,
+by 1.3-2.6x -- and the Context was corrected from the record on 2026-09-03 as
+gate 0 prescribes. The shape they described survived the correction; the
+absolutes did not.
+
+Committed record, medians over five samples (milliseconds, share of the
+`compileIfcFederation` wall time):
+
+| Stage | Digital Hub | sixty5 |
+|---|---:|---:|
+| Compile wall time | 19,763.6 | 126,149.8 |
+| Waiting on the adapter subprocess | 15,519.6 (78.5%) | 79,106.6 (62.7%) |
+| In-process compiler work | 4,346.1 (22.0%) | 46,582.0 (36.9%) |
+| Transport of unchanged documents: artifact verification + load, property index, merge, Scene IR writes, structure re-scan | 9,485 (48.0%) | 97,472 (77.3%) |
+| of which artifact verification by canonical re-serialization | 4,434.2 | 34,204.2 |
+| of which the compiler's structure stream scan | 2,305.9 | 30,215.2 |
+| of which the adapter's structure write | 837.2 | 10,586.1 |
+| of which the federation property index | 615.7 | 11,666.2 |
+| Re-extracting + publishing the changed document | 7,788 (39.4%) | 9,474 (7.5%) |
+| `compileSceneToGltf`, of which the encoder (`buildCompiledPayload`) | 1,065.6 / 451.5 (2.3%) | 10,830.6 / 3,183.7 (2.5%) |
+| Document streaming (`measureDocument`) | 222.3 | 2,437.2 |
+| `writeCompiledPackage` | 210.7 | 2,388.2 |
+| `validateScene` | 127.7 | 1,433.3 |
+
+The record's absolutes are 1.2-1.4x the ADR-0018 record's clean-rebuild
+medians on the same host and options (15,673.5 and 95,126.1 ms), uniformly
+across adapter and compiler stages, under uncontrolled foreground host load
+that the record declares; gate 4 is therefore measured against a clean
+rebuild recorded in the same session, never against these absolutes.
+
+Superseded exploratory probe, one run per model, kept for the reproduction
+verdict above:
 
 Compiler process, warm changed-discipline clean compile
 (`node --cpu-prof scripts/lib/ifc-cache-sample.mjs --config <changed-clean>
@@ -62,22 +98,24 @@ not hashing.
 
 Three conclusions follow, and they decide this ADR.
 
-1. **The encoder is not the lever.** `buildCompiledPayload` is 3.3 percent of
-   the compiler's in-process time on sixty5 and 1.2 percent of the rebuild
-   wall time (7.4 and 2.3 percent on Digital Hub). Any reuse unit that sits
-   at or below the encoder -- restored payloads, laid-out `scene.bin` byte
-   ranges, or a higher hit rate through content-derived prototype ids -- is
-   capped there, and ADR-0018's store spent more than that ceiling on I/O
-   before it restored a single byte. The tracker's two named candidates
-   cannot pass gate 4 whatever their hit rate.
+1. **The encoder is not the lever.** `buildCompiledPayload` is 6.8 percent of
+   the compiler's in-process time on sixty5 and 2.5 percent of the rebuild
+   wall time (10.4 and 2.3 percent on Digital Hub) in the record. Any reuse
+   unit that sits at or below the encoder -- restored payloads, laid-out
+   `scene.bin` byte ranges, or a higher hit rate through content-derived
+   prototype ids -- is capped there, and ADR-0018's store spent more than
+   that ceiling on I/O before it restored a single byte. The tracker's two
+   named candidates cannot pass gate 4 whatever their hit rate.
 2. **The transport is the lever.** On a changed-discipline rebuild every
-   unchanged document is verified by re-serialization (18-20x the cost of
-   hashing its stored bytes), re-merged into the federation, re-written as
-   the split Scene IR, then re-scanned by the compiler's streaming reader
-   (~15.1 s of self time on sixty5, 41 percent of the compiler's in-process
-   work, with most of the 11.3 s of garbage collection and microtask pumping
-   attributable to the same pass). Only the changed document needs any of
-   that.
+   unchanged document is verified by re-serialization (34.2 s on sixty5 in
+   the record, 44 percent of the adapter's main; the probe put hashing the
+   stored bytes at 18-20x less), re-merged and re-indexed into the federation
+   (property index 11.7 s), re-written as the split Scene IR (structure write
+   10.6 s), then re-scanned by the compiler's streaming reader (30.2 s of wall
+   time on sixty5, 65 percent of the compiler's in-process work; 2.3 s and 53
+   percent on Digital Hub). Together that is 77 percent of a sixty5 rebuild
+   and 48 percent of a Digital Hub one. Only the changed document needs any
+   of that.
 3. **Restore must be one read and one hash.** A store of many small files
    pays per-file overhead that dwarfs the hashing it exists to do. The
    artifact cache already stores one file per document; the successor keeps
@@ -231,10 +269,17 @@ rejects this ADR the way it rejected ADR-0018; no gate may be loosened to pass.
   and validation, packaging, document streaming, package write -- with the
   fresh-process, predeclared-sample protocol of
   [artifacts/cache/sixty5](../../artifacts/cache/sixty5/README.md). It fixes
-  the baseline every later gate is measured against and closes the "real-large
-  reopen stage breakdown" evidence debt in [PHASE_2](../PHASE_2.md). The
-  exploratory attribution above must reproduce within the record's own
+  the stage shares every later gate is argued against and closes the
+  "real-large reopen stage breakdown" evidence debt in [PHASE_2](../PHASE_2.md).
+  The exploratory attribution above must reproduce within the record's own
   spread or the Context of this ADR is corrected before slice 1.
+  **Met 2026-09-03**
+  ([record](../../artifacts/cache/rebuild-stages/README.md), validator
+  `pnpm cache:stages:check`): five samples per model, zero discarded, every
+  closure check held. The exploratory attribution did **not** reproduce (nine
+  of nine rows outside the spread on both models) and the Context was
+  corrected from the record; the shape it argued -- encoder 2.3-2.5 percent,
+  unchanged-document transport 48 and 77 percent -- held.
 - **Gate 1, byte identity:** every package resource of a changed-discipline
   rebuild through restored artifacts is byte-identical to a clean compile on
   both models, with the ADR-0018 record's closed report-exclusion list and no

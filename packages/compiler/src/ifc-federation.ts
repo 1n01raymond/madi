@@ -1,5 +1,6 @@
 import { spawn } from "node:child_process";
 import { availableParallelism, tmpdir } from "node:os";
+import { performance } from "node:perf_hooks";
 import { createHash } from "node:crypto";
 import { copyFile, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { basename, join, resolve } from "node:path";
@@ -7,6 +8,7 @@ import { fileURLToPath } from "node:url";
 
 import { CompiledPayloadCache } from "./compiled-payload-cache.js";
 import { compileSceneToGltf } from "./gltf.js";
+import type { CompileStage } from "./gltf.js";
 import { hydrateIfcSceneSplit, ifcSceneSplitEncodingVersion } from "./ifc-scene.js";
 import { readIfcStructure } from "./ifc-structure-stream.js";
 import type { IfcStructureRead } from "./ifc-structure-stream.js";
@@ -75,7 +77,59 @@ export interface IfcFederationCompileOptions {
   readonly elideDerivedIdentifiers?: boolean;
   readonly omitDefaultNodeTransforms?: boolean;
   readonly relocateHierarchyNodes?: boolean;
+  /**
+   * Record wall-clock stage durations into the result's `stages`. Timing is
+   * diagnostic only: it never enters the adapter report, the build report,
+   * the cache key, or the package bytes, so an instrumented compile produces
+   * the same package as a plain one.
+   */
+  readonly stageTiming?: boolean;
   readonly environment?: NodeJS.ProcessEnv;
+}
+
+export type IfcFederationStageName =
+  | "inspectSources"
+  | "toolchainIdentity"
+  | "cacheLookup"
+  | "adapter"
+  | "readSceneIr"
+  | "hydrate"
+  | "compile"
+  | "validateCompiled"
+  | "dependencyIndex"
+  | "writePackage"
+  | "writeDependencyIndex"
+  | "retainSceneIr"
+  | "cachePublish";
+
+export interface IfcAdapterProcessTiming {
+  /** Process spawn to the adapter module's first statement (interpreter start). */
+  readonly spawnToModuleStartMilliseconds: number;
+  /** IfcOpenShell and numpy import cost, measured by the adapter itself. */
+  readonly importMilliseconds: number;
+  /** Module import end to `main()` start (module-level definitions). */
+  readonly importsToMainMilliseconds: number;
+  /** `main()` start to the adapter's final stamp (extraction, merge, writes). */
+  readonly mainMilliseconds: number;
+  /** Final stamp to the process `close` event (interpreter teardown). */
+  readonly finishToCloseMilliseconds: number;
+  /** The adapter's own `naru.ifc-adapter-stage-timing.1` ledger, verbatim. */
+  readonly ledger: unknown;
+}
+
+export interface IfcFederationStageTiming {
+  readonly schemaVersion: "naru.ifc-federation-stage-timing.1";
+  /** Entry of `compileIfcFederation` to its return; excludes temp-dir cleanup. */
+  readonly totalMilliseconds: number;
+  readonly stages: Readonly<Record<IfcFederationStageName, number>>;
+  /** Milliseconds of `totalMilliseconds` outside every named stage. */
+  readonly unattributedMilliseconds: number;
+  /** The structure stream scan, one component of `readSceneIr`. */
+  readonly structureReadMilliseconds: number;
+  /** Sub-stages of `compile`; `other` closes the ledger. */
+  readonly compileStages: Readonly<Record<CompileStage | "other", number>>;
+  /** Present when the adapter ran (a package-cache hit skips it). */
+  readonly adapter?: IfcAdapterProcessTiming;
 }
 
 export interface InspectedIfcFederationDocument extends IfcSourceInspection {
@@ -90,6 +144,8 @@ export interface IfcFederationCompilationResult {
   readonly adapterReport: unknown;
   readonly dependencyIndex: IfcIncrementalDependencyIndex;
   readonly cache: CompilationCacheResult;
+  /** Only when `stageTiming` was requested. */
+  readonly stages?: IfcFederationStageTiming;
 }
 
 const incrementalDependencyIndexFilename = "incremental-dependencies.json";
@@ -149,12 +205,20 @@ async function inspectDocuments(
   return sources.sort((left, right) => left.discipline.localeCompare(right.discipline, "en"));
 }
 
+interface AdapterRun {
+  readonly stdout: string;
+  /** `Date.now()` immediately before `spawn`, comparable with the adapter's own stamps. */
+  readonly spawnedAtMs: number;
+  readonly closedAtMs: number;
+}
+
 async function runAdapter(
   executable: string,
   arguments_: readonly string[],
   environment: NodeJS.ProcessEnv,
-): Promise<string> {
-  return await new Promise<string>((resolvePromise, reject) => {
+): Promise<AdapterRun> {
+  return await new Promise<AdapterRun>((resolvePromise, reject) => {
+    const spawnedAtMs = Date.now();
     const child = spawn(executable, arguments_, {
       env: environment,
       shell: false,
@@ -181,7 +245,7 @@ async function runAdapter(
     });
     child.once("close", (code) => {
       if (code === 0) {
-        resolvePromise(stdout);
+        resolvePromise({ stdout, spawnedAtMs, closedAtMs: Date.now() });
         return;
       }
       const details = stderr.trim() || stdout.trim() || `exit code ${String(code)}`;
@@ -211,7 +275,11 @@ async function inspectAdapterToolchain(
   adapterScriptPath: string,
   environment: NodeJS.ProcessEnv,
 ): Promise<IfcAdapterIdentity> {
-  const serialized = await runAdapter(executable, [adapterScriptPath, "--identity"], environment);
+  const { stdout: serialized } = await runAdapter(
+    executable,
+    [adapterScriptPath, "--identity"],
+    environment,
+  );
   const value = parseJson(serialized.trim(), "IFC adapter identity");
   if (typeof value !== "object" || value === null) {
     throw new TypeError("IFC adapter identity must be an object.");
@@ -404,10 +472,145 @@ function assertAdapterIdentity(
   return { report, federationDigest: federation.sourceDigest };
 }
 
+const federationStageNames: readonly IfcFederationStageName[] = [
+  "inspectSources",
+  "toolchainIdentity",
+  "cacheLookup",
+  "adapter",
+  "readSceneIr",
+  "hydrate",
+  "compile",
+  "validateCompiled",
+  "dependencyIndex",
+  "writePackage",
+  "writeDependencyIndex",
+  "retainSceneIr",
+  "cachePublish",
+];
+
+class StageLedger {
+  private readonly startedAt = performance.now();
+  private readonly durations = new Map<IfcFederationStageName, number>();
+  structureReadMilliseconds = 0;
+  readonly compileStages: Record<CompileStage, number> = {
+    validateScene: 0,
+    encodeGeometry: 0,
+    measureDocument: 0,
+  };
+  adapter: IfcAdapterProcessTiming | undefined;
+
+  async time<T>(stage: IfcFederationStageName, work: () => Promise<T>): Promise<T> {
+    const started = performance.now();
+    try {
+      return await work();
+    } finally {
+      this.record(stage, performance.now() - started);
+    }
+  }
+
+  timeSync<T>(stage: IfcFederationStageName, work: () => T): T {
+    const started = performance.now();
+    try {
+      return work();
+    } finally {
+      this.record(stage, performance.now() - started);
+    }
+  }
+
+  finish(): IfcFederationStageTiming {
+    const totalMilliseconds = performance.now() - this.startedAt;
+    const stages = Object.fromEntries(
+      federationStageNames.map((stage) => [stage, this.durations.get(stage) ?? 0]),
+    ) as Record<IfcFederationStageName, number>;
+    const attributed = federationStageNames.reduce((sum, stage) => sum + stages[stage], 0);
+    const compileSubStages =
+      this.compileStages.validateScene +
+      this.compileStages.encodeGeometry +
+      this.compileStages.measureDocument;
+    return {
+      schemaVersion: "naru.ifc-federation-stage-timing.1",
+      totalMilliseconds,
+      stages,
+      unattributedMilliseconds: totalMilliseconds - attributed,
+      structureReadMilliseconds: this.structureReadMilliseconds,
+      compileStages: { ...this.compileStages, other: stages.compile - compileSubStages },
+      ...(this.adapter ? { adapter: this.adapter } : {}),
+    };
+  }
+
+  private record(stage: IfcFederationStageName, milliseconds: number): void {
+    this.durations.set(stage, (this.durations.get(stage) ?? 0) + milliseconds);
+  }
+}
+
+async function stage<T>(
+  ledger: StageLedger | undefined,
+  name: IfcFederationStageName,
+  work: () => Promise<T>,
+): Promise<T> {
+  return ledger ? await ledger.time(name, work) : await work();
+}
+
+function stageSync<T>(
+  ledger: StageLedger | undefined,
+  name: IfcFederationStageName,
+  work: () => T,
+): T {
+  return ledger ? ledger.timeSync(name, work) : work();
+}
+
+interface AdapterWallClock {
+  readonly moduleStartedAtMs: number;
+  readonly importsFinishedAtMs: number;
+  readonly mainStartedAtMs: number;
+  readonly finishedAtMs: number;
+}
+
+async function readAdapterTiming(path: string, run: AdapterRun): Promise<IfcAdapterProcessTiming> {
+  let serialized: string;
+  try {
+    serialized = await readFile(path, "utf8");
+  } catch (error) {
+    throw new TypeError("The IFC adapter did not write the requested stage-timing ledger.", {
+      cause: error,
+    });
+  }
+  const ledger = parseJson(serialized, "IFC adapter stage timing") as {
+    schemaVersion?: unknown;
+    wallClock?: Partial<Record<keyof AdapterWallClock, unknown>>;
+    importMilliseconds?: unknown;
+  };
+  const wallClock = ledger.wallClock;
+  const isMs = (value: unknown): value is number =>
+    typeof value === "number" && Number.isFinite(value);
+  if (
+    ledger.schemaVersion !== "naru.ifc-adapter-stage-timing.1" ||
+    !wallClock ||
+    !isMs(wallClock.moduleStartedAtMs) ||
+    !isMs(wallClock.importsFinishedAtMs) ||
+    !isMs(wallClock.mainStartedAtMs) ||
+    !isMs(wallClock.finishedAtMs) ||
+    !isMs(ledger.importMilliseconds)
+  ) {
+    throw new TypeError("IFC adapter stage timing ledger has an unexpected shape.");
+  }
+  return {
+    spawnToModuleStartMilliseconds: wallClock.moduleStartedAtMs - run.spawnedAtMs,
+    importMilliseconds: ledger.importMilliseconds,
+    importsToMainMilliseconds: wallClock.mainStartedAtMs - wallClock.importsFinishedAtMs,
+    mainMilliseconds: wallClock.finishedAtMs - wallClock.mainStartedAtMs,
+    finishToCloseMilliseconds: run.closedAtMs - wallClock.finishedAtMs,
+    ledger,
+  };
+}
+
 export async function compileIfcFederation(
   options: IfcFederationCompileOptions,
 ): Promise<IfcFederationCompilationResult> {
-  const sources = await inspectDocuments(options.documents);
+  const ledger = options.stageTiming === true ? new StageLedger() : undefined;
+  const sources = await stage(ledger, "inspectSources", () =>
+    inspectDocuments(options.documents),
+  );
   const threads = positiveThreads(options.threads);
   const outputDirectory = resolve(options.outputDirectory);
   const targetChunkByteBudget =
@@ -424,10 +627,15 @@ export async function compileIfcFederation(
   let cacheKey: string | undefined;
   // Both stores are keyed by the same two identities, so they are inspected
   // once for whichever of them is enabled.
-  const adapterToolchain = options.cacheDirectory || options.payloadCacheDirectory
-    ? await inspectAdapterToolchain(pythonExecutable, adapterScriptPath, environment)
-    : undefined;
-  const compiler = adapterToolchain ? await currentCompilerCacheIdentity() : undefined;
+  const { adapterToolchain, compiler } = await stage(ledger, "toolchainIdentity", async () => {
+    const toolchain = options.cacheDirectory || options.payloadCacheDirectory
+      ? await inspectAdapterToolchain(pythonExecutable, adapterScriptPath, environment)
+      : undefined;
+    return {
+      adapterToolchain: toolchain,
+      compiler: toolchain ? await currentCompilerCacheIdentity() : undefined,
+    };
+  });
   if (options.cacheDirectory && adapterToolchain && compiler) {
     cacheKeyInput = federationCacheInput(
       sources,
@@ -440,11 +648,13 @@ export async function compileIfcFederation(
     );
     cacheKey = createCompiledCacheKey(cacheKeyInput);
     try {
-      const restored = await restoreCompiledCacheEntry({
-        cacheDirectory: options.cacheDirectory,
-        key: cacheKey,
-        outputDirectory,
-      });
+      const restored = await stage(ledger, "cacheLookup", () =>
+        restoreCompiledCacheEntry({
+          cacheDirectory: options.cacheDirectory as string,
+          key: cacheKey as string,
+          outputDirectory,
+        }),
+      );
       if (restored) {
         const [
           serializedBuildReport,
@@ -472,6 +682,7 @@ export async function compileIfcFederation(
           ),
           adapterReport: parseJson(serializedAdapterReport, "Cached IFC adapter report"),
           cache: { status: "hit", key: cacheKey },
+          ...(ledger ? { stages: ledger.finish() } : {}),
         };
       }
     } catch (error) {
@@ -485,6 +696,7 @@ export async function compileIfcFederation(
   const geometryPath = join(temporaryDirectory, "scene-ir-geometry.bin");
   const propertiesPath = join(temporaryDirectory, "scene-ir-properties.bin");
   const adapterReportPath = join(temporaryDirectory, "adapter-report.json");
+  const stageTimingPath = join(temporaryDirectory, "stage-timing.json");
   try {
     const sourceArguments = sources.flatMap((source) => [
       "--document",
@@ -492,39 +704,57 @@ export async function compileIfcFederation(
       "--uri-hint",
       `${source.discipline}=${source.uriHint}`,
     ]);
-    await runAdapter(
-      pythonExecutable,
-      [
-        adapterScriptPath,
-        ...sourceArguments,
-        "--scene",
-        scenePath,
-        "--geometry",
-        geometryPath,
-        "--properties",
-        propertiesPath,
-        "--report",
-        adapterReportPath,
-        ...(options.cacheDirectory
-          ? ["--document-cache", resolve(options.cacheDirectory, "ifc-documents")]
-          : []),
-        "--threads",
-        String(threads),
-      ],
-      environment,
+    const adapterRun = await stage(ledger, "adapter", () =>
+      runAdapter(
+        pythonExecutable,
+        [
+          adapterScriptPath,
+          ...sourceArguments,
+          "--scene",
+          scenePath,
+          "--geometry",
+          geometryPath,
+          "--properties",
+          propertiesPath,
+          "--report",
+          adapterReportPath,
+          ...(options.cacheDirectory
+            ? ["--document-cache", resolve(options.cacheDirectory, "ifc-documents")]
+            : []),
+          "--threads",
+          String(threads),
+          ...(ledger ? ["--stage-timing", stageTimingPath] : []),
+        ],
+        environment,
+      ),
     );
+    if (ledger) ledger.adapter = await readAdapterTiming(stageTimingPath, adapterRun);
     // The structure document is never read or parsed as one string: the
     // streaming reader parses it record by record and hashes it on the way
     // through. Before property indexing (`madi.ifc-scene-ir-split.2`) a
     // real-large federation reached 632 MB against V8's 536,870,888-code-unit
     // string limit, and the reader keeps the compiler safe if a future
     // federation crosses it again.
-    const [structure, geometry, properties, serializedAdapterReport] = await Promise.all([
-      readIfcStructure(scenePath),
-      readFile(geometryPath),
-      readFile(propertiesPath),
-      readFile(adapterReportPath, "utf8"),
-    ]);
+    const [structure, geometry, properties, serializedAdapterReport] = await stage(
+      ledger,
+      "readSceneIr",
+      () =>
+        Promise.all([
+          ledger
+            ? (async () => {
+                const started = performance.now();
+                try {
+                  return await readIfcStructure(scenePath);
+                } finally {
+                  ledger.structureReadMilliseconds = performance.now() - started;
+                }
+              })()
+            : readIfcStructure(scenePath),
+          readFile(geometryPath),
+          readFile(propertiesPath),
+          readFile(adapterReportPath, "utf8"),
+        ]),
+    );
     const parsedAdapterReport = parseJson(serializedAdapterReport, "IFC adapter report");
     const identity = assertAdapterIdentity(
       parsedAdapterReport,
@@ -533,7 +763,9 @@ export async function compileIfcFederation(
       geometry,
       properties,
     );
-    const scene = hydrateIfcSceneSplit(structure.value, geometry, properties);
+    const scene = stageSync(ledger, "hydrate", () =>
+      hydrateIfcSceneSplit(structure.value, geometry, properties),
+    );
     if (scene.revision.sourceDigest !== `sha256:${identity.federationDigest}`) {
       throw new TypeError("IFC Scene IR federation digest does not match the adapter report.");
     }
@@ -578,15 +810,24 @@ export async function compileIfcFederation(
           compileOptions,
         })
       : undefined;
-    const compiled = compileSceneToGltf(
-      scene,
-      payloadSource ? { ...compileOptions, payloadSource } : compileOptions,
+    const compiled = stageSync(ledger, "compile", () =>
+      compileSceneToGltf(
+        scene,
+        payloadSource ? { ...compileOptions, payloadSource } : compileOptions,
+        ledger
+          ? (compileStage, milliseconds) => {
+              ledger.compileStages[compileStage] += milliseconds;
+            }
+          : undefined,
+      ),
     );
-    const validation = validateCompiledGltf(
-      compiled.document,
-      compiled.coarseBinary
-        ? [compiled.binary, compiled.coarseBinary]
-        : compiled.binary,
+    const validation = stageSync(ledger, "validateCompiled", () =>
+      validateCompiledGltf(
+        compiled.document,
+        compiled.coarseBinary
+          ? [compiled.binary, compiled.coarseBinary]
+          : compiled.binary,
+      ),
     );
     if (!validation.ok) {
       throw new TypeError(
@@ -610,42 +851,53 @@ export async function compileIfcFederation(
         ).length,
       },
     };
-    const dependencyIndex = createIfcIncrementalDependencyIndex(
-      scene,
-      sources,
-      compiled.document,
-      compiled.report.output.packageDigest,
+    const dependencyIndex = stageSync(ledger, "dependencyIndex", () =>
+      createIfcIncrementalDependencyIndex(
+        scene,
+        sources,
+        compiled.document,
+        compiled.report.output.packageDigest,
+      ),
     );
-    await writeCompiledPackage(compiled, outputDirectory, adapterReport);
-    await writeFile(
-      resolve(outputDirectory, incrementalDependencyIndexFilename),
-      serializeIfcIncrementalDependencyIndex(dependencyIndex),
-      "utf8",
+    await stage(ledger, "writePackage", () =>
+      writeCompiledPackage(compiled, outputDirectory, adapterReport),
+    );
+    await stage(ledger, "writeDependencyIndex", () =>
+      writeFile(
+        resolve(outputDirectory, incrementalDependencyIndexFilename),
+        serializeIfcIncrementalDependencyIndex(dependencyIndex),
+        "utf8",
+      ),
     );
     if (retainSceneIr) {
-      await Promise.all([
-        copyFile(scenePath, resolve(outputDirectory, "scene-ir.json")),
-        copyFile(geometryPath, resolve(outputDirectory, "scene-ir-geometry.bin")),
-        copyFile(propertiesPath, resolve(outputDirectory, "scene-ir-properties.bin")),
-      ]);
+      await stage(ledger, "retainSceneIr", () =>
+        Promise.all([
+          copyFile(scenePath, resolve(outputDirectory, "scene-ir.json")),
+          copyFile(geometryPath, resolve(outputDirectory, "scene-ir-geometry.bin")),
+          copyFile(propertiesPath, resolve(outputDirectory, "scene-ir-properties.bin")),
+        ]),
+      );
     }
     if (cacheKeyInput && cacheKey) {
+      const publishInput = cacheKeyInput;
       try {
-        await publishCompiledCacheEntry({
-          cacheDirectory: options.cacheDirectory as string,
-          packageDirectory: outputDirectory,
-          input: cacheKeyInput,
-          packageDigest: compiled.report.output.packageDigest,
-          resourcePaths: [
-            ...compiled.report.output.resources.map(({ path }) => path),
-            "adapter-report.json",
-            "build-report.json",
-            incrementalDependencyIndexFilename,
-            ...(retainSceneIr
-              ? ["scene-ir.json", "scene-ir-geometry.bin", "scene-ir-properties.bin"]
-              : []),
-          ],
-        });
+        await stage(ledger, "cachePublish", () =>
+          publishCompiledCacheEntry({
+            cacheDirectory: options.cacheDirectory as string,
+            packageDirectory: outputDirectory,
+            input: publishInput,
+            packageDigest: compiled.report.output.packageDigest,
+            resourcePaths: [
+              ...compiled.report.output.resources.map(({ path }) => path),
+              "adapter-report.json",
+              "build-report.json",
+              incrementalDependencyIndexFilename,
+              ...(retainSceneIr
+                ? ["scene-ir.json", "scene-ir-geometry.bin", "scene-ir-properties.bin"]
+                : []),
+            ],
+          }),
+        );
       } catch (error) {
         console.warn(
           `[naru] cache publish failed (${cacheFailureDetails(error)}); ` +
@@ -660,6 +912,7 @@ export async function compileIfcFederation(
       adapterReport,
       dependencyIndex,
       cache: cacheKey ? { status: "miss", key: cacheKey } : { status: "disabled" },
+      ...(ledger ? { stages: ledger.finish() } : {}),
     };
   } finally {
     await rm(temporaryDirectory, { recursive: true, force: true });

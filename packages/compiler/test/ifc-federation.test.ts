@@ -16,28 +16,9 @@ const sceneTemplatePath = fileURLToPath(
   new URL("../../../artifacts/occt/repeated-fasteners.scene.json", import.meta.url),
 );
 
-describe("IFC federation compiler orchestration", () => {
-  it("validates adapter identity and writes a compiled package", async () => {
-    const temporaryDirectory = await mkdtemp(join(tmpdir(), "naru-ifc-test-"));
-    try {
-      const sourcePath = join(temporaryDirectory, "architecture.ifc");
-      const adapterPath = join(temporaryDirectory, "fake-ifc-adapter.mjs");
-      const outputDirectory = join(temporaryDirectory, "compiled");
-      const cachedOutputDirectory = join(temporaryDirectory, "compiled-cached");
-      const relabeledOutputDirectory = join(temporaryDirectory, "compiled-relabeled");
-      const unnamedOutputDirectory = join(temporaryDirectory, "compiled-unnamed");
-      const cacheDirectory = join(temporaryDirectory, "cache");
-      const adapterCountPath = join(temporaryDirectory, "adapter-count.txt");
-      await writeFile(adapterCountPath, "0", "utf8");
-      await writeFile(
-        sourcePath,
-        "ISO-10303-21;\nHEADER;\nFILE_SCHEMA(('IFC4'));\nENDSEC;\nDATA;\nENDSEC;\nEND-ISO-10303-21;\n",
-        "utf8",
-      );
-      await writeFile(
-        adapterPath,
-        `import { createHash } from "node:crypto";
+const fakeAdapterSource = (adapterCountPath: string) => `import { createHash } from "node:crypto";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
+const moduleStartedAtMs = Date.now();
 const args = process.argv.slice(2);
 if (args.includes("--identity")) {
   console.log(JSON.stringify({
@@ -215,9 +196,43 @@ await writeFile(option("--report"), JSON.stringify({
     properties: identify(properties),
   },
 }));
-`,
+if (args.includes("--stage-timing")) {
+  const finishedAtMs = Date.now();
+  await writeFile(option("--stage-timing"), JSON.stringify({
+    schemaVersion: "naru.ifc-adapter-stage-timing.1",
+    wallClock: {
+      moduleStartedAtMs,
+      importsFinishedAtMs: moduleStartedAtMs,
+      mainStartedAtMs: moduleStartedAtMs,
+      finishedAtMs,
+    },
+    importMilliseconds: 0,
+    documents: [{ discipline, outcome: "extracted", extractMilliseconds: 1 }],
+    federation: { mergeMilliseconds: 0, propertyIndexMilliseconds: 0 },
+    write: {},
+  }));
+}
+`;
+
+describe("IFC federation compiler orchestration", () => {
+  it("validates adapter identity and writes a compiled package", async () => {
+    const temporaryDirectory = await mkdtemp(join(tmpdir(), "naru-ifc-test-"));
+    try {
+      const sourcePath = join(temporaryDirectory, "architecture.ifc");
+      const adapterPath = join(temporaryDirectory, "fake-ifc-adapter.mjs");
+      const outputDirectory = join(temporaryDirectory, "compiled");
+      const cachedOutputDirectory = join(temporaryDirectory, "compiled-cached");
+      const relabeledOutputDirectory = join(temporaryDirectory, "compiled-relabeled");
+      const unnamedOutputDirectory = join(temporaryDirectory, "compiled-unnamed");
+      const cacheDirectory = join(temporaryDirectory, "cache");
+      const adapterCountPath = join(temporaryDirectory, "adapter-count.txt");
+      await writeFile(adapterCountPath, "0", "utf8");
+      await writeFile(
+        sourcePath,
+        "ISO-10303-21;\nHEADER;\nFILE_SCHEMA(('IFC4'));\nENDSEC;\nDATA;\nENDSEC;\nEND-ISO-10303-21;\n",
         "utf8",
       );
+      await writeFile(adapterPath, fakeAdapterSource(adapterCountPath), "utf8");
 
       const result = await compileIfcFederation({
         documents: [
@@ -487,6 +502,99 @@ await writeFile(option("--report"), JSON.stringify({
       expect(retainedGeometry.byteLength).toBeGreaterThan(
         retainedScene.representations[0].surface.positions.byteLength,
       );
+    } finally {
+      await rm(temporaryDirectory, { recursive: true, force: true });
+    }
+  });
+
+  it("records stage timing beside the result without touching the package", async () => {
+    const temporaryDirectory = await mkdtemp(join(tmpdir(), "naru-ifc-timing-"));
+    try {
+      const sourcePath = join(temporaryDirectory, "architecture.ifc");
+      const adapterPath = join(temporaryDirectory, "fake-ifc-adapter.mjs");
+      const adapterCountPath = join(temporaryDirectory, "adapter-count.txt");
+      await writeFile(adapterCountPath, "0", "utf8");
+      await writeFile(
+        sourcePath,
+        "ISO-10303-21;\nHEADER;\nFILE_SCHEMA(('IFC4'));\nENDSEC;\nDATA;\nENDSEC;\nEND-ISO-10303-21;\n",
+        "utf8",
+      );
+      await writeFile(adapterPath, fakeAdapterSource(adapterCountPath), "utf8");
+      const documents = [{ discipline: "architecture", sourcePath, uriHint: "arc.ifc" }];
+      const shared = {
+        documents,
+        pythonExecutable: process.execPath,
+        adapterScriptPath: adapterPath,
+        spatialIndex: true,
+      };
+
+      const plain = await compileIfcFederation({
+        ...shared,
+        outputDirectory: join(temporaryDirectory, "plain"),
+      });
+      const timed = await compileIfcFederation({
+        ...shared,
+        outputDirectory: join(temporaryDirectory, "timed"),
+        stageTiming: true,
+      });
+
+      expect(plain.stages).toBeUndefined();
+      expect(timed.report.output.packageDigest).toBe(plain.report.output.packageDigest);
+      expect(JSON.stringify(timed.report)).not.toContain("stageTiming");
+      expect(
+        await readFile(join(temporaryDirectory, "timed", "build-report.json"), "utf8"),
+      ).not.toMatch(/Milliseconds|stages/);
+
+      const stages = timed.stages;
+      expect(stages?.schemaVersion).toBe("naru.ifc-federation-stage-timing.1");
+      if (!stages) throw new Error("stages missing");
+      const stageNames = Object.keys(stages.stages).sort();
+      expect(stageNames).toEqual(
+        [
+          "adapter",
+          "cacheLookup",
+          "cachePublish",
+          "compile",
+          "dependencyIndex",
+          "hydrate",
+          "inspectSources",
+          "readSceneIr",
+          "retainSceneIr",
+          "toolchainIdentity",
+          "validateCompiled",
+          "writeDependencyIndex",
+          "writePackage",
+        ].sort(),
+      );
+      const attributed = Object.values(stages.stages).reduce((sum, value) => sum + value, 0);
+      expect(attributed + stages.unattributedMilliseconds).toBeCloseTo(stages.totalMilliseconds, 6);
+      expect(stages.unattributedMilliseconds).toBeGreaterThanOrEqual(0);
+      expect(stages.stages.cacheLookup).toBe(0);
+      expect(stages.stages.cachePublish).toBe(0);
+      expect(stages.stages.retainSceneIr).toBe(0);
+      expect(stages.structureReadMilliseconds).toBeLessThanOrEqual(stages.stages.readSceneIr);
+      const compileSubStages = Object.values(stages.compileStages).reduce(
+        (sum, value) => sum + value,
+        0,
+      );
+      expect(compileSubStages).toBeCloseTo(stages.stages.compile, 6);
+      expect(stages.compileStages.other).toBeGreaterThanOrEqual(0);
+
+      const adapter = stages.adapter;
+      if (!adapter) throw new Error("adapter timing missing");
+      expect(adapter.importMilliseconds).toBe(0);
+      expect(adapter.mainMilliseconds).toBeGreaterThanOrEqual(0);
+      expect(adapter.spawnToModuleStartMilliseconds).toBeGreaterThanOrEqual(0);
+      expect(adapter.finishToCloseMilliseconds).toBeGreaterThanOrEqual(0);
+      expect(
+        adapter.spawnToModuleStartMilliseconds +
+          adapter.importsToMainMilliseconds +
+          adapter.mainMilliseconds +
+          adapter.finishToCloseMilliseconds,
+      ).toBeLessThanOrEqual(stages.stages.adapter + 1);
+      expect((adapter.ledger as { documents: unknown[] }).documents).toEqual([
+        { discipline: "architecture", outcome: "extracted", extractMilliseconds: 1 },
+      ]);
     } finally {
       await rm(temporaryDirectory, { recursive: true, force: true });
     }

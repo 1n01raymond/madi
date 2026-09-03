@@ -1,4 +1,5 @@
 export { compileSceneToGltf } from "./gltf.js";
+export type { CompileStage, CompileStageObserver } from "./gltf.js";
 export { measureJsonDocument } from "./json-document.js";
 export type { JsonByteSink, StreamedJsonDocument } from "./json-document.js";
 export { streamJsonInto, streamJsonToString } from "./json-stream.js";
@@ -79,9 +80,12 @@ export { inspectStepBytes, inspectStepFile } from "./step-source.js";
 export type { StepCompilationResult, StepCompileOptions } from "./step-compiler.js";
 export type { StepSourceInspection, SupportedStepSchema } from "./step-source.js";
 export type {
+  IfcAdapterProcessTiming,
   IfcFederationCompilationResult,
   IfcFederationCompileOptions,
   IfcFederationDocumentInput,
+  IfcFederationStageName,
+  IfcFederationStageTiming,
   InspectedIfcFederationDocument,
 } from "./ifc-federation.js";
 export type { IfcSourceInspection, SupportedIfcSchema } from "./ifc-source.js";

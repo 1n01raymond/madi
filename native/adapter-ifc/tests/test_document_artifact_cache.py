@@ -98,3 +98,27 @@ def test_corruption_and_identity_changes_are_cache_misses(tmp_path: Path) -> Non
     different_payload = {**payload, "sourceDigest": "different"}
     with pytest.raises(ValueError, match="two different payloads"):
         publish_document_artifact(tmp_path, key_input(), different_payload)
+
+
+def test_read_reports_load_and_verify_stages_without_changing_the_verdict(
+    tmp_path: Path,
+) -> None:
+    payload = prepare_document_payload(extracted_document())
+    artifact_path = publish_document_artifact(tmp_path, key_input(), payload)
+
+    verified: dict[str, object] = {}
+    assert read_document_artifact(tmp_path, key_input(), verified) == payload
+    assert verified["artifactState"] == "verified"
+    assert verified["artifactBytes"] == artifact_path.stat().st_size
+    assert verified["artifactLoadMilliseconds"] >= 0
+    assert verified["artifactVerifyMilliseconds"] >= 0
+
+    absent: dict[str, object] = {}
+    assert read_document_artifact(tmp_path, key_input("c" * 64), absent) is None
+    assert absent["artifactState"] == "absent"
+    assert "artifactVerifyMilliseconds" not in absent
+
+    artifact_path.write_bytes(b"corrupted")
+    corrupted: dict[str, object] = {}
+    assert read_document_artifact(tmp_path, key_input(), corrupted) is None
+    assert corrupted["artifactState"] == "absent"

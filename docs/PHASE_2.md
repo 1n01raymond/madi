@@ -65,7 +65,7 @@ much in risk and effort for a raw item count to be meaningful.
 | Per-document IFC extraction reuse | **Implemented** with [deterministic verified-artifact tests](../native/adapter-ifc/tests/test_document_artifact_cache.py) and [clean adapter-merge equivalence](../native/adapter-ifc/tests/test_document_artifact_integration.py) | Measure real-large artifact size, restore time, and peak memory |
 | Real-large document serialization | **Recorded** under accepted [ADR-0016](adr/0016-streamed-gltf-document.md): the compiler emits `scene.gltf` as a stream of bounded chunks instead of building it as one string, so the [sixty5 record](../artifacts/cache/sixty5/README.md) now compiles the default pretty-printed federation document at 545,470,166 B - 8,599,278 B past the runtime's 536,870,888-byte maximum string length - while the compact package stays byte-identical over fifteen samples; [differential tests](../packages/compiler/test/json-stream.test.ts) compare every chunk against `JSON.stringify` | Give the report, property, and dependency documents the same bounded treatment before any of them approaches the same limit |
 | Assembly-tree transport | **Recorded** under accepted [ADR-0017](adr/0017-relocated-hierarchy-sidecar.md): `--relocate-hierarchy-nodes` moves mesh-less nodes into a `naru.package-hierarchy.1` sidecar, taking the engineering baseline's document from 405,570,167 to 317,466,183 B (-21.72%) and the whole package down 2.72% once the 64,825,238 B sidecar is charged against it ([record](../artifacts/compiler/hierarchy-relocation/README.md)); a Digital Hub round trip returns 13,681 entries and 5,152 world transforms with 0 mismatches. Paired sixty5 packages in a headed browser then measured what the smaller document buys: first coarse frame 4,408 -> 3,703 ms (-15.99%), peak JS heap -20.30%, sidecar fetched once per run ahead of the coarse payload, identical endpoint over 17 counters ([record](../artifacts/ifc/relocated-hierarchy-browser/README.md)) | Flip the default in its own slice, together with promoting `naru.package-hierarchy.1` out of `experimental-not-interchange` and the package re-digests that forces |
-| Content-addressed compiled payloads | **Recorded and rejected** under [ADR-0018](adr/0018-content-addressed-compiled-payloads.md): changed-discipline rebuilds of Digital Hub (2,664 of 3,383 payloads restored) and sixty5 (40,066 of 42,435) reproduced every clean-package byte over 26 comparisons with exact store decisions, but packaging took 3,184.9 ms clean vs 7,585.0 ms store-warm on Digital Hub and 35,202.0 vs 77,713.5 ms on sixty5 ([record](../artifacts/cache/payload-reuse/README.md)) — verifying a stored payload costs more than re-encoding it from the parsed scene, so the ADR's own gate 4 rejects it; `--payload-cache` stays in the compiler, off by default, with its [storage](../packages/compiler/test/compiled-payload-store.test.ts) and [orchestration tests](../packages/compiler/test/compiled-payload-cache.test.ts) | Successor designed as [ADR-0019](adr/0019-document-artifact-transport.md) (Proposed): reuse the verified per-document Scene IR artifact across the adapter–compiler transport and remove `--payload-cache`; record its gate 0 stage decomposition, then land the slices |
+| Content-addressed compiled payloads | **Recorded and rejected** under [ADR-0018](adr/0018-content-addressed-compiled-payloads.md): changed-discipline rebuilds of Digital Hub (2,664 of 3,383 payloads restored) and sixty5 (40,066 of 42,435) reproduced every clean-package byte over 26 comparisons with exact store decisions, but packaging took 3,184.9 ms clean vs 7,585.0 ms store-warm on Digital Hub and 35,202.0 vs 77,713.5 ms on sixty5 ([record](../artifacts/cache/payload-reuse/README.md)) — verifying a stored payload costs more than re-encoding it from the parsed scene, so the ADR's own gate 4 rejects it; `--payload-cache` stays in the compiler, off by default, with its [storage](../packages/compiler/test/compiled-payload-store.test.ts) and [orchestration tests](../packages/compiler/test/compiled-payload-cache.test.ts) | Successor designed as [ADR-0019](adr/0019-document-artifact-transport.md) (Proposed): reuse the verified per-document Scene IR artifact across the adapter–compiler transport and remove `--payload-cache`; its gate 0 [stage decomposition](../artifacts/cache/rebuild-stages/README.md) is recorded (unchanged-document transport 48.0 percent of a Digital Hub rebuild, 77.3 percent of a sixty5 one; encoder 2.3 and 2.5 percent), so the next slices are the `--payload-cache` removal and the three transport slices |
 | Import lifecycle | **Pending** | A typed progress/cancellation contract must stop child processes, clean unpublished output, and retain prior valid cache entries |
 | Progressive cold-import preview | **Pending** | Publish hierarchy/search and a recognizable coarse package within 5–15 s while the full import continues |
 | Shared compiled cache | **Pending** and intentionally later | Require verified local immutable payloads plus authorization, tenant isolation, provenance, quota, and observability contracts first |
@@ -123,19 +123,23 @@ a small share of the browser's working set.
 
 1. Land the successor to the rejected payload tier that
    [ADR-0019](adr/0019-document-artifact-transport.md) (Proposed) designs. Its
-   exploratory decomposition of a changed-discipline rebuild puts the encoder
-   at 1–3 percent of the work and the adapter–compiler transport of unchanged
-   documents — re-serialization verification, federation re-merge and
-   re-write, structure re-scan — at the bulk of it, so the reuse unit becomes
-   the verified per-document Scene IR artifact rather than either option the
-   tracker named before. Slices, in order: the committed stage-decomposition
-   record (gate 0, which also closes the "Real-large reopen stage breakdown"
-   debt), removal of `--payload-cache` with its recorder while the
+   gate 0 [stage decomposition](../artifacts/cache/rebuild-stages/README.md)
+   of a changed-discipline rebuild — five fresh-process samples per model —
+   puts the encoder at 2.3 percent (Digital Hub) and 2.5 percent (sixty5) of
+   the rebuild and the adapter–compiler transport of unchanged documents —
+   re-serialization verification, federation re-merge and re-write, structure
+   re-scan — at 48.0 and 77.3 percent of it, so the reuse unit is the
+   verified per-document Scene IR artifact rather than either option the
+   tracker named before. The exploratory probe the ADR was written from did
+   not reproduce inside the record's spread, and the ADR's Context was
+   corrected from the record as gate 0 prescribes. Remaining slices, in
+   order: removal of `--payload-cache` with its recorder while the
    encoder/placement split and cache primitives stay, then the three code
    slices (stored-byte verification, column-form structure, in-compiler
    federation assembly). The ADR's gate 4 is the same predeclared bar: a lower
    whole-process rebuild median on Digital Hub and sixty5 with peak memory no
-   higher, or the ADR is Rejected like its predecessor.
+   higher, measured against a clean rebuild recorded in the same session, or
+   the ADR is Rejected like its predecessor.
 
 ### Next — finish the user-visible import loop and bounded fidelity
 
@@ -190,8 +194,7 @@ debt.
 
 | Debt | Record needed | Decision or claim blocked |
 |---|---|---|
-| Real-large reopen stage breakdown | A restore broken into its own stages — manifest read, resource verification, and file publication — rather than the single 1.36 s figure the [five-sample distribution](../artifacts/cache/sixty5/README.md) reports | Which part of a warm reopen would have to change if the 1–5 s target tightened; the distribution itself already closes the cold/warm/corrupt and cache-cost debt. [ADR-0019](adr/0019-document-artifact-transport.md) gate 0 records the same decomposition for a changed-discipline rebuild and closes this row with it |
-| Real-large document-artifact reuse | Repeat cold, warm, and one-document-changed extraction with artifact bytes, restore time, peak RSS, and clean-merge equivalence on a disclosed large fixture | Cost and scalability of the already-implemented per-document reuse tier |
+| Real-large document-artifact reuse | Cold, warm, and one-document-changed extraction with clean-merge equivalence on a disclosed large fixture; the [rebuild stage record](../artifacts/cache/rebuild-stages/README.md) already measures the one-document-changed case's artifact bytes (101,185,491 B restored on sixty5), per-document load and verification time, and peak working set | Cost and scalability of the already-implemented per-document reuse tier; the reuse tier's verification cost (34,204.2 ms on sixty5) is now the measured baseline ADR-0019 gate 3 must beat |
 | Cross-engine memory envelope | Repeat the [phase-sampled memory ledger](../artifacts/memory/sixty5-envelope/README.md) on a second engine and operating system, including whatever each reports in place of `measureUserAgentSpecificMemory` and the Windows process-tree sample | A memory claim that is not specific to one Chrome/Windows host |
 | Cross-browser localized demand | Repeated Firefox or another non-Blink real-model localized trace with request order, query p50/p95, residency, and console results | ADR-0008 acceptance |
 | Spatial precision cross-check | Nested-transform spatial bounds on the accepted ADR-0005 10,000 km fixture with no false negatives | ADR-0008 acceptance |

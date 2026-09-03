@@ -6,6 +6,12 @@ inspection/intermediate representation, not a stable NARU storage format.
 
 from __future__ import annotations
 
+import time
+
+# Stamped before IfcOpenShell and numpy load so `--stage-timing` can attribute
+# interpreter start and import cost separately from the extraction stages.
+MODULE_STARTED_AT_MS = time.time() * 1000.0
+
 import argparse
 import hashlib
 import json
@@ -25,6 +31,8 @@ import ifcopenshell.util.element
 import ifcopenshell.util.placement
 import ifcopenshell.util.unit
 import numpy as np
+
+IMPORTS_FINISHED_AT_MS = time.time() * 1000.0
 
 from document_artifact_cache import (
     DOCUMENT_ARTIFACT_SCHEMA,
@@ -933,10 +941,53 @@ def inspect_document(
     }
 
 
+STAGE_TIMING_SCHEMA = "naru.ifc-adapter-stage-timing.1"
+
+
+class StageTiming:
+    """Wall-clock stage ledger written only when `--stage-timing` is passed.
+
+    Timing never enters the adapter report or the Scene IR, which take part in
+    byte-identity comparisons; the ledger is a separate JSON file whose sums
+    let the caller attribute a run to interpreter start, imports, per-document
+    stages, federation assembly, and writes.
+    """
+
+    def __init__(self) -> None:
+        self.documents: list[dict[str, Any]] = []
+        self.federation: dict[str, float] = {}
+        self.write: dict[str, float] = {}
+
+    @staticmethod
+    def now() -> float:
+        return time.perf_counter() * 1000.0
+
+    def document(self, discipline: str) -> dict[str, Any]:
+        record: dict[str, Any] = {"discipline": discipline}
+        self.documents.append(record)
+        return record
+
+    def to_json(self, main_started_at_ms: float) -> dict[str, Any]:
+        return {
+            "schemaVersion": STAGE_TIMING_SCHEMA,
+            "wallClock": {
+                "moduleStartedAtMs": MODULE_STARTED_AT_MS,
+                "importsFinishedAtMs": IMPORTS_FINISHED_AT_MS,
+                "mainStartedAtMs": main_started_at_ms,
+                "finishedAtMs": time.time() * 1000.0,
+            },
+            "importMilliseconds": IMPORTS_FINISHED_AT_MS - MODULE_STARTED_AT_MS,
+            "documents": self.documents,
+            "federation": self.federation,
+            "write": self.write,
+        }
+
+
 def inspect_documents(
     documents: Sequence[DocumentInput],
     threads: int,
     document_cache_directory: Path | None,
+    timing: StageTiming | None = None,
 ) -> tuple[list[dict[str, Any]], dict[str, Any]]:
     extracted: list[dict[str, Any]] = []
     hits: list[str] = []
@@ -947,8 +998,13 @@ def inspect_documents(
         else None
     )
     for document in documents:
+        stages = timing.document(document.discipline) if timing else None
+        started = StageTiming.now()
         source_bytes = document.path.read_bytes()
         source_digest = sha256_bytes(source_bytes)
+        if stages is not None:
+            stages["readMilliseconds"] = StageTiming.now() - started
+            stages["sourceBytes"] = len(source_bytes)
         key_input = {
             "schemaVersion": "naru.ifc-document-artifact-key.1",
             "discipline": document.discipline,
@@ -958,22 +1014,33 @@ def inspect_documents(
             "adapterFingerprint": adapter_fingerprint,
         }
         payload = (
-            read_document_artifact(document_cache_directory, key_input)
+            read_document_artifact(document_cache_directory, key_input, stages)
             if document_cache_directory is not None
             else None
         )
         if payload is not None:
+            started = StageTiming.now()
             item = restore_document_payload(payload, document)
+            if stages is not None:
+                stages["outcome"] = "restored"
+                stages["restoreMilliseconds"] = StageTiming.now() - started
             hits.append(document.discipline)
         else:
+            started = StageTiming.now()
             item = inspect_document(document, threads, source_bytes)
+            if stages is not None:
+                stages["outcome"] = "extracted"
+                stages["extractMilliseconds"] = StageTiming.now() - started
             if document_cache_directory is not None:
                 misses.append(document.discipline)
+                started = StageTiming.now()
                 publish_document_artifact(
                     document_cache_directory,
                     key_input,
                     prepare_document_payload(item),
                 )
+                if stages is not None:
+                    stages["publishMilliseconds"] = StageTiming.now() - started
         if item["sourceDigest"] != source_digest:
             raise ValueError(
                 f"IFC document artifact digest mismatch for {document.discipline}."
@@ -991,12 +1058,15 @@ def extract_federation(
     documents: Sequence[DocumentInput],
     threads: int,
     document_cache_directory: Path | None = None,
+    timing: StageTiming | None = None,
 ) -> tuple[dict[str, Any], dict[str, Any]]:
     extracted, document_artifact_cache = inspect_documents(
         documents,
         threads,
         document_cache_directory,
+        timing,
     )
+    merge_started = StageTiming.now()
     digest_input = [
         {"discipline": item["input"].discipline, "sha256": item["sourceDigest"]}
         for item in extracted
@@ -1079,6 +1149,9 @@ def extract_federation(
     # `{schema, set, row}`, where `row` is its run in the shared reference
     # column. Both passes run after the cross-document merge because the
     # tables must span the federation.
+    if timing:
+        timing.federation["mergeMilliseconds"] = StageTiming.now() - merge_started
+    property_started = StageTiming.now()
     property_index, property_references = index_property_bags(
         [semantic["properties"]["entries"] for semantic in scene["semantics"]]
     )
@@ -1097,6 +1170,8 @@ def extract_federation(
     # Raw columns; `write_scene` streams them into the properties file and
     # replaces this member with the `madi.property-columns.1` header.
     scene["propertyValues"] = property_columns
+    if timing:
+        timing.federation["propertyIndexMilliseconds"] = StageTiming.now() - property_started
     totals: dict[str, int] = defaultdict(int)
     for item in extracted:
         for key, value in item["counts"].items():
@@ -1205,6 +1280,7 @@ def write_scene(
     geometry_path: Path,
     properties_path: Path,
     scene: dict[str, Any],
+    timing: StageTiming | None = None,
 ) -> dict[str, Any]:
     """Writes the split Scene IR transport: small structure JSON plus binary streams.
 
@@ -1222,6 +1298,7 @@ def write_scene(
     allowing edge positions to alias their surface position stream.
     """
     geometry_path.parent.mkdir(parents=True, exist_ok=True)
+    started = StageTiming.now()
     offset = 0
     with geometry_path.open("wb") as sink:
 
@@ -1262,6 +1339,9 @@ def write_scene(
                 if edges.get("sourceIds") is not None:
                     edges["sourceIds"] = append(edges["sourceIds"], "<u4")
 
+    if timing:
+        timing.write["geometryMilliseconds"] = StageTiming.now() - started
+    started = StageTiming.now()
     columns = scene["propertyValues"]
     properties_path.parent.mkdir(parents=True, exist_ok=True)
     offset = 0
@@ -1298,6 +1378,9 @@ def write_scene(
             "valueHeap": append_bytes(columns["value_heap"], "utf8-json"),
         }
 
+    if timing:
+        timing.write["propertiesMilliseconds"] = StageTiming.now() - started
+    started = StageTiming.now()
     structure_path.parent.mkdir(parents=True, exist_ok=True)
     with structure_path.open("w", encoding="utf-8", newline="\n") as output:
         json.dump(
@@ -1309,12 +1392,18 @@ def write_scene(
             allow_nan=False,
         )
         output.write("\n")
-    return {
+    if timing:
+        timing.write["structureMilliseconds"] = StageTiming.now() - started
+    started = StageTiming.now()
+    digests = {
         "encodingVersion": "naru.ifc-scene-ir-split.4",
         "structure": digest_file(structure_path),
         "geometry": digest_file(geometry_path),
         "properties": digest_file(properties_path),
     }
+    if timing:
+        timing.write["digestMilliseconds"] = StageTiming.now() - started
+    return digests
 
 
 def write_report(path: Path, report: dict[str, Any]) -> None:
@@ -1357,6 +1446,15 @@ def main() -> None:
         type=int,
         default=max(1, min(8, os.cpu_count() or 1)),
     )
+    parser.add_argument(
+        "--stage-timing",
+        type=Path,
+        help=(
+            "Optional path for a naru.ifc-adapter-stage-timing.1 ledger of "
+            "wall-clock stage durations; never affects the report or scene bytes."
+        ),
+    )
+    main_started_at_ms = time.time() * 1000.0
     arguments = parser.parse_args()
     if arguments.identity:
         print(json.dumps(adapter_identity(), sort_keys=True, separators=(",", ":")))
@@ -1375,16 +1473,22 @@ def main() -> None:
     if arguments.threads < 1:
         parser.error("--threads must be a positive integer.")
 
+    timing = StageTiming() if arguments.stage_timing is not None else None
     documents = parse_inputs(arguments.document, arguments.uri_hint)
     scene, report = extract_federation(
         documents,
         arguments.threads,
         arguments.document_cache,
+        timing,
     )
     report["scene"] = write_scene(
-        arguments.scene, arguments.geometry, arguments.properties, scene
+        arguments.scene, arguments.geometry, arguments.properties, scene, timing
     )
+    started = StageTiming.now()
     write_report(arguments.report, report)
+    if timing is not None:
+        timing.write["reportMilliseconds"] = StageTiming.now() - started
+        write_report(arguments.stage_timing, timing.to_json(main_started_at_ms))
     counts = report["counts"]
     print(
         "[ifc] "
