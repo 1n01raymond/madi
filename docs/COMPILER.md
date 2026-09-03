@@ -740,7 +740,12 @@ that is cheaper to restore than to rebuild remains before per-discipline
 compilation is a complete product claim;
 [ADR-0019](adr/0019-document-artifact-transport.md) names that unit -- the
 verified per-document Scene IR artifact, restored across the adapter-compiler
-transport -- and the gates it must pass.
+transport -- and the gates it must pass. Its first slice, artifacts verified
+from their stored bytes (`naru.ifc-document-artifact.2`, pinned by the
+compiler in [`ifc-federation.ts`](../packages/compiler/src/ifc-federation.ts)),
+is [recorded](../artifacts/cache/rebuild-stages/README.md) against a
+same-session clean rebuild on Digital Hub and sixty5; the structure scan and
+the federation re-merge it leaves are slices 2 and 3.
 
 [ADR-0018](adr/0018-content-addressed-compiled-payloads.md) was the reviewed
 design for that payload tier: reuse one unit, the prototype payload -- the

@@ -1,7 +1,7 @@
 {
-  "schemaVersion": "naru.rebuild-stage-evidence.1",
-  "mode": "fresh-process-changed-discipline-stage-decomposition",
-  "recordedAt": "2026-09-03T05:36:47.653Z",
+  "schemaVersion": "naru.rebuild-stage-evidence.2",
+  "mode": "fresh-process-changed-discipline-transport-vs-clean-rebuild",
+  "recordedAt": "2026-09-03T10:28:08.600Z",
   "model": "sixty5",
   "host": {
     "platform": "win32",
@@ -12,8 +12,8 @@
     "totalMemoryBytes": 33463021568
   },
   "commit": {
-    "head": "670f119bd9612cbb9852a09d33c43099bd1e57c1",
-    "describe": "docs: design the per-document artifact transport as the payload tier's successor (ADR-0019) (#101)",
+    "head": "21a2e3752dc4c38c22254a04fa35c3aa08dd958a",
+    "describe": "refactor: remove the rejected --payload-cache tier, keep the encoder split (#103)",
     "workingTreeClean": false
   },
   "fixture": {
@@ -83,7 +83,7 @@
     "changedSha256": "4bda52a8e603838981e80b86ced91b8c13770847c17c8f58d2c6f622c11c19d6"
   },
   "adapter": {
-    "fingerprint": "84521b04133b79581566866a87e97cf4ea5ff424dce273842bc987d0ecf812d9",
+    "fingerprint": "fc2aa5371729a3f5588d34b471f713cfd88758fae8e271f22f295c6c4a553277",
     "name": "IfcOpenShell",
     "schemaVersion": "naru.ifc-adapter-identity.1",
     "toolchain": {
@@ -101,23 +101,29 @@
     "spatialIndex": true,
     "relocateHierarchyNodes": true,
     "cacheDirectory": "output/rebuild-stages/sixty5/cache",
-    "pythonExecutable": "python.exe"
+    "cleanArmCacheDirectory": null,
+    "pythonExecutable": "output/venv-ifc/Scripts/python.exe"
   },
   "protocol": {
     "processIsolation": "Every sample and the warm-up is one fresh `node scripts/lib/ifc-cache-sample.mjs` process; the adapter is a fresh Python process inside it.",
-    "cacheState": "Warm-up extracts the ORIGINAL federation once (adapter only) so every document artifact is warm. Before each sample the package cache entries and the changed document's artifact are deleted; the unchanged documents' artifacts stay. Each sample therefore restores every unchanged document and re-extracts the changed one, and its package cache lookup is a miss.",
+    "cacheState": "Warm-up extracts the ORIGINAL federation once (adapter only) so every document artifact is warm. Before each transport sample the package cache entries and the changed document's artifact are deleted; the unchanged documents' artifacts stay. Each transport sample therefore restores every unchanged document and re-extracts the changed one, and its package cache lookup is a miss. Each clean sample compiles the same changed federation with no cache directory: nothing is looked up, restored, or published.",
+    "ordering": "Per index: reset, transport sample, then clean sample, so host drift over the session lands on both arms alike.",
     "change": "structure: \"#890= IFCEXTRUDEDAREASOLID(#886,#889,#19,250.);\" -> \"#890= IFCEXTRUDEDAREASOLID(#886,#889,#19,350.);\"",
-    "timing": "Adapter stages come from `--stage-timing` (a separate ledger file, never the report); compiler stages from `stageTiming: true` on compileIfcFederation. Neither touches a package byte: every sample's packageDigest must equal the first's.",
-    "sampleValidity": "A sample counts only when the process exits 0, the package cache misses, the document artifact hits are exactly the unchanged documents and the miss is exactly the changed one, no warning is emitted, the stage ledger is present, and the package digest equals the first sample's. Up to 3 attempts per index; every discarded attempt is recorded.",
-    "statistics": "median; p95 nearest-rank; minimum; maximum over the accepted samples",
+    "timing": "Adapter stages come from `--stage-timing` (a separate ledger file, never the report); compiler stages from `stageTiming: true` on compileIfcFederation. Neither touches a package byte: every transport sample's packageDigest must equal the first transport sample's, and every clean sample's the first clean sample's.",
+    "sampleValidity": "A transport sample counts only when the process exits 0, the package cache misses, the document artifact hits are exactly the unchanged documents and the miss is exactly the changed one, no warning is emitted, the stage ledger is present, and the package digest equals the first transport sample's. A clean sample counts only when the process exits 0, the package cache and the document artifact cache are disabled, no warning is emitted, the stage ledger is present, and the package digest equals the first clean sample's. Up to 3 attempts per index and arm; every discarded attempt is recorded. Byte identity across the arms is gate 1's verdict, never a validity rule.",
+    "statistics": "median; p95 nearest-rank; minimum; maximum over the accepted samples of each arm",
     "peakMemory": "os-sampled-win32-process-tree",
     "uncontrolled": "Other processes on the host, disk cache state between samples, and CPU frequency scaling."
   },
+  "reportExclusions": [
+    "adapter-report.json:documentArtifactCache"
+  ],
   "packageDigest": "05707534c73ce126da401a79481d0fd6c892bc308a451d6aa2a4b1691bc2439e",
+  "cleanPackageDigest": "05707534c73ce126da401a79481d0fd6c892bc308a451d6aa2a4b1691bc2439e",
   "warmUp": {
-    "adapterMilliseconds": 476300.7,
-    "processMilliseconds": 476361.1,
-    "peakWorkingSetBytes": 5116772352,
+    "adapterMilliseconds": 316952.3,
+    "processMilliseconds": 317004.7,
+    "peakWorkingSetBytes": 5071171584,
     "documentArtifactCache": {
       "hits": [],
       "misses": [
@@ -129,7 +135,7 @@
         "structure",
         "ventilation"
       ],
-      "schemaVersion": "naru.ifc-document-artifact.1",
+      "schemaVersion": "naru.ifc-document-artifact.2",
       "status": "enabled"
     },
     "artifacts": 7
@@ -138,15 +144,15 @@
     {
       "index": 1,
       "exitCode": 0,
-      "processMilliseconds": 123937.1,
-      "compileMilliseconds": 123681.6,
-      "peakWorkingSetBytes": 3318280192,
-      "peakPrivateBytes": 3830095872,
+      "processMilliseconds": 73366.2,
+      "compileMilliseconds": 73121.4,
+      "peakWorkingSetBytes": 4145639424,
+      "peakPrivateBytes": 4632739840,
       "maxProcessCount": 4,
       "packageDigest": "05707534c73ce126da401a79481d0fd6c892bc308a451d6aa2a4b1691bc2439e",
       "cache": {
         "status": "miss",
-        "key": "3cd36cfb2ea28779001ecd69cbb1de48008d55952955c17f46a0793bcee10669"
+        "key": "897773014e35bd4afbf5218c570f56f4dd6a2e3160f06e38e93398b8265dd6ed"
       },
       "documentArtifactCache": {
         "hits": [
@@ -160,139 +166,200 @@
         "misses": [
           "structure"
         ],
-        "schemaVersion": "naru.ifc-document-artifact.1",
+        "schemaVersion": "naru.ifc-document-artifact.2",
         "status": "enabled"
       },
       "warnings": [],
+      "outputFiles": {
+        "adapter-report.json": {
+          "bytes": 39026,
+          "sha256": "5731c7c65af5ddce4c456574da6f94f345fceb822cede36e1e34abc7fb6cfd23",
+          "excludedKeys": [
+            "documentArtifactCache"
+          ],
+          "semanticSha256": "823a36430118df0ece9b1f158ef69656d3b8f3cc8789a9100a77bd6f0f7cb378"
+        },
+        "build-report.json": {
+          "bytes": 142297,
+          "sha256": "d7d47aedcc0c7507d0ef616c5f5877d3b67a015ba46a276fcf9eda5c368fb228"
+        },
+        "coarse.bin": {
+          "bytes": 38700720,
+          "sha256": "39f4db859996d62a8f1427a89a7923434bcf873927c4e5551dafe6961564a9e6"
+        },
+        "hierarchy.bin": {
+          "bytes": 46250496,
+          "sha256": "e9d24b360b570022124bbc31bff001434ee57b49b4fe6ad8992002e05751a63e"
+        },
+        "hierarchy.json": {
+          "bytes": 3192,
+          "sha256": "2038ad90d33a4c3083ad0702c129da1cef228a91b0d0aa653a9c75b724a2b7d4"
+        },
+        "incremental-dependencies.json": {
+          "bytes": 38342167,
+          "sha256": "8dd77321e69a6fc400b8c6b30d581f810289bf6e61b44459a7dd641686cd8be4"
+        },
+        "properties.bin": {
+          "bytes": 31179862,
+          "sha256": "dad8d98909c738df930569c4b907c29e64cda2b65d84917936c1c4d86d3dd8c4"
+        },
+        "properties.json": {
+          "bytes": 17705010,
+          "sha256": "6b632040996161969c60deb308db4a069bd22d71de8ff0010b880f226b56f4a6"
+        },
+        "scene.bin": {
+          "bytes": 169752328,
+          "sha256": "27f324f2ebbac5d1f1ecbe3fc78fb36600dd5ea1a88a58b475924cdc67dd358c"
+        },
+        "scene.gltf": {
+          "bytes": 299336922,
+          "sha256": "e3d8f3de93259864a01cb4cad6daa07e768f2f2966fb0b7d1e02f724db6a4357"
+        },
+        "spatial.bin": {
+          "bytes": 1056956,
+          "sha256": "04930d10190a6a9663d74cac775cca43447d50af1f3ac661793bfd96bd9be514"
+        }
+      },
       "stages": {
         "schemaVersion": "naru.ifc-federation-stage-timing.1",
-        "totalMilliseconds": 123647.6603,
+        "totalMilliseconds": 73082.2789,
         "stages": {
-          "inspectSources": 461.84929999999997,
-          "toolchainIdentity": 460.4104,
-          "cacheLookup": 0.46059999999999945,
-          "adapter": 77243.6103,
-          "readSceneIr": 30020.090899999996,
-          "hydrate": 59.371100000003935,
-          "compile": 10830.603900000002,
-          "validateCompiled": 146.5804000000062,
-          "dependencyIndex": 981.6380999999965,
-          "writePackage": 2285.7111000000004,
-          "writeDependencyIndex": 131.66700000000128,
+          "inspectSources": 440.887,
+          "toolchainIdentity": 363.44329999999997,
+          "cacheLookup": 0.32540000000005875,
+          "adapter": 34872.113600000004,
+          "readSceneIr": 25383.823900000003,
+          "hydrate": 52.897799999998824,
+          "compile": 8415.982100000008,
+          "validateCompiled": 120.43739999999525,
+          "dependencyIndex": 772.0911999999953,
+          "writePackage": 1742.477899999998,
+          "writeDependencyIndex": 125.1301000000094,
           "retainSceneIr": 0,
-          "cachePublish": 929.8855999999942
+          "cachePublish": 697.2427000000025
         },
-        "unattributedMilliseconds": 95.78160000000207,
-        "structureReadMilliseconds": 29969.5089,
+        "unattributedMilliseconds": 95.42649999998685,
+        "structureReadMilliseconds": 25342.388099999996,
         "compileStages": {
-          "validateScene": 1408.7954000000027,
-          "encodeGeometry": 3101.6696999999986,
-          "measureDocument": 2437.156600000002,
-          "other": 3882.9821999999986
+          "validateScene": 1127.276899999997,
+          "encodeGeometry": 2490.0996000000014,
+          "measureDocument": 1861.6984999999986,
+          "other": 2936.9071000000113
         },
         "adapter": {
-          "spawnToModuleStartMilliseconds": 77.844482421875,
-          "importMilliseconds": 261.506103515625,
-          "importsToMainMilliseconds": 4.54638671875,
-          "mainMilliseconds": 76101.19262695312,
-          "finishToCloseMilliseconds": 797.910400390625,
+          "spawnToModuleStartMilliseconds": 56.352783203125,
+          "importMilliseconds": 216.064208984375,
+          "importsToMainMilliseconds": 3.7216796875,
+          "mainMilliseconds": 33942.689208984375,
+          "finishToCloseMilliseconds": 653.172119140625,
           "ledger": {
             "documents": [
               {
-                "artifactBytes": 35579032,
-                "artifactLoadMilliseconds": 2076.955100055784,
+                "artifactBytes": 35579010,
+                "artifactLoadMilliseconds": 433.3378999726847,
+                "artifactParseMilliseconds": 1337.3615000164136,
+                "artifactPayloadBytes": 271752539,
                 "artifactState": "verified",
-                "artifactVerifyMilliseconds": 8569.582799973432,
+                "artifactVerifyMilliseconds": 106.29419999895617,
                 "discipline": "architecture",
                 "outcome": "restored",
-                "readMilliseconds": 218.3328000307083,
-                "restoreMilliseconds": 10.301399946212769,
+                "readMilliseconds": 202.55129998922348,
+                "restoreMilliseconds": 5.951100051403046,
                 "sourceBytes": 342657851
               },
               {
-                "artifactBytes": 13156606,
-                "artifactLoadMilliseconds": 1436.1200000275858,
+                "artifactBytes": 13156524,
+                "artifactLoadMilliseconds": 206.216000020504,
+                "artifactParseMilliseconds": 978.8184000062756,
+                "artifactPayloadBytes": 172603806,
                 "artifactState": "verified",
-                "artifactVerifyMilliseconds": 6709.897499997169,
+                "artifactVerifyMilliseconds": 68.08250001631677,
                 "discipline": "electrical",
                 "outcome": "restored",
-                "readMilliseconds": 71.72190004587173,
-                "restoreMilliseconds": 5.603100001811981,
+                "readMilliseconds": 66.77609997987747,
+                "restoreMilliseconds": 2.922600030899048,
                 "sourceBytes": 97058912
               },
               {
-                "artifactBytes": 321214,
-                "artifactLoadMilliseconds": 37.97829995164648,
+                "artifactBytes": 321216,
+                "artifactLoadMilliseconds": 13.63359997048974,
+                "artifactParseMilliseconds": 17.52749999286607,
+                "artifactPayloadBytes": 4555888,
                 "artifactState": "verified",
-                "artifactVerifyMilliseconds": 149.89950001472607,
+                "artifactVerifyMilliseconds": 1.8492999952286482,
                 "discipline": "facade",
                 "outcome": "restored",
-                "readMilliseconds": 7.072300016880035,
-                "restoreMilliseconds": 0.06199997663497925,
+                "readMilliseconds": 6.736100018024445,
+                "restoreMilliseconds": 0.031800031661987305,
                 "sourceBytes": 6067026
               },
               {
-                "artifactBytes": 4738552,
-                "artifactLoadMilliseconds": 290.38419999415055,
+                "artifactBytes": 4738587,
+                "artifactLoadMilliseconds": 59.37690002610907,
+                "artifactParseMilliseconds": 195.68569998955354,
+                "artifactPayloadBytes": 29588084,
                 "artifactState": "verified",
-                "artifactVerifyMilliseconds": 1405.5426999693736,
+                "artifactVerifyMilliseconds": 11.690699961036444,
                 "discipline": "kitchen",
                 "outcome": "restored",
-                "readMilliseconds": 31.2292999625206,
-                "restoreMilliseconds": 0.35589998960494995,
+                "readMilliseconds": 30.09909999370575,
+                "restoreMilliseconds": 0.17789995670318604,
                 "sourceBytes": 49670229
               },
               {
-                "artifactBytes": 30113286,
-                "artifactLoadMilliseconds": 2947.9716999921948,
+                "artifactBytes": 30113437,
+                "artifactLoadMilliseconds": 403.0847999965772,
+                "artifactParseMilliseconds": 1928.7295999820344,
+                "artifactPayloadBytes": 278946357,
                 "artifactState": "verified",
-                "artifactVerifyMilliseconds": 10972.94140001759,
+                "artifactVerifyMilliseconds": 109.43379998207092,
                 "discipline": "plumbing",
                 "outcome": "restored",
-                "readMilliseconds": 138.11119997501373,
-                "restoreMilliseconds": 7.10369998216629,
+                "readMilliseconds": 132.78179997205734,
+                "restoreMilliseconds": 4.687600016593933,
                 "sourceBytes": 222099255
               },
               {
-                "artifactLoadMilliseconds": 0.229199999012053,
                 "artifactState": "absent",
                 "discipline": "structure",
-                "extractMilliseconds": 6257.021699965,
+                "extractMilliseconds": 5184.063099980354,
                 "outcome": "extracted",
-                "publishMilliseconds": 2801.2739999890327,
-                "readMilliseconds": 16.999599993228912,
+                "publishMilliseconds": 594.2211000323296,
+                "readMilliseconds": 16.02099996805191,
                 "sourceBytes": 7422441
               },
               {
-                "artifactBytes": 17276801,
-                "artifactLoadMilliseconds": 1521.0139999981038,
+                "artifactBytes": 17276977,
+                "artifactLoadMilliseconds": 238.85329999029636,
+                "artifactParseMilliseconds": 1004.0782999712974,
+                "artifactPayloadBytes": 140811979,
                 "artifactState": "verified",
-                "artifactVerifyMilliseconds": 5826.23569999123,
+                "artifactVerifyMilliseconds": 55.62729999655858,
                 "discipline": "ventilation",
                 "outcome": "restored",
-                "readMilliseconds": 71.92399996519089,
-                "restoreMilliseconds": 3.616499960422516,
+                "readMilliseconds": 70.31530004739761,
+                "restoreMilliseconds": 2.4836000204086304,
                 "sourceBytes": 114891068
               }
             ],
             "federation": {
-              "mergeMilliseconds": 112.34499996900558,
-              "propertyIndexMilliseconds": 11374.621500015259
+              "mergeMilliseconds": 86.76050001382828,
+              "propertyIndexMilliseconds": 9644.369699954987
             },
-            "importMilliseconds": 261.506103515625,
+            "importMilliseconds": 216.064208984375,
             "schemaVersion": "naru.ifc-adapter-stage-timing.1",
             "wallClock": {
-              "finishedAtMs": 1788413248755.0896,
-              "importsFinishedAtMs": 1788413172649.3506,
-              "mainStartedAtMs": 1788413172653.897,
-              "moduleStartedAtMs": 1788413172387.8445
+              "finishedAtMs": 1788429349494.828,
+              "importsFinishedAtMs": 1788429315548.417,
+              "mainStartedAtMs": 1788429315552.1387,
+              "moduleStartedAtMs": 1788429315332.3528
             },
             "write": {
-              "digestMilliseconds": 410.46320003271103,
-              "geometryMilliseconds": 1691.1033000349998,
-              "propertiesMilliseconds": 147.50779992341995,
-              "reportMilliseconds": 2.225599944591522,
-              "structureMilliseconds": 10586.090099990368
+              "digestMilliseconds": 388.81270003318787,
+              "geometryMilliseconds": 1392.0485000014305,
+              "propertiesMilliseconds": 114.50340002775192,
+              "reportMilliseconds": 1.9592000246047974,
+              "structureMilliseconds": 8625.241400063038
             }
           }
         }
@@ -301,15 +368,15 @@
     {
       "index": 2,
       "exitCode": 0,
-      "processMilliseconds": 126458.5,
-      "compileMilliseconds": 126189.2,
-      "peakWorkingSetBytes": 3347554304,
-      "peakPrivateBytes": 3861471232,
+      "processMilliseconds": 72799,
+      "compileMilliseconds": 72582,
+      "peakWorkingSetBytes": 4246867968,
+      "peakPrivateBytes": 4734119936,
       "maxProcessCount": 4,
       "packageDigest": "05707534c73ce126da401a79481d0fd6c892bc308a451d6aa2a4b1691bc2439e",
       "cache": {
         "status": "miss",
-        "key": "3cd36cfb2ea28779001ecd69cbb1de48008d55952955c17f46a0793bcee10669"
+        "key": "897773014e35bd4afbf5218c570f56f4dd6a2e3160f06e38e93398b8265dd6ed"
       },
       "documentArtifactCache": {
         "hits": [
@@ -323,139 +390,200 @@
         "misses": [
           "structure"
         ],
-        "schemaVersion": "naru.ifc-document-artifact.1",
+        "schemaVersion": "naru.ifc-document-artifact.2",
         "status": "enabled"
       },
       "warnings": [],
+      "outputFiles": {
+        "adapter-report.json": {
+          "bytes": 39026,
+          "sha256": "5731c7c65af5ddce4c456574da6f94f345fceb822cede36e1e34abc7fb6cfd23",
+          "excludedKeys": [
+            "documentArtifactCache"
+          ],
+          "semanticSha256": "823a36430118df0ece9b1f158ef69656d3b8f3cc8789a9100a77bd6f0f7cb378"
+        },
+        "build-report.json": {
+          "bytes": 142297,
+          "sha256": "d7d47aedcc0c7507d0ef616c5f5877d3b67a015ba46a276fcf9eda5c368fb228"
+        },
+        "coarse.bin": {
+          "bytes": 38700720,
+          "sha256": "39f4db859996d62a8f1427a89a7923434bcf873927c4e5551dafe6961564a9e6"
+        },
+        "hierarchy.bin": {
+          "bytes": 46250496,
+          "sha256": "e9d24b360b570022124bbc31bff001434ee57b49b4fe6ad8992002e05751a63e"
+        },
+        "hierarchy.json": {
+          "bytes": 3192,
+          "sha256": "2038ad90d33a4c3083ad0702c129da1cef228a91b0d0aa653a9c75b724a2b7d4"
+        },
+        "incremental-dependencies.json": {
+          "bytes": 38342167,
+          "sha256": "8dd77321e69a6fc400b8c6b30d581f810289bf6e61b44459a7dd641686cd8be4"
+        },
+        "properties.bin": {
+          "bytes": 31179862,
+          "sha256": "dad8d98909c738df930569c4b907c29e64cda2b65d84917936c1c4d86d3dd8c4"
+        },
+        "properties.json": {
+          "bytes": 17705010,
+          "sha256": "6b632040996161969c60deb308db4a069bd22d71de8ff0010b880f226b56f4a6"
+        },
+        "scene.bin": {
+          "bytes": 169752328,
+          "sha256": "27f324f2ebbac5d1f1ecbe3fc78fb36600dd5ea1a88a58b475924cdc67dd358c"
+        },
+        "scene.gltf": {
+          "bytes": 299336922,
+          "sha256": "e3d8f3de93259864a01cb4cad6daa07e768f2f2966fb0b7d1e02f724db6a4357"
+        },
+        "spatial.bin": {
+          "bytes": 1056956,
+          "sha256": "04930d10190a6a9663d74cac775cca43447d50af1f3ac661793bfd96bd9be514"
+        }
+      },
       "stages": {
         "schemaVersion": "naru.ifc-federation-stage-timing.1",
-        "totalMilliseconds": 126149.8038,
+        "totalMilliseconds": 72548.1863,
         "stages": {
-          "inspectSources": 474.7777,
-          "toolchainIdentity": 451.5272,
-          "cacheLookup": 0.3668999999999869,
-          "adapter": 76317.72,
-          "readSceneIr": 33049.7513,
-          "hydrate": 58.914099999994505,
-          "compile": 11104.565300000002,
-          "validateCompiled": 149.08950000000186,
-          "dependencyIndex": 1053.0730999999942,
-          "writePackage": 2437.0438999999897,
-          "writeDependencyIndex": 155.77009999999427,
+          "inspectSources": 442.3751,
+          "toolchainIdentity": 380.62890000000004,
+          "cacheLookup": 0.32970000000000255,
+          "adapter": 34601.7211,
+          "readSceneIr": 25236.4294,
+          "hydrate": 50.186900000000605,
+          "compile": 8356.9271,
+          "validateCompiled": 134.90709999999672,
+          "dependencyIndex": 809.1114999999991,
+          "writePackage": 1725.9958999999944,
+          "writeDependencyIndex": 110.77419999999984,
           "retainSceneIr": 0,
-          "cachePublish": 798.6895000000077
+          "cachePublish": 602.5249999999942
         },
-        "unattributedMilliseconds": 98.51520000000892,
-        "structureReadMilliseconds": 32996.48850000001,
+        "unattributedMilliseconds": 96.27440000000934,
+        "structureReadMilliseconds": 25195.817899999995,
         "compileStages": {
-          "validateScene": 1433.3435000000027,
-          "encodeGeometry": 3277.5323999999964,
-          "measureDocument": 2505.001999999993,
-          "other": 3888.68740000001
+          "validateScene": 1120.7644999999975,
+          "encodeGeometry": 2478.0053000000044,
+          "measureDocument": 1870.9747000000061,
+          "other": 2887.182599999993
         },
         "adapter": {
-          "spawnToModuleStartMilliseconds": 80.421875,
-          "importMilliseconds": 263.330810546875,
-          "importsToMainMilliseconds": 5.0302734375,
-          "mainMilliseconds": 75146.92993164062,
-          "finishToCloseMilliseconds": 821.287109375,
+          "spawnToModuleStartMilliseconds": 57.191162109375,
+          "importMilliseconds": 221.3486328125,
+          "importsToMainMilliseconds": 4.04248046875,
+          "mainMilliseconds": 33674.835693359375,
+          "finishToCloseMilliseconds": 643.58203125,
           "ledger": {
             "documents": [
               {
-                "artifactBytes": 35579032,
-                "artifactLoadMilliseconds": 1940.4308999655768,
+                "artifactBytes": 35579010,
+                "artifactLoadMilliseconds": 432.96149995876476,
+                "artifactParseMilliseconds": 1370.5754000111483,
+                "artifactPayloadBytes": 271752539,
                 "artifactState": "verified",
-                "artifactVerifyMilliseconds": 8585.069800028577,
+                "artifactVerifyMilliseconds": 106.42820002976805,
                 "discipline": "architecture",
                 "outcome": "restored",
-                "readMilliseconds": 209.2360000014305,
-                "restoreMilliseconds": 11.560199975967407,
+                "readMilliseconds": 202.86770004034042,
+                "restoreMilliseconds": 6.855499982833862,
                 "sourceBytes": 342657851
               },
               {
-                "artifactBytes": 13156606,
-                "artifactLoadMilliseconds": 1380.4233000264503,
+                "artifactBytes": 13156524,
+                "artifactLoadMilliseconds": 201.86870003817603,
+                "artifactParseMilliseconds": 969.2948000156321,
+                "artifactPayloadBytes": 172603806,
                 "artifactState": "verified",
-                "artifactVerifyMilliseconds": 6456.941900018137,
+                "artifactVerifyMilliseconds": 67.52729997970164,
                 "discipline": "electrical",
                 "outcome": "restored",
-                "readMilliseconds": 73.74870002269745,
-                "restoreMilliseconds": 4.028099954128265,
+                "readMilliseconds": 67.60490000247955,
+                "restoreMilliseconds": 3.0210999250411987,
                 "sourceBytes": 97058912
               },
               {
-                "artifactBytes": 321214,
-                "artifactLoadMilliseconds": 24.730200006160885,
+                "artifactBytes": 321216,
+                "artifactLoadMilliseconds": 5.868899985216558,
+                "artifactParseMilliseconds": 17.057099961675704,
+                "artifactPayloadBytes": 4555888,
                 "artifactState": "verified",
-                "artifactVerifyMilliseconds": 116.70610000146553,
+                "artifactVerifyMilliseconds": 1.81350001366809,
                 "discipline": "facade",
                 "outcome": "restored",
-                "readMilliseconds": 7.174000024795532,
-                "restoreMilliseconds": 0.046000003814697266,
+                "readMilliseconds": 6.709199965000153,
+                "restoreMilliseconds": 0.028400003910064697,
                 "sourceBytes": 6067026
               },
               {
-                "artifactBytes": 4738552,
-                "artifactLoadMilliseconds": 268.5576999792829,
+                "artifactBytes": 4738587,
+                "artifactLoadMilliseconds": 51.557599974330515,
+                "artifactParseMilliseconds": 187.61010002344847,
+                "artifactPayloadBytes": 29588084,
                 "artifactState": "verified",
-                "artifactVerifyMilliseconds": 1245.0387999997474,
+                "artifactVerifyMilliseconds": 11.62760000443086,
                 "discipline": "kitchen",
                 "outcome": "restored",
-                "readMilliseconds": 31.779600024223328,
-                "restoreMilliseconds": 0.26739996671676636,
+                "readMilliseconds": 29.467300057411194,
+                "restoreMilliseconds": 0.1151999831199646,
                 "sourceBytes": 49670229
               },
               {
-                "artifactBytes": 30113286,
-                "artifactLoadMilliseconds": 2589.349800022319,
+                "artifactBytes": 30113437,
+                "artifactLoadMilliseconds": 397.0312000019476,
+                "artifactParseMilliseconds": 1922.8627000120468,
+                "artifactPayloadBytes": 278946357,
                 "artifactState": "verified",
-                "artifactVerifyMilliseconds": 10223.333299974911,
+                "artifactVerifyMilliseconds": 109.28969999076799,
                 "discipline": "plumbing",
                 "outcome": "restored",
-                "readMilliseconds": 137.18850004673004,
-                "restoreMilliseconds": 7.554500043392181,
+                "readMilliseconds": 133.07480001449585,
+                "restoreMilliseconds": 5.1305999755859375,
                 "sourceBytes": 222099255
               },
               {
-                "artifactLoadMilliseconds": 0.23330003023147583,
                 "artifactState": "absent",
                 "discipline": "structure",
-                "extractMilliseconds": 6396.690099954605,
+                "extractMilliseconds": 5165.395299971104,
                 "outcome": "extracted",
-                "publishMilliseconds": 3182.827699959278,
-                "readMilliseconds": 12.391799986362457,
+                "publishMilliseconds": 593.4919000267982,
+                "readMilliseconds": 11.131499946117401,
                 "sourceBytes": 7422441
               },
               {
-                "artifactBytes": 17276801,
-                "artifactLoadMilliseconds": 1535.9268999891356,
+                "artifactBytes": 17276977,
+                "artifactLoadMilliseconds": 222.8097000042908,
+                "artifactParseMilliseconds": 1014.5570999593474,
+                "artifactPayloadBytes": 140811979,
                 "artifactState": "verified",
-                "artifactVerifyMilliseconds": 5944.083000009414,
+                "artifactVerifyMilliseconds": 56.28449999494478,
                 "discipline": "ventilation",
                 "outcome": "restored",
-                "readMilliseconds": 74.38490003347397,
-                "restoreMilliseconds": 3.51419997215271,
+                "readMilliseconds": 70.25350004434586,
+                "restoreMilliseconds": 2.086400032043457,
                 "sourceBytes": 114891068
               }
             ],
             "federation": {
-              "mergeMilliseconds": 99.27050000429153,
-              "propertyIndexMilliseconds": 11513.086100041866
+              "mergeMilliseconds": 85.65380001068115,
+              "propertyIndexMilliseconds": 9473.249200046062
             },
-            "importMilliseconds": 263.330810546875,
+            "importMilliseconds": 221.3486328125,
             "schemaVersion": "naru.ifc-adapter-stage-timing.1",
             "wallClock": {
-              "finishedAtMs": 1788413371857.713,
-              "importsFinishedAtMs": 1788413296705.7527,
-              "mainStartedAtMs": 1788413296710.783,
-              "moduleStartedAtMs": 1788413296442.4219
+              "finishedAtMs": 1788429746330.418,
+              "importsFinishedAtMs": 1788429712651.5398,
+              "mainStartedAtMs": 1788429712655.5823,
+              "moduleStartedAtMs": 1788429712430.1912
             },
             "write": {
-              "digestMilliseconds": 441.40979993343353,
-              "geometryMilliseconds": 1696.050800025463,
-              "propertiesMilliseconds": 159.06360000371933,
-              "reportMilliseconds": 2.2042999267578125,
-              "structureMilliseconds": 10580.094799995422
+              "digestMilliseconds": 381.5479000210762,
+              "geometryMilliseconds": 1381.6810000538826,
+              "propertiesMilliseconds": 116.39070004224777,
+              "reportMilliseconds": 1.9955999851226807,
+              "structureMilliseconds": 8602.188700020313
             }
           }
         }
@@ -464,15 +592,15 @@
     {
       "index": 3,
       "exitCode": 0,
-      "processMilliseconds": 133037.9,
-      "compileMilliseconds": 132787.5,
-      "peakWorkingSetBytes": 3311181824,
-      "peakPrivateBytes": 3823869952,
+      "processMilliseconds": 72952,
+      "compileMilliseconds": 72731.4,
+      "peakWorkingSetBytes": 4129423360,
+      "peakPrivateBytes": 4621877248,
       "maxProcessCount": 4,
       "packageDigest": "05707534c73ce126da401a79481d0fd6c892bc308a451d6aa2a4b1691bc2439e",
       "cache": {
         "status": "miss",
-        "key": "3cd36cfb2ea28779001ecd69cbb1de48008d55952955c17f46a0793bcee10669"
+        "key": "897773014e35bd4afbf5218c570f56f4dd6a2e3160f06e38e93398b8265dd6ed"
       },
       "documentArtifactCache": {
         "hits": [
@@ -486,139 +614,200 @@
         "misses": [
           "structure"
         ],
-        "schemaVersion": "naru.ifc-document-artifact.1",
+        "schemaVersion": "naru.ifc-document-artifact.2",
         "status": "enabled"
       },
       "warnings": [],
+      "outputFiles": {
+        "adapter-report.json": {
+          "bytes": 39026,
+          "sha256": "5731c7c65af5ddce4c456574da6f94f345fceb822cede36e1e34abc7fb6cfd23",
+          "excludedKeys": [
+            "documentArtifactCache"
+          ],
+          "semanticSha256": "823a36430118df0ece9b1f158ef69656d3b8f3cc8789a9100a77bd6f0f7cb378"
+        },
+        "build-report.json": {
+          "bytes": 142297,
+          "sha256": "d7d47aedcc0c7507d0ef616c5f5877d3b67a015ba46a276fcf9eda5c368fb228"
+        },
+        "coarse.bin": {
+          "bytes": 38700720,
+          "sha256": "39f4db859996d62a8f1427a89a7923434bcf873927c4e5551dafe6961564a9e6"
+        },
+        "hierarchy.bin": {
+          "bytes": 46250496,
+          "sha256": "e9d24b360b570022124bbc31bff001434ee57b49b4fe6ad8992002e05751a63e"
+        },
+        "hierarchy.json": {
+          "bytes": 3192,
+          "sha256": "2038ad90d33a4c3083ad0702c129da1cef228a91b0d0aa653a9c75b724a2b7d4"
+        },
+        "incremental-dependencies.json": {
+          "bytes": 38342167,
+          "sha256": "8dd77321e69a6fc400b8c6b30d581f810289bf6e61b44459a7dd641686cd8be4"
+        },
+        "properties.bin": {
+          "bytes": 31179862,
+          "sha256": "dad8d98909c738df930569c4b907c29e64cda2b65d84917936c1c4d86d3dd8c4"
+        },
+        "properties.json": {
+          "bytes": 17705010,
+          "sha256": "6b632040996161969c60deb308db4a069bd22d71de8ff0010b880f226b56f4a6"
+        },
+        "scene.bin": {
+          "bytes": 169752328,
+          "sha256": "27f324f2ebbac5d1f1ecbe3fc78fb36600dd5ea1a88a58b475924cdc67dd358c"
+        },
+        "scene.gltf": {
+          "bytes": 299336922,
+          "sha256": "e3d8f3de93259864a01cb4cad6daa07e768f2f2966fb0b7d1e02f724db6a4357"
+        },
+        "spatial.bin": {
+          "bytes": 1056956,
+          "sha256": "04930d10190a6a9663d74cac775cca43447d50af1f3ac661793bfd96bd9be514"
+        }
+      },
       "stages": {
         "schemaVersion": "naru.ifc-federation-stage-timing.1",
-        "totalMilliseconds": 132743.89680000002,
+        "totalMilliseconds": 72695.8961,
         "stages": {
-          "inspectSources": 474.74979999999994,
-          "toolchainIdentity": 461.86519999999996,
-          "cacheLookup": 0.36369999999999436,
-          "adapter": 85455.41200000001,
-          "readSceneIr": 30705.0147,
-          "hydrate": 61.40709999999672,
-          "compile": 10757.340100000001,
-          "validateCompiled": 181.0240999999951,
-          "dependencyIndex": 1120.3699999999953,
-          "writePackage": 2561.986499999999,
-          "writeDependencyIndex": 147.55530000000726,
+          "inspectSources": 442.469,
+          "toolchainIdentity": 377.92679999999996,
+          "cacheLookup": 0.3405999999999949,
+          "adapter": 34867.0765,
+          "readSceneIr": 25206.676199999994,
+          "hydrate": 49.75089999999909,
+          "compile": 8278.359100000009,
+          "validateCompiled": 135.00190000000293,
+          "dependencyIndex": 777.8191999999981,
+          "writePackage": 1726.4618999999948,
+          "writeDependencyIndex": 119.88440000000992,
           "retainSceneIr": 0,
-          "cachePublish": 719.8058000000019
+          "cachePublish": 618.2209000000003
         },
-        "unattributedMilliseconds": 97.00250000000233,
-        "structureReadMilliseconds": 30648.252300000007,
+        "unattributedMilliseconds": 95.9086999999854,
+        "structureReadMilliseconds": 25167.719000000005,
         "compileStages": {
-          "validateScene": 1338.553899999999,
-          "encodeGeometry": 3220.2564999999886,
-          "measureDocument": 2566.4839000000065,
-          "other": 3632.045800000007
+          "validateScene": 1098.1109999999971,
+          "encodeGeometry": 2497.2333999999973,
+          "measureDocument": 1838.0312999999878,
+          "other": 2844.9834000000264
         },
         "adapter": {
-          "spawnToModuleStartMilliseconds": 87.366455078125,
-          "importMilliseconds": 274.087646484375,
-          "importsToMainMilliseconds": 4.744140625,
-          "mainMilliseconds": 84319.70141601562,
-          "finishToCloseMilliseconds": 768.100341796875,
+          "spawnToModuleStartMilliseconds": 60.7666015625,
+          "importMilliseconds": 206.52099609375,
+          "importsToMainMilliseconds": 4.344970703125,
+          "mainMilliseconds": 33956.044677734375,
+          "finishToCloseMilliseconds": 639.32275390625,
           "ledger": {
             "documents": [
               {
-                "artifactBytes": 35579032,
-                "artifactLoadMilliseconds": 2032.2945000370964,
+                "artifactBytes": 35579010,
+                "artifactLoadMilliseconds": 432.49410000862554,
+                "artifactParseMilliseconds": 1339.1179000027478,
+                "artifactPayloadBytes": 271752539,
                 "artifactState": "verified",
-                "artifactVerifyMilliseconds": 8998.91150003532,
+                "artifactVerifyMilliseconds": 106.58990003867075,
                 "discipline": "architecture",
                 "outcome": "restored",
-                "readMilliseconds": 212.62959998846054,
-                "restoreMilliseconds": 9.955399990081787,
+                "readMilliseconds": 202.25999999046326,
+                "restoreMilliseconds": 5.817899942398071,
                 "sourceBytes": 342657851
               },
               {
-                "artifactBytes": 13156606,
-                "artifactLoadMilliseconds": 1542.8025999572128,
+                "artifactBytes": 13156524,
+                "artifactLoadMilliseconds": 201.67700003366917,
+                "artifactParseMilliseconds": 963.8192999991588,
+                "artifactPayloadBytes": 172603806,
                 "artifactState": "verified",
-                "artifactVerifyMilliseconds": 7101.821799995378,
+                "artifactVerifyMilliseconds": 67.52229999983683,
                 "discipline": "electrical",
                 "outcome": "restored",
-                "readMilliseconds": 71.39740002155304,
-                "restoreMilliseconds": 6.650799989700317,
+                "readMilliseconds": 67.19069999456406,
+                "restoreMilliseconds": 3.1685999631881714,
                 "sourceBytes": 97058912
               },
               {
-                "artifactBytes": 321214,
-                "artifactLoadMilliseconds": 28.56080001220107,
+                "artifactBytes": 321216,
+                "artifactLoadMilliseconds": 5.9569000150077045,
+                "artifactParseMilliseconds": 17.262900015339255,
+                "artifactPayloadBytes": 4555888,
                 "artifactState": "verified",
-                "artifactVerifyMilliseconds": 131.01160002406687,
+                "artifactVerifyMilliseconds": 1.8144000205211341,
                 "discipline": "facade",
                 "outcome": "restored",
-                "readMilliseconds": 7.221799969673157,
-                "restoreMilliseconds": 0.04809999465942383,
+                "readMilliseconds": 7.031399965286255,
+                "restoreMilliseconds": 0.026799917221069336,
                 "sourceBytes": 6067026
               },
               {
-                "artifactBytes": 4738552,
-                "artifactLoadMilliseconds": 317.400700005237,
+                "artifactBytes": 4738587,
+                "artifactLoadMilliseconds": 55.640899983700365,
+                "artifactParseMilliseconds": 197.84809998236597,
+                "artifactPayloadBytes": 29588084,
                 "artifactState": "verified",
-                "artifactVerifyMilliseconds": 1490.801999985706,
+                "artifactVerifyMilliseconds": 11.746399977710098,
                 "discipline": "kitchen",
                 "outcome": "restored",
-                "readMilliseconds": 31.582499980926514,
-                "restoreMilliseconds": 0.2682000398635864,
+                "readMilliseconds": 29.529199957847595,
+                "restoreMilliseconds": 0.16659998893737793,
                 "sourceBytes": 49670229
               },
               {
-                "artifactBytes": 30113286,
-                "artifactLoadMilliseconds": 3174.776899977587,
+                "artifactBytes": 30113437,
+                "artifactLoadMilliseconds": 397.76740001980215,
+                "artifactParseMilliseconds": 1923.5084000392817,
+                "artifactPayloadBytes": 278946357,
                 "artifactState": "verified",
-                "artifactVerifyMilliseconds": 12899.281200021505,
+                "artifactVerifyMilliseconds": 109.2011000146158,
                 "discipline": "plumbing",
                 "outcome": "restored",
-                "readMilliseconds": 141.3784999847412,
-                "restoreMilliseconds": 7.556100010871887,
+                "readMilliseconds": 133.87130004167557,
+                "restoreMilliseconds": 4.506700038909912,
                 "sourceBytes": 222099255
               },
               {
-                "artifactLoadMilliseconds": 0.20060001406818628,
                 "artifactState": "absent",
                 "discipline": "structure",
-                "extractMilliseconds": 7047.389699995518,
+                "extractMilliseconds": 5270.378199994564,
                 "outcome": "extracted",
-                "publishMilliseconds": 3283.781599998474,
-                "readMilliseconds": 12.26960003376007,
+                "publishMilliseconds": 593.1716999411583,
+                "readMilliseconds": 11.541999995708466,
                 "sourceBytes": 7422441
               },
               {
-                "artifactBytes": 17276801,
-                "artifactLoadMilliseconds": 1967.2703999676742,
+                "artifactBytes": 17276977,
+                "artifactLoadMilliseconds": 217.33559999847785,
+                "artifactParseMilliseconds": 1064.4711999921128,
+                "artifactPayloadBytes": 140811979,
                 "artifactState": "verified",
-                "artifactVerifyMilliseconds": 6647.453699959442,
+                "artifactVerifyMilliseconds": 55.89320004219189,
                 "discipline": "ventilation",
                 "outcome": "restored",
-                "readMilliseconds": 76.21630001068115,
-                "restoreMilliseconds": 6.461000025272369,
+                "readMilliseconds": 69.56560003757477,
+                "restoreMilliseconds": 2.329800009727478,
                 "sourceBytes": 114891068
               }
             ],
             "federation": {
-              "mergeMilliseconds": 137.82770001888275,
-              "propertyIndexMilliseconds": 13422.287299990654
+              "mergeMilliseconds": 101.1389000415802,
+              "propertyIndexMilliseconds": 9667.286800026894
             },
-            "importMilliseconds": 274.087646484375,
+            "importMilliseconds": 206.52099609375,
             "schemaVersion": "naru.ifc-adapter-stage-timing.1",
             "wallClock": {
-              "finishedAtMs": 1788413507610.8997,
-              "importsFinishedAtMs": 1788413423286.454,
-              "mainStartedAtMs": 1788413423291.1982,
-              "moduleStartedAtMs": 1788413423012.3665
+              "finishedAtMs": 1788430140534.6772,
+              "importsFinishedAtMs": 1788430106574.2876,
+              "mainStartedAtMs": 1788430106578.6326,
+              "moduleStartedAtMs": 1788430106367.7666
             },
             "write": {
-              "digestMilliseconds": 401.1525999903679,
-              "geometryMilliseconds": 2175.409500002861,
-              "propertiesMilliseconds": 146.36650002002716,
-              "reportMilliseconds": 2.5304999947547913,
-              "structureMilliseconds": 10573.533200025558
+              "digestMilliseconds": 379.9514000415802,
+              "geometryMilliseconds": 1355.8352000117302,
+              "propertiesMilliseconds": 112.72750002145767,
+              "reportMilliseconds": 1.9343000054359436,
+              "structureMilliseconds": 8579.100400030613
             }
           }
         }
@@ -627,15 +816,15 @@
     {
       "index": 4,
       "exitCode": 0,
-      "processMilliseconds": 126679.5,
-      "compileMilliseconds": 126384.2,
-      "peakWorkingSetBytes": 3311804416,
-      "peakPrivateBytes": 3824566272,
+      "processMilliseconds": 72993.4,
+      "compileMilliseconds": 72767.9,
+      "peakWorkingSetBytes": 4029530112,
+      "peakPrivateBytes": 4515643392,
       "maxProcessCount": 4,
       "packageDigest": "05707534c73ce126da401a79481d0fd6c892bc308a451d6aa2a4b1691bc2439e",
       "cache": {
         "status": "miss",
-        "key": "3cd36cfb2ea28779001ecd69cbb1de48008d55952955c17f46a0793bcee10669"
+        "key": "897773014e35bd4afbf5218c570f56f4dd6a2e3160f06e38e93398b8265dd6ed"
       },
       "documentArtifactCache": {
         "hits": [
@@ -649,139 +838,200 @@
         "misses": [
           "structure"
         ],
-        "schemaVersion": "naru.ifc-document-artifact.1",
+        "schemaVersion": "naru.ifc-document-artifact.2",
         "status": "enabled"
       },
       "warnings": [],
+      "outputFiles": {
+        "adapter-report.json": {
+          "bytes": 39026,
+          "sha256": "5731c7c65af5ddce4c456574da6f94f345fceb822cede36e1e34abc7fb6cfd23",
+          "excludedKeys": [
+            "documentArtifactCache"
+          ],
+          "semanticSha256": "823a36430118df0ece9b1f158ef69656d3b8f3cc8789a9100a77bd6f0f7cb378"
+        },
+        "build-report.json": {
+          "bytes": 142297,
+          "sha256": "d7d47aedcc0c7507d0ef616c5f5877d3b67a015ba46a276fcf9eda5c368fb228"
+        },
+        "coarse.bin": {
+          "bytes": 38700720,
+          "sha256": "39f4db859996d62a8f1427a89a7923434bcf873927c4e5551dafe6961564a9e6"
+        },
+        "hierarchy.bin": {
+          "bytes": 46250496,
+          "sha256": "e9d24b360b570022124bbc31bff001434ee57b49b4fe6ad8992002e05751a63e"
+        },
+        "hierarchy.json": {
+          "bytes": 3192,
+          "sha256": "2038ad90d33a4c3083ad0702c129da1cef228a91b0d0aa653a9c75b724a2b7d4"
+        },
+        "incremental-dependencies.json": {
+          "bytes": 38342167,
+          "sha256": "8dd77321e69a6fc400b8c6b30d581f810289bf6e61b44459a7dd641686cd8be4"
+        },
+        "properties.bin": {
+          "bytes": 31179862,
+          "sha256": "dad8d98909c738df930569c4b907c29e64cda2b65d84917936c1c4d86d3dd8c4"
+        },
+        "properties.json": {
+          "bytes": 17705010,
+          "sha256": "6b632040996161969c60deb308db4a069bd22d71de8ff0010b880f226b56f4a6"
+        },
+        "scene.bin": {
+          "bytes": 169752328,
+          "sha256": "27f324f2ebbac5d1f1ecbe3fc78fb36600dd5ea1a88a58b475924cdc67dd358c"
+        },
+        "scene.gltf": {
+          "bytes": 299336922,
+          "sha256": "e3d8f3de93259864a01cb4cad6daa07e768f2f2966fb0b7d1e02f724db6a4357"
+        },
+        "spatial.bin": {
+          "bytes": 1056956,
+          "sha256": "04930d10190a6a9663d74cac775cca43447d50af1f3ac661793bfd96bd9be514"
+        }
+      },
       "stages": {
         "schemaVersion": "naru.ifc-federation-stage-timing.1",
-        "totalMilliseconds": 126347.4374,
+        "totalMilliseconds": 72733.3024,
         "stages": {
-          "inspectSources": 575.8411000000001,
-          "toolchainIdentity": 611.1868999999999,
-          "cacheLookup": 0.4717000000000553,
-          "adapter": 79765.3965,
-          "readSceneIr": 30193.992,
-          "hydrate": 63.63259999999718,
-          "compile": 10688.842000000004,
-          "validateCompiled": 136.64740000000165,
-          "dependencyIndex": 1027.5648000000074,
-          "writePackage": 2388.238000000012,
-          "writeDependencyIndex": 138.99259999999776,
+          "inspectSources": 447.1787,
+          "toolchainIdentity": 374.45560000000006,
+          "cacheLookup": 0.3526999999999134,
+          "adapter": 34525.7854,
+          "readSceneIr": 25568.2917,
+          "hydrate": 51.92949999999837,
+          "compile": 8306.658399999993,
+          "validateCompiled": 119.32910000000265,
+          "dependencyIndex": 762.9661000000051,
+          "writePackage": 1730.4273000000103,
+          "writeDependencyIndex": 118.77919999998994,
           "retainSceneIr": 0,
-          "cachePublish": 661.0849000000017
+          "cachePublish": 631.2761000000028
         },
-        "unattributedMilliseconds": 95.54689999997208,
-        "structureReadMilliseconds": 30141.3257,
+        "unattributedMilliseconds": 95.87259999998787,
+        "structureReadMilliseconds": 25523.949,
         "compileStages": {
-          "validateScene": 1435.0669999999955,
-          "encodeGeometry": 3153.2900999999983,
-          "measureDocument": 2402.4811000000045,
-          "other": 3698.003800000006
+          "validateScene": 1138.3853999999992,
+          "encodeGeometry": 2455.006699999998,
+          "measureDocument": 1841.8396000000066,
+          "other": 2871.426699999989
         },
         "adapter": {
-          "spawnToModuleStartMilliseconds": 80.845703125,
-          "importMilliseconds": 271.11474609375,
-          "importsToMainMilliseconds": 5.1259765625,
-          "mainMilliseconds": 78620.81005859375,
-          "finishToCloseMilliseconds": 785.103515625,
+          "spawnToModuleStartMilliseconds": 60.94970703125,
+          "importMilliseconds": 216.521240234375,
+          "importsToMainMilliseconds": 4.18798828125,
+          "mainMilliseconds": 33609.509765625,
+          "finishToCloseMilliseconds": 634.831298828125,
           "ledger": {
             "documents": [
               {
-                "artifactBytes": 35579032,
-                "artifactLoadMilliseconds": 2147.777700040024,
+                "artifactBytes": 35579010,
+                "artifactLoadMilliseconds": 430.0898000365123,
+                "artifactParseMilliseconds": 1343.518000037875,
+                "artifactPayloadBytes": 271752539,
                 "artifactState": "verified",
-                "artifactVerifyMilliseconds": 8915.089500020258,
+                "artifactVerifyMilliseconds": 107.01949999202043,
                 "discipline": "architecture",
                 "outcome": "restored",
-                "readMilliseconds": 214.49540001153946,
-                "restoreMilliseconds": 9.359800040721893,
+                "readMilliseconds": 203.24830001592636,
+                "restoreMilliseconds": 5.589599967002869,
                 "sourceBytes": 342657851
               },
               {
-                "artifactBytes": 13156606,
-                "artifactLoadMilliseconds": 1481.650800036732,
+                "artifactBytes": 13156524,
+                "artifactLoadMilliseconds": 203.35839997278526,
+                "artifactParseMilliseconds": 966.008499963209,
+                "artifactPayloadBytes": 172603806,
                 "artifactState": "verified",
-                "artifactVerifyMilliseconds": 6856.957899988629,
+                "artifactVerifyMilliseconds": 67.62950000120327,
                 "discipline": "electrical",
                 "outcome": "restored",
-                "readMilliseconds": 80.36129993200302,
-                "restoreMilliseconds": 5.9262999296188354,
+                "readMilliseconds": 66.69290000200272,
+                "restoreMilliseconds": 3.1229999661445618,
                 "sourceBytes": 97058912
               },
               {
-                "artifactBytes": 321214,
-                "artifactLoadMilliseconds": 30.182400019839406,
+                "artifactBytes": 321216,
+                "artifactLoadMilliseconds": 6.07750000199303,
+                "artifactParseMilliseconds": 16.1777000175789,
+                "artifactPayloadBytes": 4555888,
                 "artifactState": "verified",
-                "artifactVerifyMilliseconds": 138.77939997473732,
+                "artifactVerifyMilliseconds": 2.2069000406190753,
                 "discipline": "facade",
                 "outcome": "restored",
-                "readMilliseconds": 7.522199988365173,
-                "restoreMilliseconds": 0.06930005550384521,
+                "readMilliseconds": 6.825499951839447,
+                "restoreMilliseconds": 0.024100005626678467,
                 "sourceBytes": 6067026
               },
               {
-                "artifactBytes": 4738552,
-                "artifactLoadMilliseconds": 302.9194999835454,
+                "artifactBytes": 4738587,
+                "artifactLoadMilliseconds": 51.640699966810644,
+                "artifactParseMilliseconds": 183.47579997498542,
+                "artifactPayloadBytes": 29588084,
                 "artifactState": "verified",
-                "artifactVerifyMilliseconds": 1453.776200010907,
+                "artifactVerifyMilliseconds": 11.685199977364391,
                 "discipline": "kitchen",
                 "outcome": "restored",
-                "readMilliseconds": 30.58660000562668,
-                "restoreMilliseconds": 0.361299991607666,
+                "readMilliseconds": 30.00189995765686,
+                "restoreMilliseconds": 0.15309995412826538,
                 "sourceBytes": 49670229
               },
               {
-                "artifactBytes": 30113286,
-                "artifactLoadMilliseconds": 3004.243100003805,
+                "artifactBytes": 30113437,
+                "artifactLoadMilliseconds": 401.59439999843016,
+                "artifactParseMilliseconds": 1933.0653000506572,
+                "artifactPayloadBytes": 278946357,
                 "artifactState": "verified",
-                "artifactVerifyMilliseconds": 11411.611199961044,
+                "artifactVerifyMilliseconds": 109.11050002323464,
                 "discipline": "plumbing",
                 "outcome": "restored",
-                "readMilliseconds": 141.3449000120163,
-                "restoreMilliseconds": 9.539600014686584,
+                "readMilliseconds": 131.78380000591278,
+                "restoreMilliseconds": 4.95880001783371,
                 "sourceBytes": 222099255
               },
               {
-                "artifactLoadMilliseconds": 0.22759998682886362,
                 "artifactState": "absent",
                 "discipline": "structure",
-                "extractMilliseconds": 6209.758700013161,
+                "extractMilliseconds": 5222.22110003233,
                 "outcome": "extracted",
-                "publishMilliseconds": 2946.301599919796,
-                "readMilliseconds": 12.762799978256226,
+                "publishMilliseconds": 597.110100030899,
+                "readMilliseconds": 11.111299991607666,
                 "sourceBytes": 7422441
               },
               {
-                "artifactBytes": 17276801,
-                "artifactLoadMilliseconds": 1570.6824000226334,
+                "artifactBytes": 17276977,
+                "artifactLoadMilliseconds": 236.0010000411421,
+                "artifactParseMilliseconds": 1000.526100047864,
+                "artifactPayloadBytes": 140811979,
                 "artifactState": "verified",
-                "artifactVerifyMilliseconds": 5883.572200022172,
+                "artifactVerifyMilliseconds": 55.57789996964857,
                 "discipline": "ventilation",
                 "outcome": "restored",
-                "readMilliseconds": 70.65789997577667,
-                "restoreMilliseconds": 3.185699999332428,
+                "readMilliseconds": 70.9274999499321,
+                "restoreMilliseconds": 2.19730007648468,
                 "sourceBytes": 114891068
               }
             ],
             "federation": {
-              "mergeMilliseconds": 112.10230004787445,
-              "propertyIndexMilliseconds": 11666.151300013065
+              "mergeMilliseconds": 82.26679998636246,
+              "propertyIndexMilliseconds": 9431.974099993706
             },
-            "importMilliseconds": 271.11474609375,
+            "importMilliseconds": 216.521240234375,
             "schemaVersion": "naru.ifc-adapter-stage-timing.1",
             "wallClock": {
-              "finishedAtMs": 1788413635281.8965,
-              "importsFinishedAtMs": 1788413556655.9604,
-              "mainStartedAtMs": 1788413556661.0864,
-              "moduleStartedAtMs": 1788413556384.8457
+              "finishedAtMs": 1788430535431.1687,
+              "importsFinishedAtMs": 1788430501817.471,
+              "mainStartedAtMs": 1788430501821.659,
+              "moduleStartedAtMs": 1788430501600.9497
             },
             "write": {
-              "digestMilliseconds": 406.56379997730255,
-              "geometryMilliseconds": 1860.4581000208855,
-              "propertiesMilliseconds": 206.01240003108978,
-              "reportMilliseconds": 2.556500017642975,
-              "structureMilliseconds": 11223.073199987411
+              "digestMilliseconds": 379.4218000173569,
+              "geometryMilliseconds": 1332.5529999732971,
+              "propertiesMilliseconds": 132.3540000319481,
+              "reportMilliseconds": 2.013200044631958,
+              "structureMilliseconds": 8586.872599959373
             }
           }
         }
@@ -790,15 +1040,15 @@
     {
       "index": 5,
       "exitCode": 0,
-      "processMilliseconds": 125809,
-      "compileMilliseconds": 125568,
-      "peakWorkingSetBytes": 3299540992,
-      "peakPrivateBytes": 3817005056,
+      "processMilliseconds": 73242.8,
+      "compileMilliseconds": 73025.8,
+      "peakWorkingSetBytes": 4187488256,
+      "peakPrivateBytes": 4674777088,
       "maxProcessCount": 4,
       "packageDigest": "05707534c73ce126da401a79481d0fd6c892bc308a451d6aa2a4b1691bc2439e",
       "cache": {
         "status": "miss",
-        "key": "3cd36cfb2ea28779001ecd69cbb1de48008d55952955c17f46a0793bcee10669"
+        "key": "897773014e35bd4afbf5218c570f56f4dd6a2e3160f06e38e93398b8265dd6ed"
       },
       "documentArtifactCache": {
         "hits": [
@@ -812,139 +1062,1082 @@
         "misses": [
           "structure"
         ],
-        "schemaVersion": "naru.ifc-document-artifact.1",
+        "schemaVersion": "naru.ifc-document-artifact.2",
         "status": "enabled"
       },
       "warnings": [],
+      "outputFiles": {
+        "adapter-report.json": {
+          "bytes": 39026,
+          "sha256": "5731c7c65af5ddce4c456574da6f94f345fceb822cede36e1e34abc7fb6cfd23",
+          "excludedKeys": [
+            "documentArtifactCache"
+          ],
+          "semanticSha256": "823a36430118df0ece9b1f158ef69656d3b8f3cc8789a9100a77bd6f0f7cb378"
+        },
+        "build-report.json": {
+          "bytes": 142297,
+          "sha256": "d7d47aedcc0c7507d0ef616c5f5877d3b67a015ba46a276fcf9eda5c368fb228"
+        },
+        "coarse.bin": {
+          "bytes": 38700720,
+          "sha256": "39f4db859996d62a8f1427a89a7923434bcf873927c4e5551dafe6961564a9e6"
+        },
+        "hierarchy.bin": {
+          "bytes": 46250496,
+          "sha256": "e9d24b360b570022124bbc31bff001434ee57b49b4fe6ad8992002e05751a63e"
+        },
+        "hierarchy.json": {
+          "bytes": 3192,
+          "sha256": "2038ad90d33a4c3083ad0702c129da1cef228a91b0d0aa653a9c75b724a2b7d4"
+        },
+        "incremental-dependencies.json": {
+          "bytes": 38342167,
+          "sha256": "8dd77321e69a6fc400b8c6b30d581f810289bf6e61b44459a7dd641686cd8be4"
+        },
+        "properties.bin": {
+          "bytes": 31179862,
+          "sha256": "dad8d98909c738df930569c4b907c29e64cda2b65d84917936c1c4d86d3dd8c4"
+        },
+        "properties.json": {
+          "bytes": 17705010,
+          "sha256": "6b632040996161969c60deb308db4a069bd22d71de8ff0010b880f226b56f4a6"
+        },
+        "scene.bin": {
+          "bytes": 169752328,
+          "sha256": "27f324f2ebbac5d1f1ecbe3fc78fb36600dd5ea1a88a58b475924cdc67dd358c"
+        },
+        "scene.gltf": {
+          "bytes": 299336922,
+          "sha256": "e3d8f3de93259864a01cb4cad6daa07e768f2f2966fb0b7d1e02f724db6a4357"
+        },
+        "spatial.bin": {
+          "bytes": 1056956,
+          "sha256": "04930d10190a6a9663d74cac775cca43447d50af1f3ac661793bfd96bd9be514"
+        }
+      },
       "stages": {
         "schemaVersion": "naru.ifc-federation-stage-timing.1",
-        "totalMilliseconds": 125532.1926,
+        "totalMilliseconds": 72991.974,
         "stages": {
-          "inspectSources": 462.9912,
-          "toolchainIdentity": 446.78920000000005,
-          "cacheLookup": 0.4011000000000422,
-          "adapter": 79106.5854,
-          "readSceneIr": 30263.81259999999,
-          "hydrate": 66.96869999999763,
-          "compile": 10889.094500000007,
-          "validateCompiled": 148.79069999999774,
-          "dependencyIndex": 995.1343000000052,
-          "writePackage": 2295.79800000001,
-          "writeDependencyIndex": 133.4646000000066,
+          "inspectSources": 438.4375,
+          "toolchainIdentity": 393.5151,
+          "cacheLookup": 0.3525999999999385,
+          "adapter": 34624.674,
+          "readSceneIr": 25376.711799999997,
+          "hydrate": 52.421500000004016,
+          "compile": 8661.399699999994,
+          "validateCompiled": 122.13929999999527,
+          "dependencyIndex": 760.527900000001,
+          "writePackage": 1719.828800000003,
+          "writeDependencyIndex": 110.9890999999916,
           "retainSceneIr": 0,
-          "cachePublish": 624.619200000001
+          "cachePublish": 633.7859999999928
         },
-        "unattributedMilliseconds": 97.74309999997786,
-        "structureReadMilliseconds": 30215.198000000004,
+        "unattributedMilliseconds": 97.19070000002102,
+        "structureReadMilliseconds": 25336.6042,
         "compileStages": {
-          "validateScene": 1473.9651000000013,
-          "encodeGeometry": 3183.6588000000047,
-          "measureDocument": 2422.715299999996,
-          "other": 3808.7553000000044
+          "validateScene": 1170.9940999999963,
+          "encodeGeometry": 2535.4521999999997,
+          "measureDocument": 1877.7994000000035,
+          "other": 3077.153999999995
         },
         "adapter": {
-          "spawnToModuleStartMilliseconds": 74.2958984375,
-          "importMilliseconds": 270.1953125,
-          "importsToMainMilliseconds": 4.5732421875,
-          "mainMilliseconds": 77997.64453125,
-          "finishToCloseMilliseconds": 757.291015625,
+          "spawnToModuleStartMilliseconds": 61.736083984375,
+          "importMilliseconds": 219.20751953125,
+          "importsToMainMilliseconds": 4.010009765625,
+          "mainMilliseconds": 33724.516845703125,
+          "finishToCloseMilliseconds": 615.529541015625,
           "ledger": {
             "documents": [
               {
-                "artifactBytes": 35579032,
-                "artifactLoadMilliseconds": 1903.6303000175394,
+                "artifactBytes": 35579010,
+                "artifactLoadMilliseconds": 427.7437999844551,
+                "artifactParseMilliseconds": 1350.3784000058658,
+                "artifactPayloadBytes": 271752539,
                 "artifactState": "verified",
-                "artifactVerifyMilliseconds": 8580.636999977287,
+                "artifactVerifyMilliseconds": 106.2598000280559,
                 "discipline": "architecture",
                 "outcome": "restored",
-                "readMilliseconds": 206.83259999752045,
-                "restoreMilliseconds": 11.582200050354004,
+                "readMilliseconds": 201.19649994373322,
+                "restoreMilliseconds": 6.124599993228912,
                 "sourceBytes": 342657851
               },
               {
-                "artifactBytes": 13156606,
-                "artifactLoadMilliseconds": 1485.2529999916442,
+                "artifactBytes": 13156524,
+                "artifactLoadMilliseconds": 201.85179996769875,
+                "artifactParseMilliseconds": 985.8290000120178,
+                "artifactPayloadBytes": 172603806,
                 "artifactState": "verified",
-                "artifactVerifyMilliseconds": 6841.547999996692,
+                "artifactVerifyMilliseconds": 67.62990000424907,
                 "discipline": "electrical",
                 "outcome": "restored",
-                "readMilliseconds": 72.99489998817444,
-                "restoreMilliseconds": 4.055099964141846,
+                "readMilliseconds": 67.57310003042221,
+                "restoreMilliseconds": 3.722000002861023,
                 "sourceBytes": 97058912
               },
               {
-                "artifactBytes": 321214,
-                "artifactLoadMilliseconds": 30.06920003099367,
+                "artifactBytes": 321216,
+                "artifactLoadMilliseconds": 5.690400023013353,
+                "artifactParseMilliseconds": 16.961799992714077,
+                "artifactPayloadBytes": 4555888,
                 "artifactState": "verified",
-                "artifactVerifyMilliseconds": 125.90839999029413,
+                "artifactVerifyMilliseconds": 1.8418999970890582,
                 "discipline": "facade",
                 "outcome": "restored",
-                "readMilliseconds": 7.332799971103668,
-                "restoreMilliseconds": 0.06010007858276367,
+                "readMilliseconds": 6.616200029850006,
+                "restoreMilliseconds": 0.03670001029968262,
                 "sourceBytes": 6067026
               },
               {
-                "artifactBytes": 4738552,
-                "artifactLoadMilliseconds": 294.0048999735154,
+                "artifactBytes": 4738587,
+                "artifactLoadMilliseconds": 54.339899972546846,
+                "artifactParseMilliseconds": 199.46020003408194,
+                "artifactPayloadBytes": 29588084,
                 "artifactState": "verified",
-                "artifactVerifyMilliseconds": 1490.855600044597,
+                "artifactVerifyMilliseconds": 11.624099977780133,
                 "discipline": "kitchen",
                 "outcome": "restored",
-                "readMilliseconds": 30.215700089931488,
-                "restoreMilliseconds": 0.2781999111175537,
+                "readMilliseconds": 29.88510000705719,
+                "restoreMilliseconds": 0.16609996557235718,
                 "sourceBytes": 49670229
               },
               {
-                "artifactBytes": 30113286,
-                "artifactLoadMilliseconds": 2957.7528000227176,
+                "artifactBytes": 30113437,
+                "artifactLoadMilliseconds": 395.62389999628067,
+                "artifactParseMilliseconds": 1911.9281999883242,
+                "artifactPayloadBytes": 278946357,
                 "artifactState": "verified",
-                "artifactVerifyMilliseconds": 11131.971399998292,
+                "artifactVerifyMilliseconds": 109.15470001054928,
                 "discipline": "plumbing",
                 "outcome": "restored",
-                "readMilliseconds": 141.85049998760223,
-                "restoreMilliseconds": 6.766499996185303,
+                "readMilliseconds": 132.67509996891022,
+                "restoreMilliseconds": 4.9517000913619995,
                 "sourceBytes": 222099255
               },
               {
-                "artifactLoadMilliseconds": 0.23750000400468707,
                 "artifactState": "absent",
                 "discipline": "structure",
-                "extractMilliseconds": 6442.664299964905,
+                "extractMilliseconds": 5210.445500075817,
                 "outcome": "extracted",
-                "publishMilliseconds": 3077.481900036335,
-                "readMilliseconds": 11.753400027751923,
+                "publishMilliseconds": 592.0350999832153,
+                "readMilliseconds": 11.09419995546341,
                 "sourceBytes": 7422441
               },
               {
-                "artifactBytes": 17276801,
-                "artifactLoadMilliseconds": 1556.9167000357993,
+                "artifactBytes": 17276977,
+                "artifactLoadMilliseconds": 224.70279998378828,
+                "artifactParseMilliseconds": 1018.7072000117041,
+                "artifactPayloadBytes": 140811979,
                 "artifactState": "verified",
-                "artifactVerifyMilliseconds": 6033.303899981547,
+                "artifactVerifyMilliseconds": 55.55739998817444,
                 "discipline": "ventilation",
                 "outcome": "restored",
-                "readMilliseconds": 71.9831999540329,
-                "restoreMilliseconds": 3.9420000314712524,
+                "readMilliseconds": 71.2137999534607,
+                "restoreMilliseconds": 2.2703999876976013,
                 "sourceBytes": 114891068
               }
             ],
             "federation": {
-              "mergeMilliseconds": 99.75169998407364,
-              "propertyIndexMilliseconds": 11790.969899952412
+              "mergeMilliseconds": 81.8659999370575,
+              "propertyIndexMilliseconds": 9438.785300016403
             },
-            "importMilliseconds": 270.1953125,
+            "importMilliseconds": 219.20751953125,
             "schemaVersion": "naru.ifc-adapter-stage-timing.1",
             "wallClock": {
-              "finishedAtMs": 1788413761119.709,
-              "importsFinishedAtMs": 1788413683117.4912,
-              "mainStartedAtMs": 1788413683122.0645,
-              "moduleStartedAtMs": 1788413682847.296
+              "finishedAtMs": 1788430928942.4705,
+              "importsFinishedAtMs": 1788430895213.9436,
+              "mainStartedAtMs": 1788430895217.9536,
+              "moduleStartedAtMs": 1788430894994.736
             },
             "write": {
-              "digestMilliseconds": 411.3181000351906,
-              "geometryMilliseconds": 1806.059700012207,
-              "propertiesMilliseconds": 170.00609999895096,
-              "reportMilliseconds": 2.3483999967575073,
-              "structureMilliseconds": 10999.722000002861
+              "digestMilliseconds": 391.78560000658035,
+              "geometryMilliseconds": 1369.2876000404358,
+              "propertiesMilliseconds": 113.932000041008,
+              "reportMilliseconds": 1.7540000081062317,
+              "structureMilliseconds": 8649.284900069237
+            }
+          }
+        }
+      }
+    }
+  ],
+  "cleanSamples": [
+    {
+      "index": 1,
+      "exitCode": 0,
+      "processMilliseconds": 322701,
+      "compileMilliseconds": 322310.5,
+      "peakWorkingSetBytes": 5082501120,
+      "peakPrivateBytes": 5754216448,
+      "maxProcessCount": 4,
+      "packageDigest": "05707534c73ce126da401a79481d0fd6c892bc308a451d6aa2a4b1691bc2439e",
+      "cache": {
+        "status": "disabled"
+      },
+      "documentArtifactCache": {
+        "hits": [],
+        "misses": [],
+        "schemaVersion": "naru.ifc-document-artifact.2",
+        "status": "disabled"
+      },
+      "warnings": [],
+      "outputFiles": {
+        "adapter-report.json": {
+          "bytes": 38886,
+          "sha256": "ee21224e7e50db9fbf18934d88534bc4286d25495a360b0df86416df29cdc335",
+          "excludedKeys": [
+            "documentArtifactCache"
+          ],
+          "semanticSha256": "823a36430118df0ece9b1f158ef69656d3b8f3cc8789a9100a77bd6f0f7cb378"
+        },
+        "build-report.json": {
+          "bytes": 142297,
+          "sha256": "d7d47aedcc0c7507d0ef616c5f5877d3b67a015ba46a276fcf9eda5c368fb228"
+        },
+        "coarse.bin": {
+          "bytes": 38700720,
+          "sha256": "39f4db859996d62a8f1427a89a7923434bcf873927c4e5551dafe6961564a9e6"
+        },
+        "hierarchy.bin": {
+          "bytes": 46250496,
+          "sha256": "e9d24b360b570022124bbc31bff001434ee57b49b4fe6ad8992002e05751a63e"
+        },
+        "hierarchy.json": {
+          "bytes": 3192,
+          "sha256": "2038ad90d33a4c3083ad0702c129da1cef228a91b0d0aa653a9c75b724a2b7d4"
+        },
+        "incremental-dependencies.json": {
+          "bytes": 38342167,
+          "sha256": "8dd77321e69a6fc400b8c6b30d581f810289bf6e61b44459a7dd641686cd8be4"
+        },
+        "properties.bin": {
+          "bytes": 31179862,
+          "sha256": "dad8d98909c738df930569c4b907c29e64cda2b65d84917936c1c4d86d3dd8c4"
+        },
+        "properties.json": {
+          "bytes": 17705010,
+          "sha256": "6b632040996161969c60deb308db4a069bd22d71de8ff0010b880f226b56f4a6"
+        },
+        "scene.bin": {
+          "bytes": 169752328,
+          "sha256": "27f324f2ebbac5d1f1ecbe3fc78fb36600dd5ea1a88a58b475924cdc67dd358c"
+        },
+        "scene.gltf": {
+          "bytes": 299336922,
+          "sha256": "e3d8f3de93259864a01cb4cad6daa07e768f2f2966fb0b7d1e02f724db6a4357"
+        },
+        "spatial.bin": {
+          "bytes": 1056956,
+          "sha256": "04930d10190a6a9663d74cac775cca43447d50af1f3ac661793bfd96bd9be514"
+        }
+      },
+      "stages": {
+        "schemaVersion": "naru.ifc-federation-stage-timing.1",
+        "totalMilliseconds": 322273.3206,
+        "stages": {
+          "inspectSources": 442.55730000000005,
+          "toolchainIdentity": 0.05340000000001055,
+          "cacheLookup": 0,
+          "adapter": 284954.2337,
+          "readSceneIr": 25245.63260000001,
+          "hydrate": 53.02039999997942,
+          "compile": 8732.466200000024,
+          "validateCompiled": 123.5065000000177,
+          "dependencyIndex": 786.7322999999742,
+          "writePackage": 1721.8364000000292,
+          "writeDependencyIndex": 118.82319999998435,
+          "retainSceneIr": 0,
+          "cachePublish": 0
+        },
+        "unattributedMilliseconds": 94.45859999995446,
+        "structureReadMilliseconds": 25204.021100000013,
+        "compileStages": {
+          "validateScene": 1136.0323999999673,
+          "encodeGeometry": 2475.4309999999823,
+          "measureDocument": 2031.1648999999743,
+          "other": 3089.8379000001005
+        },
+        "adapter": {
+          "spawnToModuleStartMilliseconds": 66.462890625,
+          "importMilliseconds": 225.943115234375,
+          "importsToMainMilliseconds": 4.13818359375,
+          "mainMilliseconds": 283937.6042480469,
+          "finishToCloseMilliseconds": 714.8515625,
+          "ledger": {
+            "documents": [
+              {
+                "discipline": "architecture",
+                "extractMilliseconds": 69325.23470002413,
+                "outcome": "extracted",
+                "readMilliseconds": 203.86119997501373,
+                "sourceBytes": 342657851
+              },
+              {
+                "discipline": "electrical",
+                "extractMilliseconds": 46118.994700074196,
+                "outcome": "extracted",
+                "readMilliseconds": 67.68110001087189,
+                "sourceBytes": 97058912
+              },
+              {
+                "discipline": "facade",
+                "extractMilliseconds": 1214.8104000091553,
+                "outcome": "extracted",
+                "readMilliseconds": 6.796899974346161,
+                "sourceBytes": 6067026
+              },
+              {
+                "discipline": "kitchen",
+                "extractMilliseconds": 15264.51399999857,
+                "outcome": "extracted",
+                "readMilliseconds": 30.069999992847443,
+                "sourceBytes": 49670229
+              },
+              {
+                "discipline": "plumbing",
+                "extractMilliseconds": 75827.9251999855,
+                "outcome": "extracted",
+                "readMilliseconds": 136.52639997005463,
+                "sourceBytes": 222099255
+              },
+              {
+                "discipline": "structure",
+                "extractMilliseconds": 5423.318100035191,
+                "outcome": "extracted",
+                "readMilliseconds": 10.96700006723404,
+                "sourceBytes": 7422441
+              },
+              {
+                "discipline": "ventilation",
+                "extractMilliseconds": 47050.79159998894,
+                "outcome": "extracted",
+                "readMilliseconds": 70.18839997053146,
+                "sourceBytes": 114891068
+              }
+            ],
+            "federation": {
+              "mergeMilliseconds": 108.81790000200272,
+              "propertyIndexMilliseconds": 11656.917799949646
+            },
+            "importMilliseconds": 225.943115234375,
+            "schemaVersion": "naru.ifc-adapter-stage-timing.1",
+            "wallClock": {
+              "finishedAtMs": 1788429673048.1484,
+              "importsFinishedAtMs": 1788429389106.406,
+              "mainStartedAtMs": 1788429389110.5442,
+              "moduleStartedAtMs": 1788429388880.463
+            },
+            "write": {
+              "digestMilliseconds": 386.7949000597,
+              "geometryMilliseconds": 1533.7886000275612,
+              "propertiesMilliseconds": 126.02709996700287,
+              "reportMilliseconds": 2.3716999888420105,
+              "structureMilliseconds": 9234.193000018597
+            }
+          }
+        }
+      }
+    },
+    {
+      "index": 2,
+      "exitCode": 0,
+      "processMilliseconds": 320064.2,
+      "compileMilliseconds": 319679.1,
+      "peakWorkingSetBytes": 5080170496,
+      "peakPrivateBytes": 5754077184,
+      "maxProcessCount": 4,
+      "packageDigest": "05707534c73ce126da401a79481d0fd6c892bc308a451d6aa2a4b1691bc2439e",
+      "cache": {
+        "status": "disabled"
+      },
+      "documentArtifactCache": {
+        "hits": [],
+        "misses": [],
+        "schemaVersion": "naru.ifc-document-artifact.2",
+        "status": "disabled"
+      },
+      "warnings": [],
+      "outputFiles": {
+        "adapter-report.json": {
+          "bytes": 38886,
+          "sha256": "ee21224e7e50db9fbf18934d88534bc4286d25495a360b0df86416df29cdc335",
+          "excludedKeys": [
+            "documentArtifactCache"
+          ],
+          "semanticSha256": "823a36430118df0ece9b1f158ef69656d3b8f3cc8789a9100a77bd6f0f7cb378"
+        },
+        "build-report.json": {
+          "bytes": 142297,
+          "sha256": "d7d47aedcc0c7507d0ef616c5f5877d3b67a015ba46a276fcf9eda5c368fb228"
+        },
+        "coarse.bin": {
+          "bytes": 38700720,
+          "sha256": "39f4db859996d62a8f1427a89a7923434bcf873927c4e5551dafe6961564a9e6"
+        },
+        "hierarchy.bin": {
+          "bytes": 46250496,
+          "sha256": "e9d24b360b570022124bbc31bff001434ee57b49b4fe6ad8992002e05751a63e"
+        },
+        "hierarchy.json": {
+          "bytes": 3192,
+          "sha256": "2038ad90d33a4c3083ad0702c129da1cef228a91b0d0aa653a9c75b724a2b7d4"
+        },
+        "incremental-dependencies.json": {
+          "bytes": 38342167,
+          "sha256": "8dd77321e69a6fc400b8c6b30d581f810289bf6e61b44459a7dd641686cd8be4"
+        },
+        "properties.bin": {
+          "bytes": 31179862,
+          "sha256": "dad8d98909c738df930569c4b907c29e64cda2b65d84917936c1c4d86d3dd8c4"
+        },
+        "properties.json": {
+          "bytes": 17705010,
+          "sha256": "6b632040996161969c60deb308db4a069bd22d71de8ff0010b880f226b56f4a6"
+        },
+        "scene.bin": {
+          "bytes": 169752328,
+          "sha256": "27f324f2ebbac5d1f1ecbe3fc78fb36600dd5ea1a88a58b475924cdc67dd358c"
+        },
+        "scene.gltf": {
+          "bytes": 299336922,
+          "sha256": "e3d8f3de93259864a01cb4cad6daa07e768f2f2966fb0b7d1e02f724db6a4357"
+        },
+        "spatial.bin": {
+          "bytes": 1056956,
+          "sha256": "04930d10190a6a9663d74cac775cca43447d50af1f3ac661793bfd96bd9be514"
+        }
+      },
+      "stages": {
+        "schemaVersion": "naru.ifc-federation-stage-timing.1",
+        "totalMilliseconds": 319646.26680000004,
+        "stages": {
+          "inspectSources": 441.9597,
+          "toolchainIdentity": 0.052500000000009095,
+          "cacheLookup": 0,
+          "adapter": 282484.735,
+          "readSceneIr": 25117.274199999985,
+          "hydrate": 51.574199999973644,
+          "compile": 8714.903499999957,
+          "validateCompiled": 120.6474000000162,
+          "dependencyIndex": 768.1631999999518,
+          "writePackage": 1734.1077000000514,
+          "writeDependencyIndex": 117.16759999998612,
+          "retainSceneIr": 0,
+          "cachePublish": 0
+        },
+        "unattributedMilliseconds": 95.68180000013672,
+        "structureReadMilliseconds": 25074.953800000018,
+        "compileStages": {
+          "validateScene": 1133.5699000000022,
+          "encodeGeometry": 2505.097800000047,
+          "measureDocument": 2009.2530999999726,
+          "other": 3066.982699999935
+        },
+        "adapter": {
+          "spawnToModuleStartMilliseconds": 66.376708984375,
+          "importMilliseconds": 224.68994140625,
+          "importsToMainMilliseconds": 4.019775390625,
+          "mainMilliseconds": 281475.4895019531,
+          "finishToCloseMilliseconds": 709.424072265625,
+          "ledger": {
+            "documents": [
+              {
+                "discipline": "architecture",
+                "extractMilliseconds": 68297.44270002842,
+                "outcome": "extracted",
+                "readMilliseconds": 204.40949994325638,
+                "sourceBytes": 342657851
+              },
+              {
+                "discipline": "electrical",
+                "extractMilliseconds": 42697.436599969864,
+                "outcome": "extracted",
+                "readMilliseconds": 67.86440008878708,
+                "sourceBytes": 97058912
+              },
+              {
+                "discipline": "facade",
+                "extractMilliseconds": 1160.9316999316216,
+                "outcome": "extracted",
+                "readMilliseconds": 6.773100018501282,
+                "sourceBytes": 6067026
+              },
+              {
+                "discipline": "kitchen",
+                "extractMilliseconds": 16580.086800038815,
+                "outcome": "extracted",
+                "readMilliseconds": 29.98360002040863,
+                "sourceBytes": 49670229
+              },
+              {
+                "discipline": "plumbing",
+                "extractMilliseconds": 77949.60769999027,
+                "outcome": "extracted",
+                "readMilliseconds": 131.1991000175476,
+                "sourceBytes": 222099255
+              },
+              {
+                "discipline": "structure",
+                "extractMilliseconds": 5406.032999992371,
+                "outcome": "extracted",
+                "readMilliseconds": 10.90369999408722,
+                "sourceBytes": 7422441
+              },
+              {
+                "discipline": "ventilation",
+                "extractMilliseconds": 46323.832799971104,
+                "outcome": "extracted",
+                "readMilliseconds": 68.58260005712509,
+                "sourceBytes": 114891068
+              }
+            ],
+            "federation": {
+              "mergeMilliseconds": 99.61460000276566,
+              "propertyIndexMilliseconds": 11168.327000021935
+            },
+            "importMilliseconds": 224.68994140625,
+            "schemaVersion": "naru.ifc-adapter-stage-timing.1",
+            "wallClock": {
+              "finishedAtMs": 1788430067125.576,
+              "importsFinishedAtMs": 1788429785646.0667,
+              "mainStartedAtMs": 1788429785650.0864,
+              "moduleStartedAtMs": 1788429785421.3767
+            },
+            "write": {
+              "digestMilliseconds": 389.121199965477,
+              "geometryMilliseconds": 1613.205699980259,
+              "propertiesMilliseconds": 109.57749998569489,
+              "reportMilliseconds": 2.0914000272750854,
+              "structureMilliseconds": 9018.941999971867
+            }
+          }
+        }
+      }
+    },
+    {
+      "index": 3,
+      "exitCode": 0,
+      "processMilliseconds": 321173.3,
+      "compileMilliseconds": 320777.8,
+      "peakWorkingSetBytes": 5083443200,
+      "peakPrivateBytes": 5756104704,
+      "maxProcessCount": 4,
+      "packageDigest": "05707534c73ce126da401a79481d0fd6c892bc308a451d6aa2a4b1691bc2439e",
+      "cache": {
+        "status": "disabled"
+      },
+      "documentArtifactCache": {
+        "hits": [],
+        "misses": [],
+        "schemaVersion": "naru.ifc-document-artifact.2",
+        "status": "disabled"
+      },
+      "warnings": [],
+      "outputFiles": {
+        "adapter-report.json": {
+          "bytes": 38886,
+          "sha256": "ee21224e7e50db9fbf18934d88534bc4286d25495a360b0df86416df29cdc335",
+          "excludedKeys": [
+            "documentArtifactCache"
+          ],
+          "semanticSha256": "823a36430118df0ece9b1f158ef69656d3b8f3cc8789a9100a77bd6f0f7cb378"
+        },
+        "build-report.json": {
+          "bytes": 142297,
+          "sha256": "d7d47aedcc0c7507d0ef616c5f5877d3b67a015ba46a276fcf9eda5c368fb228"
+        },
+        "coarse.bin": {
+          "bytes": 38700720,
+          "sha256": "39f4db859996d62a8f1427a89a7923434bcf873927c4e5551dafe6961564a9e6"
+        },
+        "hierarchy.bin": {
+          "bytes": 46250496,
+          "sha256": "e9d24b360b570022124bbc31bff001434ee57b49b4fe6ad8992002e05751a63e"
+        },
+        "hierarchy.json": {
+          "bytes": 3192,
+          "sha256": "2038ad90d33a4c3083ad0702c129da1cef228a91b0d0aa653a9c75b724a2b7d4"
+        },
+        "incremental-dependencies.json": {
+          "bytes": 38342167,
+          "sha256": "8dd77321e69a6fc400b8c6b30d581f810289bf6e61b44459a7dd641686cd8be4"
+        },
+        "properties.bin": {
+          "bytes": 31179862,
+          "sha256": "dad8d98909c738df930569c4b907c29e64cda2b65d84917936c1c4d86d3dd8c4"
+        },
+        "properties.json": {
+          "bytes": 17705010,
+          "sha256": "6b632040996161969c60deb308db4a069bd22d71de8ff0010b880f226b56f4a6"
+        },
+        "scene.bin": {
+          "bytes": 169752328,
+          "sha256": "27f324f2ebbac5d1f1ecbe3fc78fb36600dd5ea1a88a58b475924cdc67dd358c"
+        },
+        "scene.gltf": {
+          "bytes": 299336922,
+          "sha256": "e3d8f3de93259864a01cb4cad6daa07e768f2f2966fb0b7d1e02f724db6a4357"
+        },
+        "spatial.bin": {
+          "bytes": 1056956,
+          "sha256": "04930d10190a6a9663d74cac775cca43447d50af1f3ac661793bfd96bd9be514"
+        }
+      },
+      "stages": {
+        "schemaVersion": "naru.ifc-federation-stage-timing.1",
+        "totalMilliseconds": 320741.395,
+        "stages": {
+          "inspectSources": 441.3639,
+          "toolchainIdentity": 0.05490000000003192,
+          "cacheLookup": 0,
+          "adapter": 283201.6844,
+          "readSceneIr": 25308.18100000004,
+          "hydrate": 54.75489999999991,
+          "compile": 8714.19299999997,
+          "validateCompiled": 135.8027000000002,
+          "dependencyIndex": 834.7418999999645,
+          "writePackage": 1836.8845999999903,
+          "writeDependencyIndex": 117.96289999998407,
+          "retainSceneIr": 0,
+          "cachePublish": 0
+        },
+        "unattributedMilliseconds": 95.77080000005662,
+        "structureReadMilliseconds": 25262.27509999997,
+        "compileStages": {
+          "validateScene": 1115.421399999992,
+          "encodeGeometry": 2450.691700000025,
+          "measureDocument": 2166.500299999956,
+          "other": 2981.5795999999973
+        },
+        "adapter": {
+          "spawnToModuleStartMilliseconds": 64.646484375,
+          "importMilliseconds": 218.315185546875,
+          "importsToMainMilliseconds": 4.465087890625,
+          "mainMilliseconds": 282185.8645019531,
+          "finishToCloseMilliseconds": 722.708740234375,
+          "ledger": {
+            "documents": [
+              {
+                "discipline": "architecture",
+                "extractMilliseconds": 68307.43699997663,
+                "outcome": "extracted",
+                "readMilliseconds": 203.53519999980927,
+                "sourceBytes": 342657851
+              },
+              {
+                "discipline": "electrical",
+                "extractMilliseconds": 42415.239199995995,
+                "outcome": "extracted",
+                "readMilliseconds": 67.16499990224838,
+                "sourceBytes": 97058912
+              },
+              {
+                "discipline": "facade",
+                "extractMilliseconds": 1185.1916999816895,
+                "outcome": "extracted",
+                "readMilliseconds": 7.058000028133392,
+                "sourceBytes": 6067026
+              },
+              {
+                "discipline": "kitchen",
+                "extractMilliseconds": 16673.75220000744,
+                "outcome": "extracted",
+                "readMilliseconds": 30.029699981212616,
+                "sourceBytes": 49670229
+              },
+              {
+                "discipline": "plumbing",
+                "extractMilliseconds": 78555.12319999933,
+                "outcome": "extracted",
+                "readMilliseconds": 132.4394000172615,
+                "sourceBytes": 222099255
+              },
+              {
+                "discipline": "structure",
+                "extractMilliseconds": 5422.625199973583,
+                "outcome": "extracted",
+                "readMilliseconds": 11.011500000953674,
+                "sourceBytes": 7422441
+              },
+              {
+                "discipline": "ventilation",
+                "extractMilliseconds": 46345.83129996061,
+                "outcome": "extracted",
+                "readMilliseconds": 68.63549995422363,
+                "sourceBytes": 114891068
+              }
+            ],
+            "federation": {
+              "mergeMilliseconds": 104.47360002994537,
+              "propertyIndexMilliseconds": 11345.412800073624
+            },
+            "importMilliseconds": 218.315185546875,
+            "schemaVersion": "naru.ifc-adapter-stage-timing.1",
+            "wallClock": {
+              "finishedAtMs": 1788430461879.2913,
+              "importsFinishedAtMs": 1788430179688.9617,
+              "mainStartedAtMs": 1788430179693.4268,
+              "moduleStartedAtMs": 1788430179470.6465
+            },
+            "write": {
+              "digestMilliseconds": 385.1502999663353,
+              "geometryMilliseconds": 1558.2979000210762,
+              "propertiesMilliseconds": 111.59609997272491,
+              "reportMilliseconds": 1.8639999628067017,
+              "structureMilliseconds": 9114.329300045967
+            }
+          }
+        }
+      }
+    },
+    {
+      "index": 4,
+      "exitCode": 0,
+      "processMilliseconds": 319408.9,
+      "compileMilliseconds": 319016.3,
+      "peakWorkingSetBytes": 5078302720,
+      "peakPrivateBytes": 5745688576,
+      "maxProcessCount": 4,
+      "packageDigest": "05707534c73ce126da401a79481d0fd6c892bc308a451d6aa2a4b1691bc2439e",
+      "cache": {
+        "status": "disabled"
+      },
+      "documentArtifactCache": {
+        "hits": [],
+        "misses": [],
+        "schemaVersion": "naru.ifc-document-artifact.2",
+        "status": "disabled"
+      },
+      "warnings": [],
+      "outputFiles": {
+        "adapter-report.json": {
+          "bytes": 38886,
+          "sha256": "ee21224e7e50db9fbf18934d88534bc4286d25495a360b0df86416df29cdc335",
+          "excludedKeys": [
+            "documentArtifactCache"
+          ],
+          "semanticSha256": "823a36430118df0ece9b1f158ef69656d3b8f3cc8789a9100a77bd6f0f7cb378"
+        },
+        "build-report.json": {
+          "bytes": 142297,
+          "sha256": "d7d47aedcc0c7507d0ef616c5f5877d3b67a015ba46a276fcf9eda5c368fb228"
+        },
+        "coarse.bin": {
+          "bytes": 38700720,
+          "sha256": "39f4db859996d62a8f1427a89a7923434bcf873927c4e5551dafe6961564a9e6"
+        },
+        "hierarchy.bin": {
+          "bytes": 46250496,
+          "sha256": "e9d24b360b570022124bbc31bff001434ee57b49b4fe6ad8992002e05751a63e"
+        },
+        "hierarchy.json": {
+          "bytes": 3192,
+          "sha256": "2038ad90d33a4c3083ad0702c129da1cef228a91b0d0aa653a9c75b724a2b7d4"
+        },
+        "incremental-dependencies.json": {
+          "bytes": 38342167,
+          "sha256": "8dd77321e69a6fc400b8c6b30d581f810289bf6e61b44459a7dd641686cd8be4"
+        },
+        "properties.bin": {
+          "bytes": 31179862,
+          "sha256": "dad8d98909c738df930569c4b907c29e64cda2b65d84917936c1c4d86d3dd8c4"
+        },
+        "properties.json": {
+          "bytes": 17705010,
+          "sha256": "6b632040996161969c60deb308db4a069bd22d71de8ff0010b880f226b56f4a6"
+        },
+        "scene.bin": {
+          "bytes": 169752328,
+          "sha256": "27f324f2ebbac5d1f1ecbe3fc78fb36600dd5ea1a88a58b475924cdc67dd358c"
+        },
+        "scene.gltf": {
+          "bytes": 299336922,
+          "sha256": "e3d8f3de93259864a01cb4cad6daa07e768f2f2966fb0b7d1e02f724db6a4357"
+        },
+        "spatial.bin": {
+          "bytes": 1056956,
+          "sha256": "04930d10190a6a9663d74cac775cca43447d50af1f3ac661793bfd96bd9be514"
+        }
+      },
+      "stages": {
+        "schemaVersion": "naru.ifc-federation-stage-timing.1",
+        "totalMilliseconds": 318985.0087,
+        "stages": {
+          "inspectSources": 440.52639999999997,
+          "toolchainIdentity": 0.05189999999998918,
+          "cacheLookup": 0,
+          "adapter": 281757.4568,
+          "readSceneIr": 25242.109799999977,
+          "hydrate": 51.01509999996051,
+          "compile": 8646.23880000005,
+          "validateCompiled": 151.13919999997597,
+          "dependencyIndex": 779.6532000000007,
+          "writePackage": 1703.6395000000484,
+          "writeDependencyIndex": 118.00390000001062,
+          "retainSceneIr": 0,
+          "cachePublish": 0
+        },
+        "unattributedMilliseconds": 95.17410000000382,
+        "structureReadMilliseconds": 25200.320999999996,
+        "compileStages": {
+          "validateScene": 1103.5859000000055,
+          "encodeGeometry": 2466.8892999999807,
+          "measureDocument": 2085.470699999947,
+          "other": 2990.292900000117
+        },
+        "adapter": {
+          "spawnToModuleStartMilliseconds": 64.408203125,
+          "importMilliseconds": 226.7890625,
+          "importsToMainMilliseconds": 4.218994140625,
+          "mainMilliseconds": 280742.0402832031,
+          "finishToCloseMilliseconds": 714.54345703125,
+          "ledger": {
+            "documents": [
+              {
+                "discipline": "architecture",
+                "extractMilliseconds": 68066.98860001564,
+                "outcome": "extracted",
+                "readMilliseconds": 202.43540000915527,
+                "sourceBytes": 342657851
+              },
+              {
+                "discipline": "electrical",
+                "extractMilliseconds": 42143.64850002527,
+                "outcome": "extracted",
+                "readMilliseconds": 68.73259997367859,
+                "sourceBytes": 97058912
+              },
+              {
+                "discipline": "facade",
+                "extractMilliseconds": 1183.467299938202,
+                "outcome": "extracted",
+                "readMilliseconds": 6.754199981689453,
+                "sourceBytes": 6067026
+              },
+              {
+                "discipline": "kitchen",
+                "extractMilliseconds": 16841.38269996643,
+                "outcome": "extracted",
+                "readMilliseconds": 30.102200031280518,
+                "sourceBytes": 49670229
+              },
+              {
+                "discipline": "plumbing",
+                "extractMilliseconds": 77941.31039994955,
+                "outcome": "extracted",
+                "readMilliseconds": 137.54149997234344,
+                "sourceBytes": 222099255
+              },
+              {
+                "discipline": "structure",
+                "extractMilliseconds": 5393.1022000312805,
+                "outcome": "extracted",
+                "readMilliseconds": 11.056699991226196,
+                "sourceBytes": 7422441
+              },
+              {
+                "discipline": "ventilation",
+                "extractMilliseconds": 46095.41869997978,
+                "outcome": "extracted",
+                "readMilliseconds": 68.93580001592636,
+                "sourceBytes": 114891068
+              }
+            ],
+            "federation": {
+              "mergeMilliseconds": 97.71030002832413,
+              "propertyIndexMilliseconds": 11125.48299998045
+            },
+            "importMilliseconds": 226.7890625,
+            "schemaVersion": "naru.ifc-adapter-stage-timing.1",
+            "wallClock": {
+              "finishedAtMs": 1788430855705.4565,
+              "importsFinishedAtMs": 1788430574959.1973,
+              "mainStartedAtMs": 1788430574963.4163,
+              "moduleStartedAtMs": 1788430574732.4082
+            },
+            "write": {
+              "digestMilliseconds": 385.074599981308,
+              "geometryMilliseconds": 1497.3197000026703,
+              "propertiesMilliseconds": 111.57789993286133,
+              "reportMilliseconds": 1.9317999482154846,
+              "structureMilliseconds": 9099.680399954319
+            }
+          }
+        }
+      }
+    },
+    {
+      "index": 5,
+      "exitCode": 0,
+      "processMilliseconds": 313833.1,
+      "compileMilliseconds": 313451.7,
+      "peakWorkingSetBytes": 5073649664,
+      "peakPrivateBytes": 5741064192,
+      "maxProcessCount": 4,
+      "packageDigest": "05707534c73ce126da401a79481d0fd6c892bc308a451d6aa2a4b1691bc2439e",
+      "cache": {
+        "status": "disabled"
+      },
+      "documentArtifactCache": {
+        "hits": [],
+        "misses": [],
+        "schemaVersion": "naru.ifc-document-artifact.2",
+        "status": "disabled"
+      },
+      "warnings": [],
+      "outputFiles": {
+        "adapter-report.json": {
+          "bytes": 38886,
+          "sha256": "ee21224e7e50db9fbf18934d88534bc4286d25495a360b0df86416df29cdc335",
+          "excludedKeys": [
+            "documentArtifactCache"
+          ],
+          "semanticSha256": "823a36430118df0ece9b1f158ef69656d3b8f3cc8789a9100a77bd6f0f7cb378"
+        },
+        "build-report.json": {
+          "bytes": 142297,
+          "sha256": "d7d47aedcc0c7507d0ef616c5f5877d3b67a015ba46a276fcf9eda5c368fb228"
+        },
+        "coarse.bin": {
+          "bytes": 38700720,
+          "sha256": "39f4db859996d62a8f1427a89a7923434bcf873927c4e5551dafe6961564a9e6"
+        },
+        "hierarchy.bin": {
+          "bytes": 46250496,
+          "sha256": "e9d24b360b570022124bbc31bff001434ee57b49b4fe6ad8992002e05751a63e"
+        },
+        "hierarchy.json": {
+          "bytes": 3192,
+          "sha256": "2038ad90d33a4c3083ad0702c129da1cef228a91b0d0aa653a9c75b724a2b7d4"
+        },
+        "incremental-dependencies.json": {
+          "bytes": 38342167,
+          "sha256": "8dd77321e69a6fc400b8c6b30d581f810289bf6e61b44459a7dd641686cd8be4"
+        },
+        "properties.bin": {
+          "bytes": 31179862,
+          "sha256": "dad8d98909c738df930569c4b907c29e64cda2b65d84917936c1c4d86d3dd8c4"
+        },
+        "properties.json": {
+          "bytes": 17705010,
+          "sha256": "6b632040996161969c60deb308db4a069bd22d71de8ff0010b880f226b56f4a6"
+        },
+        "scene.bin": {
+          "bytes": 169752328,
+          "sha256": "27f324f2ebbac5d1f1ecbe3fc78fb36600dd5ea1a88a58b475924cdc67dd358c"
+        },
+        "scene.gltf": {
+          "bytes": 299336922,
+          "sha256": "e3d8f3de93259864a01cb4cad6daa07e768f2f2966fb0b7d1e02f724db6a4357"
+        },
+        "spatial.bin": {
+          "bytes": 1056956,
+          "sha256": "04930d10190a6a9663d74cac775cca43447d50af1f3ac661793bfd96bd9be514"
+        }
+      },
+      "stages": {
+        "schemaVersion": "naru.ifc-federation-stage-timing.1",
+        "totalMilliseconds": 313419.6113,
+        "stages": {
+          "inspectSources": 439.5755,
+          "toolchainIdentity": 0.06069999999999709,
+          "cacheLookup": 0,
+          "adapter": 276328.9167,
+          "readSceneIr": 25117.969999999972,
+          "hydrate": 46.756300000008196,
+          "compile": 8656.493900000001,
+          "validateCompiled": 119.15520000003744,
+          "dependencyIndex": 788.8536000000313,
+          "writePackage": 1701.6042000000016,
+          "writeDependencyIndex": 125.04120000003604,
+          "retainSceneIr": 0,
+          "cachePublish": 0
+        },
+        "unattributedMilliseconds": 95.18399999989197,
+        "structureReadMilliseconds": 25074.004799999995,
+        "compileStages": {
+          "validateScene": 1102.951699999976,
+          "encodeGeometry": 2462.410200000042,
+          "measureDocument": 2227.024699999951,
+          "other": 2864.1073000000324
+        },
+        "adapter": {
+          "spawnToModuleStartMilliseconds": 61.728759765625,
+          "importMilliseconds": 219.125732421875,
+          "importsToMainMilliseconds": 3.801025390625,
+          "mainMilliseconds": 275325.92138671875,
+          "finishToCloseMilliseconds": 714.423095703125,
+          "ledger": {
+            "documents": [
+              {
+                "discipline": "architecture",
+                "extractMilliseconds": 68330.34500002861,
+                "outcome": "extracted",
+                "readMilliseconds": 203.4701999425888,
+                "sourceBytes": 342657851
+              },
+              {
+                "discipline": "electrical",
+                "extractMilliseconds": 42324.918899953365,
+                "outcome": "extracted",
+                "readMilliseconds": 67.41539996862411,
+                "sourceBytes": 97058912
+              },
+              {
+                "discipline": "facade",
+                "extractMilliseconds": 1161.509400010109,
+                "outcome": "extracted",
+                "readMilliseconds": 7.050700008869171,
+                "sourceBytes": 6067026
+              },
+              {
+                "discipline": "kitchen",
+                "extractMilliseconds": 15132.297000050545,
+                "outcome": "extracted",
+                "readMilliseconds": 30.67090004682541,
+                "sourceBytes": 49670229
+              },
+              {
+                "discipline": "plumbing",
+                "extractMilliseconds": 74818.073300004,
+                "outcome": "extracted",
+                "readMilliseconds": 133.13309997320175,
+                "sourceBytes": 222099255
+              },
+              {
+                "discipline": "structure",
+                "extractMilliseconds": 5183.623700022697,
+                "outcome": "extracted",
+                "readMilliseconds": 11.81580001115799,
+                "sourceBytes": 7422441
+              },
+              {
+                "discipline": "ventilation",
+                "extractMilliseconds": 45377.09170001745,
+                "outcome": "extracted",
+                "readMilliseconds": 69.86059999465942,
+                "sourceBytes": 114891068
+              }
+            ],
+            "federation": {
+              "mergeMilliseconds": 99.86710000038147,
+              "propertyIndexMilliseconds": 11237.296799957752
+            },
+            "importMilliseconds": 219.125732421875,
+            "schemaVersion": "naru.ifc-adapter-stage-timing.1",
+            "wallClock": {
+              "finishedAtMs": 1788431243907.577,
+              "importsFinishedAtMs": 1788430968577.8545,
+              "mainStartedAtMs": 1788430968581.6555,
+              "moduleStartedAtMs": 1788430968358.7288
+            },
+            "write": {
+              "digestMilliseconds": 381.880999982357,
+              "geometryMilliseconds": 1534.3158999681473,
+              "propertiesMilliseconds": 113.56749999523163,
+              "reportMilliseconds": 2.11489999294281,
+              "structureMilliseconds": 8960.506999969482
             }
           }
         }
@@ -1019,243 +2212,305 @@
       "met": true
     }
   ],
+  "cleanClosure": [
+    {
+      "compilerStagesPlusUnattributedEqualTotal": true,
+      "unattributedNonNegative": true,
+      "compileSubStagesEqualCompile": true,
+      "structureReadWithinReadSceneIr": true,
+      "totalWithinCompileMilliseconds": true,
+      "adapterProcessWithinAdapterStage": true,
+      "adapterLedgerWithinMain": true,
+      "ledgerNamesEveryDocument": true,
+      "everyDocumentExtractedWithoutArtifacts": true,
+      "met": true
+    },
+    {
+      "compilerStagesPlusUnattributedEqualTotal": true,
+      "unattributedNonNegative": true,
+      "compileSubStagesEqualCompile": true,
+      "structureReadWithinReadSceneIr": true,
+      "totalWithinCompileMilliseconds": true,
+      "adapterProcessWithinAdapterStage": true,
+      "adapterLedgerWithinMain": true,
+      "ledgerNamesEveryDocument": true,
+      "everyDocumentExtractedWithoutArtifacts": true,
+      "met": true
+    },
+    {
+      "compilerStagesPlusUnattributedEqualTotal": true,
+      "unattributedNonNegative": true,
+      "compileSubStagesEqualCompile": true,
+      "structureReadWithinReadSceneIr": true,
+      "totalWithinCompileMilliseconds": true,
+      "adapterProcessWithinAdapterStage": true,
+      "adapterLedgerWithinMain": true,
+      "ledgerNamesEveryDocument": true,
+      "everyDocumentExtractedWithoutArtifacts": true,
+      "met": true
+    },
+    {
+      "compilerStagesPlusUnattributedEqualTotal": true,
+      "unattributedNonNegative": true,
+      "compileSubStagesEqualCompile": true,
+      "structureReadWithinReadSceneIr": true,
+      "totalWithinCompileMilliseconds": true,
+      "adapterProcessWithinAdapterStage": true,
+      "adapterLedgerWithinMain": true,
+      "ledgerNamesEveryDocument": true,
+      "everyDocumentExtractedWithoutArtifacts": true,
+      "met": true
+    },
+    {
+      "compilerStagesPlusUnattributedEqualTotal": true,
+      "unattributedNonNegative": true,
+      "compileSubStagesEqualCompile": true,
+      "structureReadWithinReadSceneIr": true,
+      "totalWithinCompileMilliseconds": true,
+      "adapterProcessWithinAdapterStage": true,
+      "adapterLedgerWithinMain": true,
+      "ledgerNamesEveryDocument": true,
+      "everyDocumentExtractedWithoutArtifacts": true,
+      "met": true
+    }
+  ],
   "distributions": {
     "whole": {
       "processMilliseconds": {
         "values": [
-          123937.1,
-          126458.5,
-          133037.9,
-          126679.5,
-          125809
+          73366.2,
+          72799,
+          72952,
+          72993.4,
+          73242.8
         ],
-        "median": 126458.5,
-        "p95": 133037.9,
-        "minimum": 123937.1,
-        "maximum": 133037.9
+        "median": 72993.4,
+        "p95": 73366.2,
+        "minimum": 72799,
+        "maximum": 73366.2
       },
       "compileMilliseconds": {
         "values": [
-          123681.6,
-          126189.2,
-          132787.5,
-          126384.2,
-          125568
+          73121.4,
+          72582,
+          72731.4,
+          72767.9,
+          73025.8
         ],
-        "median": 126189.2,
-        "p95": 132787.5,
-        "minimum": 123681.6,
-        "maximum": 132787.5
+        "median": 72767.9,
+        "p95": 73121.4,
+        "minimum": 72582,
+        "maximum": 73121.4
       },
       "totalMilliseconds": {
         "values": [
-          123647.7,
-          126149.8,
-          132743.9,
-          126347.4,
-          125532.2
+          73082.3,
+          72548.2,
+          72695.9,
+          72733.3,
+          72992
         ],
-        "median": 126149.8,
-        "p95": 132743.9,
-        "minimum": 123647.7,
-        "maximum": 132743.9
+        "median": 72733.3,
+        "p95": 73082.3,
+        "minimum": 72548.2,
+        "maximum": 73082.3
       },
       "harnessOverheadMilliseconds": {
         "values": [
-          255.5,
-          269.3,
-          250.4,
-          295.3,
-          241
+          244.8,
+          217,
+          220.6,
+          225.5,
+          217
         ],
-        "median": 255.5,
-        "p95": 295.3,
-        "minimum": 241,
-        "maximum": 295.3
+        "median": 220.6,
+        "p95": 244.8,
+        "minimum": 217,
+        "maximum": 244.8
       },
       "inProcessCompilerWorkMilliseconds": {
         "values": [
-          46404.1,
-          49832.1,
-          47288.5,
-          46582,
-          46425.6
+          38210.2,
+          37946.5,
+          37828.8,
+          38207.5,
+          38367.3
         ],
-        "median": 46582,
-        "p95": 49832.1,
-        "minimum": 46404.1,
-        "maximum": 49832.1
+        "median": 38207.5,
+        "p95": 38367.3,
+        "minimum": 37828.8,
+        "maximum": 38367.3
       },
       "peakWorkingSetBytes": {
         "values": [
-          3318280192,
-          3347554304,
-          3311181824,
-          3311804416,
-          3299540992
+          4145639424,
+          4246867968,
+          4129423360,
+          4029530112,
+          4187488256
         ],
-        "median": 3311804416,
-        "p95": 3347554304,
-        "minimum": 3299540992,
-        "maximum": 3347554304
+        "median": 4145639424,
+        "p95": 4246867968,
+        "minimum": 4029530112,
+        "maximum": 4246867968
       },
       "peakPrivateBytes": {
         "values": [
-          3830095872,
-          3861471232,
-          3823869952,
-          3824566272,
-          3817005056
+          4632739840,
+          4734119936,
+          4621877248,
+          4515643392,
+          4674777088
         ],
-        "median": 3824566272,
-        "p95": 3861471232,
-        "minimum": 3817005056,
-        "maximum": 3861471232
+        "median": 4632739840,
+        "p95": 4734119936,
+        "minimum": 4515643392,
+        "maximum": 4734119936
       }
     },
     "compilerStages": {
       "inspectSources": {
         "values": [
-          461.8,
-          474.8,
-          474.7,
-          575.8,
-          463
+          440.9,
+          442.4,
+          442.5,
+          447.2,
+          438.4
         ],
-        "median": 474.7,
-        "p95": 575.8,
-        "minimum": 461.8,
-        "maximum": 575.8
+        "median": 442.4,
+        "p95": 447.2,
+        "minimum": 438.4,
+        "maximum": 447.2
       },
       "toolchainIdentity": {
         "values": [
-          460.4,
-          451.5,
-          461.9,
-          611.2,
-          446.8
+          363.4,
+          380.6,
+          377.9,
+          374.5,
+          393.5
         ],
-        "median": 460.4,
-        "p95": 611.2,
-        "minimum": 446.8,
-        "maximum": 611.2
+        "median": 377.9,
+        "p95": 393.5,
+        "minimum": 363.4,
+        "maximum": 393.5
       },
       "cacheLookup": {
         "values": [
-          0.5,
+          0.3,
+          0.3,
+          0.3,
           0.4,
-          0.4,
-          0.5,
           0.4
         ],
-        "median": 0.4,
-        "p95": 0.5,
-        "minimum": 0.4,
-        "maximum": 0.5
+        "median": 0.3,
+        "p95": 0.4,
+        "minimum": 0.3,
+        "maximum": 0.4
       },
       "adapter": {
         "values": [
-          77243.6,
-          76317.7,
-          85455.4,
-          79765.4,
-          79106.6
+          34872.1,
+          34601.7,
+          34867.1,
+          34525.8,
+          34624.7
         ],
-        "median": 79106.6,
-        "p95": 85455.4,
-        "minimum": 76317.7,
-        "maximum": 85455.4
+        "median": 34624.7,
+        "p95": 34872.1,
+        "minimum": 34525.8,
+        "maximum": 34872.1
       },
       "readSceneIr": {
         "values": [
-          30020.1,
-          33049.8,
-          30705,
-          30194,
-          30263.8
+          25383.8,
+          25236.4,
+          25206.7,
+          25568.3,
+          25376.7
         ],
-        "median": 30263.8,
-        "p95": 33049.8,
-        "minimum": 30020.1,
-        "maximum": 33049.8
+        "median": 25376.7,
+        "p95": 25568.3,
+        "minimum": 25206.7,
+        "maximum": 25568.3
       },
       "hydrate": {
         "values": [
-          59.4,
-          58.9,
-          61.4,
-          63.6,
-          67
+          52.9,
+          50.2,
+          49.8,
+          51.9,
+          52.4
         ],
-        "median": 61.4,
-        "p95": 67,
-        "minimum": 58.9,
-        "maximum": 67
+        "median": 51.9,
+        "p95": 52.9,
+        "minimum": 49.8,
+        "maximum": 52.9
       },
       "compile": {
         "values": [
-          10830.6,
-          11104.6,
-          10757.3,
-          10688.8,
-          10889.1
+          8416,
+          8356.9,
+          8278.4,
+          8306.7,
+          8661.4
         ],
-        "median": 10830.6,
-        "p95": 11104.6,
-        "minimum": 10688.8,
-        "maximum": 11104.6
+        "median": 8356.9,
+        "p95": 8661.4,
+        "minimum": 8278.4,
+        "maximum": 8661.4
       },
       "validateCompiled": {
         "values": [
-          146.6,
-          149.1,
-          181,
-          136.6,
-          148.8
+          120.4,
+          134.9,
+          135,
+          119.3,
+          122.1
         ],
-        "median": 148.8,
-        "p95": 181,
-        "minimum": 136.6,
-        "maximum": 181
+        "median": 122.1,
+        "p95": 135,
+        "minimum": 119.3,
+        "maximum": 135
       },
       "dependencyIndex": {
         "values": [
-          981.6,
-          1053.1,
-          1120.4,
-          1027.6,
-          995.1
+          772.1,
+          809.1,
+          777.8,
+          763,
+          760.5
         ],
-        "median": 1027.6,
-        "p95": 1120.4,
-        "minimum": 981.6,
-        "maximum": 1120.4
+        "median": 772.1,
+        "p95": 809.1,
+        "minimum": 760.5,
+        "maximum": 809.1
       },
       "writePackage": {
         "values": [
-          2285.7,
-          2437,
-          2562,
-          2388.2,
-          2295.8
+          1742.5,
+          1726,
+          1726.5,
+          1730.4,
+          1719.8
         ],
-        "median": 2388.2,
-        "p95": 2562,
-        "minimum": 2285.7,
-        "maximum": 2562
+        "median": 1726.5,
+        "p95": 1742.5,
+        "minimum": 1719.8,
+        "maximum": 1742.5
       },
       "writeDependencyIndex": {
         "values": [
-          131.7,
-          155.8,
-          147.6,
-          139,
-          133.5
+          125.1,
+          110.8,
+          119.9,
+          118.8,
+          111
         ],
-        "median": 139,
-        "p95": 155.8,
-        "minimum": 131.7,
-        "maximum": 155.8
+        "median": 118.8,
+        "p95": 125.1,
+        "minimum": 110.8,
+        "maximum": 125.1
       },
       "retainSceneIr": {
         "values": [
@@ -1272,177 +2527,177 @@
       },
       "cachePublish": {
         "values": [
-          929.9,
-          798.7,
-          719.8,
-          661.1,
-          624.6
+          697.2,
+          602.5,
+          618.2,
+          631.3,
+          633.8
         ],
-        "median": 719.8,
-        "p95": 929.9,
-        "minimum": 624.6,
-        "maximum": 929.9
+        "median": 631.3,
+        "p95": 697.2,
+        "minimum": 602.5,
+        "maximum": 697.2
       }
     },
     "unattributedMilliseconds": {
       "values": [
-        95.8,
-        98.5,
-        97,
-        95.5,
-        97.7
+        95.4,
+        96.3,
+        95.9,
+        95.9,
+        97.2
       ],
-      "median": 97,
-      "p95": 98.5,
-      "minimum": 95.5,
-      "maximum": 98.5
+      "median": 95.9,
+      "p95": 97.2,
+      "minimum": 95.4,
+      "maximum": 97.2
     },
     "structureReadMilliseconds": {
       "values": [
-        29969.5,
-        32996.5,
-        30648.3,
-        30141.3,
-        30215.2
+        25342.4,
+        25195.8,
+        25167.7,
+        25523.9,
+        25336.6
       ],
-      "median": 30215.2,
-      "p95": 32996.5,
-      "minimum": 29969.5,
-      "maximum": 32996.5
+      "median": 25336.6,
+      "p95": 25523.9,
+      "minimum": 25167.7,
+      "maximum": 25523.9
     },
     "compileStages": {
       "validateScene": {
         "values": [
-          1408.8,
-          1433.3,
-          1338.6,
-          1435.1,
-          1474
+          1127.3,
+          1120.8,
+          1098.1,
+          1138.4,
+          1171
         ],
-        "median": 1433.3,
-        "p95": 1474,
-        "minimum": 1338.6,
-        "maximum": 1474
+        "median": 1127.3,
+        "p95": 1171,
+        "minimum": 1098.1,
+        "maximum": 1171
       },
       "encodeGeometry": {
         "values": [
-          3101.7,
-          3277.5,
-          3220.3,
-          3153.3,
-          3183.7
+          2490.1,
+          2478,
+          2497.2,
+          2455,
+          2535.5
         ],
-        "median": 3183.7,
-        "p95": 3277.5,
-        "minimum": 3101.7,
-        "maximum": 3277.5
+        "median": 2490.1,
+        "p95": 2535.5,
+        "minimum": 2455,
+        "maximum": 2535.5
       },
       "measureDocument": {
         "values": [
-          2437.2,
-          2505,
-          2566.5,
-          2402.5,
-          2422.7
+          1861.7,
+          1871,
+          1838,
+          1841.8,
+          1877.8
         ],
-        "median": 2437.2,
-        "p95": 2566.5,
-        "minimum": 2402.5,
-        "maximum": 2566.5
+        "median": 1861.7,
+        "p95": 1877.8,
+        "minimum": 1838,
+        "maximum": 1877.8
       },
       "other": {
         "values": [
-          3883,
-          3888.7,
-          3632,
-          3698,
-          3808.8
+          2936.9,
+          2887.2,
+          2845,
+          2871.4,
+          3077.2
         ],
-        "median": 3808.8,
-        "p95": 3888.7,
-        "minimum": 3632,
-        "maximum": 3888.7
+        "median": 2887.2,
+        "p95": 3077.2,
+        "minimum": 2845,
+        "maximum": 3077.2
       }
     },
     "adapterProcess": {
       "spawnToModuleStartMilliseconds": {
         "values": [
-          77.8,
-          80.4,
-          87.4,
-          80.8,
-          74.3
+          56.4,
+          57.2,
+          60.8,
+          60.9,
+          61.7
         ],
-        "median": 80.4,
-        "p95": 87.4,
-        "minimum": 74.3,
-        "maximum": 87.4
+        "median": 60.8,
+        "p95": 61.7,
+        "minimum": 56.4,
+        "maximum": 61.7
       },
       "importMilliseconds": {
         "values": [
-          261.5,
-          263.3,
-          274.1,
-          271.1,
-          270.2
+          216.1,
+          221.3,
+          206.5,
+          216.5,
+          219.2
         ],
-        "median": 270.2,
-        "p95": 274.1,
-        "minimum": 261.5,
-        "maximum": 274.1
+        "median": 216.5,
+        "p95": 221.3,
+        "minimum": 206.5,
+        "maximum": 221.3
       },
       "importsToMainMilliseconds": {
         "values": [
-          4.5,
-          5,
-          4.7,
-          5.1,
-          4.6
+          3.7,
+          4,
+          4.3,
+          4.2,
+          4
         ],
-        "median": 4.7,
-        "p95": 5.1,
-        "minimum": 4.5,
-        "maximum": 5.1
+        "median": 4,
+        "p95": 4.3,
+        "minimum": 3.7,
+        "maximum": 4.3
       },
       "mainMilliseconds": {
         "values": [
-          76101.2,
-          75146.9,
-          84319.7,
-          78620.8,
-          77997.6
+          33942.7,
+          33674.8,
+          33956,
+          33609.5,
+          33724.5
         ],
-        "median": 77997.6,
-        "p95": 84319.7,
-        "minimum": 75146.9,
-        "maximum": 84319.7
+        "median": 33724.5,
+        "p95": 33956,
+        "minimum": 33609.5,
+        "maximum": 33956
       },
       "finishToCloseMilliseconds": {
         "values": [
-          797.9,
-          821.3,
-          768.1,
-          785.1,
-          757.3
+          653.2,
+          643.6,
+          639.3,
+          634.8,
+          615.5
         ],
-        "median": 785.1,
-        "p95": 821.3,
-        "minimum": 757.3,
-        "maximum": 821.3
+        "median": 639.3,
+        "p95": 653.2,
+        "minimum": 615.5,
+        "maximum": 653.2
       }
     },
     "adapterMainUnattributedMilliseconds": {
       "values": [
-        191.4,
-        192.5,
-        213.2,
-        204.2,
-        195.6
+        199.5,
+        187.9,
+        187.8,
+        181.3,
+        192.5
       ],
-      "median": 195.6,
-      "p95": 213.2,
-      "minimum": 191.4,
-      "maximum": 213.2
+      "median": 187.9,
+      "p95": 199.5,
+      "minimum": 181.3,
+      "maximum": 199.5
     },
     "adapterDocuments": {
       "architecture": {
@@ -1450,68 +2705,94 @@
         "artifactState": "verified",
         "artifactBytes": {
           "values": [
-            35579032,
-            35579032,
-            35579032,
-            35579032,
-            35579032
+            35579010,
+            35579010,
+            35579010,
+            35579010,
+            35579010
           ],
-          "median": 35579032,
-          "p95": 35579032,
-          "minimum": 35579032,
-          "maximum": 35579032
+          "median": 35579010,
+          "p95": 35579010,
+          "minimum": 35579010,
+          "maximum": 35579010
         },
         "artifactLoadMilliseconds": {
           "values": [
-            2077,
-            1940.4,
-            2032.3,
-            2147.8,
-            1903.6
+            433.3,
+            433,
+            432.5,
+            430.1,
+            427.7
           ],
-          "median": 2032.3,
-          "p95": 2147.8,
-          "minimum": 1903.6,
-          "maximum": 2147.8
+          "median": 432.5,
+          "p95": 433.3,
+          "minimum": 427.7,
+          "maximum": 433.3
+        },
+        "artifactParseMilliseconds": {
+          "values": [
+            1337.4,
+            1370.6,
+            1339.1,
+            1343.5,
+            1350.4
+          ],
+          "median": 1343.5,
+          "p95": 1370.6,
+          "minimum": 1337.4,
+          "maximum": 1370.6
+        },
+        "artifactPayloadBytes": {
+          "values": [
+            271752539,
+            271752539,
+            271752539,
+            271752539,
+            271752539
+          ],
+          "median": 271752539,
+          "p95": 271752539,
+          "minimum": 271752539,
+          "maximum": 271752539
         },
         "artifactVerifyMilliseconds": {
           "values": [
-            8569.6,
-            8585.1,
-            8998.9,
-            8915.1,
-            8580.6
+            106.3,
+            106.4,
+            106.6,
+            107,
+            106.3
           ],
-          "median": 8585.1,
-          "p95": 8998.9,
-          "minimum": 8569.6,
-          "maximum": 8998.9
+          "median": 106.4,
+          "p95": 107,
+          "minimum": 106.3,
+          "maximum": 107
         },
         "readMilliseconds": {
           "values": [
-            218.3,
-            209.2,
-            212.6,
-            214.5,
-            206.8
+            202.6,
+            202.9,
+            202.3,
+            203.2,
+            201.2
           ],
-          "median": 212.6,
-          "p95": 218.3,
-          "minimum": 206.8,
-          "maximum": 218.3
+          "median": 202.6,
+          "p95": 203.2,
+          "minimum": 201.2,
+          "maximum": 203.2
         },
         "restoreMilliseconds": {
           "values": [
-            10.3,
-            11.6,
-            10,
-            9.4,
-            11.6
+            6,
+            6.9,
+            5.8,
+            5.6,
+            6.1
           ],
-          "median": 10.3,
-          "p95": 11.6,
-          "minimum": 9.4,
-          "maximum": 11.6
+          "median": 6,
+          "p95": 6.9,
+          "minimum": 5.6,
+          "maximum": 6.9
         },
         "sourceBytes": {
           "values": [
@@ -1532,68 +2813,94 @@
         "artifactState": "verified",
         "artifactBytes": {
           "values": [
-            13156606,
-            13156606,
-            13156606,
-            13156606,
-            13156606
+            13156524,
+            13156524,
+            13156524,
+            13156524,
+            13156524
           ],
-          "median": 13156606,
-          "p95": 13156606,
-          "minimum": 13156606,
-          "maximum": 13156606
+          "median": 13156524,
+          "p95": 13156524,
+          "minimum": 13156524,
+          "maximum": 13156524
         },
         "artifactLoadMilliseconds": {
           "values": [
-            1436.1,
-            1380.4,
-            1542.8,
-            1481.7,
-            1485.3
+            206.2,
+            201.9,
+            201.7,
+            203.4,
+            201.9
           ],
-          "median": 1481.7,
-          "p95": 1542.8,
-          "minimum": 1380.4,
-          "maximum": 1542.8
+          "median": 201.9,
+          "p95": 206.2,
+          "minimum": 201.7,
+          "maximum": 206.2
+        },
+        "artifactParseMilliseconds": {
+          "values": [
+            978.8,
+            969.3,
+            963.8,
+            966,
+            985.8
+          ],
+          "median": 969.3,
+          "p95": 985.8,
+          "minimum": 963.8,
+          "maximum": 985.8
+        },
+        "artifactPayloadBytes": {
+          "values": [
+            172603806,
+            172603806,
+            172603806,
+            172603806,
+            172603806
+          ],
+          "median": 172603806,
+          "p95": 172603806,
+          "minimum": 172603806,
+          "maximum": 172603806
         },
         "artifactVerifyMilliseconds": {
           "values": [
-            6709.9,
-            6456.9,
-            7101.8,
-            6857,
-            6841.5
+            68.1,
+            67.5,
+            67.5,
+            67.6,
+            67.6
           ],
-          "median": 6841.5,
-          "p95": 7101.8,
-          "minimum": 6456.9,
-          "maximum": 7101.8
+          "median": 67.6,
+          "p95": 68.1,
+          "minimum": 67.5,
+          "maximum": 68.1
         },
         "readMilliseconds": {
           "values": [
-            71.7,
-            73.7,
-            71.4,
-            80.4,
-            73
+            66.8,
+            67.6,
+            67.2,
+            66.7,
+            67.6
           ],
-          "median": 73,
-          "p95": 80.4,
-          "minimum": 71.4,
-          "maximum": 80.4
+          "median": 67.2,
+          "p95": 67.6,
+          "minimum": 66.7,
+          "maximum": 67.6
         },
         "restoreMilliseconds": {
           "values": [
-            5.6,
-            4,
-            6.7,
-            5.9,
-            4.1
+            2.9,
+            3,
+            3.2,
+            3.1,
+            3.7
           ],
-          "median": 5.6,
-          "p95": 6.7,
-          "minimum": 4,
-          "maximum": 6.7
+          "median": 3.1,
+          "p95": 3.7,
+          "minimum": 2.9,
+          "maximum": 3.7
         },
         "sourceBytes": {
           "values": [
@@ -1614,68 +2921,94 @@
         "artifactState": "verified",
         "artifactBytes": {
           "values": [
-            321214,
-            321214,
-            321214,
-            321214,
-            321214
+            321216,
+            321216,
+            321216,
+            321216,
+            321216
           ],
-          "median": 321214,
-          "p95": 321214,
-          "minimum": 321214,
-          "maximum": 321214
+          "median": 321216,
+          "p95": 321216,
+          "minimum": 321216,
+          "maximum": 321216
         },
         "artifactLoadMilliseconds": {
           "values": [
-            38,
-            24.7,
-            28.6,
-            30.2,
-            30.1
+            13.6,
+            5.9,
+            6,
+            6.1,
+            5.7
           ],
-          "median": 30.1,
-          "p95": 38,
-          "minimum": 24.7,
-          "maximum": 38
+          "median": 6,
+          "p95": 13.6,
+          "minimum": 5.7,
+          "maximum": 13.6
+        },
+        "artifactParseMilliseconds": {
+          "values": [
+            17.5,
+            17.1,
+            17.3,
+            16.2,
+            17
+          ],
+          "median": 17.1,
+          "p95": 17.5,
+          "minimum": 16.2,
+          "maximum": 17.5
+        },
+        "artifactPayloadBytes": {
+          "values": [
+            4555888,
+            4555888,
+            4555888,
+            4555888,
+            4555888
+          ],
+          "median": 4555888,
+          "p95": 4555888,
+          "minimum": 4555888,
+          "maximum": 4555888
         },
         "artifactVerifyMilliseconds": {
           "values": [
-            149.9,
-            116.7,
-            131,
-            138.8,
-            125.9
+            1.8,
+            1.8,
+            1.8,
+            2.2,
+            1.8
           ],
-          "median": 131,
-          "p95": 149.9,
-          "minimum": 116.7,
-          "maximum": 149.9
+          "median": 1.8,
+          "p95": 2.2,
+          "minimum": 1.8,
+          "maximum": 2.2
         },
         "readMilliseconds": {
           "values": [
-            7.1,
-            7.2,
-            7.2,
-            7.5,
-            7.3
+            6.7,
+            6.7,
+            7,
+            6.8,
+            6.6
           ],
-          "median": 7.2,
-          "p95": 7.5,
-          "minimum": 7.1,
-          "maximum": 7.5
+          "median": 6.7,
+          "p95": 7,
+          "minimum": 6.6,
+          "maximum": 7
         },
         "restoreMilliseconds": {
           "values": [
-            0.1,
             0,
             0,
-            0.1,
-            0.1
+            0,
+            0,
+            0
           ],
-          "median": 0.1,
-          "p95": 0.1,
+          "median": 0,
+          "p95": 0,
           "minimum": 0,
-          "maximum": 0.1
+          "maximum": 0
         },
         "sourceBytes": {
           "values": [
@@ -1696,68 +3029,94 @@
         "artifactState": "verified",
         "artifactBytes": {
           "values": [
-            4738552,
-            4738552,
-            4738552,
-            4738552,
-            4738552
+            4738587,
+            4738587,
+            4738587,
+            4738587,
+            4738587
           ],
-          "median": 4738552,
-          "p95": 4738552,
-          "minimum": 4738552,
-          "maximum": 4738552
+          "median": 4738587,
+          "p95": 4738587,
+          "minimum": 4738587,
+          "maximum": 4738587
         },
         "artifactLoadMilliseconds": {
           "values": [
-            290.4,
-            268.6,
-            317.4,
-            302.9,
-            294
+            59.4,
+            51.6,
+            55.6,
+            51.6,
+            54.3
           ],
-          "median": 294,
-          "p95": 317.4,
-          "minimum": 268.6,
-          "maximum": 317.4
+          "median": 54.3,
+          "p95": 59.4,
+          "minimum": 51.6,
+          "maximum": 59.4
+        },
+        "artifactParseMilliseconds": {
+          "values": [
+            195.7,
+            187.6,
+            197.8,
+            183.5,
+            199.5
+          ],
+          "median": 195.7,
+          "p95": 199.5,
+          "minimum": 183.5,
+          "maximum": 199.5
+        },
+        "artifactPayloadBytes": {
+          "values": [
+            29588084,
+            29588084,
+            29588084,
+            29588084,
+            29588084
+          ],
+          "median": 29588084,
+          "p95": 29588084,
+          "minimum": 29588084,
+          "maximum": 29588084
         },
         "artifactVerifyMilliseconds": {
           "values": [
-            1405.5,
-            1245,
-            1490.8,
-            1453.8,
-            1490.9
+            11.7,
+            11.6,
+            11.7,
+            11.7,
+            11.6
           ],
-          "median": 1453.8,
-          "p95": 1490.9,
-          "minimum": 1245,
-          "maximum": 1490.9
+          "median": 11.7,
+          "p95": 11.7,
+          "minimum": 11.6,
+          "maximum": 11.7
         },
         "readMilliseconds": {
           "values": [
-            31.2,
-            31.8,
-            31.6,
-            30.6,
-            30.2
+            30.1,
+            29.5,
+            29.5,
+            30,
+            29.9
           ],
-          "median": 31.2,
-          "p95": 31.8,
-          "minimum": 30.2,
-          "maximum": 31.8
+          "median": 29.9,
+          "p95": 30.1,
+          "minimum": 29.5,
+          "maximum": 30.1
         },
         "restoreMilliseconds": {
           "values": [
-            0.4,
-            0.3,
-            0.3,
-            0.4,
-            0.3
+            0.2,
+            0.1,
+            0.2,
+            0.2,
+            0.2
           ],
-          "median": 0.3,
-          "p95": 0.4,
-          "minimum": 0.3,
-          "maximum": 0.4
+          "median": 0.2,
+          "p95": 0.2,
+          "minimum": 0.1,
+          "maximum": 0.2
         },
         "sourceBytes": {
           "values": [
@@ -1778,68 +3137,94 @@
         "artifactState": "verified",
         "artifactBytes": {
           "values": [
-            30113286,
-            30113286,
-            30113286,
-            30113286,
-            30113286
+            30113437,
+            30113437,
+            30113437,
+            30113437,
+            30113437
           ],
-          "median": 30113286,
-          "p95": 30113286,
-          "minimum": 30113286,
-          "maximum": 30113286
+          "median": 30113437,
+          "p95": 30113437,
+          "minimum": 30113437,
+          "maximum": 30113437
         },
         "artifactLoadMilliseconds": {
           "values": [
-            2948,
-            2589.3,
-            3174.8,
-            3004.2,
-            2957.8
+            403.1,
+            397,
+            397.8,
+            401.6,
+            395.6
           ],
-          "median": 2957.8,
-          "p95": 3174.8,
-          "minimum": 2589.3,
-          "maximum": 3174.8
+          "median": 397.8,
+          "p95": 403.1,
+          "minimum": 395.6,
+          "maximum": 403.1
+        },
+        "artifactParseMilliseconds": {
+          "values": [
+            1928.7,
+            1922.9,
+            1923.5,
+            1933.1,
+            1911.9
+          ],
+          "median": 1923.5,
+          "p95": 1933.1,
+          "minimum": 1911.9,
+          "maximum": 1933.1
+        },
+        "artifactPayloadBytes": {
+          "values": [
+            278946357,
+            278946357,
+            278946357,
+            278946357,
+            278946357
+          ],
+          "median": 278946357,
+          "p95": 278946357,
+          "minimum": 278946357,
+          "maximum": 278946357
         },
         "artifactVerifyMilliseconds": {
           "values": [
-            10972.9,
-            10223.3,
-            12899.3,
-            11411.6,
-            11132
+            109.4,
+            109.3,
+            109.2,
+            109.1,
+            109.2
           ],
-          "median": 11132,
-          "p95": 12899.3,
-          "minimum": 10223.3,
-          "maximum": 12899.3
+          "median": 109.2,
+          "p95": 109.4,
+          "minimum": 109.1,
+          "maximum": 109.4
         },
         "readMilliseconds": {
           "values": [
-            138.1,
-            137.2,
-            141.4,
-            141.3,
-            141.9
+            132.8,
+            133.1,
+            133.9,
+            131.8,
+            132.7
           ],
-          "median": 141.3,
-          "p95": 141.9,
-          "minimum": 137.2,
-          "maximum": 141.9
+          "median": 132.8,
+          "p95": 133.9,
+          "minimum": 131.8,
+          "maximum": 133.9
         },
         "restoreMilliseconds": {
           "values": [
-            7.1,
-            7.6,
-            7.6,
-            9.5,
-            6.8
+            4.7,
+            5.1,
+            4.5,
+            5,
+            5
           ],
-          "median": 7.6,
-          "p95": 9.5,
-          "minimum": 6.8,
-          "maximum": 9.5
+          "median": 5,
+          "p95": 5.1,
+          "minimum": 4.5,
+          "maximum": 5.1
         },
         "sourceBytes": {
           "values": [
@@ -1858,57 +3243,44 @@
       "structure": {
         "outcome": "extracted",
         "artifactState": "absent",
-        "artifactLoadMilliseconds": {
-          "values": [
-            0.2,
-            0.2,
-            0.2,
-            0.2,
-            0.2
-          ],
-          "median": 0.2,
-          "p95": 0.2,
-          "minimum": 0.2,
-          "maximum": 0.2
-        },
         "extractMilliseconds": {
           "values": [
-            6257,
-            6396.7,
-            7047.4,
-            6209.8,
-            6442.7
+            5184.1,
+            5165.4,
+            5270.4,
+            5222.2,
+            5210.4
           ],
-          "median": 6396.7,
-          "p95": 7047.4,
-          "minimum": 6209.8,
-          "maximum": 7047.4
+          "median": 5210.4,
+          "p95": 5270.4,
+          "minimum": 5165.4,
+          "maximum": 5270.4
         },
         "publishMilliseconds": {
           "values": [
-            2801.3,
-            3182.8,
-            3283.8,
-            2946.3,
-            3077.5
+            594.2,
+            593.5,
+            593.2,
+            597.1,
+            592
           ],
-          "median": 3077.5,
-          "p95": 3283.8,
-          "minimum": 2801.3,
-          "maximum": 3283.8
+          "median": 593.5,
+          "p95": 597.1,
+          "minimum": 592,
+          "maximum": 597.1
         },
         "readMilliseconds": {
           "values": [
-            17,
-            12.4,
-            12.3,
-            12.8,
-            11.8
+            16,
+            11.1,
+            11.5,
+            11.1,
+            11.1
           ],
-          "median": 12.4,
-          "p95": 17,
-          "minimum": 11.8,
-          "maximum": 17
+          "median": 11.1,
+          "p95": 16,
+          "minimum": 11.1,
+          "maximum": 16
         },
         "sourceBytes": {
           "values": [
@@ -1929,68 +3301,94 @@
         "artifactState": "verified",
         "artifactBytes": {
           "values": [
-            17276801,
-            17276801,
-            17276801,
-            17276801,
-            17276801
+            17276977,
+            17276977,
+            17276977,
+            17276977,
+            17276977
           ],
-          "median": 17276801,
-          "p95": 17276801,
-          "minimum": 17276801,
-          "maximum": 17276801
+          "median": 17276977,
+          "p95": 17276977,
+          "minimum": 17276977,
+          "maximum": 17276977
         },
         "artifactLoadMilliseconds": {
           "values": [
-            1521,
-            1535.9,
-            1967.3,
-            1570.7,
-            1556.9
+            238.9,
+            222.8,
+            217.3,
+            236,
+            224.7
           ],
-          "median": 1556.9,
-          "p95": 1967.3,
-          "minimum": 1521,
-          "maximum": 1967.3
+          "median": 224.7,
+          "p95": 238.9,
+          "minimum": 217.3,
+          "maximum": 238.9
+        },
+        "artifactParseMilliseconds": {
+          "values": [
+            1004.1,
+            1014.6,
+            1064.5,
+            1000.5,
+            1018.7
+          ],
+          "median": 1014.6,
+          "p95": 1064.5,
+          "minimum": 1000.5,
+          "maximum": 1064.5
+        },
+        "artifactPayloadBytes": {
+          "values": [
+            140811979,
+            140811979,
+            140811979,
+            140811979,
+            140811979
+          ],
+          "median": 140811979,
+          "p95": 140811979,
+          "minimum": 140811979,
+          "maximum": 140811979
         },
         "artifactVerifyMilliseconds": {
           "values": [
-            5826.2,
-            5944.1,
-            6647.5,
-            5883.6,
-            6033.3
+            55.6,
+            56.3,
+            55.9,
+            55.6,
+            55.6
           ],
-          "median": 5944.1,
-          "p95": 6647.5,
-          "minimum": 5826.2,
-          "maximum": 6647.5
+          "median": 55.6,
+          "p95": 56.3,
+          "minimum": 55.6,
+          "maximum": 56.3
         },
         "readMilliseconds": {
           "values": [
-            71.9,
-            74.4,
-            76.2,
-            70.7,
-            72
+            70.3,
+            70.3,
+            69.6,
+            70.9,
+            71.2
           ],
-          "median": 72,
-          "p95": 76.2,
-          "minimum": 70.7,
-          "maximum": 76.2
+          "median": 70.3,
+          "p95": 71.2,
+          "minimum": 69.6,
+          "maximum": 71.2
         },
         "restoreMilliseconds": {
           "values": [
-            3.6,
-            3.5,
-            6.5,
-            3.2,
-            3.9
+            2.5,
+            2.1,
+            2.3,
+            2.2,
+            2.3
           ],
-          "median": 3.6,
-          "p95": 6.5,
-          "minimum": 3.2,
-          "maximum": 6.5
+          "median": 2.3,
+          "p95": 2.5,
+          "minimum": 2.1,
+          "maximum": 2.5
         },
         "sourceBytes": {
           "values": [
@@ -2010,231 +3408,1643 @@
     "adapterFederation": {
       "mergeMilliseconds": {
         "values": [
-          112.3,
-          99.3,
-          137.8,
-          112.1,
-          99.8
+          86.8,
+          85.7,
+          101.1,
+          82.3,
+          81.9
         ],
-        "median": 112.1,
-        "p95": 137.8,
-        "minimum": 99.3,
-        "maximum": 137.8
+        "median": 85.7,
+        "p95": 101.1,
+        "minimum": 81.9,
+        "maximum": 101.1
       },
       "propertyIndexMilliseconds": {
         "values": [
-          11374.6,
-          11513.1,
-          13422.3,
-          11666.2,
-          11791
+          9644.4,
+          9473.2,
+          9667.3,
+          9432,
+          9438.8
         ],
-        "median": 11666.2,
-        "p95": 13422.3,
-        "minimum": 11374.6,
-        "maximum": 13422.3
+        "median": 9473.2,
+        "p95": 9667.3,
+        "minimum": 9432,
+        "maximum": 9667.3
       }
     },
     "adapterWrite": {
       "digestMilliseconds": {
         "values": [
-          410.5,
-          441.4,
-          401.2,
-          406.6,
-          411.3
+          388.8,
+          381.5,
+          380,
+          379.4,
+          391.8
         ],
-        "median": 410.5,
-        "p95": 441.4,
-        "minimum": 401.2,
-        "maximum": 441.4
+        "median": 381.5,
+        "p95": 391.8,
+        "minimum": 379.4,
+        "maximum": 391.8
       },
       "geometryMilliseconds": {
         "values": [
-          1691.1,
-          1696.1,
-          2175.4,
-          1860.5,
-          1806.1
+          1392,
+          1381.7,
+          1355.8,
+          1332.6,
+          1369.3
         ],
-        "median": 1806.1,
-        "p95": 2175.4,
-        "minimum": 1691.1,
-        "maximum": 2175.4
+        "median": 1369.3,
+        "p95": 1392,
+        "minimum": 1332.6,
+        "maximum": 1392
       },
       "propertiesMilliseconds": {
         "values": [
-          147.5,
-          159.1,
-          146.4,
-          206,
-          170
+          114.5,
+          116.4,
+          112.7,
+          132.4,
+          113.9
         ],
-        "median": 159.1,
-        "p95": 206,
-        "minimum": 146.4,
-        "maximum": 206
+        "median": 114.5,
+        "p95": 132.4,
+        "minimum": 112.7,
+        "maximum": 132.4
       },
       "reportMilliseconds": {
         "values": [
-          2.2,
-          2.2,
-          2.5,
-          2.6,
-          2.3
+          2,
+          2,
+          1.9,
+          2,
+          1.8
         ],
-        "median": 2.3,
-        "p95": 2.6,
-        "minimum": 2.2,
-        "maximum": 2.6
+        "median": 2,
+        "p95": 2,
+        "minimum": 1.8,
+        "maximum": 2
       },
       "structureMilliseconds": {
         "values": [
-          10586.1,
-          10580.1,
-          10573.5,
-          11223.1,
-          10999.7
+          8625.2,
+          8602.2,
+          8579.1,
+          8586.9,
+          8649.3
         ],
-        "median": 10586.1,
-        "p95": 11223.1,
-        "minimum": 10573.5,
-        "maximum": 11223.1
+        "median": 8602.2,
+        "p95": 8649.3,
+        "minimum": 8579.1,
+        "maximum": 8649.3
       }
-    },
-    "unchangedArtifactVerifyMilliseconds": {
-      "values": [
-        33634.1,
-        32571.2,
-        37269.3,
-        34659.8,
-        34204.2
-      ],
-      "median": 34204.2,
-      "p95": 37269.3,
-      "minimum": 32571.2,
-      "maximum": 37269.3
     },
     "unchangedArtifactLoadMilliseconds": {
       "values": [
-        8310.4,
-        7739.4,
-        9063.1,
-        8537.5,
-        8227.6
+        1354.5,
+        1312.1,
+        1310.9,
+        1328.8,
+        1310
       ],
-      "median": 8310.4,
-      "p95": 9063.1,
-      "minimum": 7739.4,
-      "maximum": 9063.1
+      "median": 1312.1,
+      "p95": 1354.5,
+      "minimum": 1310,
+      "maximum": 1354.5
     },
-    "unchangedArtifactBytes": 101185491
+    "unchangedArtifactVerifyMilliseconds": {
+      "values": [
+        353,
+        353,
+        352.8,
+        353.2,
+        352.1
+      ],
+      "median": 353,
+      "p95": 353.2,
+      "minimum": 352.1,
+      "maximum": 353.2
+    },
+    "unchangedArtifactParseMilliseconds": {
+      "values": [
+        5462.2,
+        5482,
+        5506,
+        5442.8,
+        5483.3
+      ],
+      "median": 5482,
+      "p95": 5506,
+      "minimum": 5442.8,
+      "maximum": 5506
+    },
+    "unchangedArtifactBytes": 101185751,
+    "unchangedArtifactPayloadBytes": 898258653
   },
-  "exploratoryAttribution": {
-    "source": "docs/adr/0019-document-artifact-transport.md, Context table (single cpu-prof run per model on this host)",
-    "rule": "reproduced when minimum <= exploratory <= maximum of this record's samples",
-    "rows": {
-      "compileWall": {
-        "exploratoryMilliseconds": 99851,
-        "measured": "whole.totalMilliseconds",
-        "median": 126149.8,
-        "minimum": 123647.7,
-        "maximum": 132743.9,
-        "ratioMedianToExploratory": 1.263,
-        "withinSpread": false
+  "cleanDistributions": {
+    "whole": {
+      "processMilliseconds": {
+        "values": [
+          322701,
+          320064.2,
+          321173.3,
+          319408.9,
+          313833.1
+        ],
+        "median": 320064.2,
+        "p95": 322701,
+        "minimum": 313833.1,
+        "maximum": 322701
       },
-      "adapterWait": {
-        "exploratoryMilliseconds": 62787,
-        "measured": "compilerStages.adapter",
-        "median": 79106.6,
-        "minimum": 76317.7,
-        "maximum": 85455.4,
-        "ratioMedianToExploratory": 1.26,
-        "withinSpread": false
+      "compileMilliseconds": {
+        "values": [
+          322310.5,
+          319679.1,
+          320777.8,
+          319016.3,
+          313451.7
+        ],
+        "median": 319679.1,
+        "p95": 322310.5,
+        "minimum": 313451.7,
+        "maximum": 322310.5
       },
-      "inProcessCompilerWork": {
-        "exploratoryMilliseconds": 37109,
-        "measured": "whole.inProcessCompilerWorkMilliseconds",
-        "median": 46582,
-        "minimum": 46404.1,
-        "maximum": 49832.1,
-        "ratioMedianToExploratory": 1.255,
-        "withinSpread": false
+      "totalMilliseconds": {
+        "values": [
+          322273.3,
+          319646.3,
+          320741.4,
+          318985,
+          313419.6
+        ],
+        "median": 319646.3,
+        "p95": 322273.3,
+        "minimum": 313419.6,
+        "maximum": 322273.3
       },
-      "structureStreamScan": {
-        "exploratoryMilliseconds": 15100,
-        "measured": "structureReadMilliseconds",
-        "median": 30215.2,
-        "minimum": 29969.5,
-        "maximum": 32996.5,
-        "ratioMedianToExploratory": 2.001,
-        "withinSpread": false
+      "harnessOverheadMilliseconds": {
+        "values": [
+          390.5,
+          385.1,
+          395.5,
+          392.6,
+          381.4
+        ],
+        "median": 390.5,
+        "p95": 395.5,
+        "minimum": 381.4,
+        "maximum": 395.5
       },
-      "compileSceneToGltf": {
-        "exploratoryMilliseconds": 6849,
-        "measured": "compilerStages.compile",
-        "median": 10830.6,
-        "minimum": 10688.8,
-        "maximum": 11104.6,
-        "ratioMedianToExploratory": 1.581,
-        "withinSpread": false
+      "inProcessCompilerWorkMilliseconds": {
+        "values": [
+          37319.1,
+          37161.5,
+          37539.7,
+          37227.6,
+          37090.7
+        ],
+        "median": 37227.6,
+        "p95": 37539.7,
+        "minimum": 37090.7,
+        "maximum": 37539.7
       },
-      "buildCompiledPayload": {
-        "exploratoryMilliseconds": 1229,
-        "measured": "compileStages.encodeGeometry",
-        "median": 3183.7,
-        "minimum": 3101.7,
-        "maximum": 3277.5,
-        "ratioMedianToExploratory": 2.59,
-        "withinSpread": false
+      "peakWorkingSetBytes": {
+        "values": [
+          5082501120,
+          5080170496,
+          5083443200,
+          5078302720,
+          5073649664
+        ],
+        "median": 5080170496,
+        "p95": 5083443200,
+        "minimum": 5073649664,
+        "maximum": 5083443200
       },
-      "documentStreaming": {
-        "exploratoryMilliseconds": 2950,
-        "measured": "compileStages.measureDocument",
-        "median": 2437.2,
-        "minimum": 2402.5,
-        "maximum": 2566.5,
-        "ratioMedianToExploratory": 0.826,
-        "withinSpread": false,
-        "note": "The probe timed streamJsonInto; the ledger times the measuring pass, which streams the same document once (json-document.ts)."
+      "peakPrivateBytes": {
+        "values": [
+          5754216448,
+          5754077184,
+          5756104704,
+          5745688576,
+          5741064192
+        ],
+        "median": 5754077184,
+        "p95": 5756104704,
+        "minimum": 5741064192,
+        "maximum": 5756104704
+      }
+    },
+    "compilerStages": {
+      "inspectSources": {
+        "values": [
+          442.6,
+          442,
+          441.4,
+          440.5,
+          439.6
+        ],
+        "median": 441.4,
+        "p95": 442.6,
+        "minimum": 439.6,
+        "maximum": 442.6
       },
-      "writeCompiledPackage": {
-        "exploratoryMilliseconds": 1392,
-        "measured": "compilerStages.writePackage",
-        "median": 2388.2,
-        "minimum": 2285.7,
-        "maximum": 2562,
-        "ratioMedianToExploratory": 1.716,
-        "withinSpread": false
+      "toolchainIdentity": {
+        "values": [
+          0.1,
+          0.1,
+          0.1,
+          0.1,
+          0.1
+        ],
+        "median": 0.1,
+        "p95": 0.1,
+        "minimum": 0.1,
+        "maximum": 0.1
       },
+      "cacheLookup": {
+        "values": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "median": 0,
+        "p95": 0,
+        "minimum": 0,
+        "maximum": 0
+      },
+      "adapter": {
+        "values": [
+          284954.2,
+          282484.7,
+          283201.7,
+          281757.5,
+          276328.9
+        ],
+        "median": 282484.7,
+        "p95": 284954.2,
+        "minimum": 276328.9,
+        "maximum": 284954.2
+      },
+      "readSceneIr": {
+        "values": [
+          25245.6,
+          25117.3,
+          25308.2,
+          25242.1,
+          25118
+        ],
+        "median": 25242.1,
+        "p95": 25308.2,
+        "minimum": 25117.3,
+        "maximum": 25308.2
+      },
+      "hydrate": {
+        "values": [
+          53,
+          51.6,
+          54.8,
+          51,
+          46.8
+        ],
+        "median": 51.6,
+        "p95": 54.8,
+        "minimum": 46.8,
+        "maximum": 54.8
+      },
+      "compile": {
+        "values": [
+          8732.5,
+          8714.9,
+          8714.2,
+          8646.2,
+          8656.5
+        ],
+        "median": 8714.2,
+        "p95": 8732.5,
+        "minimum": 8646.2,
+        "maximum": 8732.5
+      },
+      "validateCompiled": {
+        "values": [
+          123.5,
+          120.6,
+          135.8,
+          151.1,
+          119.2
+        ],
+        "median": 123.5,
+        "p95": 151.1,
+        "minimum": 119.2,
+        "maximum": 151.1
+      },
+      "dependencyIndex": {
+        "values": [
+          786.7,
+          768.2,
+          834.7,
+          779.7,
+          788.9
+        ],
+        "median": 786.7,
+        "p95": 834.7,
+        "minimum": 768.2,
+        "maximum": 834.7
+      },
+      "writePackage": {
+        "values": [
+          1721.8,
+          1734.1,
+          1836.9,
+          1703.6,
+          1701.6
+        ],
+        "median": 1721.8,
+        "p95": 1836.9,
+        "minimum": 1701.6,
+        "maximum": 1836.9
+      },
+      "writeDependencyIndex": {
+        "values": [
+          118.8,
+          117.2,
+          118,
+          118,
+          125
+        ],
+        "median": 118,
+        "p95": 125,
+        "minimum": 117.2,
+        "maximum": 125
+      },
+      "retainSceneIr": {
+        "values": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "median": 0,
+        "p95": 0,
+        "minimum": 0,
+        "maximum": 0
+      },
+      "cachePublish": {
+        "values": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "median": 0,
+        "p95": 0,
+        "minimum": 0,
+        "maximum": 0
+      }
+    },
+    "unattributedMilliseconds": {
+      "values": [
+        94.5,
+        95.7,
+        95.8,
+        95.2,
+        95.2
+      ],
+      "median": 95.2,
+      "p95": 95.8,
+      "minimum": 94.5,
+      "maximum": 95.8
+    },
+    "structureReadMilliseconds": {
+      "values": [
+        25204,
+        25075,
+        25262.3,
+        25200.3,
+        25074
+      ],
+      "median": 25200.3,
+      "p95": 25262.3,
+      "minimum": 25074,
+      "maximum": 25262.3
+    },
+    "compileStages": {
       "validateScene": {
-        "exploratoryMilliseconds": 1018,
-        "measured": "compileStages.validateScene",
-        "median": 1433.3,
-        "minimum": 1338.6,
-        "maximum": 1474,
-        "ratioMedianToExploratory": 1.408,
-        "withinSpread": false
+        "values": [
+          1136,
+          1133.6,
+          1115.4,
+          1103.6,
+          1103
+        ],
+        "median": 1115.4,
+        "p95": 1136,
+        "minimum": 1103,
+        "maximum": 1136
+      },
+      "encodeGeometry": {
+        "values": [
+          2475.4,
+          2505.1,
+          2450.7,
+          2466.9,
+          2462.4
+        ],
+        "median": 2466.9,
+        "p95": 2505.1,
+        "minimum": 2450.7,
+        "maximum": 2505.1
+      },
+      "measureDocument": {
+        "values": [
+          2031.2,
+          2009.3,
+          2166.5,
+          2085.5,
+          2227
+        ],
+        "median": 2085.5,
+        "p95": 2227,
+        "minimum": 2009.3,
+        "maximum": 2227
+      },
+      "other": {
+        "values": [
+          3089.8,
+          3067,
+          2981.6,
+          2990.3,
+          2864.1
+        ],
+        "median": 2990.3,
+        "p95": 3089.8,
+        "minimum": 2864.1,
+        "maximum": 3089.8
       }
     },
-    "notMeasured": {
-      "gcAndMicrotasks": {
-        "exploratoryMilliseconds": 11347,
-        "reason": "A cpu-prof category with no wall-clock stage; the nearest ledger figure is unattributedMilliseconds (wall time between stage timers), reported but not compared.",
-        "unattributedMedian": 97
+    "adapterProcess": {
+      "spawnToModuleStartMilliseconds": {
+        "values": [
+          66.5,
+          66.4,
+          64.6,
+          64.4,
+          61.7
+        ],
+        "median": 64.6,
+        "p95": 66.5,
+        "minimum": 61.7,
+        "maximum": 66.5
+      },
+      "importMilliseconds": {
+        "values": [
+          225.9,
+          224.7,
+          218.3,
+          226.8,
+          219.1
+        ],
+        "median": 224.7,
+        "p95": 226.8,
+        "minimum": 218.3,
+        "maximum": 226.8
+      },
+      "importsToMainMilliseconds": {
+        "values": [
+          4.1,
+          4,
+          4.5,
+          4.2,
+          3.8
+        ],
+        "median": 4.1,
+        "p95": 4.5,
+        "minimum": 3.8,
+        "maximum": 4.5
+      },
+      "mainMilliseconds": {
+        "values": [
+          283937.6,
+          281475.5,
+          282185.9,
+          280742,
+          275325.9
+        ],
+        "median": 281475.5,
+        "p95": 283937.6,
+        "minimum": 275325.9,
+        "maximum": 283937.6
+      },
+      "finishToCloseMilliseconds": {
+        "values": [
+          714.9,
+          709.4,
+          722.7,
+          714.5,
+          714.4
+        ],
+        "median": 714.5,
+        "p95": 722.7,
+        "minimum": 709.4,
+        "maximum": 722.7
       }
     },
-    "reproduced": false,
-    "rowsOutsideSpread": [
-      "compileWall",
-      "adapterWait",
-      "inProcessCompilerWork",
-      "structureStreamScan",
-      "compileSceneToGltf",
-      "buildCompiledPayload",
-      "documentStreaming",
-      "writeCompiledPackage",
-      "validateScene"
-    ]
+    "adapterMainUnattributedMilliseconds": {
+      "values": [
+        137,
+        139.5,
+        139.7,
+        232.4,
+        145.1
+      ],
+      "median": 139.7,
+      "p95": 232.4,
+      "minimum": 137,
+      "maximum": 232.4
+    },
+    "adapterDocuments": {
+      "architecture": {
+        "outcome": "extracted",
+        "extractMilliseconds": {
+          "values": [
+            69325.2,
+            68297.4,
+            68307.4,
+            68067,
+            68330.3
+          ],
+          "median": 68307.4,
+          "p95": 69325.2,
+          "minimum": 68067,
+          "maximum": 69325.2
+        },
+        "readMilliseconds": {
+          "values": [
+            203.9,
+            204.4,
+            203.5,
+            202.4,
+            203.5
+          ],
+          "median": 203.5,
+          "p95": 204.4,
+          "minimum": 202.4,
+          "maximum": 204.4
+        },
+        "sourceBytes": {
+          "values": [
+            342657851,
+            342657851,
+            342657851,
+            342657851,
+            342657851
+          ],
+          "median": 342657851,
+          "p95": 342657851,
+          "minimum": 342657851,
+          "maximum": 342657851
+        }
+      },
+      "electrical": {
+        "outcome": "extracted",
+        "extractMilliseconds": {
+          "values": [
+            46119,
+            42697.4,
+            42415.2,
+            42143.6,
+            42324.9
+          ],
+          "median": 42415.2,
+          "p95": 46119,
+          "minimum": 42143.6,
+          "maximum": 46119
+        },
+        "readMilliseconds": {
+          "values": [
+            67.7,
+            67.9,
+            67.2,
+            68.7,
+            67.4
+          ],
+          "median": 67.7,
+          "p95": 68.7,
+          "minimum": 67.2,
+          "maximum": 68.7
+        },
+        "sourceBytes": {
+          "values": [
+            97058912,
+            97058912,
+            97058912,
+            97058912,
+            97058912
+          ],
+          "median": 97058912,
+          "p95": 97058912,
+          "minimum": 97058912,
+          "maximum": 97058912
+        }
+      },
+      "facade": {
+        "outcome": "extracted",
+        "extractMilliseconds": {
+          "values": [
+            1214.8,
+            1160.9,
+            1185.2,
+            1183.5,
+            1161.5
+          ],
+          "median": 1183.5,
+          "p95": 1214.8,
+          "minimum": 1160.9,
+          "maximum": 1214.8
+        },
+        "readMilliseconds": {
+          "values": [
+            6.8,
+            6.8,
+            7.1,
+            6.8,
+            7.1
+          ],
+          "median": 6.8,
+          "p95": 7.1,
+          "minimum": 6.8,
+          "maximum": 7.1
+        },
+        "sourceBytes": {
+          "values": [
+            6067026,
+            6067026,
+            6067026,
+            6067026,
+            6067026
+          ],
+          "median": 6067026,
+          "p95": 6067026,
+          "minimum": 6067026,
+          "maximum": 6067026
+        }
+      },
+      "kitchen": {
+        "outcome": "extracted",
+        "extractMilliseconds": {
+          "values": [
+            15264.5,
+            16580.1,
+            16673.8,
+            16841.4,
+            15132.3
+          ],
+          "median": 16580.1,
+          "p95": 16841.4,
+          "minimum": 15132.3,
+          "maximum": 16841.4
+        },
+        "readMilliseconds": {
+          "values": [
+            30.1,
+            30,
+            30,
+            30.1,
+            30.7
+          ],
+          "median": 30.1,
+          "p95": 30.7,
+          "minimum": 30,
+          "maximum": 30.7
+        },
+        "sourceBytes": {
+          "values": [
+            49670229,
+            49670229,
+            49670229,
+            49670229,
+            49670229
+          ],
+          "median": 49670229,
+          "p95": 49670229,
+          "minimum": 49670229,
+          "maximum": 49670229
+        }
+      },
+      "plumbing": {
+        "outcome": "extracted",
+        "extractMilliseconds": {
+          "values": [
+            75827.9,
+            77949.6,
+            78555.1,
+            77941.3,
+            74818.1
+          ],
+          "median": 77941.3,
+          "p95": 78555.1,
+          "minimum": 74818.1,
+          "maximum": 78555.1
+        },
+        "readMilliseconds": {
+          "values": [
+            136.5,
+            131.2,
+            132.4,
+            137.5,
+            133.1
+          ],
+          "median": 133.1,
+          "p95": 137.5,
+          "minimum": 131.2,
+          "maximum": 137.5
+        },
+        "sourceBytes": {
+          "values": [
+            222099255,
+            222099255,
+            222099255,
+            222099255,
+            222099255
+          ],
+          "median": 222099255,
+          "p95": 222099255,
+          "minimum": 222099255,
+          "maximum": 222099255
+        }
+      },
+      "structure": {
+        "outcome": "extracted",
+        "extractMilliseconds": {
+          "values": [
+            5423.3,
+            5406,
+            5422.6,
+            5393.1,
+            5183.6
+          ],
+          "median": 5406,
+          "p95": 5423.3,
+          "minimum": 5183.6,
+          "maximum": 5423.3
+        },
+        "readMilliseconds": {
+          "values": [
+            11,
+            10.9,
+            11,
+            11.1,
+            11.8
+          ],
+          "median": 11,
+          "p95": 11.8,
+          "minimum": 10.9,
+          "maximum": 11.8
+        },
+        "sourceBytes": {
+          "values": [
+            7422441,
+            7422441,
+            7422441,
+            7422441,
+            7422441
+          ],
+          "median": 7422441,
+          "p95": 7422441,
+          "minimum": 7422441,
+          "maximum": 7422441
+        }
+      },
+      "ventilation": {
+        "outcome": "extracted",
+        "extractMilliseconds": {
+          "values": [
+            47050.8,
+            46323.8,
+            46345.8,
+            46095.4,
+            45377.1
+          ],
+          "median": 46323.8,
+          "p95": 47050.8,
+          "minimum": 45377.1,
+          "maximum": 47050.8
+        },
+        "readMilliseconds": {
+          "values": [
+            70.2,
+            68.6,
+            68.6,
+            68.9,
+            69.9
+          ],
+          "median": 68.9,
+          "p95": 70.2,
+          "minimum": 68.6,
+          "maximum": 70.2
+        },
+        "sourceBytes": {
+          "values": [
+            114891068,
+            114891068,
+            114891068,
+            114891068,
+            114891068
+          ],
+          "median": 114891068,
+          "p95": 114891068,
+          "minimum": 114891068,
+          "maximum": 114891068
+        }
+      }
+    },
+    "adapterFederation": {
+      "mergeMilliseconds": {
+        "values": [
+          108.8,
+          99.6,
+          104.5,
+          97.7,
+          99.9
+        ],
+        "median": 99.9,
+        "p95": 108.8,
+        "minimum": 97.7,
+        "maximum": 108.8
+      },
+      "propertyIndexMilliseconds": {
+        "values": [
+          11656.9,
+          11168.3,
+          11345.4,
+          11125.5,
+          11237.3
+        ],
+        "median": 11237.3,
+        "p95": 11656.9,
+        "minimum": 11125.5,
+        "maximum": 11656.9
+      }
+    },
+    "adapterWrite": {
+      "digestMilliseconds": {
+        "values": [
+          386.8,
+          389.1,
+          385.2,
+          385.1,
+          381.9
+        ],
+        "median": 385.2,
+        "p95": 389.1,
+        "minimum": 381.9,
+        "maximum": 389.1
+      },
+      "geometryMilliseconds": {
+        "values": [
+          1533.8,
+          1613.2,
+          1558.3,
+          1497.3,
+          1534.3
+        ],
+        "median": 1534.3,
+        "p95": 1613.2,
+        "minimum": 1497.3,
+        "maximum": 1613.2
+      },
+      "propertiesMilliseconds": {
+        "values": [
+          126,
+          109.6,
+          111.6,
+          111.6,
+          113.6
+        ],
+        "median": 111.6,
+        "p95": 126,
+        "minimum": 109.6,
+        "maximum": 126
+      },
+      "reportMilliseconds": {
+        "values": [
+          2.4,
+          2.1,
+          1.9,
+          1.9,
+          2.1
+        ],
+        "median": 2.1,
+        "p95": 2.4,
+        "minimum": 1.9,
+        "maximum": 2.4
+      },
+      "structureMilliseconds": {
+        "values": [
+          9234.2,
+          9018.9,
+          9114.3,
+          9099.7,
+          8960.5
+        ],
+        "median": 9099.7,
+        "p95": 9234.2,
+        "minimum": 8960.5,
+        "maximum": 9234.2
+      }
+    }
+  },
+  "gates": {
+    "gate1": {
+      "rule": "Every file the transport rebuild wrote has the same SHA-256 as the file the clean rebuild of the same index wrote, except that the reports named in reportExclusions are compared after deleting the excluded keys (canonical JSON). Package digests of both arms are recorded as well.",
+      "reportExclusions": [
+        "adapter-report.json:documentArtifactCache"
+      ],
+      "transportPackageDigest": "05707534c73ce126da401a79481d0fd6c892bc308a451d6aa2a4b1691bc2439e",
+      "cleanPackageDigest": "05707534c73ce126da401a79481d0fd6c892bc308a451d6aa2a4b1691bc2439e",
+      "packageDigestsIdentical": true,
+      "resources": [
+        {
+          "name": "adapter-report.json",
+          "verdict": "identical-outside-excluded-keys",
+          "bytes": 39026
+        },
+        {
+          "name": "build-report.json",
+          "verdict": "identical",
+          "bytes": 142297
+        },
+        {
+          "name": "coarse.bin",
+          "verdict": "identical",
+          "bytes": 38700720
+        },
+        {
+          "name": "hierarchy.bin",
+          "verdict": "identical",
+          "bytes": 46250496
+        },
+        {
+          "name": "hierarchy.json",
+          "verdict": "identical",
+          "bytes": 3192
+        },
+        {
+          "name": "incremental-dependencies.json",
+          "verdict": "identical",
+          "bytes": 38342167
+        },
+        {
+          "name": "properties.bin",
+          "verdict": "identical",
+          "bytes": 31179862
+        },
+        {
+          "name": "properties.json",
+          "verdict": "identical",
+          "bytes": 17705010
+        },
+        {
+          "name": "scene.bin",
+          "verdict": "identical",
+          "bytes": 169752328
+        },
+        {
+          "name": "scene.gltf",
+          "verdict": "identical",
+          "bytes": 299336922
+        },
+        {
+          "name": "spatial.bin",
+          "verdict": "identical",
+          "bytes": 1056956
+        }
+      ],
+      "pairs": [
+        {
+          "index": 1,
+          "files": [
+            {
+              "name": "adapter-report.json",
+              "bytes": 39026,
+              "excludedKeys": [
+                "documentArtifactCache"
+              ],
+              "verdict": "identical-outside-excluded-keys"
+            },
+            {
+              "name": "build-report.json",
+              "bytes": 142297,
+              "sha256": "d7d47aedcc0c7507d0ef616c5f5877d3b67a015ba46a276fcf9eda5c368fb228",
+              "verdict": "identical"
+            },
+            {
+              "name": "coarse.bin",
+              "bytes": 38700720,
+              "sha256": "39f4db859996d62a8f1427a89a7923434bcf873927c4e5551dafe6961564a9e6",
+              "verdict": "identical"
+            },
+            {
+              "name": "hierarchy.bin",
+              "bytes": 46250496,
+              "sha256": "e9d24b360b570022124bbc31bff001434ee57b49b4fe6ad8992002e05751a63e",
+              "verdict": "identical"
+            },
+            {
+              "name": "hierarchy.json",
+              "bytes": 3192,
+              "sha256": "2038ad90d33a4c3083ad0702c129da1cef228a91b0d0aa653a9c75b724a2b7d4",
+              "verdict": "identical"
+            },
+            {
+              "name": "incremental-dependencies.json",
+              "bytes": 38342167,
+              "sha256": "8dd77321e69a6fc400b8c6b30d581f810289bf6e61b44459a7dd641686cd8be4",
+              "verdict": "identical"
+            },
+            {
+              "name": "properties.bin",
+              "bytes": 31179862,
+              "sha256": "dad8d98909c738df930569c4b907c29e64cda2b65d84917936c1c4d86d3dd8c4",
+              "verdict": "identical"
+            },
+            {
+              "name": "properties.json",
+              "bytes": 17705010,
+              "sha256": "6b632040996161969c60deb308db4a069bd22d71de8ff0010b880f226b56f4a6",
+              "verdict": "identical"
+            },
+            {
+              "name": "scene.bin",
+              "bytes": 169752328,
+              "sha256": "27f324f2ebbac5d1f1ecbe3fc78fb36600dd5ea1a88a58b475924cdc67dd358c",
+              "verdict": "identical"
+            },
+            {
+              "name": "scene.gltf",
+              "bytes": 299336922,
+              "sha256": "e3d8f3de93259864a01cb4cad6daa07e768f2f2966fb0b7d1e02f724db6a4357",
+              "verdict": "identical"
+            },
+            {
+              "name": "spatial.bin",
+              "bytes": 1056956,
+              "sha256": "04930d10190a6a9663d74cac775cca43447d50af1f3ac661793bfd96bd9be514",
+              "verdict": "identical"
+            }
+          ],
+          "met": true
+        },
+        {
+          "index": 2,
+          "files": [
+            {
+              "name": "adapter-report.json",
+              "bytes": 39026,
+              "excludedKeys": [
+                "documentArtifactCache"
+              ],
+              "verdict": "identical-outside-excluded-keys"
+            },
+            {
+              "name": "build-report.json",
+              "bytes": 142297,
+              "sha256": "d7d47aedcc0c7507d0ef616c5f5877d3b67a015ba46a276fcf9eda5c368fb228",
+              "verdict": "identical"
+            },
+            {
+              "name": "coarse.bin",
+              "bytes": 38700720,
+              "sha256": "39f4db859996d62a8f1427a89a7923434bcf873927c4e5551dafe6961564a9e6",
+              "verdict": "identical"
+            },
+            {
+              "name": "hierarchy.bin",
+              "bytes": 46250496,
+              "sha256": "e9d24b360b570022124bbc31bff001434ee57b49b4fe6ad8992002e05751a63e",
+              "verdict": "identical"
+            },
+            {
+              "name": "hierarchy.json",
+              "bytes": 3192,
+              "sha256": "2038ad90d33a4c3083ad0702c129da1cef228a91b0d0aa653a9c75b724a2b7d4",
+              "verdict": "identical"
+            },
+            {
+              "name": "incremental-dependencies.json",
+              "bytes": 38342167,
+              "sha256": "8dd77321e69a6fc400b8c6b30d581f810289bf6e61b44459a7dd641686cd8be4",
+              "verdict": "identical"
+            },
+            {
+              "name": "properties.bin",
+              "bytes": 31179862,
+              "sha256": "dad8d98909c738df930569c4b907c29e64cda2b65d84917936c1c4d86d3dd8c4",
+              "verdict": "identical"
+            },
+            {
+              "name": "properties.json",
+              "bytes": 17705010,
+              "sha256": "6b632040996161969c60deb308db4a069bd22d71de8ff0010b880f226b56f4a6",
+              "verdict": "identical"
+            },
+            {
+              "name": "scene.bin",
+              "bytes": 169752328,
+              "sha256": "27f324f2ebbac5d1f1ecbe3fc78fb36600dd5ea1a88a58b475924cdc67dd358c",
+              "verdict": "identical"
+            },
+            {
+              "name": "scene.gltf",
+              "bytes": 299336922,
+              "sha256": "e3d8f3de93259864a01cb4cad6daa07e768f2f2966fb0b7d1e02f724db6a4357",
+              "verdict": "identical"
+            },
+            {
+              "name": "spatial.bin",
+              "bytes": 1056956,
+              "sha256": "04930d10190a6a9663d74cac775cca43447d50af1f3ac661793bfd96bd9be514",
+              "verdict": "identical"
+            }
+          ],
+          "met": true
+        },
+        {
+          "index": 3,
+          "files": [
+            {
+              "name": "adapter-report.json",
+              "bytes": 39026,
+              "excludedKeys": [
+                "documentArtifactCache"
+              ],
+              "verdict": "identical-outside-excluded-keys"
+            },
+            {
+              "name": "build-report.json",
+              "bytes": 142297,
+              "sha256": "d7d47aedcc0c7507d0ef616c5f5877d3b67a015ba46a276fcf9eda5c368fb228",
+              "verdict": "identical"
+            },
+            {
+              "name": "coarse.bin",
+              "bytes": 38700720,
+              "sha256": "39f4db859996d62a8f1427a89a7923434bcf873927c4e5551dafe6961564a9e6",
+              "verdict": "identical"
+            },
+            {
+              "name": "hierarchy.bin",
+              "bytes": 46250496,
+              "sha256": "e9d24b360b570022124bbc31bff001434ee57b49b4fe6ad8992002e05751a63e",
+              "verdict": "identical"
+            },
+            {
+              "name": "hierarchy.json",
+              "bytes": 3192,
+              "sha256": "2038ad90d33a4c3083ad0702c129da1cef228a91b0d0aa653a9c75b724a2b7d4",
+              "verdict": "identical"
+            },
+            {
+              "name": "incremental-dependencies.json",
+              "bytes": 38342167,
+              "sha256": "8dd77321e69a6fc400b8c6b30d581f810289bf6e61b44459a7dd641686cd8be4",
+              "verdict": "identical"
+            },
+            {
+              "name": "properties.bin",
+              "bytes": 31179862,
+              "sha256": "dad8d98909c738df930569c4b907c29e64cda2b65d84917936c1c4d86d3dd8c4",
+              "verdict": "identical"
+            },
+            {
+              "name": "properties.json",
+              "bytes": 17705010,
+              "sha256": "6b632040996161969c60deb308db4a069bd22d71de8ff0010b880f226b56f4a6",
+              "verdict": "identical"
+            },
+            {
+              "name": "scene.bin",
+              "bytes": 169752328,
+              "sha256": "27f324f2ebbac5d1f1ecbe3fc78fb36600dd5ea1a88a58b475924cdc67dd358c",
+              "verdict": "identical"
+            },
+            {
+              "name": "scene.gltf",
+              "bytes": 299336922,
+              "sha256": "e3d8f3de93259864a01cb4cad6daa07e768f2f2966fb0b7d1e02f724db6a4357",
+              "verdict": "identical"
+            },
+            {
+              "name": "spatial.bin",
+              "bytes": 1056956,
+              "sha256": "04930d10190a6a9663d74cac775cca43447d50af1f3ac661793bfd96bd9be514",
+              "verdict": "identical"
+            }
+          ],
+          "met": true
+        },
+        {
+          "index": 4,
+          "files": [
+            {
+              "name": "adapter-report.json",
+              "bytes": 39026,
+              "excludedKeys": [
+                "documentArtifactCache"
+              ],
+              "verdict": "identical-outside-excluded-keys"
+            },
+            {
+              "name": "build-report.json",
+              "bytes": 142297,
+              "sha256": "d7d47aedcc0c7507d0ef616c5f5877d3b67a015ba46a276fcf9eda5c368fb228",
+              "verdict": "identical"
+            },
+            {
+              "name": "coarse.bin",
+              "bytes": 38700720,
+              "sha256": "39f4db859996d62a8f1427a89a7923434bcf873927c4e5551dafe6961564a9e6",
+              "verdict": "identical"
+            },
+            {
+              "name": "hierarchy.bin",
+              "bytes": 46250496,
+              "sha256": "e9d24b360b570022124bbc31bff001434ee57b49b4fe6ad8992002e05751a63e",
+              "verdict": "identical"
+            },
+            {
+              "name": "hierarchy.json",
+              "bytes": 3192,
+              "sha256": "2038ad90d33a4c3083ad0702c129da1cef228a91b0d0aa653a9c75b724a2b7d4",
+              "verdict": "identical"
+            },
+            {
+              "name": "incremental-dependencies.json",
+              "bytes": 38342167,
+              "sha256": "8dd77321e69a6fc400b8c6b30d581f810289bf6e61b44459a7dd641686cd8be4",
+              "verdict": "identical"
+            },
+            {
+              "name": "properties.bin",
+              "bytes": 31179862,
+              "sha256": "dad8d98909c738df930569c4b907c29e64cda2b65d84917936c1c4d86d3dd8c4",
+              "verdict": "identical"
+            },
+            {
+              "name": "properties.json",
+              "bytes": 17705010,
+              "sha256": "6b632040996161969c60deb308db4a069bd22d71de8ff0010b880f226b56f4a6",
+              "verdict": "identical"
+            },
+            {
+              "name": "scene.bin",
+              "bytes": 169752328,
+              "sha256": "27f324f2ebbac5d1f1ecbe3fc78fb36600dd5ea1a88a58b475924cdc67dd358c",
+              "verdict": "identical"
+            },
+            {
+              "name": "scene.gltf",
+              "bytes": 299336922,
+              "sha256": "e3d8f3de93259864a01cb4cad6daa07e768f2f2966fb0b7d1e02f724db6a4357",
+              "verdict": "identical"
+            },
+            {
+              "name": "spatial.bin",
+              "bytes": 1056956,
+              "sha256": "04930d10190a6a9663d74cac775cca43447d50af1f3ac661793bfd96bd9be514",
+              "verdict": "identical"
+            }
+          ],
+          "met": true
+        },
+        {
+          "index": 5,
+          "files": [
+            {
+              "name": "adapter-report.json",
+              "bytes": 39026,
+              "excludedKeys": [
+                "documentArtifactCache"
+              ],
+              "verdict": "identical-outside-excluded-keys"
+            },
+            {
+              "name": "build-report.json",
+              "bytes": 142297,
+              "sha256": "d7d47aedcc0c7507d0ef616c5f5877d3b67a015ba46a276fcf9eda5c368fb228",
+              "verdict": "identical"
+            },
+            {
+              "name": "coarse.bin",
+              "bytes": 38700720,
+              "sha256": "39f4db859996d62a8f1427a89a7923434bcf873927c4e5551dafe6961564a9e6",
+              "verdict": "identical"
+            },
+            {
+              "name": "hierarchy.bin",
+              "bytes": 46250496,
+              "sha256": "e9d24b360b570022124bbc31bff001434ee57b49b4fe6ad8992002e05751a63e",
+              "verdict": "identical"
+            },
+            {
+              "name": "hierarchy.json",
+              "bytes": 3192,
+              "sha256": "2038ad90d33a4c3083ad0702c129da1cef228a91b0d0aa653a9c75b724a2b7d4",
+              "verdict": "identical"
+            },
+            {
+              "name": "incremental-dependencies.json",
+              "bytes": 38342167,
+              "sha256": "8dd77321e69a6fc400b8c6b30d581f810289bf6e61b44459a7dd641686cd8be4",
+              "verdict": "identical"
+            },
+            {
+              "name": "properties.bin",
+              "bytes": 31179862,
+              "sha256": "dad8d98909c738df930569c4b907c29e64cda2b65d84917936c1c4d86d3dd8c4",
+              "verdict": "identical"
+            },
+            {
+              "name": "properties.json",
+              "bytes": 17705010,
+              "sha256": "6b632040996161969c60deb308db4a069bd22d71de8ff0010b880f226b56f4a6",
+              "verdict": "identical"
+            },
+            {
+              "name": "scene.bin",
+              "bytes": 169752328,
+              "sha256": "27f324f2ebbac5d1f1ecbe3fc78fb36600dd5ea1a88a58b475924cdc67dd358c",
+              "verdict": "identical"
+            },
+            {
+              "name": "scene.gltf",
+              "bytes": 299336922,
+              "sha256": "e3d8f3de93259864a01cb4cad6daa07e768f2f2966fb0b7d1e02f724db6a4357",
+              "verdict": "identical"
+            },
+            {
+              "name": "spatial.bin",
+              "bytes": 1056956,
+              "sha256": "04930d10190a6a9663d74cac775cca43447d50af1f3ac661793bfd96bd9be514",
+              "verdict": "identical"
+            }
+          ],
+          "met": true
+        }
+      ],
+      "met": true
+    },
+    "gate2": {
+      "rule": "Every accepted transport sample reports the unchanged documents as artifact hits and the changed document as the only miss; its ledger names each unchanged artifact verified and the changed one absent. Corrupt, truncated, tampered, wrong-key, and previous-schema artifacts are refused with a named reason and re-extracted in native/adapter-ifc/tests/test_document_artifact_cache.py.",
+      "decisions": {
+        "hits": [
+          "architecture",
+          "electrical",
+          "facade",
+          "kitchen",
+          "plumbing",
+          "ventilation"
+        ],
+        "misses": [
+          "structure"
+        ],
+        "schemaVersion": "naru.ifc-document-artifact.2",
+        "status": "enabled"
+      },
+      "everySampleIdentical": true,
+      "artifactStates": {
+        "architecture": "verified",
+        "electrical": "verified",
+        "facade": "verified",
+        "kitchen": "verified",
+        "plumbing": "verified",
+        "structure": "absent",
+        "ventilation": "verified"
+      },
+      "met": true
+    },
+    "gate3": {
+      "rule": "For the unchanged documents, the adapter's artifactLoadMilliseconds + artifactVerifyMilliseconds (one gzip read, one header line, one SHA-256 over the stored payload bytes; naru.ifc-document-artifact.2) is compared with the same read, gunzip, and hash of the same files performed in this recorder process, repeated once per sample. Met when the adapter median is at most 2x the reference median. Parsing is ledgered separately (artifactParseMilliseconds), so neither figure hides a re-serialization; the artifact format itself is pinned by native/adapter-ifc/tests/test_document_artifact_cache.py.",
+      "artifactSchema": "naru.ifc-document-artifact.2",
+      "adapter": {
+        "loadMilliseconds": {
+          "values": [
+            1354.5,
+            1312.1,
+            1310.9,
+            1328.8,
+            1310
+          ],
+          "median": 1312.1,
+          "p95": 1354.5,
+          "minimum": 1310,
+          "maximum": 1354.5
+        },
+        "verifyMilliseconds": {
+          "values": [
+            353,
+            353,
+            352.8,
+            353.2,
+            352.1
+          ],
+          "median": 353,
+          "p95": 353.2,
+          "minimum": 352.1,
+          "maximum": 353.2
+        },
+        "loadPlusVerifyMilliseconds": {
+          "values": [
+            1707.5,
+            1665.1,
+            1663.6,
+            1682,
+            1662
+          ],
+          "median": 1665.1,
+          "p95": 1707.5,
+          "minimum": 1662,
+          "maximum": 1707.5
+        },
+        "parseMilliseconds": {
+          "values": [
+            5462.2,
+            5482,
+            5506,
+            5442.8,
+            5483.3
+          ],
+          "median": 5482,
+          "p95": 5506,
+          "minimum": 5442.8,
+          "maximum": 5506
+        },
+        "artifactBytes": 101185751,
+        "artifactPayloadBytes": 898258653
+      },
+      "reference": {
+        "documents": {
+          "architecture": {
+            "schemaVersion": "naru.ifc-document-artifact.2",
+            "fileBytes": 35579010,
+            "payloadBytes": 271752539,
+            "milliseconds": {
+              "values": [
+                407,
+                408.3,
+                399.9,
+                395.3,
+                398.5
+              ],
+              "median": 399.9,
+              "p95": 408.3,
+              "minimum": 395.3,
+              "maximum": 408.3
+            }
+          },
+          "electrical": {
+            "schemaVersion": "naru.ifc-document-artifact.2",
+            "fileBytes": 13156524,
+            "payloadBytes": 172603806,
+            "milliseconds": {
+              "values": [
+                218.4,
+                199.5,
+                199,
+                195.2,
+                194.7
+              ],
+              "median": 199,
+              "p95": 218.4,
+              "minimum": 194.7,
+              "maximum": 218.4
+            }
+          },
+          "facade": {
+            "schemaVersion": "naru.ifc-document-artifact.2",
+            "fileBytes": 321216,
+            "payloadBytes": 4555888,
+            "milliseconds": {
+              "values": [
+                6.8,
+                15.5,
+                15.5,
+                14.7,
+                15.5
+              ],
+              "median": 15.5,
+              "p95": 15.5,
+              "minimum": 6.8,
+              "maximum": 15.5
+            }
+          },
+          "kitchen": {
+            "schemaVersion": "naru.ifc-document-artifact.2",
+            "fileBytes": 4738587,
+            "payloadBytes": 29588084,
+            "milliseconds": {
+              "values": [
+                48,
+                42.1,
+                40.8,
+                43.7,
+                50.5
+              ],
+              "median": 43.7,
+              "p95": 50.5,
+              "minimum": 40.8,
+              "maximum": 50.5
+            }
+          },
+          "plumbing": {
+            "schemaVersion": "naru.ifc-document-artifact.2",
+            "fileBytes": 30113437,
+            "payloadBytes": 278946357,
+            "milliseconds": {
+              "values": [
+                428.1,
+                392.8,
+                391.9,
+                371.1,
+                369.3
+              ],
+              "median": 391.9,
+              "p95": 428.1,
+              "minimum": 369.3,
+              "maximum": 428.1
+            }
+          },
+          "ventilation": {
+            "schemaVersion": "naru.ifc-document-artifact.2",
+            "fileBytes": 17276977,
+            "payloadBytes": 140811979,
+            "milliseconds": {
+              "values": [
+                210.1,
+                202.1,
+                208.9,
+                183.2,
+                205.8
+              ],
+              "median": 205.8,
+              "p95": 210.1,
+              "minimum": 183.2,
+              "maximum": 210.1
+            }
+          }
+        },
+        "totalMilliseconds": {
+          "values": [
+            1318.4,
+            1260.3,
+            1256,
+            1203.2,
+            1234.3
+          ],
+          "median": 1256,
+          "p95": 1318.4,
+          "minimum": 1203.2,
+          "maximum": 1318.4
+        }
+      },
+      "ratioAdapterToReference": 1.326,
+      "gate0": {
+        "processMilliseconds": 126458.5,
+        "unchangedArtifactLoadMilliseconds": 8310.4,
+        "unchangedArtifactVerifyMilliseconds": 34204.2,
+        "unchangedArtifactBytes": 101185491,
+        "source": "artifacts/cache/rebuild-stages, naru.rebuild-stage-evidence.1 at commit 69d67e5 (another session; reference only)",
+        "verifyRatioToGate0": 0.01
+      },
+      "met": true
+    },
+    "gate4": {
+      "rule": "The whole-process median of the transport rebuild is lower than the clean rebuild median by more than three times the clean samples' spread (maximum minus minimum), and the transport median peak process-tree working set is no higher than the clean median. Both arms are fresh processes recorded in this session, interleaved per index.",
+      "slice": 1,
+      "transport": {
+        "processMedianMilliseconds": 72993.4,
+        "processMinimumMilliseconds": 72799,
+        "processMaximumMilliseconds": 73366.2,
+        "peakWorkingSetMedianBytes": 4145639424
+      },
+      "clean": {
+        "processMedianMilliseconds": 320064.2,
+        "processMinimumMilliseconds": 313833.1,
+        "processMaximumMilliseconds": 322701,
+        "spreadMilliseconds": 8867.9,
+        "peakWorkingSetMedianBytes": 5080170496
+      },
+      "savingMilliseconds": 247070.8,
+      "savingRatio": 0.228,
+      "requiredSavingMilliseconds": 26603.7,
+      "fasterByMoreThanThreeSpreads": true,
+      "peakMemoryNoHigher": true,
+      "met": true
+    }
   }
 }

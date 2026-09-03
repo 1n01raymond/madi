@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import gzip
+import hashlib
+import json
 import sys
 from pathlib import Path
 
@@ -9,6 +12,8 @@ TOOLS = Path(__file__).resolve().parents[1] / "tools"
 sys.path.insert(0, str(TOOLS))
 
 from document_artifact_cache import (  # noqa: E402
+    DOCUMENT_ARTIFACT_SCHEMA,
+    document_artifact_key,
     document_artifact_path,
     prepare_document_payload,
     publish_document_artifact,
@@ -112,6 +117,8 @@ def test_read_reports_load_and_verify_stages_without_changing_the_verdict(
     assert verified["artifactBytes"] == artifact_path.stat().st_size
     assert verified["artifactLoadMilliseconds"] >= 0
     assert verified["artifactVerifyMilliseconds"] >= 0
+    assert verified["artifactParseMilliseconds"] >= 0
+    assert verified["artifactPayloadBytes"] > 0
 
     absent: dict[str, object] = {}
     assert read_document_artifact(tmp_path, key_input("c" * 64), absent) is None
@@ -121,4 +128,82 @@ def test_read_reports_load_and_verify_stages_without_changing_the_verdict(
     artifact_path.write_bytes(b"corrupted")
     corrupted: dict[str, object] = {}
     assert read_document_artifact(tmp_path, key_input(), corrupted) is None
-    assert corrupted["artifactState"] == "absent"
+    assert corrupted["artifactState"] == "invalid"
+    assert corrupted["artifactInvalidReason"].startswith("unreadable artifact")
+    assert "artifactParseMilliseconds" not in corrupted
+
+
+def _decompress(artifact_path: Path) -> tuple[dict[str, object], bytes]:
+    with gzip.open(artifact_path, "rb") as source:
+        header = json.loads(source.readline())
+        body = source.read()
+    return header, body
+
+
+def test_artifact_is_a_header_line_over_the_stored_payload_bytes(tmp_path: Path) -> None:
+    payload = prepare_document_payload(extracted_document())
+    artifact_path = publish_document_artifact(tmp_path, key_input(), payload)
+    header, body = _decompress(artifact_path)
+
+    assert header["schemaVersion"] == DOCUMENT_ARTIFACT_SCHEMA
+    assert header["key"] == document_artifact_key(key_input())
+    assert header["keyInput"] == key_input()
+    assert header["payloadBytes"] == len(body)
+    assert header["payloadSha256"] == hashlib.sha256(body).hexdigest()
+    assert json.loads(body) == payload
+    # The payload is canonical JSON, so the header digest is reproducible from the object.
+    canonical = json.dumps(
+        payload, ensure_ascii=False, separators=(",", ":"), sort_keys=True, allow_nan=False
+    ).encode("utf-8")
+    assert body == canonical
+
+
+def _rewrite(artifact_path: Path, header: dict[str, object], body: bytes) -> None:
+    line = json.dumps(header, separators=(",", ":"), sort_keys=True).encode("utf-8") + b"\n"
+    with gzip.GzipFile(filename="", mode="wb", fileobj=artifact_path.open("wb"), mtime=0) as out:
+        out.write(line + body)
+
+
+def test_stored_byte_verification_rejects_tampering_truncation_and_old_envelopes(
+    tmp_path: Path,
+) -> None:
+    payload = prepare_document_payload(extracted_document())
+    artifact_path = publish_document_artifact(tmp_path, key_input(), payload)
+    original = artifact_path.read_bytes()
+    header, body = _decompress(artifact_path)
+
+    def state_after(rewrite_header: dict[str, object], rewrite_body: bytes) -> dict[str, object]:
+        _rewrite(artifact_path, rewrite_header, rewrite_body)
+        timing: dict[str, object] = {}
+        assert read_document_artifact(tmp_path, key_input(), timing) is None
+        assert timing["artifactState"] == "invalid"
+        return timing
+
+    flipped = bytearray(body)
+    flipped[len(flipped) // 2] ^= 0x01
+    assert state_after(header, bytes(flipped))["artifactInvalidReason"] == "payload digest mismatch"
+    assert state_after(header, body[:-1])["artifactInvalidReason"] == "payload length mismatch"
+    assert state_after({**header, "schemaVersion": "naru.ifc-document-artifact.1"}, body)[
+        "artifactInvalidReason"
+    ] == "schema mismatch"
+    assert state_after({**header, "key": "0" * 64}, body)["artifactInvalidReason"] == "key mismatch"
+
+    # A `.1`-shaped envelope (one JSON object, no header line) is a miss, never parsed as a payload.
+    envelope = {"schemaVersion": "naru.ifc-document-artifact.1", "payload": payload}
+    with gzip.GzipFile(filename="", mode="wb", fileobj=artifact_path.open("wb"), mtime=0) as out:
+        out.write(json.dumps(envelope).encode("utf-8"))
+    old: dict[str, object] = {}
+    assert read_document_artifact(tmp_path, key_input(), old) is None
+    assert old["artifactState"] == "invalid"
+
+    # A gzip stream cut mid-member is unreadable, and therefore invalid rather than absent.
+    whole = artifact_path.read_bytes()
+    artifact_path.write_bytes(whole[: len(whole) // 2])
+    cut: dict[str, object] = {}
+    assert read_document_artifact(tmp_path, key_input(), cut) is None
+    assert cut["artifactState"] == "invalid"
+
+    # Republishing over any invalid artifact restores a verified one with the same bytes.
+    assert publish_document_artifact(tmp_path, key_input(), payload) == artifact_path
+    assert artifact_path.read_bytes() == original
+    assert read_document_artifact(tmp_path, key_input()) == payload

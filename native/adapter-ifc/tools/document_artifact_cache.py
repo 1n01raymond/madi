@@ -1,8 +1,21 @@
-"""Verified, deterministic cache storage for one extracted IFC document.
+"""Verified per-document Scene IR artifacts for the IFC federation adapter.
 
-Pure Python by design: unit tests do not need IfcOpenShell. Cached payloads are
-JSON rather than pickle because cache files are untrusted derived data and must
-never execute code while loading.
+An artifact is one deterministic gzip stream (mtime 0, no embedded file name)
+whose decompressed content is a canonical-JSON header line followed by exactly
+``payloadBytes`` bytes of canonical payload JSON (UTF-8, sorted keys, compact
+separators, no NaN):
+
+    {"key":...,"keyInput":{...},"payloadBytes":N,"payloadSha256":"...",
+     "schemaVersion":"naru.ifc-document-artifact.2"}\n
+    <payload JSON, exactly N bytes>
+
+The header names what the payload must hash to. A reader checks the schema,
+the key, and the key input, hashes the payload bytes it just decompressed, and
+parses them only when the length and the digest match: verification is one
+read and one hash of the stored bytes, never a re-serialization of the parsed
+object (ADR-0019 slice 1). Any file that fails a check is a miss; nothing
+executable such as pickle is ever loaded. Publication serializes the payload
+once, writes to a temporary sibling, and renames it into place.
 """
 
 from __future__ import annotations
@@ -14,38 +27,26 @@ import os
 import tempfile
 import time
 from pathlib import Path
-from typing import Any, TextIO
+from typing import Any
 
-
-DOCUMENT_ARTIFACT_SCHEMA = "naru.ifc-document-artifact.1"
+DOCUMENT_ARTIFACT_SCHEMA = "naru.ifc-document-artifact.2"
 _SURFACE_POSITION_ALIAS = {"$naruAlias": "surface.positions"}
 
 
-class _HashTextSink:
-    def __init__(self) -> None:
-        self.digest = hashlib.sha256()
+def _canonical_bytes(value: Any) -> bytes:
+    """Serialize `value` as canonical JSON: sorted keys, compact, UTF-8, no NaN."""
 
-    def write(self, value: str) -> int:
-        encoded = value.encode("utf-8")
-        self.digest.update(encoded)
-        return len(value)
-
-
-def _dump_canonical(value: Any, sink: TextIO | _HashTextSink) -> None:
-    json.dump(
+    return json.dumps(
         value,
-        sink,
         ensure_ascii=False,
         separators=(",", ":"),
         sort_keys=True,
         allow_nan=False,
-    )
+    ).encode("utf-8")
 
 
 def _canonical_sha256(value: Any) -> str:
-    sink = _HashTextSink()
-    _dump_canonical(value, sink)
-    return sink.digest.hexdigest()
+    return hashlib.sha256(_canonical_bytes(value)).hexdigest()
 
 
 def document_artifact_key(key_input: dict[str, Any]) -> str:
@@ -53,10 +54,10 @@ def document_artifact_key(key_input: dict[str, Any]) -> str:
 
 
 def document_artifact_path(
-    cache_directory: Path,
+    cache_directory: str | os.PathLike[str],
     key_input: dict[str, Any],
 ) -> Path:
-    return cache_directory / f"{document_artifact_key(key_input)}.json.gz"
+    return Path(cache_directory) / f"{document_artifact_key(key_input)}.json.gz"
 
 
 def prepare_document_payload(extracted: dict[str, Any]) -> dict[str, Any]:
@@ -98,103 +99,170 @@ def restore_document_payload(
     return {"input": document_input, **payload}
 
 
+
+
+class _StoredArtifact:
+    """What one read of an artifact file established, before any parsing."""
+
+    __slots__ = ("state", "reason", "header", "payload_bytes", "file_bytes", "load_ms", "verify_ms")
+
+    def __init__(self, state: str, reason: str | None) -> None:
+        self.state = state
+        self.reason = reason
+        self.header: dict[str, Any] | None = None
+        self.payload_bytes: bytes | None = None
+        self.file_bytes = 0
+        self.load_ms = 0.0
+        self.verify_ms = 0.0
+
+
+def _header_failure(header: Any, key: str, key_input: dict[str, Any]) -> str | None:
+    if not isinstance(header, dict):
+        return "header is not an object"
+    if header.get("schemaVersion") != DOCUMENT_ARTIFACT_SCHEMA:
+        return "schema mismatch"
+    if header.get("key") != key:
+        return "key mismatch"
+    if header.get("keyInput") != key_input:
+        return "key input mismatch"
+    payload_bytes = header.get("payloadBytes")
+    if isinstance(payload_bytes, bool) or not isinstance(payload_bytes, int) or payload_bytes < 0:
+        return "payloadBytes is not a byte count"
+    if not isinstance(header.get("payloadSha256"), str):
+        return "payloadSha256 is not a digest"
+    return None
+
+
+def _load_stored_artifact(path: Path, key: str, key_input: dict[str, Any]) -> _StoredArtifact:
+    """Read one artifact file and verify its stored bytes without parsing the payload."""
+
+    started = time.perf_counter()
+    try:
+        with gzip.open(path, "rb") as source:
+            header_line = source.readline()
+            payload = source.read()
+        file_bytes = path.stat().st_size
+    except FileNotFoundError:
+        return _StoredArtifact("absent", None)
+    except (OSError, EOFError) as error:
+        # Present but not a readable gzip member (corrupt or truncated stream).
+        result = _StoredArtifact("invalid", f"unreadable artifact: {type(error).__name__}")
+        result.load_ms = (time.perf_counter() - started) * 1000.0
+        return result
+    result = _StoredArtifact("invalid", None)
+    result.file_bytes = file_bytes
+    result.load_ms = (time.perf_counter() - started) * 1000.0
+    started = time.perf_counter()
+    try:
+        header = json.loads(header_line)
+    except (UnicodeDecodeError, json.JSONDecodeError):
+        header = None
+    failure = _header_failure(header, key, key_input)
+    if failure is None and len(payload) != header["payloadBytes"]:
+        failure = "payload length mismatch"
+    if failure is None and hashlib.sha256(payload).hexdigest() != header["payloadSha256"]:
+        failure = "payload digest mismatch"
+    result.verify_ms = (time.perf_counter() - started) * 1000.0
+    if failure is not None:
+        result.reason = failure
+        return result
+    result.state = "verified"
+    result.header = header
+    result.payload_bytes = payload
+    return result
+
+
 def read_document_artifact(
-    cache_directory: Path,
+    cache_directory: str | os.PathLike[str],
     key_input: dict[str, Any],
     timing: dict[str, Any] | None = None,
 ) -> dict[str, Any] | None:
-    """Restores a verified artifact payload, or None when absent or invalid.
+    """Return the verified payload for `key_input`, or None when it must be re-extracted.
 
-    When `timing` is given, the load (gunzip and JSON parse) and verify
-    (key comparison plus payload re-serialization and hash) stages are
-    reported into it in milliseconds; the verdict itself never changes.
+    `timing`, when given, receives the load/verify/parse split, the stored
+    byte counts, and `artifactState` (`verified`, `invalid`, or `absent`).
     """
+
     path = document_artifact_path(cache_directory, key_input)
+    stored = _load_stored_artifact(path, document_artifact_key(key_input), key_input)
+    if timing is not None:
+        timing["artifactState"] = stored.state
+        if stored.state != "absent":
+            timing["artifactLoadMilliseconds"] = stored.load_ms
+            timing["artifactBytes"] = stored.file_bytes
+            timing["artifactVerifyMilliseconds"] = stored.verify_ms
+        if stored.reason is not None:
+            timing["artifactInvalidReason"] = stored.reason
+    if stored.state != "verified" or stored.payload_bytes is None:
+        return None
     started = time.perf_counter()
     try:
-        with gzip.open(path, "rt", encoding="utf-8") as source:
-            envelope = json.load(source)
-    except (FileNotFoundError, OSError, UnicodeError, json.JSONDecodeError):
+        payload = json.loads(stored.payload_bytes)
+    except (UnicodeDecodeError, json.JSONDecodeError):
+        payload = None
+    parse_ms = (time.perf_counter() - started) * 1000.0
+    if not isinstance(payload, dict):
         if timing is not None:
-            timing["artifactLoadMilliseconds"] = (time.perf_counter() - started) * 1000.0
-            timing["artifactState"] = "absent"
+            timing["artifactState"] = "invalid"
+            timing["artifactInvalidReason"] = "payload is not a JSON object"
         return None
     if timing is not None:
-        timing["artifactLoadMilliseconds"] = (time.perf_counter() - started) * 1000.0
-        timing["artifactBytes"] = path.stat().st_size
-    started = time.perf_counter()
-    valid = not (
-        not isinstance(envelope, dict)
-        or envelope.get("schemaVersion") != DOCUMENT_ARTIFACT_SCHEMA
-        or envelope.get("key") != document_artifact_key(key_input)
-        or envelope.get("keyInput") != key_input
-        or not isinstance(envelope.get("payload"), dict)
-        or envelope.get("payloadSha256") != _canonical_sha256(envelope["payload"])
-    )
-    if timing is not None:
-        timing["artifactVerifyMilliseconds"] = (time.perf_counter() - started) * 1000.0
-        timing["artifactState"] = "verified" if valid else "invalid"
-    if not valid:
-        return None
-    return envelope["payload"]
+        timing["artifactPayloadBytes"] = len(stored.payload_bytes)
+        timing["artifactParseMilliseconds"] = parse_ms
+    return payload
 
 
 def publish_document_artifact(
-    cache_directory: Path,
+    cache_directory: str | os.PathLike[str],
     key_input: dict[str, Any],
     payload: dict[str, Any],
 ) -> Path:
-    cache_directory.mkdir(parents=True, exist_ok=True)
-    destination = document_artifact_path(cache_directory, key_input)
-    existing = read_document_artifact(cache_directory, key_input)
-    if existing is not None:
-        if _canonical_sha256(existing) != _canonical_sha256(payload):
-            raise ValueError(
-                "IFC document artifact key produced two different payloads."
-            )
-        return destination
-    envelope = {
-        "schemaVersion": DOCUMENT_ARTIFACT_SCHEMA,
-        "key": document_artifact_key(key_input),
-        "keyInput": key_input,
-        "payload": payload,
-        "payloadSha256": _canonical_sha256(payload),
-    }
+    """Write the artifact for `key_input` atomically; idempotent for an identical payload.
+
+    The payload is serialized exactly once. An existing artifact whose stored
+    bytes verify and name the same digest is kept; one naming a different
+    digest is an error (one key must never mean two payloads); one that fails
+    verification is overwritten.
+    """
+
+    if not isinstance(payload, dict):
+        raise TypeError("IFC document artifact payload must be a JSON object.")
+    directory = Path(cache_directory)
+    directory.mkdir(parents=True, exist_ok=True)
+    key = document_artifact_key(key_input)
+    path = directory / f"{key}.json.gz"
+    payload_bytes = _canonical_bytes(payload)
+    payload_sha256 = hashlib.sha256(payload_bytes).hexdigest()
+    existing = _load_stored_artifact(path, key, key_input)
+    if existing.state == "verified" and existing.header is not None:
+        if existing.header["payloadSha256"] != payload_sha256:
+            raise ValueError("IFC document artifact key produced two different payloads.")
+        return path
+    del existing
+    header_line = _canonical_bytes(
+        {
+            "schemaVersion": DOCUMENT_ARTIFACT_SCHEMA,
+            "key": key,
+            "keyInput": key_input,
+            "payloadBytes": len(payload_bytes),
+            "payloadSha256": payload_sha256,
+        }
+    ) + b"\n"
     descriptor, temporary_name = tempfile.mkstemp(
-        dir=cache_directory,
-        prefix=f".{destination.stem}-",
-        suffix=".tmp",
+        dir=directory, prefix=f".{path.stem}-", suffix=".tmp"
     )
+    temporary_path = Path(temporary_name)
     try:
         with os.fdopen(descriptor, "wb") as raw_output:
             with gzip.GzipFile(
-                filename="",
-                mode="wb",
-                fileobj=raw_output,
-                mtime=0,
+                filename="", mode="wb", fileobj=raw_output, mtime=0
             ) as compressed:
-                text_output = _Utf8TextWriter(compressed)
-                _dump_canonical(envelope, text_output)
-                text_output.flush()
+                compressed.write(header_line)
+                compressed.write(payload_bytes)
             raw_output.flush()
             os.fsync(raw_output.fileno())
-        os.replace(temporary_name, destination)
+        os.replace(temporary_path, path)
     except BaseException:
-        try:
-            os.unlink(temporary_name)
-        except FileNotFoundError:
-            pass
+        temporary_path.unlink(missing_ok=True)
         raise
-    return destination
-
-
-class _Utf8TextWriter:
-    def __init__(self, output: Any) -> None:
-        self.output = output
-
-    def write(self, value: str) -> int:
-        self.output.write(value.encode("utf-8"))
-        return len(value)
-
-    def flush(self) -> None:
-        self.output.flush()
+    return path

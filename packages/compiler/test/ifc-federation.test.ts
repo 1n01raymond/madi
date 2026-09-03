@@ -184,7 +184,7 @@ await writeFile(option("--report"), JSON.stringify({
     schema: "IFC4",
   }],
   documentArtifactCache: {
-    schemaVersion: "naru.ifc-document-artifact.1",
+    schemaVersion: "naru.ifc-document-artifact.2",
     status: documentCache ? "enabled" : "disabled",
     hits: [],
     misses: documentCache ? [discipline] : [],
