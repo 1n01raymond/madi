@@ -152,16 +152,26 @@ claim narrows to hierarchy-first rather than the gate being loosened.
 
 ### Negative
 
-- The adapter has to emit structure before tessellation per document rather than
-  writing one split at the end, which is a real change to its control flow and to
-  its peak memory profile -- a parsed document must stay open across the
-  publication point.
+- The adapter emits structure before tessellation per document rather than
+  writing one split at the end, which is a real change to its control flow. It is
+  also, measured, a real change to peak memory: sixty5's staged process peaks
+  1.17 GB higher (+24.8%) and runs 22.4 s longer (+7.75%) than the same
+  extraction without staging, while Digital Hub is unaffected (+0.06 GB, and
+  0.19% faster). The cost is not the tree building -- writing every sixty5 tree
+  takes 201.9 ms, and staging a single document costs nothing measurable -- it is
+  the emission order below. The largest document is now inspected last, with six
+  documents' Scene IR already accumulated, instead of first into an empty
+  accumulator, and every one of sixty5's seven documents moved in the direction
+  its rank change predicts. This is the price of a first tree at 0.690 s instead
+  of 23.6 s, and it is paid on the model that needs the feature.
 - Emission order by size and assembly order by discipline are now two different
   orders in one process. The determinism gate below exists because that is
-  precisely where a byte could move.
+  precisely where a byte could move. The adapter-level half is now measured --
+  36 byte-identical output comparisons per model with no excluded field -- and
+  the package half is gate 2.
 - A preview is written and then thrown away on every cold import. It is small
-  (598,340 B of tree for Digital Hub, 10,632,098 B for sixty5) but it is work the
-  clean path does not do.
+  (1,732,203 B of tree for Digital Hub, 25,618,528 B for sixty5) but it is work
+  the clean path does not do.
 - Digital Hub gains almost nothing: its whole tree already lands in 2.5 s. The
   complexity is paid for by the large model, which is the one that needs it.
 
@@ -199,8 +209,10 @@ are the cheaper contract.
 
 ## Validation
 
-Nothing in this ADR is implemented. What exists is the measurement the design
-rests on:
+The adapter half is implemented: `--structure-preview <directory>` publishes one
+document's tree before tessellating that document. Nothing downstream of the
+adapter is -- no staged package, no Studio, no viewer. Two records stand behind
+the design. The first prices an assembly tree without building the machinery:
 [artifacts/import/structure-readiness](../../artifacts/import/structure-readiness/README.md),
 recorded by
 [scripts/record-structure-readiness-evidence.mjs](../../scripts/record-structure-readiness-evidence.mjs)
@@ -212,10 +224,21 @@ and pinned by
 samples per model after a discarded warm-up, none discarded; per-document entry,
 root, and relation counts are identical across every sample, so only time varies.
 
-The record measures the adapter side of a tree and nothing else. It does not
-measure transport to a viewer, property or classification association, geometry,
-a real parallel run, or a cold page cache. It carries those exclusions itself
-rather than leaving them to be inferred.
+The second measures the shipping adapter doing it, watched from outside the
+process:
+[artifacts/import/structure-first-emission](../../artifacts/import/structure-first-emission/README.md),
+recorded by
+[scripts/record-structure-first-emission-evidence.mjs](../../scripts/record-structure-first-emission-evidence.mjs)
+and pinned by
+[scripts/validate-structure-first-emission-evidence.mjs](../../scripts/validate-structure-first-emission-evidence.mjs)
+(`pnpm structure:first-emission:check`, in the `check` chain). Same protocol,
+plus a `plain` arm without staging so the record says what staging costs as well
+as what it delivers.
+
+Both records measure the adapter side of a tree and nothing else. Neither
+measures transport to a viewer, property or classification association,
+geometry, a real parallel run, or a cold page cache. They carry those exclusions
+themselves rather than leaving them to be inferred.
 
 This ADR stays **Proposed**. Its gates, declared before the work:
 
@@ -224,9 +247,22 @@ This ADR stays **Proposed**. Its gates, declared before the work:
    #73's 5-15 s target. It records an honest miss: the whole-federation tree is
    outside the band on sixty5 (40,474.9 ms sequential, 15,030.3 ms estimated
    threaded) and inside it on Digital Hub (2,455.9 ms).
-1. The adapter emits one document's structure before tessellating anything, and a
-   committed record shows the first tree published within the target on sixty5,
-   with every per-document count equal to gate 0's.
+1. **Met.** The adapter emits one document's structure before tessellating
+   anything, and a committed record shows it: sixty5's first tree is verified on
+   disk 0.690 s after process spawn and Digital Hub's at 0.753 s, both inside the
+   band; every document in every staged sample published its tree before its own
+   extraction finished; and every per-document node count equals the occurrence
+   count the same run's Scene IR carries for that document. The record also
+   states the two things this gate does not buy -- the *whole* federation's tree
+   still lands at 226.638 s on sixty5, outside the band, and staging costs that
+   model 22.4 s and 1.17 GB of peak. An earlier draft of this gate asked
+   for equality with gate 0's counts, which was wrong: gate 0 walked spatial
+   containment (`IfcRelAggregates` and `IfcRelContainedInSpatialStructure`
+   participants), while a staged tree carries every occurrence, so the two
+   numbers differ by construction -- 783 against 1,027 on Digital Hub's
+   architecture document. The equality that matters is the one that makes a
+   preview node the same node the finished package draws, so that is what the
+   record pins; gate 0's count is recorded beside it rather than dropped.
 2. **Determinism.** A compile with staging enabled and one without produce the
    same package digest on both federations, byte for byte. This is the gate the
    two-orders design most plausibly breaks.
