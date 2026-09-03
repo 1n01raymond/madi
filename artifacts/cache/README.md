@@ -51,6 +51,16 @@ ADR-0018 is rejected by its own gate and the flag stays an off-by-default
 experiment until [ADR-0019](../../docs/adr/0019-document-artifact-transport.md),
 which decides its removal and names the successor reuse unit, lands.
 
+`rebuild-stages/` is ADR-0019's gate 0: the same changed-discipline rebuild
+decomposed into adapter stages (interpreter start, changed-document
+extraction, per-document artifact load and verification, merge, property
+index, Scene IR writes) and compiler stages (structure read, hydration,
+encoding, document streaming, package write) over five fresh-process samples
+per model with the sampled process tree, validated by
+`scripts/validate-rebuild-stage-evidence.mjs`. It also records that the
+exploratory probe the ADR was written from did not reproduce within the
+record's spread, which the ADR's Context now states.
+
 Adapter identities are embedded in the record (`naru.occt-adapter-identity.1`:
 cadquery 2.8.0 / OCP 7.9.3.1; `naru.ifc-adapter-identity.1`: IfcOpenShell
 0.8.5), and the compiler contributes its content-hashed identity to each cache

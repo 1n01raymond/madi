@@ -169,9 +169,11 @@ rebuilds of Digital Hub and sixty5 reproduced every clean package byte, with
 document-artifact cache has removed tessellation from the rebuild path,
 encoding a payload is a typed-array copy while restoring one reads and hashes
 every byte. ADR-0018 is Rejected. Its successor,
-[ADR-0019](adr/0019-document-artifact-transport.md), sizes the levers from an
-exploratory rebuild decomposition -- the encoder is 1-3 percent of a rebuild,
-the adapter-compiler transport of unchanged documents is the bulk of it -- and
+[ADR-0019](adr/0019-document-artifact-transport.md), sizes the levers from the
+committed [rebuild stage record](../artifacts/cache/rebuild-stages/README.md)
+-- the encoder is 2.3 percent of a Digital Hub rebuild and 2.5 percent of a
+sixty5 one, the adapter-compiler transport of unchanged documents 48.0 and
+77.3 percent -- and
 decides to reuse the verified per-document Scene IR artifact instead and to
 remove `--payload-cache`; until that removal lands, the flag is the measured
 experiment described below.
@@ -233,11 +235,15 @@ summary beside the package-cache line.
 
 That acceptance record exists and rejected the tier; what remains is the
 successor's evidence. [ADR-0019](adr/0019-document-artifact-transport.md)
-predeclares it: a committed stage decomposition of a changed-discipline rebuild
-first (gate 0), then byte identity, exact per-document restore decisions, a
-restore bounded by one read and one hash of the stored artifact, and the same
-gate 4 -- a lower whole-process rebuild median on Digital Hub and sixty5 with
-peak memory no higher. ADR-0010 stays Proposed until that record exists.
+predeclares it: the committed stage decomposition of a changed-discipline
+rebuild is recorded ([gate 0](../artifacts/cache/rebuild-stages/README.md):
+artifact verification 4,434.2 ms on Digital Hub and 34,204.2 ms on sixty5,
+29 and 44 percent of the adapter's main), and what remains is byte identity,
+exact per-document restore decisions, a restore bounded by one read and one
+hash of the stored artifact, and the same gate 4 -- a lower whole-process
+rebuild median on Digital Hub and sixty5 with peak memory no higher, against
+a clean rebuild recorded in the same session. ADR-0010 stays Proposed until
+that record exists.
 
 Shared lookup reuses the same manifest and resource hashes. The resolution
 order is local verified entry, authorized shared entry, then local compilation.

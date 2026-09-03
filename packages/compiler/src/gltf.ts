@@ -1,3 +1,4 @@
+import { performance } from "node:perf_hooks";
 import { createHash } from "node:crypto";
 
 import {
@@ -716,17 +717,31 @@ function buildPropertySidecar(
   };
 }
 
+/** Compiler sub-stages a `CompileStageObserver` receives, with wall-clock milliseconds. */
+export type CompileStage = "validateScene" | "encodeGeometry" | "measureDocument";
+
+/**
+ * Receives the duration of each named sub-stage of `compileSceneToGltf`. It is
+ * a separate parameter rather than a compile option so it can never reach a
+ * cache key, a build report, or the package bytes.
+ */
+export type CompileStageObserver = (stage: CompileStage, milliseconds: number) => void;
+
 export function compileSceneToGltf(
   scene: EngineeringScene,
   options: CompileGltfOptions = {},
+  observeStage?: CompileStageObserver,
 ): CompiledGltfPackage {
+  const stageStarted = (): number => performance.now();
   if (
     options.targetChunkByteBudget !== undefined &&
     (!Number.isSafeInteger(options.targetChunkByteBudget) || options.targetChunkByteBudget < 4)
   ) {
     throw new TypeError("targetChunkByteBudget must be an integer of at least four bytes.");
   }
+  const validationStarted = stageStarted();
   const validation = validateScene(scene);
+  observeStage?.("validateScene", performance.now() - validationStarted);
   if (!validation.ok) {
     const errors = validation.issues
       .filter(({ severity }) => severity === "error")
@@ -847,6 +862,7 @@ export function compileSceneToGltf(
   let triangleCount = 0;
   let edgeSegmentCount = 0;
 
+  const encodeStarted = stageStarted();
   for (const prototype of payloadPrototypes) {
     const representation = representationFor(prototype, representations);
     if (!representation) continue;
@@ -873,6 +889,7 @@ export function compileSceneToGltf(
     triangleCount += compiled.triangles;
     edgeSegmentCount += compiled.edges;
   }
+  observeStage?.("encodeGeometry", performance.now() - encodeStarted);
   if (coarseBuilder && options.spatialPayloadOrder === true) {
     for (const prototype of prototypes) {
       const representation = representationFor(prototype, representations);
@@ -1419,11 +1436,13 @@ export function compileSceneToGltf(
   // Measured and folded into the package digest in the same pass, so the
   // document is serialized once here and once when the packager writes it,
   // and is never resident as a whole.
+  const measureStarted = stageStarted();
   const json = measureJsonDocument(
     document,
     options.compactJson === true ? 0 : 2,
     (chunk) => packageHash.update(chunk),
   );
+  observeStage?.("measureDocument", performance.now() - measureStarted);
   const jsonDigest = json.sha256;
   const binaryDigest = sha256(binary);
   const coarseBinaryDigest = coarseBinary ? sha256(coarseBinary) : undefined;

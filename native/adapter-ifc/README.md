@@ -73,6 +73,18 @@ that identity with ordered discipline digests, stable URI hints, and every
 compile-affecting option before it permits an adapter-skipping cache hit. An
 unknown or malformed identity fails closed rather than reusing output.
 
+## Stage timing (diagnostic only)
+
+`--stage-timing <path>` writes a separate `naru.ifc-adapter-stage-timing.1`
+ledger: interpreter start and import time, and per document the source read,
+artifact load and verification (`artifactState`, `artifactBytes`), restore or
+extraction, and publication; then the federation merge, property indexing, and
+each Scene IR write. It never enters the adapter report, the Scene IR, or a
+cache key, so an instrumented run produces byte-identical output
+([integration test](tests/test_document_artifact_integration.py)). The
+compiler consumes it through `stageTiming: true` for the
+[ADR-0019 gate 0 record](../../artifacts/cache/rebuild-stages/README.md).
+
 On a whole-package miss, `naru compile-ifc --cache <directory>` also supplies
 `<directory>/ifc-documents` to the adapter. Each
 `naru.ifc-document-artifact.1` entry contains the pre-federation extraction for

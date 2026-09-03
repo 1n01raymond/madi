@@ -35,6 +35,9 @@ const config = JSON.parse(await readFile(configPath, "utf8"));
 // run uses the compact formatting the config pins.
 const compactJson = !process.argv.includes("--pretty") && config.compactJson === true;
 const adapterOnly = process.argv.includes("--adapter-only");
+// `--stage-timing` asks the compiler (and through it the adapter) for the
+// diagnostic stage ledger; it never reaches the package or its reports.
+const stageTiming = process.argv.includes("--stage-timing");
 
 const documents = config.documents.map((document) => ({
   discipline: document.discipline,
@@ -135,6 +138,7 @@ async function compileSample() {
       ...(config.spatialIndex ? { spatialIndex: true } : {}),
       ...(config.relocateHierarchyNodes ? { relocateHierarchyNodes: true } : {}),
       ...(config.pythonExecutable ? { pythonExecutable: config.pythonExecutable } : {}),
+      ...(stageTiming ? { stageTiming: true } : {}),
     });
   } catch (error) {
     failure = {
@@ -155,6 +159,7 @@ async function compileSample() {
     ...(result
       ? {
           cache: result.cache,
+          ...(result.stages ? { stages: result.stages } : {}),
           report: result.report,
           // The adapter keeps its own per-document artifact cache, so a run
           // records which documents it inspected and which it restored.

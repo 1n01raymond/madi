@@ -12,6 +12,7 @@ import hashlib
 import json
 import os
 import tempfile
+import time
 from pathlib import Path
 from typing import Any, TextIO
 
@@ -100,21 +101,40 @@ def restore_document_payload(
 def read_document_artifact(
     cache_directory: Path,
     key_input: dict[str, Any],
+    timing: dict[str, Any] | None = None,
 ) -> dict[str, Any] | None:
+    """Restores a verified artifact payload, or None when absent or invalid.
+
+    When `timing` is given, the load (gunzip and JSON parse) and verify
+    (key comparison plus payload re-serialization and hash) stages are
+    reported into it in milliseconds; the verdict itself never changes.
+    """
     path = document_artifact_path(cache_directory, key_input)
+    started = time.perf_counter()
     try:
         with gzip.open(path, "rt", encoding="utf-8") as source:
             envelope = json.load(source)
     except (FileNotFoundError, OSError, UnicodeError, json.JSONDecodeError):
+        if timing is not None:
+            timing["artifactLoadMilliseconds"] = (time.perf_counter() - started) * 1000.0
+            timing["artifactState"] = "absent"
         return None
-    if (
+    if timing is not None:
+        timing["artifactLoadMilliseconds"] = (time.perf_counter() - started) * 1000.0
+        timing["artifactBytes"] = path.stat().st_size
+    started = time.perf_counter()
+    valid = not (
         not isinstance(envelope, dict)
         or envelope.get("schemaVersion") != DOCUMENT_ARTIFACT_SCHEMA
         or envelope.get("key") != document_artifact_key(key_input)
         or envelope.get("keyInput") != key_input
         or not isinstance(envelope.get("payload"), dict)
         or envelope.get("payloadSha256") != _canonical_sha256(envelope["payload"])
-    ):
+    )
+    if timing is not None:
+        timing["artifactVerifyMilliseconds"] = (time.perf_counter() - started) * 1000.0
+        timing["artifactState"] = "verified" if valid else "invalid"
+    if not valid:
         return None
     return envelope["payload"]
 
