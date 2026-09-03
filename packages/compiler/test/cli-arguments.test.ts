@@ -24,6 +24,7 @@ describe("naru compile arguments", () => {
         "--spatial-leaf-capacity",
         "32",
         "--relocate-hierarchy-nodes",
+        "--json-events",
       ]),
     ).toEqual({
       sourcePath: "model.step",
@@ -35,6 +36,7 @@ describe("naru compile arguments", () => {
       spatialIndex: true,
       spatialLeafCapacity: 32,
       relocateHierarchyNodes: true,
+      jsonEvents: true,
     });
   });
 
@@ -44,12 +46,14 @@ describe("naru compile arguments", () => {
       outputDirectory: "out",
       spatialIndex: false,
       relocateHierarchyNodes: false,
+      jsonEvents: false,
     });
   });
 
   it("omits absent optional values instead of emitting undefined", () => {
     const parsed = parseCompileArguments(["model.step", "--output", "out"]);
     expect(Object.keys(parsed).sort()).toEqual([
+      "jsonEvents",
       "outputDirectory",
       "relocateHierarchyNodes",
       "sourcePath",
@@ -149,6 +153,7 @@ describe("naru compile-ifc arguments", () => {
       omitDefaultNodeTransforms: true,
       relocateHierarchyNodes: true,
       retainSceneIr: true,
+      jsonEvents: false,
     });
   });
 

@@ -44,6 +44,32 @@ export type {
   SpatialVector3,
 } from "./spatial-demand.js";
 export { compileIfcFederation } from "./ifc-federation.js";
+export { isAdapterProcessCancellation } from "./adapter-process.js";
+export {
+  createImportJobId,
+  ImportJobCancelledError,
+  importJobEventSchema,
+  importJobPlanLength,
+  importJobStateRank,
+  importJobStates,
+  isImportJobCancellation,
+  isImportJobTerminalState,
+  redactPaths,
+} from "./import-job.js";
+export type {
+  ImportJobCancellation,
+  ImportJobCompletion,
+  ImportJobDocument,
+  ImportJobEvent,
+  ImportJobFailure,
+  ImportJobListener,
+  ImportJobOptions,
+  ImportJobPlan,
+  ImportJobProgress,
+  ImportJobRequest,
+  ImportJobState,
+  ImportJobTerminalState,
+} from "./import-job.js";
 export {
   createIfcIncrementalDependencyIndex,
   ifcIncrementalDependencyIndexSchema,

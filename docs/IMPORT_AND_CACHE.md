@@ -58,6 +58,29 @@ outside the browser trust boundary. Cancellation must stop child processes and
 remove unpublished temporary output; it must never remove a previously
 validated cache entry.
 
+The compiler side of that promise is implemented and versioned. Both compilers
+accept an import job and report a `naru.import-job-event.1` stream through it:
+nine states in one legal order (`queued`, `inspecting`, `extracting`,
+`compiling`, `verifying`, `publishing`, then one of `completed`,
+`cancelled`, `failed`), each event carrying a gapless sequence, monotonic
+elapsed milliseconds, and a step-counted progress pair whose total is six on a
+rebuild and three on a cache restore. Progress counts lifecycle steps, never an
+estimate derived from source size, because nothing measures how long
+tessellating an unseen document takes. Every event field is scrubbed of
+filesystem paths before it leaves the module, so an import event may cross a
+trust boundary the source document never should. `naru compile` and
+`naru compile-ifc` expose the stream with `--json-events` as newline-delimited
+JSON on stdout, with human lines moved to stderr.
+
+Cancellation reaches the process tree. An aborted job terminates the adapter and
+every process it started, removes the temporary Scene IR directory it was
+extracting into, and leaves a configured cache directory untouched. The one
+uninterruptible section is publication: the package writer is not atomic, so a
+cancel observed midway would leave a directory that looks like a package and is
+not one. That section runs to the end and the cancellation event reports
+`publishedBeforeCancellation`. Contract and gates:
+[ADR-0020](adr/0020-cancellable-import-jobs.md), still Proposed.
+
 ## 3. Cache identity and invalidation
 
 A hit is valid only when the deterministic key includes every input capable of
@@ -247,7 +270,11 @@ profile under [ADR-0004](adr/0004-format-strategy.md).
    unit that is cheaper to restore than to rebuild remains.
 4. **Standards export:** retain glTF; evaluate GLB, GPU instancing, and mesh
    compression without making the cache an interchange claim.
-5. **Shared cache:** authenticated lookup/publication, tenant isolation,
+5. **Cancellable, observable import jobs:** versioned lifecycle events and a
+   cancel that stops the adapter tree implemented and unit-proved
+   ([ADR-0020](adr/0020-cancellable-import-jobs.md)); a second consumer and a
+   real-large cancellation record remain.
+6. **Shared cache:** authenticated lookup/publication, tenant isolation,
    provenance, quotas, eviction, and observability.
 
 Focused tests already prove an unchanged STEP and single-document IFC input
