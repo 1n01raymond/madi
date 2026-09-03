@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -10,6 +11,7 @@ import pytest
 TOOLS = Path(__file__).resolve().parents[1] / "tools"
 sys.path.insert(0, str(TOOLS))
 
+import structure_preview  # noqa: E402
 from structure_preview import (  # noqa: E402
     INDEX_FILENAME,
     STRUCTURE_PREVIEW_INDEX_SCHEMA,
@@ -181,3 +183,54 @@ def test_a_foreign_index_schema_is_refused(tmp_path: Path) -> None:
     (tmp_path / INDEX_FILENAME).write_text(json.dumps(index), encoding="utf-8")
     with pytest.raises(ValueError, match="not a naru.ifc-structure-preview-index.1"):
         read_structure_preview_index(tmp_path)
+
+
+def test_publish_survives_a_reader_holding_the_index_open(tmp_path, monkeypatch):
+    """A viewer polling the directory must not be able to break the writer.
+
+    On Windows `os.replace` raises PermissionError while another process holds
+    the destination open, so an import could fail merely because someone was
+    watching it. The retry is simulated here rather than raced, so the test
+    proves the same contract on every platform.
+    """
+
+    publisher = StructurePreviewPublisher(
+        tmp_path, disciplines=["architecture"], emission_order=["architecture"]
+    )
+    real_replace = os.replace
+    refusals = {"count": 0}
+
+    def refuse_twice(source, destination):
+        if refusals["count"] < 2:
+            refusals["count"] += 1
+            raise PermissionError(5, "Access is denied")
+        return real_replace(source, destination)
+
+    monkeypatch.setattr(structure_preview.os, "replace", refuse_twice)
+    descriptor = publisher.publish(preview())
+
+    assert refusals["count"] == 2
+    assert descriptor["discipline"] == "architecture"
+    index = structure_preview.read_structure_preview_index(tmp_path)
+    assert [entry["discipline"] for entry in index["documents"]] == ["architecture"]
+    assert structure_preview.read_structure_preview(tmp_path, index["documents"][0])["nodes"]
+
+
+def test_publish_reraises_a_rename_that_never_succeeds(tmp_path, monkeypatch):
+    """A budget exists so a genuinely stuck rename still fails loudly."""
+
+    publisher = StructurePreviewPublisher(
+        tmp_path, disciplines=["architecture"], emission_order=["architecture"]
+    )
+
+    def always_refuse(source, destination):
+        raise PermissionError(5, "Access is denied")
+
+    monkeypatch.setattr(structure_preview.os, "replace", always_refuse)
+    monkeypatch.setattr(structure_preview, "_REPLACE_TIMEOUT_SECONDS", 0.05)
+
+    with pytest.raises(PermissionError):
+        publisher.publish(preview())
+
+    # The failed attempt leaves no temporary file behind for a reader to find.
+    assert [entry.name for entry in tmp_path.iterdir() if entry.suffix == ".tmp"] == []

@@ -26,6 +26,7 @@ import hashlib
 import json
 import os
 import tempfile
+import time
 from pathlib import Path
 from typing import Any, Sequence
 
@@ -50,6 +51,38 @@ def preview_filename(discipline: str) -> str:
     return f"structure-{discipline}.json"
 
 
+#: A reader that opens the destination for the moment it takes to read it can
+#: make os.replace fail on Windows, so a rename is retried for about this long
+#: before the failure is treated as real. Chosen an order of magnitude above the
+#: observed contention: a reader holds a tree open for well under a millisecond.
+_REPLACE_TIMEOUT_SECONDS = 2.0
+_REPLACE_RETRY_SECONDS = 0.002
+
+
+def _replace_with_retry(temporary_path: Path, path: Path) -> None:
+    """Rename a completed temporary file over `path`, tolerating live readers.
+
+    `os.replace` is atomic on both platforms, but on Windows it raises
+    PermissionError while any other process holds the destination open --
+    which is exactly what a viewer polling this directory does. Without a
+    retry the reader would decide whether the adapter survives publication,
+    so a whole import could fail because someone was watching it. Retrying
+    keeps publication atomic (a rename either happened or did not) and makes
+    a reader unable to break the writer. A rename that never succeeds inside
+    the budget is a real failure and is raised.
+    """
+
+    deadline = time.monotonic() + _REPLACE_TIMEOUT_SECONDS
+    while True:
+        try:
+            os.replace(temporary_path, path)
+            return
+        except PermissionError:
+            if time.monotonic() >= deadline:
+                raise
+            time.sleep(_REPLACE_RETRY_SECONDS)
+
+
 def _write_atomically(path: Path, payload: bytes) -> None:
     descriptor, temporary_name = tempfile.mkstemp(
         dir=path.parent, prefix=f".{path.stem}-", suffix=".tmp"
@@ -60,7 +93,7 @@ def _write_atomically(path: Path, payload: bytes) -> None:
             output.write(payload)
             output.flush()
             os.fsync(output.fileno())
-        os.replace(temporary_path, path)
+        _replace_with_retry(temporary_path, path)
     except BaseException:
         temporary_path.unlink(missing_ok=True)
         raise
