@@ -47,9 +47,11 @@ make a one-document rebuild cheaper — is answered in
 [`payload-reuse/`](payload-reuse/README.md): on Digital Hub and sixty5 every
 store-enabled rebuild reproduced the clean package byte for byte, but restoring
 verified payloads took 2.2–2.4× the packaging time of re-encoding them, so
-ADR-0018 is rejected by its own gate and the flag stays an off-by-default
-experiment until [ADR-0019](../../docs/adr/0019-document-artifact-transport.md),
-which decides its removal and names the successor reuse unit, lands.
+ADR-0018 is rejected by its own gate.
+[ADR-0019](../../docs/adr/0019-document-artifact-transport.md) named the
+successor reuse unit and removed the flag together with this record's recorder
+(2026-09-03), so the record is historical: its validator still checks it, but
+it cannot be re-recorded from the current tree.
 
 `rebuild-stages/` is ADR-0019's gate 0: the same changed-discipline rebuild
 decomposed into adapter stages (interpreter start, changed-document

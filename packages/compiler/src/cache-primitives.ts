@@ -3,11 +3,11 @@ import { lstatSync, readFileSync } from "node:fs";
 import { lstat, readFile } from "node:fs/promises";
 
 /**
- * Guards shared by the two content-addressed stores in this package: the whole
- * package cache (`compiled-cache.ts`) and the per-prototype payload store
- * (`compiled-payload-store.ts`). They are kept in one module so a hardening fix
- * -- a refused path shape, a stricter digest check -- cannot land in one store
- * and be forgotten in the other.
+ * Guards for content-addressed stores in this package, today the whole-package
+ * cache (`compiled-cache.ts`). They live in one module so a hardening fix -- a
+ * refused path shape, a stricter digest check -- lands once for every store
+ * that adopts them; the per-prototype payload store that shared them was
+ * retired with ADR-0019.
  */
 
 export interface CacheToolInput {

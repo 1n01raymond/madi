@@ -5,7 +5,6 @@ import {
   parseIfcCompileArguments,
   usage,
 } from "./cli-arguments.js";
-import type { CompiledPayloadCacheReport } from "./compiled-payload-cache.js";
 import { compileStepFile } from "./step-compiler.js";
 import { compileIfcFederation } from "./ifc-federation.js";
 
@@ -31,7 +30,6 @@ async function main(): Promise<void> {
     if (result.cache.status !== "disabled") {
       console.log(`[naru] cache ${result.cache.status}: ${String(result.cache.key)}`);
     }
-    reportPayloadCache(result.report.compiledPayloadCache);
     console.log(`[naru] output: ${result.outputDirectory}`);
     return;
   }
@@ -51,28 +49,10 @@ async function main(): Promise<void> {
     if (result.cache.status !== "disabled") {
       console.log(`[naru] cache ${result.cache.status}: ${String(result.cache.key)}`);
     }
-    reportPayloadCache(result.report.compiledPayloadCache);
     console.log(`[naru] output: ${result.outputDirectory}`);
     return;
   }
   throw new TypeError(`Unknown command ${String(arguments_[0])}.\n\n${usage}`);
-}
-
-/**
- * Says what the payload store did, in the same shape as the package cache line.
- * Degraded prototypes already warned as they happened; this is the summary that
- * makes a rebuild visible when nothing else in the run mentions it.
- */
-function reportPayloadCache(report: CompiledPayloadCacheReport | undefined): void {
-  if (!report) return;
-  const degraded = report.outcomes["corrupt-entry"]
-    + report.outcomes["restore-failed"]
-    + report.publishFailures;
-  console.log(
-    `[naru] payload cache ${report.hits} hit / ${report.misses} miss ` +
-      `of ${report.prototypes}, ${report.published} published` +
-      (degraded > 0 ? `, ${degraded} degraded` : ""),
-  );
 }
 
 try {

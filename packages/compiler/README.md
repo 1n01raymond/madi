@@ -116,16 +116,17 @@ IfcOpenShell parsing and tessellation before the deterministic federation merge.
 The package resources still compile as one federation, and shared-cache
 authorization remains a separate gate.
 
-`src/compiled-payload-store.ts` and `src/compiled-payload-cache.ts` implement
-[ADR-0018](../../docs/adr/0018-content-addressed-compiled-payloads.md), reached
-through `--payload-cache <directory>` on both commands and off by default;
-[ADR-0019](../../docs/adr/0019-document-artifact-transport.md) decides that the
-flag is removed in a coming slice. The
-ADR is rejected by its own gate -- the
-[acceptance record](../../artifacts/cache/payload-reuse/README.md) reproduced
-every clean-package byte on a changed-discipline rebuild of Digital Hub and
-sixty5 but restored payloads 2.2-2.4x slower than re-encoding them -- so the
-flag is a measured experiment, not a recommendation.
+The content-addressed payload tier of
+[ADR-0018](../../docs/adr/0018-content-addressed-compiled-payloads.md) was
+implemented behind `--payload-cache <directory>`, rejected by its own gate --
+the [acceptance record](../../artifacts/cache/payload-reuse/README.md)
+reproduced every clean-package byte on a changed-discipline rebuild of Digital
+Hub and sixty5 but restored payloads 2.2-2.4x slower than re-encoding them --
+and removed under
+[ADR-0019](../../docs/adr/0019-document-artifact-transport.md) on 2026-09-03:
+the flag, `compiled-payload-store.ts`, `compiled-payload-cache.ts`, the
+`compiledPayloadCache` build-report block, their tests, and the record's
+recorder are gone. The record stays committed and validated.
 
 `compileIfcFederation(..., { stageTiming: true })` returns a
 `naru.ifc-federation-stage-timing.1` ledger beside the result -- the thirteen
@@ -138,45 +139,19 @@ byte, a build report, or a cache key
 ([test](test/ifc-federation.test.ts)). The
 [rebuild-stages record](../../artifacts/cache/rebuild-stages/README.md) is
 its consumer.
-Encoding and placement are separate:
-`buildCompiledPayload` produces one prototype's accessor bytes and
+
+Encoding and placement are separate, and that split is what the payload tier
+left behind: `buildCompiledPayload` produces one prototype's accessor bytes and
 placement-free metadata, `appendCompiledPayload` places them into `scene.bin`,
-and `appendGeometry` is exactly those two calls, so a restored payload and a
-freshly built one decide offsets and padding in one place. Compiling Digital Hub
-after that split reproduces the baseline package digest recorded in
+and `appendGeometry` is exactly those two calls, so offsets and padding are
+decided in one place. Compiling Digital Hub after that split reproduces the
+baseline package digest recorded in
 [artifacts/compiler/node-field-elision](../../artifacts/compiler/node-field-elision/README.md).
-`compiledPayloadContentDigest` addresses a prototype by its representation
-content -- array bytes hashed with their element type, plus whether the edge
-positions alias the surface ones -- so it can cost a rebuild but cannot miss a
-payload-affecting difference. Entries carry schema
-`naru.compiled-payload-entry.1` in a directory named for that schema, are keyed
-by compiler and adapter identity, the content digest, the unit scale, and the
-payload-affecting options, and share `src/cache-primitives.ts` with the
-whole-package cache: refused key and path shapes, an `lstat` symlink check,
-staged `mkdtemp` publication with an idempotent rename, `AMBIGUOUS_PAYLOAD` when
-one key would describe two byte sequences, and a restore that reproduces the key
-from the manifest, recomputes every accessor byte length, and verifies the
-binary before returning it.
-
-Selection is one decision per prototype, taken inside the packaging loop:
-restore a verified payload, or build it and publish it. The store is read
-synchronously so exactly one payload is live at a time, which is what keeps
-peak memory at a clean build's. Both degradations keep the compile working --
-an entry that fails verification is a miss that warns and rebuilds, and a
-publish that fails warns and keeps the compiled output -- so the package bytes
-are the same whether the store was cold, warm, corrupt, or unwritable. This tier
-is not the whole-package cache: a payload hit still runs the adapter and still
-re-lays out every federation-global resource.
-
-With a payload cache selected, `build-report.json` gains a
-`compiledPayloadCache` block -- schema, prototype count, hits, misses,
-publications, a count per outcome, publish failures, and up to sixteen named
-degraded prototypes -- and the CLI prints the same summary beside the
-package-cache line. It names prototype ids only, and like
-`adapter-report.json:documentArtifactCache` it is execution-path telemetry that
-an output-identity comparison excludes by name. The ADR's acceptance evidence,
-a changed-discipline equivalence record and a measured saving at real-large
-scale, is the next increment.
+`compiledPayloadContentDigest` -- array bytes hashed with their element type,
+plus whether the edge positions alias the surface ones -- stays as a tested
+pure function, and `src/cache-primitives.ts` keeps the guards the store shared
+with the whole-package cache: refused key and path shapes, an `lstat` symlink
+check, and staged `mkdtemp` publication with an idempotent rename.
 
 ## Compile an IFC federation
 

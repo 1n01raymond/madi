@@ -27,7 +27,6 @@
     "embedder:evidence": "pnpm --filter @naru3d/runtime-webgpu build && pnpm --filter @naru3d/package-embedder build && node scripts/record-embedder-override-evidence.mjs",
     "embedder:check": "node scripts/validate-embedder-override-evidence.mjs",
     "cache:sixty5:evidence": "pnpm --filter @naru3d/compiler... run build && node scripts/record-sixty5-cache-evidence.mjs",
-    "cache:payload:evidence": "pnpm --filter @naru3d/compiler... run build && node scripts/record-payload-reuse-evidence.mjs",
     "cache:stages:evidence": "pnpm --filter @naru3d/compiler... run build && node scripts/record-rebuild-stage-evidence.mjs",
     "node-fields:check": "node scripts/validate-node-field-elision-evidence.mjs",
     "hierarchy:relocation:check": "node scripts/validate-hierarchy-relocation-evidence.mjs",

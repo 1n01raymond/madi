@@ -209,7 +209,8 @@ measurement gate fails:
 Implementation follows the storage then selection/orchestration order the
 tracking issue sets.
 
-**Status of that order.** Storage and orchestration have both landed.
+**Status of that order** (as implemented; removed after the rejection, see
+the end of this section). Storage and orchestration both landed.
 `packages/compiler/src/compiled-payload.ts` splits encoding from placement and
 supplies `compiledPayloadContentDigest`;
 `packages/compiler/src/compiled-payload-store.ts` publishes and restores
@@ -249,9 +250,9 @@ construction: prototype ids embed the document token and the payload digest
 hashes the representation id, so one edit renames every prototype of that
 document.
 
-What survives: the storage guards, the encoder/placement split, and
-`--payload-cache` itself stay in the compiler, off by default, as the measured
-experiment; removing them is a separate decision. What does not: this reuse
+What survived at rejection: the storage guards, the encoder/placement split,
+and `--payload-cache` itself stayed in the compiler, off by default, as the
+measured experiment, with removal left as a separate decision. What does not: this reuse
 unit is not the partial-rebuild strategy. A successor ADR must pick a unit whose
 restore is cheaper than re-encoding -- laid-out byte ranges above the encoder,
 which this ADR excluded, or content-derived prototype ids -- and
@@ -260,4 +261,7 @@ does. That successor is
 [ADR-0019](0019-document-artifact-transport.md): its exploratory decomposition
 puts the encoder at 1-3 percent of a rebuild, so neither candidate named here
 can pass gate 4; the reuse unit moves to the verified per-document Scene IR
-artifact, and `--payload-cache` is removed.
+artifact, and `--payload-cache` is removed. That removal landed on
+2026-09-03: the flag, `compiled-payload-store.ts`, `compiled-payload-cache.ts`,
+their tests, and the record's recorder are gone; the encoder/placement split,
+`cache-primitives.ts`, the committed record, and its validator remain.

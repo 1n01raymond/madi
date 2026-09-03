@@ -143,15 +143,15 @@ artifacts under the selected cache: unchanged disciplines skip IfcOpenShell
 parsing and tessellation, while changed, renamed, or corrupt identities miss.
 An actual two-discipline fixture proves cold/warm and one-document-changed merge
 bytes equal a clean adapter build. Federation-wide target/coarse/spatial/property
-payloads are still laid out as a whole; the payload tier below reuses encoded
-prototype bytes, not byte ranges, so complete-package equivalence remains before
-any old range is reused.
+payloads are still laid out as a whole; the rejected payload tier reused encoded
+prototype bytes, not byte ranges, and complete-package equivalence remains the
+bar before any old range is reused.
 
-The payload contract is **implemented, off by default, and rejected as the
-reuse unit** by its own measurement (see the end of this section).
-[ADR-0018](adr/0018-content-addressed-compiled-payloads.md) content-addresses
+The payload contract was **implemented, measured, rejected as the reuse unit,
+and removed** (see the end of this section).
+[ADR-0018](adr/0018-content-addressed-compiled-payloads.md) content-addressed
 one unit only, the prototype payload -- the accessor bytes and placement-free
-accessor metadata `appendGeometry` produces -- and rebuilds every other package
+accessor metadata `appendGeometry` produces -- and rebuilt every other package
 resource from the current scene on every compile. Byte offsets, bufferView and
 accessor indices, target-chunk membership, coarse aggregation, spatial leaves,
 interned property columns, and the relocated hierarchy are all
@@ -175,63 +175,28 @@ committed [rebuild stage record](../artifacts/cache/rebuild-stages/README.md)
 sixty5 one, the adapter-compiler transport of unchanged documents 48.0 and
 77.3 percent -- and
 decides to reuse the verified per-document Scene IR artifact instead and to
-remove `--payload-cache`; until that removal lands, the flag is the measured
-experiment described below.
+remove `--payload-cache`. That removal landed on 2026-09-03; what follows is
+what the compiler kept and what the retired tier was.
 
-What the compiler carries today is the encoder split plus the store itself.
-`buildCompiledPayload` is now the only geometry encoder, and `appendGeometry` is
-that build followed by `appendCompiledPayload`, so a restored payload and a
-freshly built one reach `scene.bin` through the identical append path and one
-place decides offsets and padding. `compiledPayloadContentDigest` hashes
-representation content -- including the element type of every array and whether
-the edge positions alias the surface ones -- so a payload-affecting difference
-can cost a rebuild but never yield the wrong bytes. Entries are filed under
-`naru.compiled-payload-entry.1`, in a directory named for that schema so a bump
-opens a cold namespace instead of migrating entries, and keyed by compiler
-identity, adapter identity, the content digest, the unit scale, and the
-payload-affecting option set. Publication stages in a `mkdtemp` sibling and
-renames into place; losing that race reads the published entry back, verifies
-it, and refuses only a genuine disagreement (`AMBIGUOUS_PAYLOAD`), so one key
-can never describe two byte sequences. A restore reproduces the key from the
-manifest's own input record, recomputes each accessor's byte length from its
-element type and count, requires the accessors to cover `payload.bin` exactly,
-and verifies the byte count and SHA-256 before returning anything. The storage
-primitive throws on any mismatch, exactly as the whole-package cache does; the
-warn-and-rebuild fallback belongs to the compile paths that call it.
-Digital Hub still compiles to the `digital-hub` baseline digest recorded in
+What the compiler kept is the encoder split. `buildCompiledPayload` is the
+only geometry encoder, and `appendGeometry` is that build followed by
+`appendCompiledPayload`, so every payload reaches `scene.bin` through one
+append path and one place decides offsets and padding; Digital Hub still
+compiles to the `digital-hub` baseline digest recorded in
 [artifacts/compiler/node-field-elision](../artifacts/compiler/node-field-elision/README.md),
-so the encoder split moved no bytes.
+so the split moved no bytes. `compiledPayloadContentDigest` stays as a tested
+pure function, and the guards the store shared with the whole-package cache
+(refused key and path shapes, `lstat` symlink refusal, staged publication with
+an idempotent rename) stay in `cache-primitives.ts`, now serving that cache
+alone.
 
-Selection sits on top of that store. `naru compile` and `naru compile-ifc` take
-`--payload-cache <directory>`; without it nothing is read or written, which is
-why no committed package digest moved when the tier landed. With it,
-`CompiledPayloadCache` decides one prototype at a time inside the packaging
-loop: derive the key, restore a verified payload if the store holds one,
-otherwise build the payload and publish it. The read is synchronous so exactly
-one payload is live at a time -- an asynchronous pre-pass would hold them all,
-and ADR-0018 requires peak memory no higher than a clean build's.
-
-This tier is orthogonal to the whole-package cache. A payload hit still runs the
-adapter and still re-lays out every federation-global resource; only the encoded
-prototype bytes are reused. That is deliberate, and a compiler test pins it by
-counting adapter invocations across a two-run compile.
-
-Both degradations keep the compile working. A stored entry that fails
-verification is a miss: the compiler warns, rebuilds that payload, and finishes
-the package with identical bytes. A publish that fails -- a read-only store, a
-full disk, an entry already corrupt under the same key -- warns and keeps the
-compiled output, because a store that cannot be written to must not turn a
-successful compile into an error. Republishing over a corrupt entry is refused
-rather than papered over, so the entry stays visibly broken.
-
-`build-report.json` gains a `compiledPayloadCache` block whenever the store is
-in use: schema, prototype count, hits, misses, publications, a count per
-outcome, publish failures, and up to sixteen named degraded prototypes. It names
-prototype ids only -- a source path or property value would put engineering data
-in a build report -- and it is execution-path telemetry, so comparing two
-packages for output identity excludes it by name, as
-`adapter-report.json:documentArtifactCache` already is. The CLI prints the same
-summary beside the package-cache line.
+What was removed, so the description does not outlive the code: the
+`naru.compiled-payload-entry.1` store and its verified restore, the
+per-prototype selection inside the packaging loop, `--payload-cache
+<directory>` on both commands, the `build-report.json:compiledPayloadCache`
+telemetry block, their unit tests, and the recorder behind the acceptance
+record. The record itself stays committed and validated
+(`pnpm cache:payload:check`); it cannot be re-recorded.
 
 That acceptance record exists and rejected the tier; what remains is the
 successor's evidence. [ADR-0019](adr/0019-document-artifact-transport.md)

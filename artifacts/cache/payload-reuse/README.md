@@ -16,10 +16,13 @@ One record per model: [`digital-hub.json`](digital-hub.json) (four-document
 839.9 MB `ifc-bench-sixty5`, CC BY 4.0), both from
 `fixtures/external/manifest.json`. Schema `naru.payload-reuse-evidence.1`,
 mode `fresh-process-changed-discipline-rebuild`. Validator:
-`pnpm cache:payload:check`. Re-record: `pnpm cache:payload:evidence --
---model digital-hub` and `-- --model sixty5 --samples 3` (a sixty5 sample
-extracts one 400 MB document and writes a 650 MB package, so the whole run
-takes over an hour and peaks near 5 GB).
+`pnpm cache:payload:check`. **The recorder is retired**: ADR-0019 removed
+`--payload-cache` and with it `scripts/record-payload-reuse-evidence.mjs` and
+`pnpm cache:payload:evidence` (2026-09-03), so this record cannot be
+re-recorded from the current tree and stays as the measurement that closed the
+tier; reproducing it means checking out a commit before that removal. (A
+sixty5 sample extracted one 400 MB document and wrote a 650 MB package, so the
+whole run took over an hour and peaked near 5 GB.)
 
 ## Protocol, fixed before any result was read
 
@@ -232,8 +235,8 @@ stays Proposed until a different reuse unit is designed (candidates the
 record points at: reuse above the encoder — laid-out byte ranges, which
 ADR-0018 deliberately excluded — or content-derived prototype ids so an
 edited document keeps its untouched payloads). The `--payload-cache` flag
-stays in the compiler, off by default, as the measured-and-rejected
-experiment; removing it is a separate decision.
+stayed in the compiler, off by default, until ADR-0019 took that separate
+decision and removed it, the store, and this recorder on 2026-09-03.
 
 ## Host-local digests
 
