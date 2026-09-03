@@ -1,0 +1,1626 @@
+{
+  "schemaVersion": "naru.structure-readiness.1",
+  "mode": "fresh-process-structure-only-federation-read",
+  "recordedAt": "2026-09-03T15:34:38.890Z",
+  "model": "sixty5",
+  "host": {
+    "platform": "win32",
+    "architecture": "x64",
+    "node": "22.14.0",
+    "cpuCount": 16,
+    "cpuModel": "AMD Ryzen 7 9800X3D 8-Core Processor           ",
+    "totalMemoryBytes": 33463021568
+  },
+  "commit": {
+    "head": "a8f14576d50d5577eb3562793f2eb54de72559bb",
+    "describe": "feat: report imports as a versioned lifecycle and cancel the adapter tree (#105)",
+    "workingTreeClean": false
+  },
+  "fixture": {
+    "datasetId": "ifc-bench-sixty5",
+    "manifest": {
+      "path": "fixtures/external/manifest.json",
+      "sha256": "77d7d587d6b32938a371325e281a4584e10c2ff3118a59f300a9da097eb2f478"
+    },
+    "documents": [
+      {
+        "discipline": "architecture",
+        "uriHint": "projects/sixty5/arc.ifc",
+        "bytes": 342657851,
+        "sha256": "e91ddbbd672bbde946af14631de4c732f0cf8a7cfae5dbbf06fbeab03b5c46df"
+      },
+      {
+        "discipline": "electrical",
+        "uriHint": "projects/sixty5/electrical.ifc",
+        "bytes": 97058912,
+        "sha256": "adb8d5eda2c706a1fded2a00bd38d845e35f513e2f6ba048fc6228274dfb3986"
+      },
+      {
+        "discipline": "facade",
+        "uriHint": "projects/sixty5/facade.ifc",
+        "bytes": 6067026,
+        "sha256": "a9a1b20214da8ac1e1bea1f8670bef24f20a0d53a8ebaef4eb20b5a447640c79"
+      },
+      {
+        "discipline": "kitchen",
+        "uriHint": "projects/sixty5/kitchen.ifc",
+        "bytes": 49670229,
+        "sha256": "1905b992071729d1c780b18f6103e4d1d08307a4707d5f33a4413216f36776ac"
+      },
+      {
+        "discipline": "plumbing",
+        "uriHint": "projects/sixty5/plumbing.ifc",
+        "bytes": 222099255,
+        "sha256": "15382b06d0a63464b95ba451ce7d5fa981bf6c236ebe3f4f62bb9d2b9abfd821"
+      },
+      {
+        "discipline": "structure",
+        "uriHint": "projects/sixty5/str.ifc",
+        "bytes": 7422441,
+        "sha256": "79f294c643438ac7a494e4871857244c2de0eefa536eda5977af20640a301a22"
+      },
+      {
+        "discipline": "ventilation",
+        "uriHint": "projects/sixty5/ventilation.ifc",
+        "bytes": 114891068,
+        "sha256": "c78f6ad085961500f0890bbffda9e171c1342c5865ca152f64098dd4da644cca"
+      }
+    ]
+  },
+  "adapter": {
+    "fingerprint": "fc2aa5371729a3f5588d34b471f713cfd88758fae8e271f22f295c6c4a553277",
+    "name": "IfcOpenShell",
+    "schemaVersion": "naru.ifc-adapter-identity.1",
+    "toolchain": {
+      "architecture": "AMD64",
+      "ifcOpenShell": "0.8.5",
+      "numpy": "2.5.2",
+      "platform": "win32",
+      "python": "3.13.2"
+    },
+    "version": "0.8.5"
+  },
+  "tool": {
+    "path": "native/adapter-ifc/tools/measure_structure_readiness.py",
+    "schemaVersion": "naru.ifc-structure-readiness.1",
+    "ifcopenshellVersion": "0.8.5",
+    "pythonVersion": "3.13.2",
+    "pythonExecutable": "output/venv-ifc/Scripts/python.exe"
+  },
+  "protocol": {
+    "sampleCount": 5,
+    "discardedSamples": 0,
+    "warmUpRuns": 1,
+    "rule": "One warm-up run, then every subsequent run recorded. Each sample is a fresh Python process reading every document in its own pass. No sample is discarded for its timing; a non-zero exit aborts the recording.",
+    "covers": "Raw byte scan, IfcOpenShell parse, spatial containment walk, and JSON serialization of the resulting entry list. Property and classification association is excluded (the cold adapter spends a separate propertyIndex stage on it), and no representation is evaluated, so nothing here tessellates.",
+    "caveats": [
+      "The OS page cache is not dropped between samples, matching the protocol of artifacts/cache/sixty5.",
+      "Threaded makespan is arithmetic over the measured per-document durations, not a measured parallel run.",
+      "Time to a viewer is not measured: this is the adapter-side path to a serialized tree only."
+    ]
+  },
+  "memory": {
+    "method": "os-sampled-win32-process-tree",
+    "peakWorkingSetBytes": {
+      "values": [
+        3338653696,
+        3338780672,
+        3338543104,
+        3338706944,
+        3339423744
+      ],
+      "median": 3338706944,
+      "p95": 3339423744,
+      "minimum": 3338543104,
+      "maximum": 3339423744
+    }
+  },
+  "structure": [
+    {
+      "discipline": "architecture",
+      "uriHint": "projects/sixty5/arc.ifc",
+      "schema": "IFC2X3",
+      "sourceBytes": 342657851,
+      "structureEntries": 16534,
+      "structureRoots": 1,
+      "aggregateRelations": 20,
+      "containmentRelations": 19,
+      "structurePayloadBytes": 1760342,
+      "scanKeywordCounts": {
+        "IFCRELAGGREGATES": 20,
+        "IFCRELCONTAINEDINSPATIALSTRUCTURE": 19,
+        "IFCBUILDINGSTOREY": 19
+      },
+      "milliseconds": {
+        "scan": {
+          "values": [
+            216.6,
+            218.1,
+            218.8,
+            217.1,
+            216.6
+          ],
+          "median": 217.1,
+          "p95": 218.8,
+          "minimum": 216.6,
+          "maximum": 218.8
+        },
+        "open": {
+          "values": [
+            15193.3,
+            14915.9,
+            14846.3,
+            14792.5,
+            14945
+          ],
+          "median": 14915.9,
+          "p95": 15193.3,
+          "minimum": 14792.5,
+          "maximum": 15193.3
+        },
+        "walk": {
+          "values": [
+            139.6,
+            108.6,
+            128.6,
+            105.9,
+            108.7
+          ],
+          "median": 108.7,
+          "p95": 139.6,
+          "minimum": 105.9,
+          "maximum": 139.6
+        },
+        "serialize": {
+          "values": [
+            5.7,
+            5.8,
+            6.1,
+            6.1,
+            6.3
+          ],
+          "median": 6.1,
+          "p95": 6.3,
+          "minimum": 5.7,
+          "maximum": 6.3
+        },
+        "ready": {
+          "values": [
+            15338.6,
+            15030.3,
+            14981,
+            14904.5,
+            15059.9
+          ],
+          "median": 15030.3,
+          "p95": 15338.6,
+          "minimum": 14904.5,
+          "maximum": 15338.6
+        }
+      }
+    },
+    {
+      "discipline": "electrical",
+      "uriHint": "projects/sixty5/electrical.ifc",
+      "schema": "IFC2X3",
+      "sourceBytes": 97058912,
+      "structureEntries": 19897,
+      "structureRoots": 1,
+      "aggregateRelations": 3,
+      "containmentRelations": 19,
+      "structurePayloadBytes": 2750778,
+      "scanKeywordCounts": {
+        "IFCRELAGGREGATES": 3,
+        "IFCRELCONTAINEDINSPATIALSTRUCTURE": 19,
+        "IFCBUILDINGSTOREY": 19
+      },
+      "milliseconds": {
+        "scan": {
+          "values": [
+            65.7,
+            67.6,
+            66.6,
+            67.9,
+            66.6
+          ],
+          "median": 66.6,
+          "p95": 67.9,
+          "minimum": 65.7,
+          "maximum": 67.9
+        },
+        "open": {
+          "values": [
+            5072.1,
+            5111.5,
+            5136.9,
+            5103.4,
+            5149.6
+          ],
+          "median": 5111.5,
+          "p95": 5149.6,
+          "minimum": 5072.1,
+          "maximum": 5149.6
+        },
+        "walk": {
+          "values": [
+            147.1,
+            130.4,
+            139,
+            125.2,
+            129
+          ],
+          "median": 130.4,
+          "p95": 147.1,
+          "minimum": 125.2,
+          "maximum": 147.1
+        },
+        "serialize": {
+          "values": [
+            13.1,
+            8.4,
+            8.4,
+            7.9,
+            8.3
+          ],
+          "median": 8.4,
+          "p95": 13.1,
+          "minimum": 7.9,
+          "maximum": 13.1
+        },
+        "ready": {
+          "values": [
+            5232.3,
+            5250.2,
+            5284.3,
+            5236.5,
+            5286.9
+          ],
+          "median": 5250.2,
+          "p95": 5286.9,
+          "minimum": 5232.3,
+          "maximum": 5286.9
+        }
+      }
+    },
+    {
+      "discipline": "facade",
+      "uriHint": "projects/sixty5/facade.ifc",
+      "schema": "IFC2X3",
+      "sourceBytes": 6067026,
+      "structureEntries": 1076,
+      "structureRoots": 1,
+      "aggregateRelations": 3,
+      "containmentRelations": 18,
+      "structurePayloadBytes": 112442,
+      "scanKeywordCounts": {
+        "IFCRELAGGREGATES": 3,
+        "IFCRELCONTAINEDINSPATIALSTRUCTURE": 18,
+        "IFCBUILDINGSTOREY": 18
+      },
+      "milliseconds": {
+        "scan": {
+          "values": [
+            5.7,
+            5.4,
+            5.6,
+            5.4,
+            5.6
+          ],
+          "median": 5.6,
+          "p95": 5.7,
+          "minimum": 5.4,
+          "maximum": 5.7
+        },
+        "open": {
+          "values": [
+            288.4,
+            293.8,
+            271.5,
+            268.8,
+            256.6
+          ],
+          "median": 271.5,
+          "p95": 293.8,
+          "minimum": 256.6,
+          "maximum": 293.8
+        },
+        "walk": {
+          "values": [
+            6.5,
+            9.4,
+            6.5,
+            7.5,
+            6.5
+          ],
+          "median": 6.5,
+          "p95": 9.4,
+          "minimum": 6.5,
+          "maximum": 9.4
+        },
+        "serialize": {
+          "values": [
+            0.5,
+            0.4,
+            0.4,
+            0.4,
+            0.7
+          ],
+          "median": 0.4,
+          "p95": 0.7,
+          "minimum": 0.4,
+          "maximum": 0.7
+        },
+        "ready": {
+          "values": [
+            295.3,
+            303.7,
+            278.5,
+            276.8,
+            263.9
+          ],
+          "median": 278.5,
+          "p95": 303.7,
+          "minimum": 263.9,
+          "maximum": 303.7
+        }
+      }
+    },
+    {
+      "discipline": "kitchen",
+      "uriHint": "projects/sixty5/kitchen.ifc",
+      "schema": "IFC2X3",
+      "sourceBytes": 49670229,
+      "structureEntries": 3118,
+      "structureRoots": 1,
+      "aggregateRelations": 3,
+      "containmentRelations": 16,
+      "structurePayloadBytes": 319879,
+      "scanKeywordCounts": {
+        "IFCRELAGGREGATES": 3,
+        "IFCRELCONTAINEDINSPATIALSTRUCTURE": 16,
+        "IFCBUILDINGSTOREY": 16
+      },
+      "milliseconds": {
+        "scan": {
+          "values": [
+            34.1,
+            33.8,
+            34.8,
+            34.3,
+            33.7
+          ],
+          "median": 34.1,
+          "p95": 34.8,
+          "minimum": 33.7,
+          "maximum": 34.8
+        },
+        "open": {
+          "values": [
+            2344.2,
+            2358.3,
+            2388.3,
+            2355,
+            2378.1
+          ],
+          "median": 2358.3,
+          "p95": 2388.3,
+          "minimum": 2344.2,
+          "maximum": 2388.3
+        },
+        "walk": {
+          "values": [
+            19,
+            19.1,
+            19.8,
+            22.6,
+            19.6
+          ],
+          "median": 19.6,
+          "p95": 22.6,
+          "minimum": 19,
+          "maximum": 22.6
+        },
+        "serialize": {
+          "values": [
+            1.1,
+            1.2,
+            1.1,
+            1.9,
+            1.1
+          ],
+          "median": 1.1,
+          "p95": 1.9,
+          "minimum": 1.1,
+          "maximum": 1.9
+        },
+        "ready": {
+          "values": [
+            2364.2,
+            2378.6,
+            2409.2,
+            2379.5,
+            2398.8
+          ],
+          "median": 2379.5,
+          "p95": 2409.2,
+          "minimum": 2364.2,
+          "maximum": 2409.2
+        }
+      }
+    },
+    {
+      "discipline": "plumbing",
+      "uriHint": "projects/sixty5/plumbing.ifc",
+      "schema": "IFC2X3",
+      "sourceBytes": 222099255,
+      "structureEntries": 22725,
+      "structureRoots": 1,
+      "aggregateRelations": 3,
+      "containmentRelations": 19,
+      "structurePayloadBytes": 3572885,
+      "scanKeywordCounts": {
+        "IFCRELAGGREGATES": 3,
+        "IFCRELCONTAINEDINSPATIALSTRUCTURE": 19,
+        "IFCBUILDINGSTOREY": 19
+      },
+      "milliseconds": {
+        "scan": {
+          "values": [
+            144.4,
+            147.1,
+            146.1,
+            151.1,
+            144
+          ],
+          "median": 146.1,
+          "p95": 151.1,
+          "minimum": 144,
+          "maximum": 151.1
+        },
+        "open": {
+          "values": [
+            11211.5,
+            11116.5,
+            11214.2,
+            11228.9,
+            11408.7
+          ],
+          "median": 11214.2,
+          "p95": 11408.7,
+          "minimum": 11116.5,
+          "maximum": 11408.7
+        },
+        "walk": {
+          "values": [
+            149.6,
+            162.4,
+            150.1,
+            152.9,
+            158.9
+          ],
+          "median": 152.9,
+          "p95": 162.4,
+          "minimum": 149.6,
+          "maximum": 162.4
+        },
+        "serialize": {
+          "values": [
+            9.5,
+            14.6,
+            10.3,
+            10.1,
+            13.9
+          ],
+          "median": 10.3,
+          "p95": 14.6,
+          "minimum": 9.5,
+          "maximum": 14.6
+        },
+        "ready": {
+          "values": [
+            11370.5,
+            11293.5,
+            11374.6,
+            11391.9,
+            11581.6
+          ],
+          "median": 11374.6,
+          "p95": 11581.6,
+          "minimum": 11293.5,
+          "maximum": 11581.6
+        }
+      }
+    },
+    {
+      "discipline": "structure",
+      "uriHint": "projects/sixty5/str.ifc",
+      "schema": "IFC2X3",
+      "sourceBytes": 7422441,
+      "structureEntries": 1404,
+      "structureRoots": 1,
+      "aggregateRelations": 3,
+      "containmentRelations": 19,
+      "structurePayloadBytes": 186296,
+      "scanKeywordCounts": {
+        "IFCRELAGGREGATES": 3,
+        "IFCRELCONTAINEDINSPATIALSTRUCTURE": 19,
+        "IFCBUILDINGSTOREY": 19
+      },
+      "milliseconds": {
+        "scan": {
+          "values": [
+            5.8,
+            5.9,
+            5.9,
+            6.3,
+            6
+          ],
+          "median": 5.9,
+          "p95": 6.3,
+          "minimum": 5.8,
+          "maximum": 6.3
+        },
+        "open": {
+          "values": [
+            346.8,
+            316.5,
+            365.8,
+            314.5,
+            376.9
+          ],
+          "median": 346.8,
+          "p95": 376.9,
+          "minimum": 314.5,
+          "maximum": 376.9
+        },
+        "walk": {
+          "values": [
+            8.2,
+            8.3,
+            8.9,
+            10.5,
+            12.3
+          ],
+          "median": 8.9,
+          "p95": 12.3,
+          "minimum": 8.2,
+          "maximum": 12.3
+        },
+        "serialize": {
+          "values": [
+            0.6,
+            0.6,
+            0.6,
+            0.9,
+            0.9
+          ],
+          "median": 0.6,
+          "p95": 0.9,
+          "minimum": 0.6,
+          "maximum": 0.9
+        },
+        "ready": {
+          "values": [
+            355.6,
+            325.3,
+            375.2,
+            325.9,
+            390.1
+          ],
+          "median": 355.6,
+          "p95": 390.1,
+          "minimum": 325.3,
+          "maximum": 390.1
+        }
+      }
+    },
+    {
+      "discipline": "ventilation",
+      "uriHint": "projects/sixty5/ventilation.ifc",
+      "schema": "IFC2X3",
+      "sourceBytes": 114891068,
+      "structureEntries": 12056,
+      "structureRoots": 1,
+      "aggregateRelations": 3,
+      "containmentRelations": 19,
+      "structurePayloadBytes": 1929476,
+      "scanKeywordCounts": {
+        "IFCRELAGGREGATES": 3,
+        "IFCRELCONTAINEDINSPATIALSTRUCTURE": 19,
+        "IFCBUILDINGSTOREY": 19
+      },
+      "milliseconds": {
+        "scan": {
+          "values": [
+            76.2,
+            80.5,
+            76.4,
+            76.9,
+            77
+          ],
+          "median": 76.9,
+          "p95": 80.5,
+          "minimum": 76.2,
+          "maximum": 80.5
+        },
+        "open": {
+          "values": [
+            5654.4,
+            5639.6,
+            5689,
+            5702.6,
+            5765
+          ],
+          "median": 5689,
+          "p95": 5765,
+          "minimum": 5639.6,
+          "maximum": 5765
+        },
+        "walk": {
+          "values": [
+            104.2,
+            78.8,
+            77.9,
+            79.2,
+            84.2
+          ],
+          "median": 79.2,
+          "p95": 104.2,
+          "minimum": 77.9,
+          "maximum": 104.2
+        },
+        "serialize": {
+          "values": [
+            5.4,
+            5.3,
+            5.2,
+            5.3,
+            5.5
+          ],
+          "median": 5.3,
+          "p95": 5.5,
+          "minimum": 5.2,
+          "maximum": 5.5
+        },
+        "ready": {
+          "values": [
+            5764,
+            5723.8,
+            5772.1,
+            5787.1,
+            5854.8
+          ],
+          "median": 5772.1,
+          "p95": 5854.8,
+          "minimum": 5723.8,
+          "maximum": 5854.8
+        }
+      }
+    }
+  ],
+  "federation": {
+    "documentCount": 7,
+    "sourceBytes": 839866782,
+    "structureEntries": 76810,
+    "structurePayloadBytes": 10632098,
+    "threads": 6,
+    "milliseconds": {
+      "scan": {
+        "values": [
+          548.5,
+          558.4,
+          554.2,
+          559,
+          549.5
+        ],
+        "median": 554.2,
+        "p95": 559,
+        "minimum": 548.5,
+        "maximum": 559
+      },
+      "sequentialReady": {
+        "values": [
+          40720.5,
+          40305.4,
+          40474.9,
+          40302.2,
+          40836
+        ],
+        "median": 40474.9,
+        "p95": 40836,
+        "minimum": 40302.2,
+        "maximum": 40836
+      },
+      "firstDocumentReady": {
+        "values": [
+          295.3,
+          303.7,
+          278.5,
+          276.8,
+          263.9
+        ],
+        "median": 278.5,
+        "p95": 303.7,
+        "minimum": 263.9,
+        "maximum": 303.7
+      },
+      "slowestDocumentReady": {
+        "values": [
+          15338.6,
+          15030.3,
+          14981,
+          14904.5,
+          15059.9
+        ],
+        "median": 15030.3,
+        "p95": 15338.6,
+        "minimum": 14904.5,
+        "maximum": 15338.6
+      },
+      "estimatedThreadedMakespan": {
+        "values": [
+          15338.6,
+          15030.3,
+          14981,
+          14904.5,
+          15059.9
+        ],
+        "median": 15030.3,
+        "p95": 15338.6,
+        "minimum": 14904.5,
+        "maximum": 15338.6
+      }
+    },
+    "makespanMethod": "longest-processing-time-first-schedule-of-measured-durations",
+    "process": {
+      "values": [
+        50176.4,
+        49736.7,
+        49933.4,
+        49807.2,
+        50380.7
+      ],
+      "median": 49933.4,
+      "p95": 50380.7,
+      "minimum": 49736.7,
+      "maximum": 50380.7
+    }
+  },
+  "samples": [
+    {
+      "index": 1,
+      "processMilliseconds": 50176.4,
+      "peakWorkingSetBytes": 3338653696,
+      "peakPrivateBytes": 3948093440,
+      "federation": {
+        "documentCount": 7,
+        "sourceBytes": 839866782,
+        "structureEntries": 76810,
+        "structurePayloadBytes": 10632098,
+        "scanMilliseconds": 548.5,
+        "sequentialReadyMilliseconds": 40720.5,
+        "firstDocumentReadyMilliseconds": 295.3,
+        "slowestDocumentReadyMilliseconds": 15338.6,
+        "estimatedThreadedMakespanMilliseconds": 15338.6,
+        "makespanMethod": "longest-processing-time-first-schedule-of-measured-durations"
+      },
+      "documents": [
+        {
+          "discipline": "architecture",
+          "schema": "IFC2X3",
+          "sourceBytes": 342657851,
+          "scanMilliseconds": 216.6,
+          "openMilliseconds": 15193.3,
+          "walkMilliseconds": 139.6,
+          "serializeMilliseconds": 5.7,
+          "readyMilliseconds": 15338.6,
+          "structureEntries": 16534,
+          "structureRoots": 1,
+          "aggregateRelations": 20,
+          "containmentRelations": 19,
+          "structurePayloadBytes": 1760342,
+          "scanKeywordCounts": {
+            "IFCRELAGGREGATES": 20,
+            "IFCRELCONTAINEDINSPATIALSTRUCTURE": 19,
+            "IFCBUILDINGSTOREY": 19
+          }
+        },
+        {
+          "discipline": "electrical",
+          "schema": "IFC2X3",
+          "sourceBytes": 97058912,
+          "scanMilliseconds": 65.7,
+          "openMilliseconds": 5072.1,
+          "walkMilliseconds": 147.1,
+          "serializeMilliseconds": 13.1,
+          "readyMilliseconds": 5232.3,
+          "structureEntries": 19897,
+          "structureRoots": 1,
+          "aggregateRelations": 3,
+          "containmentRelations": 19,
+          "structurePayloadBytes": 2750778,
+          "scanKeywordCounts": {
+            "IFCRELAGGREGATES": 3,
+            "IFCRELCONTAINEDINSPATIALSTRUCTURE": 19,
+            "IFCBUILDINGSTOREY": 19
+          }
+        },
+        {
+          "discipline": "facade",
+          "schema": "IFC2X3",
+          "sourceBytes": 6067026,
+          "scanMilliseconds": 5.7,
+          "openMilliseconds": 288.4,
+          "walkMilliseconds": 6.5,
+          "serializeMilliseconds": 0.5,
+          "readyMilliseconds": 295.3,
+          "structureEntries": 1076,
+          "structureRoots": 1,
+          "aggregateRelations": 3,
+          "containmentRelations": 18,
+          "structurePayloadBytes": 112442,
+          "scanKeywordCounts": {
+            "IFCRELAGGREGATES": 3,
+            "IFCRELCONTAINEDINSPATIALSTRUCTURE": 18,
+            "IFCBUILDINGSTOREY": 18
+          }
+        },
+        {
+          "discipline": "kitchen",
+          "schema": "IFC2X3",
+          "sourceBytes": 49670229,
+          "scanMilliseconds": 34.1,
+          "openMilliseconds": 2344.2,
+          "walkMilliseconds": 19,
+          "serializeMilliseconds": 1.1,
+          "readyMilliseconds": 2364.2,
+          "structureEntries": 3118,
+          "structureRoots": 1,
+          "aggregateRelations": 3,
+          "containmentRelations": 16,
+          "structurePayloadBytes": 319879,
+          "scanKeywordCounts": {
+            "IFCRELAGGREGATES": 3,
+            "IFCRELCONTAINEDINSPATIALSTRUCTURE": 16,
+            "IFCBUILDINGSTOREY": 16
+          }
+        },
+        {
+          "discipline": "plumbing",
+          "schema": "IFC2X3",
+          "sourceBytes": 222099255,
+          "scanMilliseconds": 144.4,
+          "openMilliseconds": 11211.5,
+          "walkMilliseconds": 149.6,
+          "serializeMilliseconds": 9.5,
+          "readyMilliseconds": 11370.5,
+          "structureEntries": 22725,
+          "structureRoots": 1,
+          "aggregateRelations": 3,
+          "containmentRelations": 19,
+          "structurePayloadBytes": 3572885,
+          "scanKeywordCounts": {
+            "IFCRELAGGREGATES": 3,
+            "IFCRELCONTAINEDINSPATIALSTRUCTURE": 19,
+            "IFCBUILDINGSTOREY": 19
+          }
+        },
+        {
+          "discipline": "structure",
+          "schema": "IFC2X3",
+          "sourceBytes": 7422441,
+          "scanMilliseconds": 5.8,
+          "openMilliseconds": 346.8,
+          "walkMilliseconds": 8.2,
+          "serializeMilliseconds": 0.6,
+          "readyMilliseconds": 355.6,
+          "structureEntries": 1404,
+          "structureRoots": 1,
+          "aggregateRelations": 3,
+          "containmentRelations": 19,
+          "structurePayloadBytes": 186296,
+          "scanKeywordCounts": {
+            "IFCRELAGGREGATES": 3,
+            "IFCRELCONTAINEDINSPATIALSTRUCTURE": 19,
+            "IFCBUILDINGSTOREY": 19
+          }
+        },
+        {
+          "discipline": "ventilation",
+          "schema": "IFC2X3",
+          "sourceBytes": 114891068,
+          "scanMilliseconds": 76.2,
+          "openMilliseconds": 5654.4,
+          "walkMilliseconds": 104.2,
+          "serializeMilliseconds": 5.4,
+          "readyMilliseconds": 5764,
+          "structureEntries": 12056,
+          "structureRoots": 1,
+          "aggregateRelations": 3,
+          "containmentRelations": 19,
+          "structurePayloadBytes": 1929476,
+          "scanKeywordCounts": {
+            "IFCRELAGGREGATES": 3,
+            "IFCRELCONTAINEDINSPATIALSTRUCTURE": 19,
+            "IFCBUILDINGSTOREY": 19
+          }
+        }
+      ]
+    },
+    {
+      "index": 2,
+      "processMilliseconds": 49736.7,
+      "peakWorkingSetBytes": 3338780672,
+      "peakPrivateBytes": 3948269568,
+      "federation": {
+        "documentCount": 7,
+        "sourceBytes": 839866782,
+        "structureEntries": 76810,
+        "structurePayloadBytes": 10632098,
+        "scanMilliseconds": 558.4,
+        "sequentialReadyMilliseconds": 40305.4,
+        "firstDocumentReadyMilliseconds": 303.7,
+        "slowestDocumentReadyMilliseconds": 15030.3,
+        "estimatedThreadedMakespanMilliseconds": 15030.3,
+        "makespanMethod": "longest-processing-time-first-schedule-of-measured-durations"
+      },
+      "documents": [
+        {
+          "discipline": "architecture",
+          "schema": "IFC2X3",
+          "sourceBytes": 342657851,
+          "scanMilliseconds": 218.1,
+          "openMilliseconds": 14915.9,
+          "walkMilliseconds": 108.6,
+          "serializeMilliseconds": 5.8,
+          "readyMilliseconds": 15030.3,
+          "structureEntries": 16534,
+          "structureRoots": 1,
+          "aggregateRelations": 20,
+          "containmentRelations": 19,
+          "structurePayloadBytes": 1760342,
+          "scanKeywordCounts": {
+            "IFCRELAGGREGATES": 20,
+            "IFCRELCONTAINEDINSPATIALSTRUCTURE": 19,
+            "IFCBUILDINGSTOREY": 19
+          }
+        },
+        {
+          "discipline": "electrical",
+          "schema": "IFC2X3",
+          "sourceBytes": 97058912,
+          "scanMilliseconds": 67.6,
+          "openMilliseconds": 5111.5,
+          "walkMilliseconds": 130.4,
+          "serializeMilliseconds": 8.4,
+          "readyMilliseconds": 5250.2,
+          "structureEntries": 19897,
+          "structureRoots": 1,
+          "aggregateRelations": 3,
+          "containmentRelations": 19,
+          "structurePayloadBytes": 2750778,
+          "scanKeywordCounts": {
+            "IFCRELAGGREGATES": 3,
+            "IFCRELCONTAINEDINSPATIALSTRUCTURE": 19,
+            "IFCBUILDINGSTOREY": 19
+          }
+        },
+        {
+          "discipline": "facade",
+          "schema": "IFC2X3",
+          "sourceBytes": 6067026,
+          "scanMilliseconds": 5.4,
+          "openMilliseconds": 293.8,
+          "walkMilliseconds": 9.4,
+          "serializeMilliseconds": 0.4,
+          "readyMilliseconds": 303.7,
+          "structureEntries": 1076,
+          "structureRoots": 1,
+          "aggregateRelations": 3,
+          "containmentRelations": 18,
+          "structurePayloadBytes": 112442,
+          "scanKeywordCounts": {
+            "IFCRELAGGREGATES": 3,
+            "IFCRELCONTAINEDINSPATIALSTRUCTURE": 18,
+            "IFCBUILDINGSTOREY": 18
+          }
+        },
+        {
+          "discipline": "kitchen",
+          "schema": "IFC2X3",
+          "sourceBytes": 49670229,
+          "scanMilliseconds": 33.8,
+          "openMilliseconds": 2358.3,
+          "walkMilliseconds": 19.1,
+          "serializeMilliseconds": 1.2,
+          "readyMilliseconds": 2378.6,
+          "structureEntries": 3118,
+          "structureRoots": 1,
+          "aggregateRelations": 3,
+          "containmentRelations": 16,
+          "structurePayloadBytes": 319879,
+          "scanKeywordCounts": {
+            "IFCRELAGGREGATES": 3,
+            "IFCRELCONTAINEDINSPATIALSTRUCTURE": 16,
+            "IFCBUILDINGSTOREY": 16
+          }
+        },
+        {
+          "discipline": "plumbing",
+          "schema": "IFC2X3",
+          "sourceBytes": 222099255,
+          "scanMilliseconds": 147.1,
+          "openMilliseconds": 11116.5,
+          "walkMilliseconds": 162.4,
+          "serializeMilliseconds": 14.6,
+          "readyMilliseconds": 11293.5,
+          "structureEntries": 22725,
+          "structureRoots": 1,
+          "aggregateRelations": 3,
+          "containmentRelations": 19,
+          "structurePayloadBytes": 3572885,
+          "scanKeywordCounts": {
+            "IFCRELAGGREGATES": 3,
+            "IFCRELCONTAINEDINSPATIALSTRUCTURE": 19,
+            "IFCBUILDINGSTOREY": 19
+          }
+        },
+        {
+          "discipline": "structure",
+          "schema": "IFC2X3",
+          "sourceBytes": 7422441,
+          "scanMilliseconds": 5.9,
+          "openMilliseconds": 316.5,
+          "walkMilliseconds": 8.3,
+          "serializeMilliseconds": 0.6,
+          "readyMilliseconds": 325.3,
+          "structureEntries": 1404,
+          "structureRoots": 1,
+          "aggregateRelations": 3,
+          "containmentRelations": 19,
+          "structurePayloadBytes": 186296,
+          "scanKeywordCounts": {
+            "IFCRELAGGREGATES": 3,
+            "IFCRELCONTAINEDINSPATIALSTRUCTURE": 19,
+            "IFCBUILDINGSTOREY": 19
+          }
+        },
+        {
+          "discipline": "ventilation",
+          "schema": "IFC2X3",
+          "sourceBytes": 114891068,
+          "scanMilliseconds": 80.5,
+          "openMilliseconds": 5639.6,
+          "walkMilliseconds": 78.8,
+          "serializeMilliseconds": 5.3,
+          "readyMilliseconds": 5723.8,
+          "structureEntries": 12056,
+          "structureRoots": 1,
+          "aggregateRelations": 3,
+          "containmentRelations": 19,
+          "structurePayloadBytes": 1929476,
+          "scanKeywordCounts": {
+            "IFCRELAGGREGATES": 3,
+            "IFCRELCONTAINEDINSPATIALSTRUCTURE": 19,
+            "IFCBUILDINGSTOREY": 19
+          }
+        }
+      ]
+    },
+    {
+      "index": 3,
+      "processMilliseconds": 49933.4,
+      "peakWorkingSetBytes": 3338543104,
+      "peakPrivateBytes": 3947257856,
+      "federation": {
+        "documentCount": 7,
+        "sourceBytes": 839866782,
+        "structureEntries": 76810,
+        "structurePayloadBytes": 10632098,
+        "scanMilliseconds": 554.2,
+        "sequentialReadyMilliseconds": 40474.9,
+        "firstDocumentReadyMilliseconds": 278.5,
+        "slowestDocumentReadyMilliseconds": 14981,
+        "estimatedThreadedMakespanMilliseconds": 14981,
+        "makespanMethod": "longest-processing-time-first-schedule-of-measured-durations"
+      },
+      "documents": [
+        {
+          "discipline": "architecture",
+          "schema": "IFC2X3",
+          "sourceBytes": 342657851,
+          "scanMilliseconds": 218.8,
+          "openMilliseconds": 14846.3,
+          "walkMilliseconds": 128.6,
+          "serializeMilliseconds": 6.1,
+          "readyMilliseconds": 14981,
+          "structureEntries": 16534,
+          "structureRoots": 1,
+          "aggregateRelations": 20,
+          "containmentRelations": 19,
+          "structurePayloadBytes": 1760342,
+          "scanKeywordCounts": {
+            "IFCRELAGGREGATES": 20,
+            "IFCRELCONTAINEDINSPATIALSTRUCTURE": 19,
+            "IFCBUILDINGSTOREY": 19
+          }
+        },
+        {
+          "discipline": "electrical",
+          "schema": "IFC2X3",
+          "sourceBytes": 97058912,
+          "scanMilliseconds": 66.6,
+          "openMilliseconds": 5136.9,
+          "walkMilliseconds": 139,
+          "serializeMilliseconds": 8.4,
+          "readyMilliseconds": 5284.3,
+          "structureEntries": 19897,
+          "structureRoots": 1,
+          "aggregateRelations": 3,
+          "containmentRelations": 19,
+          "structurePayloadBytes": 2750778,
+          "scanKeywordCounts": {
+            "IFCRELAGGREGATES": 3,
+            "IFCRELCONTAINEDINSPATIALSTRUCTURE": 19,
+            "IFCBUILDINGSTOREY": 19
+          }
+        },
+        {
+          "discipline": "facade",
+          "schema": "IFC2X3",
+          "sourceBytes": 6067026,
+          "scanMilliseconds": 5.6,
+          "openMilliseconds": 271.5,
+          "walkMilliseconds": 6.5,
+          "serializeMilliseconds": 0.4,
+          "readyMilliseconds": 278.5,
+          "structureEntries": 1076,
+          "structureRoots": 1,
+          "aggregateRelations": 3,
+          "containmentRelations": 18,
+          "structurePayloadBytes": 112442,
+          "scanKeywordCounts": {
+            "IFCRELAGGREGATES": 3,
+            "IFCRELCONTAINEDINSPATIALSTRUCTURE": 18,
+            "IFCBUILDINGSTOREY": 18
+          }
+        },
+        {
+          "discipline": "kitchen",
+          "schema": "IFC2X3",
+          "sourceBytes": 49670229,
+          "scanMilliseconds": 34.8,
+          "openMilliseconds": 2388.3,
+          "walkMilliseconds": 19.8,
+          "serializeMilliseconds": 1.1,
+          "readyMilliseconds": 2409.2,
+          "structureEntries": 3118,
+          "structureRoots": 1,
+          "aggregateRelations": 3,
+          "containmentRelations": 16,
+          "structurePayloadBytes": 319879,
+          "scanKeywordCounts": {
+            "IFCRELAGGREGATES": 3,
+            "IFCRELCONTAINEDINSPATIALSTRUCTURE": 16,
+            "IFCBUILDINGSTOREY": 16
+          }
+        },
+        {
+          "discipline": "plumbing",
+          "schema": "IFC2X3",
+          "sourceBytes": 222099255,
+          "scanMilliseconds": 146.1,
+          "openMilliseconds": 11214.2,
+          "walkMilliseconds": 150.1,
+          "serializeMilliseconds": 10.3,
+          "readyMilliseconds": 11374.6,
+          "structureEntries": 22725,
+          "structureRoots": 1,
+          "aggregateRelations": 3,
+          "containmentRelations": 19,
+          "structurePayloadBytes": 3572885,
+          "scanKeywordCounts": {
+            "IFCRELAGGREGATES": 3,
+            "IFCRELCONTAINEDINSPATIALSTRUCTURE": 19,
+            "IFCBUILDINGSTOREY": 19
+          }
+        },
+        {
+          "discipline": "structure",
+          "schema": "IFC2X3",
+          "sourceBytes": 7422441,
+          "scanMilliseconds": 5.9,
+          "openMilliseconds": 365.8,
+          "walkMilliseconds": 8.9,
+          "serializeMilliseconds": 0.6,
+          "readyMilliseconds": 375.2,
+          "structureEntries": 1404,
+          "structureRoots": 1,
+          "aggregateRelations": 3,
+          "containmentRelations": 19,
+          "structurePayloadBytes": 186296,
+          "scanKeywordCounts": {
+            "IFCRELAGGREGATES": 3,
+            "IFCRELCONTAINEDINSPATIALSTRUCTURE": 19,
+            "IFCBUILDINGSTOREY": 19
+          }
+        },
+        {
+          "discipline": "ventilation",
+          "schema": "IFC2X3",
+          "sourceBytes": 114891068,
+          "scanMilliseconds": 76.4,
+          "openMilliseconds": 5689,
+          "walkMilliseconds": 77.9,
+          "serializeMilliseconds": 5.2,
+          "readyMilliseconds": 5772.1,
+          "structureEntries": 12056,
+          "structureRoots": 1,
+          "aggregateRelations": 3,
+          "containmentRelations": 19,
+          "structurePayloadBytes": 1929476,
+          "scanKeywordCounts": {
+            "IFCRELAGGREGATES": 3,
+            "IFCRELCONTAINEDINSPATIALSTRUCTURE": 19,
+            "IFCBUILDINGSTOREY": 19
+          }
+        }
+      ]
+    },
+    {
+      "index": 4,
+      "processMilliseconds": 49807.2,
+      "peakWorkingSetBytes": 3338706944,
+      "peakPrivateBytes": 3946958848,
+      "federation": {
+        "documentCount": 7,
+        "sourceBytes": 839866782,
+        "structureEntries": 76810,
+        "structurePayloadBytes": 10632098,
+        "scanMilliseconds": 559,
+        "sequentialReadyMilliseconds": 40302.2,
+        "firstDocumentReadyMilliseconds": 276.8,
+        "slowestDocumentReadyMilliseconds": 14904.5,
+        "estimatedThreadedMakespanMilliseconds": 14904.5,
+        "makespanMethod": "longest-processing-time-first-schedule-of-measured-durations"
+      },
+      "documents": [
+        {
+          "discipline": "architecture",
+          "schema": "IFC2X3",
+          "sourceBytes": 342657851,
+          "scanMilliseconds": 217.1,
+          "openMilliseconds": 14792.5,
+          "walkMilliseconds": 105.9,
+          "serializeMilliseconds": 6.1,
+          "readyMilliseconds": 14904.5,
+          "structureEntries": 16534,
+          "structureRoots": 1,
+          "aggregateRelations": 20,
+          "containmentRelations": 19,
+          "structurePayloadBytes": 1760342,
+          "scanKeywordCounts": {
+            "IFCRELAGGREGATES": 20,
+            "IFCRELCONTAINEDINSPATIALSTRUCTURE": 19,
+            "IFCBUILDINGSTOREY": 19
+          }
+        },
+        {
+          "discipline": "electrical",
+          "schema": "IFC2X3",
+          "sourceBytes": 97058912,
+          "scanMilliseconds": 67.9,
+          "openMilliseconds": 5103.4,
+          "walkMilliseconds": 125.2,
+          "serializeMilliseconds": 7.9,
+          "readyMilliseconds": 5236.5,
+          "structureEntries": 19897,
+          "structureRoots": 1,
+          "aggregateRelations": 3,
+          "containmentRelations": 19,
+          "structurePayloadBytes": 2750778,
+          "scanKeywordCounts": {
+            "IFCRELAGGREGATES": 3,
+            "IFCRELCONTAINEDINSPATIALSTRUCTURE": 19,
+            "IFCBUILDINGSTOREY": 19
+          }
+        },
+        {
+          "discipline": "facade",
+          "schema": "IFC2X3",
+          "sourceBytes": 6067026,
+          "scanMilliseconds": 5.4,
+          "openMilliseconds": 268.8,
+          "walkMilliseconds": 7.5,
+          "serializeMilliseconds": 0.4,
+          "readyMilliseconds": 276.8,
+          "structureEntries": 1076,
+          "structureRoots": 1,
+          "aggregateRelations": 3,
+          "containmentRelations": 18,
+          "structurePayloadBytes": 112442,
+          "scanKeywordCounts": {
+            "IFCRELAGGREGATES": 3,
+            "IFCRELCONTAINEDINSPATIALSTRUCTURE": 18,
+            "IFCBUILDINGSTOREY": 18
+          }
+        },
+        {
+          "discipline": "kitchen",
+          "schema": "IFC2X3",
+          "sourceBytes": 49670229,
+          "scanMilliseconds": 34.3,
+          "openMilliseconds": 2355,
+          "walkMilliseconds": 22.6,
+          "serializeMilliseconds": 1.9,
+          "readyMilliseconds": 2379.5,
+          "structureEntries": 3118,
+          "structureRoots": 1,
+          "aggregateRelations": 3,
+          "containmentRelations": 16,
+          "structurePayloadBytes": 319879,
+          "scanKeywordCounts": {
+            "IFCRELAGGREGATES": 3,
+            "IFCRELCONTAINEDINSPATIALSTRUCTURE": 16,
+            "IFCBUILDINGSTOREY": 16
+          }
+        },
+        {
+          "discipline": "plumbing",
+          "schema": "IFC2X3",
+          "sourceBytes": 222099255,
+          "scanMilliseconds": 151.1,
+          "openMilliseconds": 11228.9,
+          "walkMilliseconds": 152.9,
+          "serializeMilliseconds": 10.1,
+          "readyMilliseconds": 11391.9,
+          "structureEntries": 22725,
+          "structureRoots": 1,
+          "aggregateRelations": 3,
+          "containmentRelations": 19,
+          "structurePayloadBytes": 3572885,
+          "scanKeywordCounts": {
+            "IFCRELAGGREGATES": 3,
+            "IFCRELCONTAINEDINSPATIALSTRUCTURE": 19,
+            "IFCBUILDINGSTOREY": 19
+          }
+        },
+        {
+          "discipline": "structure",
+          "schema": "IFC2X3",
+          "sourceBytes": 7422441,
+          "scanMilliseconds": 6.3,
+          "openMilliseconds": 314.5,
+          "walkMilliseconds": 10.5,
+          "serializeMilliseconds": 0.9,
+          "readyMilliseconds": 325.9,
+          "structureEntries": 1404,
+          "structureRoots": 1,
+          "aggregateRelations": 3,
+          "containmentRelations": 19,
+          "structurePayloadBytes": 186296,
+          "scanKeywordCounts": {
+            "IFCRELAGGREGATES": 3,
+            "IFCRELCONTAINEDINSPATIALSTRUCTURE": 19,
+            "IFCBUILDINGSTOREY": 19
+          }
+        },
+        {
+          "discipline": "ventilation",
+          "schema": "IFC2X3",
+          "sourceBytes": 114891068,
+          "scanMilliseconds": 76.9,
+          "openMilliseconds": 5702.6,
+          "walkMilliseconds": 79.2,
+          "serializeMilliseconds": 5.3,
+          "readyMilliseconds": 5787.1,
+          "structureEntries": 12056,
+          "structureRoots": 1,
+          "aggregateRelations": 3,
+          "containmentRelations": 19,
+          "structurePayloadBytes": 1929476,
+          "scanKeywordCounts": {
+            "IFCRELAGGREGATES": 3,
+            "IFCRELCONTAINEDINSPATIALSTRUCTURE": 19,
+            "IFCBUILDINGSTOREY": 19
+          }
+        }
+      ]
+    },
+    {
+      "index": 5,
+      "processMilliseconds": 50380.7,
+      "peakWorkingSetBytes": 3339423744,
+      "peakPrivateBytes": 3949060096,
+      "federation": {
+        "documentCount": 7,
+        "sourceBytes": 839866782,
+        "structureEntries": 76810,
+        "structurePayloadBytes": 10632098,
+        "scanMilliseconds": 549.5,
+        "sequentialReadyMilliseconds": 40836,
+        "firstDocumentReadyMilliseconds": 263.9,
+        "slowestDocumentReadyMilliseconds": 15059.9,
+        "estimatedThreadedMakespanMilliseconds": 15059.9,
+        "makespanMethod": "longest-processing-time-first-schedule-of-measured-durations"
+      },
+      "documents": [
+        {
+          "discipline": "architecture",
+          "schema": "IFC2X3",
+          "sourceBytes": 342657851,
+          "scanMilliseconds": 216.6,
+          "openMilliseconds": 14945,
+          "walkMilliseconds": 108.7,
+          "serializeMilliseconds": 6.3,
+          "readyMilliseconds": 15059.9,
+          "structureEntries": 16534,
+          "structureRoots": 1,
+          "aggregateRelations": 20,
+          "containmentRelations": 19,
+          "structurePayloadBytes": 1760342,
+          "scanKeywordCounts": {
+            "IFCRELAGGREGATES": 20,
+            "IFCRELCONTAINEDINSPATIALSTRUCTURE": 19,
+            "IFCBUILDINGSTOREY": 19
+          }
+        },
+        {
+          "discipline": "electrical",
+          "schema": "IFC2X3",
+          "sourceBytes": 97058912,
+          "scanMilliseconds": 66.6,
+          "openMilliseconds": 5149.6,
+          "walkMilliseconds": 129,
+          "serializeMilliseconds": 8.3,
+          "readyMilliseconds": 5286.9,
+          "structureEntries": 19897,
+          "structureRoots": 1,
+          "aggregateRelations": 3,
+          "containmentRelations": 19,
+          "structurePayloadBytes": 2750778,
+          "scanKeywordCounts": {
+            "IFCRELAGGREGATES": 3,
+            "IFCRELCONTAINEDINSPATIALSTRUCTURE": 19,
+            "IFCBUILDINGSTOREY": 19
+          }
+        },
+        {
+          "discipline": "facade",
+          "schema": "IFC2X3",
+          "sourceBytes": 6067026,
+          "scanMilliseconds": 5.6,
+          "openMilliseconds": 256.6,
+          "walkMilliseconds": 6.5,
+          "serializeMilliseconds": 0.7,
+          "readyMilliseconds": 263.9,
+          "structureEntries": 1076,
+          "structureRoots": 1,
+          "aggregateRelations": 3,
+          "containmentRelations": 18,
+          "structurePayloadBytes": 112442,
+          "scanKeywordCounts": {
+            "IFCRELAGGREGATES": 3,
+            "IFCRELCONTAINEDINSPATIALSTRUCTURE": 18,
+            "IFCBUILDINGSTOREY": 18
+          }
+        },
+        {
+          "discipline": "kitchen",
+          "schema": "IFC2X3",
+          "sourceBytes": 49670229,
+          "scanMilliseconds": 33.7,
+          "openMilliseconds": 2378.1,
+          "walkMilliseconds": 19.6,
+          "serializeMilliseconds": 1.1,
+          "readyMilliseconds": 2398.8,
+          "structureEntries": 3118,
+          "structureRoots": 1,
+          "aggregateRelations": 3,
+          "containmentRelations": 16,
+          "structurePayloadBytes": 319879,
+          "scanKeywordCounts": {
+            "IFCRELAGGREGATES": 3,
+            "IFCRELCONTAINEDINSPATIALSTRUCTURE": 16,
+            "IFCBUILDINGSTOREY": 16
+          }
+        },
+        {
+          "discipline": "plumbing",
+          "schema": "IFC2X3",
+          "sourceBytes": 222099255,
+          "scanMilliseconds": 144,
+          "openMilliseconds": 11408.7,
+          "walkMilliseconds": 158.9,
+          "serializeMilliseconds": 13.9,
+          "readyMilliseconds": 11581.6,
+          "structureEntries": 22725,
+          "structureRoots": 1,
+          "aggregateRelations": 3,
+          "containmentRelations": 19,
+          "structurePayloadBytes": 3572885,
+          "scanKeywordCounts": {
+            "IFCRELAGGREGATES": 3,
+            "IFCRELCONTAINEDINSPATIALSTRUCTURE": 19,
+            "IFCBUILDINGSTOREY": 19
+          }
+        },
+        {
+          "discipline": "structure",
+          "schema": "IFC2X3",
+          "sourceBytes": 7422441,
+          "scanMilliseconds": 6,
+          "openMilliseconds": 376.9,
+          "walkMilliseconds": 12.3,
+          "serializeMilliseconds": 0.9,
+          "readyMilliseconds": 390.1,
+          "structureEntries": 1404,
+          "structureRoots": 1,
+          "aggregateRelations": 3,
+          "containmentRelations": 19,
+          "structurePayloadBytes": 186296,
+          "scanKeywordCounts": {
+            "IFCRELAGGREGATES": 3,
+            "IFCRELCONTAINEDINSPATIALSTRUCTURE": 19,
+            "IFCBUILDINGSTOREY": 19
+          }
+        },
+        {
+          "discipline": "ventilation",
+          "schema": "IFC2X3",
+          "sourceBytes": 114891068,
+          "scanMilliseconds": 77,
+          "openMilliseconds": 5765,
+          "walkMilliseconds": 84.2,
+          "serializeMilliseconds": 5.5,
+          "readyMilliseconds": 5854.8,
+          "structureEntries": 12056,
+          "structureRoots": 1,
+          "aggregateRelations": 3,
+          "containmentRelations": 19,
+          "structurePayloadBytes": 1929476,
+          "scanKeywordCounts": {
+            "IFCRELAGGREGATES": 3,
+            "IFCRELCONTAINEDINSPATIALSTRUCTURE": 19,
+            "IFCBUILDINGSTOREY": 19
+          }
+        }
+      ]
+    }
+  ],
+  "findings": {
+    "parsingDominates": {
+      "parseMilliseconds": 39907.2,
+      "walkMilliseconds": 506.2,
+      "serializeMilliseconds": 32.2,
+      "parseShareOfReady": 0.986,
+      "walkShareOfReady": 0.0125
+    },
+    "structureShareOfColdAdapter": 0.1433,
+    "coldReference": {
+      "record": "artifacts/cache/rebuild-stages/sixty5.json",
+      "cleanProcessMilliseconds": 320064.2,
+      "cleanAdapterMilliseconds": 282484.7
+    },
+    "criticalPath": {
+      "slowestDiscipline": "architecture",
+      "slowestReadySeconds": 15.03,
+      "fastestDiscipline": "facade",
+      "fastestReadySeconds": 0.279
+    },
+    "productTarget": {
+      "source": "issue #73 acceptance criterion 8",
+      "lowerSeconds": 5,
+      "upperSeconds": 15,
+      "measures": "adapter-side time to a serialized assembly tree, excluding transport to a viewer"
+    },
+    "againstProductTarget": {
+      "sequentialWholeFederationSeconds": 40.475,
+      "sequentialWithinUpperBound": false,
+      "estimatedThreadedSeconds": 15.03,
+      "estimatedThreadedWithinUpperBound": false,
+      "firstDocumentSeconds": 0.279,
+      "firstDocumentWithinUpperBound": true
+    }
+  }
+}

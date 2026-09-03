@@ -115,6 +115,25 @@ build. The federation-level property columns and compiled package are still
 rebuilt; this tier skips unchanged IfcOpenShell parsing/tessellation but does not
 yet reuse old glTF byte ranges.
 
+## Structure readiness (measurement only)
+
+`tools/measure_structure_readiness.py` answers one question and does nothing
+else: how long until a document's assembly tree exists? It scans the raw bytes
+for the spatial keywords, opens the document with IfcOpenShell, walks
+`IfcRelAggregates` and `IfcRelContainedInSpatialStructure` in deterministic
+entity order, and serializes the tree, timing each step separately and emitting
+`naru.ifc-structure-readiness.1`. It tessellates nothing, reads no properties,
+writes no Scene IR, and is never called by a compile -- it exists to keep a
+product target honest.
+
+The answer, over both committed federations, is that producing a tree *is*
+parsing: 98.46 percent (Digital Hub) and 98.60 percent (sixty5) of the time to a
+serialized tree, against 1.3 percent for the walk. See
+[artifacts/import/structure-readiness](../../artifacts/import/structure-readiness/README.md)
+(`pnpm structure:readiness:check`, re-record with
+`pnpm structure:readiness:evidence`), which is gate 0 of
+[ADR-0021](../../docs/adr/0021-staged-hierarchy-first-import.md).
+
 ## Reproduce the Digital Hub extraction
 
 Fetch the external fixture, create an isolated Python environment, and use the
