@@ -13,6 +13,7 @@ import type {
   SpatialDemandPriority,
 } from "@naru3d/runtime-webgpu";
 
+import { resolveDefaultSceneUrl } from "./default-scene.js";
 import { GeometryDecoder } from "./geometry-decoder.js";
 import type { GeometryDecodeResult } from "./geometry-decoder.js";
 import { HierarchyListView } from "./hierarchy-list.js";
@@ -237,7 +238,14 @@ const workspaceFileInput = requireElement<HTMLInputElement>("#workspace-file");
 const workspaceSourcesInput = requireElement<HTMLInputElement>("#workspace-sources");
 const workspaceStatus = requireElement<HTMLElement>("#workspace-status");
 const workspaceKind = requireElement<HTMLElement>("#workspace-kind");
-const defaultSceneUrl = new URL(`${import.meta.env.BASE_URL}scene.gltf`, window.location.href);
+const configuredDefaultSceneUrl: unknown = import.meta.env.VITE_NARU_DEFAULT_SCENE_URL;
+const defaultSceneUrl = resolveDefaultSceneUrl(
+  {
+    baseUrl: import.meta.env.BASE_URL,
+    configuredPackageUrl: configuredDefaultSceneUrl,
+  },
+  window.location.href,
+);
 const pygamerSceneUrl = new URL(
   `${import.meta.env.BASE_URL}pygamer/scene.gltf`,
   window.location.href,
