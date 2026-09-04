@@ -1,0 +1,431 @@
+{
+  "schemaVersion": "naru.workspace-reopen-evidence.1",
+  "capturedAt": "2026-09-04T17:48:00.649Z",
+  "mode": "headed-workspace-round-trip",
+  "browser": {
+    "id": "chrome",
+    "engine": "Blink",
+    "version": "151.0.7922.139",
+    "headless": false,
+    "viewport": {
+      "width": 1320,
+      "height": 1000
+    }
+  },
+  "host": {
+    "platform": "win32",
+    "architecture": "x64"
+  },
+  "served": {
+    "origin": "http://127.0.0.1:4176/",
+    "packageHref": "http://127.0.0.1:4176/scene.gltf",
+    "sceneDirectory": "output/ifc/digital-hub-split4",
+    "buildReport": "output/ifc/digital-hub-split4/build-report.json",
+    "packageDigest": "0e2ed4547e298908744ce7d9075900b1c55a4e88f26af7a6bef2ea7ee6c6595d",
+    "resources": [
+      {
+        "path": "scene.gltf",
+        "mediaType": "model/gltf+json",
+        "bytes": 41903482,
+        "sha256": "580262628478689792bfee41c1281c37ae9c4aab17c0a75a135922ba33154fa3"
+      },
+      {
+        "path": "scene.bin",
+        "mediaType": "application/octet-stream",
+        "bytes": 35962344,
+        "sha256": "e6cb5f6943f03a14ccccc7be950646dac84ad22536891ad5423e48e5113747f7"
+      },
+      {
+        "path": "coarse.bin",
+        "mediaType": "application/octet-stream",
+        "bytes": 3085296,
+        "sha256": "5e4fb16db1660f3278a3761f9699c4eb7f003220006d9c082106935e72770284"
+      },
+      {
+        "path": "properties.json",
+        "mediaType": "application/json",
+        "bytes": 1246277,
+        "sha256": "10b1f579eda1c085fdd115031ea416edf14e82b5a2b7b4e1ac0ec80f7af70675"
+      },
+      {
+        "path": "properties.bin",
+        "mediaType": "application/octet-stream",
+        "bytes": 2260991,
+        "sha256": "712fea65ca4b9de75683a01ee79f4fff5ae6f89b0c29cbd0b38a83bb586d07c1"
+      }
+    ],
+    "servedFrom": "Vite dev static hosting with HTTP Range support"
+  },
+  "federation": {
+    "documentCount": 4,
+    "sources": [
+      {
+        "discipline": "architecture",
+        "label": "arc.ifc",
+        "byteLength": 9022255,
+        "sha256": "19d7d02d53c2b88e86890ee236297b12bbb0f7748030cd32ff6a22762e9966bb"
+      },
+      {
+        "discipline": "heating",
+        "label": "heating.ifc",
+        "byteLength": 20890415,
+        "sha256": "a5603e8f6aa4cbf63aece92f92f503e9a578702d8fe96a6d4661490f1843710d"
+      },
+      {
+        "discipline": "plumbing",
+        "label": "plumbing.ifc",
+        "byteLength": 25178864,
+        "sha256": "0b1d6b0abd8d4cc3f5f798c7581bed2b39b40110ba6348d5470bbef646cfed79"
+      },
+      {
+        "discipline": "ventilation",
+        "label": "ventilation.ifc",
+        "byteLength": 12737833,
+        "sha256": "c0a1807875957c4154d45d14a3b5ed480dd3178a5bdc3262302a7eccf76d5cb1"
+      }
+    ]
+  },
+  "arms": {
+    "save": {
+      "label": "save",
+      "question": "Does the Studio save a manifest that describes the session a person set up?",
+      "milestones": {
+        "hierarchyReadyMs": 517,
+        "readyMs": 763
+      },
+      "baseline": {
+        "fileName": "http-127.0.0.1-4176-scene.gltf.naru-workspace.json",
+        "byteLength": 1663,
+        "sha256": "986dad7cbe08d3db871b7760d381f7f23ee1d5feab2c786194e9be0d4ae69cd4",
+        "statusText": "Saved 0 hidden occurrence(s) and 4 source(s) for http://127.0.0.1:4176/scene.gltf.",
+        "hiddenOccurrenceIds": 0,
+        "selectedOccurrenceId": null,
+        "sectionEnabled": false
+      },
+      "interaction": {
+        "hiddenRows": [
+          {
+            "position": 0,
+            "label": "Select Basiswand:STB 300:2397830"
+          },
+          {
+            "position": 1,
+            "label": "Select Basiswand:STB 300:2397918"
+          },
+          {
+            "position": 2,
+            "label": "Select Basiswand:STB 300:2397985"
+          }
+        ],
+        "selectedRow": {
+          "position": 3,
+          "label": "Select Bodenplatte:STB 300:2398103"
+        }
+      },
+      "customized": {
+        "fileName": "http-127.0.0.1-4176-scene.gltf.naru-workspace.json",
+        "byteLength": 1871,
+        "sha256": "5949870b198007e704f13237e0c8fa41899fcac8044449373ad729ed01f4d8c1",
+        "statusText": "Saved 3 hidden occurrence(s) and 4 source(s) for http://127.0.0.1:4176/scene.gltf.",
+        "label": "http://127.0.0.1:4176/scene.gltf",
+        "schemaVersion": "naru.workspace.1",
+        "packageReference": {
+          "kind": "url",
+          "href": "http://127.0.0.1:4176/scene.gltf"
+        },
+        "packageDigest": "0e2ed4547e298908744ce7d9075900b1c55a4e88f26af7a6bef2ea7ee6c6595d",
+        "resources": [
+          {
+            "path": "coarse.bin",
+            "byteLength": 3085296,
+            "sha256": "5e4fb16db1660f3278a3761f9699c4eb7f003220006d9c082106935e72770284"
+          },
+          {
+            "path": "properties.bin",
+            "byteLength": 2260991,
+            "sha256": "712fea65ca4b9de75683a01ee79f4fff5ae6f89b0c29cbd0b38a83bb586d07c1"
+          },
+          {
+            "path": "properties.json",
+            "byteLength": 1246277,
+            "sha256": "10b1f579eda1c085fdd115031ea416edf14e82b5a2b7b4e1ac0ec80f7af70675"
+          },
+          {
+            "path": "scene.bin",
+            "byteLength": 35962344,
+            "sha256": "e6cb5f6943f03a14ccccc7be950646dac84ad22536891ad5423e48e5113747f7"
+          },
+          {
+            "path": "scene.gltf",
+            "byteLength": 41903482,
+            "sha256": "580262628478689792bfee41c1281c37ae9c4aab17c0a75a135922ba33154fa3"
+          }
+        ],
+        "sources": [
+          {
+            "key": "architecture",
+            "label": "arc.ifc",
+            "byteLength": 9022255,
+            "sha256": "19d7d02d53c2b88e86890ee236297b12bbb0f7748030cd32ff6a22762e9966bb"
+          },
+          {
+            "key": "heating",
+            "label": "heating.ifc",
+            "byteLength": 20890415,
+            "sha256": "a5603e8f6aa4cbf63aece92f92f503e9a578702d8fe96a6d4661490f1843710d"
+          },
+          {
+            "key": "plumbing",
+            "label": "plumbing.ifc",
+            "byteLength": 25178864,
+            "sha256": "0b1d6b0abd8d4cc3f5f798c7581bed2b39b40110ba6348d5470bbef646cfed79"
+          },
+          {
+            "key": "ventilation",
+            "label": "ventilation.ifc",
+            "byteLength": 12737833,
+            "sha256": "c0a1807875957c4154d45d14a3b5ed480dd3178a5bdc3262302a7eccf76d5cb1"
+          }
+        ],
+        "view": {
+          "camera": {
+            "yaw": 0.05460183660255161,
+            "pitch": 0.2554797086703875,
+            "panRight": 0,
+            "panUp": 0,
+            "zoom": 1.4333294145603401
+          },
+          "section": {
+            "enabled": true,
+            "axis": "z",
+            "direction": -1,
+            "fraction": 0.35
+          },
+          "hiddenOccurrenceIds": [
+            "occurrence:ifc:architecture-19d7d02d53c2:14748",
+            "occurrence:ifc:architecture-19d7d02d53c2:14942",
+            "occurrence:ifc:architecture-19d7d02d53c2:15047"
+          ],
+          "selectedOccurrenceId": "occurrence:ifc:architecture-19d7d02d53c2:15155"
+        }
+      },
+      "savedFlag": "true",
+      "screenshots": {
+        "baseline": {
+          "path": "save-baseline.png",
+          "bytes": 249615,
+          "sha256": "af7d11bdf17ff320e960a1c1a7d3c86346ba80a660c6cc7b13415d4b2438be93"
+        },
+        "customized": {
+          "path": "save-customized.png",
+          "bytes": 229229,
+          "sha256": "f96abe9b4c2db2f00d8b11da72b8996145af586fc2366954bb5dcd090487ccda"
+        }
+      }
+    },
+    "unchanged": {
+      "label": "unchanged",
+      "question": "Does the same workspace reopen against an unchanged package?",
+      "milestones": {
+        "hierarchyReadyMs": 453,
+        "readyMs": 687
+      },
+      "beforeSourceInspection": {
+        "state": "unverifiable",
+        "geometryIsCurrent": "false",
+        "package": "verified",
+        "sources": "unverifiable",
+        "sourceInspection": "unavailable",
+        "hiddenOccurrences": "3",
+        "droppedOccurrences": "0",
+        "droppedSelection": "false",
+        "selectedObjectId": "159",
+        "kindLabel": "UNVERIFIABLE",
+        "statusText": "http://127.0.0.1:4176/scene.gltf reopened as unverifiable. No source document was checked, so its 4 source(s) are unverifiable; use \"Check sources\" to pick them. Restored 3 hidden occurrence(s) and the selection.",
+        "statusState": "warning",
+        "selectionText": "Selected Bodenplatte:STB 300:2398103 · node 158 · ID 159 · 0 CAD edge refs",
+        "sectionEnabled": "true",
+        "sectionPosition": 35,
+        "sceneUrl": "http://127.0.0.1:4176/scene.gltf"
+      },
+      "afterSourceInspection": {
+        "state": "verified",
+        "geometryIsCurrent": "true",
+        "package": "verified",
+        "sources": "verified",
+        "sourceInspection": "available",
+        "hiddenOccurrences": "3",
+        "droppedOccurrences": "0",
+        "droppedSelection": "false",
+        "selectedObjectId": "159",
+        "kindLabel": "VERIFIED",
+        "statusText": "http://127.0.0.1:4176/scene.gltf reopened as verified. All 4 source(s) match. Restored 3 hidden occurrence(s) and the selection.",
+        "statusState": null,
+        "selectionText": "Selected Bodenplatte:STB 300:2398103 · node 158 · ID 159 · 0 CAD edge refs",
+        "sectionEnabled": "true",
+        "sectionPosition": 35,
+        "sceneUrl": "http://127.0.0.1:4176/scene.gltf"
+      },
+      "inspectedSources": [
+        {
+          "label": "arc.ifc",
+          "byteLength": 9022255,
+          "sha256": "19d7d02d53c2b88e86890ee236297b12bbb0f7748030cd32ff6a22762e9966bb"
+        },
+        {
+          "label": "heating.ifc",
+          "byteLength": 20890415,
+          "sha256": "a5603e8f6aa4cbf63aece92f92f503e9a578702d8fe96a6d4661490f1843710d"
+        },
+        {
+          "label": "plumbing.ifc",
+          "byteLength": 25178864,
+          "sha256": "0b1d6b0abd8d4cc3f5f798c7581bed2b39b40110ba6348d5470bbef646cfed79"
+        },
+        {
+          "label": "ventilation.ifc",
+          "byteLength": 12737833,
+          "sha256": "c0a1807875957c4154d45d14a3b5ed480dd3178a5bdc3262302a7eccf76d5cb1"
+        }
+      ],
+      "resaved": {
+        "fileName": "http-127.0.0.1-4176-scene.gltf.naru-workspace.json",
+        "byteLength": 1871,
+        "sha256": "5949870b198007e704f13237e0c8fa41899fcac8044449373ad729ed01f4d8c1",
+        "statusText": "Saved 3 hidden occurrence(s) and 4 source(s) for http://127.0.0.1:4176/scene.gltf."
+      },
+      "manifestIsByteIdentical": true,
+      "screenshot": {
+        "path": "reopen-unchanged.png",
+        "bytes": 294099,
+        "sha256": "de537008a371c559c3cd493a24697e5037a30c8b7380872849e1afa911c82c4e"
+      }
+    },
+    "changedSource": {
+      "label": "changed-source",
+      "question": "Does the same workspace report a source that moved under it?",
+      "milestones": {
+        "hierarchyReadyMs": 439,
+        "readyMs": 690
+      },
+      "edit": {
+        "label": "arc.ifc",
+        "description": "Extrusion depth 7.77 -> 9.77 of #823, referenced only by #824 (IfcShapeRepresentation 'Body').",
+        "originalSha256": "19d7d02d53c2b88e86890ee236297b12bbb0f7748030cd32ff6a22762e9966bb",
+        "editedSha256": "b428d64184f73a8ef5250efc64b3f9d2a9186cb3bca35296705023284dcd932c",
+        "byteLength": 9022255,
+        "byteLengthUnchanged": true
+      },
+      "inspectedSources": [
+        {
+          "label": "arc.ifc",
+          "byteLength": 9022255,
+          "sha256": "b428d64184f73a8ef5250efc64b3f9d2a9186cb3bca35296705023284dcd932c",
+          "edited": true
+        },
+        {
+          "label": "heating.ifc",
+          "byteLength": 20890415,
+          "sha256": "a5603e8f6aa4cbf63aece92f92f503e9a578702d8fe96a6d4661490f1843710d",
+          "edited": false
+        },
+        {
+          "label": "plumbing.ifc",
+          "byteLength": 25178864,
+          "sha256": "0b1d6b0abd8d4cc3f5f798c7581bed2b39b40110ba6348d5470bbef646cfed79",
+          "edited": false
+        },
+        {
+          "label": "ventilation.ifc",
+          "byteLength": 12737833,
+          "sha256": "c0a1807875957c4154d45d14a3b5ed480dd3178a5bdc3262302a7eccf76d5cb1",
+          "edited": false
+        }
+      ],
+      "state": {
+        "state": "changed-source",
+        "geometryIsCurrent": "false",
+        "package": "verified",
+        "sources": "changed",
+        "sourceInspection": "available",
+        "hiddenOccurrences": "3",
+        "droppedOccurrences": "0",
+        "droppedSelection": "false",
+        "selectedObjectId": "159",
+        "kindLabel": "CHANGED-SOURCE",
+        "statusText": "http://127.0.0.1:4176/scene.gltf reopened as changed-source. Source evidence: arc.ifc (changed). Restored 3 hidden occurrence(s) and the selection.",
+        "statusState": "warning",
+        "selectionText": "Selected Bodenplatte:STB 300:2398103 · node 158 · ID 159 · 0 CAD edge refs",
+        "sectionEnabled": "true",
+        "sectionPosition": 35,
+        "sceneUrl": "http://127.0.0.1:4176/scene.gltf"
+      },
+      "screenshot": {
+        "path": "reopen-changed-source.png",
+        "bytes": 295293,
+        "sha256": "55cc158240da002dd0ac7ab0ecaf06580d47c2a27337e407615f4eca2281a051"
+      }
+    },
+    "reload": {
+      "label": "reload",
+      "question": "Does a reopen that must load the package first restore the same view?",
+      "milestones": {
+        "hierarchyReadyMs": 418,
+        "readyMs": 658
+      },
+      "bootSceneUrl": "http://127.0.0.1:4176/scene.gltf?reopen=1",
+      "manifestReferenceHref": "http://127.0.0.1:4176/scene.gltf",
+      "loadedPackageAgain": true,
+      "beforeSourceInspection": {
+        "state": "unverifiable",
+        "geometryIsCurrent": "false",
+        "package": "verified",
+        "sources": "unverifiable",
+        "sourceInspection": "unavailable",
+        "hiddenOccurrences": "3",
+        "droppedOccurrences": "0",
+        "droppedSelection": "false",
+        "selectedObjectId": "159",
+        "kindLabel": "UNVERIFIABLE",
+        "statusText": "http://127.0.0.1:4176/scene.gltf reopened as unverifiable. No source document was checked, so its 4 source(s) are unverifiable; use \"Check sources\" to pick them. Restored 3 hidden occurrence(s) and the selection.",
+        "statusState": "warning",
+        "selectionText": "Selected Bodenplatte:STB 300:2398103 · node 158 · ID 159 · 0 CAD edge refs",
+        "sectionEnabled": "true",
+        "sectionPosition": 35,
+        "sceneUrl": "http://127.0.0.1:4176/scene.gltf"
+      },
+      "afterSourceInspection": {
+        "state": "verified",
+        "geometryIsCurrent": "true",
+        "package": "verified",
+        "sources": "verified",
+        "sourceInspection": "available",
+        "hiddenOccurrences": "3",
+        "droppedOccurrences": "0",
+        "droppedSelection": "false",
+        "selectedObjectId": "159",
+        "kindLabel": "VERIFIED",
+        "statusText": "http://127.0.0.1:4176/scene.gltf reopened as verified. All 4 source(s) match. Restored 3 hidden occurrence(s) and the selection.",
+        "statusState": null,
+        "selectionText": "Selected Bodenplatte:STB 300:2398103 · node 158 · ID 159 · 0 CAD edge refs",
+        "sectionEnabled": "true",
+        "sectionPosition": 35,
+        "sceneUrl": "http://127.0.0.1:4176/scene.gltf"
+      },
+      "resaved": {
+        "fileName": "http-127.0.0.1-4176-scene.gltf.naru-workspace.json",
+        "byteLength": 1871,
+        "sha256": "5949870b198007e704f13237e0c8fa41899fcac8044449373ad729ed01f4d8c1",
+        "statusText": "Saved 3 hidden occurrence(s) and 4 source(s) for http://127.0.0.1:4176/scene.gltf."
+      },
+      "manifestIsByteIdentical": true,
+      "screenshot": {
+        "path": "reopen-after-reload.png",
+        "bytes": 294099,
+        "sha256": "de537008a371c559c3cd493a24697e5037a30c8b7380872849e1afa911c82c4e"
+      }
+    }
+  },
+  "consoleIssues": [],
+  "elapsedSeconds": 11.2
+}

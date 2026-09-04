@@ -1,8 +1,8 @@
 # ADR-0022: Persist a non-authoritative workspace manifest keyed by source and package identity
 
-Status: Proposed
+Status: Accepted
 
-Reviewed: 2026-09-05
+Accepted: 2026-09-05
 
 ## Context
 
@@ -213,10 +213,19 @@ it.
    host did not write back to identical bytes and asserts over every string in a
    serialized document that no path separator, no backslash, and no timestamp
    appears, and that no `recordedAt` or `host` key exists.
-4. **The exit criterion.** One browser record shows a workspace saved and
-   reopened in the Studio against an unchanged package, and the same workspace
-   reopened after a source edit reporting the change. That record is what moves
-   the Phase 2 criterion off **Pending**.
+4. **The exit criterion.** Met by
+   [`artifacts/workspace/reopen/`](../../artifacts/workspace/reopen/README.md)
+   (`naru.workspace-reopen-evidence.1`, `pnpm workspace:reopen:check`): one
+   headed Chrome 151 run over the Digital Hub package `0e2ed4547e29...` saves a
+   session of three hidden walls, one selected slab, a section plane at 35% and
+   a moved camera as an 1,871-byte manifest; reopens it against the unchanged
+   package as `unverifiable`, then `verified` once the four sources are
+   inspected, restoring every part and re-saving the same 1,871 bytes with the
+   same digest; reopens it after a same-length `7.77 -> 9.77` extrusion edit to
+   `arc.ifc` as `changed-source` with `geometryIsCurrent` false while the
+   package still reads `verified`; and reopens it once more through a forced
+   reload so both of the Studio's restore paths are recorded, producing a
+   screenshot byte-identical to the unchanged arm. Zero console issues.
 
 Failing gate 1 or gate 2 rejects this ADR rather than loosening it, on the
 precedent [ADR-0018](0018-content-addressed-compiled-payloads.md) set: a design
