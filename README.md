@@ -362,6 +362,7 @@ packages/
   compiler/           Deterministic Scene IR to standards-first glTF compiler
   scene-ir/           In-memory engineering scene types and validator
   runtime-webgpu/     Compiled glTF loader and direct WebGPU rendering path
+  workspace/          Workspace manifest, fail-closed parser, and reopen decision
 native/
   adapter-occt/       Isolated STEP/XDE extraction spike
   adapter-ifc/        Isolated multi-document IFC federation adapter

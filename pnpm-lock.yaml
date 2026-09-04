@@ -104,6 +104,8 @@ importers:
 
   packages/scene-ir: {}
 
+  packages/workspace: {}
+
   tools/benchmark:
     dependencies:
       '@naru3d/scene-ir':
