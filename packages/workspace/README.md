@@ -77,9 +77,12 @@ absolute path, and no user identity.
 filesystem path. It accepts only `http` and `https` package hrefs without
 embedded credentials, and stores a local package as a bare file name rather than
 a path. `schemaVersion` is checked first; within a version this repository
-issued, an unknown key is refused as corruption rather than ignored. Every
-collection and string is bounded by `defaultWorkspaceParseLimits`, which an
-embedder may tighten through the `limits` option.
+issued, an unknown key is refused as corruption rather than ignored. A manifest
+that names no source is refused too: it would otherwise reopen as `verified`
+with `geometryIsCurrent` true while nothing about that geometry's provenance had
+been checked. Every collection and string is bounded by
+`defaultWorkspaceParseLimits`, which an embedder may tighten through the
+`limits` option.
 
 ## Deciding a reopen
 

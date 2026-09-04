@@ -2,6 +2,7 @@ import {
   CompiledGltfError,
   NaruWebGpuError,
   NaruWebGpuRenderer,
+  PackageTransport,
 } from "@naru3d/runtime-webgpu";
 import type {
   CompiledHierarchy,
@@ -50,6 +51,30 @@ import type {
   RankedTargetChunk,
   TargetSchedulerEvent,
 } from "./view-priority-scheduler.js";
+import {
+  evaluateWorkspaceReopen,
+  parseWorkspace,
+  serializeWorkspace,
+} from "@naru3d/workspace";
+import type {
+  ObservedSource,
+  WorkspaceDocument,
+  WorkspaceEvidenceState,
+  WorkspacePackageReference,
+  WorkspaceReopenDecision,
+  WorkspaceSection,
+  WorkspaceSourceVerdict,
+  WorkspaceViewResolution,
+} from "@naru3d/workspace";
+import { readPackageIdentity } from "./package-identity.js";
+import type { PackageIdentity, PackageReportSource } from "./package-identity.js";
+import {
+  captureWorkspace,
+  inspectWorkspaceSources,
+  observeWorkspace,
+  resolveRestoredObjects,
+} from "./workspace-session.js";
+import type { RestoredObjects, WorkspaceCapture } from "./workspace-session.js";
 import faviconUrl from "../../../docs/media/naru-favicon.svg?url";
 import inverseMarkUrl from "../../../docs/media/naru-mark-inverse.svg?url";
 
@@ -207,6 +232,11 @@ const localSceneButton = requireElement<HTMLElement>(".local-scene-button");
 const openDemoSceneButton = requireElement<HTMLButtonElement>("#open-demo-scene");
 const openPygamerSceneButton = requireElement<HTMLButtonElement>("#open-pygamer-scene");
 const cancelSceneLoadButton = requireElement<HTMLButtonElement>("#cancel-scene-load");
+const saveWorkspaceButton = requireElement<HTMLButtonElement>("#save-workspace");
+const workspaceFileInput = requireElement<HTMLInputElement>("#workspace-file");
+const workspaceSourcesInput = requireElement<HTMLInputElement>("#workspace-sources");
+const workspaceStatus = requireElement<HTMLElement>("#workspace-status");
+const workspaceKind = requireElement<HTMLElement>("#workspace-kind");
 const defaultSceneUrl = new URL(`${import.meta.env.BASE_URL}scene.gltf`, window.location.href);
 const pygamerSceneUrl = new URL(
   `${import.meta.env.BASE_URL}pygamer/scene.gltf`,
@@ -218,6 +248,33 @@ requireElement<HTMLImageElement>("#naru-brand-mark").src = inverseMarkUrl;
 let disposeActiveScene: (() => void) | undefined;
 let cancelPendingSceneLoad: (() => void) | undefined;
 
+/**
+ * What the open scene lets a workspace do.
+ *
+ * The Studio holds one of these per loaded package. Every closure it carries
+ * belongs to that load, so replacing a scene replaces the session outright
+ * rather than leaving stale ids behind.
+ */
+interface StudioWorkspaceSession {
+  readonly reference: WorkspacePackageReference;
+  readonly label: string;
+  /** Memoized: the reports are read once per load, never on the load path. */
+  identity(): Promise<PackageIdentity | { readonly reason: string }>;
+  occurrenceIds(): ReadonlySet<string>;
+  /** Isolation has no field in `naru.workspace.1`, so a save must say so. */
+  isolatedObjectId(): number | undefined;
+  capture(identity: PackageIdentity): WorkspaceCapture;
+  restore(view: WorkspaceViewResolution): RestoredObjects;
+}
+
+let workspaceSession: StudioWorkspaceSession | undefined;
+/** Parsed but not yet applied, because its package is still opening. */
+let pendingWorkspace: WorkspaceDocument | undefined;
+/** Applied against the open package, so re-checking sources can re-decide. */
+let activeWorkspace: WorkspaceDocument | undefined;
+/** Present only when the user supplied every source the manifest names. */
+let inspectedWorkspaceSources: readonly ObservedSource[] | undefined;
+
 function setSourceControlsBusy(busy: boolean): void {
   openSceneUrlButton.disabled = busy;
   sceneUrlInput.disabled = busy;
@@ -228,6 +285,10 @@ function setSourceControlsBusy(busy: boolean): void {
   cancelSceneLoadButton.disabled = !busy;
   if (busy) localSceneButton.dataset.disabled = "true";
   else delete localSceneButton.dataset.disabled;
+  workspaceFileInput.disabled = busy;
+  saveWorkspaceButton.disabled = busy || workspaceSession === undefined;
+  workspaceSourcesInput.disabled =
+    busy || (activeWorkspace ?? pendingWorkspace) === undefined;
   document.documentElement.dataset.sceneLoading = String(busy);
 }
 
@@ -262,6 +323,25 @@ function resetSceneUi(): void {
   delete document.documentElement.dataset.spatialOccurrencesTotal;
   delete document.documentElement.dataset.spatialCandidateChunks;
   delete document.documentElement.dataset.spatialQueryMilliseconds;
+  delete document.documentElement.dataset.workspaceState;
+  delete document.documentElement.dataset.workspaceGeometryCurrent;
+  delete document.documentElement.dataset.workspacePackage;
+  delete document.documentElement.dataset.workspaceSources;
+  delete document.documentElement.dataset.workspaceSourceInspection;
+  delete document.documentElement.dataset.workspaceHiddenOccurrences;
+  delete document.documentElement.dataset.workspaceDroppedOccurrences;
+  delete document.documentElement.dataset.workspaceDroppedSelection;
+  delete document.documentElement.dataset.workspaceSelectedObject;
+  delete document.documentElement.dataset.workspaceSaved;
+  workspaceSession = undefined;
+  activeWorkspace = undefined;
+  saveWorkspaceButton.disabled = true;
+  workspaceKind.textContent = "WORKSPACE";
+  delete workspaceStatus.dataset.state;
+  workspaceStatus.textContent =
+    pendingWorkspace === undefined
+      ? "Open a package to save a workspace."
+      : `Reopening ${pendingWorkspace.label}…`;
   clearMemoryDataset();
   hierarchySearchInput.value = "";
   hierarchySearchResult.textContent = "Waiting for hierarchy";
@@ -501,6 +581,9 @@ async function loadScene(source: SceneSource): Promise<boolean> {
     requireElement<HTMLElement>("#stage-webgpu").dataset.state = "ready";
     const evidence = new Map(scene.objectEvidence.map((entry) => [entry.objectId, entry]));
     const evidenceByNode = new Map(scene.objectEvidence.map((entry) => [entry.nodeIndex, entry]));
+    const objectIdByOccurrence = new Map(
+      scene.objectEvidence.map((entry) => [entry.occurrenceId, entry.objectId]),
+    );
     let visibility = occurrenceVisibilityForResidency(
       scene.gpuScene,
       progressiveResidency ? initial.coarseInstanceTargetMeshIndexes : undefined,
@@ -1271,6 +1354,69 @@ async function loadScene(source: SceneSource): Promise<boolean> {
       finalizeProgressiveStatus();
     }
 
+    const packageReference: WorkspacePackageReference =
+      source.kind === "url"
+        ? { kind: "url", href: source.gltfUrl.href }
+        : { kind: "local", fileName: source.gltfFile.name };
+    const reportSource: PackageReportSource =
+      source.kind === "url" && loaded.transport !== undefined
+        ? { kind: "url", transport: PackageTransport.fromDescriptor(loaded.transport) }
+        : { kind: "local", files: source.kind === "local" ? source.sidecarFiles : [] };
+    let identityPromise: Promise<PackageIdentity | { readonly reason: string }> | undefined;
+    let occurrenceIdSet: ReadonlySet<string> | undefined;
+    const persistedSection = (): WorkspaceSection => {
+      const state = section.state();
+      return {
+        enabled: state.enabled,
+        axis: state.axis,
+        direction: state.direction,
+        fraction: state.fraction,
+      };
+    };
+    workspaceSession = {
+      reference: packageReference,
+      label: loaded.label,
+      identity: () => (identityPromise ??= readPackageIdentity(reportSource)),
+      occurrenceIds: () => (occurrenceIdSet ??= new Set(objectIdByOccurrence.keys())),
+      isolatedObjectId: () => visibility.state().isolatedObjectId,
+      capture: (identity) =>
+        captureWorkspace({
+          label: loaded.label,
+          reference: packageReference,
+          packageDigest: identity.packageDigest,
+          resources: identity.resources,
+          sources: identity.sources ?? [],
+          camera: camera.state(),
+          section: persistedSection(),
+          hiddenObjectIds: visibility.snapshot().hiddenObjectIds,
+          selectedObjectId,
+          occurrenceIdOf: (objectId) => evidence.get(objectId)?.occurrenceId,
+        }),
+      restore: (view) => {
+        // An id the reopened batches cannot act on is reported as dropped
+        // rather than thrown by `visibility.restore`, which refuses unknown ids.
+        const restored = resolveRestoredObjects(view, (occurrenceId) => {
+          const objectId = objectIdByOccurrence.get(occurrenceId);
+          return objectId !== undefined && visibility.knows(objectId) ? objectId : undefined;
+        });
+        camera.restore(view.camera);
+        section.restore(view.section);
+        visibility.restore({ hiddenObjectIds: restored.hiddenObjectIds });
+        applySection();
+        applyVisibility();
+        selectObject(restored.selectedObjectId);
+        scheduleCameraRender();
+        return restored;
+      },
+    };
+    saveWorkspaceButton.disabled = false;
+    const reopening = pendingWorkspace;
+    if (reopening === undefined) {
+      setWorkspaceStatus(`Ready to save a workspace for ${loaded.label}.`);
+    } else {
+      await applyWorkspace(reopening);
+    }
+
     pendingCleanup = undefined;
     return true;
   } catch (error) {
@@ -1290,6 +1436,280 @@ async function loadScene(source: SceneSource): Promise<boolean> {
     if (cancelPendingSceneLoad === cancel) cancelPendingSceneLoad = undefined;
     setSourceControlsBusy(false);
   }
+}
+
+const evidenceSeverity: Readonly<Record<WorkspaceEvidenceState, number>> = {
+  verified: 0,
+  unverifiable: 1,
+  changed: 2,
+  missing: 3,
+};
+
+/**
+ * Reduces the per-source verdicts to the worst one.
+ *
+ * `WorkspaceReopenDecision` carries no aggregated source state on purpose: the
+ * decision names every source so a caller can say which one changed. The
+ * Studio still needs one word for its status line, so it reduces here.
+ */
+function worstSourceState(sources: readonly WorkspaceSourceVerdict[]): WorkspaceEvidenceState {
+  let carried: WorkspaceEvidenceState = "verified";
+  for (const source of sources) {
+    if (evidenceSeverity[source.state] > evidenceSeverity[carried]) carried = source.state;
+  }
+  return carried;
+}
+
+function setWorkspaceStatus(message: string, state?: "error" | "warning"): void {
+  workspaceStatus.textContent = message;
+  if (state === undefined) delete workspaceStatus.dataset.state;
+  else workspaceStatus.dataset.state = state;
+}
+
+function describeReference(reference: WorkspacePackageReference): string {
+  return reference.kind === "url" ? reference.href : reference.fileName;
+}
+
+function shortDigest(digest: string): string {
+  return digest.length > 12 ? `${digest.slice(0, 12)}…` : digest;
+}
+
+function workspaceFileName(label: string): string {
+  const stem = label
+    .replace(/[^A-Za-z0-9._-]+/gu, "-")
+    .replace(/^-+/u, "")
+    .replace(/-+$/u, "")
+    .slice(0, 80);
+  return `${stem === "" ? "workspace" : stem}.naru-workspace.json`;
+}
+
+function downloadWorkspace(fileName: string, text: string): void {
+  const href = URL.createObjectURL(new Blob([text], { type: "application/json" }));
+  const anchor = document.createElement("a");
+  anchor.href = href;
+  anchor.download = fileName;
+  anchor.rel = "noopener";
+  anchor.click();
+  // The click takes its reference synchronously; the object URL is released on
+  // the next task so the download is not cancelled by revoking it too early.
+  window.setTimeout(() => URL.revokeObjectURL(href), 0);
+}
+
+async function saveWorkspace(): Promise<void> {
+  const session = workspaceSession;
+  if (session === undefined) {
+    setWorkspaceStatus("Open a package before saving a workspace.", "error");
+    return;
+  }
+  saveWorkspaceButton.disabled = true;
+  try {
+    setWorkspaceStatus(`Reading the identity of ${session.label}…`);
+    const identity = await session.identity();
+    if ("reason" in identity) {
+      setWorkspaceStatus(`This package cannot be saved as a workspace: ${identity.reason}`, "error");
+      return;
+    }
+    if (identity.sources === undefined) {
+      setWorkspaceStatus(
+        `This package cannot be saved as a workspace: ` +
+          `${identity.sourcesUnavailableReason ?? "its source identity could not be read"}. ` +
+          `A workspace that named no source would reopen as verified without any ` +
+          `source having been checked.`,
+        "error",
+      );
+      return;
+    }
+    const capture = session.capture(identity);
+    downloadWorkspace(
+      workspaceFileName(capture.document.label),
+      serializeWorkspace(capture.document),
+    );
+    const notes: string[] = [];
+    if (capture.unnamedHiddenObjectIds.length > 0) {
+      notes.push(
+        `${capture.unnamedHiddenObjectIds.length} hidden occurrence(s) carry no id and were not saved`,
+      );
+    }
+    if (capture.unnamedSelection) {
+      notes.push("the selection carries no occurrence id and was not saved");
+    }
+    if (session.isolatedObjectId() !== undefined) {
+      notes.push(
+        "isolation has no field in naru.workspace.1, so only the explicit hidden set was saved",
+      );
+    }
+    document.documentElement.dataset.workspaceSaved = "true";
+    setWorkspaceStatus(
+      `Saved ${capture.document.view.hiddenOccurrenceIds.length} hidden occurrence(s) and ` +
+        `${capture.document.sources.length} source(s) for ${capture.document.label}.` +
+        (notes.length > 0 ? ` Not saved: ${notes.join("; ")}.` : ""),
+      notes.length > 0 ? "warning" : undefined,
+    );
+  } catch (error) {
+    setWorkspaceStatus(
+      `Could not save this workspace: ${error instanceof Error ? error.message : String(error)}`,
+      "error",
+    );
+  } finally {
+    saveWorkspaceButton.disabled = workspaceSession === undefined;
+  }
+}
+
+function publishWorkspaceReopen(
+  manifest: WorkspaceDocument,
+  decision: WorkspaceReopenDecision,
+  restored: RestoredObjects,
+  identityReason: string | undefined,
+): void {
+  const root = document.documentElement.dataset;
+  const sourceState = worstSourceState(decision.sources);
+  root.workspaceState = decision.state;
+  root.workspaceGeometryCurrent = String(decision.geometryIsCurrent);
+  root.workspacePackage = decision.package.state;
+  root.workspaceSources = sourceState;
+  root.workspaceSourceInspection =
+    inspectedWorkspaceSources === undefined ? "unavailable" : "available";
+  root.workspaceHiddenOccurrences = String(restored.hiddenObjectIds.length);
+  root.workspaceDroppedOccurrences = String(restored.droppedOccurrenceIds.length);
+  root.workspaceDroppedSelection = String(restored.droppedSelection);
+  root.workspaceSelectedObject = String(restored.selectedObjectId);
+  workspaceKind.textContent = decision.state.toUpperCase();
+
+  const sentences = [`${manifest.label} reopened as ${decision.state}.`];
+  if (decision.package.state === "changed") {
+    sentences.push(
+      `The package digest is ${shortDigest(decision.package.observedDigest ?? "unknown")} ` +
+        `but this workspace recorded ${shortDigest(decision.package.expectedDigest)}.`,
+    );
+  } else if (identityReason !== undefined) {
+    sentences.push(`The package identity could not be read: ${identityReason}.`);
+  }
+  if (inspectedWorkspaceSources === undefined) {
+    sentences.push(
+      `No source document was checked, so its ${manifest.sources.length} source(s) are ` +
+        `unverifiable; use "Check sources" to pick them.`,
+    );
+  } else if (sourceState !== "verified") {
+    const named = decision.sources
+      .filter((source) => source.state !== "verified")
+      .map((source) => `${source.label} (${source.state})`);
+    sentences.push(`Source evidence: ${named.join(", ")}.`);
+  } else {
+    sentences.push(`All ${decision.sources.length} source(s) match.`);
+  }
+  sentences.push(
+    `Restored ${restored.hiddenObjectIds.length} hidden occurrence(s)` +
+      (restored.selectedObjectId === 0 ? " and no selection." : " and the selection."),
+  );
+  if (restored.droppedOccurrenceIds.length > 0) {
+    sentences.push(
+      `${restored.droppedOccurrenceIds.length} occurrence id(s) this package does not carry ` +
+        `were dropped${restored.droppedSelection ? ", including the selection" : ""}.`,
+    );
+  }
+  setWorkspaceStatus(
+    sentences.join(" "),
+    decision.state === "verified"
+      ? undefined
+      : decision.state === "blocked"
+        ? "error"
+        : "warning",
+  );
+}
+
+/** Applies a parsed manifest against the package that is already open. */
+async function applyWorkspace(manifest: WorkspaceDocument): Promise<void> {
+  const session = workspaceSession;
+  if (session === undefined) {
+    setWorkspaceStatus(
+      `Open ${describeReference(manifest.package.reference)} to reopen ${manifest.label}.`,
+    );
+    return;
+  }
+  const identity = await session.identity();
+  const decision = evaluateWorkspaceReopen(
+    manifest,
+    observeWorkspace({
+      packagePresent: true,
+      packageDigest: "reason" in identity ? undefined : identity.packageDigest,
+      occurrenceIds: session.occurrenceIds(),
+      inspectedSources: inspectedWorkspaceSources,
+    }),
+  );
+  const restored = session.restore(decision.view);
+  pendingWorkspace = undefined;
+  activeWorkspace = manifest;
+  workspaceSourcesInput.disabled = false;
+  publishWorkspaceReopen(
+    manifest,
+    decision,
+    restored,
+    "reason" in identity ? identity.reason : undefined,
+  );
+}
+
+async function openWorkspaceFile(file: File): Promise<void> {
+  let manifest: WorkspaceDocument;
+  try {
+    manifest = parseWorkspace(await file.text());
+  } catch (error) {
+    setWorkspaceStatus(
+      `${file.name} is not a NARU workspace: ` +
+        (error instanceof Error ? error.message : String(error)),
+      "error",
+    );
+    return;
+  }
+  // A manifest read earlier says nothing about the sources of this one.
+  inspectedWorkspaceSources = undefined;
+  activeWorkspace = undefined;
+  pendingWorkspace = manifest;
+  workspaceSourcesInput.disabled = false;
+  const reference = manifest.package.reference;
+  if (workspaceSession !== undefined && describeReference(workspaceSession.reference) === describeReference(reference)) {
+    await applyWorkspace(manifest);
+    return;
+  }
+  if (reference.kind === "local") {
+    setWorkspaceStatus(
+      `Open ${reference.fileName} with "Compiled files" to reopen ${manifest.label}; ` +
+        `a browser cannot reach a local package by name.`,
+    );
+    return;
+  }
+  let gltfUrl: URL;
+  try {
+    gltfUrl = parseSceneUrl(reference.href, window.location.href);
+  } catch (error) {
+    setWorkspaceStatus(
+      `This workspace names a package this Studio will not open: ` +
+        (error instanceof Error ? error.message : String(error)),
+      "error",
+    );
+    return;
+  }
+  sceneUrlInput.value = gltfUrl.href;
+  setWorkspaceStatus(`Reopening ${manifest.label} against ${gltfUrl.href}…`);
+  const loadedScene = await loadScene({ kind: "url", gltfUrl });
+  if (loadedScene) replaceSceneQuery(gltfUrl);
+}
+
+async function checkWorkspaceSources(files: readonly File[]): Promise<void> {
+  const manifest = activeWorkspace ?? pendingWorkspace;
+  if (manifest === undefined) {
+    setWorkspaceStatus("Open a workspace before checking its sources.", "error");
+    return;
+  }
+  setWorkspaceStatus(`Hashing ${files.length} source file(s)…`);
+  const inspection = await inspectWorkspaceSources(manifest, files);
+  if (inspection.sources === undefined) {
+    inspectedWorkspaceSources = undefined;
+    setWorkspaceStatus(`Sources stay unverifiable: ${inspection.reasons.join(" ")}`, "warning");
+    return;
+  }
+  inspectedWorkspaceSources = inspection.sources;
+  if (activeWorkspace !== undefined) await applyWorkspace(activeWorkspace);
+  else setWorkspaceStatus(`Hashed ${inspection.sources.length} source(s); open the package to reopen.`);
 }
 
 function replaceSceneQuery(sceneUrl?: URL): void {
@@ -1346,6 +1766,26 @@ openPygamerSceneButton.addEventListener("click", () => {
 
 cancelSceneLoadButton.addEventListener("click", () => {
   cancelPendingSceneLoad?.();
+});
+
+saveWorkspaceButton.addEventListener("click", () => {
+  void saveWorkspace();
+});
+
+workspaceFileInput.addEventListener("change", () => {
+  const file = workspaceFileInput.files?.[0];
+  if (!file) return;
+  void openWorkspaceFile(file).finally(() => {
+    workspaceFileInput.value = "";
+  });
+});
+
+workspaceSourcesInput.addEventListener("change", () => {
+  const files = Array.from(workspaceSourcesInput.files ?? []);
+  if (files.length === 0) return;
+  void checkWorkspaceSources(files).finally(() => {
+    workspaceSourcesInput.value = "";
+  });
 });
 
 window.addEventListener(

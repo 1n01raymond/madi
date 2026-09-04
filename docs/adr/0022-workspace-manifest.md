@@ -57,7 +57,10 @@ from it with a pure function over observed evidence.
    resource as `{path, byteLength, sha256}`; each source by a stable key with
    its `byteLength` and `sha256`. Both are copied from the reports the import
    already wrote, so a workspace never asserts an identity the pipeline did not
-   compute.
+   compute. A manifest naming no source is refused on both sides -- the writer
+   will not build one and the parser will not accept one -- because it would
+   otherwise reopen as `verified` with `geometryIsCurrent` true while nothing
+   about that geometry's provenance had been checked.
 4. **How view state is keyed.** Selection and visibility are keyed by
    `occurrenceId`. Node indices are never persisted. The section plane is
    stored as axis, direction, and a fraction in `[0, 1]`; its bounds are
@@ -135,6 +138,15 @@ from it with a pure function over observed evidence.
 - `occurrenceId` stability is inherited, not enforced here. If an adapter
   changes how it derives occurrence identity, saved selections and hidden sets
   degrade to dropped ids -- reported, but dropped.
+- Isolation is not a field. `naru.workspace.1` stores the hidden set, so a
+  workspace saved while one occurrence is isolated persists only the explicit
+  hidden set and reopens with everything else visible. The Studio says so at the
+  moment of saving rather than restoring a different view silently; carrying
+  isolation would cost a schema bump under item 7.
+- A workspace can only be saved from a package whose reports name every source
+  with a digest and a byte length. An OCCT STEP package states one source
+  without a byte length, so saving refuses and names the gap instead of writing
+  a manifest whose source half could never be verified.
 
 ## Alternatives considered
 
@@ -166,7 +178,13 @@ from it with a pure function over observed evidence.
 
 Per the Phase 2 routing decision that evidence which does not close a roadmap
 exit criterion is a test rather than a fresh-process record, gates 0 through 3
-are unit tests in this repository and gate 4 is the single browser record.
+are unit tests in this repository and gate 4 is the single browser record. The
+Studio half of gates 1 through 3 is proven over the translation layer the
+Studio calls -- `apps/webgpu-spike/src/workspace-session.ts`, whose reader of
+the two import reports is covered against their committed shapes by
+[`apps/webgpu-spike/test/package-identity.test.ts`](../../apps/webgpu-spike/test/package-identity.test.ts)
+-- because a unit test can exercise the decision but not the renderer acting on
+it.
 
 0. **Schema and decision contract.** Met by this slice:
    [`packages/workspace/test/document.test.ts`](../../packages/workspace/test/document.test.ts)
@@ -177,16 +195,24 @@ are unit tests in this repository and gate 4 is the single browser record.
    [`packages/workspace/test/reopen.test.ts`](../../packages/workspace/test/reopen.test.ts)
    covers the four per-part states, the five-state precedence, and
    `geometryIsCurrent`.
-1. **Studio round trip.** Saving and reopening a workspace through the Studio
-   restores camera, section, hidden set, and selection against an unchanged
-   package, with the ids the reopened hierarchy does not carry reported as
-   dropped rather than silently discarded.
-2. **Changed-source detection through the Studio.** A real source edit -- the
-   single-parameter IFC edit the rebuild-stage records already use -- reopens as
-   `changed-source` with `geometryIsCurrent` false.
-3. **Portability.** A manifest written by one host parses unchanged on another
-   and re-serializes to identical bytes, with the absence of host paths and
-   timestamps asserted rather than assumed.
+1. **Studio round trip.** Met at the translation layer by
+   [`apps/webgpu-spike/test/workspace-session.test.ts`](../../apps/webgpu-spike/test/workspace-session.test.ts),
+   which captures a view the Studio would capture, serializes it, reopens it
+   against unchanged evidence, and resolves the restored occurrence ids back to
+   the object ids the renderer uses: camera, section, hidden set, and selection
+   all restored, and the ids a recompiled hierarchy no longer carries reported
+   as dropped rather than silently discarded. What that test cannot show is the
+   renderer acting on the result, which is what gate 4 records.
+2. **Changed-source detection through the Studio.** Met at the translation
+   layer by the same test file: a captured workspace whose observed source bytes
+   moved reopens as `changed-source` with `geometryIsCurrent` false while the
+   package half still reads `verified`, and sources the host could not inspect
+   read `unverifiable` rather than `verified`. The real single-parameter IFC
+   edit -- the one the rebuild-stage records already use -- belongs to gate 4.
+3. **Portability.** Met by the same test file, which round-trips a manifest this
+   host did not write back to identical bytes and asserts over every string in a
+   serialized document that no path separator, no backslash, and no timestamp
+   appears, and that no `recordedAt` or `host` key exists.
 4. **The exit criterion.** One browser record shows a workspace saved and
    reopened in the Studio against an unchanged package, and the same workspace
    reopened after a source edit reporting the change. That record is what moves

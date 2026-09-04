@@ -196,3 +196,49 @@ For progressive packages, local `File.slice()` provides the same target chunk
 boundary without network requests. **Cancel** aborts the active hierarchy or
 geometry load, terminates its Worker, and prevents later target ranges from
 starting.
+
+## Save and reopen a workspace
+
+The workspace bar saves the current session as a `naru.workspace.1` manifest and
+reopens one ([ADR-0022](../../docs/adr/0022-workspace-manifest.md),
+[`@naru3d/workspace`](../../packages/workspace/README.md)). A workspace is a
+pointer plus intent: the package it was saved against, the sources that import
+consumed, and one view — camera, section, hidden set, selection. It carries no
+geometry, no absolute path, no timestamp, and no host name.
+
+**Save workspace** downloads the manifest. Package and source identity are read
+from the import's own `build-report.json` and `adapter-report.json` rather than
+from the scene, so the Studio never asserts an identity the pipeline did not
+compute; a package whose reports do not name every source with a digest and a
+byte length — an OCCT STEP package states one source with no byte length —
+refuses to be saved and says which half is missing. Visibility and selection are
+stored by `occurrenceId`, never by node index, so a recompile of the same source
+still resolves them.
+
+**Open workspace** reads a manifest. If it names the package already open, the
+view is restored immediately; if it names an HTTP(S) package, the Studio loads
+that package first and then restores; if it names a local package, the browser
+cannot reach a file by name, so the status asks for the file to be re-picked
+through **Compiled files**. Occurrence ids the reopened hierarchy no longer
+carries are reported as dropped rather than silently discarded.
+
+**Check sources** picks the source documents themselves and hashes them in the
+browser. Until that happens a reopen reports `unverifiable`, never `verified`,
+because a tab cannot stat a local IFC file and calling an unchecked source
+unchanged would be a lie. A partial selection stays `unverifiable` as a whole —
+inspecting some sources and reporting the rest as clean would be a different
+lie. Once hashed, a moved source reopens as `changed-source` with
+`geometryIsCurrent` false even when the package still matches its digest,
+because the source is authoritative
+([ADR-0002](../../docs/adr/0002-source-and-cache.md)).
+
+Isolation has no field in `naru.workspace.1`. Saving while an occurrence is
+isolated persists only the explicit hidden set, and the status says so at the
+moment of saving instead of restoring a different view later.
+
+The reopen verdict is published on the document element for tests and
+recordings: `data-workspace-state`, `data-workspace-geometry-current`,
+`data-workspace-package`, `data-workspace-sources`,
+`data-workspace-source-inspection`, `data-workspace-hidden-occurrences`,
+`data-workspace-dropped-occurrences`, `data-workspace-dropped-selection`,
+`data-workspace-selected-object`, and `data-workspace-saved`.

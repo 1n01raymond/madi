@@ -10,7 +10,8 @@
   },
   "dependencies": {
     "@naru3d/runtime-webgpu": "workspace:*",
-    "@naru3d/scene-ir": "workspace:*"
+    "@naru3d/scene-ir": "workspace:*",
+    "@naru3d/workspace": "workspace:*"
   },
   "devDependencies": {
     "@webgpu/types": "catalog:",

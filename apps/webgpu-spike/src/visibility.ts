@@ -188,6 +188,14 @@ export class OccurrenceVisibility {
     this.rebuildTables();
   }
 
+  /**
+   * Whether this scene carries the occurrence at all, so a restore can report
+   * what it dropped instead of throwing on an id the reopened package lost.
+   */
+  knows(objectId: number): boolean {
+    return this.objectIds.has(objectId);
+  }
+
   isVisible(objectId: number): boolean {
     return this.objectIds.has(objectId) && this.isVisibleKnown(objectId);
   }
