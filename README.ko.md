@@ -359,6 +359,7 @@ packages/
   compiler/           결정적 Scene IR → 표준 우선 glTF 컴파일러
   scene-ir/           인메모리 엔지니어링 장면 타입과 검증기
   runtime-webgpu/     glTF 로더와 직접 WebGPU 렌더링 경로
+  workspace/          워크스페이스 manifest, 실패 시 거부하는 파서, 재오픈 판단
 native/
   adapter-occt/       격리된 STEP/XDE 추출 스파이크
   adapter-ifc/        격리된 다중 문서 IFC federation 어댑터

@@ -36,6 +36,7 @@ Coding agents are welcome under the same rules as every contributor, plus:
 | `packages/scene-ir` | Engineering Scene IR types and `validateScene` |
 | `packages/compiler` | Scene IR to glTF packaging, the `naru` CLI (`compile`, `compile-ifc`), adapter/build reports, evidence CLI |
 | `packages/runtime-webgpu` | Direct WebGPU renderer, compiled-glTF loader, Worker decode, bounded residency |
+| `packages/workspace` | `naru.workspace.1` manifest, fail-closed parser, canonical serializer, reopen decision |
 | `apps/webgpu-spike` | Studio prototype: tree, search, properties, section plane, residency controls |
 | `apps/benchmark-lab` | NARU vs Three.js industrial benchmark harness |
 | `native/adapter-occt` | C++/Python OCCT STEP adapter (isolated, not a browser dependency) |
