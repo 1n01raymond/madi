@@ -214,7 +214,9 @@ export function median(values) {
 }
 
 /**
- * Recomputes every predeclared target from the samples. A recorded verdict is
+ * Recomputes every predeclared target from the samples, including the targets a
+ * record does not declare -- the caller checks only the ids its own family
+ * declared. A recorded verdict is
  * not evidence of itself, so the validator compares this against what the
  * recorder wrote rather than reading the verdict.
  */
@@ -239,6 +241,18 @@ export function recomputeTargets(record, ceilings) {
       (sample) =>
         sample.page.usedJsHeapBytes !== null &&
         sample.page.usedJsHeapBytes <= ceilings.usedJsHeapBytes,
+    ),
+    // The target an engine without heap estimators declares instead. It passes
+    // only if both figures are absent AND say why: a zero would satisfy neither
+    // half, which is the point of measuring the absence.
+    "heap-estimators-absent-not-zero": samples.every(
+      (sample) =>
+        sample.page.usedJsHeapBytes === null &&
+        typeof sample.page.usedJsHeapUnavailableReason === "string" &&
+        sample.page.usedJsHeapUnavailableReason.length > 0 &&
+        sample.page.uaMemoryBytes === null &&
+        typeof sample.page.uaMemoryUnavailableReason === "string" &&
+        sample.page.uaMemoryUnavailableReason.length > 0,
     ),
     // Usable means the parts a person interacts with worked, not that the whole
     // model was resident: full target residency is explicitly not required.

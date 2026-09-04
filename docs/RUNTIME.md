@@ -221,6 +221,20 @@ names its owner, lifetime, and collection method; the graphics driver's
 device-side allocation has no interface that reports it and is recorded as
 unavailable rather than as zero.
 
+The [Gecko repeat](../artifacts/memory/sixty5-envelope-gecko/README.md) runs
+the same six phases in headed Firefox 150 against the same package on the same
+host. It admits the same 66,686,508 decoded and 66,783,808 GPU bytes - the
+resident set is byte-identical at every settled phase of both profiles — inside
+a process tree whose working set medians 5,104,345,088 B, so the same residency
+is 1.31% of that process rather than 2.58%. What the runtime decides is
+engine-independent; the process around it is not, which is why every
+whole-process figure here names its engine. Gecko exposes neither
+`performance.memory` nor `measureUserAgentSpecificMemory()`, so that record
+carries no heap figure at all and the operating system's sample carries the
+bound alone. It also reports the one predeclared target this engine does not
+meet: the 4 GiB process working-set ceiling, exceeded in both profiles and
+already at the hierarchy phase, before a single target chunk is admitted.
+
 Repeating the same six phases under a forced 8 MiB budget keeps all 78,173
 renderable occurrences visible through shared coarse geometry, completes
 navigation, selection, and eviction, and reports the budget-limited state it is

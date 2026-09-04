@@ -85,8 +85,11 @@ as zero:
   `null`, so a future engine that starts reporting a heap cannot slip in
   unnoticed, and it asserts the Blink record still carries the reading this one
   cannot take. A resident-set figure that does not depend on any browser's own
-  estimator is the job of `artifacts/memory/sixty5-envelope/`, whose Gecko
-  repeat is still owed.
+  estimator is the job of the memory envelope, whose Gecko repeat is now
+  recorded in [`sixty5-envelope-gecko`](../../memory/sixty5-envelope-gecko/README.md):
+  there the OS-sampled process tree carries the whole bound, and the two
+  engines hold identical resident bytes inside processes of very different
+  size.
 - **GPU adapter identity.** Firefox reports an adapter with empty vendor,
   architecture, and description, and `isFallbackAdapter` as null, so this
   record names the adapter only as "WebGPU adapter". No claim is made here

@@ -315,8 +315,47 @@ describe("target recomputation", () => {
       "residency-gpu-within-budget": true,
       "process-working-set-ceiling": true,
       "js-heap-ceiling": true,
+      // This record's engine does expose heap estimators, so the target an
+      // engine without them declares instead is false here.
+      "heap-estimators-absent-not-zero": false,
       "forced-low-remains-usable": true,
     });
+  });
+
+  it("passes the absent-estimator target only when both figures are null and say why", () => {
+    const absent = (page: Record<string, unknown>) => ({
+      runs: [run({ samples: phases.map((phase) => sample({ phase, page })) })],
+    });
+    const reasons = {
+      usedJsHeapUnavailableReason: "performance.memory is not exposed by this engine.",
+      uaMemoryUnavailableReason: "measureUserAgentSpecificMemory is not exposed by this engine.",
+    };
+
+    expect(
+      recomputeTargets(absent({ usedJsHeapBytes: null, uaMemoryBytes: null, ...reasons }), ceilings)[
+        "heap-estimators-absent-not-zero"
+      ],
+    ).toBe(true);
+
+    // A zero is the failure this target exists to catch: it reads as a measured
+    // figure while measuring nothing.
+    expect(
+      recomputeTargets(absent({ usedJsHeapBytes: 0, uaMemoryBytes: 0, ...reasons }), ceilings)[
+        "heap-estimators-absent-not-zero"
+      ],
+    ).toBe(false);
+
+    expect(
+      recomputeTargets(
+        absent({
+          usedJsHeapBytes: null,
+          uaMemoryBytes: null,
+          usedJsHeapUnavailableReason: "",
+          uaMemoryUnavailableReason: reasons.uaMemoryUnavailableReason,
+        }),
+        ceilings,
+      )["heap-estimators-absent-not-zero"],
+    ).toBe(false);
   });
 
   it("fails a target when a single sample breaches it", () => {

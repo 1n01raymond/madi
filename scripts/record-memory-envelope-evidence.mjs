@@ -16,7 +16,7 @@
 //   node scripts/record-memory-envelope-evidence.mjs \
 //     [--scene-dir output/ifc/sixty5-prb] \
 //     [--report artifacts/ifc/sixty5/build-report.json] \
-//     [--output artifacts/memory/sixty5-envelope] \
+//     [--browser chrome|firefox] [--output <engine default>] \
 //     [--runs 3] [--low-residency-mib 8] [--headless]
 import { createHash } from "node:crypto";
 import { execFile } from "node:child_process";
@@ -28,7 +28,7 @@ import { pipeline } from "node:stream/promises";
 import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
 
-import { chromium } from "playwright";
+import { chromium, firefox } from "playwright";
 import { createServer } from "vite";
 
 const execFileAsync = promisify(execFile);
@@ -39,6 +39,49 @@ function argValue(flag, fallback) {
   return index === -1 ? fallback : process.argv[index + 1];
 }
 
+// The record is engine-parameterised so the same protocol can be repeated on a
+// second engine; every launch and platform difference lives in this table and
+// nowhere else. Chrome reports performance.memory only behind the precise-memory
+// switch. Gecko exposes neither performance.memory nor
+// measureUserAgentSpecificMemory, so on that engine both heap figures stay
+// absent with a stated reason and the operating-system process sample carries
+// the whole bound.
+const browserEngines = {
+  chrome: {
+    id: "chrome",
+    engine: "Blink",
+    defaultOutput: "artifacts/memory/sixty5-envelope",
+    launchArguments: ["--enable-precise-memory-info"],
+    processName: "chrome.exe",
+    heapEstimatorsExposed: true,
+    heapUnavailableReason:
+      "performance.memory is absent; relaunch with --enable-precise-memory-info.",
+    launchServer: () =>
+      chromium.launchServer({
+        channel: "chrome",
+        headless,
+        args: ["--enable-precise-memory-info"],
+      }),
+    connect: (endpoint) => chromium.connect(endpoint),
+  },
+  firefox: {
+    id: "firefox",
+    engine: "Gecko",
+    defaultOutput: "artifacts/memory/sixty5-envelope-gecko",
+    launchArguments: [],
+    processName: "firefox.exe",
+    heapEstimatorsExposed: false,
+    heapUnavailableReason: "performance.memory is not exposed by this engine.",
+    launchServer: () => firefox.launchServer({ headless }),
+    connect: (endpoint) => firefox.connect(endpoint),
+  },
+};
+const browserId = argValue("--browser", "chrome");
+const browserEngine = Object.hasOwn(browserEngines, browserId)
+  ? browserEngines[browserId]
+  : undefined;
+if (!browserEngine) throw new TypeError("--browser must be chrome or firefox.");
+
 const sceneDirectory = resolve(repositoryRoot, argValue("--scene-dir", "output/ifc/sixty5-prb"));
 const reportPath = resolve(
   repositoryRoot,
@@ -46,7 +89,7 @@ const reportPath = resolve(
 );
 const outputDirectory = resolve(
   repositoryRoot,
-  argValue("--output", "artifacts/memory/sixty5-envelope"),
+  argValue("--output", browserEngine.defaultOutput),
 );
 const outputFromRoot = relative(repositoryRoot, outputDirectory);
 if (
@@ -100,13 +143,31 @@ const declaredTargets = [
     metric: "process.workingSetBytes <= 4294967296",
     ceilingBytes: 4 * 1024 * 1024 * 1024,
   },
-  {
-    id: "js-heap-ceiling",
-    statement: "The main-thread JavaScript heap stays below 2 GiB.",
-    applies: "every phase of every run",
-    metric: "page.usedJsHeapBytes <= 2147483648",
-    ceilingBytes: 2 * 1024 * 1024 * 1024,
-  },
+  // An engine that exposes no heap estimator cannot be held to a heap ceiling.
+  // The absence itself becomes the target, so a missing estimator has to be
+  // recorded as an absence with a reason and can never pass as a zero.
+  ...(browserEngine.heapEstimatorsExposed
+    ? [
+        {
+          id: "js-heap-ceiling",
+          statement: "The main-thread JavaScript heap stays below 2 GiB.",
+          applies: "every phase of every run",
+          metric: "page.usedJsHeapBytes <= 2147483648",
+          ceilingBytes: 2 * 1024 * 1024 * 1024,
+        },
+      ]
+    : [
+        {
+          id: "heap-estimators-absent-not-zero",
+          statement:
+            "On an engine that exposes no heap estimator, every heap figure is recorded as " +
+            "absent with a stated reason rather than as a zero, and the bound this record " +
+            "reports comes from the operating-system process sample instead.",
+          applies: "every phase of every run",
+          metric:
+            "page.usedJsHeapBytes and page.uaMemoryBytes are null, each with a non-empty reason",
+        },
+      ]),
   {
     id: "forced-low-remains-usable",
     statement:
@@ -271,6 +332,29 @@ const ledgerCategories = [
   },
 ];
 
+// The two heap categories are estimates only where the engine publishes an
+// estimator. Where it does not, they are uncollected: the ledger says so in the
+// same way it already says the GPU driver allocation is unavailable.
+const absentHeapEstimatorNotes = {
+  "page.usedJsHeapBytes":
+    "This engine exposes no performance.memory, so the main-thread isolate is not measured " +
+    "here. Recorded as unavailable, never as zero; process.workingSetBytes and " +
+    "process.privateBytes are the estimator-independent bound.",
+  "page.uaMemoryBytes":
+    "This engine exposes no performance.measureUserAgentSpecificMemory(), so the agent " +
+    "cluster is not measured here. Recorded as unavailable, never as zero; " +
+    "process.workingSetBytes and process.privateBytes are the estimator-independent bound.",
+};
+if (!browserEngine.heapEstimatorsExposed) {
+  for (const category of ledgerCategories) {
+    const note = absentHeapEstimatorNotes[category.id];
+    if (note === undefined) continue;
+    category.method = "unsupported";
+    category.value = null;
+    category.note = note;
+  }
+}
+
 async function sha256File(path) {
   const hash = createHash("sha256");
   await pipeline(createReadStream(path), hash);
@@ -295,12 +379,12 @@ console.log(
 );
 
 /** Sums Win32_Process figures over the tree rooted at a launched browser. */
-async function sampleProcessTree(rootPid) {
+async function sampleProcessTree(rootPid, processName) {
   const { stdout } = await execFileAsync("powershell.exe", [
     "-NoProfile",
     "-NonInteractive",
     "-Command",
-    "Get-CimInstance Win32_Process -Filter \"Name='chrome.exe'\" | " +
+    `Get-CimInstance Win32_Process -Filter "Name='${processName}'" | ` +
       "Select-Object ProcessId,ParentProcessId,WorkingSetSize,PrivatePageCount | " +
       "ConvertTo-Json -Compress",
   ], { maxBuffer: 8 * 1024 * 1024 });
@@ -333,9 +417,11 @@ async function sampleProcessTree(rootPid) {
   return {
     rootPid,
     processCount: tree.length,
-    // Other Chrome instances on the host are excluded by walking from the root
-    // pid; this figure covers the launched tree only.
-    chromeProcessesOnHost: all.length,
+    // Other instances of the same browser on the host are excluded by walking
+    // from the root pid; this figure covers the launched tree only. Blink records
+    // published before the second engine was added carry this count under the
+    // name chromeProcessesOnHost.
+    browserProcessesOnHost: all.length,
     workingSetBytes: tree.reduce((total, entry) => total + entry.WorkingSetSize, 0),
     privateBytes: tree.reduce((total, entry) => total + entry.PrivatePageCount, 0),
   };
@@ -343,7 +429,7 @@ async function sampleProcessTree(rootPid) {
 
 /** Reads the page's own ledger plus both browser-estimated heap figures. */
 async function samplePage(page) {
-  return page.evaluate(async () => {
+  return page.evaluate(async (heapUnavailableReason) => {
     const dataset = document.documentElement.dataset;
     const number = (value) => (value === undefined ? null : Number(value));
     const status = document.querySelector("#status");
@@ -383,9 +469,7 @@ async function samplePage(page) {
         usedJsHeapBytes: memory ? memory.usedJSHeapSize : null,
         totalJsHeapBytes: memory ? memory.totalJSHeapSize : null,
         jsHeapLimitBytes: memory ? memory.jsHeapSizeLimit : null,
-        usedJsHeapUnavailableReason: memory
-          ? null
-          : "performance.memory is absent; relaunch with --enable-precise-memory-info.",
+        usedJsHeapUnavailableReason: memory ? null : heapUnavailableReason,
         uaMemoryBytes: null,
         uaMemoryByType: null,
         uaMemoryByScope: null,
@@ -422,18 +506,14 @@ async function samplePage(page) {
       sample.page.uaMemoryUnavailableReason = String(error);
     }
     return sample;
-  });
+  }, browserEngine.heapUnavailableReason);
 }
 
 async function recordRun({ profile, budgetBytes, residencyMiB, runIndex, captureScreenshots }) {
   const label = `${profile}#${runIndex}`;
-  const server = await chromium.launchServer({
-    channel: "chrome",
-    headless,
-    args: ["--enable-precise-memory-info"],
-  });
+  const server = await browserEngine.launchServer();
   const rootPid = server.process().pid;
-  const browser = await chromium.connect(server.wsEndpoint());
+  const browser = await browserEngine.connect(server.wsEndpoint());
   const consoleIssues = [];
   const screenshots = {};
   const samples = [];
@@ -450,7 +530,10 @@ async function recordRun({ profile, budgetBytes, residencyMiB, runIndex, capture
 
     const sample = async (phase) => {
       const atMilliseconds = Date.now() - startedAt;
-      const [pageSample, processSample] = [await samplePage(page), await sampleProcessTree(rootPid)];
+      const [pageSample, processSample] = [
+        await samplePage(page),
+        await sampleProcessTree(rootPid, browserEngine.processName),
+      ];
       samples.push({ phase, atMilliseconds, ...pageSample, process: processSample });
       console.log(
         `[memory] ${label} ${phase} +${(atMilliseconds / 1000).toFixed(1)}s ` +
@@ -816,15 +899,33 @@ const targetOutcomes = [
     ),
     observedMaximum: maxOf((sample) => sample.process.workingSetBytes),
   },
-  {
-    id: "js-heap-ceiling",
-    met: allSamples.every(
-      ({ sample }) =>
-        sample.page.usedJsHeapBytes !== null &&
-        sample.page.usedJsHeapBytes <= 2 * 1024 * 1024 * 1024,
-    ),
-    observedMaximum: maxOf((sample) => sample.page.usedJsHeapBytes),
-  },
+  ...(browserEngine.heapEstimatorsExposed
+    ? [
+        {
+          id: "js-heap-ceiling",
+          met: allSamples.every(
+            ({ sample }) =>
+              sample.page.usedJsHeapBytes !== null &&
+              sample.page.usedJsHeapBytes <= 2 * 1024 * 1024 * 1024,
+          ),
+          observedMaximum: maxOf((sample) => sample.page.usedJsHeapBytes),
+        },
+      ]
+    : [
+        {
+          id: "heap-estimators-absent-not-zero",
+          met: allSamples.every(
+            ({ sample }) =>
+              sample.page.usedJsHeapBytes === null &&
+              typeof sample.page.usedJsHeapUnavailableReason === "string" &&
+              sample.page.usedJsHeapUnavailableReason.length > 0 &&
+              sample.page.uaMemoryBytes === null &&
+              typeof sample.page.uaMemoryUnavailableReason === "string" &&
+              sample.page.uaMemoryUnavailableReason.length > 0,
+          ),
+          observedMaximum: null,
+        },
+      ]),
   {
     id: "forced-low-remains-usable",
     met:
@@ -875,17 +976,21 @@ const evidence = {
   schemaVersion: "naru.memory-envelope.1",
   capturedAt: new Date().toISOString(),
   mode: "headed-phase-sampled-memory-ledger",
-  timingComparability:
-    "Milestone offsets in this record are perturbed: every phase sample calls " +
-    "performance.measureUserAgentSpecificMemory(), which forces a collection and blocks for " +
-    "seconds. Use artifacts/ifc/sixty5-first-frame for timing.",
+  timingComparability: browserEngine.heapEstimatorsExposed
+    ? "Milestone offsets in this record are perturbed: every phase sample calls " +
+      "performance.measureUserAgentSpecificMemory(), which forces a collection and blocks for " +
+      "seconds. Use artifacts/ifc/sixty5-first-frame for timing."
+    : "Milestone offsets in this record are perturbed: this engine exposes no in-page memory " +
+      "estimator, so no phase sample forces a collection, but every phase still pauses for an " +
+      "operating-system process sample and for the scheduler to settle. Use " +
+      "artifacts/ifc/sixty5-first-frame-gecko for timing.",
   browser: {
-    id: "chrome",
-    engine: "Blink",
+    id: browserEngine.id,
+    engine: browserEngine.engine,
     version: runs[0]?.browserVersion ?? null,
     headless,
     viewport,
-    launchArguments: ["--enable-precise-memory-info"],
+    launchArguments: browserEngine.launchArguments,
   },
   host: {
     platform: process.platform,
@@ -915,7 +1020,8 @@ const evidence = {
     + "requested while the residency drain is running is serviced only when the "
     + "compositor is free again, which would date the image to a later phase.",
   processSampling:
-      "Win32_Process rows for chrome.exe, summed over the tree rooted at the launched browser.",
+      `Win32_Process rows for ${browserEngine.processName}, summed over the tree rooted at ` +
+      "the launched browser.",
     evictionProbe:
       "The centre selection is the first candidate: a promotion that admits an absent chunk " +
       "while the budget is full evicts colder groups and is recorded with source 'selection'. " +
