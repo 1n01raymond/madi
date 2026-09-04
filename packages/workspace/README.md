@@ -128,3 +128,7 @@ pnpm test
 canonical byte equality, and every refusal the trust boundary owes;
 [`test/reopen.test.ts`](test/reopen.test.ts) covers the per-part states, the
 precedence, the package-observability combinations, and view resolution.
+
+What the tests cannot show is the renderer acting on a reopen decision. That is
+recorded once, in a headed browser, in
+[`artifacts/workspace/reopen/`](../../artifacts/workspace/reopen/README.md).

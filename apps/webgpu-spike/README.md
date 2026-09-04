@@ -242,3 +242,13 @@ recordings: `data-workspace-state`, `data-workspace-geometry-current`,
 `data-workspace-source-inspection`, `data-workspace-hidden-occurrences`,
 `data-workspace-dropped-occurrences`, `data-workspace-dropped-selection`,
 `data-workspace-selected-object`, and `data-workspace-saved`.
+
+One headed browser record exercises all of that end to end:
+[`artifacts/workspace/reopen/`](../../artifacts/workspace/reopen/README.md)
+saves a session of three hidden walls, one selected slab, a section plane and a
+moved camera; reopens it against the unchanged Digital Hub package as
+`unverifiable`, then `verified` after **Check sources**, re-saving the identical
+1,871 bytes; reopens it after a same-length edit to one IFC document as
+`changed-source` with `geometryIsCurrent` false over a still-verified package;
+and reopens it once more through a page reload so both restore paths are
+recorded. Validate it with `pnpm workspace:reopen:check`.

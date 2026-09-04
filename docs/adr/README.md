@@ -35,7 +35,7 @@ reverse. They explain context and trade-offs rather than only the final choice.
 | [0019](0019-document-artifact-transport.md) | Reuse verified per-document Scene IR artifacts across the transport; retire the payload tier | Proposed |
 | [0020](0020-cancellable-import-jobs.md) | Report imports as a versioned lifecycle; cancellation stops the adapter tree | Proposed |
 | [0021](0021-staged-hierarchy-first-import.md) | Publish an import assembly tree per document, before geometry | Proposed |
-| [0022](0022-workspace-manifest.md) | Persist a non-authoritative workspace manifest keyed by source and package identity | Proposed |
+| [0022](0022-workspace-manifest.md) | Persist a non-authoritative workspace manifest keyed by source and package identity | Accepted |
 
 ## Phase 0 review
 
