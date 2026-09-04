@@ -8,6 +8,7 @@ the shape of the work inside one cold import.
 | Record | What it proves |
 |---|---|
 | [`structure-readiness/`](structure-readiness/README.md) | How early an IFC federation's assembly tree could be published: structure-only reads of every document, with the parse separated from the containment walk, on Digital Hub and sixty5. |
+| [`structure-first-emission/`](structure-first-emission/README.md) | That the adapter actually publishes one document's assembly tree before it tessellates that document, watched from outside the process, and what staging costs the run that produces it. |
 
 The design these records inform is
 [ADR-0021](../../docs/adr/0021-staged-hierarchy-first-import.md); the import

@@ -134,6 +134,43 @@ serialized tree, against 1.3 percent for the walk. See
 `pnpm structure:readiness:evidence`), which is gate 0 of
 [ADR-0021](../../docs/adr/0021-staged-hierarchy-first-import.md).
 
+## Structure preview (`--structure-preview`)
+
+`--structure-preview <directory>` makes the extraction publish each document's
+assembly tree as soon as that document is parsed, before it is tessellated. The
+tree is `naru.ifc-structure-preview.1` -- one node per `IfcProduct` and
+`IfcProject`, carrying the same occurrence ids, names, and parents the Scene IR
+will carry for that document -- written as `structure-<discipline>.json` and
+named in an `index.json` (`naru.ifc-structure-preview-index.1`) that declares
+each file's length and sha256. Every file is written to a temporary name,
+flushed, fsynced, and renamed into place, and the index is rewritten the same
+way after each document, so it never names a file that is not complete on disk.
+A consumer verifies length and digest before parsing. A consumer may also hold a
+file open while the adapter renames over it, which Windows refuses; the rename is
+retried for two seconds before the failure is treated as real, so watching an
+import cannot break it.
+
+Documents are *emitted* smallest source first, so the first tree appears as
+early as the federation allows. They are still *assembled* in the discipline
+order `parse_inputs` returns, and every list the inspection returns is sorted
+before use, so the Scene IR, the geometry and property binaries, and the
+adapter report are byte-identical with the flag and without it. The flag is off
+by default; with it absent, nothing in the path changes.
+
+Emitting smallest first is not free at real-large scale, because it also decides
+which document is *inspected* when. On sixty5 the flag costs 22.4 s (+7.75%) and
+1.17 GB of peak working set (+24.8%): the largest document is inspected last,
+with six documents' Scene IR already accumulated, instead of first into an empty
+accumulator. Writing the trees themselves costs 201.9 ms. Digital Hub, whose
+documents barely reorder, is unaffected. That is the price of a first tree at
+0.690 s instead of 23.6 s, and the record below measures it rather than assuming
+it away.
+
+See [artifacts/import/structure-first-emission](../../artifacts/import/structure-first-emission/README.md)
+(`pnpm structure:first-emission:check`, re-record with
+`pnpm structure:first-emission:evidence`), which is gate 1 of
+[ADR-0021](../../docs/adr/0021-staged-hierarchy-first-import.md).
+
 ## Reproduce the Digital Hub extraction
 
 Fetch the external fixture, create an isolated Python environment, and use the

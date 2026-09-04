@@ -1,0 +1,1501 @@
+{
+  "schemaVersion": "naru.structure-first-emission.1",
+  "mode": "fresh-process-staged-adapter-emission",
+  "recordedAt": "2026-09-03T16:50:34.469Z",
+  "model": "digital-hub",
+  "host": {
+    "platform": "win32",
+    "architecture": "x64",
+    "node": "22.14.0",
+    "cpuCount": 16,
+    "cpuModel": "AMD Ryzen 7 9800X3D 8-Core Processor           ",
+    "totalMemoryBytes": 33463021568
+  },
+  "commit": {
+    "head": "1c3f39ed2b4fc0df86d2885c6b41a017c0431cf5",
+    "describe": "fix: let a reader watch a staged tree without breaking the adapter",
+    "workingTreeClean": false
+  },
+  "fixture": {
+    "datasetId": "ifc-bench-digital-hub",
+    "manifest": {
+      "path": "fixtures/external/manifest.json",
+      "sha256": "77d7d587d6b32938a371325e281a4584e10c2ff3118a59f300a9da097eb2f478"
+    },
+    "documents": [
+      {
+        "discipline": "architecture",
+        "uriHint": "projects/digital_hub/arc.ifc",
+        "bytes": 9022255,
+        "sha256": "19d7d02d53c2b88e86890ee236297b12bbb0f7748030cd32ff6a22762e9966bb"
+      },
+      {
+        "discipline": "heating",
+        "uriHint": "projects/digital_hub/heating.ifc",
+        "bytes": 20890415,
+        "sha256": "a5603e8f6aa4cbf63aece92f92f503e9a578702d8fe96a6d4661490f1843710d"
+      },
+      {
+        "discipline": "plumbing",
+        "uriHint": "projects/digital_hub/plumbing.ifc",
+        "bytes": 25178864,
+        "sha256": "0b1d6b0abd8d4cc3f5f798c7581bed2b39b40110ba6348d5470bbef646cfed79"
+      },
+      {
+        "discipline": "ventilation",
+        "uriHint": "projects/digital_hub/ventilation.ifc",
+        "bytes": 12737833,
+        "sha256": "c0a1807875957c4154d45d14a3b5ed480dd3178a5bdc3262302a7eccf76d5cb1"
+      }
+    ]
+  },
+  "adapter": {
+    "fingerprint": "cb4c1d0f2c8bb2f7b8c1eef307e5d5eeb632b46fe0456efd7a972df73d18a867",
+    "name": "IfcOpenShell",
+    "schemaVersion": "naru.ifc-adapter-identity.1",
+    "toolchain": {
+      "architecture": "AMD64",
+      "ifcOpenShell": "0.8.5",
+      "numpy": "2.5.2",
+      "platform": "win32",
+      "python": "3.13.2"
+    },
+    "version": "0.8.5"
+  },
+  "tool": {
+    "path": "native/adapter-ifc/tools/extract_federation_scene_ir.py",
+    "previewSchema": "naru.ifc-structure-preview.1",
+    "previewIndexSchema": "naru.ifc-structure-preview-index.1",
+    "stageTimingSchema": "naru.ifc-adapter-stage-timing.1",
+    "pythonExecutable": "output/venv-ifc/Scripts/python.exe"
+  },
+  "protocol": {
+    "sampleCount": 5,
+    "discardedSamples": 0,
+    "warmUpRuns": 1,
+    "threads": 6,
+    "pollMilliseconds": 25,
+    "arms": {
+      "staged": "the adapter with --structure-preview, watched from the outside by this recorder",
+      "plain": "the same adapter, same documents, same threads, without --structure-preview"
+    },
+    "rule": "One discarded staged warm-up, then the two arms alternate staged, plain, staged, plain so a drift in host load cannot land on one arm. No sample is discarded for its timing; a non-zero exit, a tree that fails verification, or an output that differs between samples aborts the recording.",
+    "covers": "The shipping adapter over the whole federation with no document-artifact cache, so every document is extracted. First-tree time is measured from process spawn, which includes interpreter start and imports.",
+    "caveats": [
+      "Publication times are observed by a poller, so each is accurate to the poll interval, not better.",
+      "The OS page cache is not dropped between samples, matching the protocol of artifacts/cache/sixty5.",
+      "No viewer is in this path: transport, parse, and draw are ADR-0021 gate 4, not this record.",
+      "Documents are inspected sequentially; a threaded federation read is not measured here."
+    ]
+  },
+  "memory": {
+    "method": "os-sampled-win32-process-tree",
+    "stagedPeakWorkingSetBytes": {
+      "values": [
+        1865728000,
+        1868410880,
+        1819369472,
+        1870450688,
+        1802207232
+      ],
+      "median": 1865728000,
+      "p95": 1870450688,
+      "minimum": 1802207232,
+      "maximum": 1870450688
+    },
+    "plainPeakWorkingSetBytes": {
+      "values": [
+        1846370304,
+        1780133888,
+        1806573568,
+        1798090752,
+        1751982080
+      ],
+      "median": 1798090752,
+      "p95": 1846370304,
+      "minimum": 1751982080,
+      "maximum": 1846370304
+    }
+  },
+  "outputIdentity": {
+    "rule": "every output of every sample in both arms equals the first staged sample's, byte for byte",
+    "comparisons": 36,
+    "exclusions": [],
+    "digests": {
+      "scene-ir.json": "b8ec9c532231a9e464e1ee0d27e26444df16556b11a36d81b180703bb1a214bf",
+      "scene-ir-geometry.bin": "4f6ddbe99c15e0976bc097b978d0c54cbdc9a2ea0c67663ce8dac8ab21ce232b",
+      "scene-ir-properties.bin": "712fea65ca4b9de75683a01ee79f4fff5ae6f89b0c29cbd0b38a83bb586d07c1",
+      "adapter-report.json": "54aeea7049e213d29b1cf7e94e3aeac832742223bd132a179f0af20277db43b8"
+    }
+  },
+  "documents": [
+    {
+      "discipline": "architecture",
+      "uriHint": "projects/digital_hub/arc.ifc",
+      "sourceBytes": 9022255,
+      "emissionRank": 0,
+      "nodeCount": 1027,
+      "rootCount": 245,
+      "byteLength": 146605,
+      "sha256": "08d227b1a719ef71a20c84d0c119f6ad517b4c7910c70c4a9adeed9efbb590a5",
+      "schema": "IFC4",
+      "sourceDigest": "19d7d02d53c2b88e86890ee236297b12bbb0f7748030cd32ff6a22762e9966bb",
+      "parentedNodes": 782,
+      "namedNodes": 1027,
+      "sceneIrOccurrenceCount": 1027,
+      "nodeCountMatchesSceneIr": true,
+      "readinessStructureEntries": 783,
+      "milliseconds": {
+        "observedPublish": {
+          "values": [
+            759.2,
+            757.7,
+            753,
+            749.6,
+            749.2
+          ],
+          "median": 753,
+          "p95": 759.2,
+          "minimum": 749.2,
+          "maximum": 759.2
+        },
+        "structureReady": {
+          "values": [
+            455.9,
+            443.5,
+            448.8,
+            445.2,
+            455.4
+          ],
+          "median": 448.8,
+          "p95": 455.9,
+          "minimum": 443.5,
+          "maximum": 455.9
+        },
+        "structurePublish": {
+          "values": [
+            4.6,
+            4.7,
+            4.4,
+            4.4,
+            4.8
+          ],
+          "median": 4.6,
+          "p95": 4.8,
+          "minimum": 4.4,
+          "maximum": 4.8
+        },
+        "extractStaged": {
+          "values": [
+            4348.4,
+            4336.8,
+            4359.4,
+            4318.1,
+            4395
+          ],
+          "median": 4348.4,
+          "p95": 4395,
+          "minimum": 4318.1,
+          "maximum": 4395
+        },
+        "extractPlain": {
+          "values": [
+            4351.7,
+            4275.3,
+            4319.4,
+            4280.4,
+            4354.4
+          ],
+          "median": 4319.4,
+          "p95": 4354.4,
+          "minimum": 4275.3,
+          "maximum": 4354.4
+        }
+      }
+    },
+    {
+      "discipline": "heating",
+      "uriHint": "projects/digital_hub/heating.ifc",
+      "sourceBytes": 20890415,
+      "emissionRank": 2,
+      "nodeCount": 5561,
+      "rootCount": 1,
+      "byteLength": 685541,
+      "sha256": "b02807e40be6c70656c812b85d8aace9e231c52681edef134a88f0c4f668c8a5",
+      "schema": "IFC4",
+      "sourceDigest": "a5603e8f6aa4cbf63aece92f92f503e9a578702d8fe96a6d4661490f1843710d",
+      "parentedNodes": 5560,
+      "namedNodes": 5561,
+      "sceneIrOccurrenceCount": 5561,
+      "nodeCountMatchesSceneIr": true,
+      "readinessStructureEntries": 1801,
+      "milliseconds": {
+        "observedPublish": {
+          "values": [
+            11601.5,
+            10872,
+            10793.4,
+            10758.1,
+            11012.8
+          ],
+          "median": 10872,
+          "p95": 11601.5,
+          "minimum": 10758.1,
+          "maximum": 11601.5
+        },
+        "structureReady": {
+          "values": [
+            1196.3,
+            1181.9,
+            1162,
+            1207.3,
+            1217.3
+          ],
+          "median": 1196.3,
+          "p95": 1217.3,
+          "minimum": 1162,
+          "maximum": 1217.3
+        },
+        "structurePublish": {
+          "values": [
+            8.1,
+            10.2,
+            8,
+            7.8,
+            10.3
+          ],
+          "median": 8.1,
+          "p95": 10.3,
+          "minimum": 7.8,
+          "maximum": 10.3
+        },
+        "extractStaged": {
+          "values": [
+            13480,
+            13333.3,
+            13396.1,
+            14230.4,
+            14702.7
+          ],
+          "median": 13480,
+          "p95": 14702.7,
+          "minimum": 13333.3,
+          "maximum": 14702.7
+        },
+        "extractPlain": {
+          "values": [
+            13174.1,
+            13262.6,
+            13782.5,
+            13220.5,
+            13338.6
+          ],
+          "median": 13262.6,
+          "p95": 13782.5,
+          "minimum": 13174.1,
+          "maximum": 13782.5
+        }
+      }
+    },
+    {
+      "discipline": "plumbing",
+      "uriHint": "projects/digital_hub/plumbing.ifc",
+      "sourceBytes": 25178864,
+      "emissionRank": 3,
+      "nodeCount": 3121,
+      "rootCount": 25,
+      "byteLength": 391544,
+      "sha256": "71c9ae16f854db227fb107af01a1522b831f559ad4c7bdf83252181dd6f21e20",
+      "schema": "IFC4",
+      "sourceDigest": "0b1d6b0abd8d4cc3f5f798c7581bed2b39b40110ba6348d5470bbef646cfed79",
+      "parentedNodes": 3096,
+      "namedNodes": 3121,
+      "sceneIrOccurrenceCount": 3121,
+      "nodeCountMatchesSceneIr": true,
+      "readinessStructureEntries": 1016,
+      "milliseconds": {
+        "observedPublish": {
+          "values": [
+            24960.7,
+            24071.3,
+            24095.3,
+            24844.7,
+            25599.8
+          ],
+          "median": 24844.7,
+          "p95": 25599.8,
+          "minimum": 24071.3,
+          "maximum": 25599.8
+        },
+        "structureReady": {
+          "values": [
+            1055.7,
+            1041.6,
+            1056.6,
+            1025.4,
+            1086.6
+          ],
+          "median": 1055.7,
+          "p95": 1086.6,
+          "minimum": 1025.4,
+          "maximum": 1086.6
+        },
+        "structurePublish": {
+          "values": [
+            6.5,
+            10.3,
+            6.2,
+            6,
+            9.2
+          ],
+          "median": 6.5,
+          "p95": 10.3,
+          "minimum": 6,
+          "maximum": 10.3
+        },
+        "extractStaged": {
+          "values": [
+            24578.1,
+            25486.2,
+            23822.3,
+            26174.1,
+            26387.9
+          ],
+          "median": 25486.2,
+          "p95": 26387.9,
+          "minimum": 23822.3,
+          "maximum": 26387.9
+        },
+        "extractPlain": {
+          "values": [
+            25589.9,
+            25464.6,
+            26009.4,
+            26492.4,
+            23740
+          ],
+          "median": 25589.9,
+          "p95": 26492.4,
+          "minimum": 23740,
+          "maximum": 26492.4
+        }
+      }
+    },
+    {
+      "discipline": "ventilation",
+      "uriHint": "projects/digital_hub/ventilation.ifc",
+      "sourceBytes": 12737833,
+      "emissionRank": 1,
+      "nodeCount": 3972,
+      "rootCount": 1,
+      "byteLength": 508513,
+      "sha256": "8404067dfd0a0c914202078871b905e68417c1811b8bda0ea7302cee69344cb7",
+      "schema": "IFC4",
+      "sourceDigest": "c0a1807875957c4154d45d14a3b5ed480dd3178a5bdc3262302a7eccf76d5cb1",
+      "parentedNodes": 3971,
+      "namedNodes": 3972,
+      "sceneIrOccurrenceCount": 3972,
+      "nodeCountMatchesSceneIr": true,
+      "readinessStructureEntries": 1316,
+      "milliseconds": {
+        "observedPublish": {
+          "values": [
+            5509,
+            5425,
+            5463.2,
+            5399.1,
+            5573.3
+          ],
+          "median": 5463.2,
+          "p95": 5573.3,
+          "minimum": 5399.1,
+          "maximum": 5573.3
+        },
+        "structureReady": {
+          "values": [
+            855.7,
+            783.8,
+            804.3,
+            785.8,
+            866.1
+          ],
+          "median": 804.3,
+          "p95": 866.1,
+          "minimum": 783.8,
+          "maximum": 866.1
+        },
+        "structurePublish": {
+          "values": [
+            6.9,
+            8.7,
+            9.1,
+            6.5,
+            8.8
+          ],
+          "median": 8.7,
+          "p95": 9.1,
+          "minimum": 6.5,
+          "maximum": 9.1
+        },
+        "extractStaged": {
+          "values": [
+            5745.8,
+            5025.9,
+            4969.5,
+            4931.2,
+            5076.2
+          ],
+          "median": 5025.9,
+          "p95": 5745.8,
+          "minimum": 4931.2,
+          "maximum": 5745.8
+        },
+        "extractPlain": {
+          "values": [
+            5195.9,
+            5164.9,
+            5207.2,
+            5316,
+            5046.2
+          ],
+          "median": 5195.9,
+          "p95": 5316,
+          "minimum": 5046.2,
+          "maximum": 5316
+        }
+      }
+    }
+  ],
+  "process": {
+    "staged": {
+      "values": [
+        50241.2,
+        50281.8,
+        48596.1,
+        51743.5,
+        52730.1
+      ],
+      "median": 50281.8,
+      "p95": 52730.1,
+      "minimum": 48596.1,
+      "maximum": 52730.1
+    },
+    "plain": {
+      "values": [
+        50378.4,
+        50234.3,
+        51382.9,
+        51471,
+        48584.2
+      ],
+      "median": 50378.4,
+      "p95": 51471,
+      "minimum": 48584.2,
+      "maximum": 51471
+    }
+  },
+  "samples": [
+    {
+      "arm": "staged",
+      "index": 1,
+      "processMilliseconds": 50241.2,
+      "peakWorkingSetBytes": 1865728000,
+      "peakPrivateBytes": 2419986432,
+      "preview": {
+        "complete": true,
+        "indexPolls": 1634,
+        "contendedReads": 8,
+        "observations": [
+          {
+            "discipline": "architecture",
+            "observedMilliseconds": 759.2,
+            "nodeCount": 1027,
+            "rootCount": 245,
+            "byteLength": 146605,
+            "sha256": "08d227b1a719ef71a20c84d0c119f6ad517b4c7910c70c4a9adeed9efbb590a5",
+            "schema": "IFC4",
+            "sourceDigest": "19d7d02d53c2b88e86890ee236297b12bbb0f7748030cd32ff6a22762e9966bb",
+            "parentedNodes": 782,
+            "namedNodes": 1027
+          },
+          {
+            "discipline": "ventilation",
+            "observedMilliseconds": 5509,
+            "nodeCount": 3972,
+            "rootCount": 1,
+            "byteLength": 508513,
+            "sha256": "8404067dfd0a0c914202078871b905e68417c1811b8bda0ea7302cee69344cb7",
+            "schema": "IFC4",
+            "sourceDigest": "c0a1807875957c4154d45d14a3b5ed480dd3178a5bdc3262302a7eccf76d5cb1",
+            "parentedNodes": 3971,
+            "namedNodes": 3972
+          },
+          {
+            "discipline": "heating",
+            "observedMilliseconds": 11601.5,
+            "nodeCount": 5561,
+            "rootCount": 1,
+            "byteLength": 685541,
+            "sha256": "b02807e40be6c70656c812b85d8aace9e231c52681edef134a88f0c4f668c8a5",
+            "schema": "IFC4",
+            "sourceDigest": "a5603e8f6aa4cbf63aece92f92f503e9a578702d8fe96a6d4661490f1843710d",
+            "parentedNodes": 5560,
+            "namedNodes": 5561
+          },
+          {
+            "discipline": "plumbing",
+            "observedMilliseconds": 24960.7,
+            "nodeCount": 3121,
+            "rootCount": 25,
+            "byteLength": 391544,
+            "sha256": "71c9ae16f854db227fb107af01a1522b831f559ad4c7bdf83252181dd6f21e20",
+            "schema": "IFC4",
+            "sourceDigest": "0b1d6b0abd8d4cc3f5f798c7581bed2b39b40110ba6348d5470bbef646cfed79",
+            "parentedNodes": 3096,
+            "namedNodes": 3121
+          }
+        ]
+      },
+      "stages": {
+        "documents": [
+          {
+            "discipline": "architecture",
+            "extractMilliseconds": 4348.426600039005,
+            "outcome": "extracted",
+            "readMilliseconds": 5.5224000215530396,
+            "sourceBytes": 9022255,
+            "structureNodeCount": 1027,
+            "structurePublishMilliseconds": 4.6057000160217285,
+            "structurePublishedAtMs": 1788453728654.7144,
+            "structureReadyMilliseconds": 455.90360003709793
+          },
+          {
+            "discipline": "ventilation",
+            "extractMilliseconds": 5745.758099973202,
+            "outcome": "extracted",
+            "readMilliseconds": 8.337700068950653,
+            "sourceBytes": 12737833,
+            "structureNodeCount": 3972,
+            "structurePublishMilliseconds": 6.857299983501434,
+            "structurePublishedAtMs": 1788453733408.4443,
+            "structureReadyMilliseconds": 855.6711000800133
+          },
+          {
+            "discipline": "heating",
+            "extractMilliseconds": 13480.026600003242,
+            "outcome": "extracted",
+            "readMilliseconds": 14.326500058174133,
+            "sourceBytes": 20890415,
+            "structureNodeCount": 5561,
+            "structurePublishMilliseconds": 8.057200014591217,
+            "structurePublishedAtMs": 1788453739503.2124,
+            "structureReadyMilliseconds": 1196.3289999961853
+          },
+          {
+            "discipline": "plumbing",
+            "extractMilliseconds": 24578.12509995699,
+            "outcome": "extracted",
+            "readMilliseconds": 15.583199977874756,
+            "sourceBytes": 25178864,
+            "structureNodeCount": 3121,
+            "structurePublishMilliseconds": 6.465300023555756,
+            "structurePublishedAtMs": 1788453752856.9053,
+            "structureReadyMilliseconds": 1055.6553999781609
+          }
+        ],
+        "federation": {
+          "mergeMilliseconds": 7.005600035190582,
+          "propertyIndexMilliseconds": 587.4531999826431
+        },
+        "importMilliseconds": 226.052978515625,
+        "schemaVersion": "naru.ifc-adapter-stage-timing.1",
+        "wallClock": {
+          "finishedAtMs": 1788453778054.2856,
+          "importsFinishedAtMs": 1788453728191.0476,
+          "mainStartedAtMs": 1788453728195.626,
+          "moduleStartedAtMs": 1788453727964.9946
+        },
+        "write": {
+          "digestMilliseconds": 61.65839999914169,
+          "geometryMilliseconds": 246.71290004253387,
+          "propertiesMilliseconds": 8.67170000076294,
+          "reportMilliseconds": 1.6597000360488892,
+          "structureMilliseconds": 732.3014000058174
+        }
+      }
+    },
+    {
+      "arm": "plain",
+      "index": 1,
+      "processMilliseconds": 50378.4,
+      "peakWorkingSetBytes": 1846370304,
+      "peakPrivateBytes": 2408747008,
+      "stages": {
+        "documents": [
+          {
+            "discipline": "architecture",
+            "extractMilliseconds": 4351.718400001526,
+            "outcome": "extracted",
+            "readMilliseconds": 5.49729996919632,
+            "sourceBytes": 9022255
+          },
+          {
+            "discipline": "heating",
+            "extractMilliseconds": 13174.098099946976,
+            "outcome": "extracted",
+            "readMilliseconds": 13.001900017261505,
+            "sourceBytes": 20890415
+          },
+          {
+            "discipline": "plumbing",
+            "extractMilliseconds": 25589.88440001011,
+            "outcome": "extracted",
+            "readMilliseconds": 15.684699952602386,
+            "sourceBytes": 25178864
+          },
+          {
+            "discipline": "ventilation",
+            "extractMilliseconds": 5195.858600020409,
+            "outcome": "extracted",
+            "readMilliseconds": 8.503199994564056,
+            "sourceBytes": 12737833
+          }
+        ],
+        "federation": {
+          "mergeMilliseconds": 6.920799970626831,
+          "propertyIndexMilliseconds": 574.0163999795914
+        },
+        "importMilliseconds": 230.065185546875,
+        "schemaVersion": "naru.ifc-adapter-stage-timing.1",
+        "wallClock": {
+          "finishedAtMs": 1788453828536.1257,
+          "importsFinishedAtMs": 1788453778535.2595,
+          "mainStartedAtMs": 1788453778540.3425,
+          "moduleStartedAtMs": 1788453778305.1943
+        },
+        "write": {
+          "digestMilliseconds": 61.29019993543625,
+          "geometryMilliseconds": 243.10470002889633,
+          "propertiesMilliseconds": 10.243099987506866,
+          "reportMilliseconds": 1.6528000235557556,
+          "structureMilliseconds": 731.8831000328064
+        }
+      }
+    },
+    {
+      "arm": "staged",
+      "index": 2,
+      "processMilliseconds": 50281.8,
+      "peakWorkingSetBytes": 1868410880,
+      "peakPrivateBytes": 2432356352,
+      "preview": {
+        "complete": true,
+        "indexPolls": 1637,
+        "contendedReads": 8,
+        "observations": [
+          {
+            "discipline": "architecture",
+            "observedMilliseconds": 757.7,
+            "nodeCount": 1027,
+            "rootCount": 245,
+            "byteLength": 146605,
+            "sha256": "08d227b1a719ef71a20c84d0c119f6ad517b4c7910c70c4a9adeed9efbb590a5",
+            "schema": "IFC4",
+            "sourceDigest": "19d7d02d53c2b88e86890ee236297b12bbb0f7748030cd32ff6a22762e9966bb",
+            "parentedNodes": 782,
+            "namedNodes": 1027
+          },
+          {
+            "discipline": "ventilation",
+            "observedMilliseconds": 5425,
+            "nodeCount": 3972,
+            "rootCount": 1,
+            "byteLength": 508513,
+            "sha256": "8404067dfd0a0c914202078871b905e68417c1811b8bda0ea7302cee69344cb7",
+            "schema": "IFC4",
+            "sourceDigest": "c0a1807875957c4154d45d14a3b5ed480dd3178a5bdc3262302a7eccf76d5cb1",
+            "parentedNodes": 3971,
+            "namedNodes": 3972
+          },
+          {
+            "discipline": "heating",
+            "observedMilliseconds": 10872,
+            "nodeCount": 5561,
+            "rootCount": 1,
+            "byteLength": 685541,
+            "sha256": "b02807e40be6c70656c812b85d8aace9e231c52681edef134a88f0c4f668c8a5",
+            "schema": "IFC4",
+            "sourceDigest": "a5603e8f6aa4cbf63aece92f92f503e9a578702d8fe96a6d4661490f1843710d",
+            "parentedNodes": 5560,
+            "namedNodes": 5561
+          },
+          {
+            "discipline": "plumbing",
+            "observedMilliseconds": 24071.3,
+            "nodeCount": 3121,
+            "rootCount": 25,
+            "byteLength": 391544,
+            "sha256": "71c9ae16f854db227fb107af01a1522b831f559ad4c7bdf83252181dd6f21e20",
+            "schema": "IFC4",
+            "sourceDigest": "0b1d6b0abd8d4cc3f5f798c7581bed2b39b40110ba6348d5470bbef646cfed79",
+            "parentedNodes": 3096,
+            "namedNodes": 3121
+          }
+        ]
+      },
+      "stages": {
+        "documents": [
+          {
+            "discipline": "architecture",
+            "extractMilliseconds": 4336.76909995079,
+            "outcome": "extracted",
+            "readMilliseconds": 5.7537999749183655,
+            "sourceBytes": 9022255,
+            "structureNodeCount": 1027,
+            "structurePublishMilliseconds": 4.679799973964691,
+            "structurePublishedAtMs": 1788453829465.8813,
+            "structureReadyMilliseconds": 443.5257999300957
+          },
+          {
+            "discipline": "ventilation",
+            "extractMilliseconds": 5025.914000034332,
+            "outcome": "extracted",
+            "readMilliseconds": 8.265700042247772,
+            "sourceBytes": 12737833,
+            "structureNodeCount": 3972,
+            "structurePublishMilliseconds": 8.729099988937378,
+            "structurePublishedAtMs": 1788453834148.6765,
+            "structureReadyMilliseconds": 783.7834000587463
+          },
+          {
+            "discipline": "heating",
+            "extractMilliseconds": 13333.28769993782,
+            "outcome": "extracted",
+            "readMilliseconds": 13.125699996948242,
+            "sourceBytes": 20890415,
+            "structureNodeCount": 5561,
+            "structurePublishMilliseconds": 10.24020004272461,
+            "structurePublishedAtMs": 1788453839581.0242,
+            "structureReadyMilliseconds": 1181.938200056553
+          },
+          {
+            "discipline": "plumbing",
+            "extractMilliseconds": 25486.215200006962,
+            "outcome": "extracted",
+            "readMilliseconds": 16.175800025463104,
+            "sourceBytes": 25178864,
+            "structureNodeCount": 3121,
+            "structurePublishMilliseconds": 10.288699984550476,
+            "structurePublishedAtMs": 1788453852787.0598,
+            "structureReadyMilliseconds": 1041.5501000285149
+          }
+        ],
+        "federation": {
+          "mergeMilliseconds": 6.788199961185455,
+          "propertyIndexMilliseconds": 589.0397999882698
+        },
+        "importMilliseconds": 232.963623046875,
+        "schemaVersion": "naru.ifc-adapter-stage-timing.1",
+        "wallClock": {
+          "finishedAtMs": 1788453878916.0168,
+          "importsFinishedAtMs": 1788453829014.153,
+          "mainStartedAtMs": 1788453829018.8008,
+          "moduleStartedAtMs": 1788453828781.1895
+        },
+        "write": {
+          "digestMilliseconds": 62.44830006361008,
+          "geometryMilliseconds": 263.7394999265671,
+          "propertiesMilliseconds": 8.537600040435791,
+          "reportMilliseconds": 1.9535999298095703,
+          "structureMilliseconds": 718.9093999862671
+        }
+      }
+    },
+    {
+      "arm": "plain",
+      "index": 2,
+      "processMilliseconds": 50234.3,
+      "peakWorkingSetBytes": 1780133888,
+      "peakPrivateBytes": 2346803200,
+      "stages": {
+        "documents": [
+          {
+            "discipline": "architecture",
+            "extractMilliseconds": 4275.308300018311,
+            "outcome": "extracted",
+            "readMilliseconds": 5.533699989318848,
+            "sourceBytes": 9022255
+          },
+          {
+            "discipline": "heating",
+            "extractMilliseconds": 13262.640799999237,
+            "outcome": "extracted",
+            "readMilliseconds": 13.440100014209747,
+            "sourceBytes": 20890415
+          },
+          {
+            "discipline": "plumbing",
+            "extractMilliseconds": 25464.63440001011,
+            "outcome": "extracted",
+            "readMilliseconds": 15.528200030326843,
+            "sourceBytes": 25178864
+          },
+          {
+            "discipline": "ventilation",
+            "extractMilliseconds": 5164.891499996185,
+            "outcome": "extracted",
+            "readMilliseconds": 8.581400036811829,
+            "sourceBytes": 12737833
+          }
+        ],
+        "federation": {
+          "mergeMilliseconds": 7.18939995765686,
+          "propertyIndexMilliseconds": 561.122200012207
+        },
+        "importMilliseconds": 218.70849609375,
+        "schemaVersion": "naru.ifc-adapter-stage-timing.1",
+        "wallClock": {
+          "finishedAtMs": 1788453929239.188,
+          "importsFinishedAtMs": 1788453879372.0393,
+          "mainStartedAtMs": 1788453879376.1248,
+          "moduleStartedAtMs": 1788453879153.3308
+        },
+        "write": {
+          "digestMilliseconds": 60.33970004320145,
+          "geometryMilliseconds": 243.5766999721527,
+          "propertiesMilliseconds": 10.294100046157837,
+          "reportMilliseconds": 1.4016000032424927,
+          "structureMilliseconds": 756.450100004673
+        }
+      }
+    },
+    {
+      "arm": "staged",
+      "index": 3,
+      "processMilliseconds": 48596.1,
+      "peakWorkingSetBytes": 1819369472,
+      "peakPrivateBytes": 2379108352,
+      "preview": {
+        "complete": true,
+        "indexPolls": 1581,
+        "contendedReads": 8,
+        "observations": [
+          {
+            "discipline": "architecture",
+            "observedMilliseconds": 753,
+            "nodeCount": 1027,
+            "rootCount": 245,
+            "byteLength": 146605,
+            "sha256": "08d227b1a719ef71a20c84d0c119f6ad517b4c7910c70c4a9adeed9efbb590a5",
+            "schema": "IFC4",
+            "sourceDigest": "19d7d02d53c2b88e86890ee236297b12bbb0f7748030cd32ff6a22762e9966bb",
+            "parentedNodes": 782,
+            "namedNodes": 1027
+          },
+          {
+            "discipline": "ventilation",
+            "observedMilliseconds": 5463.2,
+            "nodeCount": 3972,
+            "rootCount": 1,
+            "byteLength": 508513,
+            "sha256": "8404067dfd0a0c914202078871b905e68417c1811b8bda0ea7302cee69344cb7",
+            "schema": "IFC4",
+            "sourceDigest": "c0a1807875957c4154d45d14a3b5ed480dd3178a5bdc3262302a7eccf76d5cb1",
+            "parentedNodes": 3971,
+            "namedNodes": 3972
+          },
+          {
+            "discipline": "heating",
+            "observedMilliseconds": 10793.4,
+            "nodeCount": 5561,
+            "rootCount": 1,
+            "byteLength": 685541,
+            "sha256": "b02807e40be6c70656c812b85d8aace9e231c52681edef134a88f0c4f668c8a5",
+            "schema": "IFC4",
+            "sourceDigest": "a5603e8f6aa4cbf63aece92f92f503e9a578702d8fe96a6d4661490f1843710d",
+            "parentedNodes": 5560,
+            "namedNodes": 5561
+          },
+          {
+            "discipline": "plumbing",
+            "observedMilliseconds": 24095.3,
+            "nodeCount": 3121,
+            "rootCount": 25,
+            "byteLength": 391544,
+            "sha256": "71c9ae16f854db227fb107af01a1522b831f559ad4c7bdf83252181dd6f21e20",
+            "schema": "IFC4",
+            "sourceDigest": "0b1d6b0abd8d4cc3f5f798c7581bed2b39b40110ba6348d5470bbef646cfed79",
+            "parentedNodes": 3096,
+            "namedNodes": 3121
+          }
+        ]
+      },
+      "stages": {
+        "documents": [
+          {
+            "discipline": "architecture",
+            "extractMilliseconds": 4359.428699970245,
+            "outcome": "extracted",
+            "readMilliseconds": 5.552500009536743,
+            "sourceBytes": 9022255,
+            "structureNodeCount": 1027,
+            "structurePublishMilliseconds": 4.442799985408783,
+            "structurePublishedAtMs": 1788453930152.0835,
+            "structureReadyMilliseconds": 448.81129997968674
+          },
+          {
+            "discipline": "ventilation",
+            "extractMilliseconds": 4969.49690002203,
+            "outcome": "extracted",
+            "readMilliseconds": 8.159600019454956,
+            "sourceBytes": 12737833,
+            "structureNodeCount": 3972,
+            "structurePublishMilliseconds": 9.05189996957779,
+            "structurePublishedAtMs": 1788453934872.534,
+            "structureReadyMilliseconds": 804.2650000452995
+          },
+          {
+            "discipline": "heating",
+            "extractMilliseconds": 13396.112200021744,
+            "outcome": "extracted",
+            "readMilliseconds": 13.139999985694885,
+            "sourceBytes": 20890415,
+            "structureNodeCount": 5561,
+            "structurePublishMilliseconds": 8.048899948596954,
+            "structurePublishedAtMs": 1788453940207.9172,
+            "structureReadyMilliseconds": 1161.9793999791145
+          },
+          {
+            "discipline": "plumbing",
+            "extractMilliseconds": 23822.25450003147,
+            "outcome": "extracted",
+            "readMilliseconds": 16.077399909496307,
+            "sourceBytes": 25178864,
+            "structureNodeCount": 3121,
+            "structurePublishMilliseconds": 6.176800012588501,
+            "structurePublishedAtMs": 1788453953511.7664,
+            "structureReadyMilliseconds": 1056.5667999386787
+          }
+        ],
+        "federation": {
+          "mergeMilliseconds": 6.740299940109253,
+          "propertyIndexMilliseconds": 610.4515999555588
+        },
+        "importMilliseconds": 223.859375,
+        "schemaVersion": "naru.ifc-adapter-stage-timing.1",
+        "wallClock": {
+          "finishedAtMs": 1788453977915.0674,
+          "importsFinishedAtMs": 1788453929695.3523,
+          "mainStartedAtMs": 1788453929700.0557,
+          "moduleStartedAtMs": 1788453929471.493
+        },
+        "write": {
+          "digestMilliseconds": 60.64670008420944,
+          "geometryMilliseconds": 242.3511000275612,
+          "propertiesMilliseconds": 8.57420003414154,
+          "reportMilliseconds": 1.7052000164985657,
+          "structureMilliseconds": 678.2419000864029
+        }
+      }
+    },
+    {
+      "arm": "plain",
+      "index": 3,
+      "processMilliseconds": 51382.9,
+      "peakWorkingSetBytes": 1806573568,
+      "peakPrivateBytes": 2370379776,
+      "stages": {
+        "documents": [
+          {
+            "discipline": "architecture",
+            "extractMilliseconds": 4319.443400025368,
+            "outcome": "extracted",
+            "readMilliseconds": 5.469000041484833,
+            "sourceBytes": 9022255
+          },
+          {
+            "discipline": "heating",
+            "extractMilliseconds": 13782.473500013351,
+            "outcome": "extracted",
+            "readMilliseconds": 13.143399953842163,
+            "sourceBytes": 20890415
+          },
+          {
+            "discipline": "plumbing",
+            "extractMilliseconds": 26009.381400048733,
+            "outcome": "extracted",
+            "readMilliseconds": 15.561100006103516,
+            "sourceBytes": 25178864
+          },
+          {
+            "discipline": "ventilation",
+            "extractMilliseconds": 5207.230699956417,
+            "outcome": "extracted",
+            "readMilliseconds": 8.471099972724915,
+            "sourceBytes": 12737833
+          }
+        ],
+        "federation": {
+          "mergeMilliseconds": 6.951399981975555,
+          "propertyIndexMilliseconds": 566.5586000084877
+        },
+        "importMilliseconds": 226.4169921875,
+        "schemaVersion": "naru.ifc-adapter-stage-timing.1",
+        "wallClock": {
+          "finishedAtMs": 1788454029361.6824,
+          "importsFinishedAtMs": 1788453978381.2122,
+          "mainStartedAtMs": 1788453978385.7783,
+          "moduleStartedAtMs": 1788453978154.7952
+        },
+        "write": {
+          "digestMilliseconds": 60.75009995698929,
+          "geometryMilliseconds": 242.109099984169,
+          "propertiesMilliseconds": 8.671599924564362,
+          "reportMilliseconds": 1.9118000268936157,
+          "structureMilliseconds": 715.1675000190735
+        }
+      }
+    },
+    {
+      "arm": "staged",
+      "index": 4,
+      "processMilliseconds": 51743.5,
+      "peakWorkingSetBytes": 1870450688,
+      "peakPrivateBytes": 2437156864,
+      "preview": {
+        "complete": true,
+        "indexPolls": 1684,
+        "contendedReads": 8,
+        "observations": [
+          {
+            "discipline": "architecture",
+            "observedMilliseconds": 749.6,
+            "nodeCount": 1027,
+            "rootCount": 245,
+            "byteLength": 146605,
+            "sha256": "08d227b1a719ef71a20c84d0c119f6ad517b4c7910c70c4a9adeed9efbb590a5",
+            "schema": "IFC4",
+            "sourceDigest": "19d7d02d53c2b88e86890ee236297b12bbb0f7748030cd32ff6a22762e9966bb",
+            "parentedNodes": 782,
+            "namedNodes": 1027
+          },
+          {
+            "discipline": "ventilation",
+            "observedMilliseconds": 5399.1,
+            "nodeCount": 3972,
+            "rootCount": 1,
+            "byteLength": 508513,
+            "sha256": "8404067dfd0a0c914202078871b905e68417c1811b8bda0ea7302cee69344cb7",
+            "schema": "IFC4",
+            "sourceDigest": "c0a1807875957c4154d45d14a3b5ed480dd3178a5bdc3262302a7eccf76d5cb1",
+            "parentedNodes": 3971,
+            "namedNodes": 3972
+          },
+          {
+            "discipline": "heating",
+            "observedMilliseconds": 10758.1,
+            "nodeCount": 5561,
+            "rootCount": 1,
+            "byteLength": 685541,
+            "sha256": "b02807e40be6c70656c812b85d8aace9e231c52681edef134a88f0c4f668c8a5",
+            "schema": "IFC4",
+            "sourceDigest": "a5603e8f6aa4cbf63aece92f92f503e9a578702d8fe96a6d4661490f1843710d",
+            "parentedNodes": 5560,
+            "namedNodes": 5561
+          },
+          {
+            "discipline": "plumbing",
+            "observedMilliseconds": 24844.7,
+            "nodeCount": 3121,
+            "rootCount": 25,
+            "byteLength": 391544,
+            "sha256": "71c9ae16f854db227fb107af01a1522b831f559ad4c7bdf83252181dd6f21e20",
+            "schema": "IFC4",
+            "sourceDigest": "0b1d6b0abd8d4cc3f5f798c7581bed2b39b40110ba6348d5470bbef646cfed79",
+            "parentedNodes": 3096,
+            "namedNodes": 3121
+          }
+        ]
+      },
+      "stages": {
+        "documents": [
+          {
+            "discipline": "architecture",
+            "extractMilliseconds": 4318.098800003529,
+            "outcome": "extracted",
+            "readMilliseconds": 5.509299993515015,
+            "sourceBytes": 9022255,
+            "structureNodeCount": 1027,
+            "structurePublishMilliseconds": 4.421499967575073,
+            "structurePublishedAtMs": 1788454030308.1985,
+            "structureReadyMilliseconds": 445.22990000247955
+          },
+          {
+            "discipline": "ventilation",
+            "extractMilliseconds": 4931.244199931622,
+            "outcome": "extracted",
+            "readMilliseconds": 8.326299965381622,
+            "sourceBytes": 12737833,
+            "structureNodeCount": 3972,
+            "structurePublishMilliseconds": 6.541299998760223,
+            "structurePublishedAtMs": 1788454034972.3645,
+            "structureReadyMilliseconds": 785.7702999711037
+          },
+          {
+            "discipline": "heating",
+            "extractMilliseconds": 14230.405900001526,
+            "outcome": "extracted",
+            "readMilliseconds": 13.295900046825409,
+            "sourceBytes": 20890415,
+            "structureNodeCount": 5561,
+            "structurePublishMilliseconds": 7.763400018215179,
+            "structurePublishedAtMs": 1788454040333.5261,
+            "structureReadyMilliseconds": 1207.3481000065804
+          },
+          {
+            "discipline": "plumbing",
+            "extractMilliseconds": 26174.12239998579,
+            "outcome": "extracted",
+            "readMilliseconds": 15.717400014400482,
+            "sourceBytes": 25178864,
+            "structureNodeCount": 3121,
+            "structurePublishMilliseconds": 6.023100018501282,
+            "structurePublishedAtMs": 1788454054395.321,
+            "structureReadyMilliseconds": 1025.4307000637054
+          }
+        ],
+        "federation": {
+          "mergeMilliseconds": 6.625999987125397,
+          "propertyIndexMilliseconds": 624.1446999311447
+        },
+        "importMilliseconds": 222.783447265625,
+        "schemaVersion": "naru.ifc-adapter-stage-timing.1",
+        "wallClock": {
+          "finishedAtMs": 1788454081220.7058,
+          "importsFinishedAtMs": 1788454029855.9075,
+          "mainStartedAtMs": 1788454029860.0059,
+          "moduleStartedAtMs": 1788454029633.124
+        },
+        "write": {
+          "digestMilliseconds": 56.01300001144409,
+          "geometryMilliseconds": 251.39410001039505,
+          "propertiesMilliseconds": 8.450700044631958,
+          "reportMilliseconds": 1.6310999989509583,
+          "structureMilliseconds": 699.7419999241829
+        }
+      }
+    },
+    {
+      "arm": "plain",
+      "index": 4,
+      "processMilliseconds": 51471,
+      "peakWorkingSetBytes": 1798090752,
+      "peakPrivateBytes": 2353111040,
+      "stages": {
+        "documents": [
+          {
+            "discipline": "architecture",
+            "extractMilliseconds": 4280.42460000515,
+            "outcome": "extracted",
+            "readMilliseconds": 5.476499974727631,
+            "sourceBytes": 9022255
+          },
+          {
+            "discipline": "heating",
+            "extractMilliseconds": 13220.503799974918,
+            "outcome": "extracted",
+            "readMilliseconds": 13.090699970722198,
+            "sourceBytes": 20890415
+          },
+          {
+            "discipline": "plumbing",
+            "extractMilliseconds": 26492.357199966908,
+            "outcome": "extracted",
+            "readMilliseconds": 15.673600018024445,
+            "sourceBytes": 25178864
+          },
+          {
+            "discipline": "ventilation",
+            "extractMilliseconds": 5315.997600018978,
+            "outcome": "extracted",
+            "readMilliseconds": 8.415899991989136,
+            "sourceBytes": 12737833
+          }
+        ],
+        "federation": {
+          "mergeMilliseconds": 7.634599983692169,
+          "propertyIndexMilliseconds": 659.5466999411583
+        },
+        "importMilliseconds": 223.91455078125,
+        "schemaVersion": "naru.ifc-adapter-stage-timing.1",
+        "wallClock": {
+          "finishedAtMs": 1788454132776.7996,
+          "importsFinishedAtMs": 1788454081688.4749,
+          "mainStartedAtMs": 1788454081692.941,
+          "moduleStartedAtMs": 1788454081464.5603
+        },
+        "write": {
+          "digestMilliseconds": 61.112999975681305,
+          "geometryMilliseconds": 249.02660006284714,
+          "propertiesMilliseconds": 10.251699984073639,
+          "reportMilliseconds": 1.8689000010490417,
+          "structureMilliseconds": 729.7748000025749
+        }
+      }
+    },
+    {
+      "arm": "staged",
+      "index": 5,
+      "processMilliseconds": 52730.1,
+      "peakWorkingSetBytes": 1802207232,
+      "peakPrivateBytes": 2352959488,
+      "preview": {
+        "complete": true,
+        "indexPolls": 1715,
+        "contendedReads": 9,
+        "observations": [
+          {
+            "discipline": "architecture",
+            "observedMilliseconds": 749.2,
+            "nodeCount": 1027,
+            "rootCount": 245,
+            "byteLength": 146605,
+            "sha256": "08d227b1a719ef71a20c84d0c119f6ad517b4c7910c70c4a9adeed9efbb590a5",
+            "schema": "IFC4",
+            "sourceDigest": "19d7d02d53c2b88e86890ee236297b12bbb0f7748030cd32ff6a22762e9966bb",
+            "parentedNodes": 782,
+            "namedNodes": 1027
+          },
+          {
+            "discipline": "ventilation",
+            "observedMilliseconds": 5573.3,
+            "nodeCount": 3972,
+            "rootCount": 1,
+            "byteLength": 508513,
+            "sha256": "8404067dfd0a0c914202078871b905e68417c1811b8bda0ea7302cee69344cb7",
+            "schema": "IFC4",
+            "sourceDigest": "c0a1807875957c4154d45d14a3b5ed480dd3178a5bdc3262302a7eccf76d5cb1",
+            "parentedNodes": 3971,
+            "namedNodes": 3972
+          },
+          {
+            "discipline": "heating",
+            "observedMilliseconds": 11012.8,
+            "nodeCount": 5561,
+            "rootCount": 1,
+            "byteLength": 685541,
+            "sha256": "b02807e40be6c70656c812b85d8aace9e231c52681edef134a88f0c4f668c8a5",
+            "schema": "IFC4",
+            "sourceDigest": "a5603e8f6aa4cbf63aece92f92f503e9a578702d8fe96a6d4661490f1843710d",
+            "parentedNodes": 5560,
+            "namedNodes": 5561
+          },
+          {
+            "discipline": "plumbing",
+            "observedMilliseconds": 25599.8,
+            "nodeCount": 3121,
+            "rootCount": 25,
+            "byteLength": 391544,
+            "sha256": "71c9ae16f854db227fb107af01a1522b831f559ad4c7bdf83252181dd6f21e20",
+            "schema": "IFC4",
+            "sourceDigest": "0b1d6b0abd8d4cc3f5f798c7581bed2b39b40110ba6348d5470bbef646cfed79",
+            "parentedNodes": 3096,
+            "namedNodes": 3121
+          }
+        ]
+      },
+      "stages": {
+        "documents": [
+          {
+            "discipline": "architecture",
+            "extractMilliseconds": 4395.005500018597,
+            "outcome": "extracted",
+            "readMilliseconds": 5.587499976158142,
+            "sourceBytes": 9022255,
+            "structureNodeCount": 1027,
+            "structurePublishMilliseconds": 4.8228999972343445,
+            "structurePublishedAtMs": 1788454133721.8186,
+            "structureReadyMilliseconds": 455.4301000237465
+          },
+          {
+            "discipline": "ventilation",
+            "extractMilliseconds": 5076.187200009823,
+            "outcome": "extracted",
+            "readMilliseconds": 8.42739999294281,
+            "sourceBytes": 12737833,
+            "structureNodeCount": 3972,
+            "structurePublishMilliseconds": 8.793300032615662,
+            "structurePublishedAtMs": 1788454138533.1323,
+            "structureReadyMilliseconds": 866.1374999880791
+          },
+          {
+            "discipline": "heating",
+            "extractMilliseconds": 14702.743000030518,
+            "outcome": "extracted",
+            "readMilliseconds": 13.041099965572357,
+            "sourceBytes": 20890415,
+            "structureNodeCount": 5561,
+            "structurePublishMilliseconds": 10.299600005149841,
+            "structurePublishedAtMs": 1788454143968.9539,
+            "structureReadyMilliseconds": 1217.3316999673843
+          },
+          {
+            "discipline": "plumbing",
+            "extractMilliseconds": 26387.898599922657,
+            "outcome": "extracted",
+            "readMilliseconds": 15.536100029945374,
+            "sourceBytes": 25178864,
+            "structureNodeCount": 3121,
+            "structurePublishMilliseconds": 9.161799967288971,
+            "structurePublishedAtMs": 1788454158554.0056,
+            "structureReadyMilliseconds": 1086.5888000130653
+          }
+        ],
+        "federation": {
+          "mergeMilliseconds": 7.194700002670288,
+          "propertyIndexMilliseconds": 606.6086000204086
+        },
+        "importMilliseconds": 230.90283203125,
+        "schemaVersion": "naru.ifc-adapter-stage-timing.1",
+        "wallClock": {
+          "finishedAtMs": 1788454185601.0671,
+          "importsFinishedAtMs": 1788454133258.1907,
+          "mainStartedAtMs": 1788454133262.9648,
+          "moduleStartedAtMs": 1788454133027.2878
+        },
+        "write": {
+          "digestMilliseconds": 62.723499953746796,
+          "geometryMilliseconds": 256.04729998111725,
+          "propertiesMilliseconds": 9.13349997997284,
+          "reportMilliseconds": 1.7785999774932861,
+          "structureMilliseconds": 772.799899995327
+        }
+      }
+    },
+    {
+      "arm": "plain",
+      "index": 5,
+      "processMilliseconds": 48584.2,
+      "peakWorkingSetBytes": 1751982080,
+      "peakPrivateBytes": 2303868928,
+      "stages": {
+        "documents": [
+          {
+            "discipline": "architecture",
+            "extractMilliseconds": 4354.403600037098,
+            "outcome": "extracted",
+            "readMilliseconds": 5.825900018215179,
+            "sourceBytes": 9022255
+          },
+          {
+            "discipline": "heating",
+            "extractMilliseconds": 13338.589800059795,
+            "outcome": "extracted",
+            "readMilliseconds": 13.60369998216629,
+            "sourceBytes": 20890415
+          },
+          {
+            "discipline": "plumbing",
+            "extractMilliseconds": 23740.00100004673,
+            "outcome": "extracted",
+            "readMilliseconds": 15.707599997520447,
+            "sourceBytes": 25178864
+          },
+          {
+            "discipline": "ventilation",
+            "extractMilliseconds": 5046.1875,
+            "outcome": "extracted",
+            "readMilliseconds": 8.692499995231628,
+            "sourceBytes": 12737833
+          }
+        ],
+        "federation": {
+          "mergeMilliseconds": 7.490299999713898,
+          "propertyIndexMilliseconds": 585.3461999893188
+        },
+        "importMilliseconds": 223.10888671875,
+        "schemaVersion": "naru.ifc-adapter-stage-timing.1",
+        "wallClock": {
+          "finishedAtMs": 1788454234266.3875,
+          "importsFinishedAtMs": 1788454186065.5984,
+          "mainStartedAtMs": 1788454186070.296,
+          "moduleStartedAtMs": 1788454185842.4895
+        },
+        "write": {
+          "digestMilliseconds": 63.36030000448227,
+          "geometryMilliseconds": 253.75669991970062,
+          "propertiesMilliseconds": 9.09610003232956,
+          "reportMilliseconds": 1.8978999853134155,
+          "structureMilliseconds": 739.0856000185013
+        }
+      }
+    }
+  ],
+  "findings": {
+    "emissionOrder": {
+      "expected": [
+        "architecture",
+        "ventilation",
+        "heating",
+        "plumbing"
+      ],
+      "declared": [
+        "architecture",
+        "ventilation",
+        "heating",
+        "plumbing"
+      ],
+      "observed": [
+        "architecture",
+        "ventilation",
+        "heating",
+        "plumbing"
+      ],
+      "stableAcrossSamples": true,
+      "rule": "ascending source size, ties broken by discipline name",
+      "matchesSourceSize": true
+    },
+    "firstTree": {
+      "discipline": "architecture",
+      "sourceBytes": 9022255,
+      "nodeCount": 1027,
+      "observedSeconds": 0.753,
+      "observedP95Seconds": 0.759,
+      "shareOfStagedProcess": 0.015
+    },
+    "structureBeforeTessellation": {
+      "rule": "every document publishes its tree before its own extraction finishes",
+      "holds": true,
+      "slowestReadyMilliseconds": 1196.3,
+      "wholeFederationObservedSeconds": 24.845
+    },
+    "countsAgreeWithSceneIr": true,
+    "federationCompletion": {
+      "rule": "documents are inspected one after another, so document N's tree waits for N-1 tessellations",
+      "lastTreeObservedSeconds": 24.845,
+      "shareOfStagedProcess": 0.4941,
+      "structureOnlyPassSeconds": 2.456,
+      "note": "Publishing every tree before any tessellation would need a structure-only pass over the whole federation, which gate 0 measured at structureOnlyPassSeconds. ADR-0021 chose the per-document unit, so this record measures what that choice delivers and leaves the alternative priced rather than taken."
+    },
+    "stagingCost": {
+      "stagedMedianMilliseconds": 50281.8,
+      "plainMedianMilliseconds": 50378.4,
+      "differenceMilliseconds": -96.6,
+      "ratio": 0.9981,
+      "publishMilliseconds": 27.9,
+      "stagedBytes": 1732203
+    },
+    "productTarget": {
+      "source": "issue #73 acceptance criterion 8",
+      "lowerSeconds": 5,
+      "upperSeconds": 15,
+      "measures": "process spawn to a verified staged tree on disk, transport to a viewer excluded"
+    },
+    "againstProductTarget": {
+      "firstTreeSeconds": 0.753,
+      "firstTreeWithinUpperBound": true,
+      "wholeFederationSeconds": 24.845,
+      "wholeFederationWithinUpperBound": false
+    }
+  }
+}

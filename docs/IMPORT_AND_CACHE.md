@@ -100,8 +100,26 @@ source first, and each tree is published as a `naru.package-hierarchy.1` pair
 verified by digest before use. A staged preview is never a compiled package and
 never a cache tier — a cancelled import removes it, a completed one supersedes
 it — and the final package must stay byte-identical to a compile that never
-staged anything. Nothing of it is implemented yet; coarse geometry preview is
-explicitly unmeasured and carries its own gate.
+staged anything.
+
+The adapter half of that design ships behind `--structure-preview <directory>`,
+and a second record measures it doing the work rather than modelling it
+([record](../artifacts/import/structure-first-emission/README.md), the same
+five-sample protocol plus a `plain` arm without staging). A watcher outside the
+process verified sixty5's first tree on disk 0.690 s after spawn and Digital
+Hub's at 0.753 s, both inside the target; every document in every staged sample
+published its tree before its own extraction finished; and every per-document
+node count equals the occurrence count the same run's Scene IR carries. Both
+arms produce byte-identical adapter output, 36 comparisons per model with no
+excluded field — the adapter-level half of ADR-0021's determinism gate, whose
+package-level half is still open. Staging is not free at real-large scale: the
+sixty5 run costs 22.4 s (+7.75%) and 1.17 GB of peak working set (+24.8%), which
+the record attributes to the emission reorder — the largest document is
+inspected last, with the rest of the federation already accumulated — rather
+than to building trees, since writing every sixty5 tree takes 201.9 ms and
+staging one document alone costs nothing measurable. Digital Hub is unaffected.
+What remains is the staged package, the Studio background import, and coarse
+geometry preview, which stays explicitly unmeasured and carries its own gate.
 
 ## 3. Cache identity and invalidation
 
@@ -296,10 +314,12 @@ profile under [ADR-0004](adr/0004-format-strategy.md).
    cancel that stops the adapter tree implemented and unit-proved
    ([ADR-0020](adr/0020-cancellable-import-jobs.md)); a second consumer and a
    real-large cancellation record remain.
-6. **Staged hierarchy-first preview:** designed and measured only as far as
-   the adapter ([ADR-0021](adr/0021-staged-hierarchy-first-import.md),
-   [record](../artifacts/import/structure-readiness/README.md)); structure-first
-   emission, the staged package, and the Studio background import remain.
+6. **Staged hierarchy-first preview:** structure-first adapter emission
+   implemented behind `--structure-preview` and recorded
+   ([ADR-0021](adr/0021-staged-hierarchy-first-import.md),
+   [readiness](../artifacts/import/structure-readiness/README.md),
+   [first emission](../artifacts/import/structure-first-emission/README.md));
+   the staged package and the Studio background import remain.
 7. **Shared cache:** authenticated lookup/publication, tenant isolation,
    provenance, quotas, eviction, and observability.
 
