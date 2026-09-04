@@ -18,19 +18,22 @@ Read in this order:
    and distribution.
 8. [Benchmark plan](BENCHMARKS.md) — datasets, baselines, metrics, scenarios,
    and anti-benchmark rules.
-9. [Roadmap](ROADMAP.md) — evidence-gated phases and exit criteria.
-10. [Phase 0 evidence](PHASE_0.md) — completed exit record, reproduction, and
+9. [Real-large results matrix](REAL_LARGE_RESULTS.md) — the committed cold/warm
+   import, startup, frame, memory, and interaction figures for one real-large
+   model, presented together.
+10. [Roadmap](ROADMAP.md) — evidence-gated phases and exit criteria.
+11. [Phase 0 evidence](PHASE_0.md) — completed exit record, reproduction, and
    known limits.
-11. [Phase 1 evidence](PHASE_1.md) — completed vertical-slice evidence and
+12. [Phase 1 evidence](PHASE_1.md) — completed vertical-slice evidence and
     known limits.
-12. [Phase 1 completion report](PHASE_1_REPORT.md) — exit decision and
+13. [Phase 1 completion report](PHASE_1_REPORT.md) — exit decision and
     consolidated reproducible performance summary.
-13. [Phase 2 tracker](PHASE_2.md) — current priorities, dependencies, official
+14. [Phase 2 tracker](PHASE_2.md) — current priorities, dependencies, official
     exit-gate status, and evidence debt.
-14. [Architecture decisions](adr/README.md) — decisions and alternatives.
-15. [Branching and releases](BRANCHING.md) — work branches, pull requests,
+15. [Architecture decisions](adr/README.md) — decisions and alternatives.
+16. [Branching and releases](BRANCHING.md) — work branches, pull requests,
     merge rules, backports, tags, and enforcement gates.
-16. [Translations](TRANSLATIONS.md) — README languages, terminology, and
+17. [Translations](TRANSLATIONS.md) — README languages, terminology, and
     maintenance workflow.
 
 ## Documentation rules

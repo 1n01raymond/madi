@@ -9,7 +9,7 @@
 //   node scripts/record-ifc-browser-evidence.mjs \
 //     [--scene-dir output/ifc/sixty5] \
 //     [--report artifacts/ifc/sixty5/build-report.json] \
-//     [--output artifacts/ifc/sixty5-browser] [--headless] \
+//     [--output artifacts/ifc/sixty5-browser] [--browser chrome|firefox] [--headless] \
 //     [--skip-coarse-screenshot] [--residency-mib 64]
 import { createHash } from "node:crypto";
 import { createReadStream } from "node:fs";
@@ -18,7 +18,7 @@ import { isAbsolute, relative, resolve, sep } from "node:path";
 import { pipeline } from "node:stream/promises";
 import { fileURLToPath } from "node:url";
 
-import { chromium } from "playwright";
+import { chromium, firefox } from "playwright";
 import { createServer } from "vite";
 
 const repositoryRoot = fileURLToPath(new URL("..", import.meta.url));
@@ -46,6 +46,27 @@ if (
   throw new TypeError("Browser evidence output must remain inside the repository.");
 }
 const headless = process.argv.includes("--headless");
+// The record is engine-parameterised so the same protocol can be repeated on
+// a second engine; every launch difference lives in this table and nowhere
+// else. Chrome reports performance.memory only with the precise-memory switch.
+const browserEngines = {
+  chrome: {
+    id: "chrome",
+    engine: "Blink",
+    launch: () =>
+      chromium.launch({ channel: "chrome", headless, args: ["--enable-precise-memory-info"] }),
+  },
+  firefox: {
+    id: "firefox",
+    engine: "Gecko",
+    launch: () => firefox.launch({ headless }),
+  },
+};
+const browserId = argValue("--browser", "chrome");
+const browserEngine = Object.hasOwn(browserEngines, browserId)
+  ? browserEngines[browserId]
+  : undefined;
+if (!browserEngine) throw new TypeError("--browser must be chrome or firefox.");
 const skipCoarseScreenshot = process.argv.includes("--skip-coarse-screenshot");
 const residencyMiBArgument = argValue("--residency-mib", null);
 const residencyMiB = residencyMiBArgument === null ? null : Number(residencyMiBArgument);
@@ -88,11 +109,7 @@ const vite = await createServer({
   root: resolve(repositoryRoot, "apps/webgpu-spike"),
   server: { host: "127.0.0.1", port: 4174, strictPort: true },
 });
-const browser = await chromium.launch({
-  channel: "chrome",
-  headless,
-  args: ["--enable-precise-memory-info"],
-});
+const browser = await browserEngine.launch();
 try {
   await vite.listen();
   const viewerUrl = new URL("http://127.0.0.1:4174/");
@@ -330,8 +347,8 @@ try {
     schemaVersion: "madi.ifc-browser-residency.2",
     capturedAt: new Date(startedAt).toISOString(),
     browser: {
-      id: "chrome",
-      engine: "Blink",
+      id: browserEngine.id,
+      engine: browserEngine.engine,
       version: browser.version(),
       headless,
       viewport: { width: 1320, height: 1000 },

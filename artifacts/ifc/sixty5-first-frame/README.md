@@ -147,6 +147,8 @@ before opening headed Chrome. `coarse-frame.png`, `budget-limited.png`, and
 
 - This is a Chrome/Blink result on one discrete-GPU Windows host, not an
   ADR-0003 renderer decision or a cross-browser performance claim.
+  `../sixty5-first-frame-gecko/` repeats it in Firefox on the same host and the
+  same package: the resident set is byte-identical, the wall clock is not.
 - The optimization applies only to the compiler's existing
   `prototype-aabb-v1` coarse representation. Target geometry and the serialized
   glTF profile are unchanged.

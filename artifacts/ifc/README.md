@@ -11,6 +11,7 @@ outside Git because they are large reproducible inputs or derived caches.
 | `sixty5/` | First real-large seven-discipline extraction and the measured compiler boundary |
 | `sixty5-browser/` | Original real-large browser/residency record and 268.0 s first-frame baseline |
 | `sixty5-first-frame/` | Shared-coarse, virtualized-list, skip-and-continue, estimate-gate, and shared-vertex-pool follow-up: 4.487 s median first frame and 111 of 234 resident chunks on the identical package |
+| `sixty5-first-frame-gecko/` | Firefox/Gecko repeat of `sixty5-first-frame/` on the same package and host: a byte-identical resident set at 111 of 234 chunks, 1.52x the median first frame |
 | `relocated-hierarchy-browser/` | Paired sixty5 packages that differ only in whether the assembly tree is in the document: −15.99% first frame, −20.30% peak heap, ADR-0017's browser gate |
 
 Normal CI runs `pnpm ifc:edges:check` and `pnpm ifc:federation:check` without
