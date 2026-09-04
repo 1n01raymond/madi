@@ -74,6 +74,7 @@
     "demand:priority:evidence": "node scripts/record-demand-priority-evidence.mjs",
     "memory:envelope:check": "node scripts/validate-memory-envelope-evidence.mjs",
     "memory:envelope:evidence": "node scripts/record-memory-envelope-evidence.mjs",
+    "memory:envelope:gecko:evidence": "node scripts/record-memory-envelope-evidence.mjs --browser firefox",
     "spatial:localized:evidence": "node scripts/record-spatial-localized-trace-evidence.mjs",
     "spatial:package": "pnpm --filter @naru3d/compiler... run build && node scripts/compile-ifc-spatial-package.mjs",
     "test": "vitest run",

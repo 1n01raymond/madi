@@ -1,0 +1,2512 @@
+{
+  "schemaVersion": "naru.memory-envelope.1",
+  "capturedAt": "2026-09-04T14:12:27.935Z",
+  "mode": "headed-phase-sampled-memory-ledger",
+  "timingComparability": "Milestone offsets in this record are perturbed: this engine exposes no in-page memory estimator, so no phase sample forces a collection, but every phase still pauses for an operating-system process sample and for the scheduler to settle. Use artifacts/ifc/sixty5-first-frame-gecko for timing.",
+  "browser": {
+    "id": "firefox",
+    "engine": "Gecko",
+    "version": "150.0.2",
+    "headless": false,
+    "viewport": {
+      "width": 1320,
+      "height": 1000
+    },
+    "launchArguments": []
+  },
+  "host": {
+    "platform": "win32",
+    "architecture": "x64",
+    "cpuCount": 16,
+    "totalMemoryBytes": 33463021568,
+    "node": "v22.14.0"
+  },
+  "source": {
+    "buildReport": "artifacts/ifc/sixty5/build-report.json",
+    "sceneDirectory": "output/ifc/sixty5-prb",
+    "packageDigest": "a2d6c72a6e936ac3ea2a183a1028cc4a06b20985c6d90b16058954323b7c3347",
+    "resources": [
+      {
+        "path": "scene.gltf",
+        "mediaType": "model/gltf+json",
+        "bytes": 448823852,
+        "sha256": "a35b01a5eef5b3492e3a68072ede9cdff53dce8032c7b68f719154651fc54709"
+      },
+      {
+        "path": "scene.bin",
+        "mediaType": "application/octet-stream",
+        "bytes": 120707064,
+        "sha256": "7a04489cfadb39706b7b8c3832402991e8d6f1e15983547d71939cc924fad913"
+      },
+      {
+        "path": "coarse.bin",
+        "mediaType": "application/octet-stream",
+        "bytes": 38700720,
+        "sha256": "258e085d4f3d0b380bb89c3596b2e3bfc4a43177afe9fc7e92d6e1046db9031b"
+      },
+      {
+        "path": "properties.json",
+        "mediaType": "application/json",
+        "bytes": 17705010,
+        "sha256": "dc3394714b73d322dcfe6bad7ce780dbdd18cb547e5eaf45a26c9e66de932312"
+      },
+      {
+        "path": "properties.bin",
+        "mediaType": "application/octet-stream",
+        "bytes": 31179862,
+        "sha256": "dad8d98909c738df930569c4b907c29e64cda2b65d84917936c1c4d86d3dd8c4"
+      }
+    ],
+    "servedFrom": "Vite dev static hosting with HTTP Range support"
+  },
+  "method": {
+    "phases": [
+      "hierarchy",
+      "coarse-frame",
+      "budget-limited",
+      "navigation",
+      "selection",
+      "eviction"
+    ],
+    "runsPerProfile": 3,
+    "profiles": [
+      {
+        "name": "default-budget",
+        "residencyMiB": null,
+        "budgetBytes": 67108864
+      },
+      {
+        "name": "forced-low-budget",
+        "residencyMiB": 8,
+        "budgetBytes": 8388608
+      }
+    ],
+    "camera": {
+      "wheelDelta": -5000,
+      "panX": 400,
+      "panY": -300
+    },
+    "screenshots": "Each capture is taken while the page is quiet: the coarse frame before its memory sample, the others after the scheduler settles. A full-page capture requested while the residency drain is running is serviced only when the compositor is free again, which would date the image to a later phase.",
+    "processSampling": "Win32_Process rows for firefox.exe, summed over the tree rooted at the launched browser.",
+    "evictionProbe": "The centre selection is the first candidate: a promotion that admits an absent chunk while the budget is full evicts colder groups and is recorded with source 'selection'. Only if that pick was already resident are twenty viewport points scanned in a fixed order, and the first pick that evicts ends the scan.",
+    "evictionQuiescence": "The eviction sample is taken after a bounded 180 s wait for the scheduler counters to stop moving. Each run records whether that wait succeeded and, when it did not, what kept changing; a budget too small to hold the demanded set re-admits around the pinned selection indefinitely."
+  },
+  "ledgerCategories": [
+    {
+      "id": "package.documentBytes",
+      "owner": "compiled glTF document, held by the main thread and the geometry Worker",
+      "lifetime": "whole session; the Worker keeps the parsed document until the scene closes",
+      "method": "exact-declared",
+      "partOf": null,
+      "note": "Transferred byte length. What the parsed form costs in the heap is a different, engine-owned number; see page.uaMemoryBytes."
+    },
+    {
+      "id": "package.propertyIndexBytes",
+      "owner": "property sidecar index document (properties.json), fetched on the first selection",
+      "lifetime": "from the first selection to the end of the session",
+      "method": "exact-declared",
+      "partOf": null,
+      "note": "The index only. Property values live in properties.bin, which is read by range per selection and not retained; those bytes appear in page.uaMemoryBytes while a selection holds them, never here."
+    },
+    {
+      "id": "package.spatialIndexBytes",
+      "owner": "spatial demand index, when the package carries one",
+      "lifetime": "whole session",
+      "method": "exact-declared",
+      "partOf": null,
+      "note": "Zero means the package has no spatial index, not that the index is free."
+    },
+    {
+      "id": "package.declaredGeometryBytes",
+      "owner": "target geometry declared by the document",
+      "lifetime": "never resident as a whole",
+      "method": "exact-declared",
+      "partOf": null,
+      "note": "Bounds the Range requests, not the memory: only admitted chunks are ever decoded."
+    },
+    {
+      "id": "residency.budgetBytes",
+      "owner": "ProgressiveResidency, configured by ?residencyMiB",
+      "lifetime": "whole session",
+      "method": "exact-declared",
+      "partOf": null,
+      "note": "The only memory figure in the Studio that is a policy rather than a measurement."
+    },
+    {
+      "id": "residency.decodedBytes",
+      "owner": "decoded target geometry arrays held by ProgressiveResidency",
+      "lifetime": "until eviction",
+      "method": "exact-counted",
+      "partOf": "page.uaMemoryBytes",
+      "note": "Counts each shared vertex pool once, as the admission cost formula does."
+    },
+    {
+      "id": "residency.gpuBytes",
+      "owner": "GPU buffers charged to admitted target chunks",
+      "lifetime": "until eviction",
+      "method": "exact-counted",
+      "partOf": "renderer.gpuBufferBytes",
+      "note": "Target detail only. Coarse batches and the camera uniform are outside this charge, which is why the renderer total is larger."
+    },
+    {
+      "id": "renderer.gpuVertexPoolBytes",
+      "owner": "one GPUBuffer per shared prototype vertex pool",
+      "lifetime": "until the last batch referencing the pool is released",
+      "method": "exact-counted",
+      "partOf": "renderer.gpuBufferBytes",
+      "note": "Counted once per pool. Summing per batch would report allocations that were never made."
+    },
+    {
+      "id": "renderer.gpuBatchBufferBytes",
+      "owner": "per-batch index, edge, and instance GPUBuffers",
+      "lifetime": "until the batch is released",
+      "method": "exact-counted",
+      "partOf": "renderer.gpuBufferBytes"
+    },
+    {
+      "id": "renderer.gpuUniformBytes",
+      "owner": "the camera uniform buffer",
+      "lifetime": "whole session",
+      "method": "exact-counted",
+      "partOf": "renderer.gpuBufferBytes"
+    },
+    {
+      "id": "renderer.gpuBufferBytes",
+      "owner": "the renderer's GPUBuffer allocations",
+      "lifetime": "mixed; see the three categories it contains",
+      "method": "exact-counted",
+      "partOf": null,
+      "includes": [
+        "renderer.gpuVertexPoolBytes",
+        "renderer.gpuBatchBufferBytes",
+        "renderer.gpuUniformBytes"
+      ]
+    },
+    {
+      "id": "renderer.gpuAttachmentBytes",
+      "owner": "the depth and object-id render attachments",
+      "lifetime": "until the canvas is resized",
+      "method": "upper-bound",
+      "partOf": null,
+      "note": "depth24plus storage is implementation-defined, so the wider 4-byte layout is charged. Deliberately outside renderer.gpuBufferBytes: a texture is not a buffer allocation."
+    },
+    {
+      "id": "renderer.cpuStagingBytes",
+      "owner": "per-batch instance staging arrays on the JavaScript heap",
+      "lifetime": "until the batch is released",
+      "method": "exact-counted",
+      "partOf": "page.usedJsHeapBytes"
+    },
+    {
+      "id": "page.usedJsHeapBytes",
+      "owner": "the main-thread V8 isolate",
+      "lifetime": "sampled",
+      "method": "unsupported",
+      "partOf": null,
+      "note": "This engine exposes no performance.memory, so the main-thread isolate is not measured here. Recorded as unavailable, never as zero; process.workingSetBytes and process.privateBytes are the estimator-independent bound.",
+      "value": null
+    },
+    {
+      "id": "page.uaMemoryBytes",
+      "owner": "the whole agent cluster, including dedicated workers",
+      "lifetime": "sampled",
+      "method": "unsupported",
+      "partOf": "process.workingSetBytes",
+      "note": "This engine exposes no performance.measureUserAgentSpecificMemory(), so the agent cluster is not measured here. Recorded as unavailable, never as zero; process.workingSetBytes and process.privateBytes are the estimator-independent bound.",
+      "value": null
+    },
+    {
+      "id": "process.workingSetBytes",
+      "owner": "the headed browser process tree (browser, renderer, GPU, utility)",
+      "lifetime": "sampled",
+      "method": "os-sampled",
+      "partOf": null,
+      "note": "Win32_Process WorkingSetSize summed over the tree rooted at the launched browser. Includes pages shared with other processes, so it is not additive across trees."
+    },
+    {
+      "id": "process.privateBytes",
+      "owner": "the same process tree",
+      "lifetime": "sampled",
+      "method": "os-sampled",
+      "partOf": null,
+      "note": "Win32_Process PrivatePageCount, which this API reports in bytes: private committed pages, excluding pages shared with other processes. A committed page need not be resident, so this figure runs well above process.workingSetBytes and is not a claim about how much RAM the browser holds."
+    },
+    {
+      "id": "gpu.driverAllocationBytes",
+      "owner": "the graphics driver's device-side allocations",
+      "lifetime": "unknown",
+      "method": "unsupported",
+      "partOf": null,
+      "value": null,
+      "note": "No browser or operating-system interface available to page or host script reports what the WebGPU driver allocated on the device. Recorded as unavailable, never as zero; renderer.gpu* are the requested sizes, not the driver's."
+    }
+  ],
+  "declaredTargets": [
+    {
+      "id": "residency-decoded-within-budget",
+      "statement": "Decoded target residency never exceeds the configured budget, in either profile.",
+      "applies": "every phase of every run",
+      "metric": "residency.decodedBytes <= residency.budgetBytes"
+    },
+    {
+      "id": "residency-gpu-within-budget",
+      "statement": "GPU target residency never exceeds the configured budget, in either profile.",
+      "applies": "every phase of every run",
+      "metric": "residency.gpuBytes <= residency.budgetBytes"
+    },
+    {
+      "id": "process-working-set-ceiling",
+      "statement": "The browser process tree stays below 4 GiB while a 657 MB package is open.",
+      "applies": "every phase of every run",
+      "metric": "process.workingSetBytes <= 4294967296",
+      "ceilingBytes": 4294967296
+    },
+    {
+      "id": "heap-estimators-absent-not-zero",
+      "statement": "On an engine that exposes no heap estimator, every heap figure is recorded as absent with a stated reason rather than as a zero, and the bound this record reports comes from the operating-system process sample instead.",
+      "applies": "every phase of every run",
+      "metric": "page.usedJsHeapBytes and page.uaMemoryBytes are null, each with a non-empty reason"
+    },
+    {
+      "id": "forced-low-remains-usable",
+      "statement": "Under the forced-low budget the hierarchy and a coarse frame still appear, and a source-aware selection still resolves; full target residency is not required.",
+      "applies": "the forced-low profile (8 MiB)",
+      "metric": "phases hierarchy and coarse-frame reached, selection resolves property entries"
+    }
+  ],
+  "targetOutcomes": [
+    {
+      "id": "residency-decoded-within-budget",
+      "met": true,
+      "observedMaximum": {
+        "value": 67009152,
+        "profile": "default-budget",
+        "runIndex": 1,
+        "phase": "selection"
+      }
+    },
+    {
+      "id": "residency-gpu-within-budget",
+      "met": true,
+      "observedMaximum": {
+        "value": 67108748,
+        "profile": "default-budget",
+        "runIndex": 1,
+        "phase": "navigation"
+      }
+    },
+    {
+      "id": "process-working-set-ceiling",
+      "met": false,
+      "observedMaximum": {
+        "value": 5486096384,
+        "profile": "forced-low-budget",
+        "runIndex": 1,
+        "phase": "coarse-frame"
+      }
+    },
+    {
+      "id": "heap-estimators-absent-not-zero",
+      "met": true,
+      "observedMaximum": null
+    },
+    {
+      "id": "forced-low-remains-usable",
+      "met": true,
+      "observedMaximum": null
+    }
+  ],
+  "summary": {
+    "defaultBudget": {
+      "runs": 3,
+      "medianWorkingSetBytes": 5104345088,
+      "medianPrivateBytes": 11447386112,
+      "medianUsedJsHeapBytes": null,
+      "medianUaMemoryBytes": null,
+      "medianResidentDecodedBytes": 66686508,
+      "medianResidentGpuBytes": 66783808,
+      "medianRendererGpuBufferBytes": 66783936,
+      "chunksReady": [
+        111,
+        111,
+        111
+      ]
+    },
+    "forcedLowBudget": {
+      "runs": 3,
+      "medianWorkingSetBytes": 4701130752,
+      "medianPrivateBytes": 4953575424,
+      "medianUsedJsHeapBytes": null,
+      "medianUaMemoryBytes": null,
+      "medianResidentDecodedBytes": 8249400,
+      "medianResidentGpuBytes": 8251192,
+      "medianRendererGpuBufferBytes": 8251320,
+      "chunksReady": [
+        4,
+        4,
+        4
+      ]
+    },
+    "budgetToWorkingSetDeltaBytes": 403214336,
+    "residencyShareOfWorkingSet": 0.0131
+  },
+  "runs": [
+    {
+      "profile": "default-budget",
+      "runIndex": 1,
+      "residencyMiB": null,
+      "budgetBytes": 67108864,
+      "startedAt": "2026-09-04T14:09:51.229Z",
+      "browserVersion": "150.0.2",
+      "rootPid": 46768,
+      "samples": [
+        {
+          "phase": "hierarchy",
+          "atMilliseconds": 3971,
+          "statusText": "Hierarchy ready · 188319 occurrences · decoding 117,878.0 KiB in Worker…",
+          "statusState": "loading",
+          "statusStage": "hierarchy",
+          "crossOriginIsolated": true,
+          "package": {
+            "documentBytes": 448823852,
+            "propertyIndexBytes": 17705010,
+            "spatialIndexBytes": 0,
+            "declaredGeometryBytes": 120707064
+          },
+          "residency": {
+            "budgetBytes": null,
+            "decodedBytes": null,
+            "gpuBytes": null,
+            "budgetReached": false,
+            "chunksReady": null,
+            "chunksTotal": null,
+            "schedulerRequests": null,
+            "schedulerSkips": null,
+            "evictedTargetMeshCount": null,
+            "selectionResidency": null
+          },
+          "renderer": {
+            "gpuVertexPoolBytes": null,
+            "gpuBatchBufferBytes": null,
+            "gpuUniformBytes": null,
+            "gpuBufferBytes": null,
+            "gpuAttachmentBytes": null,
+            "cpuStagingBytes": null
+          },
+          "page": {
+            "usedJsHeapBytes": null,
+            "totalJsHeapBytes": null,
+            "jsHeapLimitBytes": null,
+            "usedJsHeapUnavailableReason": "performance.memory is not exposed by this engine.",
+            "uaMemoryBytes": null,
+            "uaMemoryByType": null,
+            "uaMemoryByScope": null,
+            "uaMemoryEntryCount": null,
+            "uaMemorySampleMilliseconds": null,
+            "uaMemoryUnavailableReason": "performance.measureUserAgentSpecificMemory is not exposed in this browser."
+          },
+          "process": {
+            "rootPid": 46768,
+            "processCount": 8,
+            "browserProcessesOnHost": 8,
+            "workingSetBytes": 4187951104,
+            "privateBytes": 4356640768
+          }
+        },
+        {
+          "phase": "coarse-frame",
+          "atMilliseconds": 7017,
+          "statusText": "View-priority target detail 3/234 · 78173 occurrences retained · 8,986.3 KiB GPU resident",
+          "statusState": "loading",
+          "statusStage": "target-chunks",
+          "crossOriginIsolated": true,
+          "package": {
+            "documentBytes": 448823852,
+            "propertyIndexBytes": 17705010,
+            "spatialIndexBytes": 0,
+            "declaredGeometryBytes": 120707064
+          },
+          "residency": {
+            "budgetBytes": 67108864,
+            "decodedBytes": 9197064,
+            "gpuBytes": 9202020,
+            "budgetReached": false,
+            "chunksReady": 3,
+            "chunksTotal": 234,
+            "schedulerRequests": 4,
+            "schedulerSkips": null,
+            "evictedTargetMeshCount": null,
+            "selectionResidency": null
+          },
+          "renderer": {
+            "gpuVertexPoolBytes": 826800,
+            "gpuBatchBufferBytes": 8375220,
+            "gpuUniformBytes": 128,
+            "gpuBufferBytes": 9202148,
+            "gpuAttachmentBytes": 4900480,
+            "cpuStagingBytes": 7630176
+          },
+          "page": {
+            "usedJsHeapBytes": null,
+            "totalJsHeapBytes": null,
+            "jsHeapLimitBytes": null,
+            "usedJsHeapUnavailableReason": "performance.memory is not exposed by this engine.",
+            "uaMemoryBytes": null,
+            "uaMemoryByType": null,
+            "uaMemoryByScope": null,
+            "uaMemoryEntryCount": null,
+            "uaMemorySampleMilliseconds": null,
+            "uaMemoryUnavailableReason": "performance.measureUserAgentSpecificMemory is not exposed in this browser."
+          },
+          "process": {
+            "rootPid": 46768,
+            "processCount": 8,
+            "browserProcessesOnHost": 8,
+            "workingSetBytes": 4848574464,
+            "privateBytes": 6028660736
+          }
+        },
+        {
+          "phase": "budget-limited",
+          "atMilliseconds": 15757,
+          "statusText": "Residency budget reached · 24326 surface batches retained · 78173 renderable occurrences",
+          "statusState": "ready",
+          "statusStage": "rendered",
+          "crossOriginIsolated": true,
+          "package": {
+            "documentBytes": 448823852,
+            "propertyIndexBytes": 17705010,
+            "spatialIndexBytes": 0,
+            "declaredGeometryBytes": 120707064
+          },
+          "residency": {
+            "budgetBytes": 67108864,
+            "decodedBytes": 66686508,
+            "gpuBytes": 66783808,
+            "budgetReached": true,
+            "chunksReady": 111,
+            "chunksTotal": 234,
+            "schedulerRequests": 111,
+            "schedulerSkips": 123,
+            "evictedTargetMeshCount": null,
+            "selectionResidency": null
+          },
+          "renderer": {
+            "gpuVertexPoolBytes": 28790184,
+            "gpuBatchBufferBytes": 37993624,
+            "gpuUniformBytes": 128,
+            "gpuBufferBytes": 66783936,
+            "gpuAttachmentBytes": 4900480,
+            "cpuStagingBytes": 10833216
+          },
+          "page": {
+            "usedJsHeapBytes": null,
+            "totalJsHeapBytes": null,
+            "jsHeapLimitBytes": null,
+            "usedJsHeapUnavailableReason": "performance.memory is not exposed by this engine.",
+            "uaMemoryBytes": null,
+            "uaMemoryByType": null,
+            "uaMemoryByScope": null,
+            "uaMemoryEntryCount": null,
+            "uaMemorySampleMilliseconds": null,
+            "uaMemoryUnavailableReason": "performance.measureUserAgentSpecificMemory is not exposed in this browser."
+          },
+          "process": {
+            "rootPid": 46768,
+            "processCount": 8,
+            "browserProcessesOnHost": 8,
+            "workingSetBytes": 5139324928,
+            "privateBytes": 11478167552
+          }
+        },
+        {
+          "phase": "navigation",
+          "atMilliseconds": 22301,
+          "statusText": "Residency budget reached · 24930 surface batches retained · 78173 renderable occurrences",
+          "statusState": "ready",
+          "statusStage": "rendered",
+          "crossOriginIsolated": true,
+          "package": {
+            "documentBytes": 448823852,
+            "propertyIndexBytes": 17705010,
+            "spatialIndexBytes": 0,
+            "declaredGeometryBytes": 120707064
+          },
+          "residency": {
+            "budgetBytes": 67108864,
+            "decodedBytes": 67009032,
+            "gpuBytes": 67108748,
+            "budgetReached": true,
+            "chunksReady": 110,
+            "chunksTotal": 234,
+            "schedulerRequests": 132,
+            "schedulerSkips": 247,
+            "evictedTargetMeshCount": null,
+            "selectionResidency": null
+          },
+          "renderer": {
+            "gpuVertexPoolBytes": 28889112,
+            "gpuBatchBufferBytes": 38219636,
+            "gpuUniformBytes": 128,
+            "gpuBufferBytes": 67108876,
+            "gpuAttachmentBytes": 4900480,
+            "cpuStagingBytes": 10996224
+          },
+          "page": {
+            "usedJsHeapBytes": null,
+            "totalJsHeapBytes": null,
+            "jsHeapLimitBytes": null,
+            "usedJsHeapUnavailableReason": "performance.memory is not exposed by this engine.",
+            "uaMemoryBytes": null,
+            "uaMemoryByType": null,
+            "uaMemoryByScope": null,
+            "uaMemoryEntryCount": null,
+            "uaMemorySampleMilliseconds": null,
+            "uaMemoryUnavailableReason": "performance.measureUserAgentSpecificMemory is not exposed in this browser."
+          },
+          "process": {
+            "rootPid": 46768,
+            "processCount": 8,
+            "browserProcessesOnHost": 8,
+            "workingSetBytes": 5186531328,
+            "privateBytes": 11874820096
+          }
+        },
+        {
+          "phase": "selection",
+          "atMilliseconds": 23533,
+          "statusText": "Residency budget reached · 24840 surface batches retained · 78173 renderable occurrences",
+          "statusState": "ready",
+          "statusStage": "rendered",
+          "crossOriginIsolated": true,
+          "package": {
+            "documentBytes": 448823852,
+            "propertyIndexBytes": 17705010,
+            "spatialIndexBytes": 0,
+            "declaredGeometryBytes": 120707064
+          },
+          "residency": {
+            "budgetBytes": 67108864,
+            "decodedBytes": 67009152,
+            "gpuBytes": 67108508,
+            "budgetReached": true,
+            "chunksReady": 110,
+            "chunksTotal": 234,
+            "schedulerRequests": 132,
+            "schedulerSkips": 371,
+            "evictedTargetMeshCount": 199,
+            "selectionResidency": "target"
+          },
+          "renderer": {
+            "gpuVertexPoolBytes": 28891224,
+            "gpuBatchBufferBytes": 38217284,
+            "gpuUniformBytes": 128,
+            "gpuBufferBytes": 67108636,
+            "gpuAttachmentBytes": 4900480,
+            "cpuStagingBytes": 10985184
+          },
+          "page": {
+            "usedJsHeapBytes": null,
+            "totalJsHeapBytes": null,
+            "jsHeapLimitBytes": null,
+            "usedJsHeapUnavailableReason": "performance.memory is not exposed by this engine.",
+            "uaMemoryBytes": null,
+            "uaMemoryByType": null,
+            "uaMemoryByScope": null,
+            "uaMemoryEntryCount": null,
+            "uaMemorySampleMilliseconds": null,
+            "uaMemoryUnavailableReason": "performance.measureUserAgentSpecificMemory is not exposed in this browser."
+          },
+          "process": {
+            "rootPid": 46768,
+            "processCount": 8,
+            "browserProcessesOnHost": 8,
+            "workingSetBytes": 5363843072,
+            "privateBytes": 12073758720
+          }
+        },
+        {
+          "phase": "eviction",
+          "atMilliseconds": 28095,
+          "statusText": "Residency budget reached · 24840 surface batches retained · 78173 renderable occurrences",
+          "statusState": "ready",
+          "statusStage": "rendered",
+          "crossOriginIsolated": true,
+          "package": {
+            "documentBytes": 448823852,
+            "propertyIndexBytes": 17705010,
+            "spatialIndexBytes": 0,
+            "declaredGeometryBytes": 120707064
+          },
+          "residency": {
+            "budgetBytes": 67108864,
+            "decodedBytes": 67009152,
+            "gpuBytes": 67108508,
+            "budgetReached": true,
+            "chunksReady": 110,
+            "chunksTotal": 234,
+            "schedulerRequests": 132,
+            "schedulerSkips": 371,
+            "evictedTargetMeshCount": 199,
+            "selectionResidency": "target"
+          },
+          "renderer": {
+            "gpuVertexPoolBytes": 28891224,
+            "gpuBatchBufferBytes": 38217284,
+            "gpuUniformBytes": 128,
+            "gpuBufferBytes": 67108636,
+            "gpuAttachmentBytes": 4900480,
+            "cpuStagingBytes": 10985184
+          },
+          "page": {
+            "usedJsHeapBytes": null,
+            "totalJsHeapBytes": null,
+            "jsHeapLimitBytes": null,
+            "usedJsHeapUnavailableReason": "performance.memory is not exposed by this engine.",
+            "uaMemoryBytes": null,
+            "uaMemoryByType": null,
+            "uaMemoryByScope": null,
+            "uaMemoryEntryCount": null,
+            "uaMemorySampleMilliseconds": null,
+            "uaMemoryUnavailableReason": "performance.measureUserAgentSpecificMemory is not exposed in this browser."
+          },
+          "process": {
+            "rootPid": 46768,
+            "processCount": 8,
+            "browserProcessesOnHost": 8,
+            "workingSetBytes": 5253013504,
+            "privateBytes": 11955245056
+          }
+        }
+      ],
+      "selection": {
+        "selectedObjectId": "148339",
+        "selectionResidency": "target",
+        "evictedTargetMeshCount": "199",
+        "semanticProperties": {
+          "state": "resolved",
+          "entryCount": 6,
+          "countLabel": "· 6 · IFC2X3"
+        }
+      },
+      "eviction": {
+        "observed": true,
+        "source": "selection",
+        "selected": "148339",
+        "selectionResidency": "target",
+        "evictedTargetMeshCount": 199
+      },
+      "evictionAttempts": [],
+      "evictionQuiescence": {
+        "settled": true,
+        "waitedMilliseconds": 4036,
+        "state": "ready|132|371|110|67108508"
+      },
+      "consoleIssues": [],
+      "screenshots": {
+        "coarse-frame.png": {
+          "path": "default-budget/coarse-frame.png",
+          "bytes": 163174,
+          "sha256": "65560149ecd437e147bfeb2891795b1dd4bf8f9cd8b99d99532532d38c26ffdc"
+        },
+        "budget-limited.png": {
+          "path": "default-budget/budget-limited.png",
+          "bytes": 207018,
+          "sha256": "6840220e90466fd0e40ed5047d22ae23f7e80060032ed32ef7ca1c8d698babb5"
+        },
+        "selection.png": {
+          "path": "default-budget/selection.png",
+          "bytes": 276162,
+          "sha256": "e15d4b241349bc8652558554483b44a1bdbf236d962eabb9bcd5579c36b58670"
+        }
+      }
+    },
+    {
+      "profile": "default-budget",
+      "runIndex": 2,
+      "residencyMiB": null,
+      "budgetBytes": 67108864,
+      "startedAt": "2026-09-04T14:10:20.567Z",
+      "browserVersion": "150.0.2",
+      "rootPid": 42868,
+      "samples": [
+        {
+          "phase": "hierarchy",
+          "atMilliseconds": 3879,
+          "statusText": "Hierarchy ready · 188319 occurrences · decoding 117,878.0 KiB in Worker…",
+          "statusState": "loading",
+          "statusStage": "hierarchy",
+          "crossOriginIsolated": true,
+          "package": {
+            "documentBytes": 448823852,
+            "propertyIndexBytes": 17705010,
+            "spatialIndexBytes": 0,
+            "declaredGeometryBytes": 120707064
+          },
+          "residency": {
+            "budgetBytes": null,
+            "decodedBytes": null,
+            "gpuBytes": null,
+            "budgetReached": false,
+            "chunksReady": null,
+            "chunksTotal": null,
+            "schedulerRequests": null,
+            "schedulerSkips": null,
+            "evictedTargetMeshCount": null,
+            "selectionResidency": null
+          },
+          "renderer": {
+            "gpuVertexPoolBytes": null,
+            "gpuBatchBufferBytes": null,
+            "gpuUniformBytes": null,
+            "gpuBufferBytes": null,
+            "gpuAttachmentBytes": null,
+            "cpuStagingBytes": null
+          },
+          "page": {
+            "usedJsHeapBytes": null,
+            "totalJsHeapBytes": null,
+            "jsHeapLimitBytes": null,
+            "usedJsHeapUnavailableReason": "performance.memory is not exposed by this engine.",
+            "uaMemoryBytes": null,
+            "uaMemoryByType": null,
+            "uaMemoryByScope": null,
+            "uaMemoryEntryCount": null,
+            "uaMemorySampleMilliseconds": null,
+            "uaMemoryUnavailableReason": "performance.measureUserAgentSpecificMemory is not exposed in this browser."
+          },
+          "process": {
+            "rootPid": 42868,
+            "processCount": 8,
+            "browserProcessesOnHost": 8,
+            "workingSetBytes": 4204441600,
+            "privateBytes": 4380585984
+          }
+        },
+        {
+          "phase": "coarse-frame",
+          "atMilliseconds": 6734,
+          "statusText": "Coarse bounds ready · 78173 renderable occurrences · loading 117,878.0 KiB target geometry…",
+          "statusState": "loading",
+          "statusStage": "coarse",
+          "crossOriginIsolated": true,
+          "package": {
+            "documentBytes": 448823852,
+            "propertyIndexBytes": 17705010,
+            "spatialIndexBytes": 0,
+            "declaredGeometryBytes": 120707064
+          },
+          "residency": {
+            "budgetBytes": 67108864,
+            "decodedBytes": null,
+            "gpuBytes": null,
+            "budgetReached": false,
+            "chunksReady": 0,
+            "chunksTotal": 234,
+            "schedulerRequests": 1,
+            "schedulerSkips": null,
+            "evictedTargetMeshCount": null,
+            "selectionResidency": null
+          },
+          "renderer": {
+            "gpuVertexPoolBytes": 576,
+            "gpuBatchBufferBytes": 7505040,
+            "gpuUniformBytes": 128,
+            "gpuBufferBytes": 7505744,
+            "gpuAttachmentBytes": 4900480,
+            "cpuStagingBytes": 7504608
+          },
+          "page": {
+            "usedJsHeapBytes": null,
+            "totalJsHeapBytes": null,
+            "jsHeapLimitBytes": null,
+            "usedJsHeapUnavailableReason": "performance.memory is not exposed by this engine.",
+            "uaMemoryBytes": null,
+            "uaMemoryByType": null,
+            "uaMemoryByScope": null,
+            "uaMemoryEntryCount": null,
+            "uaMemorySampleMilliseconds": null,
+            "uaMemoryUnavailableReason": "performance.measureUserAgentSpecificMemory is not exposed in this browser."
+          },
+          "process": {
+            "rootPid": 42868,
+            "processCount": 8,
+            "browserProcessesOnHost": 8,
+            "workingSetBytes": 4794159104,
+            "privateBytes": 5848567808
+          }
+        },
+        {
+          "phase": "budget-limited",
+          "atMilliseconds": 15385,
+          "statusText": "Residency budget reached · 24326 surface batches retained · 78173 renderable occurrences",
+          "statusState": "ready",
+          "statusStage": "rendered",
+          "crossOriginIsolated": true,
+          "package": {
+            "documentBytes": 448823852,
+            "propertyIndexBytes": 17705010,
+            "spatialIndexBytes": 0,
+            "declaredGeometryBytes": 120707064
+          },
+          "residency": {
+            "budgetBytes": 67108864,
+            "decodedBytes": 66686508,
+            "gpuBytes": 66783808,
+            "budgetReached": true,
+            "chunksReady": 111,
+            "chunksTotal": 234,
+            "schedulerRequests": 111,
+            "schedulerSkips": 123,
+            "evictedTargetMeshCount": null,
+            "selectionResidency": null
+          },
+          "renderer": {
+            "gpuVertexPoolBytes": 28790184,
+            "gpuBatchBufferBytes": 37993624,
+            "gpuUniformBytes": 128,
+            "gpuBufferBytes": 66783936,
+            "gpuAttachmentBytes": 4900480,
+            "cpuStagingBytes": 10833216
+          },
+          "page": {
+            "usedJsHeapBytes": null,
+            "totalJsHeapBytes": null,
+            "jsHeapLimitBytes": null,
+            "usedJsHeapUnavailableReason": "performance.memory is not exposed by this engine.",
+            "uaMemoryBytes": null,
+            "uaMemoryByType": null,
+            "uaMemoryByScope": null,
+            "uaMemoryEntryCount": null,
+            "uaMemorySampleMilliseconds": null,
+            "uaMemoryUnavailableReason": "performance.measureUserAgentSpecificMemory is not exposed in this browser."
+          },
+          "process": {
+            "rootPid": 42868,
+            "processCount": 8,
+            "browserProcessesOnHost": 8,
+            "workingSetBytes": 5104345088,
+            "privateBytes": 11447386112
+          }
+        },
+        {
+          "phase": "navigation",
+          "atMilliseconds": 21731,
+          "statusText": "Residency budget reached · 24930 surface batches retained · 78173 renderable occurrences",
+          "statusState": "ready",
+          "statusStage": "rendered",
+          "crossOriginIsolated": true,
+          "package": {
+            "documentBytes": 448823852,
+            "propertyIndexBytes": 17705010,
+            "spatialIndexBytes": 0,
+            "declaredGeometryBytes": 120707064
+          },
+          "residency": {
+            "budgetBytes": 67108864,
+            "decodedBytes": 67009032,
+            "gpuBytes": 67108748,
+            "budgetReached": true,
+            "chunksReady": 110,
+            "chunksTotal": 234,
+            "schedulerRequests": 132,
+            "schedulerSkips": 247,
+            "evictedTargetMeshCount": null,
+            "selectionResidency": null
+          },
+          "renderer": {
+            "gpuVertexPoolBytes": 28889112,
+            "gpuBatchBufferBytes": 38219636,
+            "gpuUniformBytes": 128,
+            "gpuBufferBytes": 67108876,
+            "gpuAttachmentBytes": 4900480,
+            "cpuStagingBytes": 10996224
+          },
+          "page": {
+            "usedJsHeapBytes": null,
+            "totalJsHeapBytes": null,
+            "jsHeapLimitBytes": null,
+            "usedJsHeapUnavailableReason": "performance.memory is not exposed by this engine.",
+            "uaMemoryBytes": null,
+            "uaMemoryByType": null,
+            "uaMemoryByScope": null,
+            "uaMemoryEntryCount": null,
+            "uaMemorySampleMilliseconds": null,
+            "uaMemoryUnavailableReason": "performance.measureUserAgentSpecificMemory is not exposed in this browser."
+          },
+          "process": {
+            "rootPid": 42868,
+            "processCount": 8,
+            "browserProcessesOnHost": 8,
+            "workingSetBytes": 5134422016,
+            "privateBytes": 11827421184
+          }
+        },
+        {
+          "phase": "selection",
+          "atMilliseconds": 22918,
+          "statusText": "Residency budget reached · 24840 surface batches retained · 78173 renderable occurrences",
+          "statusState": "ready",
+          "statusStage": "rendered",
+          "crossOriginIsolated": true,
+          "package": {
+            "documentBytes": 448823852,
+            "propertyIndexBytes": 17705010,
+            "spatialIndexBytes": 0,
+            "declaredGeometryBytes": 120707064
+          },
+          "residency": {
+            "budgetBytes": 67108864,
+            "decodedBytes": 67009152,
+            "gpuBytes": 67108508,
+            "budgetReached": true,
+            "chunksReady": 110,
+            "chunksTotal": 234,
+            "schedulerRequests": 132,
+            "schedulerSkips": 371,
+            "evictedTargetMeshCount": 199,
+            "selectionResidency": "target"
+          },
+          "renderer": {
+            "gpuVertexPoolBytes": 28891224,
+            "gpuBatchBufferBytes": 38217284,
+            "gpuUniformBytes": 128,
+            "gpuBufferBytes": 67108636,
+            "gpuAttachmentBytes": 4900480,
+            "cpuStagingBytes": 10985184
+          },
+          "page": {
+            "usedJsHeapBytes": null,
+            "totalJsHeapBytes": null,
+            "jsHeapLimitBytes": null,
+            "usedJsHeapUnavailableReason": "performance.memory is not exposed by this engine.",
+            "uaMemoryBytes": null,
+            "uaMemoryByType": null,
+            "uaMemoryByScope": null,
+            "uaMemoryEntryCount": null,
+            "uaMemorySampleMilliseconds": null,
+            "uaMemoryUnavailableReason": "performance.measureUserAgentSpecificMemory is not exposed in this browser."
+          },
+          "process": {
+            "rootPid": 42868,
+            "processCount": 8,
+            "browserProcessesOnHost": 8,
+            "workingSetBytes": 5417730048,
+            "privateBytes": 12131172352
+          }
+        },
+        {
+          "phase": "eviction",
+          "atMilliseconds": 27422,
+          "statusText": "Residency budget reached · 24840 surface batches retained · 78173 renderable occurrences",
+          "statusState": "ready",
+          "statusStage": "rendered",
+          "crossOriginIsolated": true,
+          "package": {
+            "documentBytes": 448823852,
+            "propertyIndexBytes": 17705010,
+            "spatialIndexBytes": 0,
+            "declaredGeometryBytes": 120707064
+          },
+          "residency": {
+            "budgetBytes": 67108864,
+            "decodedBytes": 67009152,
+            "gpuBytes": 67108508,
+            "budgetReached": true,
+            "chunksReady": 110,
+            "chunksTotal": 234,
+            "schedulerRequests": 132,
+            "schedulerSkips": 371,
+            "evictedTargetMeshCount": 199,
+            "selectionResidency": "target"
+          },
+          "renderer": {
+            "gpuVertexPoolBytes": 28891224,
+            "gpuBatchBufferBytes": 38217284,
+            "gpuUniformBytes": 128,
+            "gpuBufferBytes": 67108636,
+            "gpuAttachmentBytes": 4900480,
+            "cpuStagingBytes": 10985184
+          },
+          "page": {
+            "usedJsHeapBytes": null,
+            "totalJsHeapBytes": null,
+            "jsHeapLimitBytes": null,
+            "usedJsHeapUnavailableReason": "performance.memory is not exposed by this engine.",
+            "uaMemoryBytes": null,
+            "uaMemoryByType": null,
+            "uaMemoryByScope": null,
+            "uaMemoryEntryCount": null,
+            "uaMemorySampleMilliseconds": null,
+            "uaMemoryUnavailableReason": "performance.measureUserAgentSpecificMemory is not exposed in this browser."
+          },
+          "process": {
+            "rootPid": 42868,
+            "processCount": 8,
+            "browserProcessesOnHost": 8,
+            "workingSetBytes": 5283467264,
+            "privateBytes": 11994378240
+          }
+        }
+      ],
+      "selection": {
+        "selectedObjectId": "148339",
+        "selectionResidency": "target",
+        "evictedTargetMeshCount": "199",
+        "semanticProperties": {
+          "state": "resolved",
+          "entryCount": 6,
+          "countLabel": "· 6 · IFC2X3"
+        }
+      },
+      "eviction": {
+        "observed": true,
+        "source": "selection",
+        "selected": "148339",
+        "selectionResidency": "target",
+        "evictedTargetMeshCount": 199
+      },
+      "evictionAttempts": [],
+      "evictionQuiescence": {
+        "settled": true,
+        "waitedMilliseconds": 4050,
+        "state": "ready|132|371|110|67108508"
+      },
+      "consoleIssues": [],
+      "screenshots": {}
+    },
+    {
+      "profile": "default-budget",
+      "runIndex": 3,
+      "residencyMiB": null,
+      "budgetBytes": 67108864,
+      "startedAt": "2026-09-04T14:10:49.240Z",
+      "browserVersion": "150.0.2",
+      "rootPid": 46576,
+      "samples": [
+        {
+          "phase": "hierarchy",
+          "atMilliseconds": 3900,
+          "statusText": "Hierarchy ready · 188319 occurrences · decoding 117,878.0 KiB in Worker…",
+          "statusState": "loading",
+          "statusStage": "hierarchy",
+          "crossOriginIsolated": true,
+          "package": {
+            "documentBytes": 448823852,
+            "propertyIndexBytes": 17705010,
+            "spatialIndexBytes": 0,
+            "declaredGeometryBytes": 120707064
+          },
+          "residency": {
+            "budgetBytes": null,
+            "decodedBytes": null,
+            "gpuBytes": null,
+            "budgetReached": false,
+            "chunksReady": null,
+            "chunksTotal": null,
+            "schedulerRequests": null,
+            "schedulerSkips": null,
+            "evictedTargetMeshCount": null,
+            "selectionResidency": null
+          },
+          "renderer": {
+            "gpuVertexPoolBytes": null,
+            "gpuBatchBufferBytes": null,
+            "gpuUniformBytes": null,
+            "gpuBufferBytes": null,
+            "gpuAttachmentBytes": null,
+            "cpuStagingBytes": null
+          },
+          "page": {
+            "usedJsHeapBytes": null,
+            "totalJsHeapBytes": null,
+            "jsHeapLimitBytes": null,
+            "usedJsHeapUnavailableReason": "performance.memory is not exposed by this engine.",
+            "uaMemoryBytes": null,
+            "uaMemoryByType": null,
+            "uaMemoryByScope": null,
+            "uaMemoryEntryCount": null,
+            "uaMemorySampleMilliseconds": null,
+            "uaMemoryUnavailableReason": "performance.measureUserAgentSpecificMemory is not exposed in this browser."
+          },
+          "process": {
+            "rootPid": 46576,
+            "processCount": 8,
+            "browserProcessesOnHost": 8,
+            "workingSetBytes": 4219580416,
+            "privateBytes": 4383879168
+          }
+        },
+        {
+          "phase": "coarse-frame",
+          "atMilliseconds": 6800,
+          "statusText": "Coarse bounds ready · 78173 renderable occurrences · loading 117,878.0 KiB target geometry…",
+          "statusState": "loading",
+          "statusStage": "coarse",
+          "crossOriginIsolated": true,
+          "package": {
+            "documentBytes": 448823852,
+            "propertyIndexBytes": 17705010,
+            "spatialIndexBytes": 0,
+            "declaredGeometryBytes": 120707064
+          },
+          "residency": {
+            "budgetBytes": 67108864,
+            "decodedBytes": null,
+            "gpuBytes": null,
+            "budgetReached": false,
+            "chunksReady": 0,
+            "chunksTotal": 234,
+            "schedulerRequests": 1,
+            "schedulerSkips": null,
+            "evictedTargetMeshCount": null,
+            "selectionResidency": null
+          },
+          "renderer": {
+            "gpuVertexPoolBytes": 576,
+            "gpuBatchBufferBytes": 7505040,
+            "gpuUniformBytes": 128,
+            "gpuBufferBytes": 7505744,
+            "gpuAttachmentBytes": 4900480,
+            "cpuStagingBytes": 7504608
+          },
+          "page": {
+            "usedJsHeapBytes": null,
+            "totalJsHeapBytes": null,
+            "jsHeapLimitBytes": null,
+            "usedJsHeapUnavailableReason": "performance.memory is not exposed by this engine.",
+            "uaMemoryBytes": null,
+            "uaMemoryByType": null,
+            "uaMemoryByScope": null,
+            "uaMemoryEntryCount": null,
+            "uaMemorySampleMilliseconds": null,
+            "uaMemoryUnavailableReason": "performance.measureUserAgentSpecificMemory is not exposed in this browser."
+          },
+          "process": {
+            "rootPid": 46576,
+            "processCount": 8,
+            "browserProcessesOnHost": 8,
+            "workingSetBytes": 4721635328,
+            "privateBytes": 5638389760
+          }
+        },
+        {
+          "phase": "budget-limited",
+          "atMilliseconds": 15444,
+          "statusText": "Residency budget reached · 24326 surface batches retained · 78173 renderable occurrences",
+          "statusState": "ready",
+          "statusStage": "rendered",
+          "crossOriginIsolated": true,
+          "package": {
+            "documentBytes": 448823852,
+            "propertyIndexBytes": 17705010,
+            "spatialIndexBytes": 0,
+            "declaredGeometryBytes": 120707064
+          },
+          "residency": {
+            "budgetBytes": 67108864,
+            "decodedBytes": 66686508,
+            "gpuBytes": 66783808,
+            "budgetReached": true,
+            "chunksReady": 111,
+            "chunksTotal": 234,
+            "schedulerRequests": 111,
+            "schedulerSkips": 123,
+            "evictedTargetMeshCount": null,
+            "selectionResidency": null
+          },
+          "renderer": {
+            "gpuVertexPoolBytes": 28790184,
+            "gpuBatchBufferBytes": 37993624,
+            "gpuUniformBytes": 128,
+            "gpuBufferBytes": 66783936,
+            "gpuAttachmentBytes": 4900480,
+            "cpuStagingBytes": 10833216
+          },
+          "page": {
+            "usedJsHeapBytes": null,
+            "totalJsHeapBytes": null,
+            "jsHeapLimitBytes": null,
+            "usedJsHeapUnavailableReason": "performance.memory is not exposed by this engine.",
+            "uaMemoryBytes": null,
+            "uaMemoryByType": null,
+            "uaMemoryByScope": null,
+            "uaMemoryEntryCount": null,
+            "uaMemorySampleMilliseconds": null,
+            "uaMemoryUnavailableReason": "performance.measureUserAgentSpecificMemory is not exposed in this browser."
+          },
+          "process": {
+            "rootPid": 46576,
+            "processCount": 8,
+            "browserProcessesOnHost": 8,
+            "workingSetBytes": 5041352704,
+            "privateBytes": 11377922048
+          }
+        },
+        {
+          "phase": "navigation",
+          "atMilliseconds": 21799,
+          "statusText": "Residency budget reached · 24930 surface batches retained · 78173 renderable occurrences",
+          "statusState": "ready",
+          "statusStage": "rendered",
+          "crossOriginIsolated": true,
+          "package": {
+            "documentBytes": 448823852,
+            "propertyIndexBytes": 17705010,
+            "spatialIndexBytes": 0,
+            "declaredGeometryBytes": 120707064
+          },
+          "residency": {
+            "budgetBytes": 67108864,
+            "decodedBytes": 67009032,
+            "gpuBytes": 67108748,
+            "budgetReached": true,
+            "chunksReady": 110,
+            "chunksTotal": 234,
+            "schedulerRequests": 132,
+            "schedulerSkips": 247,
+            "evictedTargetMeshCount": null,
+            "selectionResidency": null
+          },
+          "renderer": {
+            "gpuVertexPoolBytes": 28889112,
+            "gpuBatchBufferBytes": 38219636,
+            "gpuUniformBytes": 128,
+            "gpuBufferBytes": 67108876,
+            "gpuAttachmentBytes": 4900480,
+            "cpuStagingBytes": 10996224
+          },
+          "page": {
+            "usedJsHeapBytes": null,
+            "totalJsHeapBytes": null,
+            "jsHeapLimitBytes": null,
+            "usedJsHeapUnavailableReason": "performance.memory is not exposed by this engine.",
+            "uaMemoryBytes": null,
+            "uaMemoryByType": null,
+            "uaMemoryByScope": null,
+            "uaMemoryEntryCount": null,
+            "uaMemorySampleMilliseconds": null,
+            "uaMemoryUnavailableReason": "performance.measureUserAgentSpecificMemory is not exposed in this browser."
+          },
+          "process": {
+            "rootPid": 46576,
+            "processCount": 8,
+            "browserProcessesOnHost": 8,
+            "workingSetBytes": 5101649920,
+            "privateBytes": 11794305024
+          }
+        },
+        {
+          "phase": "selection",
+          "atMilliseconds": 22965,
+          "statusText": "Residency budget reached · 24840 surface batches retained · 78173 renderable occurrences",
+          "statusState": "ready",
+          "statusStage": "rendered",
+          "crossOriginIsolated": true,
+          "package": {
+            "documentBytes": 448823852,
+            "propertyIndexBytes": 17705010,
+            "spatialIndexBytes": 0,
+            "declaredGeometryBytes": 120707064
+          },
+          "residency": {
+            "budgetBytes": 67108864,
+            "decodedBytes": 67009152,
+            "gpuBytes": 67108508,
+            "budgetReached": true,
+            "chunksReady": 110,
+            "chunksTotal": 234,
+            "schedulerRequests": 132,
+            "schedulerSkips": 371,
+            "evictedTargetMeshCount": 199,
+            "selectionResidency": "target"
+          },
+          "renderer": {
+            "gpuVertexPoolBytes": 28891224,
+            "gpuBatchBufferBytes": 38217284,
+            "gpuUniformBytes": 128,
+            "gpuBufferBytes": 67108636,
+            "gpuAttachmentBytes": 4900480,
+            "cpuStagingBytes": 10985184
+          },
+          "page": {
+            "usedJsHeapBytes": null,
+            "totalJsHeapBytes": null,
+            "jsHeapLimitBytes": null,
+            "usedJsHeapUnavailableReason": "performance.memory is not exposed by this engine.",
+            "uaMemoryBytes": null,
+            "uaMemoryByType": null,
+            "uaMemoryByScope": null,
+            "uaMemoryEntryCount": null,
+            "uaMemorySampleMilliseconds": null,
+            "uaMemoryUnavailableReason": "performance.measureUserAgentSpecificMemory is not exposed in this browser."
+          },
+          "process": {
+            "rootPid": 46576,
+            "processCount": 8,
+            "browserProcessesOnHost": 8,
+            "workingSetBytes": 5449256960,
+            "privateBytes": 12166119424
+          }
+        },
+        {
+          "phase": "eviction",
+          "atMilliseconds": 27484,
+          "statusText": "Residency budget reached · 24840 surface batches retained · 78173 renderable occurrences",
+          "statusState": "ready",
+          "statusStage": "rendered",
+          "crossOriginIsolated": true,
+          "package": {
+            "documentBytes": 448823852,
+            "propertyIndexBytes": 17705010,
+            "spatialIndexBytes": 0,
+            "declaredGeometryBytes": 120707064
+          },
+          "residency": {
+            "budgetBytes": 67108864,
+            "decodedBytes": 67009152,
+            "gpuBytes": 67108508,
+            "budgetReached": true,
+            "chunksReady": 110,
+            "chunksTotal": 234,
+            "schedulerRequests": 132,
+            "schedulerSkips": 371,
+            "evictedTargetMeshCount": 199,
+            "selectionResidency": "target"
+          },
+          "renderer": {
+            "gpuVertexPoolBytes": 28891224,
+            "gpuBatchBufferBytes": 38217284,
+            "gpuUniformBytes": 128,
+            "gpuBufferBytes": 67108636,
+            "gpuAttachmentBytes": 4900480,
+            "cpuStagingBytes": 10985184
+          },
+          "page": {
+            "usedJsHeapBytes": null,
+            "totalJsHeapBytes": null,
+            "jsHeapLimitBytes": null,
+            "usedJsHeapUnavailableReason": "performance.memory is not exposed by this engine.",
+            "uaMemoryBytes": null,
+            "uaMemoryByType": null,
+            "uaMemoryByScope": null,
+            "uaMemoryEntryCount": null,
+            "uaMemorySampleMilliseconds": null,
+            "uaMemoryUnavailableReason": "performance.measureUserAgentSpecificMemory is not exposed in this browser."
+          },
+          "process": {
+            "rootPid": 46576,
+            "processCount": 8,
+            "browserProcessesOnHost": 8,
+            "workingSetBytes": 5242032128,
+            "privateBytes": 11956658176
+          }
+        }
+      ],
+      "selection": {
+        "selectedObjectId": "148339",
+        "selectionResidency": "target",
+        "evictedTargetMeshCount": "199",
+        "semanticProperties": {
+          "state": "resolved",
+          "entryCount": 6,
+          "countLabel": "· 6 · IFC2X3"
+        }
+      },
+      "eviction": {
+        "observed": true,
+        "source": "selection",
+        "selected": "148339",
+        "selectionResidency": "target",
+        "evictedTargetMeshCount": 199
+      },
+      "evictionAttempts": [],
+      "evictionQuiescence": {
+        "settled": true,
+        "waitedMilliseconds": 4059,
+        "state": "ready|132|371|110|67108508"
+      },
+      "consoleIssues": [],
+      "screenshots": {}
+    },
+    {
+      "profile": "forced-low-budget",
+      "runIndex": 1,
+      "residencyMiB": 8,
+      "budgetBytes": 8388608,
+      "startedAt": "2026-09-04T14:11:17.991Z",
+      "browserVersion": "150.0.2",
+      "rootPid": 46360,
+      "samples": [
+        {
+          "phase": "hierarchy",
+          "atMilliseconds": 3964,
+          "statusText": "Hierarchy ready · 188319 occurrences · decoding 117,878.0 KiB in Worker…",
+          "statusState": "loading",
+          "statusStage": "hierarchy",
+          "crossOriginIsolated": true,
+          "package": {
+            "documentBytes": 448823852,
+            "propertyIndexBytes": 17705010,
+            "spatialIndexBytes": 0,
+            "declaredGeometryBytes": 120707064
+          },
+          "residency": {
+            "budgetBytes": null,
+            "decodedBytes": null,
+            "gpuBytes": null,
+            "budgetReached": false,
+            "chunksReady": null,
+            "chunksTotal": null,
+            "schedulerRequests": null,
+            "schedulerSkips": null,
+            "evictedTargetMeshCount": null,
+            "selectionResidency": null
+          },
+          "renderer": {
+            "gpuVertexPoolBytes": null,
+            "gpuBatchBufferBytes": null,
+            "gpuUniformBytes": null,
+            "gpuBufferBytes": null,
+            "gpuAttachmentBytes": null,
+            "cpuStagingBytes": null
+          },
+          "page": {
+            "usedJsHeapBytes": null,
+            "totalJsHeapBytes": null,
+            "jsHeapLimitBytes": null,
+            "usedJsHeapUnavailableReason": "performance.memory is not exposed by this engine.",
+            "uaMemoryBytes": null,
+            "uaMemoryByType": null,
+            "uaMemoryByScope": null,
+            "uaMemoryEntryCount": null,
+            "uaMemorySampleMilliseconds": null,
+            "uaMemoryUnavailableReason": "performance.measureUserAgentSpecificMemory is not exposed in this browser."
+          },
+          "process": {
+            "rootPid": 46360,
+            "processCount": 8,
+            "browserProcessesOnHost": 8,
+            "workingSetBytes": 5108727808,
+            "privateBytes": 5378854912
+          }
+        },
+        {
+          "phase": "coarse-frame",
+          "atMilliseconds": 7074,
+          "statusText": "Residency budget reached · 449 surface batches retained · 78173 renderable occurrences",
+          "statusState": "ready",
+          "statusStage": "rendered",
+          "crossOriginIsolated": true,
+          "package": {
+            "documentBytes": 448823852,
+            "propertyIndexBytes": 17705010,
+            "spatialIndexBytes": 0,
+            "declaredGeometryBytes": 120707064
+          },
+          "residency": {
+            "budgetBytes": 8388608,
+            "decodedBytes": 8249400,
+            "gpuBytes": 8251192,
+            "budgetReached": true,
+            "chunksReady": 4,
+            "chunksTotal": 234,
+            "schedulerRequests": 4,
+            "schedulerSkips": 230,
+            "evictedTargetMeshCount": null,
+            "selectionResidency": null
+          },
+          "renderer": {
+            "gpuVertexPoolBytes": 364200,
+            "gpuBatchBufferBytes": 7886992,
+            "gpuUniformBytes": 128,
+            "gpuBufferBytes": 8251320,
+            "gpuAttachmentBytes": 4900480,
+            "cpuStagingBytes": 7554240
+          },
+          "page": {
+            "usedJsHeapBytes": null,
+            "totalJsHeapBytes": null,
+            "jsHeapLimitBytes": null,
+            "usedJsHeapUnavailableReason": "performance.memory is not exposed by this engine.",
+            "uaMemoryBytes": null,
+            "uaMemoryByType": null,
+            "uaMemoryByScope": null,
+            "uaMemoryEntryCount": null,
+            "uaMemorySampleMilliseconds": null,
+            "uaMemoryUnavailableReason": "performance.measureUserAgentSpecificMemory is not exposed in this browser."
+          },
+          "process": {
+            "rootPid": 46360,
+            "processCount": 8,
+            "browserProcessesOnHost": 8,
+            "workingSetBytes": 5486096384,
+            "privateBytes": 5752352768
+          }
+        },
+        {
+          "phase": "budget-limited",
+          "atMilliseconds": 11643,
+          "statusText": "Residency budget reached · 449 surface batches retained · 78173 renderable occurrences",
+          "statusState": "ready",
+          "statusStage": "rendered",
+          "crossOriginIsolated": true,
+          "package": {
+            "documentBytes": 448823852,
+            "propertyIndexBytes": 17705010,
+            "spatialIndexBytes": 0,
+            "declaredGeometryBytes": 120707064
+          },
+          "residency": {
+            "budgetBytes": 8388608,
+            "decodedBytes": 8249400,
+            "gpuBytes": 8251192,
+            "budgetReached": true,
+            "chunksReady": 4,
+            "chunksTotal": 234,
+            "schedulerRequests": 4,
+            "schedulerSkips": 230,
+            "evictedTargetMeshCount": null,
+            "selectionResidency": null
+          },
+          "renderer": {
+            "gpuVertexPoolBytes": 364200,
+            "gpuBatchBufferBytes": 7886992,
+            "gpuUniformBytes": 128,
+            "gpuBufferBytes": 8251320,
+            "gpuAttachmentBytes": 4900480,
+            "cpuStagingBytes": 7554240
+          },
+          "page": {
+            "usedJsHeapBytes": null,
+            "totalJsHeapBytes": null,
+            "jsHeapLimitBytes": null,
+            "usedJsHeapUnavailableReason": "performance.memory is not exposed by this engine.",
+            "uaMemoryBytes": null,
+            "uaMemoryByType": null,
+            "uaMemoryByScope": null,
+            "uaMemoryEntryCount": null,
+            "uaMemorySampleMilliseconds": null,
+            "uaMemoryUnavailableReason": "performance.measureUserAgentSpecificMemory is not exposed in this browser."
+          },
+          "process": {
+            "rootPid": 46360,
+            "processCount": 8,
+            "browserProcessesOnHost": 8,
+            "workingSetBytes": 4719620096,
+            "privateBytes": 4961955840
+          }
+        },
+        {
+          "phase": "navigation",
+          "atMilliseconds": 16969,
+          "statusText": "Residency budget reached · 650 surface batches retained · 78173 renderable occurrences",
+          "statusState": "ready",
+          "statusStage": "rendered",
+          "crossOriginIsolated": true,
+          "package": {
+            "documentBytes": 448823852,
+            "propertyIndexBytes": 17705010,
+            "spatialIndexBytes": 0,
+            "declaredGeometryBytes": 120707064
+          },
+          "residency": {
+            "budgetBytes": 8388608,
+            "decodedBytes": 8385360,
+            "gpuBytes": 8387956,
+            "budgetReached": true,
+            "chunksReady": 1,
+            "chunksTotal": 234,
+            "schedulerRequests": 83,
+            "schedulerSkips": 1389,
+            "evictedTargetMeshCount": null,
+            "selectionResidency": null
+          },
+          "renderer": {
+            "gpuVertexPoolBytes": 430728,
+            "gpuBatchBufferBytes": 7957228,
+            "gpuUniformBytes": 128,
+            "gpuBufferBytes": 8388084,
+            "gpuAttachmentBytes": 4900480,
+            "cpuStagingBytes": 7570464
+          },
+          "page": {
+            "usedJsHeapBytes": null,
+            "totalJsHeapBytes": null,
+            "jsHeapLimitBytes": null,
+            "usedJsHeapUnavailableReason": "performance.memory is not exposed by this engine.",
+            "uaMemoryBytes": null,
+            "uaMemoryByType": null,
+            "uaMemoryByScope": null,
+            "uaMemoryEntryCount": null,
+            "uaMemorySampleMilliseconds": null,
+            "uaMemoryUnavailableReason": "performance.measureUserAgentSpecificMemory is not exposed in this browser."
+          },
+          "process": {
+            "rootPid": 46360,
+            "processCount": 8,
+            "browserProcessesOnHost": 8,
+            "workingSetBytes": 4950519808,
+            "privateBytes": 5321822208
+          }
+        },
+        {
+          "phase": "selection",
+          "atMilliseconds": 17946,
+          "statusText": "Residency budget reached · 355 surface batches retained · 78173 renderable occurrences",
+          "statusState": "ready",
+          "statusStage": "rendered",
+          "crossOriginIsolated": true,
+          "package": {
+            "documentBytes": 448823852,
+            "propertyIndexBytes": 17705010,
+            "spatialIndexBytes": 0,
+            "declaredGeometryBytes": 120707064
+          },
+          "residency": {
+            "budgetBytes": 8388608,
+            "decodedBytes": 8375808,
+            "gpuBytes": 8377224,
+            "budgetReached": true,
+            "chunksReady": 2,
+            "chunksTotal": 234,
+            "schedulerRequests": 84,
+            "schedulerSkips": 1621,
+            "evictedTargetMeshCount": 325,
+            "selectionResidency": "target"
+          },
+          "renderer": {
+            "gpuVertexPoolBytes": 429600,
+            "gpuBatchBufferBytes": 7947624,
+            "gpuUniformBytes": 128,
+            "gpuBufferBytes": 8377352,
+            "gpuAttachmentBytes": 4900480,
+            "cpuStagingBytes": 7538592
+          },
+          "page": {
+            "usedJsHeapBytes": null,
+            "totalJsHeapBytes": null,
+            "jsHeapLimitBytes": null,
+            "usedJsHeapUnavailableReason": "performance.memory is not exposed by this engine.",
+            "uaMemoryBytes": null,
+            "uaMemoryByType": null,
+            "uaMemoryByScope": null,
+            "uaMemoryEntryCount": null,
+            "uaMemorySampleMilliseconds": null,
+            "uaMemoryUnavailableReason": "performance.measureUserAgentSpecificMemory is not exposed in this browser."
+          },
+          "process": {
+            "rootPid": 46360,
+            "processCount": 8,
+            "browserProcessesOnHost": 8,
+            "workingSetBytes": 5274705920,
+            "privateBytes": 5656989696
+          }
+        },
+        {
+          "phase": "eviction",
+          "atMilliseconds": 22502,
+          "statusText": "Residency budget reached · 355 surface batches retained · 78173 renderable occurrences",
+          "statusState": "ready",
+          "statusStage": "rendered",
+          "crossOriginIsolated": true,
+          "package": {
+            "documentBytes": 448823852,
+            "propertyIndexBytes": 17705010,
+            "spatialIndexBytes": 0,
+            "declaredGeometryBytes": 120707064
+          },
+          "residency": {
+            "budgetBytes": 8388608,
+            "decodedBytes": 8375808,
+            "gpuBytes": 8377224,
+            "budgetReached": true,
+            "chunksReady": 2,
+            "chunksTotal": 234,
+            "schedulerRequests": 84,
+            "schedulerSkips": 1621,
+            "evictedTargetMeshCount": 325,
+            "selectionResidency": "target"
+          },
+          "renderer": {
+            "gpuVertexPoolBytes": 429600,
+            "gpuBatchBufferBytes": 7947624,
+            "gpuUniformBytes": 128,
+            "gpuBufferBytes": 8377352,
+            "gpuAttachmentBytes": 4900480,
+            "cpuStagingBytes": 7538592
+          },
+          "page": {
+            "usedJsHeapBytes": null,
+            "totalJsHeapBytes": null,
+            "jsHeapLimitBytes": null,
+            "usedJsHeapUnavailableReason": "performance.memory is not exposed by this engine.",
+            "uaMemoryBytes": null,
+            "uaMemoryByType": null,
+            "uaMemoryByScope": null,
+            "uaMemoryEntryCount": null,
+            "uaMemorySampleMilliseconds": null,
+            "uaMemoryUnavailableReason": "performance.measureUserAgentSpecificMemory is not exposed in this browser."
+          },
+          "process": {
+            "rootPid": 46360,
+            "processCount": 8,
+            "browserProcessesOnHost": 8,
+            "workingSetBytes": 5183418368,
+            "privateBytes": 5525929984
+          }
+        }
+      ],
+      "selection": {
+        "selectedObjectId": "148339",
+        "selectionResidency": "target",
+        "evictedTargetMeshCount": "325",
+        "semanticProperties": {
+          "state": "resolved",
+          "entryCount": 6,
+          "countLabel": "· 6 · IFC2X3"
+        }
+      },
+      "eviction": {
+        "observed": true,
+        "source": "selection",
+        "selected": "148339",
+        "selectionResidency": "target",
+        "evictedTargetMeshCount": 325
+      },
+      "evictionAttempts": [],
+      "evictionQuiescence": {
+        "settled": true,
+        "waitedMilliseconds": 4034,
+        "state": "ready|84|1621|2|8377224"
+      },
+      "consoleIssues": [],
+      "screenshots": {
+        "coarse-frame.png": {
+          "path": "forced-low-budget/coarse-frame.png",
+          "bytes": 163041,
+          "sha256": "0b3999787e496940691d5f7b7b1e79796d77e16786605612be8ba6047793e87f"
+        },
+        "budget-limited.png": {
+          "path": "forced-low-budget/budget-limited.png",
+          "bytes": 182676,
+          "sha256": "0d245448db2909dec3c9453ccd7d08696814d30e5c85cc58f35b95edaf7e2f15"
+        },
+        "selection.png": {
+          "path": "forced-low-budget/selection.png",
+          "bytes": 272893,
+          "sha256": "4e4a00726faa73ed5171cc06b79f517f5aea2818f1c068740af790aaa8000e22"
+        }
+      }
+    },
+    {
+      "profile": "forced-low-budget",
+      "runIndex": 2,
+      "residencyMiB": 8,
+      "budgetBytes": 8388608,
+      "startedAt": "2026-09-04T14:11:41.767Z",
+      "browserVersion": "150.0.2",
+      "rootPid": 3052,
+      "samples": [
+        {
+          "phase": "hierarchy",
+          "atMilliseconds": 4061,
+          "statusText": "Hierarchy ready · 188319 occurrences · decoding 117,878.0 KiB in Worker…",
+          "statusState": "loading",
+          "statusStage": "hierarchy",
+          "crossOriginIsolated": true,
+          "package": {
+            "documentBytes": 448823852,
+            "propertyIndexBytes": 17705010,
+            "spatialIndexBytes": 0,
+            "declaredGeometryBytes": 120707064
+          },
+          "residency": {
+            "budgetBytes": null,
+            "decodedBytes": null,
+            "gpuBytes": null,
+            "budgetReached": false,
+            "chunksReady": null,
+            "chunksTotal": null,
+            "schedulerRequests": null,
+            "schedulerSkips": null,
+            "evictedTargetMeshCount": null,
+            "selectionResidency": null
+          },
+          "renderer": {
+            "gpuVertexPoolBytes": null,
+            "gpuBatchBufferBytes": null,
+            "gpuUniformBytes": null,
+            "gpuBufferBytes": null,
+            "gpuAttachmentBytes": null,
+            "cpuStagingBytes": null
+          },
+          "page": {
+            "usedJsHeapBytes": null,
+            "totalJsHeapBytes": null,
+            "jsHeapLimitBytes": null,
+            "usedJsHeapUnavailableReason": "performance.memory is not exposed by this engine.",
+            "uaMemoryBytes": null,
+            "uaMemoryByType": null,
+            "uaMemoryByScope": null,
+            "uaMemoryEntryCount": null,
+            "uaMemorySampleMilliseconds": null,
+            "uaMemoryUnavailableReason": "performance.measureUserAgentSpecificMemory is not exposed in this browser."
+          },
+          "process": {
+            "rootPid": 3052,
+            "processCount": 8,
+            "browserProcessesOnHost": 8,
+            "workingSetBytes": 4219285504,
+            "privateBytes": 4401446912
+          }
+        },
+        {
+          "phase": "coarse-frame",
+          "atMilliseconds": 6933,
+          "statusText": "Coarse bounds ready · 78173 renderable occurrences · loading 117,878.0 KiB target geometry…",
+          "statusState": "loading",
+          "statusStage": "coarse",
+          "crossOriginIsolated": true,
+          "package": {
+            "documentBytes": 448823852,
+            "propertyIndexBytes": 17705010,
+            "spatialIndexBytes": 0,
+            "declaredGeometryBytes": 120707064
+          },
+          "residency": {
+            "budgetBytes": 8388608,
+            "decodedBytes": null,
+            "gpuBytes": null,
+            "budgetReached": false,
+            "chunksReady": 0,
+            "chunksTotal": 234,
+            "schedulerRequests": 1,
+            "schedulerSkips": null,
+            "evictedTargetMeshCount": null,
+            "selectionResidency": null
+          },
+          "renderer": {
+            "gpuVertexPoolBytes": 576,
+            "gpuBatchBufferBytes": 7505040,
+            "gpuUniformBytes": 128,
+            "gpuBufferBytes": 7505744,
+            "gpuAttachmentBytes": 4900480,
+            "cpuStagingBytes": 7504608
+          },
+          "page": {
+            "usedJsHeapBytes": null,
+            "totalJsHeapBytes": null,
+            "jsHeapLimitBytes": null,
+            "usedJsHeapUnavailableReason": "performance.memory is not exposed by this engine.",
+            "uaMemoryBytes": null,
+            "uaMemoryByType": null,
+            "uaMemoryByScope": null,
+            "uaMemoryEntryCount": null,
+            "uaMemorySampleMilliseconds": null,
+            "uaMemoryUnavailableReason": "performance.measureUserAgentSpecificMemory is not exposed in this browser."
+          },
+          "process": {
+            "rootPid": 3052,
+            "processCount": 8,
+            "browserProcessesOnHost": 8,
+            "workingSetBytes": 4561526784,
+            "privateBytes": 4740411392
+          }
+        },
+        {
+          "phase": "budget-limited",
+          "atMilliseconds": 11478,
+          "statusText": "Residency budget reached · 449 surface batches retained · 78173 renderable occurrences",
+          "statusState": "ready",
+          "statusStage": "rendered",
+          "crossOriginIsolated": true,
+          "package": {
+            "documentBytes": 448823852,
+            "propertyIndexBytes": 17705010,
+            "spatialIndexBytes": 0,
+            "declaredGeometryBytes": 120707064
+          },
+          "residency": {
+            "budgetBytes": 8388608,
+            "decodedBytes": 8249400,
+            "gpuBytes": 8251192,
+            "budgetReached": true,
+            "chunksReady": 4,
+            "chunksTotal": 234,
+            "schedulerRequests": 4,
+            "schedulerSkips": 230,
+            "evictedTargetMeshCount": null,
+            "selectionResidency": null
+          },
+          "renderer": {
+            "gpuVertexPoolBytes": 364200,
+            "gpuBatchBufferBytes": 7886992,
+            "gpuUniformBytes": 128,
+            "gpuBufferBytes": 8251320,
+            "gpuAttachmentBytes": 4900480,
+            "cpuStagingBytes": 7554240
+          },
+          "page": {
+            "usedJsHeapBytes": null,
+            "totalJsHeapBytes": null,
+            "jsHeapLimitBytes": null,
+            "usedJsHeapUnavailableReason": "performance.memory is not exposed by this engine.",
+            "uaMemoryBytes": null,
+            "uaMemoryByType": null,
+            "uaMemoryByScope": null,
+            "uaMemoryEntryCount": null,
+            "uaMemorySampleMilliseconds": null,
+            "uaMemoryUnavailableReason": "performance.measureUserAgentSpecificMemory is not exposed in this browser."
+          },
+          "process": {
+            "rootPid": 3052,
+            "processCount": 8,
+            "browserProcessesOnHost": 8,
+            "workingSetBytes": 3791085568,
+            "privateBytes": 3957944320
+          }
+        },
+        {
+          "phase": "navigation",
+          "atMilliseconds": 16676,
+          "statusText": "Residency budget reached · 650 surface batches retained · 78173 renderable occurrences",
+          "statusState": "ready",
+          "statusStage": "rendered",
+          "crossOriginIsolated": true,
+          "package": {
+            "documentBytes": 448823852,
+            "propertyIndexBytes": 17705010,
+            "spatialIndexBytes": 0,
+            "declaredGeometryBytes": 120707064
+          },
+          "residency": {
+            "budgetBytes": 8388608,
+            "decodedBytes": 8385360,
+            "gpuBytes": 8387956,
+            "budgetReached": true,
+            "chunksReady": 1,
+            "chunksTotal": 234,
+            "schedulerRequests": 78,
+            "schedulerSkips": 1389,
+            "evictedTargetMeshCount": null,
+            "selectionResidency": null
+          },
+          "renderer": {
+            "gpuVertexPoolBytes": 430728,
+            "gpuBatchBufferBytes": 7957228,
+            "gpuUniformBytes": 128,
+            "gpuBufferBytes": 8388084,
+            "gpuAttachmentBytes": 4900480,
+            "cpuStagingBytes": 7570464
+          },
+          "page": {
+            "usedJsHeapBytes": null,
+            "totalJsHeapBytes": null,
+            "jsHeapLimitBytes": null,
+            "usedJsHeapUnavailableReason": "performance.memory is not exposed by this engine.",
+            "uaMemoryBytes": null,
+            "uaMemoryByType": null,
+            "uaMemoryByScope": null,
+            "uaMemoryEntryCount": null,
+            "uaMemorySampleMilliseconds": null,
+            "uaMemoryUnavailableReason": "performance.measureUserAgentSpecificMemory is not exposed in this browser."
+          },
+          "process": {
+            "rootPid": 3052,
+            "processCount": 8,
+            "browserProcessesOnHost": 8,
+            "workingSetBytes": 3906125824,
+            "privateBytes": 4195655680
+          }
+        },
+        {
+          "phase": "selection",
+          "atMilliseconds": 17691,
+          "statusText": "Residency budget reached · 355 surface batches retained · 78173 renderable occurrences",
+          "statusState": "ready",
+          "statusStage": "rendered",
+          "crossOriginIsolated": true,
+          "package": {
+            "documentBytes": 448823852,
+            "propertyIndexBytes": 17705010,
+            "spatialIndexBytes": 0,
+            "declaredGeometryBytes": 120707064
+          },
+          "residency": {
+            "budgetBytes": 8388608,
+            "decodedBytes": 8375808,
+            "gpuBytes": 8377224,
+            "budgetReached": true,
+            "chunksReady": 2,
+            "chunksTotal": 234,
+            "schedulerRequests": 79,
+            "schedulerSkips": 1621,
+            "evictedTargetMeshCount": 325,
+            "selectionResidency": "target"
+          },
+          "renderer": {
+            "gpuVertexPoolBytes": 429600,
+            "gpuBatchBufferBytes": 7947624,
+            "gpuUniformBytes": 128,
+            "gpuBufferBytes": 8377352,
+            "gpuAttachmentBytes": 4900480,
+            "cpuStagingBytes": 7538592
+          },
+          "page": {
+            "usedJsHeapBytes": null,
+            "totalJsHeapBytes": null,
+            "jsHeapLimitBytes": null,
+            "usedJsHeapUnavailableReason": "performance.memory is not exposed by this engine.",
+            "uaMemoryBytes": null,
+            "uaMemoryByType": null,
+            "uaMemoryByScope": null,
+            "uaMemoryEntryCount": null,
+            "uaMemorySampleMilliseconds": null,
+            "uaMemoryUnavailableReason": "performance.measureUserAgentSpecificMemory is not exposed in this browser."
+          },
+          "process": {
+            "rootPid": 3052,
+            "processCount": 8,
+            "browserProcessesOnHost": 8,
+            "workingSetBytes": 4195119104,
+            "privateBytes": 4479750144
+          }
+        },
+        {
+          "phase": "eviction",
+          "atMilliseconds": 22173,
+          "statusText": "Residency budget reached · 355 surface batches retained · 78173 renderable occurrences",
+          "statusState": "ready",
+          "statusStage": "rendered",
+          "crossOriginIsolated": true,
+          "package": {
+            "documentBytes": 448823852,
+            "propertyIndexBytes": 17705010,
+            "spatialIndexBytes": 0,
+            "declaredGeometryBytes": 120707064
+          },
+          "residency": {
+            "budgetBytes": 8388608,
+            "decodedBytes": 8375808,
+            "gpuBytes": 8377224,
+            "budgetReached": true,
+            "chunksReady": 2,
+            "chunksTotal": 234,
+            "schedulerRequests": 79,
+            "schedulerSkips": 1621,
+            "evictedTargetMeshCount": 325,
+            "selectionResidency": "target"
+          },
+          "renderer": {
+            "gpuVertexPoolBytes": 429600,
+            "gpuBatchBufferBytes": 7947624,
+            "gpuUniformBytes": 128,
+            "gpuBufferBytes": 8377352,
+            "gpuAttachmentBytes": 4900480,
+            "cpuStagingBytes": 7538592
+          },
+          "page": {
+            "usedJsHeapBytes": null,
+            "totalJsHeapBytes": null,
+            "jsHeapLimitBytes": null,
+            "usedJsHeapUnavailableReason": "performance.memory is not exposed by this engine.",
+            "uaMemoryBytes": null,
+            "uaMemoryByType": null,
+            "uaMemoryByScope": null,
+            "uaMemoryEntryCount": null,
+            "uaMemorySampleMilliseconds": null,
+            "uaMemoryUnavailableReason": "performance.measureUserAgentSpecificMemory is not exposed in this browser."
+          },
+          "process": {
+            "rootPid": 3052,
+            "processCount": 8,
+            "browserProcessesOnHost": 8,
+            "workingSetBytes": 4035010560,
+            "privateBytes": 4317450240
+          }
+        }
+      ],
+      "selection": {
+        "selectedObjectId": "148339",
+        "selectionResidency": "target",
+        "evictedTargetMeshCount": "325",
+        "semanticProperties": {
+          "state": "resolved",
+          "entryCount": 6,
+          "countLabel": "· 6 · IFC2X3"
+        }
+      },
+      "eviction": {
+        "observed": true,
+        "source": "selection",
+        "selected": "148339",
+        "selectionResidency": "target",
+        "evictedTargetMeshCount": 325
+      },
+      "evictionAttempts": [],
+      "evictionQuiescence": {
+        "settled": true,
+        "waitedMilliseconds": 4033,
+        "state": "ready|79|1621|2|8377224"
+      },
+      "consoleIssues": [],
+      "screenshots": {}
+    },
+    {
+      "profile": "forced-low-budget",
+      "runIndex": 3,
+      "residencyMiB": 8,
+      "budgetBytes": 8388608,
+      "startedAt": "2026-09-04T14:12:05.121Z",
+      "browserVersion": "150.0.2",
+      "rootPid": 45616,
+      "samples": [
+        {
+          "phase": "hierarchy",
+          "atMilliseconds": 3894,
+          "statusText": "Hierarchy ready · 188319 occurrences · decoding 117,878.0 KiB in Worker…",
+          "statusState": "loading",
+          "statusStage": "hierarchy",
+          "crossOriginIsolated": true,
+          "package": {
+            "documentBytes": 448823852,
+            "propertyIndexBytes": 17705010,
+            "spatialIndexBytes": 0,
+            "declaredGeometryBytes": 120707064
+          },
+          "residency": {
+            "budgetBytes": null,
+            "decodedBytes": null,
+            "gpuBytes": null,
+            "budgetReached": false,
+            "chunksReady": null,
+            "chunksTotal": null,
+            "schedulerRequests": null,
+            "schedulerSkips": null,
+            "evictedTargetMeshCount": null,
+            "selectionResidency": null
+          },
+          "renderer": {
+            "gpuVertexPoolBytes": null,
+            "gpuBatchBufferBytes": null,
+            "gpuUniformBytes": null,
+            "gpuBufferBytes": null,
+            "gpuAttachmentBytes": null,
+            "cpuStagingBytes": null
+          },
+          "page": {
+            "usedJsHeapBytes": null,
+            "totalJsHeapBytes": null,
+            "jsHeapLimitBytes": null,
+            "usedJsHeapUnavailableReason": "performance.memory is not exposed by this engine.",
+            "uaMemoryBytes": null,
+            "uaMemoryByType": null,
+            "uaMemoryByScope": null,
+            "uaMemoryEntryCount": null,
+            "uaMemorySampleMilliseconds": null,
+            "uaMemoryUnavailableReason": "performance.measureUserAgentSpecificMemory is not exposed in this browser."
+          },
+          "process": {
+            "rootPid": 45616,
+            "processCount": 8,
+            "browserProcessesOnHost": 8,
+            "workingSetBytes": 5088481280,
+            "privateBytes": 5340520448
+          }
+        },
+        {
+          "phase": "coarse-frame",
+          "atMilliseconds": 6764,
+          "statusText": "Coarse bounds ready · 78173 renderable occurrences · loading 117,878.0 KiB target geometry…",
+          "statusState": "loading",
+          "statusStage": "coarse",
+          "crossOriginIsolated": true,
+          "package": {
+            "documentBytes": 448823852,
+            "propertyIndexBytes": 17705010,
+            "spatialIndexBytes": 0,
+            "declaredGeometryBytes": 120707064
+          },
+          "residency": {
+            "budgetBytes": 8388608,
+            "decodedBytes": null,
+            "gpuBytes": null,
+            "budgetReached": false,
+            "chunksReady": 0,
+            "chunksTotal": 234,
+            "schedulerRequests": 1,
+            "schedulerSkips": null,
+            "evictedTargetMeshCount": null,
+            "selectionResidency": null
+          },
+          "renderer": {
+            "gpuVertexPoolBytes": 576,
+            "gpuBatchBufferBytes": 7505040,
+            "gpuUniformBytes": 128,
+            "gpuBufferBytes": 7505744,
+            "gpuAttachmentBytes": 4900480,
+            "cpuStagingBytes": 7504608
+          },
+          "page": {
+            "usedJsHeapBytes": null,
+            "totalJsHeapBytes": null,
+            "jsHeapLimitBytes": null,
+            "usedJsHeapUnavailableReason": "performance.memory is not exposed by this engine.",
+            "uaMemoryBytes": null,
+            "uaMemoryByType": null,
+            "uaMemoryByScope": null,
+            "uaMemoryEntryCount": null,
+            "uaMemorySampleMilliseconds": null,
+            "uaMemoryUnavailableReason": "performance.measureUserAgentSpecificMemory is not exposed in this browser."
+          },
+          "process": {
+            "rootPid": 45616,
+            "processCount": 8,
+            "browserProcessesOnHost": 8,
+            "workingSetBytes": 5463404544,
+            "privateBytes": 5727399936
+          }
+        },
+        {
+          "phase": "budget-limited",
+          "atMilliseconds": 11302,
+          "statusText": "Residency budget reached · 449 surface batches retained · 78173 renderable occurrences",
+          "statusState": "ready",
+          "statusStage": "rendered",
+          "crossOriginIsolated": true,
+          "package": {
+            "documentBytes": 448823852,
+            "propertyIndexBytes": 17705010,
+            "spatialIndexBytes": 0,
+            "declaredGeometryBytes": 120707064
+          },
+          "residency": {
+            "budgetBytes": 8388608,
+            "decodedBytes": 8249400,
+            "gpuBytes": 8251192,
+            "budgetReached": true,
+            "chunksReady": 4,
+            "chunksTotal": 234,
+            "schedulerRequests": 4,
+            "schedulerSkips": 230,
+            "evictedTargetMeshCount": null,
+            "selectionResidency": null
+          },
+          "renderer": {
+            "gpuVertexPoolBytes": 364200,
+            "gpuBatchBufferBytes": 7886992,
+            "gpuUniformBytes": 128,
+            "gpuBufferBytes": 8251320,
+            "gpuAttachmentBytes": 4900480,
+            "cpuStagingBytes": 7554240
+          },
+          "page": {
+            "usedJsHeapBytes": null,
+            "totalJsHeapBytes": null,
+            "jsHeapLimitBytes": null,
+            "usedJsHeapUnavailableReason": "performance.memory is not exposed by this engine.",
+            "uaMemoryBytes": null,
+            "uaMemoryByType": null,
+            "uaMemoryByScope": null,
+            "uaMemoryEntryCount": null,
+            "uaMemorySampleMilliseconds": null,
+            "uaMemoryUnavailableReason": "performance.measureUserAgentSpecificMemory is not exposed in this browser."
+          },
+          "process": {
+            "rootPid": 45616,
+            "processCount": 8,
+            "browserProcessesOnHost": 8,
+            "workingSetBytes": 4701130752,
+            "privateBytes": 4953575424
+          }
+        },
+        {
+          "phase": "navigation",
+          "atMilliseconds": 16567,
+          "statusText": "Residency budget reached · 650 surface batches retained · 78173 renderable occurrences",
+          "statusState": "ready",
+          "statusStage": "rendered",
+          "crossOriginIsolated": true,
+          "package": {
+            "documentBytes": 448823852,
+            "propertyIndexBytes": 17705010,
+            "spatialIndexBytes": 0,
+            "declaredGeometryBytes": 120707064
+          },
+          "residency": {
+            "budgetBytes": 8388608,
+            "decodedBytes": 8385360,
+            "gpuBytes": 8387956,
+            "budgetReached": true,
+            "chunksReady": 1,
+            "chunksTotal": 234,
+            "schedulerRequests": 80,
+            "schedulerSkips": 1389,
+            "evictedTargetMeshCount": null,
+            "selectionResidency": null
+          },
+          "renderer": {
+            "gpuVertexPoolBytes": 430728,
+            "gpuBatchBufferBytes": 7957228,
+            "gpuUniformBytes": 128,
+            "gpuBufferBytes": 8388084,
+            "gpuAttachmentBytes": 4900480,
+            "cpuStagingBytes": 7570464
+          },
+          "page": {
+            "usedJsHeapBytes": null,
+            "totalJsHeapBytes": null,
+            "jsHeapLimitBytes": null,
+            "usedJsHeapUnavailableReason": "performance.memory is not exposed by this engine.",
+            "uaMemoryBytes": null,
+            "uaMemoryByType": null,
+            "uaMemoryByScope": null,
+            "uaMemoryEntryCount": null,
+            "uaMemorySampleMilliseconds": null,
+            "uaMemoryUnavailableReason": "performance.measureUserAgentSpecificMemory is not exposed in this browser."
+          },
+          "process": {
+            "rootPid": 45616,
+            "processCount": 8,
+            "browserProcessesOnHost": 8,
+            "workingSetBytes": 4923121664,
+            "privateBytes": 5299048448
+          }
+        },
+        {
+          "phase": "selection",
+          "atMilliseconds": 17465,
+          "statusText": "Residency budget reached · 355 surface batches retained · 78173 renderable occurrences",
+          "statusState": "ready",
+          "statusStage": "rendered",
+          "crossOriginIsolated": true,
+          "package": {
+            "documentBytes": 448823852,
+            "propertyIndexBytes": 17705010,
+            "spatialIndexBytes": 0,
+            "declaredGeometryBytes": 120707064
+          },
+          "residency": {
+            "budgetBytes": 8388608,
+            "decodedBytes": 8375808,
+            "gpuBytes": 8377224,
+            "budgetReached": true,
+            "chunksReady": 2,
+            "chunksTotal": 234,
+            "schedulerRequests": 81,
+            "schedulerSkips": 1621,
+            "evictedTargetMeshCount": 325,
+            "selectionResidency": "target"
+          },
+          "renderer": {
+            "gpuVertexPoolBytes": 429600,
+            "gpuBatchBufferBytes": 7947624,
+            "gpuUniformBytes": 128,
+            "gpuBufferBytes": 8377352,
+            "gpuAttachmentBytes": 4900480,
+            "cpuStagingBytes": 7538592
+          },
+          "page": {
+            "usedJsHeapBytes": null,
+            "totalJsHeapBytes": null,
+            "jsHeapLimitBytes": null,
+            "usedJsHeapUnavailableReason": "performance.memory is not exposed by this engine.",
+            "uaMemoryBytes": null,
+            "uaMemoryByType": null,
+            "uaMemoryByScope": null,
+            "uaMemoryEntryCount": null,
+            "uaMemorySampleMilliseconds": null,
+            "uaMemoryUnavailableReason": "performance.measureUserAgentSpecificMemory is not exposed in this browser."
+          },
+          "process": {
+            "rootPid": 45616,
+            "processCount": 8,
+            "browserProcessesOnHost": 8,
+            "workingSetBytes": 5301895168,
+            "privateBytes": 5696352256
+          }
+        },
+        {
+          "phase": "eviction",
+          "atMilliseconds": 21972,
+          "statusText": "Residency budget reached · 355 surface batches retained · 78173 renderable occurrences",
+          "statusState": "ready",
+          "statusStage": "rendered",
+          "crossOriginIsolated": true,
+          "package": {
+            "documentBytes": 448823852,
+            "propertyIndexBytes": 17705010,
+            "spatialIndexBytes": 0,
+            "declaredGeometryBytes": 120707064
+          },
+          "residency": {
+            "budgetBytes": 8388608,
+            "decodedBytes": 8375808,
+            "gpuBytes": 8377224,
+            "budgetReached": true,
+            "chunksReady": 2,
+            "chunksTotal": 234,
+            "schedulerRequests": 81,
+            "schedulerSkips": 1621,
+            "evictedTargetMeshCount": 325,
+            "selectionResidency": "target"
+          },
+          "renderer": {
+            "gpuVertexPoolBytes": 429600,
+            "gpuBatchBufferBytes": 7947624,
+            "gpuUniformBytes": 128,
+            "gpuBufferBytes": 8377352,
+            "gpuAttachmentBytes": 4900480,
+            "cpuStagingBytes": 7538592
+          },
+          "page": {
+            "usedJsHeapBytes": null,
+            "totalJsHeapBytes": null,
+            "jsHeapLimitBytes": null,
+            "usedJsHeapUnavailableReason": "performance.memory is not exposed by this engine.",
+            "uaMemoryBytes": null,
+            "uaMemoryByType": null,
+            "uaMemoryByScope": null,
+            "uaMemoryEntryCount": null,
+            "uaMemorySampleMilliseconds": null,
+            "uaMemoryUnavailableReason": "performance.measureUserAgentSpecificMemory is not exposed in this browser."
+          },
+          "process": {
+            "rootPid": 45616,
+            "processCount": 8,
+            "browserProcessesOnHost": 8,
+            "workingSetBytes": 5211361280,
+            "privateBytes": 5570928640
+          }
+        }
+      ],
+      "selection": {
+        "selectedObjectId": "148339",
+        "selectionResidency": "target",
+        "evictedTargetMeshCount": "325",
+        "semanticProperties": {
+          "state": "resolved",
+          "entryCount": 6,
+          "countLabel": "· 6 · IFC2X3"
+        }
+      },
+      "eviction": {
+        "observed": true,
+        "source": "selection",
+        "selected": "148339",
+        "selectionResidency": "target",
+        "evictedTargetMeshCount": 325
+      },
+      "evictionAttempts": [],
+      "evictionQuiescence": {
+        "settled": true,
+        "waitedMilliseconds": 4053,
+        "state": "ready|81|1621|2|8377224"
+      },
+      "consoleIssues": [],
+      "screenshots": {}
+    }
+  ],
+  "consoleIssues": []
+}

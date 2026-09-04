@@ -114,9 +114,10 @@ into deterministic requests (512 KiB by default), while the existing
 `prototype-aabb-v1` tier is collapsed at runtime into one canonical box batch
 with contiguous occurrence transforms. The browser enforces separate 64 MiB
 decoded and GPU admission budgets. Those budgets bound admitted target
-geometry, not the browser process: the
-[memory envelope](../../artifacts/memory/sixty5-envelope/README.md) measures
-both in the same runs. Promoted targets mask matching coarse
+geometry, not the browser process: the memory envelope measures both in the
+same runs, on [Blink](../../artifacts/memory/sixty5-envelope/README.md) and on
+[Gecko](../../artifacts/memory/sixty5-envelope-gecko/README.md), which admit
+identical resident bytes inside processes of very different size. Promoted targets mask matching coarse
 instances; evicting colder target groups reveals those shared fallbacks again,
 so visibility intent and stable object IDs survive every batch update. An
 admission is delta-priced end to end: residency totals update incrementally,
