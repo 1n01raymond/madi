@@ -78,6 +78,9 @@ importers:
       '@naru3d/scene-ir':
         specifier: workspace:*
         version: link:../../packages/scene-ir
+      '@naru3d/workspace':
+        specifier: workspace:*
+        version: link:../../packages/workspace
     devDependencies:
       '@webgpu/types':
         specifier: 'catalog:'

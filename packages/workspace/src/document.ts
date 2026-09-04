@@ -312,6 +312,12 @@ function readSources(
       sha256: readDigest(record["sha256"], `${sourcePath}.sha256`),
     });
   });
+  // A workspace naming no source would reopen as `verified` with
+  // `geometryIsCurrent` true while nothing about that geometry's provenance had
+  // been checked, which is the one outcome the reopen states exist to prevent.
+  if (sources.length === 0) {
+    invalid(`${path} must name at least one source.`);
+  }
   return sources;
 }
 

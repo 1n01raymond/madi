@@ -186,6 +186,14 @@ describe("workspace trust boundary", () => {
       "repeats",
     );
   });
+
+  it("refuses a manifest that names no source", () => {
+    expectRefusal(
+      () => normalizeWorkspace(workspace({ sources: [] })),
+      "INVALID_WORKSPACE",
+      "must name at least one source",
+    );
+  });
 });
 
 describe("workspace parse limits", () => {

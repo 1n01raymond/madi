@@ -12,6 +12,14 @@ export interface AxisSectionState {
   readonly offset: number;
 }
 
+/** The section intent a saved workspace carries; extents stay derived. */
+export interface RestorableSectionState {
+  readonly enabled: boolean;
+  readonly axis: SectionAxis;
+  readonly direction: 1 | -1;
+  readonly fraction: number;
+}
+
 const axisIndex: Readonly<Record<SectionAxis, 0 | 1 | 2>> = { x: 0, y: 1, z: 2 };
 const axisNormal: Readonly<Record<SectionAxis, readonly [number, number, number]>> = {
   x: [1, 0, 0],
@@ -60,6 +68,20 @@ export class AxisSectionPlane {
   setFraction(fraction: number): void {
     if (!Number.isFinite(fraction)) throw new TypeError("Section fraction must be finite.");
     this.fraction = Math.min(1, Math.max(0, fraction));
+  }
+
+  /**
+   * Reapplies a persisted section without trusting the manifest's arithmetic.
+   *
+   * Only the four intent fields are read; `minimum`, `maximum`, and `offset`
+   * are re-derived from the reopened scene's bounds, so a section saved
+   * against one package lands at the same relative depth in another.
+   */
+  restore(state: RestorableSectionState): void {
+    this.setAxis(state.axis);
+    this.setFraction(state.fraction);
+    this.direction = state.direction === -1 ? -1 : 1;
+    this.enabled = state.enabled;
   }
 
   state(): AxisSectionState {

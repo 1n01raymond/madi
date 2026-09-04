@@ -80,6 +80,21 @@ header {
   background: rgb(8 24 33 / 88%);
 }
 
+.workspace-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.workspace-bar .scene-source-current {
+  flex: 1 1 220px;
+}
+
+.workspace-bar > small {
+  flex: 1 1 100%;
+}
+
 .scene-source-current {
   display: grid;
   min-width: 0;

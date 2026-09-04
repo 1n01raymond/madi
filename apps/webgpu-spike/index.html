@@ -57,14 +57,35 @@
           <input
             id="local-scene-files"
             type="file"
-            accept=".gltf,.bin,model/gltf+json,application/octet-stream"
+            accept=".gltf,.bin,.json,model/gltf+json,application/json,application/octet-stream"
             multiple
           />
         </label>
         <button id="open-demo-scene" class="demo-scene-button" type="button">Demo</button>
         <button id="open-pygamer-scene" class="demo-scene-button" type="button">PyGamer (STEP)</button>
         <button id="cancel-scene-load" type="button" hidden disabled>Cancel</button>
-        <small>Select one compiled <code>.gltf</code> and all external <code>.bin</code> resources. Remote hosts require CORS.</small>
+        <small>Select one compiled <code>.gltf</code>, all external <code>.bin</code> resources, and the <code>.json</code> sidecars and reports beside them. Remote hosts require CORS.</small>
+      </section>
+
+      <section class="scene-source workspace-bar" aria-label="Workspace">
+        <div class="scene-source-current">
+          <span id="workspace-kind">WORKSPACE</span>
+          <strong id="workspace-status" aria-live="polite">Open a package to save a workspace.</strong>
+        </div>
+        <button id="save-workspace" type="button" disabled>Save workspace</button>
+        <label class="local-scene-button" for="workspace-file">
+          Reopen workspace
+          <input id="workspace-file" type="file" accept=".json,application/json" />
+        </label>
+        <label class="local-scene-button" for="workspace-sources">
+          Check sources
+          <input id="workspace-sources" type="file" multiple disabled />
+        </label>
+        <small>
+          A workspace records the package it points at, the sources it was built
+          from, and the view you left &mdash; never geometry. Reopening judges the
+          package by digest; checking sources hashes the documents you select.
+        </small>
       </section>
 
       <section class="pipeline" aria-label="Runtime loading pipeline">

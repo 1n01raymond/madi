@@ -7,6 +7,15 @@ export interface CameraRelativeFrame {
   readonly origin: Vector3;
 }
 
+/** The navigation numbers a saved workspace carries, in camera units. */
+export interface OrbitCameraState {
+  readonly yaw: number;
+  readonly pitch: number;
+  readonly panRight: number;
+  readonly panUp: number;
+  readonly zoom: number;
+}
+
 const defaultYaw = -Math.PI / 4;
 const defaultPitch = Math.asin(1 / Math.sqrt(3));
 const minimumScale = 0.000_001;
@@ -88,6 +97,42 @@ export class OrthographicOrbitCamera {
       (bounds.min[2] + bounds.max[2]) / 2,
     ];
     this.fit();
+  }
+
+  /** The navigation state a workspace persists; framing extents stay derived. */
+  state(): OrbitCameraState {
+    return {
+      yaw: this.yaw,
+      pitch: this.pitch,
+      panRight: this.panRight,
+      panUp: this.panUp,
+      zoom: this.zoom,
+    };
+  }
+
+  /**
+   * Reapplies persisted navigation without refitting.
+   *
+   * Fitted extents are derived from the bounds this camera was constructed
+   * with, so a reopened package frames itself at the same scale a fresh one
+   * does. Orbiting never refits either, which makes the round trip exact for
+   * the ordinary path. A view that was fitted at a non-default orientation and
+   * then orbited restores its direction, pan, and zoom but reframes at the
+   * constructed scale, because the manifest carries navigation, not extents.
+   *
+   * Pitch and zoom are clamped to the interactive range so a hand-edited
+   * manifest cannot place the camera where orbiting and zooming cannot.
+   */
+  restore(state: OrbitCameraState): void {
+    const { yaw, pitch, panRight, panUp, zoom } = state;
+    if (![yaw, pitch, panRight, panUp, zoom].every((value) => Number.isFinite(value))) {
+      throw new TypeError("Camera state must contain finite values.");
+    }
+    this.yaw = yaw;
+    this.pitch = clamp(pitch, -Math.PI * 0.495, Math.PI * 0.495);
+    this.panRight = panRight;
+    this.panUp = panUp;
+    this.zoom = clamp(zoom, 0.05, 100);
   }
 
   /** Restores an isometric view and frames the complete scene. */
