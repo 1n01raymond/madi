@@ -94,6 +94,11 @@ estimate-gated prefetch that skips the chunks the budget cannot hold, and a
 vertex pool shared across a prototype's material groups, which raises the
 resident endpoint to 111 of 234 chunks
 (`artifacts/ifc/sixty5-first-frame/`).
+Headed Firefox consumes the same package and settles on a byte-identical
+resident set at 1.52x the median first frame, so the residency budget tracks
+measured bytes rather than one engine’s behaviour
+(`artifacts/ifc/sixty5-first-frame-gecko/`). Every real-large figure the phase
+has recorded is presented together in `docs/REAL_LARGE_RESULTS.md`.
 
 - local STEP AP242 input;
 - XDE hierarchy, names, colors, units, transforms;
