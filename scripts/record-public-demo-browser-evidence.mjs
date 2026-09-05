@@ -6,8 +6,11 @@
  * The record is self-contained: before the browser starts, every resource the
  * committed build report declares is downloaded from the origin in Node and
  * hashed, so the record proves which bytes the browser was offered; then a
- * headed browser opens the deployed Studio with NO query so the bundle's own
- * default scene URL is what gets exercised, and the recorder captures every
+ * headed browser opens the deployed Studio, either with NO query so the
+ * bundle's own default scene URL is what gets exercised (`--open-via default`)
+ * or through the Studio's `?scene=` query naming the origin document
+ * (`--open-via scene-query`, for a package that is not the deployed default),
+ * and the recorder captures every
  * response the page received from the origin (status, Content-Type,
  * Content-Range, CORS headers), the hierarchy / first-frame / ready
  * milestones, a pick with resolved property entries, and two screenshots.
@@ -22,6 +25,7 @@
  *     [--package-origin https://packages.blacktanlabs.com/naru/digital-hub/v1/] \
  *     [--build-report artifacts/ifc/digital-hub/build-report.json] \
  *     [--output artifacts/public-demo/digital-hub-origin] \
+ *     [--open-via default|scene-query] \
  *     [--browser chrome|firefox] [--headless] [--timeout-ms 120000]
  */
 import { createHash } from "node:crypto";
@@ -95,6 +99,7 @@ const options = {
   ),
   buildReport: resolve(repoRoot, argValue("--build-report", defaultBuildReport)),
   output: resolveOutputDirectory(argValue("--output", defaultOutput)),
+  openVia: argValue("--open-via", "default"),
   browser: argValue("--browser", "chrome"),
   headless: process.argv.includes("--headless"),
   timeoutMs: Number.parseInt(argValue("--timeout-ms", "120000"), 10),
@@ -106,6 +111,9 @@ if (!engine) {
 }
 if (!Number.isInteger(options.timeoutMs) || options.timeoutMs <= 0) {
   throw new Error("--timeout-ms must be a positive integer.");
+}
+if (options.openVia !== "default" && options.openVia !== "scene-query") {
+  throw new Error("--open-via must be default or scene-query.");
 }
 
 const studioUrl = new URL("studio/", options.siteUrl).href;
@@ -124,7 +132,7 @@ function assert(condition, message) {
   if (!condition) throw new Error(message);
 }
 
-async function fetchChecked(url, init = {}) {
+async function fetchChecked(url, init = {}, timeoutMs = 120_000) {
   const response = await fetch(url, {
     redirect: "error",
     ...init,
@@ -133,7 +141,7 @@ async function fetchChecked(url, init = {}) {
       "cache-control": "no-cache",
       ...(init.headers ?? {}),
     },
-    signal: AbortSignal.timeout(120_000),
+    signal: AbortSignal.timeout(timeoutMs),
   }).catch((error) => {
     const cause = error?.cause?.message ? ` (${error.cause.message})` : "";
     throw new Error(`${init.method ?? "GET"} ${url} failed: ${error.message}${cause}`);
@@ -149,7 +157,12 @@ function assetPaths(html) {
   return [...matches];
 }
 
-/** Proves the deployed bundle names the origin document as its default scene. */
+/**
+ * Records how the origin document is reached. With `--open-via default` the
+ * deployed bundle must name the origin document as its default scene; with
+ * `--open-via scene-query` the Studio is opened at `studio/?scene=<document>`
+ * and the bundle is only required to exist.
+ */
 async function inspectDeployment() {
   const html = await (await fetchChecked(studioUrl)).text();
   const assets = assetPaths(html);
@@ -157,24 +170,31 @@ async function inspectDeployment() {
   const documentHref = new URL("scene.gltf", options.packageOrigin).href;
   const scriptAssets = assets.filter((path) => path.endsWith(".js"));
   let targetingAsset = null;
-  for (const path of scriptAssets) {
-    const text = await (await fetchChecked(new URL(path, studioUrl).href)).text();
-    if (text.includes(documentHref)) {
-      targetingAsset = path;
-      break;
+  if (options.openVia === "default") {
+    for (const path of scriptAssets) {
+      const text = await (await fetchChecked(new URL(path, studioUrl).href)).text();
+      if (text.includes(documentHref)) {
+        targetingAsset = path;
+        break;
+      }
     }
+    assert(
+      targetingAsset !== null,
+      `No deployed script asset under ${studioUrl} names ${documentHref} as the default scene.`,
+    );
   }
-  assert(
-    targetingAsset !== null,
-    `No deployed script asset under ${studioUrl} names ${documentHref} as the default scene.`,
-  );
+  const openedUrl = new URL(studioUrl);
+  if (options.openVia === "scene-query") openedUrl.searchParams.set("scene", documentHref);
   return {
     studioUrl,
     siteOrigin,
     assetCount: assets.length,
     scriptAssetCount: scriptAssets.length,
+    openedVia: options.openVia,
+    openedHref: openedUrl.href,
     targetingAsset,
-    defaultSceneHref: documentHref,
+    defaultSceneHref: options.openVia === "default" ? documentHref : null,
+    documentHref,
   };
 }
 
@@ -183,7 +203,10 @@ async function verifyOriginResources(declared) {
   const resources = [];
   for (const resource of declared) {
     const url = new URL(resource.path, options.packageOrigin).href;
-    const response = await fetchChecked(url, { headers: { origin: siteOrigin } });
+    // One minute of floor plus one second per megabyte declared: an 854 MB
+    // package must not be failed by the fixed two-minute budget a 63 MB one fits.
+    const timeoutMs = 60_000 + Math.ceil(resource.bytes / 1_000_000) * 1_000;
+    const response = await fetchChecked(url, { headers: { origin: siteOrigin } }, timeoutMs);
     const hash = createHash("sha256");
     let bytes = 0;
     for await (const chunk of response.body) {
@@ -309,12 +332,14 @@ async function readStudioState(page) {
       hierarchyReady: dataset.hierarchyReady === "true",
       coarseReady: dataset.coarseReady === "true",
       targetReady: dataset.targetReady === "true",
+      targetReadyState: dataset.targetReady ?? null,
       targetChunksTotal: number("targetChunksTotal"),
       targetChunksReady: number("targetChunksReady"),
       targetSchedulerMode: dataset.targetSchedulerMode ?? null,
       targetSchedulerDemandPriority: dataset.targetSchedulerDemandPriority ?? null,
       targetSchedulerRequests: number("targetSchedulerRequests"),
       targetSchedulerSkips: number("targetSchedulerSkips"),
+      targetSchedulerCancellations: number("targetSchedulerCancellations"),
       residentDecodedBytes: number("residentDecodedBytes"),
       residentGpuBytes: number("residentGpuBytes"),
       residencyBudgetBytes: number("residencyBudgetBytes"),
@@ -390,7 +415,11 @@ async function main() {
 
   console.log(`[public-demo] inspecting ${studioUrl}`);
   const deployment = await inspectDeployment();
-  console.log(`[public-demo] default scene = ${deployment.defaultSceneHref} (${deployment.targetingAsset})`);
+  console.log(
+    deployment.openedVia === "default"
+      ? `[public-demo] default scene = ${deployment.defaultSceneHref} (${deployment.targetingAsset})`
+      : `[public-demo] opening ${deployment.openedHref}`,
+  );
 
   console.log(`[public-demo] verifying ${buildReport.resources.length} resources at ${options.packageOrigin}`);
   const originBefore = await verifyOriginResources(buildReport.resources);
@@ -430,7 +459,7 @@ async function main() {
     });
 
     const t0 = Date.now();
-    await page.goto(studioUrl, { waitUntil: "load", timeout: options.timeoutMs });
+    await page.goto(deployment.openedHref, { waitUntil: "load", timeout: options.timeoutMs });
     const waitFor = (predicate) =>
       page.waitForFunction(predicate, null, { timeout: options.timeoutMs });
     await waitFor(() => document.documentElement.dataset.hierarchyReady === "true");
@@ -441,8 +470,19 @@ async function main() {
         document.documentElement.dataset.targetReady === "true",
     );
     const firstCoarseFrameMs = Date.now() - t0;
-    await waitFor(() => document.documentElement.dataset.targetReady === "true");
+    // `ready` is the Studio's own terminal state. A package that fits the
+    // 64 MiB residency budget ends with targetReady "true"; a real-large one
+    // ends budget-limited ("limited"), and both are `ready` to the status
+    // element. An error state ends the wait too, and fails below.
+    await waitFor(() => {
+      const state = document.querySelector("#status")?.getAttribute("data-state");
+      return state === "ready" || state === "error";
+    });
     const readyMs = Date.now() - t0;
+    const finalState = await page.evaluate(
+      () => document.querySelector("#status")?.getAttribute("data-state"),
+    );
+    assert(finalState === "ready", `The Studio ended in state ${finalState}: ${await page.locator("#status").innerText()}`);
     milestones = { hierarchyMs, firstCoarseFrameMs, readyMs };
     console.log(
       `[public-demo] hierarchy ${hierarchyMs} ms, first coarse frame ${firstCoarseFrameMs} ms, ready ${readyMs} ms`,
@@ -452,6 +492,11 @@ async function main() {
     assert(
       stateAtReady.location.origin === siteOrigin,
       `The page runs at ${stateAtReady.location.origin}, expected ${siteOrigin}.`,
+    );
+    const requestedScene = new URL(stateAtReady.location.href).searchParams.get("scene");
+    assert(
+      requestedScene === (deployment.openedVia === "scene-query" ? deployment.documentHref : null),
+      `The page's scene query is ${requestedScene}, which does not match --open-via ${deployment.openedVia}.`,
     );
     const ready = await screenshot(page, "ready.png");
 

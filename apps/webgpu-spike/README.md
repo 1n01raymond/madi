@@ -73,7 +73,13 @@ URL, and reaches hierarchy, a first coarse frame, ready with every chunk
 resident over `206` Range responses, and a pick with resolved properties, with
 every origin resource verified against the committed build report before and
 after the run. `pnpm demo:browser:check` validates that record; re-record it
-against the live site and origin with `pnpm demo:browser:evidence`.
+against the live site and origin with `pnpm demo:browser:evidence`. The
+[engineering-baseline origin record](../../artifacts/public-demo/engineering-baseline-origin/README.md)
+repeats that against the 854,447,023-byte engineering baseline, opened through
+the scene query rather than the default scene: the budget-limited ready state
+with 82 of 626 chunks resident under 64 MiB over 82 `206` Range responses, and
+a pick with resolved properties. `pnpm demo:baseline:check` validates it;
+re-record with `pnpm demo:baseline:evidence`.
 
 The live origin is a Cloudflare R2 bucket behind `packages.blacktanlabs.com`,
 provisioned with `wrangler` on 2026-09-05, and reproducing it is four steps:

@@ -36,7 +36,7 @@ reverse. They explain context and trade-offs rather than only the final choice.
 | [0020](0020-cancellable-import-jobs.md) | Report imports as a versioned lifecycle; cancellation stops the adapter tree | Proposed |
 | [0021](0021-staged-hierarchy-first-import.md) | Publish an import assembly tree per document, before geometry | Proposed |
 | [0022](0022-workspace-manifest.md) | Persist a non-authoritative workspace manifest keyed by source and package identity | Accepted |
-| [0023](0023-public-package-delivery-origin.md) | Serve public demo packages from a Cloudflare R2 delivery origin | Proposed |
+| [0023](0023-public-package-delivery-origin.md) | Serve public demo packages from a Cloudflare R2 delivery origin | Accepted |
 
 ## Phase 0 review
 
