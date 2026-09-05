@@ -1,8 +1,8 @@
 # ADR-0023: Serve public demo packages from a Cloudflare R2 delivery origin
 
-Status: Proposed
+Status: Accepted
 
-Reviewed: 2026-09-05
+Accepted: 2026-09-05
 
 ## Context
 
@@ -175,8 +175,9 @@ the first deployment that read the variable, GitHub Actions run
 [33954446446](https://github.com/1n01raymond/naru/actions/runs/33954446446)
 on `c55814c` (2026-09-05). Gate 3 closed the same day with the committed
 [public-demo browser record](../../artifacts/public-demo/digital-hub-origin/README.md)
-(`pnpm demo:browser:check`). Gate 4 stays open: the engineering baseline is not
-yet published through the origin.
+(`pnpm demo:browser:check`). Gate 4 closed the same day with the committed
+[engineering-baseline record](../../artifacts/public-demo/engineering-baseline-origin/README.md)
+(`pnpm demo:baseline:check`), which is what Phase 2 exit criterion 1 asks for.
 
 0. **Loader wiring proven by tests.** `resolveDefaultSceneUrl` refuses a
    relative value, a non-HTTP(S) scheme, embedded credentials, a query or
@@ -207,9 +208,21 @@ yet published through the origin.
    then picking an occurrence with 18 resolved property entries, with 0
    console issues; every origin resource was verified against the committed
    build report before and after the browser ran.
-4. **The baseline delivered.** The 854,446,743-byte engineering baseline is
-   published this way and opened through the Studio, which is what Phase 2 exit
-   criterion 1 asks for.
+4. **The baseline delivered.** The engineering baseline is published this way
+   and opened through the Studio, which is what Phase 2 exit criterion 1 asks
+   for. **Met** 2026-09-05: the qualified 31-document package is published at
+   `https://packages.blacktanlabs.com/naru/engineering-baseline/v1/` beside its
+   CC BY 4.0 license and attribution, and the
+   [record](../../artifacts/public-demo/engineering-baseline-origin/README.md)
+   shows headed Chrome 151 opening the deployed Studio through the scene query,
+   verifying all six resources (854,447,023 bytes, package `04472c9ad292…`,
+   this host's compile of the sources the macOS qualification record compiled
+   to `6d23bffd6632…`; both digests pinned) at the origin before and after the
+   run, and reaching hierarchy at 13,736 ms, first coarse frame at 19,955 ms,
+   and the budget-limited ready state at 29,026 ms with 82 of 626 chunks
+   resident under the 64 MiB budget (544 refused before fetch) over 82 `206`
+   Range responses, then picking an occurrence with 9 resolved property
+   entries, with 0 console issues; three runs settled on an identical endpoint.
 
 Failing gate 1 or gate 2 rejects this decision. Neither is closed by relaxing
 the loader.

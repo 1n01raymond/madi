@@ -332,12 +332,14 @@ async function readStudioState(page) {
       hierarchyReady: dataset.hierarchyReady === "true",
       coarseReady: dataset.coarseReady === "true",
       targetReady: dataset.targetReady === "true",
+      targetReadyState: dataset.targetReady ?? null,
       targetChunksTotal: number("targetChunksTotal"),
       targetChunksReady: number("targetChunksReady"),
       targetSchedulerMode: dataset.targetSchedulerMode ?? null,
       targetSchedulerDemandPriority: dataset.targetSchedulerDemandPriority ?? null,
       targetSchedulerRequests: number("targetSchedulerRequests"),
       targetSchedulerSkips: number("targetSchedulerSkips"),
+      targetSchedulerCancellations: number("targetSchedulerCancellations"),
       residentDecodedBytes: number("residentDecodedBytes"),
       residentGpuBytes: number("residentGpuBytes"),
       residencyBudgetBytes: number("residencyBudgetBytes"),
@@ -468,8 +470,19 @@ async function main() {
         document.documentElement.dataset.targetReady === "true",
     );
     const firstCoarseFrameMs = Date.now() - t0;
-    await waitFor(() => document.documentElement.dataset.targetReady === "true");
+    // `ready` is the Studio's own terminal state. A package that fits the
+    // 64 MiB residency budget ends with targetReady "true"; a real-large one
+    // ends budget-limited ("limited"), and both are `ready` to the status
+    // element. An error state ends the wait too, and fails below.
+    await waitFor(() => {
+      const state = document.querySelector("#status")?.getAttribute("data-state");
+      return state === "ready" || state === "error";
+    });
     const readyMs = Date.now() - t0;
+    const finalState = await page.evaluate(
+      () => document.querySelector("#status")?.getAttribute("data-state"),
+    );
+    assert(finalState === "ready", `The Studio ended in state ${finalState}: ${await page.locator("#status").innerText()}`);
     milestones = { hierarchyMs, firstCoarseFrameMs, readyMs };
     console.log(
       `[public-demo] hierarchy ${hierarchyMs} ms, first coarse frame ${firstCoarseFrameMs} ms, ready ${readyMs} ms`,
