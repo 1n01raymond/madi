@@ -156,9 +156,25 @@ builds the Studio with `VITE_NARU_DEFAULT_SCENE_URL`, and
 [`scripts/check-public-demo.mjs`](../../scripts/check-public-demo.mjs) asserts
 the Decision's point 1 contract when given `--package-origin`. With the
 variable unset the deployment keeps its current behaviour, so nothing here
-depends on the decision being accepted. Gates 1 to 4 still require the
-delivery origin itself, which the maintainer owns and which does not exist
-yet; none of them can be recorded from the repository alone.
+depends on the decision being accepted.
+
+The origin was provisioned on 2026-09-05: Cloudflare R2 bucket `naru-packages`
+behind the custom domain `packages.blacktanlabs.com`, serving the committed
+Digital Hub package at `https://packages.blacktanlabs.com/naru/digital-hub/v1/`
+with the five declared resources uploaded at the digests
+[`artifacts/ifc/digital-hub/build-report.json`](../../artifacts/ifc/digital-hub/build-report.json)
+records, each under the `Content-Type` the compiler emits, next to
+`LICENSE.txt` and `ATTRIBUTION.txt` for the MIT fixture (Decision point 6). Its
+CORS rule allows `GET`/`HEAD` with the `Range` header from the GitHub Pages
+origin and the local development origins and exposes `Content-Range`,
+`Content-Length`, `ETag`, and `Accept-Ranges`; the repository variable
+`NARU_PACKAGE_ORIGIN` names that prefix. The maintainer recipe lives in the
+[Studio guide](../../apps/webgpu-spike/README.md). Gates 1 to 3
+are recorded by the deployment itself, so they close only once a deploy runs
+with this slice merged and the variable set; an exploratory headed-Chrome load
+of the origin package from a local development server (hierarchy, first frame,
+45 `Content-Range` responses, a pick, no console issues) preceded the record
+but is not committed evidence.
 
 0. **Loader wiring proven by tests.** `resolveDefaultSceneUrl` refuses a
    relative value, a non-HTTP(S) scheme, embedded credentials, a query or

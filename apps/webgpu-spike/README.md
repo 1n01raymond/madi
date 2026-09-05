@@ -64,6 +64,25 @@ That exposed header is not optional. The geometry Worker refuses a range
 response whose `Content-Range` it cannot read, so an origin that omits it
 produces a page that renders its shell and never receives geometry.
 
+The live origin is a Cloudflare R2 bucket behind `packages.blacktanlabs.com`,
+provisioned with `wrangler` on 2026-09-05, and reproducing it is four steps:
+`wrangler r2 bucket create <bucket>`; `wrangler r2 bucket cors set <bucket>
+--file cors.json` with the R2 API shape `{"rules":[{"allowed":{"origins":[...],
+"methods":["GET","HEAD"],"headers":["range","content-type"]},"exposeHeaders":
+["Content-Range","Content-Length","ETag","Accept-Ranges"],"maxAgeSeconds":3600}]}`
+where the origins list carries the Pages site and any local development
+origin; `wrangler r2 bucket domain add <bucket> --domain <host> --zone-id <id>`
+for a hostname in a zone the account already holds; then one
+`wrangler r2 object put <bucket>/<prefix>/<file> --file <path> --content-type
+<type> --remote` per declared resource, with `model/gltf+json` for the
+document, `application/json` for `properties.json`, and
+`application/octet-stream` for every binary. `--remote` is not optional:
+without it wrangler 4 writes to its local Miniflare store and the public
+hostname keeps answering 404. Upload the package whose digests the committed
+build report names, never a local recompile, and put the fixture's license and
+attribution beside it (`LICENSE.txt`, `ATTRIBUTION.txt`); the prefix is
+immutable once a deploy has verified it, so a new package gets a new prefix.
+
 The Scene Inspector searches hierarchy names, occurrence/prototype IDs, and
 source references as soon as `scene.gltf` is available; geometry residency is
 not required. Press `/` to focus search and Enter to select its first renderable
