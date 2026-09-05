@@ -64,6 +64,17 @@ That exposed header is not optional. The geometry Worker refuses a range
 response whose `Content-Range` it cannot read, so an origin that omits it
 produces a page that renders its shell and never receives geometry.
 
+The smoke check reads headers; whether the deployed Studio actually reaches a
+picture across those origins is a browser question, and the
+[public-demo browser record](../../artifacts/public-demo/digital-hub-origin/README.md)
+answers it: headed Chrome opens the deployed Studio with no query, reads the
+Digital Hub package from the origin through the bundle's own default scene
+URL, and reaches hierarchy, a first coarse frame, ready with every chunk
+resident over `206` Range responses, and a pick with resolved properties, with
+every origin resource verified against the committed build report before and
+after the run. `pnpm demo:browser:check` validates that record; re-record it
+against the live site and origin with `pnpm demo:browser:evidence`.
+
 The live origin is a Cloudflare R2 bucket behind `packages.blacktanlabs.com`,
 provisioned with `wrangler` on 2026-09-05, and reproducing it is four steps:
 `wrangler r2 bucket create <bucket>`; `wrangler r2 bucket cors set <bucket>
