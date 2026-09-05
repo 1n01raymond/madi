@@ -14,6 +14,7 @@ function parsePositiveInteger(value, option) {
 function parseArguments(argv) {
   const options = {
     url: DEFAULT_URL,
+    packageOrigin: undefined,
     attempts: 1,
     retryDelayMs: 0,
   };
@@ -24,6 +25,9 @@ function parseArguments(argv) {
 
     if (option === "--url" && value) {
       options.url = value;
+      index += 1;
+    } else if (option === "--package-origin" && value) {
+      options.packageOrigin = value;
       index += 1;
     } else if (option === "--attempts" && value) {
       options.attempts = parsePositiveInteger(value, option);
@@ -41,6 +45,24 @@ function parseArguments(argv) {
   url.search = "";
   url.hash = "";
   options.url = url.href;
+
+  if (options.packageOrigin !== undefined) {
+    const origin = new URL(options.packageOrigin);
+    if (origin.protocol !== "http:" && origin.protocol !== "https:") {
+      throw new Error("--package-origin must use HTTP or HTTPS.");
+    }
+    if (origin.username !== "" || origin.password !== "") {
+      throw new Error("--package-origin must not carry credentials.");
+    }
+    if (origin.search !== "" || origin.hash !== "") {
+      throw new Error("--package-origin must not carry a query or fragment.");
+    }
+    // A package prefix names the directory holding scene.gltf, because the
+    // loader resolves every declared resource against the document's own URL.
+    origin.pathname = `${origin.pathname.replace(/\/?$/, "/")}`;
+    options.packageOrigin = origin.href;
+  }
+
   return options;
 }
 
@@ -57,16 +79,22 @@ async function loadResources(reportPath) {
 }
 
 async function fetchChecked(url, init = {}) {
-  const response = await fetch(url, {
-    ...init,
-    headers: {
-      "accept-encoding": "identity",
-      "cache-control": "no-cache",
-      ...init.headers,
-    },
-    signal: AbortSignal.timeout(30_000),
-  });
-  return response;
+  try {
+    return await fetch(url, {
+      ...init,
+      headers: {
+        "accept-encoding": "identity",
+        "cache-control": "no-cache",
+        ...init.headers,
+      },
+      signal: AbortSignal.timeout(30_000),
+    });
+  } catch (error) {
+    // A refused redirect surfaces as a bare "fetch failed"; a smoke check that
+    // does not name the URL and the reason is not worth reading in CI.
+    const reason = error?.cause?.message ?? error?.message ?? String(error);
+    throw new Error(`${url} could not be fetched: ${reason}`, { cause: error });
+  }
 }
 
 function cacheBusted(url, attempt) {
@@ -125,7 +153,112 @@ async function checkStudioIndex(baseUrl, attempt) {
     assert(assetResponse.status === 200, `${assetUrl.href} returned HTTP ${assetResponse.status}.`);
   }
 
-  return assetPaths.length;
+  return assetPaths;
+}
+
+// A site that was built without VITE_NARU_DEFAULT_SCENE_URL still serves a
+// working Studio, so the deployed bundle is the only place that says which
+// package the demo actually opens.
+async function checkStudioTargetsOrigin(baseUrl, assetPaths, packageOrigin, attempt) {
+  const documentHref = new URL("scene.gltf", packageOrigin).href;
+  const scriptPaths = assetPaths.filter((path) => path.endsWith(".js"));
+  assert(scriptPaths.length > 0, `${baseUrl} declares no Studio script asset.`);
+
+  for (const scriptPath of scriptPaths) {
+    const scriptUrl = cacheBusted(new URL(scriptPath, baseUrl), attempt);
+    const response = await fetchChecked(scriptUrl);
+    assert(response.status === 200, `${scriptUrl.href} returned HTTP ${response.status}.`);
+    if ((await response.text()).includes(documentHref)) {
+      return documentHref;
+    }
+  }
+
+  throw new Error(
+    `No deployed Studio script names ${documentHref}; the site was built without ` +
+      "VITE_NARU_DEFAULT_SCENE_URL and would open a package that is no longer there.",
+  );
+}
+
+function allowsOrigin(header, siteOrigin) {
+  return header === "*" || header === siteOrigin;
+}
+
+// The loader reads Content-Range on every 206 and fails closed when it cannot,
+// and that header is not CORS-safelisted: an origin that omits it renders the
+// Studio shell and never delivers geometry.
+function assertExposesContentRange(response, resourceUrl) {
+  const exposed = (response.headers.get("access-control-expose-headers") ?? "")
+    .split(",")
+    .map((entry) => entry.trim().toLowerCase());
+  assert(
+    exposed.includes("*") || exposed.includes("content-range"),
+    `${resourceUrl} does not expose Content-Range to the site origin.`,
+  );
+}
+
+async function checkDeliveredResource(packageOrigin, siteOrigin, resource) {
+  // No cache-busting query here: ADR-0023 makes a package prefix immutable, so
+  // a cached response is the correct response, and an object store is entitled
+  // to refuse an unexpected query parameter.
+  const resourceUrl = new URL(resource.path, packageOrigin);
+  const headers = { origin: siteOrigin };
+  const response = await fetchChecked(resourceUrl, {
+    method: "HEAD",
+    headers,
+    redirect: "error",
+  });
+  assert(response.status === 200, `${resourceUrl.href} returned HTTP ${response.status}.`);
+
+  const contentLength = Number.parseInt(response.headers.get("content-length") ?? "", 10);
+  assert(
+    contentLength === resource.bytes,
+    `${resourceUrl.href} has ${contentLength} bytes; expected ${resource.bytes}.`,
+  );
+  assert(
+    response.headers.get("content-type")?.startsWith(resource.mediaType),
+    `${resourceUrl.href} has unexpected content type ${response.headers.get("content-type")}.`,
+  );
+  assert(
+    allowsOrigin(response.headers.get("access-control-allow-origin"), siteOrigin),
+    `${resourceUrl.href} does not allow ${siteOrigin}; it answered ` +
+      `${response.headers.get("access-control-allow-origin") ?? "no Access-Control-Allow-Origin"}.`,
+  );
+
+  if (resource.mediaType !== "application/octet-stream") {
+    return false;
+  }
+
+  const rangeResponse = await fetchChecked(resourceUrl, {
+    headers: { ...headers, range: `bytes=0-${RANGE_END}` },
+    redirect: "error",
+  });
+  assert(
+    rangeResponse.status === 206,
+    `${resourceUrl.href} Range request returned HTTP ${rangeResponse.status}.`,
+  );
+  assert(
+    rangeResponse.headers.get("content-range") === `bytes 0-${RANGE_END}/${resource.bytes}`,
+    `${resourceUrl.href} returned an unexpected Content-Range.`,
+  );
+  assert(
+    allowsOrigin(rangeResponse.headers.get("access-control-allow-origin"), siteOrigin),
+    `${resourceUrl.href} does not allow ${siteOrigin} on a Range request.`,
+  );
+  assertExposesContentRange(rangeResponse, resourceUrl.href);
+  const range = await rangeResponse.arrayBuffer();
+  assert(
+    range.byteLength === RANGE_END + 1,
+    `${resourceUrl.href} returned ${range.byteLength} bytes.`,
+  );
+  return true;
+}
+
+async function checkDeliveryOrigin(packageOrigin, siteOrigin, resources) {
+  let rangeCount = 0;
+  for (const resource of resources) {
+    rangeCount += Number(await checkDeliveredResource(packageOrigin, siteOrigin, resource));
+  }
+  return rangeCount;
 }
 
 async function checkResource(baseUrl, prefix, resource, attempt) {
@@ -184,16 +317,34 @@ async function main() {
     "../artifacts/phase1/adafruit-pygamer/build-report.json",
   );
 
+  const siteOrigin = new URL(options.url).origin;
+
   for (let attempt = 1; attempt <= options.attempts; attempt += 1) {
     try {
       const mediaCount = await checkLanding(options.url, attempt);
-      const assetCount = await checkStudioIndex(options.url, attempt);
-      const digitalHubRanges = await checkPackage(
-        options.url,
-        "studio/",
-        digitalHubResources,
-        attempt,
-      );
+      const assetPaths = await checkStudioIndex(options.url, attempt);
+      let delivery = "site artifact";
+      let digitalHubRanges;
+      if (options.packageOrigin === undefined) {
+        digitalHubRanges = await checkPackage(
+          options.url,
+          "studio/",
+          digitalHubResources,
+          attempt,
+        );
+      } else {
+        delivery = await checkStudioTargetsOrigin(
+          options.url,
+          assetPaths,
+          options.packageOrigin,
+          attempt,
+        );
+        digitalHubRanges = await checkDeliveryOrigin(
+          options.packageOrigin,
+          siteOrigin,
+          digitalHubResources,
+        );
+      }
       const pyGamerRanges = await checkPackage(
         options.url,
         "studio/pygamer/",
@@ -202,9 +353,10 @@ async function main() {
       );
       console.log(
         `Public demo smoke check passed: ${mediaCount} landing media references, ` +
-          `${assetCount} app assets, ` +
+          `${assetPaths.length} app assets, ` +
           `${digitalHubResources.length + pyGamerResources.length} package resources, ` +
-          `${digitalHubRanges + pyGamerRanges} HTTP Range responses.`,
+          `${digitalHubRanges + pyGamerRanges} HTTP Range responses, ` +
+          `default scene from ${delivery}.`,
       );
       return;
     } catch (error) {

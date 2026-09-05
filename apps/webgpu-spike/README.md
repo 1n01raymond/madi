@@ -48,6 +48,41 @@ the Digital Hub package digests before publishing, then checks the live
 landing page, Studio assets, every declared package resource, and binary HTTP
 Range delivery with `pnpm demo:smoke`.
 
+Where that default package is served from is deployment configuration, not
+application behaviour. With the repository variable `NARU_PACKAGE_ORIGIN`
+unset, the package is copied into the Pages site artifact and the Studio opens
+it site-relative, which is the arrangement the 1 GB site limit bounds. Set the
+variable to an HTTPS prefix and the deployment instead verifies every declared
+resource's SHA-256 at that origin, builds the Studio to open the package
+cross-origin, and runs `pnpm demo:smoke --package-origin <url>`, which asserts
+the delivery contract
+[ADR-0023](../../docs/adr/0023-public-package-delivery-origin.md) sets out: no
+redirect, an exact `Content-Length`, an allowlisted `Content-Type`,
+`Access-Control-Allow-Origin` covering the site origin,
+`Access-Control-Expose-Headers` carrying `Content-Range`, and an honest `206`.
+That exposed header is not optional. The geometry Worker refuses a range
+response whose `Content-Range` it cannot read, so an origin that omits it
+produces a page that renders its shell and never receives geometry.
+
+The live origin is a Cloudflare R2 bucket behind `packages.blacktanlabs.com`,
+provisioned with `wrangler` on 2026-09-05, and reproducing it is four steps:
+`wrangler r2 bucket create <bucket>`; `wrangler r2 bucket cors set <bucket>
+--file cors.json` with the R2 API shape `{"rules":[{"allowed":{"origins":[...],
+"methods":["GET","HEAD"],"headers":["range","content-type"]},"exposeHeaders":
+["Content-Range","Content-Length","ETag","Accept-Ranges"],"maxAgeSeconds":3600}]}`
+where the origins list carries the Pages site and any local development
+origin; `wrangler r2 bucket domain add <bucket> --domain <host> --zone-id <id>`
+for a hostname in a zone the account already holds; then one
+`wrangler r2 object put <bucket>/<prefix>/<file> --file <path> --content-type
+<type> --remote` per declared resource, with `model/gltf+json` for the
+document, `application/json` for `properties.json`, and
+`application/octet-stream` for every binary. `--remote` is not optional:
+without it wrangler 4 writes to its local Miniflare store and the public
+hostname keeps answering 404. Upload the package whose digests the committed
+build report names, never a local recompile, and put the fixture's license and
+attribution beside it (`LICENSE.txt`, `ATTRIBUTION.txt`); the prefix is
+immutable once a deploy has verified it, so a new package gets a new prefix.
+
 The Scene Inspector searches hierarchy names, occurrence/prototype IDs, and
 source references as soon as `scene.gltf` is available; geometry residency is
 not required. Press `/` to focus search and Enter to select its first renderable
@@ -89,6 +124,14 @@ starting Vite. For example, in PowerShell:
 $env:NARU_SCENE_DIR = "output/ifc/digital-hub"
 pnpm dev
 ```
+
+`VITE_NARU_DEFAULT_SCENE_URL` does the same for a *built* Studio: when set it
+must be an absolute HTTP(S) URL naming a compiled glTF document, and the app
+opens that package instead of `${BASE_URL}scene.gltf`. A value that is not
+usable -- relative, credential-bearing, carrying a query or fragment, or not
+naming a `.gltf` document -- fails the build instead of silently falling back
+to the site-relative default (`apps/webgpu-spike/src/default-scene.ts`,
+`pnpm test`).
 
 The runtime preserves one pickable occurrence ID across material-separated
 surface batches. One session Worker validates the glTF document, composes its

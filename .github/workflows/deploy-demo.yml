@@ -9,12 +9,22 @@ name: Deploy public demo
 # reachable as a secondary example via studio/?scene=pygamer/scene.gltf.
 #
 # Digital Hub's compiled package (~63 MB) is not committed, per AGENTS.md's
-# rule against large derived geometry in git history. It is instead published
-# as a GitHub Release asset (tag demo-digital-hub-v1) and downloaded here at
-# deploy time. This job verifies every downloaded file's SHA-256 against the
-# committed artifacts/ifc/digital-hub/build-report.json before using it, so a
-# stale or mismatched release asset fails the deploy instead of publishing
-# silently wrong bytes.
+# rule against large derived geometry in git history. Where it is served from
+# depends on the repository variable NARU_PACKAGE_ORIGIN (ADR-0023):
+#
+#   unset - the package is downloaded from the GitHub Release asset (tag
+#           demo-digital-hub-v1) and copied into the Pages site artifact, so
+#           the Studio opens it site-relative. This is the historical path and
+#           it is bounded by the 1 GB Pages site limit.
+#   set   - the package is already published under that HTTPS prefix (an
+#           object store meeting the ADR-0023 delivery contract) and the Studio
+#           is built to open it cross-origin. No package byte enters the site
+#           artifact, so the site limit stops bounding the model.
+#
+# Either way this job verifies every resource's SHA-256 against the committed
+# artifacts/ifc/digital-hub/build-report.json before publishing a site that
+# points at it, so stale or mismatched bytes fail the deploy instead of being
+# served silently.
 #
 # sixty5 (657 MB, CC-BY-4.0) is deliberately excluded from this demo.
 
@@ -63,15 +73,41 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Download Digital Hub demo package
+      - name: Resolve the package delivery origin
+        id: delivery
+        env:
+          PACKAGE_ORIGIN: ${{ vars.NARU_PACKAGE_ORIGIN }}
         run: |
           set -euo pipefail
+          # publicDir has to exist either way; in delivery-origin mode it stays
+          # empty, which is what keeps package bytes out of the site artifact.
           mkdir -p demo-scene/digital-hub
+          if [ -z "${PACKAGE_ORIGIN}" ]; then
+            echo "mode=site-artifact" >> "$GITHUB_OUTPUT"
+            echo "document=" >> "$GITHUB_OUTPUT"
+            echo "Digital Hub will be served from the Pages site artifact."
+            exit 0
+          fi
+          case "${PACKAGE_ORIGIN}" in
+            https://*) ;;
+            *) echo "::error::NARU_PACKAGE_ORIGIN must be an https:// prefix"; exit 1 ;;
+          esac
+          origin="${PACKAGE_ORIGIN%/}/"
+          echo "mode=delivery-origin" >> "$GITHUB_OUTPUT"
+          echo "origin=${origin}" >> "$GITHUB_OUTPUT"
+          echo "document=${origin}scene.gltf" >> "$GITHUB_OUTPUT"
+          echo "Digital Hub will be served from ${origin}"
+
+      - name: Download Digital Hub demo package
+        if: steps.delivery.outputs.mode == 'site-artifact'
+        run: |
+          set -euo pipefail
           curl -fsSL -o digital-hub-demo-package.tar.gz \
             "https://github.com/${{ github.repository }}/releases/download/demo-digital-hub-v1/digital-hub-demo-package.tar.gz"
           tar -xzf digital-hub-demo-package.tar.gz -C demo-scene/digital-hub
 
       - name: Verify Digital Hub package against committed evidence
+        if: steps.delivery.outputs.mode == 'site-artifact'
         run: |
           set -euo pipefail
           for f in scene.gltf scene.bin coarse.bin properties.json properties.bin; do
@@ -84,6 +120,24 @@ jobs:
             fi
           done
 
+      - name: Verify the delivery origin against committed evidence
+        if: steps.delivery.outputs.mode == 'delivery-origin'
+        env:
+          PACKAGE_ORIGIN: ${{ steps.delivery.outputs.origin }}
+        run: |
+          set -euo pipefail
+          for f in scene.gltf scene.bin coarse.bin properties.json properties.bin; do
+            expected=$(jq -r --arg p "$f" '.output.resources[] | select(.path == $p) | .sha256' \
+              artifacts/ifc/digital-hub/build-report.json)
+            # No -L, --max-redirs 0: the loader refuses redirects, so a deploy
+            # that publishes a pointer to this origin has to refuse them too.
+            actual=$(curl -fsS --max-redirs 0 "${PACKAGE_ORIGIN}${f}" | sha256sum | cut -d' ' -f1)
+            if [ "$expected" != "$actual" ]; then
+              echo "::error::$f digest mismatch at ${PACKAGE_ORIGIN}: expected $expected, got $actual"
+              exit 1
+            fi
+          done
+
       - name: Build workspace dependencies
         run: pnpm --filter @naru3d/webgpu-spike^... run build
 
@@ -91,6 +145,9 @@ jobs:
         working-directory: apps/webgpu-spike
         env:
           NARU_SCENE_DIR: ${{ github.workspace }}/demo-scene/digital-hub
+          # Empty in site-artifact mode, which the Studio reads as "not
+          # configured" and resolves as ${BASE_URL}scene.gltf, exactly as before.
+          VITE_NARU_DEFAULT_SCENE_URL: ${{ steps.delivery.outputs.document }}
         run: pnpm exec vite build --base=/naru/studio/
 
       - name: Assemble the site (landing page + Studio + evidence media)
@@ -137,8 +194,13 @@ jobs:
           node-version: 22.14.0
 
       - name: Smoke-test deployed Studio and packages
-        run: >-
-          node scripts/check-public-demo.mjs
-          --url "${{ steps.deployment.outputs.page_url }}"
-          --attempts 12
-          --retry-delay-ms 10000
+        env:
+          PAGE_URL: ${{ steps.deployment.outputs.page_url }}
+          PACKAGE_ORIGIN: ${{ vars.NARU_PACKAGE_ORIGIN }}
+        run: |
+          set -euo pipefail
+          args=(--url "$PAGE_URL" --attempts 12 --retry-delay-ms 10000)
+          if [ -n "${PACKAGE_ORIGIN}" ]; then
+            args+=(--package-origin "${PACKAGE_ORIGIN%/}/")
+          fi
+          node scripts/check-public-demo.mjs "${args[@]}"
