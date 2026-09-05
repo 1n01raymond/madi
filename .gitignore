@@ -39,3 +39,4 @@ CLAUDE.local.md
 .env.*
 !.env.example
 *.log
+.wrangler/

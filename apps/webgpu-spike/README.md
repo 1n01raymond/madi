@@ -72,7 +72,9 @@ provisioned with `wrangler` on 2026-09-05, and reproducing it is four steps:
 ["Content-Range","Content-Length","ETag","Accept-Ranges"],"maxAgeSeconds":3600}]}`
 where the origins list carries the Pages site and any local development
 origin; `wrangler r2 bucket domain add <bucket> --domain <host> --zone-id <id>`
-for a hostname in a zone the account already holds; then one
+for a hostname in a zone the account already holds, followed by
+`wrangler r2 bucket domain update <bucket> --domain <host> --min-tls 1.2`
+because a new custom domain accepts TLS 1.0 by default; then one
 `wrangler r2 object put <bucket>/<prefix>/<file> --file <path> --content-type
 <type> --remote` per declared resource, with `model/gltf+json` for the
 document, `application/json` for `properties.json`, and
