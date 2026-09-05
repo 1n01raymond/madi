@@ -173,10 +173,10 @@ newer only. The maintainer recipe lives in the
 [Studio guide](../../apps/webgpu-spike/README.md). Gates 1 and 2 closed with
 the first deployment that read the variable, GitHub Actions run
 [33954446446](https://github.com/1n01raymond/naru/actions/runs/33954446446)
-on `c55814c` (2026-09-05). An exploratory headed-Chrome load of the deployed
-Studio, opened without a query, reached hierarchy, first frame, 45
-`Content-Range` responses, and a pick with no console issues, but that run is
-not committed evidence and gate 3 stays open until one is recorded.
+on `c55814c` (2026-09-05). Gate 3 closed the same day with the committed
+[public-demo browser record](../../artifacts/public-demo/digital-hub-origin/README.md)
+(`pnpm demo:browser:check`). Gate 4 stays open: the engineering baseline is not
+yet published through the origin.
 
 0. **Loader wiring proven by tests.** `resolveDefaultSceneUrl` refuses a
    relative value, a non-HTTP(S) scheme, embedded credentials, a query or
@@ -198,6 +198,15 @@ not committed evidence and gate 3 stays open until one is recorded.
    origin, and published the site.
 3. **A browser record of a cross-origin package.** The deployed Studio opens a
    package served by the origin and reaches hierarchy, first frame, and a pick.
+   **Met** 2026-09-05: the
+   [record](../../artifacts/public-demo/digital-hub-origin/README.md) shows
+   headed Chrome 151 opening the deployed Studio with no query, reading the
+   Digital Hub package from the origin through the bundle's own default scene
+   URL, reaching hierarchy at 2,676 ms, first coarse frame at 3,717 ms, and
+   ready at 7,729 ms with all 45 chunks resident over 45 `206` Range responses,
+   then picking an occurrence with 18 resolved property entries, with 0
+   console issues; every origin resource was verified against the committed
+   build report before and after the browser ran.
 4. **The baseline delivered.** The 854,446,743-byte engineering baseline is
    published this way and opened through the Studio, which is what Phase 2 exit
    criterion 1 asks for.

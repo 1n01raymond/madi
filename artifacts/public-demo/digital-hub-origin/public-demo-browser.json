@@ -1,0 +1,371 @@
+{
+  "schemaVersion": "naru.public-demo-browser-evidence.1",
+  "capturedAt": "2026-09-05T13:19:26.339Z",
+  "mode": "headed-deployed-studio-delivery-origin-load",
+  "browser": {
+    "id": "chrome",
+    "engine": "Blink",
+    "version": "151.0.7922.139",
+    "headless": false,
+    "viewport": {
+      "width": 1320,
+      "height": 1000
+    }
+  },
+  "host": {
+    "platform": "win32",
+    "architecture": "x64"
+  },
+  "site": {
+    "url": "https://1n01raymond.github.io/naru/",
+    "origin": "https://1n01raymond.github.io"
+  },
+  "packageOrigin": {
+    "url": "https://packages.blacktanlabs.com/naru/digital-hub/v1/",
+    "origin": "https://packages.blacktanlabs.com",
+    "crossOrigin": true
+  },
+  "buildReport": {
+    "path": "artifacts/ifc/digital-hub/build-report.json",
+    "schemaVersion": "madi.phase1.compiler-report.1",
+    "packageDigest": "9b98866671eb080fd1a34646b6225d27d1ee55bddecbaad58790d35a344c5f1c",
+    "resources": [
+      {
+        "path": "scene.gltf",
+        "mediaType": "model/gltf+json",
+        "bytes": 34184035,
+        "sha256": "ab2bf2cb83214395c791deeaee6f79330a28609ccb5d36704f81fdd2c2a109a6"
+      },
+      {
+        "path": "scene.bin",
+        "mediaType": "application/octet-stream",
+        "bytes": 22410360,
+        "sha256": "83bd64abfab3058ead781abfd80adc397d7ef992d2eb53b63eae8f67ec05b84f"
+      },
+      {
+        "path": "coarse.bin",
+        "mediaType": "application/octet-stream",
+        "bytes": 3085296,
+        "sha256": "5e4fb16db1660f3278a3761f9699c4eb7f003220006d9c082106935e72770284"
+      },
+      {
+        "path": "properties.json",
+        "mediaType": "application/json",
+        "bytes": 1246277,
+        "sha256": "10b1f579eda1c085fdd115031ea416edf14e82b5a2b7b4e1ac0ec80f7af70675"
+      },
+      {
+        "path": "properties.bin",
+        "mediaType": "application/octet-stream",
+        "bytes": 2260991,
+        "sha256": "712fea65ca4b9de75683a01ee79f4fff5ae6f89b0c29cbd0b38a83bb586d07c1"
+      }
+    ]
+  },
+  "deployment": {
+    "studioUrl": "https://1n01raymond.github.io/naru/studio/",
+    "siteOrigin": "https://1n01raymond.github.io",
+    "assetCount": 2,
+    "scriptAssetCount": 1,
+    "targetingAsset": "/naru/studio/assets/index-D43uoGBX.js",
+    "defaultSceneHref": "https://packages.blacktanlabs.com/naru/digital-hub/v1/scene.gltf"
+  },
+  "origin": {
+    "verifiedBeforeBrowser": [
+      {
+        "path": "scene.gltf",
+        "url": "https://packages.blacktanlabs.com/naru/digital-hub/v1/scene.gltf",
+        "bytes": 34184035,
+        "sha256": "ab2bf2cb83214395c791deeaee6f79330a28609ccb5d36704f81fdd2c2a109a6",
+        "declaredMediaType": "model/gltf+json",
+        "contentType": "model/gltf+json",
+        "contentLength": 34184035,
+        "acceptRanges": "bytes",
+        "accessControlAllowOrigin": "https://1n01raymond.github.io",
+        "accessControlExposeHeaders": "Content-Range,Content-Length,ETag,Accept-Ranges",
+        "matchesBuildReport": true
+      },
+      {
+        "path": "scene.bin",
+        "url": "https://packages.blacktanlabs.com/naru/digital-hub/v1/scene.bin",
+        "bytes": 22410360,
+        "sha256": "83bd64abfab3058ead781abfd80adc397d7ef992d2eb53b63eae8f67ec05b84f",
+        "declaredMediaType": "application/octet-stream",
+        "contentType": "application/octet-stream",
+        "contentLength": 22410360,
+        "acceptRanges": "bytes",
+        "accessControlAllowOrigin": "https://1n01raymond.github.io",
+        "accessControlExposeHeaders": "Content-Range,Content-Length,ETag,Accept-Ranges",
+        "matchesBuildReport": true
+      },
+      {
+        "path": "coarse.bin",
+        "url": "https://packages.blacktanlabs.com/naru/digital-hub/v1/coarse.bin",
+        "bytes": 3085296,
+        "sha256": "5e4fb16db1660f3278a3761f9699c4eb7f003220006d9c082106935e72770284",
+        "declaredMediaType": "application/octet-stream",
+        "contentType": "application/octet-stream",
+        "contentLength": 3085296,
+        "acceptRanges": "bytes",
+        "accessControlAllowOrigin": "https://1n01raymond.github.io",
+        "accessControlExposeHeaders": "Content-Range,Content-Length,ETag,Accept-Ranges",
+        "matchesBuildReport": true
+      },
+      {
+        "path": "properties.json",
+        "url": "https://packages.blacktanlabs.com/naru/digital-hub/v1/properties.json",
+        "bytes": 1246277,
+        "sha256": "10b1f579eda1c085fdd115031ea416edf14e82b5a2b7b4e1ac0ec80f7af70675",
+        "declaredMediaType": "application/json",
+        "contentType": "application/json",
+        "contentLength": 1246277,
+        "acceptRanges": "bytes",
+        "accessControlAllowOrigin": "https://1n01raymond.github.io",
+        "accessControlExposeHeaders": "Content-Range,Content-Length,ETag,Accept-Ranges",
+        "matchesBuildReport": true
+      },
+      {
+        "path": "properties.bin",
+        "url": "https://packages.blacktanlabs.com/naru/digital-hub/v1/properties.bin",
+        "bytes": 2260991,
+        "sha256": "712fea65ca4b9de75683a01ee79f4fff5ae6f89b0c29cbd0b38a83bb586d07c1",
+        "declaredMediaType": "application/octet-stream",
+        "contentType": "application/octet-stream",
+        "contentLength": 2260991,
+        "acceptRanges": "bytes",
+        "accessControlAllowOrigin": "https://1n01raymond.github.io",
+        "accessControlExposeHeaders": "Content-Range,Content-Length,ETag,Accept-Ranges",
+        "matchesBuildReport": true
+      }
+    ],
+    "verifiedAfterBrowser": [
+      {
+        "path": "scene.gltf",
+        "bytes": 34184035,
+        "sha256": "ab2bf2cb83214395c791deeaee6f79330a28609ccb5d36704f81fdd2c2a109a6"
+      },
+      {
+        "path": "scene.bin",
+        "bytes": 22410360,
+        "sha256": "83bd64abfab3058ead781abfd80adc397d7ef992d2eb53b63eae8f67ec05b84f"
+      },
+      {
+        "path": "coarse.bin",
+        "bytes": 3085296,
+        "sha256": "5e4fb16db1660f3278a3761f9699c4eb7f003220006d9c082106935e72770284"
+      },
+      {
+        "path": "properties.json",
+        "bytes": 1246277,
+        "sha256": "10b1f579eda1c085fdd115031ea416edf14e82b5a2b7b4e1ac0ec80f7af70675"
+      },
+      {
+        "path": "properties.bin",
+        "bytes": 2260991,
+        "sha256": "712fea65ca4b9de75683a01ee79f4fff5ae6f89b0c29cbd0b38a83bb586d07c1"
+      }
+    ],
+    "note": "Every declared resource was downloaded and hashed in Node before and after the browser run; the browser was therefore offered exactly the bytes the committed build report records."
+  },
+  "milestones": {
+    "hierarchyMs": 2676,
+    "firstCoarseFrameMs": 3717,
+    "readyMs": 7729
+  },
+  "stateAtReady": {
+    "location": {
+      "href": "https://1n01raymond.github.io/naru/studio/",
+      "origin": "https://1n01raymond.github.io"
+    },
+    "sceneSource": "url",
+    "sceneSourceKind": "DEMO",
+    "sceneSourceLabel": "https://packages.blacktanlabs.com/naru/digital-hub/v1/scene.gltf",
+    "status": "Compiled glTF ready · 3635 surface batches · 5152 renderable occurrences",
+    "panel": {
+      "prototypes": "3383",
+      "occurrences": "5152",
+      "triangles": "913,532",
+      "edges": "12",
+      "binarySize": "21,885.1 KiB",
+      "decodeTime": "4498.6 ms",
+      "sourceFormat": "IFC4",
+      "gpuAdapter": "nvidia"
+    },
+    "hierarchyReady": true,
+    "coarseReady": true,
+    "targetReady": true,
+    "targetChunksTotal": 45,
+    "targetChunksReady": 45,
+    "targetSchedulerMode": "coarse-chunk-bounds-v1",
+    "targetSchedulerDemandPriority": "retained-coarse-bounds",
+    "targetSchedulerRequests": 45,
+    "targetSchedulerSkips": null,
+    "residentDecodedBytes": 23476872,
+    "residentGpuBytes": 23491408,
+    "residencyBudgetBytes": 67108864,
+    "residencyBudgetReached": null,
+    "visibleOccurrences": 5152
+  },
+  "pick": {
+    "point": {
+      "x": 653,
+      "y": 942
+    },
+    "selection": {
+      "text": "Selected Oberfläche:2437498 · node 688 · ID 689 · 0 CAD edge refs",
+      "selectedObjectId": "689",
+      "selectionResidency": "retained",
+      "name": "Oberfläche:2437498",
+      "sourceRef": "source:ifc:architecture-19d7d02d53c2:guid:3LJODRGPbDdfXHXShFL9C7"
+    },
+    "properties": {
+      "state": "loading",
+      "statusText": "Loading property sidecar…",
+      "countLabel": "· 18 · IFC4",
+      "entryCount": 18,
+      "sampleEntries": [
+        {
+          "key": "Abmessungen.Oberflächenbereich",
+          "value": "618.897537683"
+        },
+        {
+          "key": "Abmessungen.Projizierter Bereich",
+          "value": "618.897537683"
+        },
+        {
+          "key": "ID-Daten.Bearbeitungsbereich",
+          "value": "Workset1"
+        },
+        {
+          "key": "ID-Daten.Geändert von",
+          "value": ""
+        },
+        {
+          "key": "Materialien und Oberflächen.Material",
+          "value": "Umgebung - Gras"
+        },
+        {
+          "key": "Phasen.Phase erstellt",
+          "value": "Phase 1"
+        },
+        {
+          "key": "Pset_BuildingElementProxyCommon.IsExternal",
+          "value": "false"
+        },
+        {
+          "key": "Pset_BuildingElementProxyCommon.Reference",
+          "value": "Oberfläche"
+        }
+      ]
+    }
+  },
+  "stateAfterPick": {
+    "location": {
+      "href": "https://1n01raymond.github.io/naru/studio/",
+      "origin": "https://1n01raymond.github.io"
+    },
+    "sceneSource": "url",
+    "sceneSourceKind": "DEMO",
+    "sceneSourceLabel": "https://packages.blacktanlabs.com/naru/digital-hub/v1/scene.gltf",
+    "status": "Compiled glTF ready · 3635 surface batches · 5152 renderable occurrences",
+    "panel": {
+      "prototypes": "3383",
+      "occurrences": "5152",
+      "triangles": "913,532",
+      "edges": "12",
+      "binarySize": "21,885.1 KiB",
+      "decodeTime": "4498.6 ms",
+      "sourceFormat": "IFC4",
+      "gpuAdapter": "nvidia"
+    },
+    "hierarchyReady": true,
+    "coarseReady": true,
+    "targetReady": true,
+    "targetChunksTotal": 45,
+    "targetChunksReady": 45,
+    "targetSchedulerMode": "coarse-chunk-bounds-v1",
+    "targetSchedulerDemandPriority": "retained-coarse-bounds",
+    "targetSchedulerRequests": 45,
+    "targetSchedulerSkips": null,
+    "residentDecodedBytes": 23476872,
+    "residentGpuBytes": 23491408,
+    "residencyBudgetBytes": 67108864,
+    "residencyBudgetReached": null,
+    "visibleOccurrences": 5152
+  },
+  "network": {
+    "total": 49,
+    "perResource": {
+      "scene.gltf": {
+        "responses": 1,
+        "statuses": {
+          "200": 1
+        },
+        "rangeRequests": 0,
+        "contentRangeResponses": 0,
+        "contentType": "model/gltf+json",
+        "accessControlAllowOrigin": "https://1n01raymond.github.io",
+        "accessControlExposeHeaders": "Content-Range,Content-Length,ETag,Accept-Ranges"
+      },
+      "scene.bin": {
+        "responses": 45,
+        "statuses": {
+          "206": 45
+        },
+        "rangeRequests": 45,
+        "contentRangeResponses": 45,
+        "contentType": "application/octet-stream",
+        "accessControlAllowOrigin": "https://1n01raymond.github.io",
+        "accessControlExposeHeaders": "Content-Range,Content-Length,ETag,Accept-Ranges"
+      },
+      "coarse.bin": {
+        "responses": 1,
+        "statuses": {
+          "200": 1
+        },
+        "rangeRequests": 0,
+        "contentRangeResponses": 0,
+        "contentType": "application/octet-stream",
+        "accessControlAllowOrigin": "https://1n01raymond.github.io",
+        "accessControlExposeHeaders": "Content-Range,Content-Length,ETag,Accept-Ranges"
+      },
+      "properties.json": {
+        "responses": 1,
+        "statuses": {
+          "200": 1
+        },
+        "rangeRequests": 0,
+        "contentRangeResponses": 0,
+        "contentType": "application/json",
+        "accessControlAllowOrigin": "https://1n01raymond.github.io",
+        "accessControlExposeHeaders": "Content-Range,Content-Length,ETag,Accept-Ranges"
+      },
+      "properties.bin": {
+        "responses": 1,
+        "statuses": {
+          "200": 1
+        },
+        "rangeRequests": 0,
+        "contentRangeResponses": 0,
+        "contentType": "application/octet-stream",
+        "accessControlAllowOrigin": "https://1n01raymond.github.io",
+        "accessControlExposeHeaders": "Content-Range,Content-Length,ETag,Accept-Ranges"
+      }
+    }
+  },
+  "screenshots": {
+    "ready": {
+      "file": "ready.png",
+      "bytes": 264326,
+      "sha256": "43e572fc3c63bf626edd44cd42b50d0a51263770adbaecf8a1f2511da2d33027"
+    },
+    "picked": {
+      "file": "picked.png",
+      "bytes": 268798,
+      "sha256": "be9af4916f7ceeecc94707d3f9ce5e675b4894687483f5cf03153fd2ba16834c"
+    }
+  },
+  "consoleIssues": [],
+  "timingNote": "Wall-clock milestones cross the public network to two CDNs (the Pages site and the delivery origin) and are reported as a bound on this host at capture time, not as a stable figure.",
+  "elapsedSeconds": 14.503
+}
