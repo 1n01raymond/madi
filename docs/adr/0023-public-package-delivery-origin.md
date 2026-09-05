@@ -168,13 +168,15 @@ records, each under the `Content-Type` the compiler emits, next to
 CORS rule allows `GET`/`HEAD` with the `Range` header from the GitHub Pages
 origin and the local development origins and exposes `Content-Range`,
 `Content-Length`, `ETag`, and `Accept-Ranges`; the repository variable
-`NARU_PACKAGE_ORIGIN` names that prefix. The maintainer recipe lives in the
-[Studio guide](../../apps/webgpu-spike/README.md). Gates 1 to 3
-are recorded by the deployment itself, so they close only once a deploy runs
-with this slice merged and the variable set; an exploratory headed-Chrome load
-of the origin package from a local development server (hierarchy, first frame,
-45 `Content-Range` responses, a pick, no console issues) preceded the record
-but is not committed evidence.
+`NARU_PACKAGE_ORIGIN` names that prefix; the custom domain accepts TLS 1.2 or
+newer only. The maintainer recipe lives in the
+[Studio guide](../../apps/webgpu-spike/README.md). Gates 1 and 2 closed with
+the first deployment that read the variable, GitHub Actions run
+[33954446446](https://github.com/1n01raymond/naru/actions/runs/33954446446)
+on `c55814c` (2026-09-05). An exploratory headed-Chrome load of the deployed
+Studio, opened without a query, reached hierarchy, first frame, 45
+`Content-Range` responses, and a pick with no console issues, but that run is
+not committed evidence and gate 3 stays open until one is recorded.
 
 0. **Loader wiring proven by tests.** `resolveDefaultSceneUrl` refuses a
    relative value, a non-HTTP(S) scheme, embedded credentials, a query or
@@ -185,10 +187,15 @@ but is not committed evidence.
    passes for every declared resource of the published package: no redirect,
    exact `Content-Length`, allowlisted `Content-Type`, `Access-Control-Allow-Origin`
    covering the site origin, `Access-Control-Expose-Headers` carrying
-   `Content-Range`, and an honest `206`.
+   `Content-Range`, and an honest `206`. **Met** 2026-09-05: the smoke check
+   passed against the deployed site with the seven package resources and four
+   Range responses served from the origin, the default scene resolving to
+   `https://packages.blacktanlabs.com/naru/digital-hub/v1/scene.gltf`.
 2. **Digests verified at the origin.** The deploy verifies every declared
    resource's SHA-256 at the live origin against the committed build report,
-   and a mismatch fails the deploy.
+   and a mismatch fails the deploy. **Met** 2026-09-05: run 33954446446 ran
+   in delivery-origin mode, verified the five Digital Hub resources at the
+   origin, and published the site.
 3. **A browser record of a cross-origin package.** The deployed Studio opens a
    package served by the origin and reaches hierarchy, first frame, and a pick.
 4. **The baseline delivered.** The 854,446,743-byte engineering baseline is
